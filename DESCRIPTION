@@ -1,0 +1,19 @@
+Package: Prostar2
+Title: PKG_TITLE
+Version: 0.0.0.9000
+Authors@R: person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut'))
+Description: PKG_DESC.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    shiny,
+    golem,
+    processx,
+    attempt,
+    DT,
+    glue,
+    htmltools
+RoxygenNote: 6.1.0
+Suggests: 
+    testthat
