@@ -11,7 +11,7 @@
 golem::fill_desc(
   pkg_name = "Prostar2", # The Name of the package containing the App 
   pkg_title = "PKG_TITLE", # The Title of the package containing the App 
-  pkg_description = "PKG_DESC.", # The Description of the package containing the App 
+  pkg_description = "This package provides a GUI interface for DAPAR.", # The Description of the package containing the App 
   author_first_name = "Samuel", # Your First Name
   author_last_name = "Wieczorek",  # Your Last Name
   author_email = "samuel.wieczorek@cea.fr",      # Your Email

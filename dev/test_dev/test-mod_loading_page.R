@@ -10,7 +10,7 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-  callModule(mod_loading_page, "loadPage")
+  callModule(mod_loading_page_server, "loadPage")
 }
 
 

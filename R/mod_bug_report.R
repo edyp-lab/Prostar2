@@ -19,10 +19,7 @@ mod_bug_report_ui <- function(id){
     tags$p("If you encounter an issue with Prostar, you can send an email to the maintainer so he will have sufficient informations
                   to start identify the problem. In addition, you can add the MSnset as an attachment to the mail."),
     tags$br(),
-    fluidRow(
-      column(width=3,uiOutput(ns("BugReport_output"))),
-      column(width=3,uiOutput(ns("clip")))
-    ),
+    uiOutput(ns("BugReport_output")),
     tags$br(),
     tags$head(tags$style("#fileReaderText{font-size:12px; font-style:italic;overflow-y:scroll; max-height: 400px; background: ghostwhite;}")),
     verbatimTextOutput(ns("fileReaderText"))
@@ -46,14 +43,6 @@ mod_bug_report_server <- function(input, output, session){
   sink(con, append=TRUE, type="message")
   # }
   
-  
-  
-  observe({
-    req(logfile)
-    print(paste0("logfile =", logfile))
-  })
-  
-  
   # ============================================================
   # This part of the code monitors the file for changes once per
   # 0.5 second (500 milliseconds).
@@ -74,11 +63,10 @@ mod_bug_report_server <- function(input, output, session){
     mail <- unlist(strsplit(mail, ">"))[1]
     
     tagList(
-      
-      
       a(actionButton(inputId = ns("email1"), label = "Contact maintainer", 
                      icon = icon("envelope", lib = "font-awesome"), class = actionBtnClass),
-        href=paste0("mailto:", mail,"?subject=[Prostar bug report]&body="))
+                    href=paste0("mailto:", mail,"?subject=[Prostar bug report]&body=")
+        )
     ) 
     
   })

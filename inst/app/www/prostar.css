@@ -45,3 +45,53 @@ button.Prostar_tooltip_white {
     
 }
 
+
+.hr {
+    border-top: 1px solid #000000;
+    
+}
+
+
+.modal-dialog{
+    width:200px;
+    
+}
+
+
+.tab-content {
+    padding-top: 40px; 
+    
+}
+
+
+
+
+.body {
+    font-size:14px;
+    
+}
+
+
+.rect {
+    float: left;
+    width: 100px;
+    height: 20px;
+    margin: 2px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    
+}
+
+.green {
+    background: #06AB27;
+    
+}
+
+.red {
+    background: #C90404;
+    
+}
+
+.grey {
+    background: lightgrey;
+    
+}

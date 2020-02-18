@@ -8,7 +8,7 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-  callModule(mod_bug_report,'home')
+  callModule(mod_bug_report_server,'home')
   warning("Test warning message")
   print("test de print")
 }

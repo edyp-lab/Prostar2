@@ -4,6 +4,7 @@ source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
+    br(),br(),
     mod_navigation_ui('test_nav')
   )
 )

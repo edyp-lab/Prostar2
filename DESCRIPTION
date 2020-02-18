@@ -1,11 +1,17 @@
 Package: Prostar2
 Title: PKG_TITLE
-Version: 0.0.0.9000
-Authors@R: person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut'))
-Description: PKG_DESC.
-License: What license is it under?
+Version: 2.0
+Date: 2020-01-28
+Authors@R: c(person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut')),
+                person('Thomas', 'Burger', email = 'thomas.burger@cea.fr', role = c('aut')),
+                person('Enora', 'Fremy', email = 'enora.fremy@cea.fr', role = c('aut')))
+Maintainer: Samuel Wieczorek <samuel.wieczorek@cea.fr>
+Description: This package provides a GUI interface for DAPAR.
+License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
+Depends: R (>= 3.6.2)
+biocViews: MassSpectrometry, Normalization, Preprocessing, R.utils, Proteomics,GO, GUI
 Imports: 
     shiny,
     golem,
@@ -20,10 +26,10 @@ Imports:
     DAPARdata,
     DAPAR,
     RColorBrewer,
-    sass,
     Biobase,
     colourpicker,
-    htmlwidgets
+    htmlwidgets,
+    BiocManager
 RoxygenNote: 7.0.2
 Suggests: 
     testthat (>= 2.1.0)
