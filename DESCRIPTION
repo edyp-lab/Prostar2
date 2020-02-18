@@ -13,7 +13,17 @@ Imports:
     attempt,
     DT,
     glue,
-    htmltools
-RoxygenNote: 6.1.0
+    htmltools,
+    shinyjs,
+    shinyBS,
+    highcharter,
+    DAPARdata,
+    DAPAR,
+    RColorBrewer,
+    sass,
+    Biobase,
+    colourpicker,
+    htmlwidgets
+RoxygenNote: 7.0.2
 Suggests: 
-    testthat
+    testthat (>= 2.1.0)
