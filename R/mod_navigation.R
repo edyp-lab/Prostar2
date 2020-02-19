@@ -67,7 +67,7 @@ $inactive: #AEB6BF;
 		}
 		
 		&::after{
-			background-color: $inactive;
+			background-color: $active;
 		}
 	
 		span{
@@ -201,6 +201,7 @@ $inactive: #AEB6BF;
 mod_navigation_ui <- function(id){
   ns <- NS(id)
   tagList(
+    shinyjs::useShinyjs(),
     uiOutput(ns("loadCssCode")),
     fluidRow(
       align= 'center',
@@ -267,46 +268,6 @@ mod_navigation_server <- function(input, output, session, pages){
     current$nbSteps <- length(pages()@stepsNames)
     })
   
-  ##--------------------------------------------------------------
-  ## Gestion des couleurs du slideshow
-  ##--------------------------------------------------------------
-  
-  # 
-  # output$timeline_progress_indicator <- renderUI({
-  #   current$val
-  #   color <- rep("lightgrey",current$nbSteps)
-  #   colorForCursor <- rep("white",current$nbSteps)
-  #   
-  #   status <- pages()@isDone
-  #   #buildTable(pages()@stepsNames, color,colorForCursor, params())
-  #   
-  #   for (i in 1:current$nbSteps){
-  #     status <- pages()@isDone[i]
-  #     col <- ifelse(pages()@isMandatory[i], "red", orangeProstar)
-  #     ifelse(status, color[i] <- "green", color[i] <- col)
-  #   }
-  #   
-  #   
-  #   status[which(status==1)] <- 'completed'
-  #   status[current$val] <- 'active'
-  #   status[which(status==0)] <- 'undone'
-  #   
-  #   if (pages()@iconType == 'bubble') {
-  #     txt <- "<ul class='progress-indicator'>"
-  #   } else if (pages()@iconType == 'rectangle'){
-  #     txt <- "<ul class='progress-indicator custom-complex'>"
-  #   }
-  #   
-  #   steps <- pages()@stepsNames
-  #   for( i in 1:length(steps) ) {
-  #     txt <- paste0(txt, "<li class=",status[i], "> <span class='bubble'> </span>", steps[i], "</li>")
-  #   }
-  #   txt <- paste0(txt,"</ul>")
-  #   
-  #   return(HTML(txt))
-  # })
-
-  
   
   
   output$timeline <- renderUI({
@@ -320,109 +281,57 @@ mod_navigation_server <- function(input, output, session, pages){
       txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
      }
     txt <- paste0(txt,"</div></div>")
-    
-    print(HTML(txt))
     HTML(txt)
   })
-  
-  
-  
-  
   
   
   observeEvent(req(input$rstBtn),{
     current$val <- 1
   })
   
-  # observeEvent(c(pages()@forceReset,input$rstBtn),{
-  #   req(input$rstBtn)
-  #   current$val
-  #   
-  #   if (!is.null(pages()@forceReset) || input$rstBtn > 0){
-  #     print("ON FAIT LE RESET EFFECTIF")
-  #     pages()@rstFunc
-  #     current$val <- 1
-  #   }
-  #   
-  # })
-  
-  
-  
-  # observeEvent(current$val,{
-  #    
-  #   shinyjs::toggleState(id = "test", condition = current$val > 1)
-  #   shinyjs::toggleState(id = "nextBtn", condition = current$val < current$nbSteps)
-  # })
-  # 
-  ##--------------------------------------------------------------
-  ## Navigation dans le slideshow
-  ##--------------------------------------------------------------
   
   navPage <- function(direction) {
     newval <- current$val + direction 
-    if(newal<= 1) {newval <- 1}
-    else if (newval >= current$nbSteps){
-    newal <- current$nbSteps
+    if(newval<= 1) {
+      newval <- 1
+      } else if (newval >= current$nbSteps){
+      newval <- current$nbSteps
   }
     current$val <- newval
-
   }
-  
   observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
   observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
   
   
   
-  #bars <- reactive({ })
-  
-  #screens <- reactive({
+ 
+
   output$screens <- renderUI({
-    isolate({
-      ll <- NULL
-      #isolate({
-      
-      for (i in 1:current$nbSteps){
-        if (i == 1) {
-          ll[[i]] <- div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]])
-        } else {
-          ll[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
-        }
-      }
-      tagList(ll)
-    })
-    
-  })
-  
-  
-  
-  observe({
     current$val
-    
-    if (current$val < current$nbSteps) {
-      shinyjs::enable('nextBtn')
-    } else {shinyjs::disable('nextBtn')}
-    
-    if (current$val == 1) {
-      shinyjs::disable('prevBtn')
-    } else {shinyjs::enable('prevBtn')}
-    
-    shinyjs::hide(selector = ".page")
-    
+    #isolate({
+      ll <- NULL
+
+      for (i in 1:current$nbSteps){
+        if (i == current$val) {
+           ll[[i]] <- shinyjs::show(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
+         } else {
+           ll[[i]] <- shinyjs::hide(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
+         }
+      }
+    tagList(ll)
+   # })
+
   })
+
+
   
-  observeEvent(current$val,{
-    
-    for (i in 1:current$nbSteps){
-      shinyjs::toggle(id = paste0("screen", i), condition = current$val == i)
-    }
-  })
-  
-  
-  
-  
-  # this return is used when one wants to dissociate buttons and screens
-  # return(reactive(list(bars=bars(),
-  #                 screens=pages())))
+  # observeEvent(current$val,{
+  # 
+  #   for (i in 1:current$nbSteps){
+  #     shinyjs::toggleState(id = paste0("screen", i), condition = current$val == i)
+  #   }
+  # })
+
 }
 
 
@@ -433,12 +342,11 @@ mod_navigation_server <- function(input, output, session, pages){
                           slots= list(
                             name = "character",
                             stepsNames = "character",
-                            isMandatory = "logical",
+                            #isMandatory = "logical",
                             ll.UI = "list",
                             #rstFunc = "ANY",
                             isDone = "logical",
-                            forceReset = "logical",
-                            iconType = 'character'
+                            forceReset = "logical"
                           )
                           
 )
@@ -452,8 +360,7 @@ NavStructure <- function(
   ll.UI = list(),
   #rstFunc = NULL,
   isDone = logical(),
-  forceReset = logical(),
-  iconType = character()
+  forceReset = logical()
 )
 {
   obj <- new("NavStructure",
@@ -463,8 +370,7 @@ NavStructure <- function(
              ll.UI = ll.UI,
              #rstFunc = rstFunc,
              isDone = isDone,
-             forceReset =forceReset,
-             iconType = iconType
+             forceReset =forceReset
   )
   #validObject(obj)
   

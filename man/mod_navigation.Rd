@@ -27,6 +27,7 @@ mod_navigation_server(input, output, session, pages)
 \item{iconType}{xxxxxx}
 }
 \description{
-A shiny Module.
+A shiny Module. The sass source code for timeline was inspired by 
+ : https://codepen.io/cjl750/pen/mXbMyo
 }
 \keyword{internal}

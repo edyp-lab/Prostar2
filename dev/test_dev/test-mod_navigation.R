@@ -14,15 +14,14 @@ server <- function(input, output, session) {
   
   navmodparams <- reactiveValues(
     obj = NavStructure(name = "test",
-                      stepsNames = c("screen1", "screen2","screen3"),
+                      stepsNames = c("Screen 1", "Screen 2","Screen 3"),
                       #isMandatory = rep(FALSE,3),
                       ll.UI = list( screenStep1 = uiOutput("screen1"),
                                     screenStep2 = uiOutput("screen2"),
                                     screenStep3 = uiOutput("screen3")),
                       #rstFunc = reactive({resetFunc()}),
                       isDone =  c(FALSE,FALSE, TRUE),
-                      forceReset = FALSE,
-                      iconType='bubble')
+                      forceReset = FALSE)
   )
   
 
@@ -32,16 +31,13 @@ server <- function(input, output, session) {
   )
   
   resetFunc <- reactive({
-    nav_mod_params$stepsDone <- rep(FALSE, 3)
+    navmodparams$obj@isDone <- rep(FALSE, 3)
   })
   
   
   output$screen1 <- renderUI({
     tagList(
-      div(
-        id = "screen1",
-        tags$p('screen 1')
-      )
+        tags$h1('Screen 1')
     )
   })
   
@@ -49,19 +45,13 @@ server <- function(input, output, session) {
   
   output$screen2 <- renderUI({
     tagList(
-      div(
-        id = "screen2",
-        tags$p('screen 2')
-      )
+        tags$h2('Screen 2')
     )
   })
   
   output$screen3 <- renderUI({
     tagList(
-      div(
-        id = "screen3",
-        tags$p('screen 3')
-      )
+       tags$h3('Screen 3')
     )
   })
 

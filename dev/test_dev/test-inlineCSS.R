@@ -41,7 +41,11 @@ $inactive: #AEB6BF;
 	background-color: $active;
 	position: relative;
 	border-radius: 50%;
-
+	 
+	 &:hover{
+		cursor: pointer;
+	}
+	
 	&::before, &::after{
 		content: '';
 		display: block;
@@ -71,7 +75,7 @@ $inactive: #AEB6BF;
 		}
 		
 		&::after{
-			background-color: $inactive;
+			background-color: $active;
 		}
 	
 		span{
@@ -180,8 +184,19 @@ $inactive: #AEB6BF;
 "
 
 
+
   ui = fluidPage(
+    
+    #extendShinyjs(text = jsCode, functions = c("alerta")),
+   # tags$script(HTML("$(function(click){Shiny.setInputValue('tutu', 'tutu);});")),
+    tags$script(HTML("$(function() {
+                      $('.input-flex-container').on('click',function() {
+	                        Shiny.setInputValue('tutu', 1, {priority: 'event'});
+	                        console.log('tutu');
+	                     });
+                     });")),
     uiOutput("updateCssCode"),
+    
     
     fluidRow(
       align= 'center',
@@ -206,34 +221,17 @@ $inactive: #AEB6BF;
     ),
     
     
-    # div(
-    #   div( style="align: center;display:inline-block; vertical-align: middle; padding: 7px",
-    #        shinyjs::disabled(actionButton("rstBtn", "reset",
-    #                                       class = PrevNextBtnClass,
-    #                                       style='padding:4px; font-size:80%'))),
-    #   div( style="align: center;display:inline-block; vertical-align: middle; padding: 7px",
-    #        shinyjs::disabled(actionButton("prevBtn", "<<",
-    #                                       class = PrevNextBtnClass,
-    #                                       style='padding:4px; font-size:80%'))),
-    #   div( style="align: center;display:inline-block; vertical-align: middle;",
-    #        # uiOutput(ns("timeline_progress_indicator" ))
-    #        uiOutput("timeline" )
-    #   ),
-    #   div(style="align: center;display:inline-block; vertical-align: middle; padding: 7px",
-    #       actionButton("nextBtn", ">>",
-    #                    class = PrevNextBtnClass,
-    #                    style='padding:4px; font-size:80%')
-    #       
-    #   )
-    # ),
-    
-    
     selectInput('nSteps', 'n', choices=1:20, selected=5)
   )
   
   
   
   server = function(input, output) {
+    
+    
+    
+   
+    
     
     output$updateCssCode <- renderUI({
       input$nSteps
@@ -257,6 +255,8 @@ $inactive: #AEB6BF;
       txt <- paste0(txt,"</div></div>")
       HTML(txt)
     })
+    
+    observeEvent(input$tutu,{print('toto') })
   }
 
 
