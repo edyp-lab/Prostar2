@@ -1,47 +1,20 @@
 library(shiny)
+library(shinyjs)
 
 # Method 1 - passing a string of valid CSS
 
 ## code inspire de  : https://codepen.io/cjl750/pen/mXbMyo
 
 code_sass <-"$numDots:3;
-$parentWidthBase: 0.8;
+$parentWidthBase: 0.6;
 $parentWidth: $parentWidthBase * 100vw;
-$parentMaxWidth: 1000px;
+$parentMaxWidth: 800px;
 $dotWidth: 25px;
 $dotWidthSm: 17px;
 $active: #2C3E50;
 $inactive: #AEB6BF;
 
 
-
-html, body{
-	height: 100%;
-}
-
-body{
-	font-family: 'Quicksand', sans-serif;
-	font-weight: 500;
-	color: #424949;
-	background-color: #ECF0F1;
-	padding: 0 25px;
-	display: flex;
-	flex-direction: column;
-	position: relative;
-}
-
-h1{
-	text-align: center;
-	height: 38px;
-	margin: 60px 0;
-	
-	span{
-		white-space: nowrap;
-	}
-}
-		
-		
-		
 .flex-parent{
 	display: flex;
 	flex-direction: column;
@@ -56,7 +29,7 @@ h1{
 	justify-content: space-around;
 	align-items: center;
 	width: $parentWidth;
-	height: 100px;
+	height: 20px;
 	max-width: $parentMaxWidth;
 	position: relative;
 	z-index: 0;
@@ -209,8 +182,53 @@ h1{
 
   ui = fluidPage(
     uiOutput("updateCssCode"),
-    selectInput('nSteps', 'n', choices=1:20, selected=5),
-    uiOutput("toto")
+    
+    fluidRow(
+      align= 'center',
+      column(width=2,
+             div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                  shinyjs::disabled(actionButton("rstBtn", "reset",
+                                                    class = PrevNextBtnClass,
+                                                    style='padding:4px; font-size:80%'))),
+             div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                  shinyjs::disabled(actionButton("prevBtn", "<<",
+                                                    class = PrevNextBtnClass,
+                                                    style='padding:4px; font-size:80%')))
+             ),
+      column(width=8,div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                          uiOutput("timeline" ))
+             ),
+      column(width=2,div(style="display:inline-block; vertical-align: middle; padding: 7px",
+                         actionButton("nextBtn", ">>",
+                                  class = PrevNextBtnClass,
+                                  style='padding:4px; font-size:80%'))
+      )
+    ),
+    
+    
+    # div(
+    #   div( style="align: center;display:inline-block; vertical-align: middle; padding: 7px",
+    #        shinyjs::disabled(actionButton("rstBtn", "reset",
+    #                                       class = PrevNextBtnClass,
+    #                                       style='padding:4px; font-size:80%'))),
+    #   div( style="align: center;display:inline-block; vertical-align: middle; padding: 7px",
+    #        shinyjs::disabled(actionButton("prevBtn", "<<",
+    #                                       class = PrevNextBtnClass,
+    #                                       style='padding:4px; font-size:80%'))),
+    #   div( style="align: center;display:inline-block; vertical-align: middle;",
+    #        # uiOutput(ns("timeline_progress_indicator" ))
+    #        uiOutput("timeline" )
+    #   ),
+    #   div(style="align: center;display:inline-block; vertical-align: middle; padding: 7px",
+    #       actionButton("nextBtn", ">>",
+    #                    class = PrevNextBtnClass,
+    #                    style='padding:4px; font-size:80%')
+    #       
+    #   )
+    # ),
+    
+    
+    selectInput('nSteps', 'n', choices=1:20, selected=5)
   )
   
   
@@ -227,10 +245,10 @@ h1{
       code[[1]][1] <- paste0(prefix, input$nSteps, suffix, collapse='')
       print( code[[1]][1])
       code_sass <- paste(unlist(code), collapse = '')
-      inlineCSS( sass(code_sass))
+      shinyjs::inlineCSS( sass::sass(code_sass))
     })
     
-    output$toto <- renderUI({
+    output$timeline <- renderUI({
       
       txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
       for (i in 1:input$nSteps){

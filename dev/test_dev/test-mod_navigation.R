@@ -12,24 +12,10 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  # navmodparams <- reactiveValues(
-  #   processTest = list(name = "test",
-  #                      stepsNames = c("screen1", "screen2","screen3"),
-  #                      isMandatory = rep(FALSE,3),
-  #                      ll.UI = list( screenStep1 = uiOutput("screen1"),
-  #                                    screenStep2 = uiOutput("screen2"),
-  #                                    screenStep3 = uiOutput("screen3")),
-  #                     # rstFunc = reactive({resetFunc()}),
-  #                       isDone =  rep(FALSE,3),
-  #                       forceReset = FALSE,
-  #                       iconType='bubble'
-  #   )
-  #   )
-
   navmodparams <- reactiveValues(
     obj = NavStructure(name = "test",
                       stepsNames = c("screen1", "screen2","screen3"),
-                      isMandatory = rep(FALSE,3),
+                      #isMandatory = rep(FALSE,3),
                       ll.UI = list( screenStep1 = uiOutput("screen1"),
                                     screenStep2 = uiOutput("screen2"),
                                     screenStep3 = uiOutput("screen3")),

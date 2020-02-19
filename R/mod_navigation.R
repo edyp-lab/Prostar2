@@ -1,305 +1,8 @@
-# Module UI
-  
-#' @title   mod_navigation_ui and mod_navigation_server
-#' @description  A shiny Module.
-#'
-#' @param id shiny id
-#' @param input internal
-#' @param output internal
-#' @param session internal
-#' @param isDone xxxxx
-#' @param screens xxxxx
-#' @param rstFunc xxxxx
-#' @param iconType xxxxxx
-#'
-#' @rdname mod_navigation
-#'
-#' @keywords internal
-#' @export 
-#' @importFrom shiny NS tagList
-#' @importFrom shinyjs disabled inlineCSS
-mod_navigation_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    uiOutput("updateCssCode"),
-    
-    #inlineCSS(progressWizard_CSS),
-    inlineCSS(timeline_css2),
-    # 
-    # div(
-    #   div( style="align: center;display:inline-block; vertical-align: top; padding: 7px",
-    #        shinyjs::disabled(actionButton(ns("rstBtn"), "reset", 
-    #                                       class = PrevNextBtnClass,
-    #                                       style='padding:4px; font-size:80%'))),
-    #   div( style="align: center;display:inline-block; vertical-align: top; padding: 7px",
-    #        shinyjs::disabled(actionButton(ns("prevBtn"), "<<", 
-    #                                       class = PrevNextBtnClass,
-    #                                       style='padding:4px; font-size:80%'))),
-    #   div( style="align: center;display:inline-block; vertical-align: top;",
-    #       # uiOutput(ns("timeline_progress_indicator" ))
-    #        uiOutput(ns("timeline" ))
-    #        ),
-    #   
-    #   
-    #   div(style="align: center;display:inline-block; vertical-align: top; padding: 7px",
-    #       actionButton(ns("nextBtn"), ">>", 
-    #                    class = PrevNextBtnClass, 
-    #                    style='padding:4px; font-size:80%')
-    #       
-    #   )
-    # ),
-    #uiOutput(ns("timeline_progress_indicator" )),
-    uiOutput(ns("timeline" )),
-    hr(),
-    uiOutput(ns("screens"))
-    
-    
-  )
-}
-    
-# Module Server
-    
-#' @rdname mod_navigation
-#' @export
-#' @keywords internal
-#' @import shiny shinyjs
-    
-mod_navigation_server <- function(input, output, session, pages){
-  ns <- session$ns
-  
-  current <- reactiveValues(
-    # This variable is the indice of the current screen
-    val = 1,
-    nbSteps = NULL
-  )
-  
-  
-  output$updateCssCode <- renderUI({
-    req(current$nbSteps)
-    
-    code <- strsplit(code_sass,"\n")
-    firstLine <- code[[1]][1]
-    prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
-    suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
-    
-    code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
-    code_sass <- paste(unlist(code), collapse = '')
-    inlineCSS( sass(code_sass))
-  })
-  
-  
-  observeEvent(req(pages()),{
-    current$nbSteps <- length(pages()@stepsNames)
-    })
-  
-  ##--------------------------------------------------------------
-  ## Gestion des couleurs du slideshow
-  ##--------------------------------------------------------------
-  
-  # 
-  # output$timeline_progress_indicator <- renderUI({
-  #   current$val
-  #   color <- rep("lightgrey",current$nbSteps)
-  #   colorForCursor <- rep("white",current$nbSteps)
-  #   
-  #   status <- pages()@isDone
-  #   #buildTable(pages()@stepsNames, color,colorForCursor, params())
-  #   
-  #   for (i in 1:current$nbSteps){
-  #     status <- pages()@isDone[i]
-  #     col <- ifelse(pages()@isMandatory[i], "red", orangeProstar)
-  #     ifelse(status, color[i] <- "green", color[i] <- col)
-  #   }
-  #   
-  #   
-  #   status[which(status==1)] <- 'completed'
-  #   status[current$val] <- 'active'
-  #   status[which(status==0)] <- 'undone'
-  #   
-  #   if (pages()@iconType == 'bubble') {
-  #     txt <- "<ul class='progress-indicator'>"
-  #   } else if (pages()@iconType == 'rectangle'){
-  #     txt <- "<ul class='progress-indicator custom-complex'>"
-  #   }
-  #   
-  #   steps <- pages()@stepsNames
-  #   for( i in 1:length(steps) ) {
-  #     txt <- paste0(txt, "<li class=",status[i], "> <span class='bubble'> </span>", steps[i], "</li>")
-  #   }
-  #   txt <- paste0(txt,"</ul>")
-  #   
-  #   return(HTML(txt))
-  # })
-
-  
-  
-  
-  output$timeline <- renderUI({
-    current$val
-     
-    status <- rep('',current$nbSteps)
-    status[current$val] <- ' active'
-    steps <- pages()@stepsNames
-    print(steps)
-        txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
-    for (i in 1:current$nbSteps){
-      txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
-     }
-    txt <- paste0(txt,"	</div></div>")
-    
-    
-    HTML(txt)
-  })
-  
-  
-  
-  
-  
-  
-  observeEvent(req(input$rstBtn),{
-    current$val <- 1
-  })
-  
-  # observeEvent(c(pages()@forceReset,input$rstBtn),{
-  #   req(input$rstBtn)
-  #   current$val
-  #   
-  #   if (!is.null(pages()@forceReset) || input$rstBtn > 0){
-  #     print("ON FAIT LE RESET EFFECTIF")
-  #     pages()@rstFunc
-  #     current$val <- 1
-  #   }
-  #   
-  # })
-  
-  
-  
-  observeEvent(current$val,{
-    shinyjs::toggle(id = "prevBtn", condition = (current$nbSteps > 1))
-    shinyjs::toggle(id = "nextBtn", condition = (current$nbSteps > 1) )
-    
-    shinyjs::toggleState(id = "prevBtn", condition = current$val > 1)
-    shinyjs::toggleState(id = "nextBtn", condition = current$val < current$nbSteps)
-  })
-  
-  ##--------------------------------------------------------------
-  ## Navigation dans le slideshow
-  ##--------------------------------------------------------------
-  
-  navPage <- function(direction) {
-    current$val <- current$val + direction
-  }
-  
-  observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
-  observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
-  
-  
-  
-  #bars <- reactive({ })
-  
-  #screens <- reactive({
-  output$screens <- renderUI({
-    isolate({
-      ll <- NULL
-      #isolate({
-      
-      for (i in 1:current$nbSteps){
-        if (i == 1) {
-          ll[[i]] <- div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]])
-        } else {
-          ll[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
-        }
-      }
-      
-      
-      tagList(ll)
-    })
-    
-  })
-  
-  
-  
-  observe({
-    current$val
-    
-    if (current$val < current$nbSteps) {
-      shinyjs::enable('nextBtn')
-    } else {shinyjs::disable('nextBtn')}
-    
-    if (current$val == 1) {
-      shinyjs::disable('prevBtn')
-    } else {shinyjs::enable('prevBtn')}
-    
-    shinyjs::hide(selector = ".page")
-    
-  })
-  
-  observeEvent(current$val,{
-    
-    for (i in 1:current$nbSteps){
-      shinyjs::toggle(id = paste0("screen", i), condition = current$val == i)
-    }
-  })
-  
-  
-  
-  
-  # this return is used when one wants to dissociate buttons and screens
-  # return(reactive(list(bars=bars(),
-  #                 screens=pages())))
-}
-
-
-####################"
-## definition d'une classe pour la structure utilisee par le module de navigation
-#' @exportClass NavStructure
-.NavStructure <- setClass("NavStructure",
-                          slots= list(
-                            name = "character",
-                            stepsNames = "character",
-                            isMandatory = "logical",
-                            ll.UI = "list",
-                            #rstFunc = "ANY",
-                            isDone = "logical",
-                            forceReset = "logical",
-                            iconType = 'character'
-                          )
-                          
-)
-
-
-#' @export NavStructure
-NavStructure <- function(
-  name = character(),
-  stepsNames = character(),
-  isMandatory = logical(),
-  ll.UI = list(),
-  #rstFunc = NULL,
-  isDone = logical(),
-  forceReset = logical(),
-  iconType = character()
-)
-{
-  obj <- new("NavStructure",
-             name = name,
-             stepsNames = stepsNames,
-             isMandatory = isMandatory,
-             ll.UI = ll.UI,
-             #rstFunc = rstFunc,
-             isDone = isDone,
-             forceReset =forceReset,
-             iconType = iconType
-  )
-  #validObject(obj)
-  
-  obj
-}
-
 
 code_sass <-"$numDots:3;
-$parentWidthBase: 0.8;
+$parentWidthBase: 0.4;
 $parentWidth: $parentWidthBase * 100vw;
-$parentMaxWidth: 1000px;
+$parentMaxWidth: 800px;
 $dotWidth: 25px;
 $dotWidthSm: 17px;
 $active: #2C3E50;
@@ -307,33 +10,6 @@ $inactive: #AEB6BF;
 
 
 
-html, body{
-	height: 100%;
-}
-
-body{
-	font-family: 'Quicksand', sans-serif;
-	font-weight: 500;
-	color: #424949;
-	background-color: #ECF0F1;
-	padding: 0 25px;
-	display: flex;
-	flex-direction: column;
-	position: relative;
-}
-
-h1{
-	text-align: center;
-	height: 38px;
-	margin: 60px 0;
-	
-	span{
-		white-space: nowrap;
-	}
-}
-		
-		
-		
 .flex-parent{
 	display: flex;
 	flex-direction: column;
@@ -348,11 +24,12 @@ h1{
 	justify-content: space-around;
 	align-items: center;
 	width: $parentWidth;
-	height: 100px;
+	height: 20px;
 	max-width: $parentMaxWidth;
 	position: relative;
 	z-index: 0;
 }
+
 
 .input{
 	width: $dotWidth;
@@ -497,6 +174,299 @@ h1{
 }
 }
 "
+
+
+
+# Module UI
+  
+#' @title   mod_navigation_ui and mod_navigation_server
+#' @description  A shiny Module. The sass source code for timeline was inspired by 
+#'  : https://codepen.io/cjl750/pen/mXbMyo
+#'
+#' @param id shiny id
+#' @param input internal
+#' @param output internal
+#' @param session internal
+#' @param isDone xxxxx
+#' @param screens xxxxx
+#' @param rstFunc xxxxx
+#' @param iconType xxxxxx
+#'
+#' @rdname mod_navigation
+#'
+#' @keywords internal
+#' @export 
+#' @importFrom shiny NS tagList
+#' @importFrom shinyjs disabled inlineCSS
+mod_navigation_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+    uiOutput(ns("loadCssCode")),
+    fluidRow(
+      align= 'center',
+      column(width=2,
+             div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                  shinyjs::disabled(actionButton(ns("rstBtn"), "reset",
+                                                 class = PrevNextBtnClass,
+                                                 style='padding:4px; font-size:80%'))),
+             div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                  shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                                 class = PrevNextBtnClass,
+                                                 style='padding:4px; font-size:80%')))
+            ),
+      column(width=8,div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                          uiOutput(ns("timeline")))
+      ),
+      column(width=2,div(style="display:inline-block; vertical-align: middle; padding: 7px",
+                         actionButton(ns("nextBtn"), ">>",
+                                      class = PrevNextBtnClass,
+                                      style='padding:4px; font-size:80%'))
+      )
+    ),
+
+    br(),
+    uiOutput(ns("screens"))
+    
+    
+  )
+}
+    
+# Module Server
+    
+#' @rdname mod_navigation
+#' @export
+#' @keywords internal
+#' @import shiny shinyjs
+#' @importFrom sass sass
+    
+mod_navigation_server <- function(input, output, session, pages){
+  ns <- session$ns
+  
+  current <- reactiveValues(
+    # This variable is the indice of the current screen
+    val = 1,
+    nbSteps = NULL
+  )
+  
+  
+  output$loadCssCode <- renderUI({
+    req(current$nbSteps)
+    
+    code <- strsplit(code_sass,"\n")
+    firstLine <- code[[1]][1]
+    prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
+    suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
+    
+    code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
+    code_sass <- paste(unlist(code), collapse = '')
+    shinyjs::inlineCSS( sass::sass(code_sass))
+  })
+  
+  
+  observeEvent(req(pages()),{
+    current$nbSteps <- length(pages()@stepsNames)
+    })
+  
+  ##--------------------------------------------------------------
+  ## Gestion des couleurs du slideshow
+  ##--------------------------------------------------------------
+  
+  # 
+  # output$timeline_progress_indicator <- renderUI({
+  #   current$val
+  #   color <- rep("lightgrey",current$nbSteps)
+  #   colorForCursor <- rep("white",current$nbSteps)
+  #   
+  #   status <- pages()@isDone
+  #   #buildTable(pages()@stepsNames, color,colorForCursor, params())
+  #   
+  #   for (i in 1:current$nbSteps){
+  #     status <- pages()@isDone[i]
+  #     col <- ifelse(pages()@isMandatory[i], "red", orangeProstar)
+  #     ifelse(status, color[i] <- "green", color[i] <- col)
+  #   }
+  #   
+  #   
+  #   status[which(status==1)] <- 'completed'
+  #   status[current$val] <- 'active'
+  #   status[which(status==0)] <- 'undone'
+  #   
+  #   if (pages()@iconType == 'bubble') {
+  #     txt <- "<ul class='progress-indicator'>"
+  #   } else if (pages()@iconType == 'rectangle'){
+  #     txt <- "<ul class='progress-indicator custom-complex'>"
+  #   }
+  #   
+  #   steps <- pages()@stepsNames
+  #   for( i in 1:length(steps) ) {
+  #     txt <- paste0(txt, "<li class=",status[i], "> <span class='bubble'> </span>", steps[i], "</li>")
+  #   }
+  #   txt <- paste0(txt,"</ul>")
+  #   
+  #   return(HTML(txt))
+  # })
+
+  
+  
+  
+  output$timeline <- renderUI({
+    current$val
+     
+    status <- rep('',current$nbSteps)
+    status[current$val] <- ' active'
+    steps <- pages()@stepsNames
+    txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
+    for (i in 1:current$nbSteps){
+      txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
+     }
+    txt <- paste0(txt,"</div></div>")
+    
+    print(HTML(txt))
+    HTML(txt)
+  })
+  
+  
+  
+  
+  
+  
+  observeEvent(req(input$rstBtn),{
+    current$val <- 1
+  })
+  
+  # observeEvent(c(pages()@forceReset,input$rstBtn),{
+  #   req(input$rstBtn)
+  #   current$val
+  #   
+  #   if (!is.null(pages()@forceReset) || input$rstBtn > 0){
+  #     print("ON FAIT LE RESET EFFECTIF")
+  #     pages()@rstFunc
+  #     current$val <- 1
+  #   }
+  #   
+  # })
+  
+  
+  
+  observeEvent(current$val,{
+    # shinyjs::toggle(id = "prevBtn", condition = (current$nbSteps > 1))
+    # shinyjs::toggle(id = "nextBtn", condition = (current$nbSteps > 1) )
+    # 
+    shinyjs::toggleState(id = "prevBtn", condition = current$val > 1)
+    shinyjs::toggleState(id = "nextBtn", condition = current$val < current$nbSteps)
+  })
+  
+  ##--------------------------------------------------------------
+  ## Navigation dans le slideshow
+  ##--------------------------------------------------------------
+  
+  navPage <- function(direction) {
+    current$val <- current$val + direction
+  }
+  
+  observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
+  observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
+  
+  
+  
+  #bars <- reactive({ })
+  
+  #screens <- reactive({
+  output$screens <- renderUI({
+    isolate({
+      ll <- NULL
+      #isolate({
+      
+      for (i in 1:current$nbSteps){
+        if (i == 1) {
+          ll[[i]] <- div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]])
+        } else {
+          ll[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
+        }
+      }
+      tagList(ll)
+    })
+    
+  })
+  
+  
+  
+  observe({
+    current$val
+    
+    if (current$val < current$nbSteps) {
+      shinyjs::enable('nextBtn')
+    } else {shinyjs::disable('nextBtn')}
+    
+    if (current$val == 1) {
+      shinyjs::disable('prevBtn')
+    } else {shinyjs::enable('prevBtn')}
+    
+    shinyjs::hide(selector = ".page")
+    
+  })
+  
+  observeEvent(current$val,{
+    
+    for (i in 1:current$nbSteps){
+      shinyjs::toggle(id = paste0("screen", i), condition = current$val == i)
+    }
+  })
+  
+  
+  
+  
+  # this return is used when one wants to dissociate buttons and screens
+  # return(reactive(list(bars=bars(),
+  #                 screens=pages())))
+}
+
+
+####################"
+## definition d'une classe pour la structure utilisee par le module de navigation
+#' @exportClass NavStructure
+.NavStructure <- setClass("NavStructure",
+                          slots= list(
+                            name = "character",
+                            stepsNames = "character",
+                            isMandatory = "logical",
+                            ll.UI = "list",
+                            #rstFunc = "ANY",
+                            isDone = "logical",
+                            forceReset = "logical",
+                            iconType = 'character'
+                          )
+                          
+)
+
+
+#' @export NavStructure
+NavStructure <- function(
+  name = character(),
+  stepsNames = character(),
+  #isMandatory = logical(),
+  ll.UI = list(),
+  #rstFunc = NULL,
+  isDone = logical(),
+  forceReset = logical(),
+  iconType = character()
+)
+{
+  obj <- new("NavStructure",
+             name = name,
+             stepsNames = stepsNames,
+            # isMandatory = isMandatory,
+             ll.UI = ll.UI,
+             #rstFunc = rstFunc,
+             isDone = isDone,
+             forceReset =forceReset,
+             iconType = iconType
+  )
+  #validObject(obj)
+  
+  obj
+}
+
 
 
 
