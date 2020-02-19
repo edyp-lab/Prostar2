@@ -206,13 +206,13 @@ mod_navigation_ui <- function(id){
       align= 'center',
       column(width=2,
              div( style="display:inline-block; vertical-align: middle; padding: 7px",
-                  shinyjs::disabled(actionButton(ns("rstBtn"), "reset",
+                  actionButton(ns("rstBtn"), "reset",
                                                  class = PrevNextBtnClass,
-                                                 style='padding:4px; font-size:80%'))),
-             div( style="display:inline-block; vertical-align: middle; padding: 7px",
-                  shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                                 style='padding:4px; font-size:80%')),
+             div( id='test',style="display:inline-block; vertical-align: middle; padding: 7px",
+                  actionButton(ns("prevBtn"), "<<",
                                                  class = PrevNextBtnClass,
-                                                 style='padding:4px; font-size:80%')))
+                                                 style='padding:4px; font-size:80%'))
             ),
       column(width=8,div( style="display:inline-block; vertical-align: middle; padding: 7px",
                           uiOutput(ns("timeline")))
@@ -348,20 +348,24 @@ mod_navigation_server <- function(input, output, session, pages){
   
   
   
-  observeEvent(current$val,{
-    # shinyjs::toggle(id = "prevBtn", condition = (current$nbSteps > 1))
-    # shinyjs::toggle(id = "nextBtn", condition = (current$nbSteps > 1) )
-    # 
-    shinyjs::toggleState(id = "prevBtn", condition = current$val > 1)
-    shinyjs::toggleState(id = "nextBtn", condition = current$val < current$nbSteps)
-  })
-  
+  # observeEvent(current$val,{
+  #    
+  #   shinyjs::toggleState(id = "test", condition = current$val > 1)
+  #   shinyjs::toggleState(id = "nextBtn", condition = current$val < current$nbSteps)
+  # })
+  # 
   ##--------------------------------------------------------------
   ## Navigation dans le slideshow
   ##--------------------------------------------------------------
   
   navPage <- function(direction) {
-    current$val <- current$val + direction
+    newval <- current$val + direction 
+    if(newal<= 1) {newval <- 1}
+    else if (newval >= current$nbSteps){
+    newal <- current$nbSteps
+  }
+    current$val <- newval
+
   }
   
   observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
