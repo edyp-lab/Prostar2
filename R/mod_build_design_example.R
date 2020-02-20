@@ -7,16 +7,19 @@
 #' @param input internal
 #' @param output internal
 #' @param session internal
+#' @param designLevel An integer
 #'
 #' @rdname mod_build_design_example
 #'
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
+#' @importFrom  rhandsontable rHandsontableOutput 
 mod_build_design_example_ui <- function(id){
   ns <- NS(id)
   tagList(
-  
+    uiOutput(ns('title')),
+    rHandsontableOutput(ns("nlevelsExample"))
   )
 }
     
@@ -25,331 +28,119 @@ mod_build_design_example_ui <- function(id){
 #' @rdname mod_build_design_example
 #' @export
 #' @keywords internal
+#' @importFrom  rhandsontable renderRHandsontable hot_context_menu hot_cols hot_rows
+#' @importFrom  RColorBrewer brewer.pal
     
-mod_build_design_example_server <- function(input, output, session){
+mod_build_design_example_server <- function(input, output, session, designLevel){
   ns <- session$ns
   
-  #  rv.buildDesign <- reactiveValues(
-  #    hot = NULL,
-  #    designChecked = NULL,
-  #    newOrder = NULL,
-  #    conditionsChecked = NULL,
-  #    designSaved = NULL
-  #  )
-  #  
-  #  
+  
+  output$title <- renderUI({
+    designLevel()
+    if(designLevel() %in% 1:3){
+      h4(paste0("Example for a ",designLevel(),"-levels design"))
+     } else {
+             warning("This level is not implemented.")
+    }
+  })
+  
+
+  
+  output$nlevelsExample <- renderRHandsontable({
+    designLevel()
+    pal <- RColorBrewer::brewer.pal(3,'Dark2')
+    
+    if (designLevel() == 1){
+      df <- data.frame(Sample.name= paste0("Sample ",as.character(1:6)),
+                       Condition = c(rep("A", 2), rep("B", 2), rep("C", 2)),
+                       Bio.Rep = 1:6,
+                       stringsAsFactors = FALSE)
+      
+      
+      color_rend <- paste0("function (instance, td, row, col, prop, value, cellProperties) {
+                         Handsontable.renderers.TextRenderer.apply(this, arguments);
+                         
+                         if(col==1 && (row>=0 && row<=1)) {td.style.background = '",pal[1], "';}
+                         if(col==1 && (row>=2 && row<=3)) {td.style.background = '",pal[2], "';}
+                         if(col==1 && (row>=4 && row<=5)) {td.style.background = '",pal[3], "';}
+                         
+                    }")
+      } else if (designLevel() == 2){
+      df <- data.frame(Sample.name= paste0("Sample ",as.character(1:14)),
+                       Condition = c(rep("A", 4), rep("B", 4), rep("C", 6)),
+                       Bio.Rep = as.integer(c(1,1,2,2,3,3,4,4,5,5,6,6,7,7)),
+                       Tech.Rep = c(1:14),
+                       stringsAsFactors = FALSE)
+     
+     
+      color_rend <- paste0("function (instance, td, row, col, prop, value, cellProperties) {
+                         Handsontable.renderers.TextRenderer.apply(this, arguments);
+                         
+                         if(col==1 && (row>=0 && row<=3)) {td.style.background = '",pal[1], "';}
+                         if(col==1 && (row>=4 && row<=7)) {td.style.background = '",pal[2], "';}
+                         if(col==1 && (row>=8 && row<=14)) {td.style.background = '",pal[3], "';}
+                         
+                         
+                         if(col==2 && (row==0||row==1||row==4||row==5||row==8||row==9||row==12||row==13)) 
+                         {td.style.background = 'lightgrey';}
+                         
+                         if(col==3 && (row==0||row==2||row==4||row==6||row==8||row==10||row==12)) 
+                         {td.style.background = 'lightgrey';}
+                    }")
+      
+    } else if (designLevel() == 3){
+      df <- data.frame(Sample.name= paste0("Sample ",as.character(1:16)),
+                       Condition = c(rep( "A", 8), rep("B", 8)),
+                       Bio.Rep = as.integer(c(rep(1,4),rep(2,4),rep(3,4),rep(4,4))),
+                       Tech.Rep = as.integer(c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8)),
+                       Analyt.Rep = c(1:16),
+                       stringsAsFactors = FALSE)
+      
+      color_rend <- paste0("function (instance, td, row, col, prop, value, cellProperties) {
+                           Handsontable.renderers.TextRenderer.apply(this, arguments);
+                           
+                           if(col==1 && (row>=0 && row<=7)) {td.style.background = '",pal[1], "';}
+                           
+                           if(col==1 && (row>=8 && row<=15))  {td.style.background = '",pal[2], "';}
+                           
+                           if(col==2 && (row==0||row==1||row==2||row==3||row==8||row==9||row==10||row==11)) 
+                           {td.style.background = 'lightgrey';}
+                           
+                           if(col==3 && (row==0||row==1||row==4||row==5|| row==8||row==9||row==12||row==13)) 
+                           {td.style.background = 'lightgrey';}
+                           
+                           
+                           if(col==4 && (row==0||row==2||row==4||row==6|| row==8||row==10||row==12||row==14)) 
+                           {td.style.background = 'lightgrey';}
+                            }")
+      
+    }
+    
+     rhandsontable::rhandsontable(df,
+                                 rowHeaders=NULL,
+                                 fillHandle = list(direction='vertical', 
+                                                   autoInsertRow=FALSE,
+                                                   maxRows=16 )
+                                 ) %>%
+      rhandsontable::hot_rows(rowHeights = 30) %>%
+      rhandsontable::hot_context_menu(allowRowEdit = FALSE, 
+                                      allowColEdit = FALSE,
+                                      allowInsertRow = FALSE,
+                                      allowInsertColumn = FALSE,
+                                      allowRemoveRow = FALSE,
+                                      allowRemoveColumn = FALSE,
+                                      autoInsertRow=FALSE) %>%
+      rhandsontable::hot_cols(readOnly = TRUE,
+                              renderer = color_rend,
+                              halign = 'htCenter')
+  
+  })
   
   
-  
-  #  #-------------------------------------------------------------
-  #  output$hot <- rhandsontable::renderRHandsontable({
-  #    rv.buildDesign$hot
-  #    input$chooseExpDesign
-  #    
-  #    if (is.null(rv.buildDesign$hot)){
-  #      rv.buildDesign$hot  <- data.frame(Sample.name = as.character(input$eData.box),
-  #                                        Condition = rep("",length(input$eData.box)),
-  #                                        stringsAsFactors = FALSE)
-  #    }
-  #    
-  #    hot <- rhandsontable::rhandsontable(rv.buildDesign$hot,rowHeaders=NULL, 
-  #                                        fillHandle = list(direction='vertical', 
-  #                                                          autoInsertRow=FALSE,
-  #                                                          maxRows=nrow(rv.buildDesign$hot))) %>%
-  #      rhandsontable::hot_rows(rowHeights = 30) %>%
-  #      rhandsontable::hot_context_menu(allowRowEdit = TRUE, 
-  #                                      allowColEdit = FALSE,
-  #                                      allowInsertRow = FALSE,
-  #                                      allowInsertColumn = FALSE,
-  #                                      allowRemoveRow = TRUE,
-  #                                      allowRemoveColumn = FALSE,
-  #                                      autoInsertRow=FALSE     ) %>%
-  #      rhandsontable:: hot_cols(renderer = color_renderer()) %>%
-  #      rhandsontable::hot_col(col = "Sample.name", readOnly = TRUE)
-  #    
-  #    if (!is.null(input$chooseExpDesign)) {
-  #      switch(input$chooseExpDesign,
-  #             FlatDesign = {
-  #               if ("Bio.Rep" %in% colnames(rv.buildDesign$hot))
-  #                 hot <- hot %>% rhandsontable::hot_col(col = "Bio.Rep", readOnly = TRUE)
-  #             },
-  #             twoLevelsDesign = {
-  #               if ("Tech.Rep" %in% colnames(rv.buildDesign$hot))
-  #                 hot <- hot %>% rhandsontable::hot_col(col =  "Tech.Rep", readOnly = TRUE)
-  #             } ,
-  #             threeLevelsDesign = {
-  #               if ("Analyt.Rep" %in% colnames(rv.buildDesign$hot))
-  #                 hot <- hot %>% rhandsontable::hot_col(col = "Analyt.Rep", readOnly = TRUE)
-  #             }
-  #      )
-  #    }
-  #    hot
-  #    
-  #  })
-  #  
-  #  
-  #  
-  #  
-  #  
-  #  #----------------------------------------------------------
-  #  output$UI_checkConditions  <- renderUI({
-  #    
-  #    req(rv.buildDesign$hot)
-  #    rv.buildDesign$conditionsChecked
-  #    input$convert_reorder
-  #    
-  #    if ((sum(rv.buildDesign$hot$Condition == "")==0) && (input$convert_reorder != "None")){
-  #      tags$div(
-  #        tags$div(style="display:inline-block;",
-  #                 actionButton(ns("btn_checkConds"), "Check conditions", class = actionBtnClass)
-  #        ),
-  #        
-  #        tags$div(style="display:inline-block;",
-  #                 if(!is.null(rv.buildDesign$conditionsChecked)){
-  #                   
-  #                   if (isTRUE(rv.buildDesign$conditionsChecked$valid)){
-  #                     img <- "images/Ok.png"
-  #                     txt <- "Correct conditions"
-  #                   }else {
-  #                     img <- "images/Problem.png"
-  #                     txt <- "Invalid conditions"
-  #                   }
-  #                   tagList(
-  #                     tags$div(
-  #                       tags$div(style="display:inline-block;",tags$img(src = img, height=25)),
-  #                       tags$div(style="display:inline-block;",tags$p(txt))
-  #                     ),
-  #                     if(!isTRUE(rv.buildDesign$conditionsChecked$valid)){
-  #                       tags$p(rv.buildDesign$conditionsChecked$warn)
-  #                     }
-  #                   )
-  #                 }
-  #        )
-  #      )
-  #    } else {
-  #      tagList(
-  #        br(),
-  #        br()
-  #      )
-  #      
-  #    }
-  #  })
-  #  
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  output$UI_hierarchicalExp <- renderUI({
-  #    req(rv.buildDesign$conditionsChecked)
-  #    if (!isTRUE(rv.buildDesign$conditionsChecked$valid)){return(NULL)
-  #    } else {
-  #      tagList(
-  #        div(
-  #          div(
-  #            # edit1
-  #            style="display:inline-block; vertical-align: middle;",
-  #            tags$b("2 - Choose the type of experimental design and complete it accordingly")
-  #          ),
-  #          div(
-  #            # edit2
-  #            style="display:inline-block; vertical-align: middle;",
-  #            tags$button(id=ns("btn_helpDesign"), tags$sup("[?]"), class="Prostar_tooltip")
-  #          )
-  #        ),
-  #        
-  #        radioButtons(ns("chooseExpDesign"), "",
-  #                     choices = c("Flat design (automatic)" = "FlatDesign" ,
-  #                                 "2 levels design (complete Bio.Rep column)" = "twoLevelsDesign" ,
-  #                                 "3 levels design (complete Bio.Rep and Tech.Rep columns)" = "threeLevelsDesign" ),
-  #                     selected=character(0))
-  #      )
-  #    }
-  #    
-  #  })
-  #  
-  #  
-  #  
-  #  
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  output$viewDesign <- renderUI({
-  #    
-  #    rv.buildDesign$designSaved
-  #    if (isTRUE(rv.buildDesign$designSaved)){return(NULL)}
-  #    
-  #    tagList(
-  #      h4("Design"),
-  #      rHandsontableOutput(ns("hot"))
-  #    )
-  #  })
-  #  
-  #  
-  #  callModule(moduleDesignExample,"buildDesignExampleThree", reactive({3}), n_rows = reactive({nrow(rv.buildDesign$hot)}))
-  #  callModule(moduleDesignExample,"buildDesignExampleTwo", reactive({2}), n_rows = reactive({nrow(rv.buildDesign$hot)}))
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  output$designExamples <- renderUI({
-  #    input$chooseExpDesign
-  #    print(input$chooseExpDesign)
-  #    switch(input$chooseExpDesign,
-  #           FlatDesign = 
-  #             {
-  #               tags$p("There is nothing to do for the flat design: the 'Bio.Rep' column is already filled.")
-  #             },
-  #           twoLevelsDesign =  {
-  #             tagList(
-  #               h4("Example for a 2-levels design"),
-  #               moduleDesignExampleUI(ns("buildDesignExampleTwo"))
-  #             )
-  #           },
-  #           threeLevelsDesign =  {
-  #             tagList(
-  #               h4("Example for a 3-levels design"),
-  #               moduleDesignExampleUI(ns("buildDesignExampleThree"))
-  #             )
-  #           }
-  #    )
-  #  })
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  observe({
-  #    shinyjs::onclick("btn_helpDesign",{
-  #      print("onClick : btn_helpDesign")
-  #      if (!is.null(input$chooseExpDesign))
-  #      {
-  #        shinyjs::toggle(id = "designExamples", anim = TRUE)
-  #      }
-  #    }
-  #    )
-  #  })
-  #  
-  #  
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  observeEvent(input$chooseExpDesign, {
-  #    rv.buildDesign$hot
-  #    rv.buildDesign$designChecked <- NULL
-  #    switch(input$chooseExpDesign,
-  #           FlatDesign = {
-  #             rv.buildDesign$hot  <- data.frame(rv.buildDesign$hot[,1:2],
-  #                                               Bio.Rep = seq(1:nrow(rv.buildDesign$hot)),
-  #                                               stringsAsFactors = FALSE)
-  #           },
-  #           twoLevelsDesign = {
-  #             rv.buildDesign$hot  <- data.frame(rv.buildDesign$hot[,1:2],Bio.Rep = rep("",nrow(rv.buildDesign$hot)),
-  #                                               Tech.Rep = seq(1:nrow(rv.buildDesign$hot)),
-  #                                               stringsAsFactors = FALSE)
-  #           },
-  #           threeLevelsDesign = {
-  #             #if (length(grep("Tech.Rep", colnames(rv.buildDesign$hot))) > 0) { return(NULL)}
-  #             rv.buildDesign$hot  <- data.frame(rv.buildDesign$hot[,1:2],
-  #                                               Bio.Rep = rep("",nrow(rv.buildDesign$hot)),
-  #                                               Tech.Rep = rep("",nrow(rv.buildDesign$hot)),
-  #                                               Analyt.Rep = seq(1:nrow(rv.buildDesign$hot)),
-  #                                               stringsAsFactors = FALSE)
-  #           }
-  #    )
-  #  })
-  #  
-  #  
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  observeEvent(input$hot,{ rv.buildDesign$hot <-  rhandsontable::hot_to_r(input$hot)})
-  #  
-  #  
-  #  
-  #  #------------------------------------------------------------------------------
-  #  observeEvent(input$btn_checkDesign,{ 
-  #    rv.buildDesign$designChecked <- check.design(rv.buildDesign$hot)
-  #    print(rv.buildDesign$designChecked)
-  #    
-  #  })
-  #  
-  #  #------------------------------------------------------------------------------
-  #  output$checkDesign <- renderUI({
-  #    req(input$chooseExpDesign)
-  #    rv.buildDesign$designChecked
-  #    req(rv.buildDesign$conditionsChecked)
-  #    
-  #    if(!isTRUE(rv.buildDesign$conditionsChecked$valid)){return(NULL)}
-  #    switch(isolate({input$chooseExpDesign}),
-  #           FlatDesign = {},
-  #           twoLevelsDesign = { if (sum(rv.buildDesign$hot$Bio.Rep == "") > 0) {return(NULL)}},
-  #           threeLevelsDesign = {if ((sum(rv.buildDesign$hot$Bio.Rep == "")+sum(rv.buildDesign$hot$Tech.Rep == "")) > 0) {return(NULL)}}
-  #    )
-  #    
-  #    
-  #    tags$div(
-  #      tags$div(
-  #        style="display:inline-block;",
-  #        actionButton(ns("btn_checkDesign"), "Check design", class = actionBtnClass)
-  #      ),
-  #      
-  #      tags$div(
-  #        style="display:inline-block;",
-  #        if(!is.null(rv.buildDesign$designChecked)){
-  #          
-  #          if (isTRUE(rv.buildDesign$designChecked$valid)){
-  #            shinyjs::enable("createMSnsetButton")
-  #            img <- "images/Ok.png"
-  #            txt <- "Correct design"
-  #            #rvNavProcess$Done[4] <- TRUE
-  #          }else {
-  #            img <- "images/Problem.png"
-  #            txt <- "Invalid design"}
-  #          tagList(
-  #            tags$div(
-  #              tags$div(style="display:inline-block;",tags$img(src = img, height=25)),
-  #              tags$div(style="display:inline-block;",tags$p(txt))
-  #            ),
-  #            if(!isTRUE(rv.buildDesign$designChecked$valid)){
-  #              shinyjs::disable("createMSnsetButton")
-  #              tags$p(rv.buildDesign$designChecked$warn)
-  #            } else {
-  #              shinyjs::enable("createMSnsetButton")
-  #              #rvNavProcess$Done[4] <- TRUE
-  #            }
-  #          )
-  #        } else {
-  #          shinyjs::disable("createMSnsetButton")
-  #        }
-  #      )
-  #      
-  #    )
-  #    
-  #    
-  #  })
-  #  
-  #  
-  
-  
-  #  
-  #  #----------------------------------------------------------
-  #  observeEvent(input$btn_checkConds,{
-  #    input$convert_reorder
-  #    
-  #    if (length(grep("Bio.Rep", colnames(rv.buildDesign$hot))) > 0)  { return(NULL)}
-  #    
-  #    if (isTRUE(input$convert_reorder)) {
-  #      rv.buildDesign$newOrder <- order(rv.buildDesign$hot["Condition"])
-  #      rv.buildDesign$hot <- rv.buildDesign$hot[rv.buildDesign$newOrder,]
-  #    }
-  #    
-  #    rv.buildDesign$conditionsChecked <- check.conditions(rv.buildDesign$hot$Condition)
-  #    
-  #  })
-  #  
-  
-  
-  #  
-  #  
   
 }
-    
+
+
 ## To be copied in the UI
 # mod_build_design_example_ui("build_design_example_ui_1")
     

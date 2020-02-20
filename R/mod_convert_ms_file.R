@@ -30,9 +30,34 @@ mod_convert_ms_file_ui <- function(id){
 mod_convert_ms_file_server <- function(input, output, session){
   ns <- session$ns
   
+  
   callModule(mod_popover_for_help_server,"modulePopover_convertChooseDatafile", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Data file</font></strong>")), 
                                   content="Select one (.txt, .csv, .tsv, .xls, .xlsx) file.")))
+  
+  # Variable to manage the different screens of the module
+  rv.convert <- reactiveValues(
+    # structure needed fior the navigation module
+    nav = NavStructure(name = "Convert",
+                       stepsNames = c("Select file", "Data Id", "Epx. & feat. data", "Build design", "Convert"),
+                       ll.UI = list( screenStep1 = uiOutput(ns("Convert_SelectFile")),
+                                     screenStep2 = uiOutput(ns("Convert_DataId")),
+                                     screenStep3 = uiOutput(ns("Convert_ExpFeatData")),
+                                     screenStep4 = uiOutput(ns("Convert_BuildDesign")),
+                                     screenStep5 = uiOutput(ns("Convert_Convert"))
+                       ),
+                       isDone =  rep(FALSE,5),
+                       forceReset = FALSE
+                      ),
+    tab1 = NULL,
+    obj =  NULL,
+    design = NULL,
+    
+    # contient l'objet de sortie du module (ie. a MAE instance)
+    dataOut = NULL, 
+    name = "processConvert"
+  )
+  
   
   callModule(mod_popover_for_help_server,"modulePopover_convertIdType", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">ID definition</font></strong>")), 
@@ -56,28 +81,9 @@ mod_convert_ms_file_server <- function(input, output, session){
                rv.convert$dataOut@datasets[[1]]
              }))
   
-  
-  # Variable to manage the different screens of the module
-  rv.convert <- reactiveValues(
-    # structure needed fior the navigation module
-    nav = NavStructure(name = "Convert",
-                       stepsNames = c("Select file", "Data Id", "Epx. & feat. data", "Build design", "Convert"),
-                       ll.UI = list( screenStep1 = uiOutput(ns("Convert_SelectFile")),
-                                     screenStep2 = uiOutput(ns("Convert_DataId")),
-                                     screenStep3 = uiOutput(ns("Convert_ExpFeatData")),
-                                     screenStep4 = uiOutput(ns("Convert_BuildDesign")),
-                                     screenStep5 = uiOutput(ns("Convert_Convert"))
-                                     ),
-                       isDone =  rep(FALSE,5),
-                       forceReset = FALSE
-                       ),
-    tab1 = NULL,
-    obj =  NULL,
-    
-    # contient l'objet de sortie du module (ie. a MAE instance)
-    dataOut = NULL, 
-    name = "processConvert"
-  )
+  rv.convert$tab1 <- callModule(mod_import_file_from_server,'importFile')
+  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', data=reactive({NULL}))
+ 
   
   
   callModule(mod_navigation_server, 'nav_convert',pages=reactive({rv.convert$nav}))
@@ -155,39 +161,10 @@ mod_convert_ms_file_server <- function(input, output, session){
   #################################
   ### Screen 4 : Build design
   output$Convert_BuildDesign <- renderUI({
-
-    tagList(
-      tags$p("If you do not know how to fill the experimental design, you can click
-           on the '?' next to each design in the list that appear once the conditions
-           are checked or got to the ",
-             actionLink(ns("linkToFaq1"), "FAQ", style="background-color: white"),
-             " page."),
-      shinyBS::bsModal("modalLinkFAQ", "NULL", ns("linkToFaq1"), size = "large", moduleInsertMarkdownUI(ns('FAQ_MD2')),
-                       tags$head(tags$style("#window .modal-footer{display:none}
-                                             .modal-header{display:none}"))),
-      fluidRow(
-        column(width=6,tags$b("1 - Fill the \"Condition\" column to identify the conditions to compare.")),
-        column(width=6,uiOutput(ns("UI_checkConditions"))  )
-      ),
-      fluidRow(
-        column(width=6,uiOutput(ns("UI_hierarchicalExp"))),
-        column(width=6,uiOutput(ns("checkDesign") ))
-      ),
-      hr(),
-      selectInput(ns("convert_reorder"), "Order by conditions ?",
-                  choices=c("No"="No", "Yes"="Yes"),
-                  width="100px"),
-      tags$div(
-
-        tags$div(style="display:inline-block; vertical-align: top;",
-                 uiOutput(ns("viewDesign"),width="100%")
-        ),
-        tags$div(style="display:inline-block; vertical-align: top;",
-                 #shinyjs::hidden(div(id = ns("showExamples"), uiOutput("designExamples") ))
-                 shinyjs::hidden(uiOutput(ns("designExamples")))
-        )
-      )
-    )
+    req(rv$widgets$Convert$datafile)
+    req(input$file1)
+    
+    mod_build_design_ui('buildDesign')
  })
 
 
@@ -237,528 +214,7 @@ mod_convert_ms_file_server <- function(input, output, session){
  #  ############################################################################
  #  ####### ENd definitino of UI   ##################
  #  #############################################################################
- #  
- #  observe({
- #    req(input$idBox)
- #    req(rv.convert$tab1)
- #    test1 <- test2 <- FALSE
- #    
- #    test1 <- (input$typeOfData == "peptide") && !(input$convert_proteinId == "")
- #    
- #    
- #    if (input$idBox =="Auto ID") {
- #      test2 <- TRUE
- #    }
- #    else {
- #      test2 <- (length(as.data.frame(rv.convert$tab1)[, input$idBox])
- #                == length(unique(as.data.frame(rv.convert$tab1)[, input$idBox])))
- #    }
- #    
- #    rv.convert$nav@isDone[2] <- test1 && test2
- #  })
- #  
- #  
- #  
- #  output$warningNonUniqueID <- renderUI({
- #    req(input$idBox)
- #    req(rv.convert$tab1)
- #    
- #    isolate({
- #      if (input$idBox =="Auto ID") {
- #        text <- "<img src=\"images/Ok.png\" height=\"24\"></img>"
- #      }
- #      else {
- #        t <- (length(as.data.frame(rv.convert$tab1)[, input$idBox])
- #              == length(unique(as.data.frame(rv.convert$tab1)[, input$idBox])))
- #        
- #        if (!t){
- #          text <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">
- #        Warning ! Your ID contains duplicate data.
- #        Please choose another one."
- #        }
- #        else {
- #          text <- "<img src=\"images/Ok.png\" height=\"24\"></img>"
- #        }
- #      }
- #      HTML(text)
- #      
- #    })
- #  })
- #  
- #  
- #  
- #  output$convertChooseProteinID_UI <- renderUI({
- #    req(rv.convert$tab1)
- #    
- #    if (input$typeOfData == "protein") {return(NULL)}
- #    
- #    .choices <- c("",colnames(rv.convert$tab1))
- #    names(.choices) <- c("",colnames(rv.convert$tab1))
- #    tagList(
- #      mod_popover_for_help_ui(ns("modulePopover_convertProteinID")),
- #      selectInput(ns("convert_proteinId"),"",choices =  .choices , selected = character(0))
- #    )
- #  })
- #  
- #  
- #  #########################################################
- #  output$id <- renderUI({
- #    req(rv.convert$tab1)
- #    
- #    .choices <- c("Auto ID",colnames(rv.convert$tab1))
- #    names(.choices) <- c("Auto ID",colnames(rv.convert$tab1))
- #    
- #    tagList(
- #      mod_popover_for_help_ui(ns("modulePopover_convertIdType")),
- #      selectInput(ns("idBox"), label = "", choices = .choices)
- #    )
- #    
- #  })
- #  
- #  
- #  
-
- #  
- #  
- #  observeEvent(input$fData.box,ignoreInit = TRUE,{
- #    
- #    choices = colnames(rv.convert$tab1)[-which(colnames(rv.convert$tab1) %in% input$fData.box)]
- #    names(choices) = 
- #      colnames(rv.convert$tab1)[-which(colnames(rv.convert$tab1) %in% input$fData.box)]
- #    updateSelectInput(session, "eData.box", 
- #                      label = "",
- #                      choices = choices,
- #                      selected = choices)
- #    
- #  })
- #  
- #  
- #  
- #  
- #  output$helpTextDataID <- renderUI({
- #    req(input$typeOfData)
- #    
- #    .type <- ""
- #    switch(input$typeOfData,
- #           protein = {.type <- "proteins"},
- #           peptide = {.type <- "peptides"}
- #    )
- #    txt <- paste ("Please select among the columns of your data the one that 
- #                corresponds to a unique ID of the ", .type, ".", sep=" ")
- #    helpText(txt)
- #    
- #  })
- #  
- #
-
- #  
- #  output$conversionDone <- renderUI({
- #    req(rv.convert$obj)
- #    h4("The conversion is done. Your dataset has been automatically loaded 
- #     in memory. Now, you can switch to the Descriptive statistics panel to 
- #     vizualize your data.")
- #  })
- #  
- #  
- #  observe({
- #    rv.convert$nav@isDone[1] <- !is.null(input$file2Convert)
- #  })
- #  
- #  observe({
- #    rv.convert$nav@isDone[3] <- length(input$eData.box)>0
- #  })
- #  
- #  
- #  observe({
- #    rv.convert$nav@isDone[4] <- !is.null(rv.buildDesign$designChecked$valid) && isTRUE(rv.buildDesign$designChecked$valid)
- #  })
- #  
- #  
- #  
-
- #  
- #  
- #  
- #  
- #  ###########################################
- #  ##
- #  ##   Quanti data table
- #  ##
- #  ##
- #  ##############################################
- #  output$eData <- renderUI({
- #    input$file2Convert
- #    rv.convert$tab1
- #    if (is.null(rv.convert$tab1)) {return(NULL)  }
- #    
- #    choices <- colnames(rv.convert$tab1)
- #    names(choices) <- colnames(rv.convert$tab1)
- #    
- #    tagList(
- #      mod_popover_for_help_ui(ns("modulePopover_convertDataQuanti")),
- #      selectInput(ns("eData.box"),
- #                  label = "",
- #                  choices = choices,
- #                  multiple = TRUE, width='200px',
- #                  size = 20,
- #                  selectize = FALSE)
- #    )
- #  })
- #  
- #  
- #  
- #  
- #  
- #  
- #  output$checkIdentificationTab <- renderUI({
- #    req(input$selectIdent)
- #    if (!isTRUE(input$selectIdent)){return(NULL)}
- #    
- #    shinyValue("colForOriginValue_",length(input$eData.box))
- #    temp <- shinyValue("colForOriginValue_",length(input$eData.box))
- #    
- #    if ((length(which(temp == "None")) == length(temp)))
- #    {
- #      img <- "images/Ok.png"
- #      txt <- "Correct"
- #    }  else {
- #      if (length(which(temp == "None")) > 0)
- #      {
- #        img <- "images/Problem.png"
- #        txt <- "The identification method is not appropriately defined for each sample."
- #      } else {
- #        if(length(temp) != length(unique(temp))){
- #          img <- "images/Problem.png"
- #          txt <- "There are duplicates in identification columns."
- #        }else { 
- #          img <- "images/Ok.png"
- #          txt <- "Correct"
- #        }
- #      }
- #    }
- #    tags$div(
- #      tags$div(
- #        tags$div(style="display:inline-block;",tags$img(src = img, height=25)),
- #        tags$div(style="display:inline-block;",tags$p(txt))
- #      )
- #    )
- #    
- #    
- #  })
- #  
- #  
- #  
- #  
- #  
- #  
- #  # reactive dataset
- #  quantiDataTable <- reactive({
- #    req(input$eData.box)
- #    req(rv.convert$tab1)
- #    
- #    session$sendCustomMessage('unbind-DT', 'x1')
- #    df <- NULL
- #    choices <- c("None",colnames(rv.convert$tab1))
- #    names(choices) <- c("None",colnames(rv.convert$tab1))
- #    
- #    if (isTRUE(input$selectIdent)) {
- #      
- #      df <- data.frame(as.data.frame(input$eData.box),
- #                       shinyInput(selectInput,
- #                                  "colForOriginValue_",
- #                                  nrow(as.data.frame(input$eData.box)),
- #                                  choices=choices))
- #      colnames(df) <- c("Sample", "Identification method")
- #    } else {
- #      df <- data.frame(Sample = as.data.frame(input$eData.box))
- #      colnames(df) <- c("Sample")
- #    }
- #    df
- #  })
- #  
- #  
- #  
- #  output$x1 <- renderDataTable({
- #    dat <-  DT::datatable(
- #      quantiDataTable(),
- #      escape=FALSE,
- #      rownames = FALSE,
- #      extensions = c('Scroller', 'Buttons'),
- #      server=FALSE,
- #      selection='none', 
- #      class = 'compact',
- #      options=list(
- #        preDrawCallback=JS(
- #          'function() {
- #      Shiny.unbindAll(this.api().table().node());}'),
- #        drawCallback= JS(
- #          'function(settings) {
- #      Shiny.bindAll(this.api().table().node());}'),
- #        # rowCallback = JS("function(r,d) {$(r).attr('height', '10px')}"),
- #        dom = 'Bfrtip',
- #        autoWidth=TRUE,
- #        deferRender = TRUE,
- #        bLengthChange = FALSE,
- #        scrollX = 200,
- #        scrollY = 500,
- #        scroller = TRUE,
- #        ajax = list(url = dataTableAjax(session, quantiDataTable()))
- #        
- #      ))
- #    return(dat)
- #  })
- #  
- #  
- #  observeEvent(shinyValue("colForOriginValue_",nrow(quantiDataTable())),{})
- #  
- #  
- #  checkIdentificationMethod_Ok <- reactive({
- #    #req(input$selectIdent)
- #    res <- TRUE
- #    tmp <- NULL
- #    if (isTRUE(input$selectIdent)) {
- #      tmp <- shinyValue("colForOriginValue_",nrow(quantiDataTable()))
- #      if ((length(grep("None", tmp)) > 0)  || (sum(is.na(tmp)) > 0)){ res <- FALSE }
- #    } 
- #    res
- #    
- #  })
- #  
- #  
- #  datasetID_Ok <- reactive({
- #    req(input$idBox)
- #    req(rv.convert$tab1)
- #    if (input$idBox == "Auto ID") {t <- TRUE}
- #    else {
- #      t <- (length(as.data.frame(rv.convert$tab1)[, input$idBox])
- #            == length(unique(as.data.frame(rv.convert$tab1)[, input$idBox])))
- #    }
- #    t
- #  })
- #  
- #  
- #  
- #  
- #  output$warningCreateMSnset <- renderUI({
- #    if (isTRUE(input$selectIdent)){
- #      colNamesForOriginofValues <- shinyValue("colForOriginValue_",nrow(quantiDataTable()))
- #      if (length(which(colNamesForOriginofValues == "None")) >0){
- #        text <- "<font color=\"red\"> Warning: The MSnset cannot be created because the identification 
- #      method are not fully filled.  <br>"
- #        HTML(text)
- #      }
- #    }
- #  })
- #  
- #  
- #  
- #  
- #  #######################################
- #  observeEvent(input$createMSnsetButton,{
- #    #req(rv.convert$obj)
- #    
- #    colNamesForOriginofValues <- NULL
- #    if (isTRUE(input$selectIdent)) {
- #      colNamesForOriginofValues <- shinyValue("colForOriginValue_",nrow(quantiDataTable()))
- #      if (length(which(colNamesForOriginofValues == "None")) >0){ return (NULL)   }
- #    } 
- #    
- #    #isolate({
- #    result = tryCatch(
- #      {
- #        ext <- GetExtension(input$file2Convert$name)
- #        
- #        
- #        input$filenameToCreate
- #        rv.convert$tab1
- #        
- #        tmp.eData.box <- input$eData.box
- #        indexForEData <- match(tmp.eData.box, colnames(rv.convert$tab1))
- #        if (!is.null(rv.buildDesign$newOrder)){
- #          tmp.eData.box <- tmp.eData.box[rv.buildDesign$newOrder]
- #          indexForEData <- indexForEData[rv.buildDesign$newOrder]
- #        }
- #        
- #        indexForFData <- seq(1,ncol(rv.convert$tab1))[-indexForEData]
- #        
- #        indexForIDBox <- NULL
- #        if (input$idBox !="Auto ID") {
- #          indexForIDBox <- match(input$idBox, colnames(rv.convert$tab1))
- #        }
- #        
- #        
- #        metadata <- rhandsontable::hot_to_r(input$hot)
- #        logData <- (input$checkDataLogged == "no")
- #        
- #        
- #        indexForOriginOfValue <- NULL
- #        if (!is.null(colNamesForOriginofValues) && (length(grep("None", colNamesForOriginofValues))==0)  && (sum(is.na(colNamesForOriginofValues)) == 0)){
- #          for (i in 1:length(tmp.eData.box)){
- #            indexForOriginOfValue <- c(indexForOriginOfValue, which(colnames(rv.convert$tab1) == input[[paste0("colForOriginValue_", i)]]))
- #          }
- #        }
- #        
- #        
- #        versions <- list(Prostar_Version = 
- #                           installed.packages(lib.loc = Prostar.loc)["Prostar","Version"],
- #                         DAPAR_Version = 
- #                           installed.packages(lib.loc = DAPAR.loc)["DAPAR","Version"]
- #        )
- #        tmp <- createMSnset(rv.convert$tab1, 
- #                            metadata, 
- #                            indexForEData, 
- #                            indexForFData, 
- #                            indexForIDBox,
- #                            indexForOriginOfValue,
- #                            logData, 
- #                            input$replaceAllZeros,
- #                            pep_prot_data = input$typeOfData,
- #                            proteinId =  gsub(".", "_", input$convert_proteinId, fixed=TRUE),
- #                            versions
- #        )
- #        
- #        
- #        ll.process <- type <- NULL
- #        switch(input$typeOfData,
- #               peptide = {
- #                 rv.convert$obj <- pepPipeline()
- #                 ll.process <- pipeline.def$peptide
- #               },
- #               protein = {
- #                 rv.convert$obj <- protPipeline()
- #                 ll.process <- pipeline.def$protein
- #                 
- #               }, 
- #               p2p = {
- #                 rv.convert$obj <- p2pPipeline()
- #                 ll.process <- pipeline.def$p2p
- #                 
- #               }
- #        )
- #        
- #        rv.convert$obj <- initialize(rv.convert$obj, 
- #                                     c('original',ll.process), 
- #                                     tmp,
- #                                     input$filenameToCreate, 
- #                                     input$typeOfData )
- #        
- #        
- #        
- #        print("New dataset converted")
- #        print(rv.convert$obj)
- #        ClearConvertUI()
- #        #ClearMemory()
- #        
- #        l.params <- list(filename = input$filenameToCreate)
- #        
- #        #loadObjectInMemoryFromConverter()
- #        
- #        updateTabsetPanel(session, "tabImport", selected = "Convert")
- #        rv.convert$dataOut <- rv.convert$obj
- #        
- #        rvNavProcess$Done[5] <- TRUE
- #      }
- #      , warning = function(w) {
- #        if (conditionMessage(w) %in% c("NaNs produced", "production de NaN")){
- #          shinyjs::info(paste("Warning : Your original dataset may contain negative values",
- #                              "so that they cannot be logged. Please check back the dataset or", 
- #                              "the log option in the first tab.",
- #                              sep=" "))
- #        } else {
- #          shinyjs::info(paste("Warning in CreateMSnSet",":",
- #                              conditionMessage(w), 
- #                              sep=" "))
- #        }
- #      }, error = function(e) {
- #        shinyjs::info(paste("Error :","CreateMSnSet",":",
- #                            conditionMessage(e), 
- #                            sep=" "))
- #      }, finally = {
- #        #cleanup-code 
- #      })
- #    
- #    
- #    
- #    #})
- #  })
- #  
- #  
- #  
- #  
- #  ClearConvertUI <- reactive({
- #    
- #    updateSelectInput(session, 
- #                      "datasets",  
- #                      choices = G_noneStr)
- #    #updateRadioButtons(session,"typeOfData",selected = typePeptide )
- #    updateRadioButtons(session, "checkDataLogged", selected="no")
- #    
- #    updateSelectInput(session, "idBox", selected = NULL)
- #    
- #    updateSelectizeInput(session,"eData.box",choices = NULL, selected=NULL)
- #    updateTextInput(session,"filenameToCreate",value= "")
- #    updateTextInput(session,"nameExport",value= "")
- #    
- #    updateCheckboxInput(session, "replaceAllZeros",value = TRUE)
- #    updateRadioButtons(session,
- #                       inputId = "ChooseFilters", 
- #                       selected = gFilterNone)
- #    
- #  })
- #  
- #  
- #  
- #  
- #  
- #  
  
- #  
- #  
- #  
- #  
- #  
- #  color_renderer <- reactive({
- #    conds <- rv.buildDesign$hot$Condition
- #    pal <- rv.prostar$settings()$examplePalette
- #    txt <- "function (instance, td, row, col, prop, value, cellProperties) {
- #  Handsontable.renderers.TextRenderer.apply(this, arguments);"
- #    c <- 1
- #    for (i in 1:length(conds)){
- #      if (conds[i] != "")
- #        txt <- paste0(txt, "if(row==",(i-1)," && col==",c, ") {td.style.background = '",pal[which(conds[i] == unique(conds))],"';}")
- #    }
- #    txt <- paste0(txt,"}")
- #    
- #    return (txt)
- #  })
- #  
- #  
- #  
- #  output$convertFinalStep <- renderUI({
- #    req(rv.buildDesign$designChecked)
- #    if (!(rv.buildDesign$designChecked$valid)){return(NULL)}
- #    tagList(
- #      uiOutput(ns("checkAll_convert"), width="50"),
- #      htmlOutput("msgAlertCreateMSnset"),
- #      hr(),
- #      textInput(ns("filenameToCreate"),"Enter the name of the study"),
- #      actionButton(ns("createMSnsetButton"),"Convert data", class = actionBtnClass),
- #      uiOutput(ns("warningCreateMSnset"))
- #      
- #    )
- #  })
-
- #  
- #  
- #  #----------------------------------------------------------
- #  observeEvent(input$eData.box,{
- #    rv.buildDesign$hot  <- data.frame(Sample.name = as.character(input$eData.box),
- #                                      Condition = rep("",length(input$eData.box)),
- #                                      stringsAsFactors = FALSE)
- #    
- #    
- #  })
- #  
   
   return(reactive({rv.convert$dataOut}))
 
