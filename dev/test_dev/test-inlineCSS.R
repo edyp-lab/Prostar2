@@ -98,7 +98,7 @@ $inactive: #AEB6BF;
 	}
 	
 	span{
-		width: 1px;
+		width: 100%;
 		height: 1px;
 		position: absolute;
 		top: 50%;
@@ -250,7 +250,7 @@ $inactive: #AEB6BF;
       
       txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
       for (i in 1:input$nSteps){
-        txt <- paste0(txt,"<div class='input active'><span name='1910'></span>	</div>")
+        txt <- paste0(txt,"<div class='input active'><span name='Filtering module'></span>	</div>")
       }
       txt <- paste0(txt,"</div></div>")
       HTML(txt)

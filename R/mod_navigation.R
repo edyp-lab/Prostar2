@@ -224,8 +224,8 @@ mod_navigation_ui <- function(id){
                                       style='padding:4px; font-size:80%'))
       )
     ),
-
-    br(),
+    hr(),
+    br(),br(),br(),
     uiOutput(ns("screens"))
     
     
@@ -292,45 +292,24 @@ mod_navigation_server <- function(input, output, session, pages){
   
   navPage <- function(direction) {
     newval <- current$val + direction 
-    if(newval<= 1) {
-      newval <- 1
-      } else if (newval >= current$nbSteps){
-      newval <- current$nbSteps
+    newval <- max(1, newval)
+    newval <- min(newval, current$nbSteps)
+   current$val <- newval
   }
-    current$val <- newval
-  }
+  
+  
   observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
   observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
   
   
-  
- 
 
   output$screens <- renderUI({
     current$val
-    #isolate({
-      ll <- NULL
-
-      for (i in 1:current$nbSteps){
-        if (i == current$val) {
-           ll[[i]] <- shinyjs::show(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
-         } else {
-           ll[[i]] <- shinyjs::hide(div(id = ns(paste0("screen",i)), pages()@ll.UI[[i]]))
-         }
-      }
+    ll <- NULL
+    ll[[current$val]] <- pages()@ll.UI[[current$val]]
     tagList(ll)
-   # })
-
   })
 
-
-  
-  # observeEvent(current$val,{
-  # 
-  #   for (i in 1:current$nbSteps){
-  #     shinyjs::toggleState(id = paste0("screen", i), condition = current$val == i)
-  #   }
-  # })
 
 }
 

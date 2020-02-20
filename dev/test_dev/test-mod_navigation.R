@@ -15,11 +15,9 @@ server <- function(input, output, session) {
   navmodparams <- reactiveValues(
     obj = NavStructure(name = "test",
                       stepsNames = c("Screen 1", "Screen 2","Screen 3"),
-                      #isMandatory = rep(FALSE,3),
                       ll.UI = list( screenStep1 = uiOutput("screen1"),
                                     screenStep2 = uiOutput("screen2"),
                                     screenStep3 = uiOutput("screen3")),
-                      #rstFunc = reactive({resetFunc()}),
                       isDone =  c(FALSE,FALSE, TRUE),
                       forceReset = FALSE)
   )
