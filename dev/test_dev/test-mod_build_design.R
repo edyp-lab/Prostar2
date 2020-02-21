@@ -1,8 +1,10 @@
-
+library(shinyjs)
+library(rhandsontable)
 source(file.path('../../R', 'mod_build_design.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
+  useShinyjs(),
   tagList(
     mod_build_design_ui('buildDesign')
   )
@@ -16,9 +18,7 @@ server <- function(input, output, session) {
   
   callModule(mod_build_design_server, 
              'buildDesign', 
-             sampleNames=reactive({colnames(Biobase::exprs(obj))}),
-             examplePalette = reactive({RColorBrewer::brewer.pal(8, 'Dark2')})
-             )
+             sampleNames=reactive({colnames(Biobase::exprs(obj))}))
 }
 
 
