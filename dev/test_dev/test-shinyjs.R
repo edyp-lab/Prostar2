@@ -6,11 +6,15 @@ library(shinyjs)
 
 moduleTestUI <- function(id, label='ui1'){
   ns <- NS(id)
-  shinyUI(fluidPage(
+  useShinyjs()
+  tagList(
+    #shinyUI(fluidPage(
     actionButton(ns("btn"), "Submit", class='btn-primary'),
     actionButton(ns("toggle"), "Toggle"),
-    shinyjs::hidden(uiOutput(ns('test')))
-  ))
+    hidden(uiOutput(ns('showExamples')))
+   
+  #)
+  )
 }
 
 moduleTest <- function(input, output, session) {
@@ -18,7 +22,14 @@ moduleTest <- function(input, output, session) {
   ns <- session$ns
   observeEvent(input$toggle, {
     toggleState("btn")
-    toggle("test")
+    toggle("showExamples")
+  })
+  
+  callModule(mod_build_design_example_server, 'designExamples', designLevel = reactive({2})  )
+  
+  
+  output$showExamples <- renderUI({
+    mod_build_design_example_ui(ns('designExamples') )
   })
   
   observeEvent(input$btn1, {
@@ -45,9 +56,9 @@ moduleTest <- function(input, output, session) {
     })
 
 
+ 
 
     observe({
-      req(input$chooseExpDesign)
       shinyjs::onclick("btn1",{
         print(input$btn)
         # shinyjs::toggle(id = "designExamples", anim = TRUE)
@@ -62,7 +73,8 @@ moduleTest <- function(input, output, session) {
 ui <- fluidPage(
   useShinyjs(),
   tagList(
-    htmlOutput("page")
+    #htmlOutput("page")
+    moduleTestUI('ui1')
   )
 )
 

@@ -13,7 +13,7 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
- callModule(mod_build_design_example_server,'design_example', designLevel=reactive({input$level}))
+ callModule(mod_build_design_example_server,'design_example')
   
   output$viewExample <- renderUI({
     mod_build_design_example_ui("design_example")

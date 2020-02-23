@@ -37,13 +37,13 @@ mod_build_design_ui <- function(id){
      selectInput(ns("convert_reorder"), "Order by conditions ?",
                  choices=c("No"="No", "Yes"="Yes"),
                  width="100px"),
-    h4("Design"),
+    h4("Design table"),
      tags$div(
        tags$div(style="display:inline-block; vertical-align: top;",
                 rHandsontableOutput(ns("hot"),width="100%"),
        ),
         tags$div(style="display:inline-block; vertical-align: top;",
-                 shinyjs::hidden(div(id = ns("showExamples"), selectInput('toto', 'toto', choices=1:3) ))
+                 shinyjs::hidden(uiOutput(ns('showExamples')))
        )
      )
    )
@@ -61,8 +61,6 @@ mod_build_design_ui <- function(id){
 mod_build_design_server <- function(input, output, session, sampleNames){
   ns <- session$ns
   
-  callModule(mod_insert_md_server, 'FAQ', URL_FAQ)
-  
   rv.buildDesign <- reactiveValues(
     design_df = NULL,
     hot_table = NULL,
@@ -70,12 +68,29 @@ mod_build_design_server <- function(input, output, session, sampleNames){
     newOrder = NULL,
     conditionsChecked = NULL,
     designSaved = NULL,
+    level = NULL,
     out = NULL
+  )
+  
+  
+  callModule(mod_insert_md_server, 'FAQ', URL_FAQ)
+  
+  callModule(mod_build_design_example_server, 
+             'designExamples'
   )
   
   
   
   
+  
+  observeEvent(rv.buildDesign$level,{
+    print('------')
+    print(rv.buildDesign$level)
+  })
+
+  output$showExamples <- renderUI({
+    mod_build_design_example_ui(ns('designExamples') )
+  })
   
   color_renderer <- reactive({
     req(rv.buildDesign$design_df)
@@ -83,7 +98,6 @@ mod_build_design_server <- function(input, output, session, sampleNames){
     pal <- RColorBrewer::brewer.pal(8, 'Dark2')
     txt <- "function (instance, td, row, col, prop, value, cellProperties) {
                       Handsontable.renderers.TextRenderer.apply(this, arguments);"
-   print(conds)
     c <- 1
     for (i in 1:length(conds)){
       if (conds[i] != "")
@@ -118,8 +132,8 @@ mod_build_design_server <- function(input, output, session, sampleNames){
   #----------------------------------------------------------
   observeEvent(req(sampleNames()),{
     rv.buildDesign$design_df  <- data.frame(Sample.name = as.character(sampleNames()),
-                                      Condition = rep("",length(sampleNames())),
-                                      stringsAsFactors = FALSE)
+                                            Condition = rep("",length(sampleNames())),
+                                            stringsAsFactors = FALSE)
   })
   
   
@@ -246,12 +260,19 @@ mod_build_design_server <- function(input, output, session, sampleNames){
 
 
   
+  # observe({
+  #   shinyjs::onclick('btn_helpDesign', {
+  #     print('click on btn_helpDesign')
+  #   })
+  # })
+  # 
+  
   
   # #------------------------------------------------------------------------------
   observeEvent(input$btn_helpDesign,{
-    req(input$chooseExpDesign)
+    #req(input$chooseExpDesign)
       print(input$btn_helpDesign)
-       # shinyjs::toggle(id = "designExamples", anim = TRUE)
+        shinyjs::toggle(id = "showExamples", anim = TRUE)
 
   })
 
@@ -268,12 +289,14 @@ mod_build_design_server <- function(input, output, session, sampleNames){
              rv.buildDesign$design_df <- data.frame(rv.buildDesign$design_df[,1:2],
                                                Bio.Rep = seq(1:nrow(rv.buildDesign$design_df)),
                                                stringsAsFactors = FALSE)
+             rv.buildDesign$level <- 1
            },
            twoLevelsDesign = {
              rv.buildDesign$design_df  <- data.frame(rv.buildDesign$design_df[,1:2],
                                                Bio.Rep = rep("",nrow(rv.buildDesign$design_df)),
                                                Tech.Rep = seq(1:nrow(rv.buildDesign$design_df)),
                                                stringsAsFactors = FALSE)
+             rv.buildDesign$level <- 2
            },
            threeLevelsDesign = {
              rv.buildDesign$design_df  <- data.frame(rv.buildDesign$design_df[,1:2],
@@ -281,6 +304,7 @@ mod_build_design_server <- function(input, output, session, sampleNames){
                                                Tech.Rep = rep("",nrow(rv.buildDesign$design_df)),
                                                Analyt.Rep = seq(1:nrow(rv.buildDesign$design_df)),
                                                stringsAsFactors = FALSE)
+             rv.buildDesign$level <- 3
            }
     )
   })
@@ -309,10 +333,6 @@ mod_build_design_server <- function(input, output, session, sampleNames){
     if (!isTRUE(rv.buildDesign$conditionsChecked$valid)){
       return(NULL) } 
     
-    
-    
-    
-
     replicateComplete <- length(which(rv.buildDesign$design_df[,3:ncol(rv.buildDesign$design_df)] == ''))==0
     if (replicateComplete) {
     tags$div(
@@ -326,9 +346,9 @@ mod_build_design_server <- function(input, output, session, sampleNames){
         if(!is.null(rv.buildDesign$designChecked)){
 
           if (isTRUE(rv.buildDesign$designChecked$valid)){
-            #shinyjs::enable("createMSnsetButton")
             img <- "www/images/Ok.png"
             txt <- "Correct design"
+            rv.buildDesign$out <- rv.buildDesign$design_df
             #rvNavProcess$Done[4] <- TRUE
           }else {
             img <- "www/images/Problem.png"
@@ -353,7 +373,7 @@ mod_build_design_server <- function(input, output, session, sampleNames){
   
   
   
-  return(reactive({rhandsontable::hot_to_r(rv.buildDesign$out)}))
+  return(reactive({rv.buildDesign$out}))
 }
     
 ## To be copied in the UI
