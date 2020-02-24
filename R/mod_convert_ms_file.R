@@ -49,7 +49,7 @@ mod_convert_ms_file_server <- function(input, output, session){
                        isDone =  rep(FALSE,5),
                        forceReset = FALSE
                       ),
-    tab1 = NULL,
+    data2convert = NULL,
     obj =  NULL,
     design = NULL,
     
@@ -81,8 +81,9 @@ mod_convert_ms_file_server <- function(input, output, session){
                rv.convert$dataOut@datasets[[1]]
              }))
   
-  rv.convert$tab1 <- callModule(mod_import_file_from_server,'importFile')
-  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', data=reactive({NULL}))
+  rv.convert$data2convert <- callModule(mod_import_file_from_server,'importFile')
+  
+  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({NULL}))
  
   
   
@@ -184,11 +185,11 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   
   output$ConvertOptions <- renderUI({
-    req(input$file2Convert)
+    req(input$data2convert)
 
     tagList(
       radioButtons(ns("typeOfData"),
-                   "Choose the pipeline",
+                   "Choose the pipeline to use with the data",
                    choices=c("peptide" = "peptide",
                              "protein" = "protein",
                              "peptide to protein (p2p)" = "p2p")
@@ -198,11 +199,11 @@ mod_convert_ms_file_server <- function(input, output, session){
                     "Are your data already log-transformed ?",
                     #width = widthWellPanel,
                     choices=c("yes (they stay unchanged)" = "yes",
-                              "no (they wil be automatically transformed)"="no"),
+                              "no (they will be log-transformed by the conversion tool)"="no"),
                     selected="no")
       ,br()
       ,checkboxInput(ns("replaceAllZeros"),
-                     "Replace all 0 and NaN by NA",
+                     "Replace all '0' and 'NaN' by NA",
                      value= TRUE)
     )
   })

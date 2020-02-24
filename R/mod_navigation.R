@@ -219,9 +219,9 @@ mod_navigation_ui <- function(id){
                           uiOutput(ns("timeline")))
       ),
       column(width=2,div(style="display:inline-block; vertical-align: middle; padding: 7px",
-                         actionButton(ns("nextBtn"), ">>",
+                         shinyjs::disabled(actionButton(ns("nextBtn"), ">>",
                                       class = PrevNextBtnClass,
-                                      style='padding:4px; font-size:80%'))
+                                      style='padding:4px; font-size:80%')))
       )
     ),
     hr(),
@@ -245,8 +245,10 @@ mod_navigation_server <- function(input, output, session, pages){
   
   current <- reactiveValues(
     # This variable is the indice of the current screen
-    val = 1,
-    nbSteps = NULL
+    val = NULL,
+    nbSteps = NULL,
+    ll.screens = list(),
+    pages = NULL
   )
   
   
@@ -265,11 +267,22 @@ mod_navigation_server <- function(input, output, session, pages){
   
   
   observeEvent(req(pages()),{
+    print(pages()@isDone)
+    current$pages <- pages()
     current$nbSteps <- length(pages()@stepsNames)
-    })
+    current$val <- 1
+    
+    current$ll.screens[[1]] <- div(id = ns(paste0("screen",1)), current$pages@ll.UI[[1]])
+    for (i in 2:current$nbSteps){
+      current$ll.screens[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)), current$pages@ll.UI[[i]]))
+    }
+    current$val <- 1
+    
+  })
+
   
-  
-  
+  #### -----
+  ### Three timelines
   output$timeline <- renderUI({
     current$val
      
@@ -285,8 +298,15 @@ mod_navigation_server <- function(input, output, session, pages){
   })
   
   
+  
+  
+  
+  
+  
+  
   observeEvent(req(input$rstBtn),{
     current$val <- 1
+    #current$pages@isDone <- rep(FALSE, current$nbSteps)
   })
   
   
@@ -301,13 +321,18 @@ mod_navigation_server <- function(input, output, session, pages){
   observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
   observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
   
+  observeEvent(current$pages@isDone[current$val],{
+    print('new value for current$pages@isDone')
+    print(current$pages@isDone[current$val])
+    shinyjs::toggleState(id = "nextBtn", condition = isTRUE(current$pages@isDone[current$val]))
+  })
   
+  observeEvent(current$val, {
+    lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
+    })
 
   output$screens <- renderUI({
-    current$val
-    ll <- NULL
-    ll[[current$val]] <- pages()@ll.UI[[current$val]]
-    tagList(ll)
+    tagList(current$ll.screens)
   })
 
 
