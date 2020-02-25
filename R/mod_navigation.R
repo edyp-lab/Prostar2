@@ -316,6 +316,8 @@ mod_navigation_server <- function(input, output, session, pages){
   
   observeEvent( pages$isDone[current$val],{
     shinyjs::toggleState(id = "nextBtn", condition = isTRUE(pages$isDone[current$val]))
+    shinyjs::toggle(id = "nextBtn", condition = current$val< current$nbSteps)
+    shinyjs::toggle(id = "prevBtn", condition = current$val > 1)
   })
   
   observeEvent(current$val, {
