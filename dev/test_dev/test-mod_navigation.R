@@ -13,7 +13,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   navmodparams <- reactiveValues(
-    obj = NavStructure(name = "test",
+    obj = list(name = "test",
                       stepsNames = c("Screen 1", "Screen 2","Screen 3"),
                       ll.UI = list( screenStep1 = uiOutput("screen1"),
                                     screenStep2 = uiOutput("screen2"),

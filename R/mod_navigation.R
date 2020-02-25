@@ -248,7 +248,7 @@ mod_navigation_server <- function(input, output, session, pages){
     val = NULL,
     nbSteps = NULL,
     ll.screens = list(),
-    pages = NULL
+    pages = reactiveValues()
   )
   
   
@@ -267,9 +267,9 @@ mod_navigation_server <- function(input, output, session, pages){
   
   
   observeEvent(req(pages()),{
-    print(pages()@isDone)
+    print(pages()$isDone)
     current$pages <- pages()
-    current$nbSteps <- length(pages()@stepsNames)
+    current$nbSteps <- length(pages()$stepsNames)
     current$val <- 1
     
     current$ll.screens[[1]] <- div(id = ns(paste0("screen",1)), current$pages@ll.UI[[1]])
@@ -288,7 +288,7 @@ mod_navigation_server <- function(input, output, session, pages){
      
     status <- rep('',current$nbSteps)
     status[current$val] <- ' active'
-    steps <- pages()@stepsNames
+    steps <- pages()$stepsNames
     txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
     for (i in 1:current$nbSteps){
       txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
