@@ -246,9 +246,7 @@ mod_navigation_server <- function(input, output, session, pages){
   current <- reactiveValues(
     # This variable is the indice of the current screen
     val = NULL,
-    nbSteps = NULL,
-    ll.screens = list(),
-    pages = reactiveValues()
+    nbSteps = NULL
   )
   
   
@@ -266,16 +264,16 @@ mod_navigation_server <- function(input, output, session, pages){
   })
   
   
-  observeEvent(req(pages()),{
-    print(pages()$isDone)
-    current$pages <- pages()
-    current$nbSteps <- length(pages()$stepsNames)
+  observeEvent(req(pages),{
+    current$nbSteps <- length(pages$stepsNames)
     current$val <- 1
     
-    current$ll.screens[[1]] <- div(id = ns(paste0("screen",1)), current$pages@ll.UI[[1]])
+    pages$ll.UI[[1]] <- div(id = ns(paste0("screen",1)),  pages$ll.UI[[1]])
     for (i in 2:current$nbSteps){
-      current$ll.screens[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)), current$pages@ll.UI[[i]]))
+      pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)),  pages$ll.UI[[i]]))
     }
+    
+    
     current$val <- 1
     
   })
@@ -288,7 +286,7 @@ mod_navigation_server <- function(input, output, session, pages){
      
     status <- rep('',current$nbSteps)
     status[current$val] <- ' active'
-    steps <- pages()$stepsNames
+    steps <- pages$stepsNames
     txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
     for (i in 1:current$nbSteps){
       txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
@@ -298,15 +296,10 @@ mod_navigation_server <- function(input, output, session, pages){
   })
   
   
-  
-  
-  
-  
-  
-  
   observeEvent(req(input$rstBtn),{
     current$val <- 1
-    #current$pages@isDone <- rep(FALSE, current$nbSteps)
+    pages$isDone <- rep(FALSE, current$nbSteps)
+    pages$reset <- TRUE
   })
   
   
@@ -321,10 +314,8 @@ mod_navigation_server <- function(input, output, session, pages){
   observeEvent(input$prevBtn,ignoreInit = TRUE,{navPage(-1)})
   observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
   
-  observeEvent(current$pages@isDone[current$val],{
-    print('new value for current$pages@isDone')
-    print(current$pages@isDone[current$val])
-    shinyjs::toggleState(id = "nextBtn", condition = isTRUE(current$pages@isDone[current$val]))
+  observeEvent( pages$isDone[current$val],{
+    shinyjs::toggleState(id = "nextBtn", condition = isTRUE(pages$isDone[current$val]))
   })
   
   observeEvent(current$val, {
@@ -332,53 +323,10 @@ mod_navigation_server <- function(input, output, session, pages){
     })
 
   output$screens <- renderUI({
-    tagList(current$ll.screens)
+    tagList(pages$ll.UI)
   })
 
 
-}
-
-
-####################"
-## definition d'une classe pour la structure utilisee par le module de navigation
-#' @exportClass NavStructure
-.NavStructure <- setClass("NavStructure",
-                          slots= list(
-                            name = "character",
-                            stepsNames = "character",
-                            #isMandatory = "logical",
-                            ll.UI = "list",
-                            #rstFunc = "ANY",
-                            isDone = "logical",
-                            forceReset = "logical"
-                          )
-                          
-)
-
-
-#' @export NavStructure
-NavStructure <- function(
-  name = character(),
-  stepsNames = character(),
-  #isMandatory = logical(),
-  ll.UI = list(),
-  #rstFunc = NULL,
-  isDone = logical(),
-  forceReset = logical()
-)
-{
-  obj <- new("NavStructure",
-             name = name,
-             stepsNames = stepsNames,
-            # isMandatory = isMandatory,
-             ll.UI = ll.UI,
-             #rstFunc = rstFunc,
-             isDone = isDone,
-             forceReset =forceReset
-  )
-  #validObject(obj)
-  
-  obj
 }
 
 
