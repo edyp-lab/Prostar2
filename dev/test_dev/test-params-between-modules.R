@@ -1,5 +1,36 @@
 library(shiny)
 
+
+mod_view_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+    uiOutput(ns('showVar'))
+  )
+}
+
+
+mod_view_server <- function(input, output, session, data){
+  ns <- session$ns
+  
+  output$showVar <- renderUI({
+    tagList(
+      h3("Module"),
+      p("contenu de la variable data$obj1 :"),
+      HTML(unlist(data$obj1)),
+      p("contenu de la variable data$obj2 :"),
+      HTML(data$obj2),
+      p("contenu de la variable data$obj3 :"),
+      HTML(data$obj3)
+    )
+  })
+}
+
+
+
+
+######------------------------------------------------------------------
+
+
 ui <- fluidPage(
   tagList(
     fluidRow(
@@ -14,7 +45,10 @@ ui <- fluidPage(
       )
     ),
     
-    uiOutput('showVar')
+    fluidRow(
+      column(width=4,uiOutput('showVar')),
+      column(width=4,mod_view_ui("view"))
+    )
   )
 )
 
@@ -30,6 +64,7 @@ server <- function(input, output, session) {
     obj3 = 'obj3'
   )
   
+  callModule(mod_view_server,id = "view",data= r)
   
   output$chooseItem_ui <- renderUI({
     req(input$chooseObj)
