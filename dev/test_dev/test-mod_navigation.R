@@ -19,6 +19,7 @@ server <- function(input, output, session) {
                     screenStep2 = uiOutput("screen2"),
                     screenStep3 = uiOutput("screen3")),
       isDone =  c(FALSE,FALSE, FALSE),
+      mandatory =  c(FALSE,TRUE, FALSE),
       reset = FALSE
       )
   
@@ -31,15 +32,14 @@ r.params <- reactiveValues(
 
 
 
-  callModule(mod_navigation_server, "test_nav",pages = r.nav)
+  callModule(mod_navigation_server, "test_nav",style=2, pages = r.nav)
   
   observeEvent(req(r.nav$reset),{
     print("execute reset")
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     resetWidgets()
-    
-   # print(names(input))
+
   })
   
   

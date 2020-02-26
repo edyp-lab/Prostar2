@@ -1,5 +1,6 @@
 
-code_sass_timeline_style1 <-"$numDots:3;
+code_sass_timeline <- list(
+style1 ="$numDots:3;
 $parentWidthBase: 0.4;
 $parentWidth: $parentWidthBase * 100vw;
 $parentMaxWidth: 800px;
@@ -173,16 +174,115 @@ $inactive: #AEB6BF;
 }
 }
 }
-"
+",
+style2 = "$test: test;
+$colCompleted: #07910A;
+$colMandatory: #D30505;
+$colDefault: #B3AFAB;
+$radius: 20px;
+$lineWidth: 5px;
+
+.timeline{
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.li{
+  transition: all 200ms ease-in;
+}
+
+.timestamp{
+  margin-bottom: 20px;
+  padding: 0px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 100;
+}
+.status {
+  padding: 0px 40px;
+  display: flex;
+  justify-content: center;
+  border-top: $lineWidth solid $colDefault;
+  position: relative;
+  transition: all 200ms ease-in;
+  h4{
+    font-weight: 600;
+    border-bottom: 3px solid white;
+  }
+  
+  &:before{
+    content: '';
+    width: $radius;
+    height: $radius;
+    background-color: white;
+    border-radius: 55px;
+    border: $lineWidth solid $colDefault;
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transition: all 200ms ease-in;
+  }
+}
+
+.li.complete{
+  .status{
+    border-top: $lineWidth solid $colDefault;
+    &:before{
+      background-color: $colCompleted;
+      border: $lineWidth solid $colCompleted;
+      transition: all 200ms ease-in;
+      }
+    h4{
+      color: $colCompleted;
+      border-bottom: 3px solid white;
+      }
+    }
+}
+
+.li.mandatory{
+  .status{
+    border-top: $lineWidth solid $colDefault;
+    &:before{
+      background-color: white;
+      border: $lineWidth solid $colMandatory;
+      transition: all 200ms ease-in;
+      }
+    h4{
+      color: $colMandatory;
+      border-bottom: 3px solid white;
+    }
+  }
+}
 
 
+           
+.li.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor;
+    }
+  }
+}
 
-
-
-code_sass_timeline_style2 <- ""
-
-code_sass_timeline_style3  <- ""
-
+.li.complete.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor ;
+    }
+  }
+}
+      
+.li.mandatory.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor;
+    }
+  }
+}", 
+style3 = "")
 
 # Module UI
   
@@ -257,20 +357,19 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
   )
   
   
-  
-  output$load_css_style <- renderUI({ uiOutput(ns(paste0('css_style', style)))  })
-  
-  output$css_style1 <- renderUI({
+  output$load_css_style <- renderUI({
     req(current$nbSteps)
-    
-    code <- strsplit(code_sass_timeline_style1,"\n")
+    style
+    if (style==3) return(NULL)
+    code <- strsplit(code_sass_timeline[[paste0('style',style)]],"\n")
     firstLine <- code[[1]][1]
     prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
     suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
     
     code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
-    code_sass_timeline_style1 <- paste(unlist(code), collapse = '')
-    shinyjs::inlineCSS( sass::sass(code_sass_timeline_style1))
+   
+    shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
+
   })
   
   
@@ -282,10 +381,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     for (i in 2:current$nbSteps){
       pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)),  pages$ll.UI[[i]]))
     }
-    
-    
     current$val <- 1
-    
   })
 
   
@@ -305,6 +401,67 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     txt <- paste0(txt,"</div></div>")
     HTML(txt)
   })
+  
+  
+  output$timeline2 <- renderUI({
+    current$val
+    pages
+    status <- rep('',current$nbSteps)
+    if( !is.null(pages$mandatory))
+      status[which(pages$mandatory)] <- 'mandatory'
+    
+    #status <- rep('',current$nbSteps)
+    status[which(pages$isDone)] <- 'complete'
+    print(status)
+    
+    active  <- rep('',current$nbSteps)
+    active[current$val] <- 'active'
+    
+    steps <- pages$stepsNames
+    txt <- "<ul class='timeline' id='timeline'>"
+    for (i in 1:current$nbSteps){
+      txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
+    }
+    txt <- paste0(txt,"</ul>")
+
+    HTML(txt)
+  })
+  
+  
+  output$timeline3 <- renderUI({
+    current$val
+    color <- rep("lightgrey",current$nbSteps)
+    colorForCursor <- rep("white",current$nbSteps)
+    
+    
+    for (i in 1:current$nbSteps){
+      status <- pages$isDone[i]
+      col <- ifelse(!is.null(pages$mandatory) && pages$mandatory[i], "red", orangeProstar)
+      ifelse(status, color[i] <- "green", color[i] <- col)
+    }
+    
+    colorForCursor[current$val] <- "black"
+    
+    steps <- pages$stepsNames
+    colorCurrentPos <- colorForCursor
+    paste0("     ", steps, "     ")
+    rows.color <- rows.text <-  rows.cursor <- list()
+    rows.text <- list()
+    for( i in 1:length( color ) ) {
+      rows.color[[i]] <-lapply( color[i], function( x ) tags$th(  style=paste0("background-color:", x,"; height: 20px;" ) ))
+      rows.cursor[[i]] <-lapply( colorCurrentPos[i], function( x ) tags$th(  style=paste0("background-color:", x,"; height: 5px;" ) ))
+      rows.text[[i]] <- lapply( steps[i], function( x ) tags$td( x ) ) 
+    }
+    
+    html.table <-  tags$table(style = "width: 100%; text-align: center;border: 1;border-collapse: separate;border-spacing: 10px;padding-top: 0px;",
+                              tags$tr( rows.color ),
+                              tags$tr( rows.cursor ),
+                              tags$tr( rows.text )
+    )
+    
+    html.table
+  })
+
   
   
   observeEvent(req(input$rstBtn),{
@@ -343,325 +500,3 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
 }
 
 
-
-
-#' 
-#' 
-#' 
-#' 
-#' timeline_css <- "$red: #e74c3c
-#' $blue : #2980b9
-#' $midnight : #2c3e50
-#' $green: #7b3
-#' 
-#' .timeline
-#'   list-style-type: none
-#'   display: flex
-#'   align-items: center
-#'   justify-content: center
-#' .li
-#'   transition: all 200ms ease-in
-#' 
-#' .timestamp
-#'   margin-bottom: 20px
-#'   padding: 0px 40px
-#'   display: flex
-#'   flex-direction: column
-#'   align-items: center
-#'   font-weight: 100
-#' .status
-#'   padding: 0px 40px
-#'   display: flex
-#'   justify-content: center
-#'   border-top: 2px solid #D6DCE0
-#'   position: relative
-#'   transition: all 200ms ease-in  
-#'   h4
-#'     font-weight: 600
-#'   &:before
-#'     content: ''
-#'     width: 25px
-#'     height: 25px
-#'     background-color: white
-#'     border-radius: 25px
-#'     border: 1px solid #ddd
-#'     position: absolute
-#'     top: -15px
-#'     left: 42%
-#'     transition: all 200ms ease-in 
-#'   
-#'  
-#' .li.complete
-#'   .status
-#'     border-top: 2px solid $midnight
-#'     &:before
-#'       background-color: $midnight
-#'       border: none
-#'       transition: all 200ms ease-in 
-#'     h4
-#'       color: $midnight
-#'       
-#'       
-#' .li.complete
-#'   .status
-#'     border-top: 2px solid $green
-#'     &:before
-#'       background-color: $green
-#'       border: none
-#'       transition: all 200ms ease-in 
-#'     h4
-#'       color: $green
-#'       
-#'       
-#' .li.needed
-#'   .status
-#'     border-top: 2px solid $red
-#'     &:before
-#'       background-color: $red
-#'       border: none
-#'       transition: all 200ms ease-in 
-#'     h4
-#'       color: $red
-#'       
-#' .li.current
-#'   .status
-#'     border-top: 2px solid $blue
-#'     &:before
-#'       background-color: $blue
-#'       border: none
-#'       transition: all 200ms ease-in 
-#'     h4
-#'       color: $blue
-#'       
-#'       
-#' @media (min-device-width: 320px) and (max-device-width: 700px)
-#'   .timeline
-#'     list-style-type: none
-#'     display: flex
-#'   .li
-#'     transition: all 200ms ease-in
-#'     display: flex
-#'     width: inherit
-#'   .timestamp
-#'     width: 100px
-#'   .status
-#'     &:before
-#'       left: -8%
-#'       top: 30%
-#'       transition: all 200ms ease-in "
-#' 
-#' 
-#' ####################
-#' progressWizard_CSS <- ".flexer,.progress-indicator{
-#'   display:-webkit-box;
-#'   display:-moz-box;
-#'   display:-ms-flexbox;
-#'   display:-webkit-flex;
-#'   display:flex
-#' }
-#' 
-#' .no-flexer,.progress-indicator.stacked{
-#'   display:block
-#' }
-#' 
-#' .no-flexer-element{
-#'   -ms-flex:0;
-#'   -webkit-flex:0;
-#'   -moz-flex:0;
-#'   flex:0;
-#' }
-#' 
-#' .flexer-element,.progress-indicator>li{
-#'   -ms-flex:1;
-#'   -webkit-flex:1;
-#'   -moz-flex:1;
-#'   flex:1
-#' }
-#' 
-#' .progress-indicator{
-#'   margin:0 0 1em;
-#'   padding:0;
-#'   font-size:100%;
-#' }
-#' 
-#' .progress-indicator>li{
-#'   list-style:none;
-#'   text-align:center;
-#'   width:auto;
-#'   padding:0;
-#'   margin:0;
-#'   position:relative;
-#'   text-overflow:ellipsis;
-#'   color:#bbb;
-#'   display:block
-#' }
-#' 
-#' .progress-indicator>li:hover{
-#'   color:#6f6f6f
-#' }
-#' 
-#' .progress-indicator>li.completed,.progress-indicator>li.completed .bubble{
-#'   color:#65d074
-#' }
-#' 
-#' .progress-indicator>li .bubble{
-#'   border-radius:1000px;
-#'   width:40px;
-#'   height:40px;
-#'   background-color:#bbb;
-#'   display:block;
-#'   margin:0 auto .5em;
-#'   border-bottom:1px solid #888
-#' }
-#' 
-#' .progress-indicator>li .bubble:after,.progress-indicator>li .bubble:before{
-#'   display:block;
-#'   position:absolute;
-#'   top:19px;
-#'   width:100%;
-#'   height:3px;
-#'   content:'';
-#'   background-color:#bbb
-#' }
-#' 
-#' .progress-indicator>li.completed .bubble,.progress-indicator>li.completed .bubble:after,.progress-indicator>li.completed .bubble:before{
-#'   background-color:#65d074;
-#'   border-color:#247830
-#' }
-#' 
-#' .progress-indicator>li .bubble:before{
-#'   left:0
-#' }
-#' 
-#' .progress-indicator>li .bubble:after{
-#'   right:0
-#' }
-#' 
-#' .progress-indicator>li:first-child .bubble:after,.progress-indicator>li:first-child .bubble:before{
-#'   width:50%;
-#'   margin-left:50%
-#' }
-#' 
-#' .progress-indicator>li:last-child .bubble:after,.progress-indicator>li:last-child .bubble:before{
-#'   width:50%;
-#'   margin-right:50%
-#' }
-#' 
-#' .progress-indicator>li.active,.progress-indicator>li.active .bubble{
-#'   color:#337AB7
-#' }
-#' 
-#' .progress-indicator>li.active .bubble,.progress-indicator>li.active .bubble:after,.progress-indicator>li.active .bubble:before{
-#'   background-color:#337AB7;
-#'   border-color:#122a3f
-#' }
-#' 
-#' .progress-indicator>li a:hover .bubble,.progress-indicator>li a:hover .bubble:after,.progress-indicator>li a:hover .bubble:before{
-#'   background-color:#5671d0;
-#'   border-color:#1f306e
-#' }
-#' 
-#' .progress-indicator>li a:hover .bubble{
-#'   color:#5671d0
-#' }
-#' 
-#' .progress-indicator>li.danger .bubble,.progress-indicator>li.danger .bubble:after,.progress-indicator>li.danger .bubble:before{
-#'   background-color:#d3140f;
-#'   border-color:#440605
-#' }
-#' 
-#' .progress-indicator>li.danger .bubble{
-#'   color:#d3140f
-#' }
-#' 
-#' .progress-indicator>li.warning .bubble,.progress-indicator>li.warning .bubble:after,.progress-indicator>li.warning .bubble:before
-#' {
-#'   background-color:#edb10a;
-#'   border-color:#5a4304
-#' }
-#' 
-#' .progress-indicator>li.warning .bubble{
-#'   color:#edb10a
-#' }
-#' 
-#' .progress-indicator>li.info .bubble,.progress-indicator>li.info .bubble:after,.progress-indicator>li.info .bubble:before{
-#'   background-color:#5b32d6;
-#'   border-color:#25135d
-#' }
-#' 
-#' .progress-indicator>li.info .bubble{
-#'   color:#5b32d6
-#' }
-#' 
-#' .progress-indicator.stacked>li{
-#'   text-indent:-10px;
-#'   text-align:center;
-#'   display:block
-#' }
-#' 
-#' .progress-indicator.stacked>li .bubble:after,.progress-indicator.stacked>li .bubble:before{
-#'   left:50%;
-#'   margin-left:-1.5px;
-#'   width:3px;
-#'   height:100%
-#' }
-#' 
-#' .progress-indicator.stacked .stacked-text{
-#'   position:relative;
-#'   z-index:10;
-#'   top:0;
-#'   margin-left:60%!important;
-#'   width:45%!important;
-#'   display:inline-block;
-#'   text-align:left;
-#'   line-height:1.2em
-#' }
-#' 
-#' .progress-indicator.stacked>li a{
-#'     border:none}.progress-indicator.stacked.nocenter>li .bubble{
-#'       margin-left:0;
-#'       margin-right:0
-#' }
-#' 
-#' .progress-indicator.stacked.nocenter>li .bubble:after,.progress-indicator.stacked.nocenter>li .bubble:before{
-#'   left:10px
-#' }
-#' 
-#' .progress-indicator.stacked.nocenter .stacked-text{
-#'   width:auto!important;
-#'   display:block;
-#'   margin-left:40px!important
-#' }
-#' 
-#' @media handheld,screen and (max-width:400px){
-#'   .progress-indicator{
-#'     font-size:60%
-#'   }
-#' }
-#' 
-#' 
-#' /* A totally custom override */
-#'     .progress-indicator.custom-complex {
-#'         /*background-color: #f1f1f1;
-#'         border: 1px solid #ddd;
-#'         border-radius: 10px;*/
-#'         padding: 10px 5px;
-#'         
-#'     }
-#'     .progress-indicator.custom-complex > li .bubble {
-#'         height: 24px;
-#'         width: 99%;
-#'         border-radius: 2px;
-#'         box-shadow: inset -5px 0 12px rgba(0, 0, 0, 0.2);
-#'     }
-#'     .progress-indicator.custom-complex > li .bubble:before,
-#'     .progress-indicator.custom-complex > li .bubble:after {
-#'         display: none;
-#'     }"
-    
-## To be copied in the UI
-# mod_navigation_ui("navigation_ui_1")
-    
-## To be copied in the server
-# callModule(mod_navigation_server, "navigation_ui_1")
- 

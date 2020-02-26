@@ -77,7 +77,7 @@ nodes <- data.frame(id = 1:length(list_all_called_modules),
 
 edges <- data.frame(from=tmp.a, 
                     to=tmp.b,
-                    arrows = rep('to',length(temp.a)),
+                    arrows = rep('to',length(tmp.a)),
                     stringsAsFactors = FALSE)
 
 visNetwork(nodes, edges)
