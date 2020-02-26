@@ -1,5 +1,5 @@
 
-code_sass <-"$numDots:3;
+code_sass_timeline_style1 <-"$numDots:3;
 $parentWidthBase: 0.4;
 $parentWidth: $parentWidthBase * 100vw;
 $parentMaxWidth: 800px;
@@ -177,6 +177,13 @@ $inactive: #AEB6BF;
 
 
 
+
+
+code_sass_timeline_style2 <- ""
+
+code_sass_timeline_style3  <- ""
+
+
 # Module UI
   
 #' @title   mod_navigation_ui and mod_navigation_server
@@ -202,7 +209,7 @@ mod_navigation_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    uiOutput(ns("loadCssCode")),
+    uiOutput(ns("load_css_style")),
     fluidRow(
       align= 'center',
       column(width=2,
@@ -216,7 +223,7 @@ mod_navigation_ui <- function(id){
                                                  style='padding:4px; font-size:80%'))
             ),
       column(width=8,div( style="display:inline-block; vertical-align: middle; padding: 7px",
-                          uiOutput(ns("timeline")))
+                          uiOutput(ns("timelineStyle")))
       ),
       column(width=2,div(style="display:inline-block; vertical-align: middle; padding: 7px",
                          shinyjs::disabled(actionButton(ns("nextBtn"), ">>",
@@ -240,7 +247,7 @@ mod_navigation_ui <- function(id){
 #' @import shiny shinyjs
 #' @importFrom sass sass
     
-mod_navigation_server <- function(input, output, session, pages){
+mod_navigation_server <- function(input, output, session, style=1, pages){
   ns <- session$ns
   
   current <- reactiveValues(
@@ -250,17 +257,20 @@ mod_navigation_server <- function(input, output, session, pages){
   )
   
   
-  output$loadCssCode <- renderUI({
+  
+  output$load_css_style <- renderUI({ uiOutput(ns(paste0('css_style', style)))  })
+  
+  output$css_style1 <- renderUI({
     req(current$nbSteps)
     
-    code <- strsplit(code_sass,"\n")
+    code <- strsplit(code_sass_timeline_style1,"\n")
     firstLine <- code[[1]][1]
     prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
     suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
     
     code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
-    code_sass <- paste(unlist(code), collapse = '')
-    shinyjs::inlineCSS( sass::sass(code_sass))
+    code_sass_timeline_style1 <- paste(unlist(code), collapse = '')
+    shinyjs::inlineCSS( sass::sass(code_sass_timeline_style1))
   })
   
   
@@ -279,11 +289,12 @@ mod_navigation_server <- function(input, output, session, pages){
   })
 
   
+  output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
+  
   #### -----
   ### Three timelines
-  output$timeline <- renderUI({
+  output$timeline1 <- renderUI({
     current$val
-     
     status <- rep('',current$nbSteps)
     status[current$val] <- ' active'
     steps <- pages$stepsNames
