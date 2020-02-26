@@ -20,7 +20,7 @@
 mod_popover_for_help_ui <- function(id){
   ns <- NS(id)
   tagList(
-    inlineCSS(pop_css),
+    shinyjs::inlineCSS(pop_css),
     uiOutput(ns("customPopover"))
   )
 }

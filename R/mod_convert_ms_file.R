@@ -36,19 +36,30 @@ mod_convert_ms_file_server <- function(input, output, session){
                                   content="Select one (.txt, .csv, .tsv, .xls, .xlsx) file.")))
   
   # Variable to manage the different screens of the module
+  r.nav <- reactiveValues(
+    name = "Convert",
+    stepsNames = c("Select file", "Data Id", "Epx. & feat. data", "Build design", "Convert"),
+    ll.UI = list( screenStep1 = uiOutput(ns("Convert_SelectFile")),
+                  screenStep2 = uiOutput(ns("Convert_DataId")),
+                  screenStep3 = uiOutput(ns("Convert_ExpFeatData")),
+                  screenStep4 = uiOutput(ns("Convert_BuildDesign")),
+                  screenStep5 = uiOutput(ns("Convert_Convert"))
+                  ),
+    isDone =  rep(FALSE,5),
+    mandatory =  rep(FALSE,5),
+    reset = FALSE
+  )
+  
+  ## reactive values for variables in the module
   rv.convert <- reactiveValues(
-    # structure needed fior the navigation module
-    nav = NavStructure(name = "Convert",
-                       stepsNames = c("Select file", "Data Id", "Epx. & feat. data", "Build design", "Convert"),
-                       ll.UI = list( screenStep1 = uiOutput(ns("Convert_SelectFile")),
-                                     screenStep2 = uiOutput(ns("Convert_DataId")),
-                                     screenStep3 = uiOutput(ns("Convert_ExpFeatData")),
-                                     screenStep4 = uiOutput(ns("Convert_BuildDesign")),
-                                     screenStep5 = uiOutput(ns("Convert_Convert"))
-                       ),
-                       isDone =  rep(FALSE,5),
-                       forceReset = FALSE
-                      ),
+    widgets = list(
+                  selectIdent = FALSE,
+                  convert_proteinId = character(0),
+                  idBox = "Auto ID",
+                  typeOfData = "peptide",
+                  checkDataLogged = "no",
+                  replaceAllZeros = TRUE
+                  ),
     data2convert = NULL,
     obj =  NULL,
     design = NULL,
@@ -58,6 +69,31 @@ mod_convert_ms_file_server <- function(input, output, session){
     name = "processConvert"
   )
   
+  
+  
+  observeEvent(req(r.nav$reset),{
+    ## do not modify this part
+    r.nav$isDone <- rep(FALSE, 3)
+    r.nav$reset <- FALSE
+    ## end of no modifiable part
+    
+    ## update widgets whose names are in r.widgets with the value in this list
+    updateCheckboxInput(session,'selectIdent', value=r.convert$widgets[['selectIdent']])
+    updateSelectInput(session,'convert_proteinId', selected=r.convert$widgets[['convert_proteinId']])
+    updateSelectInput(session,'idBox', selected=r.convert$widgets[['idBox']])
+    updateRadioButtons(session, "typeOfData", selected=r.convert$widgets[['typeOfData']])
+    updateRadioButtons(session, "checkDataLogged", selected=r.convert$widgets[['checkDataLogged']])
+    updateCheckboxInput(session,"replaceAllZeros", value= r.convert$widgets[['replaceAllZeros']])
+  })
+  
+  
+  callModule(mod_navigation_server, 'nav_convert',style=2,pages=r.nav)
+  
+ 
+  
+  
+  
+  #### END of template part of the module
   
   callModule(mod_popover_for_help_server,"modulePopover_convertIdType", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">ID definition</font></strong>")), 
@@ -85,27 +121,6 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({NULL}))
  
-  
-  
-  callModule(mod_navigation_server, 'nav_convert',pages=reactive({rv.convert$nav}))
- 
-  
-  resetModuleConvert<- reactive({  
-    # ## update widgets values (reactive values)
-    # resetModuleProcess("Convert")
-    # 
-    # ## update widgets in UI
-    # updateCheckboxInput(session,"selectIdent", value = FALSE)
-    # updateSelectInput(session,"convert_proteinId",selected = character(0))
-    # updateSelectInput(session,"idBox", selected = "Auto ID")
-    # updateRadioButtons(session, "typeOfData", selected="peptide")
-    # updateRadioButtons(session, "checkDataLogged", selected="no")
-    # updateCheckboxInput(session,"replaceAllZeros", value= TRUE)
-    
-    rv.convert$nav@isDone = rep(FALSE, 5)
-  })
-
-  
   
   
   ##

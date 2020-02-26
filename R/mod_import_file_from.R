@@ -13,10 +13,11 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
+#' @importFrom shinyjs useShinyjs
 mod_import_file_from_ui <- function(id){
   ns <- NS(id)
   tagList(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     uiOutput(ns('chooseFileType')),
     uiOutput(ns('chooseFile')),
     uiOutput(ns("ChooseXlsSheets"))
