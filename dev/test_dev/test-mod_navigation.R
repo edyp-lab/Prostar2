@@ -38,16 +38,11 @@ r.params <- reactiveValues(
     print("execute reset")
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
-    resetWidgets()
-
-  })
-  
-  
-  resetWidgets <- function(){
     updateSelectInput(session,'select1', selected=r.params[['select1']])
     updateSelectInput(session,'select2', selected=r.params[['select2']])
     updateSelectInput(session,'select3', selected=r.params[['select3']])
-  }
+
+  })
   
   
   ##------------------------------------------------------------

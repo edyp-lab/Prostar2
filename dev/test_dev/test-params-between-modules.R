@@ -10,10 +10,12 @@ mod_view_ui <- function(id){
                          choices=c('None'='None', 'obj 1'='obj1', 'obj 2'='obj2', 'obj3'='obj3'),
                          width=150)),
       column(width=4,uiOutput(ns('chooseItem_ui'))),
-      column(width=4,actionButton(ns('btn'), 'Random change value in MODULE'))),
-             uiOutput(ns('showVar')),
-    verbatimTextOutput(ns('showMsg'))
-
+      column(width=4,actionButton(ns('btn'), 'Random change value in MODULE'),
+                      actionButton(ns('session_btn'), 'add values to session'),
+                      uiOutput(ns('showVar')),
+                      verbatimTextOutput(ns('showMsg'))
+      )
+)
   )
 }
 
@@ -27,7 +29,11 @@ mod_view_server <- function(input, output, session, data){
   )
   
   
+  
   observeEvent(data,{ rv$res <- data})
+  
+  
+  
   
   output$chooseItem_ui <- renderUI({
     req(input$chooseObj)
@@ -44,16 +50,26 @@ mod_view_server <- function(input, output, session, data){
     input$chooseItem
     
     if (input$chooseObj == 'obj2'){
-      data$obj2 <- paste0('mod_',sample(20:29, 1))
+      tmp <- paste0('mod_',sample(20:29, 1))
+      data$obj2 <- tmp
+      session$userData$settings$obj2 <- tmp
     } else if(input$chooseObj == 'obj3'){
-      data$obj3 <- paste0('mod__',sample(30:39, 1))
+      tmp <- paste0('mod__',sample(30:39, 1))
+      data$obj3 <- tmp
+      session$userData$settings$obj3 <- tmp
     } else if (input$chooseObj == 'obj1'){
       if (input$chooseItem == 'A'){
-        data$obj1$A <- paste0('mod_A_',sample(1:10,1))
+        tmp <- paste0('mod_A_',sample(1:10,1))
+        data$obj1$A <- tmp
+        session$userData$settings$obj1$A <- tmp
       } else if (input$chooseItem == 'B') {
-        data$obj1$B <- paste0('mod_B_',sample(1:10,1))
+        tmp <- paste0('mod_B_',sample(1:10,1))
+        data$obj1$B <- tmp
+        session$userData$settings$obj1$B <- tmp
       } else if (input$chooseItem == 'C'){
-        data$obj1$C <- paste0('mod_C_',sample(1:10,1))
+        tmp <- paste0('mod_C_',sample(1:10,1))
+        data$obj1$C <- tmp
+        session$userData$settings$obj1$C <- tmp
       }
     }
     rv$logMod <- ''
@@ -70,9 +86,24 @@ mod_view_server <- function(input, output, session, data){
       p("contenu de la variable data$obj2 :"),
       HTML(data$obj2),
       p("contenu de la variable data$obj3 :"),
-      HTML(data$obj3)
+      HTML(data$obj3),
+      br(),
+      p("contenu de la variable session$userData$settings$obj1 :"),
+      HTML(unlist((session$userData$settings$obj1))),
+      p("contenu de la variable session$userData$settings$obj2 :"),
+      HTML(session$userData$settings$obj2),
+      p("contenu de la variable session$userData$settings$obj3 :"),
+      HTML(session$userData$settings$obj3)
     )
   })
+  
+  observeEvent(session$userData$settings,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings"))})
+  observeEvent(session$userData$settings$obj1,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings$obj1"))})
+  observeEvent(session$userData$settings$obj1$A,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings$obj1$A"))})
+  observeEvent(session$userData$settings$obj1$B,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings$obj1$B"))})
+  observeEvent(session$userData$settings$obj1$C,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings$obj1$C"))})
+  observeEvent(session$userData$settings$obj2,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings$obj2"))})
+  observeEvent(session$userData$settings$obj3,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on session$userData$settings$obj3"))})
   
   observeEvent(data,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on data"))})
   observeEvent(data$obj1,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on data$obj1"))})
@@ -81,6 +112,7 @@ mod_view_server <- function(input, output, session, data){
   observeEvent(data$obj1$C,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on data$obj1$C"))})
   observeEvent(data$obj2,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on data$obj2"))})
   observeEvent(data$obj3,{ rv$logMod <- c(rv$logMod,paste0("module :" ,date(), '  ', "event on data$obj3"))})
+  
   
   output$showMsg <- renderText({ paste0(rv$logMod, '\n')})
   
@@ -140,6 +172,16 @@ server <- function(input, output, session) {
     res = NULL,
     logRes = NULL
   )
+  
+  
+  
+  session$userData$settings <- list(
+    obj1=list(A=1,
+              B=1,
+              C=1),
+    obj2= 2,
+    obj3 = 2
+    )
   
   logApp <- NULL
   
