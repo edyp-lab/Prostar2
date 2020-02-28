@@ -18,8 +18,13 @@ mod_import_file_from_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    uiOutput(ns('chooseFileType')),
-    uiOutput(ns('chooseFile')),
+    checkboxGroupInput(ns("importFileFrom"),
+                      "Import from",
+                      #selected = rv.importFrom$typeOfFile,
+                      width=150,
+                      choices = names(list('None' = 'None', 'Maxquant (txt)'='Maxquant', 'Excel'='Excel'))
+    ),
+    uiOutput(ns('chooseMFile')),
     uiOutput(ns("ChooseXlsSheets"))
   )
 }
@@ -50,17 +55,15 @@ mod_import_file_from_server <- function(input, output, session){
   })
   
   
-  output$chooseFileType <- renderUI({
-    selectInput(ns("importFileFrom"),
-                "Import from",
-                selected = rv.importFrom$typeOfFile,
-                width=150,
-                choices = names(list('None' = 'None', 'Maxquant (txt)'='Maxquant', 'Excel'='Excel'))
-    )
-  })
   
   output$chooseFile <- renderUI({
     req(input$importFileFrom)
+    accepted_exts <- NULL
+    if (input$importFileFrom == 'Maxquant'){
+      accepeted_exts <- c(".txt", ".tsv", ".csv")
+    } else if (input$importFileFrom =='Excel'){
+      accepeted_exts <- c(".xls", ".xlsx")
+    }
     fluidRow(
       column(width=2, 
              mod_popover_for_help_ui(ns("modulePopover_convertChooseDatafile"))
@@ -69,7 +72,8 @@ mod_import_file_from_server <- function(input, output, session){
              fileInput(ns("file2Convert"), 
                        "", 
                        multiple=FALSE, 
-                       accept=c(".txt", ".tsv", ".csv",".xls", ".xlsx"))
+                       accept=accepeted_exts
+                       )
              )
       )
   })

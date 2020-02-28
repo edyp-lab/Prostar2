@@ -34,13 +34,17 @@ r.params <- reactiveValues(
 
   callModule(mod_navigation_server, "test_nav",style=2, pages = r.nav)
   
+  
   observeEvent(req(r.nav$reset),{
     print("execute reset")
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
-    updateSelectInput(session,'select1', selected=r.params[['select1']])
-    updateSelectInput(session,'select2', selected=r.params[['select2']])
-    updateSelectInput(session,'select3', selected=r.params[['select3']])
+    r.params$select1 <- NULL
+    r.params$select2 <- NULL
+    r.params$select3 <- NULL
+    #updateSelectInput(session,'select1', selected=r.params[['select1']])
+    #updateSelectInput(session,'select2', selected=r.params[['select2']])
+    #updateSelectInput(session,'select3', selected=r.params[['select3']])
 
   })
   

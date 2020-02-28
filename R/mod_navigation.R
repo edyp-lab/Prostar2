@@ -492,6 +492,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
     })
 
+
   output$screens <- renderUI({
     tagList(pages$ll.UI)
   })
