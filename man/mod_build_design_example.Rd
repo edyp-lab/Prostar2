@@ -7,7 +7,7 @@
 \usage{
 mod_build_design_example_ui(id)
 
-mod_build_design_example_server(input, output, session, designLevel)
+mod_build_design_example_server(input, output, session)
 }
 \arguments{
 \item{id}{shiny id}
