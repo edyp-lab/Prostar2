@@ -7,7 +7,7 @@
 \usage{
 mod_import_file_from_ui(id)
 
-mod_import_file_from_server(input, output, session)
+mod_import_file_from_server(input, output, session, reset = FALSE)
 }
 \arguments{
 \item{id}{shiny id}

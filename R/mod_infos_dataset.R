@@ -16,27 +16,19 @@
 #' @importFrom shiny NS tagList 
 mod_infos_dataset_ui <- function(id){
   ns <- NS(id)
-  # tagList(
-  #   h3(style='color: red;',"TODO list"),
-  #   h4(style='color: red;',"faire le tableau de resume pour les mae avec eventuellement lien vers le tableau des msnset"),
-  #   mod_format_DT_ui(ns('dt'))
-  #   ,uiOutput(ns('info'))
-  # )
-  # 
-  
+
   tagList(
     fluidRow(
       column(width=6,
              h4("MAE summary"),
-             mod_format_DT_ui(ns('dt'))),
+             mod_format_DT_ui(ns('dt'))
+      ),
       column(width=6,
              selectInput(ns("selectInputMsnset"),
                          "Select a dataset for further information",
                          choices = c("None",names(dat@ExperimentList@listData))),
-             uiOutput(ns('selectMsnset'))
-             
-             )
-      # ,uiOutput(ns('info')))
+             uiOutput(ns('selectMsnset'))     
+      )
     )
   )
 }
@@ -108,7 +100,6 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   Get_MSnSet_Summary <- function(dat){
-    #req(dat)
     
     columns <- c("Number of samples","Number of conditions",
                  "Number of lines", "Number of missing values", "% of missing values", 
@@ -156,6 +147,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
         br(),
         h4("MsnSet summary"),
         mod_format_DT_ui(ns('dt2')),
+        uiOutput(ns('info')),
         br(),
         h4("pData"),
         mod_format_DT_ui(ns('dt3'))
@@ -168,83 +160,72 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
   })
   
-  # observeEvent(req(input$selectInputMsnset),{
-  # 
-  #   if (input$selectInputMsnset != "None") {
-  # 
-  #     data <- get(input$selectInputMsnset)
-  # 
-  #     callModule(mod_format_DT_server,'dt2',
-  #                table2show = reactive({Get_MSnSet_Summary(data)}))
-  #   }
-  # })
-  
 
   
+  output$info <- renderUI({
+    req(input$selectInputMsnset)
     
-  
-  # output$info <- renderUI({
-  #   
-  #   req(input$selectInputMsnset)
-  #   dataset <- input$selectInputMsnset
-  #   
-  #   typeOfDataset <- dataset@experimentData@other$typeOfData
-  #   
-  #   if (NeedsUpdate())
-  #   {    
-  #     tags$div(
-  #       tags$div(style="display:inline-block; vertical-align: top;",
-  #                tags$img(src = "www/images/Problem.png", height=25)),
-  #       tags$div(style="display:inline-block; vertical-align: top;",
-  #                HTML("The dataset was created with a former version of ProStaR, which experimental design is not compliant with the current
-  #                     software functionalities. Please update the design below"))
-  #     )
-  #   } else{
-  #     
-  #     NA.count <- length(which(is.na(Biobase::exprs(dataset))))
-  #     nb.empty.lines <- sum(apply(is.na(as.matrix(Biobase::exprs(dataset))), 1, all))
-  #     tagList(
-  #       tags$h4("Info"),
-  #       if (typeOfDataset == "protein"){
-  #         tags$p("The aggregation tool
-  #                has been disabled because the dataset contains 
-  #                protein quantitative data.")
-  #       },
-  #       
-  #       if (NA.count > 0){
-  #         tags$p("As your dataset contains missing values, you should 
-  #                impute them prior to proceed to the differential analysis.")
-  #       },
-  #       if (nb.empty.lines > 0){
-  #         tags$p("As your dataset contains lines with no values, you 
-  #                should remove them with the filter tool
-  #                prior to proceed to the analysis of the data.")
-  #       }
-  #       
-  #     )
-  #     
-  #   }
-  # })
-  # 
-  
-  
+    
+    if (input$selectInputMsnset != "None") {
+     
+      data <- get(input$selectInputMsnset)
+      
+      typeOfDataset <- data@experimentData@other$typeOfData
+      
+      if (NeedsUpdate())  {
+        
+        tags$div(
+          tags$div(style="display:inline-block; vertical-align: top;",
+                   tags$img(src = "www/images/Problem.png", height=25)),
+          tags$div(style="display:inline-block; vertical-align: top;",
+                   HTML("The dataset was created with a former version of ProStaR, which experimental design is not compliant with the current
+                      software functionalities. Please update the design below"))
+        )
+      } else{
+        
+        
+        NA.count <- length(which(is.na(Biobase::exprs(data))))
+        nb.empty.lines <- sum(apply(is.na(as.matrix(Biobase::exprs(data))), 1, all))
+        tagList(
+          tags$h4("Info"),
+          if (typeOfDataset == "protein"){
+            tags$p("The aggregation tool
+                 has been disabled because the dataset contains
+                 protein quantitative data.")
+          },
+          
+          if (NA.count > 0){
+            tags$p("As your dataset contains missing values, you should
+                 impute them prior to proceed to the differential analysis.")
+          },
+          if (nb.empty.lines > 0){
+            tags$p("As your dataset contains lines with no values, you
+                 should remove them with the filter tool
+                 prior to proceed to the analysis of the data.")
+          }
+          
+        )
+        
+      }
+    }
+  })
   
   
   
-  ########################################################### 
-  # NeedsUpdate <- reactive({
-  #   req(input$selectMsnset)
-  #   
-  #   PROSTAR.version <- dataset@experimentData@other$Prostar_Version
-  #   
-  #   if (!is.null(PROSTAR.version) && (compareVersion(PROSTAR.version,"1.12.9") != -1)
-  #       && (check.design(Biobase::pData(dataset))$valid))
-  #   {return (FALSE)}
-  #   
-  #   else {
-  #     return(TRUE)
-  #   }
-  # })
+  
+  NeedsUpdate <- reactive({
+    
+    data <- get(input$selectInputMsnset)
+    PROSTAR.version <- data@experimentData@other$Prostar_Version
+
+    if (!is.null(PROSTAR.version) && (compareVersion(PROSTAR.version,"1.12.9") != -1)
+        && (check.design(Biobase::pData(data))$valid))
+    {return (FALSE)}
+
+    else {
+      return(TRUE)
+    }
+  })
   
   
 }

@@ -10,12 +10,13 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  require(DAPARdata)
-  data('Exp1_R25_prot')
+  # require(DAPARdata)
+  # data('Exp1_R25_prot')
   # callModule(mod_infos_dataset_server,'test_infos_DT',
   #            obj = reactive({Exp1_R25_prot}))
   
-  #show(dat)
+  
+  # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
   callModule(mod_infos_dataset_server,'test_infos_DT',
              obj = reactive({dat}))
 }
