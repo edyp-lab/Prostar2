@@ -17,6 +17,8 @@ mod_infos_dataset_server(input, output, session, obj = NULL)
 \item{output}{internal}
 
 \item{session}{internal}
+
+\item{obj}{xxxx}
 }
 \description{
 A shiny Module.

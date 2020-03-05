@@ -7,7 +7,7 @@
 \usage{
 mod_navigation_ui(id)
 
-mod_navigation_server(input, output, session, pages)
+mod_navigation_server(input, output, session, style = 1, pages)
 }
 \arguments{
 \item{id}{shiny id}

@@ -13,14 +13,15 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
-#' @importFrom shinyjs useShinyjs
+#' @importFrom shinyjs useShinyjs disabled toggleState
 mod_import_file_from_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
     uiOutput(ns('chooseFileType')),
     uiOutput(ns('chooseFile')),
-    uiOutput(ns("ChooseXlsSheets"))
+    uiOutput(ns("ChooseXlsSheets")),
+    shinyjs::disabled(actionButton(ns('import'), 'Import file'))
   )
 }
     
@@ -32,35 +33,48 @@ mod_import_file_from_ui <- function(id){
 #' @importFrom DAPAR readExcel listSheets
 #' @importFrom shinyjs info
     
-mod_import_file_from_server <- function(input, output, session){
+mod_import_file_from_server <- function(input, output, session, reset=FALSE){
   ns <- session$ns
   options(shiny.maxRequestSize=300*1024^2)
+  
   rv.importFrom <- reactiveValues(
-    extension = NULL,
-    out = NULL,
-    params = list(
-      typeOfFile = 'None'
-    )
-    
+    current.extension = NULL,
+    current.accepted = NULL,
+    extension = list(maxquant = c("txt", "tsv", "csv"),
+                    excel = c("xls", "xlsx")
+                    ),
+    out = NULL
   )
   
-  
-  observeEvent(input$importFileFrom,{
-    rv.importFrom$typeOfFile <- input$importFileFrom
-  })
-  
+ 
   
   output$chooseFileType <- renderUI({
     selectInput(ns("importFileFrom"),
                 "Import from",
-                selected = rv.importFrom$typeOfFile,
+                selected = NULL,
                 width=150,
-                choices = names(list('None' = 'None', 'Maxquant (txt)'='Maxquant', 'Excel'='Excel'))
+                choices = names(list('None' = 'None', 
+                                     'Maxquant'='Maxquant', 
+                                     'Excel'='Excel')
+                                )
     )
   })
   
+  
+  
+  observeEvent(input$importFileFrom,{
+    switch(input$importFileFrom,
+           Maxquant = rv.importFrom$current.accepted <-  rv.importFrom$extension$maxquant,
+           Excel = rv.importFrom$current.accepted <- rv.importFrom$extension$excel
+    )
+    rv.importFrom$out <- NULL
+    shinyjs::disable('import')
+  })
+  
+  
   output$chooseFile <- renderUI({
     req(input$importFileFrom)
+    if (input$importFileFrom == "None"){ return(NULL)}
     fluidRow(
       column(width=2, 
              mod_popover_for_help_ui(ns("modulePopover_convertChooseDatafile"))
@@ -69,30 +83,37 @@ mod_import_file_from_server <- function(input, output, session){
              fileInput(ns("file2Convert"), 
                        "", 
                        multiple=FALSE, 
-                       accept=c(".txt", ".tsv", ".csv",".xls", ".xlsx"))
+                       accept=rv.importFrom$current.accepted
+                       )
              )
       )
   })
   
-  observeEvent(req(input$file2Convert),{
-    authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
-    .ext <- strsplit(input$file2Convert$name, '.', fixed=TRUE)[[1]][2]
-    if( is.na(match(.ext, authorizedExts))) {
-      shinyjs::info("Warning : this file is not a text nor an Excel file !
+  
+  
+  observeEvent(input$file2Convert,{
+    shinyjs::disable('import')
+    rv.importFrom$out <- NULL
+    rv.importFrom$current.extension <-  strsplit(input$file2Convert$name, '.', fixed=TRUE)[[1]][2]
+    if( !(rv.importFrom$current.extension %in% rv.importFrom$current.accepted)) {
+      shinyjs::info("Warning : this file is not a valid file !
                    Please choose another one.")
+      shinyjs::disable('import')
       return(NULL)
     } else {
-    rv.importFrom$extension <- .ext
+      shinyjs::enable('import')
     }
+    
   })
+  
   
   output$ChooseXlsSheets <- renderUI({
     req(input$file2Convert)
-    req(rv.importFrom$extension )
-    if (!(rv.importFrom$extension %in% c("xls","xlsx"))){
+    req(rv.importFrom$current.extension )
+     if (!(rv.importFrom$current.extension %in% rv.importFrom$extension$excel)){
+       shinyjs::disable('import')
       return(NULL)
       }
-    
     
       selectInput(ns("XLSsheets"), 
                   "Select sheet with quant. data", 
@@ -105,20 +126,20 @@ mod_import_file_from_server <- function(input, output, session){
   
 
    ############ Read text file to be imported ######################
-   observeEvent(c(input$file2Convert,input$XLSsheets),{
-    req(rv.importFrom$extension)
+   observeEvent(input$import,{
+    req(rv.importFrom$current.extension)
       
      tryCatch(
        {
-       if (rv.importFrom$extension %in% c("xls","xlsx")){
-                if (is.null(input$XLSsheets)) {
+       switch(input$importFileFrom,
+              Excel = if (is.null(input$XLSsheets)) {
                       return(NULL)
                 } else {
-                    rv.importFrom$out <- readExcel(input$file2Convert$datapath, ext, sheet=input$XLSsheets)
-                } 
-       } else {
-         rv.importFrom$out <- read.csv(input$file2Convert$datapath,  header=TRUE, sep="\t", as.is=T)
-       }
+                    rv.importFrom$out <- DAPAR::readExcel(input$file2Convert$datapath, ext, sheet=input$XLSsheets)
+                },
+              Maxquant = rv.importFrom$out <- read.csv(input$file2Convert$datapath,  header=TRUE, sep="\t", as.is=T)
+       )
+        
         },
        warning = function(w) {
            shinyjs::info(conditionMessage(w))

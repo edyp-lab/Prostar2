@@ -1,6 +1,7 @@
 # set max upload file size to 30 Mo
 options(shiny.maxRequestSize=300*1024^2)
 
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_import_file_from.R'), local=TRUE)$value
 
 
