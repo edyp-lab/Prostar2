@@ -7,6 +7,7 @@
 #' @param input internal
 #' @param output internal
 #' @param session internal
+#' @param obj xxxx
 #'
 #' @rdname mod_infos_dataset
 #'

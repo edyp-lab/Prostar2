@@ -141,15 +141,7 @@ mod_convert_ms_file_server <- function(input, output, session){
   output$Convert_DataId <- renderUI({
 
     tagList(
-      tags$div(
-        tags$div( style="display:inline-block; vertical-align: top; padding-right: 100px;",
-                  uiOutput(ns("id")),
-                  uiOutput(ns("warningNonUniqueID"))
-        ),
-        tags$div( style="display:inline-block; vertical-align: top;",
-                  uiOutput(ns("convertChooseProteinID_UI"))
-        )
-      )
+      
     )
   })
 
@@ -159,17 +151,7 @@ mod_convert_ms_file_server <- function(input, output, session){
   output$Convert_ExpFeatData <- renderUI({
 
     tagList(
-      fluidRow(
-        column(width=4,checkboxInput(ns("selectIdent"),
-                                     "Select columns for identification method",
-                                     value = FALSE)),
-        column(width=4,uiOutput(ns("checkIdentificationTab")))
-      ),
-      fluidRow(
-        column(width=4,uiOutput(ns("eData"),width = "400px")),
-        column(width=8,DT::dataTableOutput(ns("x1"), width='500px'))),
-      tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
-                     Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());})"))
+ 
     )
   })
 
