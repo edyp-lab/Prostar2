@@ -22,6 +22,7 @@ mod_import_file_from_ui <- function(id){
     uiOutput(ns('chooseFile')),
     uiOutput(ns("ChooseXlsSheets")),
     shinyjs::disabled(actionButton(ns('import'), 'Import file'))
+
   )
 }
     
@@ -48,6 +49,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
   
  
   
+
   output$chooseFileType <- renderUI({
     selectInput(ns("importFileFrom"),
                 "Import from",
@@ -59,7 +61,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
                                 )
     )
   })
-  
+
   
   
   observeEvent(input$importFileFrom,{
@@ -74,7 +76,9 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
   
   output$chooseFile <- renderUI({
     req(input$importFileFrom)
+
     if (input$importFileFrom == "None"){ return(NULL)}
+
     fluidRow(
       column(width=2, 
              mod_popover_for_help_ui(ns("modulePopover_convertChooseDatafile"))
@@ -84,6 +88,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
                        "", 
                        multiple=FALSE, 
                        accept=rv.importFrom$current.accepted
+
                        )
              )
       )
