@@ -13,7 +13,7 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
-#' @importFrom shinyjs useShinyjs disabled toggleState
+#' @importFrom shinyjs useShinyjs disabled
 mod_import_file_from_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -21,7 +21,7 @@ mod_import_file_from_ui <- function(id){
     uiOutput(ns('chooseFileType')),
     uiOutput(ns('chooseFile')),
     uiOutput(ns("ChooseXlsSheets")),
-    shinyjs::disabled(actionButton(ns('import'), 'Import file'))
+    actionButton(ns('import'), 'Import file')
 
   )
 }
@@ -32,7 +32,7 @@ mod_import_file_from_ui <- function(id){
 #' @export
 #' @keywords internal
 #' @importFrom DAPAR readExcel listSheets
-#' @importFrom shinyjs info
+#' @importFrom shinyjs info disabled disable enable
     
 mod_import_file_from_server <- function(input, output, session, reset=FALSE){
   ns <- session$ns
@@ -70,7 +70,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
            Excel = rv.importFrom$current.accepted <- rv.importFrom$extension$excel
     )
     rv.importFrom$out <- NULL
-    shinyjs::disable('import')
+    #shinyjs::disable('import')
   })
   
   
@@ -97,17 +97,18 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
   
   
   observeEvent(input$file2Convert,{
-    shinyjs::disable('import')
+    #shinyjs::disable('import')
     rv.importFrom$out <- NULL
     rv.importFrom$current.extension <-  strsplit(input$file2Convert$name, '.', fixed=TRUE)[[1]][2]
     if( !(rv.importFrom$current.extension %in% rv.importFrom$current.accepted)) {
       shinyjs::info("Warning : this file is not a valid file !
                    Please choose another one.")
-      shinyjs::disable('import')
+      #shinyjs::disable('import')
       return(NULL)
-    } else {
-      shinyjs::enable('import')
-    }
+    } 
+    # else {
+    #   shinyjs::enable('import')
+    # }
     
   })
   
@@ -116,7 +117,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
     req(input$file2Convert)
     req(rv.importFrom$current.extension )
      if (!(rv.importFrom$current.extension %in% rv.importFrom$extension$excel)){
-       shinyjs::disable('import')
+       #shinyjs::disable('import')
       return(NULL)
       }
     

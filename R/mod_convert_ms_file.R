@@ -52,15 +52,8 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   ## reactive values for variables in the module
   rv.convert <- reactiveValues(
-    widgets = list(
-                  selectIdent = FALSE,
-                  convert_proteinId = character(0),
-                  idBox = "Auto ID",
-                  typeOfData = "peptide",
-                  checkDataLogged = "no",
-                  replaceAllZeros = TRUE
-                  ),
     data2convert = NULL,
+    dataIn = NULL,
     obj =  NULL,
     design = NULL,
     
@@ -78,12 +71,12 @@ mod_convert_ms_file_server <- function(input, output, session){
     ## end of no modifiable part
     
     ## update widgets whose names are in r.widgets with the value in this list
-    updateCheckboxInput(session,'selectIdent', value=r.convert$widgets[['selectIdent']])
-    updateSelectInput(session,'convert_proteinId', selected=r.convert$widgets[['convert_proteinId']])
-    updateSelectInput(session,'idBox', selected=r.convert$widgets[['idBox']])
-    updateRadioButtons(session, "typeOfData", selected=r.convert$widgets[['typeOfData']])
-    updateRadioButtons(session, "checkDataLogged", selected=r.convert$widgets[['checkDataLogged']])
-    updateCheckboxInput(session,"replaceAllZeros", value= r.convert$widgets[['replaceAllZeros']])
+    # updateCheckboxInput(session,'selectIdent', value=NULL)
+    # updateSelectInput(session,'convert_proteinId', selected=NULL)
+    # updateSelectInput(session,'idBox', selected=NULL)
+    # updateRadioButtons(session, "typeOfData", selected=NULL)
+    # updateRadioButtons(session, "checkDataLogged", selected=NULL)
+    # updateCheckboxInput(session,"replaceAllZeros", value=NULL)
   })
   
   
@@ -95,17 +88,13 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   #### END of template part of the module
   
-  callModule(mod_popover_for_help_server,"modulePopover_convertIdType", 
-             data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">ID definition</font></strong>")), 
-                                  content="If you choose the automatic ID, Prostar will build an index.")))
+  
   
   callModule(mod_popover_for_help_server,"modulePopover_convertDataQuanti", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Quantitative data</font></strong>")), 
                                   content="Select the columns that are quantitation values by clicking in the field below.")))
   
-  callModule(mod_popover_for_help_server,"modulePopover_convertProteinID", 
-             data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Select protein IDs</font></strong>")), 
-                                  content="Select the column containing the parent protein IDs.")))
+
   
   
   callModule(mod_insert_md_server, "FAQ_MD2",URL_FAQ)
@@ -117,16 +106,17 @@ mod_convert_ms_file_server <- function(input, output, session){
                rv.convert$dataOut@datasets[[1]]
              }))
   
-  rv.convert$data2convert <- callModule(mod_import_file_from_server,'importFile')
   
-  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({NULL}))
  
   
   
   ##
   ## Definitions of the screens
   ##
-  ## Screen 1
+  
+  ###---------------------------------------------###
+  ###                 Screen 1                    ###
+  ###---------------------------------------------###
   output$Convert_SelectFile <- renderUI({
     tagList(
       mod_import_file_from_ui(ns('importFile')),
@@ -135,55 +125,11 @@ mod_convert_ms_file_server <- function(input, output, session){
     )
   })
   
-
-  #################################
-  ### Screen 2
-  output$Convert_DataId <- renderUI({
-
-    tagList(
-      
-    )
-  })
-
-
-  #################################
-  ### Screen 3
-  output$Convert_ExpFeatData <- renderUI({
-
-    tagList(
- 
-    )
-  })
-
-
-  #################################
-  ### Screen 4 : Build design
-  output$Convert_BuildDesign <- renderUI({
-    req(rv$widgets$Convert$datafile)
-    req(input$file1)
-    
-    mod_build_design_ui('buildDesign')
- })
-
-
-
-  #################################
-  ### Screen 5
-  output$Convert_Convert <- renderUI({
-    tagList(
-      uiOutput(ns("convertFinalStep")),
-      uiOutput(ns("conversionDone")),
-      mod_infos_dataset_ui(ns("infoAboutMSnset"))
-    )
-  })
-  
-  
-
   
   
   output$ConvertOptions <- renderUI({
-    req(input$data2convert)
-
+    req(rv.convert$dataIn)
+    
     tagList(
       radioButtons(ns("typeOfData"),
                    "Choose the pipeline to use with the data",
@@ -191,7 +137,7 @@ mod_convert_ms_file_server <- function(input, output, session){
                              "protein" = "protein",
                              "peptide to protein (p2p)" = "p2p")
       )
-
+      
       ,radioButtons(ns("checkDataLogged"),
                     "Are your data already log-transformed ?",
                     #width = widthWellPanel,
@@ -204,7 +150,194 @@ mod_convert_ms_file_server <- function(input, output, session){
                      value= TRUE)
     )
   })
+  
+  
+  rv.convert$data2convert <- callModule(mod_import_file_from_server,'importFile')
+  
+  observeEvent(req(rv.convert$data2convert()),{ 
+    rv.convert$dataIn <- rv.convert$data2convert()
+    r.nav$isDone[1] <- TRUE
+    })
 
+  ###---------------------------------------------###
+  ###                 Screen 2                    ###
+  ###---------------------------------------------###
+  output$Convert_DataId <- renderUI({
+
+    tagList(
+      tags$div(
+        tags$div( style="display:inline-block; vertical-align: top; padding-right: 100px;",
+                  uiOutput(ns("choose_keyID_ui")),
+                  uiOutput(ns("warning_keyID_ui"))
+        ),
+         tags$div( style="display:inline-block; vertical-align: top;",
+                   uiOutput(ns("choose_col_Parent_Protein_ui")),
+                   tableOutput(ns('preview_col_Parent_Protein_ui')),
+                   uiOutput(ns("note_col_Parent_Protein_ui")),
+                   uiOutput("RemoveOrphanPept_ui")
+         )
+      )
+    )
+  })
+
+  callModule(mod_popover_for_help_server,"modulePopover_convertIdType", 
+             data = list(title = HTML(paste0("<strong><font size=\"4\">Key ID definition</font></strong>")), 
+                                  content="If you choose the automatic ID, Prostar will build an index."))
+  
+  output$choose_keyID_ui <- renderUI({
+    req(rv.convert$dataIn)
+     .choices <- c("Auto ID",colnames(rv.convert$dataIn))
+    names(.choices) <- c("Auto ID",colnames(rv.convert$dataIn))
+    
+    tagList(
+      mod_popover_for_help_ui(ns("modulePopover_convertIdType")),
+      selectInput(ns("choose_keyID"), label = "", choices = .choices)
+    )
+    
+  })
+   
+  
+  
+  output$warning_keyID_ui <- renderUI({
+    req(input$choose_keyID)
+    
+    #isolate({
+      if (input$choose_keyID =="Auto ID") {
+        text <- "<img src=\"images/Ok.png\" height=\"24\"></img>"
+      }
+      else {
+        t <- (length(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])
+              == length(unique(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])))
+        
+        if (!t){
+          text <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">
+        Warning ! Your ID contains duplicate data.
+        Please choose another one."
+        }
+        else {
+          text <- "<img src=\"images/Ok\" height=\"24\"></img><font color=\"green\">
+        This column is valid to serve as a unique ID for entities"
+        }
+      }
+      HTML(text)
+      
+    #})
+  })
+  
+  
+  callModule(mod_popover_for_help_server,"parentProtein", 
+             data = list(title = HTML(paste0("<strong><font size=\"4\">Select col for parent protein IDs</font></strong>")), 
+                                  content="Select the column containing the parent protein IDs."))
+  
+  
+  
+  output$choose_col_Parent_Protein_ui <- renderUI({
+    req(input$typeOfData)
+    if (input$typeOfData != 'peptide') { return(NULL)}
+    
+    .choices <- c("",colnames(rv.convert$dataIn))
+    names(.choices) <- c("",colnames(rv.convert$dataIn))
+    tagList(
+      mod_popover_for_help_ui(ns("parentProtein")),
+      selectInput(ns("choose_col_Parent_Protein"),"",choices =  .choices , selected = character(0))
+    )
+  })
+  
+  
+  output$preview_col_Parent_Protein_ui <- renderTable(
+    #req(input$choose_col_Parent_Protein)
+    if (is.null(input$choose_col_Parent_Protein) || input$choose_col_Parent_Protein == "") {
+      return (NULL)
+      } else{
+     head(rv.convert$dataIn[,input$choose_col_Parent_Protein])
+        },colnames=FALSE
+    
+  )
+  
+  output$note_col_Parent_Protein_ui <- renderUI({
+    req(input$typeOfData)
+    if (input$typeOfData != 'peptide') { return(NULL)}
+    
+    tagList(
+      p("Please note that in case of multiple parent protein for one peptide, their IDs must be
+          separated by a semi-colon. If not, the agregation tool and peptide-protein graphs 
+          cannot be run."),
+      checkboxInput(ns('confirm_separator'), 
+                    'I confirm that the separator is correct',
+                    value = FALSE)
+    )
+  })
+
+  
+  output$RemoveOrphanPept_ui <- renderUI({
+    req(input$typeOfData)
+    if (input$typeOfData != 'peptide') { return(NULL)}
+    req(input$choose_col_Parent_Protein)
+      index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
+      
+      
+      if (length(index) > 0) {
+        
+        ifelse (length(index)==1, 
+                txt <-"One peptide does not have any parent protein.",
+                txt <- paste0(length(index), " peptides don't have any parent protein.")
+        )
+        tagList(
+          p(txt),
+          actionButton(ns('RemoveOrphanPept_btn'), 'Remove orphan peptides')
+        )
+      } else {
+        p("No orphan peptides were detected.")
+      }
+      
+    }) 
+    
+    observeEvent(input$RemoveOrphanPept_btn, {
+      req(input$choose_col_Parent_Protein)
+      index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
+      rv.convert$dataIn <- rv.convert$dataIn[-index,]
+    })
+    
+  
+  ###---------------------------------------------###
+  ###                 Screen 3                    ###
+  ###---------------------------------------------###
+  output$Convert_ExpFeatData <- renderUI({
+
+    tagList(
+ 
+    )
+  })
+
+
+  ###---------------------------------------------###
+  ###                 Screen 4                    ###
+  ###---------------------------------------------###
+  output$Convert_BuildDesign <- renderUI({
+    req(rv$widgets$Convert$datafile)
+    req(input$file1)
+    
+    mod_build_design_ui('buildDesign')
+ })
+
+  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({NULL}))
+  
+
+  ###---------------------------------------------###
+  ###                 Screen 5                    ###
+  ###---------------------------------------------###
+  output$Convert_Convert <- renderUI({
+    tagList(
+      uiOutput(ns("convertFinalStep")),
+      uiOutput(ns("conversionDone")),
+      mod_infos_dataset_ui(ns("infoAboutMSnset"))
+    )
+  })
+  
+  
+
+  
+ 
   
   
 
