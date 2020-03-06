@@ -104,7 +104,8 @@ ui <- fluidPage(
                                   choices=c('None'='None', 'obj 1'='obj1', 'obj 2'='obj2', 'obj3'='obj3'),
                                   width=150)),
                column(width=4,uiOutput('chooseItem_ui')),
-               column(width=4,actionButton('btn', 'Random change value in APP'))),
+               column(width=4,actionButton('btn', 'Random change value in APP'),
+                      actionButton('changeRes', 'Change value in res'))),
              uiOutput('showVar'),
              verbatimTextOutput('showLogVar'),
              #tags$head(tags$style("#showLogVar{overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
@@ -158,6 +159,12 @@ server <- function(input, output, session) {
   
   observeEvent(rv$res(),{
     rv$logRes <- ''
+  })
+  
+  
+  observeEvent(input$changeRes,{
+    
+    rv$res()$obj3 <- 'toto'
   })
   
   observeEvent(input$btn,{

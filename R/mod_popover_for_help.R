@@ -21,7 +21,17 @@ mod_popover_for_help_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::inlineCSS(pop_css),
-    uiOutput(ns("customPopover"))
+    div(
+      div(
+        # edit1
+        style="display:inline-block; vertical-align: middle; padding-bottom: 5px;",
+        uiOutput(ns("write_title_ui"))
+      ),
+      div(style="display:inline-block; vertical-align: middle;padding-bottom: 5px;",
+        uiOutput(ns('dot')),
+        uiOutput(ns('show_Pop'))
+          )
+  )
   )
 }
     
@@ -30,40 +40,26 @@ mod_popover_for_help_ui <- function(id){
 #' @rdname mod_popover_for_help
 #' @export
 #' @keywords internal
-#' @importFrom shinyBS bsPopover
+#' @importFrom shinyBS bsPopover addPopover
     
 mod_popover_for_help_server <- function(input, output, session, data){
   ns <- session$ns
   
-  output$customPopover <- renderUI({
-    req(data())
-    
-    div(
-      div(
-        # edit1
-        style="display:inline-block; vertical-align: middle; padding-bottom: 5px;",
-        data()$title
-      ),
-      div(
-        # edit2
-        style="display:inline-block; vertical-align: middle;padding-bottom: 5px;",
-        if (!is.null(data()$color) && ('white' == data()$color)) {
-          tags$button(id=ns("q1"), tags$sup("[?]"), class="Prostar_tooltip_white")
-        } else {
-          tags$button(id=ns("q1"), tags$sup("[?]"), class="Prostar_tooltip")
-        },
-        shinyBS::bsPopover(id = ns("q1"), 
-                           title = "",
-                           content = data()$content,
-                           placement = "right", 
-                           trigger = "hover", 
-                           options = list(container = "body")
-        )
-      )
-    )
-    
-    
+  output$write_title_ui <- renderUI({
+    req(data)
+  data$title
   })
+  
+  output$dot <- renderUI({
+    tags$button(tags$sup("[?]"), class="Prostar_tooltip")
+  })
+  
+  output$show_Pop <- renderUI({
+    shinyBS::bsTooltip(ns("dot"), data$content, trigger = 'hover')
+
+  })
+
+
 }
 
 
