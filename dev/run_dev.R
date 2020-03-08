@@ -1,5 +1,5 @@
+getwd()
 setwd("~/Github/2.0/Prostar2/")
-library(MSnbase)
 
 # Set options here
 options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode

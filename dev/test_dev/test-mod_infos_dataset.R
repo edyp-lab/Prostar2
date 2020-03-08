@@ -1,4 +1,4 @@
-
+library(MSnbase)
 source(file.path('~/Github/2.0/Prostar2/R', 'mod_infos_dataset.R'), local=TRUE)$value
 
 
@@ -23,3 +23,4 @@ server <- function(input, output, session) {
 
 
 shinyApp(ui, server)
+# library(shiny); runApp('dev/test_dev/test-mod_infos_dataset.R')
