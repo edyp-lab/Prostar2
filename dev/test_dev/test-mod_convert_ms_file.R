@@ -1,5 +1,6 @@
 
 source(file.path('../../R', 'mod_convert_ms_file.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 
 ui <- fluidPage(

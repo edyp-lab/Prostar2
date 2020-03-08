@@ -26,6 +26,7 @@ mod_convert_ms_file_ui <- function(id){
 #' @export
 #' @keywords internal
 #' @importFrom shinyBS bsModal
+#' @importFrom shinyjs hidden toggle
     
 mod_convert_ms_file_server <- function(input, output, session){
   ns <- session$ns
@@ -56,7 +57,9 @@ mod_convert_ms_file_server <- function(input, output, session){
     dataIn = NULL,
     obj =  NULL,
     design = NULL,
-    
+    hot = NULL,
+    tab1 = NULL,
+    designChecked = NULL,
     # contient l'objet de sortie du module (ie. a MAE instance)
     dataOut = NULL, 
     name = "processConvert"
@@ -65,18 +68,21 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   
   observeEvent(req(r.nav$reset),{
-    ## do not modify this part
-    r.nav$isDone <- rep(FALSE, 3)
-    r.nav$reset <- FALSE
-    ## end of no modifiable part
+    
     
     ## update widgets whose names are in r.widgets with the value in this list
+    ## This part must be before the reinitialization of r.nav$isDone
     # updateCheckboxInput(session,'selectIdent', value=NULL)
     # updateSelectInput(session,'convert_proteinId', selected=NULL)
     # updateSelectInput(session,'idBox', selected=NULL)
     # updateRadioButtons(session, "typeOfData", selected=NULL)
     # updateRadioButtons(session, "checkDataLogged", selected=NULL)
     # updateCheckboxInput(session,"replaceAllZeros", value=NULL)
+    
+    ## do not modify this part
+    r.nav$isDone <- rep(FALSE, 5)
+    r.nav$reset <- FALSE
+    ## end of no modifiable part
   })
   
   
@@ -89,12 +95,7 @@ mod_convert_ms_file_server <- function(input, output, session){
   #### END of template part of the module
   
   
-  
-  callModule(mod_popover_for_help_server,"modulePopover_convertDataQuanti", 
-             data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Quantitative data</font></strong>")), 
-                                  content="Select the columns that are quantitation values by clicking in the field below.")))
-  
-
+ 
   
   
   callModule(mod_insert_md_server, "FAQ_MD2",URL_FAQ)
@@ -114,9 +115,9 @@ mod_convert_ms_file_server <- function(input, output, session){
   ## Definitions of the screens
   ##
   
-  ###---------------------------------------------###
-  ###                 Screen 1                    ###
-  ###---------------------------------------------###
+  ###---------------------------------------------------------------------------------###
+  ###                                 Screen 1                                        ###
+  ###---------------------------------------------------------------------------------###
   output$Convert_SelectFile <- renderUI({
     tagList(
       mod_import_file_from_ui(ns('importFile')),
@@ -128,9 +129,7 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   
   output$ConvertOptions <- renderUI({
-    req(rv.convert$dataIn)
-    
-    tagList(
+        tagList(
       radioButtons(ns("typeOfData"),
                    "Choose the pipeline to use with the data",
                    choices=c("peptide" = "peptide",
@@ -159,11 +158,10 @@ mod_convert_ms_file_server <- function(input, output, session){
     r.nav$isDone[1] <- TRUE
     })
 
-  ###---------------------------------------------###
-  ###                 Screen 2                    ###
-  ###---------------------------------------------###
+  ###---------------------------------------------------------------------------------###
+  ###                                 Screen 2                                        ###
+  ###---------------------------------------------------------------------------------###
   output$Convert_DataId <- renderUI({
-
     tagList(
       tags$div(
         tags$div( style="display:inline-block; vertical-align: top; padding-right: 100px;",
@@ -174,7 +172,7 @@ mod_convert_ms_file_server <- function(input, output, session){
                    uiOutput(ns("choose_col_Parent_Protein_ui")),
                    tableOutput(ns('preview_col_Parent_Protein_ui')),
                    uiOutput(ns("note_col_Parent_Protein_ui")),
-                   uiOutput("RemoveOrphanPept_ui")
+                   uiOutput(ns("RemoveOrphanPept_ui"))
          )
       )
     )
@@ -185,15 +183,15 @@ mod_convert_ms_file_server <- function(input, output, session){
                                   content="If you choose the automatic ID, Prostar will build an index."))
   
   output$choose_keyID_ui <- renderUI({
-    req(rv.convert$dataIn)
-     .choices <- c("Auto ID",colnames(rv.convert$dataIn))
-    names(.choices) <- c("Auto ID",colnames(rv.convert$dataIn))
+   isolate({
+      .choices <- c("", "AutoID",colnames(rv.convert$dataIn))
+    names(.choices) <- c("None","-- Auto ID --",colnames(rv.convert$dataIn))
     
     tagList(
       mod_popover_for_help_ui(ns("modulePopover_convertIdType")),
-      selectInput(ns("choose_keyID"), label = "", choices = .choices)
+      selectInput(ns("choose_keyID"), label = "", choices = .choices, selected=character(0))
     )
-    
+    })
   })
    
   
@@ -202,8 +200,9 @@ mod_convert_ms_file_server <- function(input, output, session){
     req(input$choose_keyID)
     
     #isolate({
-      if (input$choose_keyID =="Auto ID") {
-        text <- "<img src=\"images/Ok.png\" height=\"24\"></img>"
+      if (input$choose_keyID =="AutoID") {
+        text <- "<img src=\"images/Ok\" height=\"24\"></img><font color=\"green\">
+        This column is valid to serve as a unique ID for entities"
       }
       else {
         t <- (length(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])
@@ -234,19 +233,20 @@ mod_convert_ms_file_server <- function(input, output, session){
   output$choose_col_Parent_Protein_ui <- renderUI({
     req(input$typeOfData)
     if (input$typeOfData != 'peptide') { return(NULL)}
-    
-    .choices <- c("",colnames(rv.convert$dataIn))
-    names(.choices) <- c("",colnames(rv.convert$dataIn))
-    tagList(
-      mod_popover_for_help_ui(ns("parentProtein")),
-      selectInput(ns("choose_col_Parent_Protein"),"",choices =  .choices , selected = character(0))
-    )
+    isolate({
+      .choices <- c("",colnames(rv.convert$dataIn))
+      names(.choices) <- c("",colnames(rv.convert$dataIn))
+      tagList(
+        mod_popover_for_help_ui(ns("parentProtein")),
+        selectInput(ns("choose_col_Parent_Protein"),"",choices =  .choices , selected = character(0))
+      )
+    })
   })
   
   
   output$preview_col_Parent_Protein_ui <- renderTable(
-    #req(input$choose_col_Parent_Protein)
-    if (is.null(input$choose_col_Parent_Protein) || input$choose_col_Parent_Protein == "") {
+   # req(input$choose_col_Parent_Protein)
+    if (input$typeOfData != 'peptide' || is.null(input$choose_col_Parent_Protein) || input$choose_col_Parent_Protein == "") {
       return (NULL)
       } else{
      head(rv.convert$dataIn[,input$choose_col_Parent_Protein])
@@ -273,7 +273,8 @@ mod_convert_ms_file_server <- function(input, output, session){
     req(input$typeOfData)
     if (input$typeOfData != 'peptide') { return(NULL)}
     req(input$choose_col_Parent_Protein)
-      index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
+    
+    index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
       
       
       if (length(index) > 0) {
@@ -289,26 +290,256 @@ mod_convert_ms_file_server <- function(input, output, session){
       } else {
         p("No orphan peptides were detected.")
       }
-      
     }) 
     
+  
     observeEvent(input$RemoveOrphanPept_btn, {
       req(input$choose_col_Parent_Protein)
       index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
       rv.convert$dataIn <- rv.convert$dataIn[-index,]
     })
     
+    
+    
+    observe({
+      req(rv.convert$dataIn)
+      req(input$choose_keyID)
+      test_keyID <- test_parentProt <- TRUE
+      
+      if(input$typeOfData == "peptide"){
+        test_parentProt <- !(input$choose_col_Parent_Protein == "") && !is.null(input$choose_col_Parent_Protein) && isTRUE(input$confirm_separator)
+       }
+      
+      
+      if (input$choose_keyID =="AutoID") {
+        test_keyID <- TRUE
+      } else {
+        test_keyID <- (length(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])
+                  == length(unique(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])))
+      }
+      
+      r.nav$isDone[2] <- test_keyID && test_parentProt
+    })
+    
+    
+    
+    
   
-  ###---------------------------------------------###
-  ###                 Screen 3                    ###
-  ###---------------------------------------------###
+###---------------------------------------------------------------------------------###
+###                                 Screen 3                                        ###
+###---------------------------------------------------------------------------------###
   output$Convert_ExpFeatData <- renderUI({
 
     tagList(
- 
+      fluidRow(
+        column(width=4,uiOutput(ns("choose_quanti_data_col_ui"),width = "400px"))
+         ,column(width=8,
+                 shinyjs::hidden(checkboxInput(ns("select_Identification"), 
+                               "Select columns for identification method", 
+                               value = NULL))
+                 ,uiOutput(ns("check_Identification_Tab_ui"))
+                 
+                 ,tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
+                                   Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());
+                                   })"))
+                 ,uiOutput(ns('show_Identification_Tab_ui'))
+               )
+         )
+      )
+  })
+  
+  
+  
+  callModule(mod_popover_for_help_server,"modulePopover_convertDataQuanti", 
+             data = list(title = h3('Quantitative data'), 
+                        content="Select the columns that are quantitation values by clicking in the field below."))
+  
+  
+  
+  output$choose_quanti_data_col_ui <- renderUI({
+    req(rv.convert$dataIn)
+    tagList(
+      mod_popover_for_help_ui(ns("modulePopover_convertDataQuanti")),
+      selectInput(ns("choose_quanti_data_col"),
+                  label = "",
+                  choices = colnames(rv.convert$dataIn),
+                  selected = character(0),
+                  multiple = TRUE, 
+                  width='200px',
+                  size = 20,
+                  selectize = FALSE)
     )
   })
+  
+  observeEvent(input$choose_quanti_data_col,{
+    shinyjs::toggle('select_Identification', condition=length(input$choose_quanti_data_col)>0)
+  })
+  
+  
+  output$check_Identification_Tab_ui <- renderUI({
+    req(input$select_Identification)
+    req(input$choose_quanti_data_col)
+    #if (!isTRUE(rv$widgets$Convert$selectIdent)){return(NULL)}
 
+   # shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
+    temp <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
+    if ((length(which(temp == "None")) == length(temp)))
+    {
+      img <- "images/Ok.png"
+      txt <- "Correct"
+    }  else {
+      if (length(which(temp == "None")) > 0)
+      {
+        img <- "images/Problem.png"
+        txt <- "The identification method is not appropriately defined for each sample."
+      } else {
+        if(length(temp) != length(unique(temp))){
+          img <- "images/Problem.png"
+          txt <- "There are duplicates in identification columns."
+        }else {
+          img <- "images/Ok.png"
+          txt <- "Correct"
+        }
+      }
+    }
+    tags$div(
+      tags$div(
+        tags$div(style="display:inline-block;",tags$img(src = img, height=25)),
+        tags$div(style="display:inline-block;",tags$p(txt))
+      )
+    )
+  })
+  
+  
+  shinyOutput <- function(FUN,id,num,...) {
+    inputs <- character(num)
+    for (i in seq_len(num)) {
+      inputs[i] <- as.character(FUN(paste0(id,i),label=NULL,...))
+    }
+    inputs
+  }
+  
+  
+  # function for dynamic inputs in DT
+  shinyInput <- function(FUN,id,num,...) {
+    inputs <- character(num)
+    for (i in seq_len(num)) {
+      inputs[i] <- as.character(FUN(paste0(id,i),label=NULL,...))
+    }
+    inputs
+  }
+  
+  
+  # function to read DT inputs
+  shinyValue <- function(id,num) {
+    unlist(lapply(seq_len(num),function(i) {
+      value <- input[[paste0(id,i)]]
+      if (is.null(value)) NA else value
+    }))
+  }
+  
+  #####################
+  
+
+  
+  
+  # observeEvent(input$fData.box,ignoreInit = TRUE,{
+  #   
+  #   choices = colnames(rv$tab1)[-which(colnames(rv$tab1) %in% input$fData.box)]
+  #   names(choices) = 
+  #     colnames(rv$tab1)[-which(colnames(rv$tab1) %in% input$fData.box)]
+  #   updateSelectInput(session, "choose_quanti_data_colx", 
+  #                     label = "",
+  #                     choices = choices,
+  #                     selected = input$choose_quanti_data_col)
+  # })
+  # 
+  
+
+  output$show_Identification_Tab_ui <- renderUI({
+    print(input$select_Identification)
+
+    if (length(input$choose_quanti_data_col) == 0 || !isTRUE(input$select_Identification)){
+      return(NULL)
+    }
+    DT::dataTableOutput(ns("show_table"), width='500px')
+  })
+  
+  
+  output$show_table <- DT::renderDataTable(
+    quantiDataTable(),
+    escape=FALSE,
+    rownames = FALSE,
+    extensions = c('Scroller'),
+    server=FALSE,
+    selection='none',
+    class = 'compact',
+    options=list(
+      preDrawCallback=JS(
+        'function() {
+            Shiny.unbindAll(this.api().table().node());}'),
+      drawCallback= JS(
+        'function(settings) {
+            Shiny.bindAll(this.api().table().node());}'),
+      # rowCallback = JS("function(r,d) {$(r).attr('height', '10px')}"),
+      dom = 'Bfrtip',
+      autoWidth=TRUE,
+      deferRender = TRUE,
+      bLengthChange = FALSE,
+      scrollX = 200,
+      scrollY = 500,
+      scroller = TRUE,
+      ajax = list(url = dataTableAjax(session, quantiDataTable()))
+
+    )
+
+  )
+  
+
+  
+  quantiDataTable <- reactive({
+    print("IN quantiDataTable()")
+    req(input$choose_quanti_data_col)
+    req(rv.convert$dataIn)
+
+    session$sendCustomMessage('unbind-DT', 'show_table')
+    df <- NULL
+    choices <- c("None",colnames(rv.convert$dataIn))
+    names(choices) <- c("None",colnames(rv.convert$dataIn))
+
+    if (isTRUE(input$select_Identification)) {
+
+      df <- data.frame(as.data.frame(input$choose_quanti_data_col),
+                       shinyInput(selectInput,
+                                  ns("colForOriginValue_"),
+                                  nrow(as.data.frame(input$choose_quanti_data_col)),
+                                  choices=choices)
+      )
+      colnames(df) <- c("Sample", "Identification method")
+    } else {
+      df <- data.frame(Sample = as.data.frame(input$choose_quanti_data_col))
+      colnames(df) <- c("Sample")
+    }
+
+    print(df)
+    df
+  })
+  
+  
+  
+  
+  # observeEvent(shinyValue("colForOriginValue_",nrow(quantiDataTable())),{})
+  
+  
+  # checkIdentificationMethod_Ok <- reactive({
+  #   res <- TRUE
+  #   tmp <- NULL
+  #   if (isTRUE(input$select_Identification)) {
+  #     tmp <- shinyValue("colForOriginValue_",nrow(quantiDataTable()))
+  #     if ((length(grep("None", tmp)) > 0)  || (sum(is.na(tmp)) > 0)){ res <- FALSE }
+  #   }
+  #   res
+  # })
 
   ###---------------------------------------------###
   ###                 Screen 4                    ###

@@ -11,8 +11,8 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  dat <- list(title = tags$h1('Test'), 
-              content=HTML("<ul><li>First item</li> <li>Second item</li></ul>")
+  dat <- list(title = h1('Test'), 
+              content="explanation"
               )
   # dat <- list(
   #   title = tags$h3('Test of the module Popover.'),
