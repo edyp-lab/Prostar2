@@ -26,8 +26,9 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
                   screenStep2 = uiOutput(ns("screen2")),
                   screenStep3 = uiOutput(ns("screen3")),
                   screenStep4 = uiOutput(ns("screen4")),
-                  screenStep5 = uiOutput(ns("screen5"))),
-    isDone =  c(FALSE,FALSE, FALSE, FALSE, FALSE),
+                  screenStep5 = uiOutput(ns("screen5"))
+                  ),
+    isDone =  c(TRUE,FALSE, FALSE, FALSE, FALSE),
     mandatory =  c(FALSE,FALSE, FALSE, FALSE, FALSE),
     reset = FALSE
   )
@@ -48,7 +49,7 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
  
   observeEvent(req(r.nav$reset),{
     print("execute reset")
-    r.nav$isDone <- rep(FALSE, 5)
+    r.nav$isDone <- c(TRUE,FALSE, FALSE, FALSE, FALSE) #rep(FALSE, 5)
     
     r.nav$reset <- FALSE
     
@@ -66,9 +67,9 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
   observeEvent(input$done2,{r.nav$isDone[4] <- TRUE})
   observeEvent(input$done3,{r.nav$isDone[5] <- TRUE})
   
-  observeEvent(input$ChooseFilters, {r.widgets$ChooseFilters <- input$ChooseFilters})
-  observeEvent(input$seuilNA, {r.widgets$seuilNA <- input$seuilNA})
-  observeEvent(input$deleted.mvLines, {rv$deleted.mvLines <- input$deleted.mvLines})
+  observeEvent(input$ChooseFilters,ignoreInit=TRUE, {r.widgets$ChooseFilters <- input$ChooseFilters})
+  observeEvent(input$seuilNA,ignoreInit=TRUE, {r.widgets$seuilNA <- input$seuilNA})
+  observeEvent(input$deleted.mvLines, ignoreInit=TRUE, {rv$deleted.mvLines <- input$deleted.mvLines})
   
   #Global variables
   def.progress.saveFiltering <- c("Build Parameters list", "Save Parameters list", "Save new dataset")
@@ -90,13 +91,19 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
   }
   
   
+  Get_symFilter_cname_choice <- reactive({
+    choice <- c("None", colnames(Biobase::fData(obj)))
+    choice
+  })
+  
+  
   
   ###################################################
   ## Screen 1 ##
   ###################################################
   
   output$screen1 <- renderUI({
-    
+    print("### Screen 1 ###")
     tagList(
         div(
           div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
@@ -163,64 +170,64 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
   
   
   
-  # ###################################################
-  # ## Screen 2 ##
-  # ###################################################
-  # 
-  # 
-  # output$screenFiltering2 <- renderUI({
-  #   print("In output$screenFiltering2 <- renderUI")
-  #   tagList(
-  #     tags$div(
-  #       tags$div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-  #                 selectInput("symFilter_cname", "Column name", choices = Get_symFilter_cname_choice())
-  #       ),
-  #       div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-  #            textInput("symFilter_tagName", "Prefix", value = "", width='50px')
-  #       ),
-  #       div( style="display:inline-block; vertical-align: middle;",
-  #            p(""),actionButton("actionButtonFilter", "Perform", class = actionBtnClass)
-  #       )
-  #     ),
-  #     hr(),
-  #     div(
-  #       div( style="display:inline-block; vertical-align: middle; align: center;",
-  #            DT::dataTableOutput("FilterSummaryData")
-  #       )
-  #     )
-  #     
-  #   )
-  # })
-  # 
-  # 
-  # output$FilterSummaryData <- DT::renderDataTable(server=TRUE,{
-  #   req(obj)
-  #   req(input$DT_numfilterSummary)
-  #   isolate({
-  #     if (nrow(input$DT_filterSummary )==0){
-  #       df <- data.frame(Filter="-", Prefix="-", nbDeleted=0, Total=nrow(obj), stringsAsFactors = FALSE)
-  #       #input$DT_filterSummary <- rbind(input$DT_numfilterSummary ,df)
-  #       input$DT_filterSummary <- df
-  #     }
-  #     
-  #     DT::datatable(input$DT_filterSummary,
-  #                   extensions = c('Scroller', 'Buttons'),
-  #                   rownames = FALSE,
-  #                   options=list(buttons = list('copy',
-  #                                               list(
-  #                                                 extend = 'csv',
-  #                                                 filename = 'Filtering_summary'
-  #                                               ),'print'),
-  #                                dom='Brt',
-  #                                initComplete = initComplete(),
-  #                                deferRender = TRUE,
-  #                                bLengthChange = FALSE
-  #                   ))
-  #   })
-  # })
-  # 
-  # 
-  # 
+  ###################################################
+  ## Screen 2 ##
+  ###################################################
+
+
+  output$screen2 <- renderUI({
+    print("### Screen 2 ###")
+    tagList(
+      tags$div(
+        tags$div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  selectInput(ns("symFilter_cname"), "Column name", choices = Get_symFilter_cname_choice())
+        ),
+        div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+             textInput(ns("symFilter_tagName"), "Prefix", value = "", width='50px')
+        ),
+        div( style="display:inline-block; vertical-align: middle;",
+             p(""),actionButton(ns("actionButtonFilter"), "Perform", class = actionBtnClass)
+        )
+      ),
+      hr(),
+      div(
+        div( style="display:inline-block; vertical-align: middle; align: center;",
+             DT::dataTableOutput(ns("FilterSummaryData"))
+        )
+      )
+    )
+  })
+  
+
+
+  output$FilterSummaryData <- DT::renderDataTable(server=TRUE,{
+    req(obj)
+    req(input$DT_numfilterSummary)
+    isolate({
+      if (nrow(input$DT_filterSummary )==0){
+        df <- data.frame(Filter="-", Prefix="-", nbDeleted=0, Total=nrow(obj), stringsAsFactors = FALSE)
+        #input$DT_filterSummary <- rbind(input$DT_numfilterSummary ,df)
+        input$DT_filterSummary <- df
+      }
+
+      DT::datatable(input$DT_filterSummary,
+                    extensions = c('Scroller', 'Buttons'),
+                    rownames = FALSE,
+                    options=list(buttons = list('copy',
+                                                list(
+                                                  extend = 'csv',
+                                                  filename = 'Filtering_summary'
+                                                ),'print'),
+                                 dom='Brt',
+                                 initComplete = initComplete(),
+                                 deferRender = TRUE,
+                                 bLengthChange = FALSE
+                    ))
+    })
+  })
+
+
+
   # ###################################################
   # ## Screen 3 ##
   # ###################################################
@@ -370,102 +377,103 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
     r.widgets$ChooseFilters
     r.widgets$seuilNA
     
-    keepThat <- mvFilterGetIndices(obj,
-                                   r.widgets$ChooseFilters,
-                                   as.integer(r.widgets$seuilNA))
-    
-    if (!is.null(keepThat))
-    {
-      rv$deleted.mvLines <- obj[-keepThat]
-      obj <- mvFilterFromIndices(obj, 
-                                 keepThat,
-                                 GetFilterText(r.widgets$ChooseFilters, as.integer(r.widgets$seuilNA)))
-      r.nav$isDone[1] <- TRUE
+    if (r.widgets$ChooseFilters != gFilterNone){
       
-    }
+      keepThat <- mvFilterGetIndices(obj,
+                                     r.widgets$ChooseFilters,
+                                     as.integer(r.widgets$seuilNA))
+      if (!is.null(keepThat)) {
+        rv$deleted.mvLines <- obj[-keepThat]
+        obj <- mvFilterFromIndices(obj, 
+                                   keepThat,
+                                   GetFilterText(r.widgets$ChooseFilters, as.integer(r.widgets$seuilNA)))
+        r.nav$isDone[1] <- TRUE
+        
+      }}
     
   })
   
   
   
   
-  # # Screen 2
-  # observeEvent(input$actionButtonFilter,{
-  #   req(input$symFilter_cname)
-  #   temp <- obj
-  #   
-  #   if (input$symFilter_cname=="None"){return()}
-  #   cname <- input$symFilter_cname
-  #   tagName <- input$symFilter_tagName
-  #   res <- StringBasedFiltering2(temp,cname, input$symFilter_tagName)
-  #   nbDeleted <- 0
-  #   
-  #   if (!is.null(res[["deleted"]])){
-  #     rv$deleted.stringBased <- rbindMSnset(rv$deleted.stringBased, res[["deleted"]])
-  #     nbDeleted <-  nrow(res[["deleted"]])
-  #   } else {
-  #     nbDeleted <-  0
-  #   }                          
-  #   obj <- res[["obj"]]
-  #   rvModProcess$moduleFilteringDone[2] <- TRUE
-  #   
-  #   df <- data.frame(Filter=cname, Prefix=tagName, nbDeleted=nbDeleted, Total=nrow(obj))
-  #   input$DT_filterSummary <- rbind(input$DT_filterSummary , df)
-  # })
-  # 
-  # 
-  # 
-  # observeEvent(input$actionButtonFilter,{
-  #   req(input$symFilter_cname)
-  #   temp <- obj
-  #   
-  #   if (input$symFilter_cname=="None"){return()}
-  #   cname <- input$symFilter_cname
-  #   tagName <- input$symFilter_tagName
-  #   res <- StringBasedFiltering2(temp,cname, input$symFilter_tagName)
-  #   nbDeleted <- 0
-  #   
-  #   if (!is.null(res[["deleted"]])){
-  #     rv$deleted.stringBased <- rbindMSnset(rv$deleted.stringBased, res[["deleted"]])
-  #     nbDeleted <-  nrow(res[["deleted"]])
-  #   } else {
-  #     nbDeleted <-  0
-  #   }                          
-  #   obj <- res[["obj"]]
-  #   rvModProcess$moduleFilteringDone[2] <- TRUE
-  #   
-  #   df <- data.frame(Filter=cname, Prefix=tagName, nbDeleted=nbDeleted, Total=nrow(obj))
-  #   input$DT_filterSummary <- rbind(input$DT_filterSummary , df)
-  # })
-  # 
-  # 
-  # 
-  # observeEvent(input$actionButtonFilter,{
-  #   req(input$symFilter_cname)
-  #   temp <- obj
-  #   
-  #   if (input$symFilter_cname=="None"){return()}
-  #   cname <- input$symFilter_cname
-  #   tagName <- input$symFilter_tagName
-  #   res <- StringBasedFiltering2(temp,cname, input$symFilter_tagName)
-  #   nbDeleted <- 0
-  #   
-  #   if (!is.null(res[["deleted"]])){
-  #     rv$deleted.stringBased <- rbindMSnset(rv$deleted.stringBased, res[["deleted"]])
-  #     nbDeleted <-  nrow(res[["deleted"]])
-  #   } else {
-  #     nbDeleted <-  0
-  #   }                          
-  #   obj <- res[["obj"]]
-  #   rvModProcess$moduleFilteringDone[2] <- TRUE
-  #   
-  #   df <- data.frame(Filter=cname, Prefix=tagName, nbDeleted=nbDeleted, Total=nrow(obj))
-  #   input$DT_filterSummary <- rbind(input$DT_filterSummary , df)
-  # })
-  # 
-  # 
-  # 
-  # 
+  
+  # Screen 2
+  observeEvent(input$actionButtonFilter,{
+    req(input$symFilter_cname)
+    temp <- obj
+
+    if (input$symFilter_cname=="None"){return()}
+    cname <- input$symFilter_cname
+    tagName <- input$symFilter_tagName
+    res <- StringBasedFiltering2(temp,cname, input$symFilter_tagName)
+    nbDeleted <- 0
+
+    if (!is.null(res[["deleted"]])){
+      rv$deleted.stringBased <- rbindMSnset(rv$deleted.stringBased, res[["deleted"]])
+      nbDeleted <-  nrow(res[["deleted"]])
+    } else {
+      nbDeleted <-  0
+    }
+    obj <- res[["obj"]]
+    r.nav$isDone[2] <- TRUE
+
+    df <- data.frame(Filter=cname, Prefix=tagName, nbDeleted=nbDeleted, Total=nrow(obj))
+    input$DT_filterSummary <- rbind(input$DT_filterSummary , df)
+  })
+
+
+
+  observeEvent(input$actionButtonFilter,{
+    req(input$symFilter_cname)
+    temp <- obj
+
+    if (input$symFilter_cname=="None"){return()}
+    cname <- input$symFilter_cname
+    tagName <- input$symFilter_tagName
+    res <- StringBasedFiltering2(temp,cname, input$symFilter_tagName)
+    nbDeleted <- 0
+
+    if (!is.null(res[["deleted"]])){
+      rv$deleted.stringBased <- rbindMSnset(rv$deleted.stringBased, res[["deleted"]])
+      nbDeleted <-  nrow(res[["deleted"]])
+    } else {
+      nbDeleted <-  0
+    }
+    obj <- res[["obj"]]
+    r.nav$isDone[2] <- TRUE
+
+    df <- data.frame(Filter=cname, Prefix=tagName, nbDeleted=nbDeleted, Total=nrow(obj))
+    input$DT_filterSummary <- rbind(input$DT_filterSummary , df)
+  })
+
+
+
+  observeEvent(input$actionButtonFilter,{
+    req(input$symFilter_cname)
+    temp <- obj
+
+    if (input$symFilter_cname=="None"){return()}
+    cname <- input$symFilter_cname
+    tagName <- input$symFilter_tagName
+    res <- StringBasedFiltering2(temp,cname, input$symFilter_tagName)
+    nbDeleted <- 0
+
+    if (!is.null(res[["deleted"]])){
+      rv$deleted.stringBased <- rbindMSnset(rv$deleted.stringBased, res[["deleted"]])
+      nbDeleted <-  nrow(res[["deleted"]])
+    } else {
+      nbDeleted <-  0
+    }
+    obj <- res[["obj"]]
+    r.nav$isDone[2] <- TRUE
+
+    df <- data.frame(Filter=cname, Prefix=tagName, nbDeleted=nbDeleted, Total=nrow(obj))
+    input$DT_filterSummary <- rbind(input$DT_filterSummary , df)
+  })
+
+
+
+
   # # Screen 3
   # observeEvent(input$btn_numFilter,ignoreInit=TRUE,{
   #   temp <- obj
