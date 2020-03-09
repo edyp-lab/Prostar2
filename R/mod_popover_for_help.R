@@ -16,10 +16,11 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
-#' @importFrom shinyjs inlineCSS
+#' @importFrom shinyjs inlineCSS useShinyjs
 mod_popover_for_help_ui <- function(id){
   ns <- NS(id)
   tagList(
+    shinyjs::useShinyjs(),
     shinyjs::inlineCSS(pop_css),
     div(
       div(
@@ -40,7 +41,7 @@ mod_popover_for_help_ui <- function(id){
 #' @rdname mod_popover_for_help
 #' @export
 #' @keywords internal
-#' @importFrom shinyBS bsPopover addPopover
+#' @importFrom shinyBS bsPopover addPopover bsTooltip
     
 mod_popover_for_help_server <- function(input, output, session, data){
   ns <- session$ns

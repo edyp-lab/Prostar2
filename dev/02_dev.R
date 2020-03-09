@@ -7,7 +7,7 @@
 
 ## 2.1 Add modules
 ## 
-golem::add_module( name = "build_design" ) # Name of the module
+golem::add_module( name = "plots_missing_values" ) # Name of the module
 golem::add_module( name = "my_other_module" ) # Name of the module
 
 ## 2.2 Add dependencies

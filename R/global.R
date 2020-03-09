@@ -47,3 +47,7 @@ grey <- "#FFFFFF"
 orangeProstar <- "#E97D5E"
 
 G_path2conf <- './R/pipeline.conf'
+
+
+
+
