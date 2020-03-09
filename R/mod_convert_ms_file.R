@@ -376,36 +376,51 @@ mod_convert_ms_file_server <- function(input, output, session){
   })
   
   
-  output$check_Identification_Tab_ui <- renderUI({
+  
+  check_Identification_Tab <- reactive({
     req(input$select_Identification)
     req(input$choose_quanti_data_col)
-    #if (!isTRUE(rv$widgets$Convert$selectIdent)){return(NULL)}
-
-   # shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
+    
     temp <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
+    
+    isOk <- TRUE
+    msg <- NULL
     if ((length(which(temp == "None")) == length(temp)))
     {
-      img <- "images/Ok.png"
-      txt <- "Correct"
+      isOk <- TRUE
+      msg <- "Correct"
     }  else {
       if (length(which(temp == "None")) > 0)
       {
-        img <- "images/Problem.png"
-        txt <- "The identification method is not appropriately defined for each sample."
+        isOk <- FALSE
+        msg <- "The identification method is not appropriately defined for each sample."
       } else {
         if(length(temp) != length(unique(temp))){
-          img <- "images/Problem.png"
-          txt <- "There are duplicates in identification columns."
+          isOk <- FALSE
+          msg <- "There are duplicates in identification columns."
         }else {
-          img <- "images/Ok.png"
-          txt <- "Correct"
+          isOk <- TRUE
+          msg <- "Correct"
         }
       }
+    }
+     
+    rep <- list(isOk=isOk, msg = msg)
+    rep
+})
+  
+  output$check_Identification_Tab_ui <- renderUI({
+     rep <- check_Identification_Tab()
+    
+     if (isTRUE(rep$isOk)){
+      img <- "images/Ok.png"
+    } else {
+      img <-"images/Problem.png"
     }
     tags$div(
       tags$div(
         tags$div(style="display:inline-block;",tags$img(src = img, height=25)),
-        tags$div(style="display:inline-block;",tags$p(txt))
+        tags$div(style="display:inline-block;",tags$p(rep$msg))
       )
     )
   })
@@ -457,8 +472,7 @@ mod_convert_ms_file_server <- function(input, output, session){
   
 
   output$show_Identification_Tab_ui <- renderUI({
-    print(input$select_Identification)
-
+    
     if (length(input$choose_quanti_data_col) == 0 || !isTRUE(input$select_Identification)){
       return(NULL)
     }
@@ -521,37 +535,35 @@ mod_convert_ms_file_server <- function(input, output, session){
       colnames(df) <- c("Sample")
     }
 
-    print(df)
     df
   })
   
+  observe({
+    input$select_Identification
+    if (isTRUE(input$select_Identification)){
+      r.nav$isDone[3] <- length(input$choose_quanti_data_col)>0  && check_Identification_Tab()$isOk 
+    } else {
+      r.nav$isDone[3] <- length(input$choose_quanti_data_col)>0 
+    }
+  })
   
   
+   observeEvent(shinyValue("colForOriginValue_",nrow(quantiDataTable())),{})
   
-  # observeEvent(shinyValue("colForOriginValue_",nrow(quantiDataTable())),{})
-  
-  
-  # checkIdentificationMethod_Ok <- reactive({
-  #   res <- TRUE
-  #   tmp <- NULL
-  #   if (isTRUE(input$select_Identification)) {
-  #     tmp <- shinyValue("colForOriginValue_",nrow(quantiDataTable()))
-  #     if ((length(grep("None", tmp)) > 0)  || (sum(is.na(tmp)) > 0)){ res <- FALSE }
-  #   }
-  #   res
-  # })
 
   ###---------------------------------------------###
   ###                 Screen 4                    ###
   ###---------------------------------------------###
+   rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({input$choose_quanti_data_col}))
+   
   output$Convert_BuildDesign <- renderUI({
-    req(rv$widgets$Convert$datafile)
-    req(input$file1)
-    
-    mod_build_design_ui('buildDesign')
+    mod_build_design_ui(ns('buildDesign'))
  })
 
-  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({NULL}))
+  
+  observeEvent(req(rv.convert$design()), {
+    r.nav$isDone[4] <- TRUE
+  })
   
 
   ###---------------------------------------------###
@@ -565,12 +577,7 @@ mod_convert_ms_file_server <- function(input, output, session){
     )
   })
   
-  
 
-  
- 
-  
-  
 
  #  
  #  ############################################################################

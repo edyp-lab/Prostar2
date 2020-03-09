@@ -21,7 +21,8 @@ mod_build_design_example_ui <- function(id){
     #uiOutput(ns('title')),
     shinyBS::bsCollapse(id = "collapseFormerReleases", open = NULL,multiple = FALSE,
                         shinyBS::bsCollapsePanel("Level 1", rHandsontableOutput(ns('showLevel1')),style = "info"),
-                        shinyBS::bsCollapsePanel("Level 2", rHandsontableOutput(ns('showLevel2')),style = "info")
+                        shinyBS::bsCollapsePanel("Level 2", rHandsontableOutput(ns('showLevel2')),style = "info"),
+                        shinyBS::bsCollapsePanel("Level 3", rHandsontableOutput(ns('showLevel3')),style = "info")
     )
 
 

@@ -1,8 +1,8 @@
 
-source(file.path('~/Github/2.0/Prostar2/R', 'mod_navigation.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 
-source(file.path('~/Github/2.0/Prostar2/R', 'mod_filtering_protein.R'), local=TRUE)$value
-source(file.path('~/Github/2.0/DAPAR/R', 'missingValuesFilter.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_filtering_protein.R'), local=TRUE)$value
+source(file.path('../../R', 'missingValuesFilter.R'), local=TRUE)$value
 source(file.path('~/Github/2.0/DAPAR/R', 'utils.R'), local=TRUE)$value
 source(file.path("~/Github/2.0/Prostar/inst/ProstarApp/src", "modules/Misc/modulePopover.R"),  local = TRUE)$value
 source(file.path("~/Github/2.0/Prostar/inst/ProstarApp/src", "modules/Plots/moduleGroupMVPlots.R"),  local = TRUE)$value

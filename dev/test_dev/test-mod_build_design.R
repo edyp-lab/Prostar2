@@ -16,9 +16,16 @@ server <- function(input, output, session) {
   data(Exp1_R25_prot)
   obj <- Exp1_R25_prot
   
-  callModule(mod_build_design_server, 
+  rv.test <- reactiveValues(
+    res = NULL
+  )
+  rv.test$res <- callModule(mod_build_design_server, 
              'buildDesign', 
-             sampleNames=reactive({colnames(Biobase::exprs(obj))}))
+             sampleNames=colnames(Biobase::exprs(obj)))
+  
+  observeEvent(req(rv.test$res() ),{
+    print(rv.test$res() )
+  })
 }
 
 

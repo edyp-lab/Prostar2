@@ -80,14 +80,6 @@ mod_build_design_server <- function(input, output, session, sampleNames){
   )
   
   
-  
-  
-  
-  observeEvent(rv.buildDesign$level,{
-    print('------')
-    print(rv.buildDesign$level)
-  })
-
   output$showExamples <- renderUI({
     mod_build_design_example_ui(ns('designExamples') )
   })
@@ -130,9 +122,9 @@ mod_build_design_server <- function(input, output, session, sampleNames){
   
   
   #----------------------------------------------------------
-  observeEvent(req(sampleNames()),{
-    rv.buildDesign$design_df  <- data.frame(Sample.name = as.character(sampleNames()),
-                                            Condition = rep("",length(sampleNames())),
+  observeEvent(req(sampleNames),{
+    rv.buildDesign$design_df  <- data.frame(Sample.name = as.character(sampleNames),
+                                            Condition = rep("",length(sampleNames)),
                                             stringsAsFactors = FALSE)
   })
   
@@ -367,11 +359,7 @@ mod_build_design_server <- function(input, output, session, sampleNames){
 }
 
   })
-  
- 
-  
-  
-  
+
   
   return(reactive({rv.buildDesign$out}))
 }
