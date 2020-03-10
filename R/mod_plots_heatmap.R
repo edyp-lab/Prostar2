@@ -1,0 +1,112 @@
+# Module UI
+
+#' @title   mod_plots_heatmap_ui and mod_plots_heatmap_server
+#' @description  A shiny Module.
+#'
+#' @param id shiny id
+#' @param input internal
+#' @param output internal
+#' @param session internal
+#'
+#' @rdname mod_plots_heatmap
+#'
+#' @keywords internal
+#' @export 
+#' @importFrom shiny NS tagList 
+mod_plots_heatmap_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+    div(
+      div(
+        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+        selectInput(ns("distance"),"Distance",
+                    #choices = G_heatmapDistance_Choices,
+                    choices = list("Euclidean" ="euclidean",
+                                   "Manhattan"="manhattan",
+                                   "Maximum" = "maximum",
+                                   "Canberra" = "canberra",
+                                   "Binary" = "binary",
+                                   "Minkowski" = "minkowski"),
+                    selected = "euclidean",
+                    width="150px")
+      ),
+      div(
+        style="display:inline-block; vertical-align: middle;",
+        selectInput(ns("linkage"),"Linkage",
+                    #choices=G_heatmapLinkage_Choices,
+                    choices=list("Complete" = "complete",
+                                 "Average"="average",
+                                 "Ward.D"="ward.D",
+                                 "Ward.D2"="ward.D2",
+                                 "Single" = "single",
+                                 "Centroid" = "centroid",
+                                 "Mcquitty" = "mcquitty",
+                                 "Median" = "median"),
+                    selected='complete',
+                    width="150px")
+      ),
+      
+      tags$hr(),
+      uiOutput(ns("DS_PlotHeatmap"))
+    )
+  )
+}
+
+# Module Server
+
+#' @rdname mod_plots_heatmap
+#' @export
+#' @keywords internal
+
+mod_plots_heatmap_server <- function(input, output, session, obj){
+  ns <- session$ns
+  
+  
+  output$DS_PlotHeatmap <- renderUI({
+    req(obj)
+    #if (nrow(obj) > limitHeatmap){
+    if (nrow(obj) > 20000){
+      tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
+    }else {
+      tagList(
+        plotOutput(ns("heatmap"), width = "900px", height = "600px")
+        #%>% shinycssloaders::withSpinner(type=spinnerType)
+        %>% shinycssloaders::withSpinner(type="8")
+        
+      )
+    }
+  })
+  
+  
+  
+  output$heatmap <- renderPlot({
+    heatmap()
+  })
+  
+  
+  
+  heatmap <- reactive({
+    
+    req(obj)
+    input$linkage
+    input$distance
+    
+    isolate({ 
+      wrapper.heatmapD(obj,
+                       input$distance, 
+                       input$linkage,
+                       TRUE)
+    })
+    
+  })
+  
+  
+  
+}
+
+## To be copied in the UI
+# mod_plots_heatmap_ui("plots_heatmap_ui_1")
+
+## To be copied in the server
+# callModule(mod_plots_heatmap_server, "plots_heatmap_ui_1")
+
