@@ -1,5 +1,5 @@
 library(MSnbase)
-source(file.path('~/Github/2.0/Prostar2/R', 'mod_infos_dataset.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 
 
 

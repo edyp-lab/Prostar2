@@ -120,7 +120,8 @@ Group2Color <- reactive({
 getDataForExprs <- function(obj){
   
   
-  test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
+  #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
+  test.table <- as.data.frame(round(Biobase::exprs(obj),digits=10))
   # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
   if (!is.null(obj@experimentData@other$OriginOfValues)){ #agregated dataset
     test.table <- cbind(test.table, 
@@ -338,3 +339,13 @@ ReadPipelineConfig <- function(filename) {
   
 }
 
+
+
+
+# Dans mod_msnset_explorer.R
+initComplete <- function(){
+  return (JS(
+    "function(settings, json) {",
+    "$(this.api().table().header()).css({'background-color': 'darkgrey', 'color': 'black'});",
+    "}"))
+} #comonFunc.R de prostar 2.0
