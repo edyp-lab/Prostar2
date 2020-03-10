@@ -1,5 +1,6 @@
 
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
+source(file.path('../../R', 'commonFunc.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
@@ -17,7 +18,7 @@ server <- function(input, output, session) {
     res = NULL
    )
   
-  rv$res <- callModule(mod_choose_pipeline_server,'pipe', pipeline.def=reactive({defs}))
+  rv$res <- callModule(mod_choose_pipeline_server,'pipe', pipeline.def=defs)
   
   output$showPipeline <- renderText({
     req(rv$res())

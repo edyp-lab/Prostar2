@@ -77,10 +77,6 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
                proteinID <- data@experimentData@other$proteinId
                typeOfData <- data@experimentData@other$typeOfData
                ll.pipeline <- rv.openDataset$pipe()
-               print(proteinID)
-               print(typeOfData)
-               print(ll.pipeline)
-               print(DeleteExtension(input$file$name))
                
                switch(typeOfData,
                       peptide = {rv.openDataset$out <- PipelinePeptide(analysis= DeleteExtension(input$file$name), 

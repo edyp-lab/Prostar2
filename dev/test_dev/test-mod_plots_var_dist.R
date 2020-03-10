@@ -3,7 +3,7 @@ library(shinycssloaders)
 library(MSnbase)
 library(DAPAR)
 
-source("~/Github/master/Prostar/inst/ProstarApp/ui/ui_Configure.R")
+
 # plotWidth <- "800px"
 # plotHeight <- "600px"
 
