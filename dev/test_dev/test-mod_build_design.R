@@ -21,7 +21,7 @@ server <- function(input, output, session) {
   )
   rv.test$res <- callModule(mod_build_design_server, 
              'buildDesign', 
-             sampleNames=colnames(Biobase::exprs(obj)))
+             sampleNames=reactive({colnames(Biobase::exprs(obj))}))
   
   observeEvent(req(rv.test$res() ),{
     print(rv.test$res() )
