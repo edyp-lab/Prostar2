@@ -113,14 +113,6 @@ mod_msnset_explorer_server <- function(input, output, session, obj=NULL){ # obj 
     #moduleSettings.R de prostar 2.0
     pal <- unique(RColorBrewer::brewer.pal(8,"Dark2"))
     
-    columns = colnames(data)[1:2]
-    valueColumns = colnames(data)[2]
-    print("error from")
-    print(columns)
-    print(valueColumns)
-    print(unique(data$Condition))
-    print(pal)
-    
     dt <- DT::datatable(  data,
                           extensions = c('Scroller', 'Buttons'),
                           rownames=  FALSE,
