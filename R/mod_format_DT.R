@@ -72,7 +72,7 @@ mod_format_DT_server <- function(input, output, session,
   
   initComplete <- function(){
     
-    return (JS(
+    return (htmlwidgets::JS(
       "function(settings, json) {",
       "$(this.api().table().header()).css({'background-color': 'darkgrey', 'color': 'black'});",
       "}"))

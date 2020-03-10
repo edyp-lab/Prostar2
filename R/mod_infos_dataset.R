@@ -24,14 +24,16 @@ mod_infos_dataset_ui <- function(id){
              mod_format_DT_ui(ns('dt'))
       ),
       column(width=6,
-             selectInput(ns("selectInputMsnset"),
-                         "Select a dataset for further information",
-                         choices = c("None",names(dat@ExperimentList@listData))),
-             uiOutput(ns('selectMsnset'))     
+             uiOutput(ns('choose_msnset_ui')),
+             uiOutput(ns('selectMsnset_ui'))     
       )
     )
   )
 }
+
+
+
+
 
 # Module Server
 
@@ -44,26 +46,33 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   callModule(mod_format_DT_server,'dt',
-             table2show = reactive({Get_mae_summary(dat)}))
+             table2show = reactive({Get_mae_summary(obj)}))
   
   
-  Get_mae_summary <- function(dat){
+  output$choose_msnset_ui <- renderUI({
+    req(obj)
+    selectInput(ns("selectInputMsnset"),
+                "Select a dataset for further information",
+                choices = c("None",names(obj@ExperimentList@listData)))
+  })
+  
+  Get_mae_summary <- function(obj){
     
     # pour nb_msnset, rajouter distinction singulier/pluriel ?
-    nb_msnset <- paste0(length(names(dat@ExperimentList@listData)), " MsnSet")
-    names_msnset <- list(names(dat@ExperimentList@listData))
-    pipeline <- gsub("Pipeline","",dat@pipelineType)
+    nb_msnset <- paste0(length(names(obj@ExperimentList@listData)), " MsnSet")
+    names_msnset <- list(names(obj@ExperimentList@listData))
+    pipeline <- gsub("Pipeline","",obj@pipelineType)
     
     if (pipeline == "Peptide") {
       
-      if(length(dat@matAdj)!=0){
+      if(length(obj@matAdj)!=0){
         txt <- "matAdj <span style=\"color: lime\">OK</span>"
       }
       else{ 
         txt <- "matAdj <span style=\"color: red\">Missing</span>"
       }
       
-      if(length(dat@CC)!=0){
+      if(length(obj@CC)!=0){
         txt <- paste0(txt, " ; Comp Connex <span style=\"color: lime\">OK</span>")
       }
       else{
@@ -87,7 +96,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     do <- data.frame(Definition= columns,
                      Value=rep(0,length(columns)))
     
-    if (is.null(dat)){
+    if (is.null(obj)){
       return(do)
     }
     
@@ -99,7 +108,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   
-  Get_MSnSet_Summary <- function(dat){
+  Get_MSnSet_Summary <- function(obj){
     
     columns <- c("Number of samples","Number of conditions",
                  "Number of lines", "Number of missing values", "% of missing values", 
@@ -107,18 +116,18 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     do <- data.frame(Definition= columns,
                      Value=rep(0,length(columns)))
-    if (is.null(dat)){
+    if (is.null(obj)){
       return(do)
     }
-    NA.count<- length(which(is.na(Biobase::exprs(dat)==TRUE)))
-    pourcentage <- 100 * round(NA.count/(ncol(dat)*nrow(dat)), digits=4)
+    NA.count<- length(which(is.na(Biobase::exprs(obj)==TRUE)))
+    pourcentage <- 100 * round(NA.count/(ncol(obj)*nrow(obj)), digits=4)
     nb.empty.lines <- sum(apply(
-      is.na(as.matrix(Biobase::exprs(dat))), 1, all))
+      is.na(as.matrix(Biobase::exprs(obj))), 1, all))
     
     
-    val <- c(ncol(Biobase::exprs(dat)),
-             length(unique(Biobase::pData(dat)$Condition)),
-             nrow(Biobase::exprs(dat)),
+    val <- c(ncol(Biobase::exprs(obj)),
+             length(unique(Biobase::pData(obj)$Condition)),
+             nrow(Biobase::exprs(obj)),
              NA.count,
              pourcentage,
              nb.empty.lines)
@@ -128,13 +137,13 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   }
   
   
-  output$selectMsnset <- renderUI({
+  output$selectMsnset_ui <- renderUI({
     req(input$selectInputMsnset)
     
     
     if (input$selectInputMsnset != "None") {
       
-      data <- get(input$selectInputMsnset)
+      data <- obj@ExperimentList@listData[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',
                  table2show = reactive({Get_MSnSet_Summary(data)}))
@@ -168,7 +177,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     if (input$selectInputMsnset != "None") {
      
-      data <- get(input$selectInputMsnset)
+      data <- obj@ExperimentList@listData[[input$selectInputMsnset]]
       
       typeOfDataset <- data@experimentData@other$typeOfData
       
@@ -215,7 +224,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   NeedsUpdate <- reactive({
     
-    data <- get(input$selectInputMsnset)
+    data <- obj@ExperimentList@listData[[input$selectInputMsnset]]
     PROSTAR.version <- data@experimentData@other$Prostar_Version
 
     if (!is.null(PROSTAR.version) && (compareVersion(PROSTAR.version,"1.12.9") != -1)

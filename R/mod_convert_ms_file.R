@@ -31,6 +31,7 @@ mod_convert_ms_file_ui <- function(id){
 mod_convert_ms_file_server <- function(input, output, session){
   ns <- session$ns
   
+  defs.pipeline <- ReadPipelineConfig('../../R/pipeline.conf')
   
   callModule(mod_popover_for_help_server,"modulePopover_convertChooseDatafile", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Data file</font></strong>")), 
@@ -574,6 +575,7 @@ mod_convert_ms_file_server <- function(input, output, session){
       #htmlOutput(ns("msgAlertCreateMSnset")),
       #hr(),
       #textInput(ns("filenameToCreate"),"Enter the name of the study"),
+      mod_choose_pipeline_ui(ns('choose_pipeline_ui')),
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
       #uiOutput(ns("conversionDone")),
       mod_infos_dataset_ui(ns("infoAboutMSnset")),
@@ -585,6 +587,8 @@ mod_convert_ms_file_server <- function(input, output, session){
   })
   
 
+  
+  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=defs.pipeline)
   
   output$conversionDone <- renderUI({
     
@@ -675,12 +679,26 @@ browser()
                                               versions
                                   )
         
+        print(original.msnset)
+        
+        
+        defs <- ReadPipelineConfig('../../R/pipeline.conf')
+        ll.pipeline <- defs$protein
+        mae <- DAPAR::PipelineProtein(analysis= 'analysis', 
+                                      pipelineType = 'protein', 
+                                      dataType ='protein',
+                                      processes=NULL, 
+                                      experiments=list(original=Exp1_R25_prot), 
+                                      colData=Biobase::pData(Exp1_R25_prot)
+        )
+        
+        
         
         # rv$current.obj.name <- input$filenameToCreate
         # rv$indexNA <- which(is.na(exprs(rv$current.obj)))
         # rv$typeOfDataset <- rv$widgets$Convert$typeOfData
         # rv$current.obj <- addOriginOfValue(rv$current.obj)
-        # colnames(fData(rv$current.obj)) <- gsub(".", "_", colnames(fData(rv$current.obj)), fixed=TRUE)
+        # colnames(Biobase::fData(rv$current.obj)) <- gsub(".", "_", colnames(Biobase::fData(rv$current.obj)), fixed=TRUE)
         # names(rv$current.obj@experimentData@other) <- gsub(".", "_", names(rv$current.obj@experimentData@other), fixed=TRUE)
         # rv$current.obj <- addOriginOfValue(rv$current.obj)
         # rv$widgets$aggregation$proteinId <- rv$current.obj@experimentData@other$proteinId

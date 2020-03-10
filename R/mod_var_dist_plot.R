@@ -20,7 +20,7 @@ mod_var_dist_plot_ui <- function(id){
                of the protein/peptides."),
     helpText("For better visualization, it is possible to zoom in by click-and-drag."),
     #highchartOutput(ns("viewDistCV"),width = plotWidth, height = plotHeight) %>% shinycssloaders::withSpinner(type=spinnerType)
-    highchartOutput(ns("viewDistCV"),width = plotWidth, height = plotHeight) %>% shinycssloaders::withSpinner(type=8)
+    highchartOutput(ns("viewDistCV"),width = 600, height = 600) %>% shinycssloaders::withSpinner(type=8)
   )
 }
 
