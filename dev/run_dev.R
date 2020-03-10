@@ -1,5 +1,6 @@
 getwd()
 setwd("~/Github/2.0/Prostar2/")
+#setwd("~/Github/2.0/Prostar2/dev/test_dev/")
 
 # Set options here
 options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode

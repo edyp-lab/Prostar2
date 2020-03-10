@@ -1,10 +1,9 @@
 library(MSnbase)
+
 library(DAPAR)
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'commonFunc.R'), local=TRUE)$value
-
-
 
 ui <- fluidPage(
   mod_infos_dataset_ui('test_infos_DT')
