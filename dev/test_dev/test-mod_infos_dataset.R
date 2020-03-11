@@ -1,5 +1,3 @@
-library(MSnbase)
-
 library(DAPAR)
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
@@ -30,7 +28,7 @@ server <- function(input, output, session) {
             
   # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
   callModule(mod_infos_dataset_server,'test_infos_DT',
-             obj = mae)
+             obj = NULL)
 }
 
 

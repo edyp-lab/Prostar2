@@ -40,6 +40,7 @@ mod_infos_dataset_ui <- function(id){
 #' @rdname mod_infos_dataset
 #' @export
 #' @keywords internal
+#' @import MultiAssayExperiment
 
 mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
@@ -53,26 +54,26 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     req(obj)
     selectInput(ns("selectInputMsnset"),
                 "Select a dataset for further information",
-                choices = c("None",names(obj@ExperimentList@listData)))
+                choices = c("None",names(experiments(obj))))
   })
   
   Get_mae_summary <- function(obj){
     
     # pour nb_msnset, rajouter distinction singulier/pluriel ?
-    nb_msnset <- paste0(length(names(obj@ExperimentList@listData)), " MsnSet")
-    names_msnset <- list(names(obj@ExperimentList@listData))
-    pipeline <- gsub("Pipeline","",obj@pipelineType)
+    nb_msnset <- paste0(length(names(experiments(obj))), " MsnSet")
+    names_msnset <- list(names(experiments(obj)))
+    pipeline <- gsub("Pipeline","",pipelineType(obj))
     
     if (pipeline == "Peptide") {
       
-      if(length(obj@matAdj)!=0){
+      if(length(matAdj(obj))!=0){
         txt <- "matAdj <span style=\"color: lime\">OK</span>"
       }
       else{ 
         txt <- "matAdj <span style=\"color: red\">Missing</span>"
       }
       
-      if(length(obj@CC)!=0){
+      if(length(CC(obj))!=0){
         txt <- paste0(txt, " ; Comp Connex <span style=\"color: lime\">OK</span>")
       }
       else{
@@ -110,8 +111,11 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   Get_MSnSet_Summary <- function(obj){
     
-    columns <- c("Number of samples","Number of conditions",
-                 "Number of lines", "Number of missing values", "% of missing values", 
+    columns <- c("Number of samples",
+                 "Number of conditions",
+                 "Number of lines",
+                 "Number of missing values",
+                 "% of missing values", 
                  "Number of empty lines")
     
     do <- data.frame(Definition= columns,
@@ -143,7 +147,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     if (input$selectInputMsnset != "None") {
       
-      data <- obj@ExperimentList@listData[[input$selectInputMsnset]]
+      data <- experiments(obj)[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',
                  table2show = reactive({Get_MSnSet_Summary(data)}))
