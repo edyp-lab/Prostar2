@@ -20,9 +20,9 @@ mod_build_design_example_ui <- function(id){
   tagList(
     #uiOutput(ns('title')),
     shinyBS::bsCollapse(id = "collapseFormerReleases", open = NULL,multiple = FALSE,
-                        shinyBS::bsCollapsePanel("Level 1", rHandsontableOutput(ns('showLevel1')),style = "info"),
-                        shinyBS::bsCollapsePanel("Level 2", rHandsontableOutput(ns('showLevel2')),style = "info"),
-                        shinyBS::bsCollapsePanel("Level 3", rHandsontableOutput(ns('showLevel3')),style = "info")
+                        shinyBS::bsCollapsePanel("Level 1", rhandsontable::rHandsontableOutput(ns('showLevel1')),style = "info"),
+                        shinyBS::bsCollapsePanel("Level 2", rhandsontable::rHandsontableOutput(ns('showLevel2')),style = "info"),
+                        shinyBS::bsCollapsePanel("Level 3", rhandsontable::rHandsontableOutput(ns('showLevel3')),style = "info")
     )
 
 
@@ -163,26 +163,26 @@ mod_build_design_example_server <- function(input, output, session){
   }
 
 
-output$showLevel1 <- renderRHandsontable({
+output$showLevel1 <- rhandsontable::renderRHandsontable({
   df <- GetExample_Level1()$df
   color <- GetExample_Level1()$color
   BuildHot(df, color)
 })
 
-output$showLevel2 <- renderRHandsontable({
+output$showLevel2 <- rhandsontable::renderRHandsontable({
   df <- GetExample_Level2()$df
   color <- GetExample_Level2()$color
   BuildHot(df, color)
 })
 
-output$showLevel3 <- renderRHandsontable({
+output$showLevel3 <- rhandsontable::renderRHandsontable({
   df <- GetExample_Level3()$df
   color <- GetExample_Level3()$color
   BuildHot(df, color)
 })
 
 
-  output$nlevelsExample <- renderRHandsontable({
+  output$nlevelsExample <- rhandsontable::renderRHandsontable({
     req(designLevel())
     #pal <- RColorBrewer::brewer.pal(3,'Dark2')
     if (designLevel() == 1){

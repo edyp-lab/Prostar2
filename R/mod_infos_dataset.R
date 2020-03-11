@@ -47,34 +47,35 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   callModule(mod_format_DT_server,'dt',
-             table2show = reactive({Get_mae_summary(obj)}))
+             table2show = reactive({Get_mae_summary()}))
   
   
   output$choose_msnset_ui <- renderUI({
-    req(obj)
+    req(obj())
     selectInput(ns("selectInputMsnset"),
                 "Select a dataset for further information",
-                choices = c("None",names(MultiAssayExperiment::experiments(obj)))
+                choices = c("None",names(MultiAssayExperiment::experiments(obj())))
                 )
   })
   
-  Get_mae_summary <- function(obj){
-    req(obj)
+  Get_mae_summary <- reactive({
+
+    req(obj())
     # pour nb_msnset, rajouter distinction singulier/pluriel ?
-    nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj))), " MsnSet")
-    names_msnset <- list(names(MultiAssayExperiment::experiments(obj)))
-    pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj))
+    nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")
+    names_msnset <- list(names(MultiAssayExperiment::experiments(obj())))
+    pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj()))
     
     if (pipeline == "Peptide") {
       
-      if(length(DAPAR::matAdj(obj))!=0){
+      if(length(DAPAR::matAdj(obj()))!=0){
         txt <- "matAdj <span style=\"color: lime\">OK</span>"
       }
       else{ 
         txt <- "matAdj <span style=\"color: red\">Missing</span>"
       }
       
-      if(length(DAPAR::CC(obj))!=0){
+      if(length(DAPAR::CC(obj()))!=0){
         txt <- paste0(txt, " ; Comp Connex <span style=\"color: lime\">OK</span>")
       }
       else{
@@ -98,20 +99,20 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     do <- data.frame(Definition= columns,
                      Value=rep(0,length(columns)))
     
-    if (is.null(obj)){
+    if (is.null(obj())){
       return(do)
     }
     
     do$Value <- val
     
-    return(do)
-  }
+    do
+  })
   
   
   
   
-  Get_MSnSet_Summary <- function(obj){
- 
+  Get_MSnSet_Summary <- reactive({
+    data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
     columns <- c("Number of samples",
                  "Number of conditions",
                  "Number of lines",
@@ -121,43 +122,45 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     do <- data.frame(Definition= columns,
                      Value=rep(0,length(columns)))
-    if (is.null(obj)){
-      return(do)
+    if (is.null(obj())){
+      do
     }
-    NA.count<- length(which(is.na(Biobase::exprs(obj)==TRUE)))
-    pourcentage <- 100 * round(NA.count/(ncol(obj)*nrow(obj)), digits=4)
+    
+    NA.count<- length(which(is.na(Biobase::exprs(data)==TRUE)))
+    pourcentage <- 100 * round(NA.count/(ncol(data)*nrow(data)), digits=4)
     nb.empty.lines <- sum(apply(
-      is.na(as.matrix(Biobase::exprs(obj))), 1, all))
+      is.na(as.matrix(Biobase::exprs(data))), 1, all))
     
     
-    val <- c(ncol(Biobase::exprs(obj)),
-             length(unique(Biobase::pData(obj)$Condition)),
-             nrow(Biobase::exprs(obj)),
+    val <- c(ncol(Biobase::exprs(data)),
+             length(unique(Biobase::pData(data)$Condition)),
+             nrow(Biobase::exprs(data)),
              NA.count,
              pourcentage,
              nb.empty.lines)
     do$Value <- val
     
-    return(do)
-  }
+    do
+  })
   
   
   output$selectMsnset_ui <- renderUI({
     req(input$selectInputMsnset)
+    req(obj())
     
     
     if (input$selectInputMsnset != "None") {
       
-      data <- MultiAssayExperiment::experiments(obj)[[input$selectInputMsnset]]
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',
-                 table2show = reactive({Get_MSnSet_Summary(data)}))
+                 table2show = reactive({Get_MSnSet_Summary()}))
       
       callModule(mod_format_DT_server,'dt3',
-                 table2show = reactive({data@phenoData@data}))
+                 table2show = reactive({Biobase::pData(data)}))
      
       tagList(
-        h4(paste0("Type of Data: ", data@experimentData@other[["typeOfData"]] )),
+        h4(paste0("Type of Data: ", data@experimentData@other$typeOfData)),
         br(),
         h4("MsnSet summary"),
         mod_format_DT_ui(ns('dt2')),
@@ -178,13 +181,13 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   output$info <- renderUI({
     req(input$selectInputMsnset)
-    
+    req(obj())
     
     if (input$selectInputMsnset != "None") {
      
-      data <- MultiAssayExperiment::experiments(obj)[[input$selectInputMsnset]]
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       
-      typeOfDataset <- data@experimentData@other$typeOfData
+      typeOfDataset <-  data@experimentData@other$typeOfData
       
       if (NeedsUpdate())  {
         
@@ -229,7 +232,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   NeedsUpdate <- reactive({
     
-    data <- MultiAssayExperiment::experiments(obj)[[input$selectInputMsnset]]
+    data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
     PROSTAR.version <- data@experimentData@other$Prostar_Version
 
     if (!is.null(PROSTAR.version) && (compareVersion(PROSTAR.version,"1.12.9") != -1)

@@ -28,7 +28,7 @@ server <- function(input, output, session) {
             
   # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
   callModule(mod_infos_dataset_server,'test_infos_DT',
-             obj = mae)
+             obj = reactive({mae}))
 }
 
 

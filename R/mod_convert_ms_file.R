@@ -583,10 +583,8 @@ mod_convert_ms_file_server <- function(input, output, session){
 
   
   callModule(mod_infos_dataset_server, "infos",
-             obj = reactive({
-               req(rv.convert$dataOut)
-               rv.convert$dataOut@datasets[[1]]
-             }))
+             obj = rv.convert$dataOut@datasets[[1]]
+             )
   
   rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=defs.pipeline)
   
