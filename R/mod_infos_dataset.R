@@ -54,26 +54,27 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     req(obj)
     selectInput(ns("selectInputMsnset"),
                 "Select a dataset for further information",
-                choices = c("None",names(experiments(obj))))
+                choices = c("None",names(MultiAssayExperiment::experiments(obj)))
+                )
   })
   
   Get_mae_summary <- function(obj){
-    
+    req(obj)
     # pour nb_msnset, rajouter distinction singulier/pluriel ?
-    nb_msnset <- paste0(length(names(experiments(obj))), " MsnSet")
-    names_msnset <- list(names(experiments(obj)))
-    pipeline <- gsub("Pipeline","",pipelineType(obj))
+    nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj))), " MsnSet")
+    names_msnset <- list(names(MultiAssayExperiment::experiments(obj)))
+    pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj))
     
     if (pipeline == "Peptide") {
       
-      if(length(matAdj(obj))!=0){
+      if(length(DAPAR::matAdj(obj))!=0){
         txt <- "matAdj <span style=\"color: lime\">OK</span>"
       }
       else{ 
         txt <- "matAdj <span style=\"color: red\">Missing</span>"
       }
       
-      if(length(CC(obj))!=0){
+      if(length(DAPAR::CC(obj))!=0){
         txt <- paste0(txt, " ; Comp Connex <span style=\"color: lime\">OK</span>")
       }
       else{
@@ -110,7 +111,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   Get_MSnSet_Summary <- function(obj){
-    
+ 
     columns <- c("Number of samples",
                  "Number of conditions",
                  "Number of lines",
@@ -147,7 +148,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     if (input$selectInputMsnset != "None") {
       
-      data <- experiments(obj)[[input$selectInputMsnset]]
+      data <- MultiAssayExperiment::experiments(obj)[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',
                  table2show = reactive({Get_MSnSet_Summary(data)}))
@@ -181,7 +182,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     if (input$selectInputMsnset != "None") {
      
-      data <- obj@ExperimentList@listData[[input$selectInputMsnset]]
+      data <- MultiAssayExperiment::experiments(obj)[[input$selectInputMsnset]]
       
       typeOfDataset <- data@experimentData@other$typeOfData
       
@@ -228,7 +229,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   NeedsUpdate <- reactive({
     
-    data <- obj@ExperimentList@listData[[input$selectInputMsnset]]
+    data <- MultiAssayExperiment::experiments(obj)[[input$selectInputMsnset]]
     PROSTAR.version <- data@experimentData@other$Prostar_Version
 
     if (!is.null(PROSTAR.version) && (compareVersion(PROSTAR.version,"1.12.9") != -1)
