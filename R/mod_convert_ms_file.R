@@ -583,7 +583,10 @@ mod_convert_ms_file_server <- function(input, output, session){
 
   
   callModule(mod_infos_dataset_server, "infos",
-             obj = rv.convert$dataOut@datasets[[1]]
+             obj = reactive({
+               req(rv.convert$dataOut)
+               rv.convert$dataOut
+             })
              )
   
   rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=defs.pipeline, dataType = input$typeOfData)
@@ -650,36 +653,24 @@ mod_convert_ms_file_server <- function(input, output, session){
         )
         
  
-        print(colnames(rv.convert$dataIn))
-        print(design)
-        print(indexForQuantiData)
-        print(indexForFData)
-        print(key_id_index)
-        print(indexForOriginOfValue)
-        print(logged_data)
-        print(input$replaceAllZeros)
-        print(input$typeOfData)
-        print(gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE))
-        print(versions)
-        
         tryCatch({
-        original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
-                                              metadata = design,
-                                              indExpData = indexForQuantiData,
-                                              indFData = indexForFData,
-                                              indiceID = key_id_index,
-                                              indexForOriginOfValue = indexForOriginOfValue,
-                                              logData = logged_data,
-                                              replaceZeros = input$replaceAllZeros,
-                                              pep_prot_data = input$typeOfData,
-                                              proteinId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
-                                              versions
-                                  )
-        
-        print(original.msnset)
-        
-switch(rv.convert$pipeline,
+      switch(names(rv.convert$pipeline()),
        peptide = {
+         # original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
+         #                                        metadata = design,
+         #                                        indExpData = indexForQuantiData,
+         #                                        indFData = indexForFData,
+         #                                        indiceID = key_id_index,
+         #                                        indexForOriginOfValue = indexForOriginOfValue,
+         #                                        logData = logged_data,
+         #                                        replaceZeros = input$replaceAllZeros,
+         #                                        pep_prot_data = input$typeOfData,
+         #                                        proteinId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
+         #                                        versions
+         # )
+         # 
+         # print(original.msnset)
+         
          # defs <- ReadPipelineConfig('../../R/pipeline.conf')
          # ll.pipeline <- defs$peptide
          # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
@@ -692,16 +683,32 @@ switch(rv.convert$pipeline,
          #
        },
        protein = {
-         # defs <- ReadPipelineConfig('../../R/pipeline.conf')
-         # ll.pipeline <- defs$protein
-         # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
-         #                               pipelineType = rv.convert$pipeline, 
-         #                               dataType = input$typeOfData,
-         #                               processes=NULL, 
-         #                               experiments=list(original=Exp1_R25_prot), 
-         #                               colData=Biobase::pData(Exp1_R25_prot)
-         # )
-         #
+         original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
+                                                metadata = design,
+                                                indExpData = indexForQuantiData,
+                                                indFData = indexForFData,
+                                                indiceID = key_id_index,
+                                                indexForOriginOfValue = indexForOriginOfValue,
+                                                logData = logged_data,
+                                                replaceZeros = input$replaceAllZeros,
+                                                pep_prot_data = input$typeOfData,
+                                                versions
+         )
+         
+         print(original.msnset)
+         #browser()
+         defs <- ReadPipelineConfig('../../R/pipeline.conf')
+
+          mae <- DAPAR::PipelineProtein(analysis= input$studyName,
+                                        pipelineType = names(rv.convert$pipeline()),
+                                        dataType = input$typeOfData,
+                                        processes=defs$protein,
+                                        experiments=list(original=Exp1_R25_prot),
+                                        colData=Biobase::pData(Exp1_R25_prot)
+          )
+          print(mae)
+         rv.convert$dataOut <- mae
+         
        },
        p2p = {
          # defs <- ReadPipelineConfig('../../R/pipeline.conf')
@@ -747,10 +754,10 @@ switch(rv.convert$pipeline,
       #                           sep=" "))
       #   }
     }, error = function(e) {
-      browser()
-      shinyjs::info(paste("Error :","CreateMSnSet",":",
-                          conditionMessage(e), 
-                          sep=" "))
+      print(e)
+      # shinyjs::info(paste("Error :","CreateMSnSet",":",
+      #                     conditionMessage(e), 
+      #                     sep=" "))
     }, finally = {
       #cleanup-code 
     })

@@ -14,8 +14,8 @@ server <- function(input, output, session) {
   data('Exp1_R25_prot')
   obj <- Exp1_R25_prot
   callModule(mod_format_DT_server,'test_format_DT',
-             #table2show = reactive({Biobase::pData(obj)}))
-  table2show = NULL)
+             table2show = reactive({Biobase::pData(obj)}))
+  #table2show = reactive({NULL}))
 }
 
 

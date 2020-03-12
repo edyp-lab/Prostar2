@@ -16,6 +16,7 @@
 #' @importFrom shiny NS tagList 
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs useShinyjs
+#' @importFrom rhandsontable rHandsontableOutput
 mod_build_design_ui <- function(id){
   ns <- NS(id)
   shinyjs::useShinyjs()
@@ -41,7 +42,7 @@ mod_build_design_ui <- function(id){
     h4("Design table"),
      tags$div(
        tags$div(style="display:inline-block; vertical-align: top;",
-                rHandsontableOutput(ns("hot"),width="100%"),
+                rhandsontable::rHandsontableOutput(ns("hot"),width="100%"),
        ),
         tags$div(style="display:inline-block; vertical-align: top;",
                  shinyjs::hidden(uiOutput(ns('showExamples')))

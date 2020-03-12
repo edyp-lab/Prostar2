@@ -61,6 +61,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   Get_mae_summary <- reactive({
 
     req(obj())
+    print(obj())
     # pour nb_msnset, rajouter distinction singulier/pluriel ?
     nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")
     names_msnset <- list(names(MultiAssayExperiment::experiments(obj())))
@@ -189,17 +190,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
       
       typeOfDataset <-  data@experimentData@other$typeOfData
       
-      if (NeedsUpdate())  {
-        
-        tags$div(
-          tags$div(style="display:inline-block; vertical-align: top;",
-                   tags$img(src = "www/images/Problem.png", height=25)),
-          tags$div(style="display:inline-block; vertical-align: top;",
-                   HTML("The dataset was created with a former version of ProStaR, which experimental design is not compliant with the current
-                      software functionalities. Please update the design below"))
-        )
-      } else{
-        
+      
         
         NA.count <- length(which(is.na(Biobase::exprs(data))))
         nb.empty.lines <- sum(apply(is.na(as.matrix(Biobase::exprs(data))), 1, all))
@@ -222,28 +213,25 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
           }
           
         )
-        
-      }
     }
   })
   
   
   
-  
-  NeedsUpdate <- reactive({
-    
-    data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
-    PROSTAR.version <- data@experimentData@other$Prostar_Version
-
-    if (!is.null(PROSTAR.version) && (compareVersion(PROSTAR.version,"1.12.9") != -1)
-        && (check.design(Biobase::pData(data))$valid))
-    {return (FALSE)}
-
-    else {
-      return(TRUE)
-    }
-  })
-  
+  # 
+  # NeedsUpdate <- reactive({
+  #   
+  #   data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
+  #   PROSTAR.version <- data@experimentData@other$Prostar_Version
+  # 
+  #   re(compareVersion(PROSTAR.version,"1.12.9") != -1))
+  #   {return (FALSE)}
+  # 
+  #   else {
+  #     return(TRUE)
+  #   }
+  # })
+  # 
   
 }
 
