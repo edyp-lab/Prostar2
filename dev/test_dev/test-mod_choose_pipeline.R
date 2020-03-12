@@ -5,6 +5,7 @@ source(file.path('../../R', 'commonFunc.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
+    selectInput('dataType', 'DataType', choices = c('protein', 'peptide'), selected=character(0)),
     mod_choose_pipeline_ui('pipe'),
     verbatimTextOutput('showPipeline')
   )
@@ -18,7 +19,7 @@ server <- function(input, output, session) {
     res = NULL
    )
   
-  rv$res <- callModule(mod_choose_pipeline_server,'pipe', pipeline.def=defs)
+  rv$res <- callModule(mod_choose_pipeline_server,'pipe', pipeline.def=defs, dataType = input$dataType)
   
   output$showPipeline <- renderText({
     req(rv$res())

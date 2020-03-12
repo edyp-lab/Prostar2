@@ -27,7 +27,7 @@ mod_choose_pipeline_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_choose_pipeline_server <- function(input, output, session, pipeline.def){
+mod_choose_pipeline_server <- function(input, output, session, pipeline.def, dataType){
   ns <- session$ns
   
   rv.choosePipeline <- reactiveValues(
