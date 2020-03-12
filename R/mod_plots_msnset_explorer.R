@@ -36,7 +36,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- obj@experimentData@other$typeOfData
+    typeOfDataset <- Biobase::experimentData(obj)@other$typeOfData
     .choices<- NULL
     
     
@@ -238,9 +238,9 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
     #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
     test.table <- as.data.frame(round(Biobase::exprs(obj),digits=10))
     # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
-    if (!is.null(obj@experimentData@other$OriginOfValues)){ #agregated dataset
+    if (!is.null(Biobase::experimentData(obj)@other$OriginOfValues)){ #agregated dataset
       test.table <- cbind(test.table, 
-                          Biobase::fData(obj)[,obj@experimentData@other$OriginOfValues])
+                          Biobase::fData(obj)[,Biobase::experimentData(obj)@other$OriginOfValues])
       # print(paste0("tutu:",head(test.table)))
       
     } else {
