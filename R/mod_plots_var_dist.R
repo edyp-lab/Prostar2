@@ -20,7 +20,7 @@ mod_plots_var_dist_ui <- function(id){
                of the protein/peptides."),
     helpText("For better visualization, it is possible to zoom in by click-and-drag."),
     #highchartOutput(ns("viewDistCV"),width = plotWidth, height = plotHeight) %>% shinycssloaders::withSpinner(type=spinnerType)
-    highchartOutput(ns("viewDistCV"),width = 600, height = 600) %>% shinycssloaders::withSpinner(type=8)
+    highchartOutput(ns("viewDistCV"),width = 600, height = 600)
   )
 }
 
@@ -35,17 +35,14 @@ mod_plots_var_dist_ui <- function(id){
 mod_plots_var_dist_server <- function(input, output, session, obj){
   ns <- session$ns
   
+  if (is.null(obj) | class(obj)!="MSnSet") { return(NULL) }
+  
   examplePalette = RColorBrewer::brewer.pal(ncol(Biobase::exprs(obj)),"Dark2")
-  
-  varDist = NULL
-  
-  #------------------------------
   
   viewDistCV <- reactive({
     
     req(obj)
-    examplePalette
-    
+
     isolate({
       varDist <- wrapper.CVDistD_HC(obj,examplePalette)
     })

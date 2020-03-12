@@ -33,6 +33,10 @@ mod_plots_group_mv_ui <- function(id){
 mod_plots_group_mv_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
   
+  
+  if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
+  
+  
   qData <- Biobase::pData(obj)
   conds <- unique(qData$Condition)
   
@@ -48,10 +52,9 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL){
   
   output$histo_MV_per_lines <- renderHighchart({
     req(obj)
-    tmp <- NULL
+    
     isolate({
-      tmp <- 
-        wrapper.mvPerLinesHisto_HC(obj, c(2:length(colnames(Biobase::pData(obj)))))
+      tmp <- wrapper.mvPerLinesHisto_HC(obj, c(2:length(colnames(Biobase::pData(obj)))))
     })
     tmp
   })
@@ -61,7 +64,7 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL){
   
   output$histo_MV_per_lines_per_conditions <- renderHighchart({
     req(obj)
-    tmp <- NULL
+   
     isolate({
       tmp <- wrapper.mvPerLinesHistoPerCondition_HC(obj, 
                                                     c(2:length(colnames(Biobase::pData(obj))))

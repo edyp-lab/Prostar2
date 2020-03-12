@@ -61,6 +61,7 @@ mod_plots_heatmap_ui <- function(id){
 mod_plots_heatmap_server <- function(input, output, session, obj){
   ns <- session$ns
   
+  if (is.null(obj) | class(obj)!="MSnSet") { return(NULL) }
   
   output$DS_PlotHeatmap <- renderUI({
     req(obj)
@@ -71,7 +72,7 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
       tagList(
         plotOutput(ns("heatmap"), width = "900px", height = "600px")
         #%>% shinycssloaders::withSpinner(type=spinnerType)
-        %>% shinycssloaders::withSpinner(type="8")
+        
         
       )
     }
@@ -88,8 +89,8 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
   heatmap <- reactive({
     
     req(obj)
-    input$linkage
-    input$distance
+    req(input$linkage)
+    req(input$distance)
     
     isolate({ 
       wrapper.heatmapD(obj,

@@ -1,4 +1,9 @@
-library(MSnbase)
+library(dplyr)
+library(DT)
+
+
+source(file.path("../../R","mod_plots_msnset_explorer.R"), local=TRUE)$value
+source(file.path("../../R","mod_plots_legend_colored_exprs.R"), local=TRUE)$value
 
 
 ui <- fluidPage(
@@ -10,8 +15,11 @@ server <- function(input, output, session) {
   
   require(DAPARdata)
   data('Exp1_R25_prot')
-  callModule(mod_plots_msnset_explorer_server,'msnset_explorer',
-             obj = reactive({Exp1_R25_prot}))
+  
+  callModule(mod_plots_msnset_explorer_server,'msnset_explorer', obj = Exp1_R25_prot)
+  #callModule(mod_plots_msnset_explorer_server,'msnset_explorer', obj = NULL)
+  #callModule(mod_plots_msnset_explorer_server,'msnset_explorer', obj = mae)
+
   
 }
 

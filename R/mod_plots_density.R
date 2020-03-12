@@ -29,6 +29,10 @@ mod_plots_density_ui <- function(id){
 mod_plots_density_server <- function(input, output, session, obj = NULL){
   ns <- session$ns
   
+  
+  if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
+  
+  
   output$Densityplot <- renderHighchart({
     req(obj)
     # settings <- rv.prostar$settings()
@@ -44,13 +48,11 @@ mod_plots_density_server <- function(input, output, session, obj = NULL){
     isolate({
       
       withProgress(message = 'Making plot', value = 100, {
-        pattern <- paste0(obj@experimentData@name,".densityplot")
         tmp <- densityPlotD_HC(obj, 
                                # rv.prostar$settings()$legendForSamples,
                                # rv.prostar$settings()$examplePalette
                                legend = legend,
                                palette = palette)
-        # future(createPNGFromWidget(rv$tempplot$boxplot,pattern))
       })
     })
     tmp

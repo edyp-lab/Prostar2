@@ -26,7 +26,8 @@ mod_plots_legend_colored_exprs_ui <- function(id){
     
     fluidRow(
       column(width=2,HTML(paste0("<div style=\"width:50px;height:20px;border:0px solid #000; background-color: ",
-                                 orangeProstar,";\"></div>"))),
+                                 #orangeProstar,";\"></div>"))),
+                                 "#E97D5E",";\"></div>"))),
       column(width=10, tags$p("Missing in Entire Condition"))
     )
   )

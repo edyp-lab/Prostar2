@@ -1,13 +1,16 @@
 library(highcharter)
 library(DAPAR)
 
+
+source(file.path("../../R","mod_plots_density.R"), local=TRUE)$value
+
+
 ui <- fluidPage(
   mod_plots_density_ui('plots_density')
 )
 
 
 
-# Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
   
@@ -16,9 +19,9 @@ server <- function(input, output, session) {
   
   
   # obj est un msnset
-  callModule(mod_plots_density_server,'plots_density',
-             obj = Exp1_R25_prot)
-  
+  callModule(mod_plots_density_server,'plots_density', obj = Exp1_R25_prot)
+  #callModule(mod_plots_density_server,'plots_density', obj = NULL)
+  #callModule(mod_plots_density_server,'plots_density', obj = mae)
 }
 
 

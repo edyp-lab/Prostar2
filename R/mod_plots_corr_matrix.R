@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_plots_corr_matrix_ui and mod_plots_corr_matrix_server
 #' @description  A shiny Module.
 #'
@@ -24,7 +24,7 @@ mod_plots_corr_matrix_ui <- function(id){
       tags$div(style="display:inline-block; vertical-align: middle;",
                
                tags$div(
-                 tags$div(style="display:inline-block; vertical-align: top;",
+                 tags$div(style="display:inline-block; vertical-align: top; material-circle;",
                           shinyWidgets::dropdownButton(
                             tags$div(
                               tags$div(style="display:inline-block; vertical-align: bottom;",
@@ -32,13 +32,12 @@ mod_plots_corr_matrix_ui <- function(id){
                                                    "Tune to modify the color gradient",
                                                    #min = 0,max = 1,value = defaultGradientRate,step=0.01),
                                                    min = 0,max = 1,value = 0.9,step=0.01),
-                                       tooltip="Plots parameters",
-                                       style = "material-circle", icon = icon("gear"), status = optionsBtnClass
+                                       tooltip="Plots parameters"
                                        
                               )
                             ),
                             tooltip="Plots parameters",
-                            style = "material-circle", icon = icon("gear"), status = optionsBtnClass
+                            icon = icon("gear"), status = "info" #status = optionsBtnClass
                           ))
                )
                
@@ -48,16 +47,17 @@ mod_plots_corr_matrix_ui <- function(id){
     highchartOutput(ns("corrMatrix"),width = "800px",height = "600px")
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_plots_corr_matrix
 #' @export
 #' @keywords internal
-    
+
 mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
   ns <- session$ns
   
+  if (is.null(obj) | class(obj)!="MSnSet") {return(NULL)}
   
   corrMatrix <- reactive({
     
@@ -70,7 +70,6 @@ mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
     else{
       gradient <- input$expGradientRate}
     isolate({
-      pattern <- paste0(obj@experimentData@name,".corrMatrix")
       tmp <- wrapper.corrMatrixD_HC(obj,gradient)
       
     })
@@ -84,10 +83,10 @@ mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
   
   
 }
-    
+
 ## To be copied in the UI
 # mod_plots_corr_matrix_ui("plots_corr_matrix_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_corr_matrix_server, "plots_corr_matrix_ui_1")
- 
+

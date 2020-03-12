@@ -3,24 +3,24 @@ library(shinycssloaders)
 library(MSnbase)
 library(DAPAR)
 
-
-# plotWidth <- "800px"
-# plotHeight <- "600px"
+source(file.path("../../R","mod_plots_var_dist.R"), local=TRUE)$value
 
 ui <- fluidPage(
   mod_plots_var_dist_ui('varDistPlot')
 )
 
-# Define server logic to summarize and view selected dataset ----
+
+
 server <- function(input, output, session) {
   
   
   library(DAPARdata)
   data("Exp1_R25_prot")
-  data <- get("Exp1_R25_prot")
-  
+
   # obj est un msnset
-  callModule(mod_plots_var_dist_server,'varDistPlot', obj = data)
+  callModule(mod_plots_var_dist_server,'varDistPlot', obj = Exp1_R25_prot)
+  #callModule(mod_plots_var_dist_server,'varDistPlot', obj = NULL)
+  #callModule(mod_plots_var_dist_server,'varDistPlot', obj = mae)
 }
 
 

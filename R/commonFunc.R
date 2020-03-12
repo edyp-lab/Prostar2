@@ -117,28 +117,6 @@ Group2Color <- reactive({
 
 
 
-getDataForExprs <- function(obj){
-  
-  
-  #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
-  test.table <- as.data.frame(round(Biobase::exprs(obj),digits=10))
-  # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
-  if (!is.null(obj@experimentData@other$OriginOfValues)){ #agregated dataset
-    test.table <- cbind(test.table, 
-                        Biobase::fData(obj)[,obj@experimentData@other$OriginOfValues])
-    # print(paste0("tutu:",head(test.table)))
-    
-  } else {
-    test.table <- cbind(test.table, 
-                        as.data.frame(matrix(rep(NA,ncol(test.table)*nrow(test.table)), nrow=nrow(test.table))))
-    #print(paste0("tata:",head(test.table)))
-  }
-  return(test.table)
-  
-}
-
-
-
 
 ############################""
 
