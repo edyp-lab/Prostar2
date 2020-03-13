@@ -673,12 +673,13 @@ mod_convert_ms_file_server <- function(input, output, session){
          
          defs <- ReadPipelineConfig('../../R/pipeline.conf')
          ll.pipeline <- defs$peptide
-         mae <- DAPAR::PipelinePeptide(analysis= input$studyName,
-                                       pipelineType = rv.convert$pipeline,
+         mae <- DAPAR::PipelineProtein(analysis= input$studyName,
+                                       pipelineType = names(rv.convert$pipeline()),
                                        dataType = input$typeOfData,
                                        processes=NULL,
-                                       experiments=list(original=Exp1_R25_prot),
-                                       colData=Biobase::pData(Exp1_R25_prot)
+                                       experiments=list(original=original.msnset),
+                                       colData=Biobase::pData(original.msnset)
+
          )
 
        },
@@ -692,6 +693,7 @@ mod_convert_ms_file_server <- function(input, output, session){
                                                 logData = logged_data,
                                                 replaceZeros = input$replaceAllZeros,
                                                 typeOfData = input$typeOfData,
+                                                parentProtId = NULL,
                                                 versions
          )
          
@@ -701,8 +703,8 @@ mod_convert_ms_file_server <- function(input, output, session){
                                         pipelineType = names(rv.convert$pipeline()),
                                         dataType = input$typeOfData,
                                         processes=defs$protein,
-                                        experiments=list(original=Exp1_R25_prot),
-                                        colData=Biobase::pData(Exp1_R25_prot)
+                                        experiments=list(original=original.msnset),
+                                        colData=Biobase::pData(original.msnset)
           )
           
        },
