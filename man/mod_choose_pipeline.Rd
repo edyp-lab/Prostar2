@@ -7,7 +7,7 @@
 \usage{
 mod_choose_pipeline_ui(id)
 
-mod_choose_pipeline_server(input, output, session, pipeline.def)
+mod_choose_pipeline_server(input, output, session, pipeline.def, dataType)
 }
 \arguments{
 \item{id}{shiny id}
