@@ -18,8 +18,8 @@ server <- function(input, output, session) {
   data("Exp1_R25_prot")
 
   # obj est un msnset
-  callModule(mod_plots_var_dist_server,'varDistPlot', obj = Exp1_R25_prot)
-  #callModule(mod_plots_var_dist_server,'varDistPlot', obj = NULL)
+  #callModule(mod_plots_var_dist_server,'varDistPlot', obj = Exp1_R25_prot)
+  callModule(mod_plots_var_dist_server,'varDistPlot', obj = NULL)
   #callModule(mod_plots_var_dist_server,'varDistPlot', obj = mae)
 }
 

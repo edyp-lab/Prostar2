@@ -1,6 +1,9 @@
 library(highcharter)
 library(DAPAR)
 
+source(file.path("../../R","mod_plots_intensity.R"), local=TRUE)$value
+source(file.path("../../R","global.R"), local=TRUE)$value
+
 ui <- fluidPage(
   mod_plots_intensity_ui('plots_intensity')
 )
@@ -12,8 +15,7 @@ server <- function(input, output, session) {
   require(DAPARdata)
   data('Exp1_R25_prot')
   
-  callModule(mod_plots_intensity_server,'plots_intensity',
-             obj = Exp1_R25_prot)
+  callModule(mod_plots_intensity_server,'plots_intensity', obj = Exp1_R25_prot)
   
 }
 

@@ -16,17 +16,24 @@
 #' @importFrom shiny NS tagList 
 mod_infos_dataset_ui <- function(id){
   ns <- NS(id)
-
+  
   tagList(
     fluidRow(
-      column(width=6,
+      column(width=4,
+             htmlOutput(ns('title')),
+             br(),
              h4("MAE summary"),
              mod_format_DT_ui(ns('dt'))
       ),
-      column(width=6,
+      column(width=4,
              uiOutput(ns('choose_msnset_ui')),
-             uiOutput(ns('selectMsnset_ui'))     
-      )
+             uiOutput(ns('properties_ui')),
+             verbatimTextOutput(ns('properties'))
+                 
+      ),
+      column(width=4,
+             uiOutput(ns('selectMsnset_ui'))   
+    )
     )
   )
 }
@@ -45,24 +52,31 @@ mod_infos_dataset_ui <- function(id){
 mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
   
+  if (is.null(obj)) { return(NULL) }
   
   callModule(mod_format_DT_server,'dt',
-             table2show = reactive({Get_mae_summary()}))
+             #table2show = reactive({Get_mae_summary()}))
+             table2show = Get_mae_summary())
   
+  output$title <- renderUI({
+    title <- analysis(obj())
+    #print(title)
+    h3(paste0("Analysis \"",title,"\":"))
+  })
   
   output$choose_msnset_ui <- renderUI({
     req(obj())
     selectInput(ns("selectInputMsnset"),
                 "Select a dataset for further information",
                 choices = c("None",names(MultiAssayExperiment::experiments(obj())))
-                )
+    )
   })
+
   
   Get_mae_summary <- reactive({
-
+    
     req(obj())
-    print(obj())
-    # pour nb_msnset, rajouter distinction singulier/pluriel ?
+    
     nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")
     names_msnset <- list(names(MultiAssayExperiment::experiments(obj())))
     pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj()))
@@ -145,6 +159,29 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   })
   
   
+  
+  output$properties_ui <- renderUI({
+    req(input$selectInputMsnset)
+    req(obj())
+    
+    if (input$selectInputMsnset != "None") {
+      checkboxInput(ns('properties_button'), "Display details?", value=FALSE)
+    }
+  })
+  
+  output$properties <- renderPrint({
+    req(input$properties_button)
+    
+    if (input$selectInputMsnset != "None" && isTRUE(input$properties_button)) {
+      
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
+      data@experimentData@other
+      #properties(data) # fonctionne pas 
+    }
+  })
+  
+  
+  
   output$selectMsnset_ui <- renderUI({
     req(input$selectInputMsnset)
     req(obj())
@@ -155,22 +192,25 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',
-                 table2show = reactive({Get_MSnSet_Summary()}))
+                 #table2show = reactive({Get_MSnSet_Summary()}))
+                 table2show = Get_MSnSet_Summary())
       
       callModule(mod_format_DT_server,'dt3',
-                 table2show = reactive({Biobase::pData(data)}))
-     
+                 #table2show = reactive({Biobase::pData(data)}))
+                 table2show = data.frame(MultiAssayExperiment::colData(obj())) ) 
+      
       tagList(
-        h4(paste0("Type of Data: ", data@experimentData@other$typeOfData)),
+        h3(paste0("MSnSet \"",input$selectInputMsnset,"\":")),
         br(),
         h4("MsnSet summary"),
         mod_format_DT_ui(ns('dt2')),
+        br(),
         uiOutput(ns('info')),
         br(),
         h4("pData"),
         mod_format_DT_ui(ns('dt3'))
         
-        )
+      )
     }
     else {
       return(NULL)
@@ -178,41 +218,41 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
   })
   
-
+  
   
   output$info <- renderUI({
     req(input$selectInputMsnset)
     req(obj())
     
     if (input$selectInputMsnset != "None") {
-     
+      
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       
       typeOfDataset <-  data@experimentData@other$typeOfData
       
       
-        
-        NA.count <- length(which(is.na(Biobase::exprs(data))))
-        nb.empty.lines <- sum(apply(is.na(as.matrix(Biobase::exprs(data))), 1, all))
-        tagList(
-          tags$h4("Info"),
-          if (typeOfDataset == "protein"){
-            tags$p("The aggregation tool
+      
+      NA.count <- length(which(is.na(Biobase::exprs(data))))
+      nb.empty.lines <- sum(apply(is.na(as.matrix(Biobase::exprs(data))), 1, all))
+      tagList(
+        tags$h4("Info"),
+        if (typeOfDataset == "protein"){
+          tags$p("The aggregation tool
                  has been disabled because the dataset contains
                  protein quantitative data.")
-          },
-          
-          if (NA.count > 0){
-            tags$p("As your dataset contains missing values, you should
+        },
+        
+        if (NA.count > 0){
+          tags$p("As your dataset contains missing values, you should
                  impute them prior to proceed to the differential analysis.")
-          },
-          if (nb.empty.lines > 0){
-            tags$p("As your dataset contains lines with no values, you
+        },
+        if (nb.empty.lines > 0){
+          tags$p("As your dataset contains lines with no values, you
                  should remove them with the filter tool
                  prior to proceed to the analysis of the data.")
-          }
-          
-        )
+        }
+        
+      )
     }
   })
   

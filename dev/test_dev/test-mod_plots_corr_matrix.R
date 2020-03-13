@@ -16,8 +16,8 @@ server <- function(input, output, session) {
   data("Exp1_R25_prot")
   
   # obj est un msnset
-  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = Exp1_R25_prot)
-  #callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = NULL)
+  #callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = Exp1_R25_prot)
+  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = NULL)
   #callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = mae)
 }
 
