@@ -1,6 +1,3 @@
-
-
-library(rhandsontable)
 library(shiny)
 
 
@@ -8,54 +5,45 @@ library(shiny)
 mod_hot_ui <- function(id){
   ns <- NS(id)
   tagList(
-    #rHandsontableOutput(ns("hot"))
+    h4('resultat'),
+    verbatimTextOutput(ns("hot"))
   )
 }
 
-mod_hot_server <- function(input, output, session, r=NULL){
+mod_hot_server <- function(input, output, session){
   ns <- session$ns
   
-  values <- reactiveValues(
-    df = NULL
-  )
-  
-  ## Handsontable
-  observeEvent(req(r()),{
-    values$df <- r()
-    print(values$df)
-    print(r())
+  output$hot <- renderText({
+    #unlist(R.Version())[1]
+    unlist(session$userData$settings)[1]
   })
-  
-  # output$hot <- renderRHandsontable({
-  #   req(values$df)
-  #   tmp <- rhandsontable(values$df)
-  #   tmp
-  # })
-  
 }
 
 
 
 ###----------------------------------------------------
-ui <- shinyUI(fluidPage(
+ui <- fluidPage(
   actionButton('setUser', 'Set user df'),
   mod_hot_ui('test')
-))
+)
 
-server <- shinyServer(function(input, output, session) {
+
+server <- function(input, output, session) {
   
   r <- reactiveValues(
-    settings = NULL
+    settings = list()
   )
+  callModule(mod_hot_server, 'test')
+  
+  
   observeEvent(input$setUser,{
-    r$settings <- data.frame(a=1:3, b=4:6)
-    #print(session$userData$df)
+    r$settings <- list(a = input$setUser[1])
+    session$userData$settings <- list(a = input$setUser[1])
+    #attr(session$userData,"settings") <- r$settings
   })
-  
-  callModule(mod_hot_server, 'test', r=reactive({NULL}))
-  
-})
+
+}
 
 ## run app 
-runApp(list(ui=ui, server=server))
+shinyApp(ui, server)
 

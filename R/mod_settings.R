@@ -44,7 +44,7 @@ mod_settings_ui <- function(id){
                )),
       tabPanel("Colors",
                div(id = 'showInfoColorOptions', tags$p("Color customization is available after data loading only.")),
-               hidden(uiOutput(ns("defineColorsUI")))
+               uiOutput(ns("defineColorsUI"))
       ),
       tabPanel("Plots",
                sliderInput(ns("defaultGradientRate"),
@@ -56,22 +56,30 @@ mod_settings_ui <- function(id){
   #)
 }
     
+
+
 # Module Server
     
 #' @rdname mod_settings
 #' @export
 #' @keywords internal
 #' @import shiny
-#' @importFrom highcharter renderHighchart
+#' @import highcharter
 
-mod_settings_server <- function(input, output, session, dataIn){
+mod_settings_server <- function(input, output, session){
   ns <- session$ns
   
+  example.Conditions <- c('A', 'B', 'A', 'B', 'B', 'B')
+
   
   rv.settings <- reactiveValues(
     nDigits = 10,
-    colorsVolcanoplot = list(In=orangeProstar, Out='lightgrey'),
-    colorsTypeMV = list(MEC=orangeProstar, POV='lightblue'),
+    colorsVolcanoplot = reactiveValues(In=orangeProstar, 
+                             Out='lightgrey'
+                             ),
+    colorsTypeMV = reactiveValues(MEC=orangeProstar,
+                        POV='lightblue'
+                        ),
     choosePalette = 'Dark2',
     typeOfPalette = 'predefined',
     whichGroup2Color = 'Condition',
@@ -90,32 +98,30 @@ mod_settings_server <- function(input, output, session, dataIn){
   
   
   GetTest <- reactive({
-    req(dataIn())
     rv.settings$whichGroup2Color
     
-    nbConds <- length(unique(Biobase::pData(dataIn())$Condition))
-    pal <- rep('#000000', length(Biobase::pData(dataIn())$Condition))
+    nbConds <- length(unique(example.Conditions))
+    pal <- rep('#000000', length(example.Conditions))
     
     
     nbColors <- NULL
     temp <- NULL
     if (is.null(rv.settings$whichGroup2Color) || (rv.settings$whichGroup2Color=="Condition")){
-      nbColors <- length(unique(Biobase::pData(dataIn())$Condition))
+      nbColors <- length(unique(example.Conditions))
       nbColors <-  RColorBrewer::brewer.pal.info[listBrewerPalettes[1],]$mincolors
       nbColors <- max(nbColors,nbConds)
       palette <- NULL
       for(i in 1:nbConds){palette <- c(palette,input[[paste0("customColorCondition_",i)]])}
-      for (i in 1:ncol(Biobase::exprs(dataIn()))){
-        temp[i] <- palette[ which(Biobase::pData(dataIn())$Condition[i] == unique(Biobase::pData(dataIn())$Condition))]
+      for (i in 1:length(example.Conditions)){
+        temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
       }
       
     } else if (rv.settings$whichGroup2Color=="Replicate"){
-      nbColors <- length((Biobase::pData(dataIn())$Condition))
+      nbColors <- length(example.Conditions)
       for(i in 1:nbColors){temp <- c(temp,input[[paste0("customColorCondition_",i)]])}
     }
     
     temp
-    
   })
   
   
@@ -123,13 +129,13 @@ mod_settings_server <- function(input, output, session, dataIn){
   GetExamplePalette <- reactive({
     rv.settings$choosePalette
     rv.settings$whichGroup2Color
-    req(dataIn())
     GetTest()
     rv.settings$typeOfPalette
-    #req(input$typeOfPalette)
-    pal <- rep('#000000', length(Biobase::pData(dataIn())$Condition))
+
     
-    nbConds <- length(unique(Biobase::pData(dataIn())$Condition))
+    pal <- rep('#000000', length(example.Conditions))
+    
+    nbConds <- length(unique(example.Conditions))
     switch(rv.settings$typeOfPalette,
            predefined={
              if ((rv.settings$whichGroup2Color == "Condition") ){
@@ -137,60 +143,53 @@ mod_settings_server <- function(input, output, session, dataIn){
                nbColors <- max(3,nbConds)
                palette <- RColorBrewer::brewer.pal(nbColors,rv.settings$choosePalette)[1:nbConds]
                temp <- NULL
-               for (i in 1:ncol(Biobase::exprs(dataIn()))){
-                 temp[i] <- palette[ which(Biobase::pData(dataIn())$Condition[i] == unique(Biobase::pData(dataIn())$Condition))]
+               for (i in 1:length(example.Conditions)){
+                 temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
                }
                
              }  else if (rv.settings$whichGroup2Color == "Replicate"){
-               nbConds <- length(Biobase::pData(dataIn())$Condition)
+               nbConds <- length(example.Conditions)
                temp <- RColorBrewer::brewer.pal(nbConds,rv.settings$choosePalette)
              }
              
            },
            custom = {
-             nbConds <- length(unique(Biobase::pData(dataIn())$Condition))
-             pal <- rep('#000000', length(Biobase::pData(dataIn())$Condition))
+             nbConds <- length(unique(example.Conditions))
+             pal <- rep('#000000', nbConds)
              
              
              nbColors <- NULL
              temp <- NULL
              if (is.null(rv.settings$whichGroup2Color) || (rv.settings$whichGroup2Color=="Condition")){
-               nbColors <- length(unique(Biobase::pData(dataIn())$Condition))
+               nbColors <- length(unique(example.Conditions))
                nbColors <-  RColorBrewer::brewer.pal.info[listBrewerPalettes[1],]$mincolors
                nbColors <- max(nbColors,nbConds)
                palette <- NULL
                for(i in 1:nbConds){palette <- c(palette,input[[paste0("customColorCondition_",i)]])}
-               for (i in 1:ncol(Biobase::exprs(dataIn()))){
-                 temp[i] <- palette[ which(Biobase::pData(dataIn())$Condition[i] == unique(Biobase::pData(dataIn())$Condition))]
+               for (i in 1:length(example.Conditions)){
+                 temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
                }
                
              } else if (rv.settings$whichGroup2Color=="Replicate"){
-               nbColors <- length((Biobase::pData(dataIn())$Condition))
+               nbColors <- length(example.Conditions)
                for(i in 1:nbColors){temp <- c(temp,input[[paste0("customColorCondition_",i)]])}
              }
              
            }
     )
     
-    if (!is.null(temp)) {pal[1:length(temp)] <- temp}
+    if (!is.null(temp)) {
+      pal[1:length(temp)] <- temp
+      }
     
     rv.settings$examplePalette <- pal
     rv.settings$examplePalette
   })
   
+
   
-  observeEvent(dataIn(), {
-    rv.settings$examplePalette = GetExamplePalette()
-  })
-  
-  
-  callModule(mod_popover_for_help_server,"modulePopover_numPrecision", data = reactive(list(title=HTML(paste0("<strong><font size=\"4\">Numerical precisions</font></strong>")),
-                                                                                            content= "Set the number of decimals to display for numerical values.")))
-  observe({
-    shinyjs::toggle("defineColorsUI", condition=!is.null(dataIn()))
-    shinyjs::toggle("showInfoColorOptions", condition=is.null(dataIn()))
-  })
-  
+  callModule(mod_popover_for_help_server,"modulePopover_numPrecision", data = list(title=HTML(paste0("<strong><font size=\"4\">Numerical precisions</font></strong>")),
+                                                                                            content= "Set the number of decimals to display for numerical values."))
   
   output$settings_nDigits_UI <- renderUI({
     numericInput(ns("settings_nDigits"), "", value=rv.settings$nDigits, min=0, width="100px")
@@ -258,7 +257,7 @@ mod_settings_server <- function(input, output, session, dataIn){
       fluidRow(
         column(width=3,radioButtons(ns("typeOfPalette"), "Type of palette for conditions",
                                     choices=c("predefined"="predefined", "custom"="custom"), selected=GetTypeOfPalette())),
-        column(width=6,highchartOutput(ns("displayPalette"), width="300px", height = "200px"))
+        column(width=6,highcharter::highchartOutput(ns("displayPalette"), width="300px", height = "200px"))
       ),
       
       uiOutput(ns("predefinedPaletteUI")),
@@ -277,9 +276,6 @@ mod_settings_server <- function(input, output, session, dataIn){
   
   observeEvent(GetExamplePalette(), {
     rv.settings$examplePalette <- GetExamplePalette()
-    
-    print("new rv.settings$examplePalette")
-    print(rv.settings$examplePalette)
   })
   
   
@@ -311,12 +307,12 @@ mod_settings_server <- function(input, output, session, dataIn){
     nbColors <- NULL
     switch(rv.settings$whichGroup2Color,
            Condition={
-             nbColors <- length(unique(Biobase::pData(dataIn())$Condition))
-             labels <- unique(Biobase::pData(dataIn())$Condition)
+             nbColors <- length(unique(example.Conditions))
+             labels <- unique(example.Conditions)
            },
            Replicate={
-             nbColors <- length((Biobase::pData(dataIn())$Condition))
-             labels <- Biobase::pData(dataIn())$Condition
+             nbColors <- length(example.Conditions)
+             labels <- example.Conditions
            }
     )
     
@@ -337,24 +333,24 @@ mod_settings_server <- function(input, output, session, dataIn){
   observeEvent(input$colVolcanoIn, {rv.settings$colorsVolcanoplot$In <- input$colVolcanoIn})
   observeEvent(input$colVolcanoOut, {rv.settings$colorsVolcanoplot$Out <- input$colVolcanoOut})
   
-  output$displayPalette <- renderHighchart({
+  output$displayPalette <- highcharter::renderHighchart({
     #req(input$chooseNbColors)
     #GetTest()
     rv.settings$examplePalette
-    nbConds <- length(unique(Biobase::pData(dataIn())$Condition))
+    nbConds <- length(unique(example.Conditions))
     
-    highchart() %>%
-      my_hc_chart(chartType = "column") %>%
-      hc_add_series(data = data.frame(y= abs(1+rnorm(ncol(Biobase::exprs(dataIn()))))), type="column", colorByPoint = TRUE) %>%
-      hc_colors(rv.settings$examplePalette) %>%
-      hc_plotOptions( column = list(stacking = "normal"),
-                      animation=list(duration = 1)) %>%
-      hc_legend(enabled = FALSE) %>%
-      hc_yAxis(labels=FALSE,title = list(text = "")) %>%
-      hc_xAxis(categories = 1:nbConds, title = list(text = ""))
+    highcharter::highchart() %>%
+      highcharter::hc_chart(chartType = "column") %>%
+      highcharter::hc_add_series(data = data.frame(y= abs(1+rnorm(length(example.Conditions)))), type="column", colorByPoint = TRUE) %>%
+      highcharter::hc_colors(rv.settings$examplePalette) %>%
+      highcharter::hc_plotOptions( column = list(stacking = "normal"), animation=list(duration = 1)) %>%
+      highcharter::hc_legend(enabled = FALSE) %>%
+      highcharter::hc_yAxis(labels=FALSE,title = list(text = "")) %>%
+      highcharter::hc_xAxis(categories = 1:nbConds, title = list(text = "")
+      )
   })
   
-  return(reactive({reactiveValuesToList(rv.settings)}))
+  return(reactive({rv.settings}))
   
 }
     

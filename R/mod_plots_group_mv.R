@@ -30,21 +30,35 @@ mod_plots_group_mv_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_plots_group_mv_server <- function(input, output, session, obj=NULL){
+mod_plots_group_mv_server <- function(input, output, session, obj=NULL, settings=NULL){
   ns <- session$ns
   
   
+  rv.group.mv <- reactiveValues(
+    palette = NULL
+  )
+  
   if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
   
+  observeEvent(settings(), {
+ 
+    if (is.null(settings()$examplePalette)){
+      conds <- Biobase::pData(obj)$Conditions
+      palette.init <- RColorBrewer::brewer.pal(8,"Dark2")[1:max(3,length(unique(conds)))]
+      for (i in 1:length(conds)){
+        rv.group.mv$palette[i] <- palette.init[which(qData[i] == unique(qData))]
+      }
+     } else {
+        rv.group.mv$palette <- settings()$examplePalette
+      }
+  })
   
   qData <- Biobase::pData(obj)
   conds <- unique(qData$Condition)
   
   output$histo_MV <- renderHighchart({
     req(obj)
-    #tmp <- wrapper.mvHisto_HC(obj,palette=rv.prostar$settings()$examplePalette)
-    tmp <- wrapper.mvHisto_HC(obj,palette=rep(RColorBrewer::brewer.pal(8,"Dark2")[1:length(conds)], each=nrow(qData)/length(conds)))
-                                
+    tmp <- wrapper.mvHisto_HC(obj,palette=rv.group.mv$palette)
     tmp
   })
   
