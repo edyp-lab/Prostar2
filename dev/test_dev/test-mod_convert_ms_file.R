@@ -1,4 +1,4 @@
-  for (f in list.files('../../R', pattern='.R')){
+    for (f in list.files('../../R', pattern='.R')){
   source(file.path('../../R', f), local=TRUE)$value
 }
 

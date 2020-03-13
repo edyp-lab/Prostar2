@@ -656,42 +656,43 @@ mod_convert_ms_file_server <- function(input, output, session){
         tryCatch({
       switch(names(rv.convert$pipeline()),
        peptide = {
-         # original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
-         #                                        metadata = design,
-         #                                        indExpData = indexForQuantiData,
-         #                                        indFData = indexForFData,
-         #                                        indiceID = key_id_index,
-         #                                        indexForOriginOfValue = indexForOriginOfValue,
-         #                                        logData = logged_data,
-         #                                        replaceZeros = input$replaceAllZeros,
-         #                                        pep_prot_data = input$typeOfData,
-         #                                        proteinId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
-         #                                        versions
-         # )
-         # 
-         # print(original.msnset)
+         original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
+                                                metadata = design,
+                                                indExpData = indexForQuantiData,
+                                                indFData = indexForFData,
+                                                keyId = key_id_index,
+                                                indexForOriginOfValue = indexForOriginOfValue,
+                                                logData = logged_data,
+                                                replaceZeros = input$replaceAllZeros,
+                                                typeOfData = input$typeOfData,
+                                                parentProtId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
+                                                versions
+         )
+
+         print(original.msnset)
          
-         # defs <- ReadPipelineConfig('../../R/pipeline.conf')
-         # ll.pipeline <- defs$peptide
-         # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
-         #                               pipelineType = rv.convert$pipeline, 
-         #                               dataType = input$typeOfData,
-         #                               processes=NULL, 
-         #                               experiments=list(original=Exp1_R25_prot), 
-         #                               colData=Biobase::pData(Exp1_R25_prot)
-         # )
-         #
+         defs <- ReadPipelineConfig('../../R/pipeline.conf')
+         ll.pipeline <- defs$peptide
+         mae <- DAPAR::PipelineProtein(analysis= input$studyName,
+                                       pipelineType = names(rv.convert$pipeline()),
+                                       dataType = input$typeOfData,
+                                       processes=NULL,
+                                       experiments=list(original=original.msnset),
+                                       colData=Biobase::pData(original.msnset)
+         )
+
        },
        protein = {
          original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
                                                 metadata = design,
                                                 indExpData = indexForQuantiData,
                                                 indFData = indexForFData,
-                                                indiceID = key_id_index,
+                                                keyId = key_id_index,
                                                 indexForOriginOfValue = indexForOriginOfValue,
                                                 logData = logged_data,
                                                 replaceZeros = input$replaceAllZeros,
-                                                pep_prot_data = input$typeOfData,
+                                                typeOfData = input$typeOfData,
+                                                parentProtId = NULL,
                                                 versions
          )
          
@@ -703,8 +704,8 @@ mod_convert_ms_file_server <- function(input, output, session){
                                         pipelineType = names(rv.convert$pipeline()),
                                         dataType = input$typeOfData,
                                         processes=defs$protein,
-                                        experiments=list(original=Exp1_R25_prot),
-                                        colData=Biobase::pData(Exp1_R25_prot)
+                                        experiments=list(original=original.msnset),
+                                        colData=Biobase::pData(original.msnset)
           )
           print(mae)
          rv.convert$dataOut <- mae
