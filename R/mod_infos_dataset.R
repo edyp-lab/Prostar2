@@ -169,6 +169,18 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     }
   })
   
+  observeEvent(input$selectInputMsnset,{
+    
+    if (isTRUE(input$properties_button)) {
+      
+      output$properties_ui <- renderUI({
+        checkboxInput(ns('properties_button'), "Display details?", value=TRUE)
+      })
+    }
+    else{ return(NULL)}
+  })
+  
+  
   output$properties <- renderPrint({
     req(input$properties_button)
     
