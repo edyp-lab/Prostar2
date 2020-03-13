@@ -74,8 +74,9 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
       switch(class(data)[1],
              MultiAssayExperiment= {rv.openDataset$out <- data},
              MSnSet= {
-               proteinID <- data@experimentData@other$proteinId
-               typeOfData <- data@experimentData@other$typeOfData
+               keyId <- keyId(data)
+               parentProtId <- parentProtId(data)
+               typeOfData <- typeOfData(data)
                ll.pipeline <- rv.openDataset$pipe()
                
                switch(typeOfData,
