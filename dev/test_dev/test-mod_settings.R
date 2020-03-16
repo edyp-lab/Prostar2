@@ -26,7 +26,7 @@ server <- function(input, output, session) {
   # })
   output$showSettings <- renderText({
     #r$settings()
-    HTML(r$settings()$nDigits)
+    HTML(r$settings()$examplePalette)
 
   })
   

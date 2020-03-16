@@ -82,8 +82,8 @@ mod_settings_server <- function(input, output, session){
                         ),
     choosePalette = 'Dark2',
     typeOfPalette = 'predefined',
-    whichGroup2Color = 'Condition',
-    examplePalette = RColorBrewer::brewer.pal(8,"Dark2"),
+    #whichGroup2Color = 'Condition',
+    examplePalette = NULL,
     defaultGradientRate = 0.9,
     legDS = NULL,
     corrMatrixGradient = defaultGradientRate,
@@ -97,92 +97,65 @@ mod_settings_server <- function(input, output, session){
   
   
   
-  GetTest <- reactive({
-    rv.settings$whichGroup2Color
-    
-    nbConds <- length(unique(example.Conditions))
-    pal <- rep('#000000', length(example.Conditions))
-    
-    
-    nbColors <- NULL
-    temp <- NULL
-    if (is.null(rv.settings$whichGroup2Color) || (rv.settings$whichGroup2Color=="Condition")){
-      nbColors <- length(unique(example.Conditions))
-      nbColors <-  RColorBrewer::brewer.pal.info[listBrewerPalettes[1],]$mincolors
-      nbColors <- max(nbColors,nbConds)
-      palette <- NULL
-      for(i in 1:nbConds){palette <- c(palette,input[[paste0("customColorCondition_",i)]])}
-      for (i in 1:length(example.Conditions)){
-        temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
-      }
-      
-    } else if (rv.settings$whichGroup2Color=="Replicate"){
-      nbColors <- length(example.Conditions)
-      for(i in 1:nbColors){temp <- c(temp,input[[paste0("customColorCondition_",i)]])}
-    }
-    
-    temp
-  })
-  
+  # GetTest <- reactive({
+  #   rv.settings$whichGroup2Color
+  #   
+  #   nbConds <- length(unique(example.Conditions))
+  #   pal <- rep('#000000', length(example.Conditions))
+  #   
+  #   
+  #   nbColors <- NULL
+  #   temp <- NULL
+  #   if (is.null(rv.settings$whichGroup2Color) || (rv.settings$whichGroup2Color=="Condition")){
+  #     nbColors <- length(unique(example.Conditions))
+  #     nbColors <-  RColorBrewer::brewer.pal.info[listBrewerPalettes[1],]$mincolors
+  #     nbColors <- max(nbColors,nbConds)
+  #     palette <- NULL
+  #     for(i in 1:nbConds){palette <- c(palette,input[[paste0("customColorCondition_",i)]])}
+  #     for (i in 1:length(example.Conditions)){
+  #       temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+  #     }
+  #     
+  #   } else if (rv.settings$whichGroup2Color=="Replicate"){
+  #     nbColors <- length(example.Conditions)
+  #     for(i in 1:nbColors){temp <- c(temp,input[[paste0("customColorCondition_",i)]])}
+  #   }
+  #   
+  #   temp
+  # })
+  # 
   
   ############
   GetExamplePalette <- reactive({
     rv.settings$choosePalette
-    rv.settings$whichGroup2Color
-    GetTest()
+    #rv.settings$whichGroup2Color
+    #GetTest()
     rv.settings$typeOfPalette
-
-    
-    pal <- rep('#000000', length(example.Conditions))
-    
     nbConds <- length(unique(example.Conditions))
+    
+    
+    palette <- NULL
+    nbColors <- max(3,nbConds)
     switch(rv.settings$typeOfPalette,
            predefined={
-             if ((rv.settings$whichGroup2Color == "Condition") ){
-               # nbColors <-  brewer.pal.info[listBrewerPalettes[1],]$mincolors
-               nbColors <- max(3,nbConds)
                palette <- RColorBrewer::brewer.pal(nbColors,rv.settings$choosePalette)[1:nbConds]
-               temp <- NULL
-               for (i in 1:length(example.Conditions)){
-                 temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+
+               for (i in 1:nbConds){
+                 rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
                }
-               
-             }  else if (rv.settings$whichGroup2Color == "Replicate"){
-               nbConds <- length(example.Conditions)
-               temp <- RColorBrewer::brewer.pal(nbConds,rv.settings$choosePalette)
-             }
-             
            },
            custom = {
-             nbConds <- length(unique(example.Conditions))
-             pal <- rep('#000000', nbConds)
-             
-             
-             nbColors <- NULL
-             temp <- NULL
-             if (is.null(rv.settings$whichGroup2Color) || (rv.settings$whichGroup2Color=="Condition")){
-               nbColors <- length(unique(example.Conditions))
-               nbColors <-  RColorBrewer::brewer.pal.info[listBrewerPalettes[1],]$mincolors
-               nbColors <- max(nbColors,nbConds)
-               palette <- NULL
-               for(i in 1:nbConds){palette <- c(palette,input[[paste0("customColorCondition_",i)]])}
-               for (i in 1:length(example.Conditions)){
-                 temp[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
-               }
-               
-             } else if (rv.settings$whichGroup2Color=="Replicate"){
-               nbColors <- length(example.Conditions)
-               for(i in 1:nbColors){temp <- c(temp,input[[paste0("customColorCondition_",i)]])}
+             #browser()
+             for(i in 1:nbConds){
+               palette <- c(palette,input[[paste0("customColorCondition_",i)]])
              }
-             
+             if (is.null(palette)){return(NULL)}
+             for (i in 1:nbConds){
+                 rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+               }
            }
     )
-    
-    if (!is.null(temp)) {
-      pal[1:length(temp)] <- temp
-      }
-    
-    rv.settings$examplePalette <- pal
+
     rv.settings$examplePalette
   })
   
@@ -268,11 +241,6 @@ mod_settings_server <- function(input, output, session){
   
   observeEvent(input$choosePalette, {rv.settings$choosePalette <-input$choosePalette })
   
-  GetWhichGroup2Color <- reactive({rv.settings$whichGroup2Color})
-  
-  observeEvent(input$whichGroup2Color,{
-    rv.settings$whichGroup2Color <- input$whichGroup2Color
-  })
   
   observeEvent(GetExamplePalette(), {
     rv.settings$examplePalette <- GetExamplePalette()
@@ -302,19 +270,10 @@ mod_settings_server <- function(input, output, session){
     rv.settings$typeOfPalette
     if (rv.settings$typeOfPalette == 'predefined') {return(NULL)}
     
-    rv.settings$whichGroup2Color
     ll <- list()
     nbColors <- NULL
-    switch(rv.settings$whichGroup2Color,
-           Condition={
-             nbColors <- length(unique(example.Conditions))
-             labels <- unique(example.Conditions)
-           },
-           Replicate={
-             nbColors <- length(example.Conditions)
-             labels <- example.Conditions
-           }
-    )
+    nbColors <- length(unique(example.Conditions))
+    labels <- unique(example.Conditions)
     
     for (i in 1:nbColors) {
       ll <- list(ll,
@@ -334,13 +293,11 @@ mod_settings_server <- function(input, output, session){
   observeEvent(input$colVolcanoOut, {rv.settings$colorsVolcanoplot$Out <- input$colVolcanoOut})
   
   output$displayPalette <- highcharter::renderHighchart({
-    #req(input$chooseNbColors)
-    #GetTest()
     rv.settings$examplePalette
     nbConds <- length(unique(example.Conditions))
     
     highcharter::highchart() %>%
-      highcharter::hc_chart(chartType = "column") %>%
+      DAPAR::dapar_hc_chart(chartType = "column") %>%
       highcharter::hc_add_series(data = data.frame(y= abs(1+rnorm(length(example.Conditions)))), type="column", colorByPoint = TRUE) %>%
       highcharter::hc_colors(rv.settings$examplePalette) %>%
       highcharter::hc_plotOptions( column = list(stacking = "normal"), animation=list(duration = 1)) %>%
