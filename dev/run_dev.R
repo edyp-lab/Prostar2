@@ -1,5 +1,5 @@
 getwd()
-setwd("~/Github/2.0/Prostar2/")
+setwd("~/TELETRAVAIL/github_2.0/Prostar2/")
 
 # Set options here
 options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode
@@ -14,5 +14,5 @@ golem::document_and_reload()
 # Run the application
 #Prostar2::run_app()
 
-setwd("~/Github/2.0/Prostar2/dev/test_dev/")
+setwd("~/TELETRAVAIL/github_2.0/Prostar2/dev/test_dev/")
 

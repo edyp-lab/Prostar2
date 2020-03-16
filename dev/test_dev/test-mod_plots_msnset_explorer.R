@@ -1,5 +1,6 @@
 library(dplyr)
 library(DT)
+library(shiny)
 
 
 source(file.path("../../R","mod_plots_msnset_explorer.R"), local=TRUE)$value

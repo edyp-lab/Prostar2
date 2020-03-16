@@ -1,7 +1,10 @@
 library(shiny)
 library(shinyjs)
+library(dplyr)
 
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
