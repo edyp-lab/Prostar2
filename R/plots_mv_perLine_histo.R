@@ -174,7 +174,7 @@ mvPerLinesHisto_HC <- function(qData, samplesData, indLegend="auto", showValues=
                     animation=list(duration = 100)) %>%
     hc_legend(enabled = FALSE) %>%
     hc_xAxis(categories = row.names(df), title = list(text = "#[NA values] per line")) %>%
-    my_hc_ExportMenu(filename = "missingValuesPlot1") %>%
+    DAPAR::dapar_hc_ExportMenu(filename = "missingValuesPlot1") %>%
     hc_tooltip(enabled = TRUE,
                headerFormat= '',
                pointFormat = "{point.y} ")

@@ -17,11 +17,8 @@ server <- function(input, output, session) {
   library(DAPARdata)
   data("Exp1_R25_prot")
   
-  
   # obj est un msnset
-  #callModule(mod_plots_density_server,'plots_density', obj = Exp1_R25_prot)
-  callModule(mod_plots_density_server,'plots_density', obj = NULL)
-  #callModule(mod_plots_density_server,'plots_density', obj = mae)
+  callModule(mod_plots_density_server,'plots_density', obj = Exp1_R25_prot)
 }
 
 
