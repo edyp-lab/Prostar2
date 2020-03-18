@@ -7,7 +7,7 @@ source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
-    mod_settings_ui('settings'),
+    #mod_settings_ui('settings'),
     mod_plots_group_mv_ui('plots_group_mv')
   )
 )

@@ -7,18 +7,20 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' @importFrom shinyjs useShinyjs
 mod_plots_tracking_ui <- function(id){
   ns <- NS(id)
   tagList(
+    useShinyjs(),
     selectInput(ns("typeSelect"), "Type of selection", 
                 choices=c("None"="None",
                           "Protein list"="ProteinList", 
                           "Random"="Random", 
                           "Specific column"="Column"),
                 width=('130px')),
-    uiOutput(ns("listSelect_UI")),
-    uiOutput(ns("randomSelect_UI")),
-    uiOutput(ns("columnSelect_UI"))
+    shinyjs::hidden(uiOutput(ns("listSelect_UI"))),
+    shinyjs::hidden(uiOutput(ns("randomSelect_UI"))),
+    shinyjs::hidden(uiOutput(ns("columnSelect_UI")))
   )
 }
     
@@ -50,40 +52,43 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   #   updateSelectInput(session, "colSelect", selected=params()$col)
   # })
   
+  
+  observeEvent(obj,{
+    print(keyId(obj))
+  })
   observeEvent(input$typeSelect, ignoreInit = TRUE, {
-    shinyjs::toggle("listSelect", condition=input$typeSelect=="ProteinList")
-    shinyjs::toggle("randSelect", condition=input$typeSelect=="Random")
-    shinyjs::toggle("colSelect", condition=input$typeSelect=="Column")
+    shinyjs::toggle("listSelect_UI", condition=input$typeSelect=="ProteinList")
+    shinyjs::toggle("randSelect_UI", condition=input$typeSelect=="Random")
+    shinyjs::toggle("colSelect_UI", condition=input$typeSelect=="Column")
   })
   
   output$listSelect_UI <- renderUI({
-    isolate({
-      ll <-  Biobase::fData(obj)[,obj@experimentData@other$proteinId]
-      shinyjs::hidden(selectInput(ns("listSelect"), "Protein for normalization", choices=ll, multiple = TRUE, width='400px'))
-    })
+    #isolate({
+      ll <-  Biobase::fData(obj)[,DAPAR::keyId(obj)]
+      selectInput(ns("listSelect"), "Protein for normalization", choices=ll, multiple = TRUE, width='400px')
+   # })
   })
   
   
   output$randomSelect_UI <- renderUI({
-    isolate({
-      ll <-  Biobase::fData(obj)[,obj@experimentData@other$proteinId]
-      shinyjs::hidden(textInput(ns("randSelect"), "Random", value="1", width=('120px')))
-    })
+    #isolate({
+      ll <-  Biobase::fData(obj)[,DAPAR::keyId(obj)]
+      textInput(ns("randSelect"), "Random", value="1", width=('120px'))
+   # })
   })
   
   output$columnSelect_UI <- renderUI({
-    isolate({
+    #isolate({
       ll <-  colnames(Biobase::fData(obj))
-      shinyjs::hidden(selectInput(ns("colSelect"), "Column", choices=ll))
-    })
+      selectInput(ns("colSelect"), "Column", choices=ll)
+    #})
   })
   
   
   BuildResult <- reactive({
     
     #isolate({
-    ll <-  Biobase::fData(obj)[,obj@experimentData@other$proteinId]
-    
+    ll <-  Biobase::fData(obj)[,keyId(obj)]
     
     res <- list(type= input$typeSelect,
                 list = input$listSelect,
@@ -95,7 +100,6 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
     )
     
     # })
-    print("res")
     res
   })
   
