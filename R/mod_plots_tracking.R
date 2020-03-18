@@ -30,6 +30,10 @@ mod_plots_tracking_ui <- function(id){
 mod_plots_tracking_server <- function(input, output, session, obj, params, reset=FALSE){
   ns <- session$ns
   
+  r <- reactiveValues(
+    indices =NULL
+  )
+  
   if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
   
   # observe({
@@ -53,13 +57,11 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   # })
   
   
-  observeEvent(obj,{
-    print(keyId(obj))
-  })
+  
   observeEvent(input$typeSelect, ignoreInit = TRUE, {
     shinyjs::toggle("listSelect_UI", condition=input$typeSelect=="ProteinList")
-    shinyjs::toggle("randSelect_UI", condition=input$typeSelect=="Random")
-    shinyjs::toggle("colSelect_UI", condition=input$typeSelect=="Column")
+    shinyjs::toggle("randomSelect_UI", condition=input$typeSelect=="Random")
+    shinyjs::toggle("columnSelect_UI", condition=input$typeSelect=="Column")
   })
   
   output$listSelect_UI <- renderUI({
@@ -85,25 +87,46 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   })
   
   
-  BuildResult <- reactive({
-    
-    #isolate({
-    ll <-  Biobase::fData(obj)[,keyId(obj)]
-    
-    res <- list(type= input$typeSelect,
-                list = input$listSelect,
-                rand = as.numeric(input$randSelect),
-                col = input$colSelect,
-                list.indices = if (length(input$listSelect)==0){NULL} else match(input$listSelect, ll),
-                rand.indices = if (length(input$randSelect)==0){NULL} else sample(1:length(ll), as.numeric(input$randSelect), replace=FALSE),
-                col.indices =  if (length(input$colSelect)==0){NULL} else which(input$colSelect == 1)
-    )
-    
-    # })
-    res
+  observeEvent(input$listSelect,{
+    r$indices  <- if (length(input$listSelect)==0){NULL} else match(input$listSelect, ll)
   })
   
-  return(reactive({BuildResult()}))
+  
+  observeEvent(input$randSelect,{
+    r$indices <- if (length(input$randSelect)==0){NULL} else sample(1:nrow(obj), as.numeric(input$randSelect), replace=FALSE)
+  })
+  
+  
+  observeEvent(input$colSelect,{
+    ll <-  Biobase::fData(obj)[,input$colSelect]
+    print(head(ll))
+     r$indices <- if (length(input$colSelect)==0){NULL} else which(ll == 1)
+  })
+  
+  
+  observeEvent(r$indices,{
+    print(r$indices)
+  })
+  
+  # BuildResult <- reactive({
+  #   
+  #   #isolate({
+  #   ll <-  Biobase::fData(obj)[,keyId(obj)]
+  #   
+  #   res <- list(type= input$typeSelect,
+  #               list = input$listSelect,
+  #               rand = as.numeric(input$randSelect),
+  #               col = input$colSelect,
+  #               list.indices = if (length(input$listSelect)==0){NULL} else match(input$listSelect, ll),
+  #               rand.indices = if (length(input$randSelect)==0){NULL} else sample(1:length(ll), as.numeric(input$randSelect), replace=FALSE),
+  #               col.indices =  if (length(input$colSelect)==0){NULL} else which(input$colSelect == 1)
+  #   )
+  #   
+  #   # })
+  #   res
+  # })
+  
+  return(reactive({r$indices}))
   
   
 }
