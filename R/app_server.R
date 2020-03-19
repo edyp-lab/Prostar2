@@ -33,11 +33,11 @@ app_server <- function(input, output,session) {
     
   )
   
-  callModule(mod_settings_server, "modSettings",dataIn = reactive({dataIn=NULL}))
-  callModule(mod_homepage_server, "homepage")
-  callModule(mod_release_notes_server, "modReleaseNotes")
-  callModule(mod_check_updates_server, "modCheckUpdates")
-  
+   rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
+   callModule(mod_homepage_server, "homepage")
+   callModule(mod_release_notes_server, "modReleaseNotes")
+  # callModule(mod_check_updates_server, "modCheckUpdates")
+
   callModule(mod_bug_report_server, "bugreport")
   callModule(mod_insert_md_server, "links_MD",URL_links)
   callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)

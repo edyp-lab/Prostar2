@@ -1,6 +1,6 @@
 # Module UI
   
-#' @title   mod_plots_boxplots_ui and mod_plots_boxplots_server
+#' @title   mod_plots_intensity_plots_ui and mod_plots_intensity_plots_server
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
@@ -8,13 +8,13 @@
 #' @param output internal
 #' @param session internal
 #'
-#' @rdname mod_plots_boxplots
+#' @rdname mod_plots_intensity_plots
 #'
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
 #' @import shinyjs
-mod_plots_boxplots_ui <- function(id){
+mod_plots_intensity_plots_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
@@ -38,12 +38,11 @@ mod_plots_boxplots_ui <- function(id){
     
 # Module Server
     
-#' @rdname mod_plots_boxplots
+#' @rdname mod_plots_intensity_plots
 #' @export
 #' @keywords internal
-#' @import DAPAR 
     
-mod_plots_boxplots_server <- function(input, output, session, dataIn, params=NULL, reset, base_palette){
+mod_plots_intensity_plots_server <- function(input, output, session, dataIn, params=NULL, reset, base_palette){
   ns <- session$ns
   
   rv.modboxplot <- reactiveValues(
@@ -74,13 +73,13 @@ mod_plots_boxplots_server <- function(input, output, session, dataIn, params=NUL
       ) } else { return(NULL)}
   })
   
-
+  
   
   observeEvent(req(rv.modboxplot$var()),{
-
+    
     if (is.null(rv.modboxplot$var()$type)){
       return(NULL)
-      }
+    }
     ll <- Biobase::fData(dataIn())[,parentProtId(dataIn())]
     
     
@@ -108,17 +107,17 @@ mod_plots_boxplots_server <- function(input, output, session, dataIn, params=NUL
   
   output$BoxPlot <- renderHighchart({
     dataIn()
-     rv.modboxplot$indices
+    rv.modboxplot$indices
     tmp <- NULL
-      
-      pattern <- paste0('test',".boxplot")
-      conds <- Biobase::pData(dataIn())$Condition
-      tmp <- DAPAR::boxPlotD_HC(dataIn(),
-                                legend=conds,
-                                palette=base_palette(),
-                                subset.view = rv.modboxplot$indices)
-      #future(createPNGFromWidget(tmp,pattern))
-
+    
+    pattern <- paste0('test',".boxplot")
+    conds <- Biobase::pData(dataIn())$Condition
+    tmp <- DAPAR::boxPlotD_HC(dataIn(),
+                              legend=conds,
+                              palette=base_palette(),
+                              subset.view = rv.modboxplot$indices)
+    #future(createPNGFromWidget(tmp,pattern))
+    
     tmp
   })
   
@@ -129,34 +128,34 @@ mod_plots_boxplots_server <- function(input, output, session, dataIn, params=NUL
     print( rv.modboxplot$indices)
     tmp <- NULL
     
-      # A temp file to save the output. It will be deleted after renderImage
-      # sends it, because deleteFile=TRUE.
-      outfile <- tempfile(fileext='.png')
-      # Generate a png
-      # png(outfile, width = 640, height = 480, units = "px")
-      png(outfile)
-      pattern <- paste0('test',".violinplot")
-      conds <- Biobase::pData(dataIn())$Condition
-      tmp <- DAPAR::violinPlotD(dataIn(),
-                                legend = conds,
-                                palette = base_palette(),
-                                subset.view =  rv.modboxplot$indices)
-      #future(createPNGFromWidget(tmp,pattern))
-      dev.off()
+    # A temp file to save the output. It will be deleted after renderImage
+    # sends it, because deleteFile=TRUE.
+    outfile <- tempfile(fileext='.png')
+    # Generate a png
+    # png(outfile, width = 640, height = 480, units = "px")
+    png(outfile)
+    pattern <- paste0('test',".violinplot")
+    conds <- Biobase::pData(dataIn())$Condition
+    tmp <- DAPAR::violinPlotD(dataIn(),
+                              legend = conds,
+                              palette = base_palette(),
+                              subset.view =  rv.modboxplot$indices)
+    #future(createPNGFromWidget(tmp,pattern))
+    dev.off()
     tmp
-
+    
     # Return a list
     list(src = outfile,
          alt = "This is alternate text")
   }, deleteFile = TRUE)
-
+  
   
   return(reactive({rv.modboxplot$var()}))
 }
     
 ## To be copied in the UI
-# mod_plots_boxplots_ui("plots_boxplots_ui_1")
+# mod_plots_intensity_plots_ui("plots_intensity_plots_ui_1")
     
 ## To be copied in the server
-# callModule(mod_plots_boxplots_server, "plots_boxplots_ui_1")
+# callModule(mod_plots_intensity_plots_server, "plots_intensity_plots_ui_1")
  
