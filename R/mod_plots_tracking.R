@@ -1,17 +1,20 @@
-#' plots_tracking UI Function
+#' @title   mod_plots_boxplots_ui and mod_plots_boxplots_server
+#' @description  A shiny Module.
 #'
-#' @description A shiny Module.
+#' @param id shiny id
+#' @param input internal
+#' @param output internal
+#' @param session internal
 #'
-#' @param id,input,output,session Internal parameters for {shiny}.
+#' @rdname mod_plots_tracking
 #'
-#' @noRd 
-#'
+#' @keywords internal
+#' @export 
 #' @importFrom shiny NS tagList 
-#' @importFrom shinyjs useShinyjs
 mod_plots_tracking_ui <- function(id){
   ns <- NS(id)
   tagList(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     selectInput(ns("typeSelect"), "Type of selection", 
                 choices=c("None"="None",
                           "Protein list"="ProteinList", 
@@ -26,35 +29,36 @@ mod_plots_tracking_ui <- function(id){
     
 #' plots_tracking Server Function
 #'
-#' @noRd 
+#' @rdname mod_plots_tracking
+#' @export
+#' @keywords internal
 mod_plots_tracking_server <- function(input, output, session, obj, params, reset=FALSE){
   ns <- session$ns
   
-  r <- reactiveValues(
-    indices =NULL
-  )
   
-  if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
   
-  # observe({
-  #   reset()
-  #   print("In track module =RESET observe")
-  #   print(reset())
-  #   if (reset() > 0) {
-  #     updateSelectInput(session, "typeSelect", selected="None")
-  #     updateSelectInput(session, "listSelect", NULL)
-  #     updateSelectInput(session, "randSelect", selected="1")
-  #     updateSelectInput(session, "colSelect", selected=NULL)
-  #   }
-  # })
-  # 
-  # observe({
-  #   params()
-  #   updateSelectInput(session, "typeSelect", selected=params()$type)
-  #   updateSelectInput(session, "listSelect", selected=params()$list)
-  #   updateSelectInput(session, "randSelect", selected=params()$rand)
-  #   updateSelectInput(session, "colSelect", selected=params()$col)
-  # })
+  observe({
+    if (is.null(obj()) || class(obj()) != "MSnSet") { return(NULL) }
+  })
+  
+  
+  observe({
+    reset()
+    if (reset() > 0) {
+      updateSelectInput(session, "typeSelect", selected="None")
+      updateSelectInput(session, "listSelect", NULL)
+      updateSelectInput(session, "randSelect", selected="1")
+      updateSelectInput(session, "colSelect", selected=NULL)
+    }
+  })
+
+  observe({
+    params()
+    updateSelectInput(session, "typeSelect", selected=params()$type)
+    updateSelectInput(session, "listSelect", selected=params()$list)
+    updateSelectInput(session, "randSelect", selected=params()$rand)
+    updateSelectInput(session, "colSelect", selected=params()$col)
+  })
   
   
   
@@ -65,70 +69,49 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   })
   
   output$listSelect_UI <- renderUI({
-    #isolate({
-      ll <-  Biobase::fData(obj)[,DAPAR::keyId(obj)]
+      ll <-  Biobase::fData(obj())[,DAPAR::keyId(obj())]
       selectInput(ns("listSelect"), "Protein for normalization", choices=ll, multiple = TRUE, width='400px')
-   # })
   })
   
   
   output$randomSelect_UI <- renderUI({
-    #isolate({
-      ll <-  Biobase::fData(obj)[,DAPAR::keyId(obj)]
       textInput(ns("randSelect"), "Random", value="1", width=('120px'))
-   # })
   })
   
   output$columnSelect_UI <- renderUI({
-    #isolate({
-      ll <-  colnames(Biobase::fData(obj))
+      ll <-  colnames(Biobase::fData(obj()))
       selectInput(ns("colSelect"), "Column", choices=ll)
-    #})
   })
   
   
-  observeEvent(input$listSelect,{
-    r$indices  <- if (length(input$listSelect)==0){NULL} else match(input$listSelect, ll)
+
+  BuildResult <- reactive({
+    print(paste0('input$randSelect = ', as.numeric(input$randSelect)))
+
+    res <- list(type= input$typeSelect,
+                list = input$listSelect,
+                rand = as.numeric(input$randSelect),
+                col = input$colSelect,
+                list.indices = if (is.null(input$listSelect) || length(input$listSelect)==0){
+                                  NULL
+                                  } else {
+                                    match(input$listSelect, Biobase::fData(obj())[,keyId(obj())])
+                                    },
+                rand.indices = if (is.null(input$randSelect) || input$randSelect==""){
+                                  NULL
+                                } else {
+                                  sample(1:nrow(obj()), as.numeric(input$randSelect), replace=FALSE)
+                                  },
+                col.indices =  if (is.null(input$colSelect) || length(input$colSelect)==0){
+                                  NULL
+                                } else {
+                                  which(Biobase::fData(obj())[,input$colSelect] == 1)
+                                }
+    )
+    res
   })
   
-  
-  observeEvent(input$randSelect,{
-    r$indices <- if (length(input$randSelect)==0){NULL} else sample(1:nrow(obj), as.numeric(input$randSelect), replace=FALSE)
-  })
-  
-  
-  observeEvent(input$colSelect,{
-    ll <-  Biobase::fData(obj)[,input$colSelect]
-    print(head(ll))
-     r$indices <- if (length(input$colSelect)==0){NULL} else which(ll == 1)
-  })
-  
-  
-  observeEvent(r$indices,{
-    print(r$indices)
-  })
-  
-  # BuildResult <- reactive({
-  #   
-  #   #isolate({
-  #   ll <-  Biobase::fData(obj)[,keyId(obj)]
-  #   
-  #   res <- list(type= input$typeSelect,
-  #               list = input$listSelect,
-  #               rand = as.numeric(input$randSelect),
-  #               col = input$colSelect,
-  #               list.indices = if (length(input$listSelect)==0){NULL} else match(input$listSelect, ll),
-  #               rand.indices = if (length(input$randSelect)==0){NULL} else sample(1:length(ll), as.numeric(input$randSelect), replace=FALSE),
-  #               col.indices =  if (length(input$colSelect)==0){NULL} else which(input$colSelect == 1)
-  #   )
-  #   
-  #   # })
-  #   res
-  # })
-  
-  return(reactive({r$indices}))
-  
-  
+  return(reactive({BuildResult()}))
 }
     
 ## To be copied in the UI

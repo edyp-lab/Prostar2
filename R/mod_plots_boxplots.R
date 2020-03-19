@@ -13,16 +13,21 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
+#' @import shinyjs
 mod_plots_boxplots_ui <- function(id){
   ns <- NS(id)
   tagList(
+    shinyjs::useShinyjs(),
     tags$div(
       tags$div(style="display:inline-block; vertical-align: middle;",
                highchartOutput(ns("BoxPlot")),
-               imageOutput(ns("viewViolinPlot"))
+               shinyjs::hidden(imageOutput(ns("viewViolinPlot")))
       ),
       tags$div(style="display:inline-block; vertical-align: middle;",
-               selectInput(ns("choosePlot"), "Choose plot", choices=c( "violinplot"="violinplot","boxplot"="boxplot"), width='100px')
+               selectInput(ns("choosePlot"), "Choose plot", 
+                           choices=c( "violinplot"="violinplot",
+                                      "boxplot"="boxplot"), 
+                           width='100px')
       ),
       
       uiOutput(ns('showTrackProt'))
@@ -36,9 +41,9 @@ mod_plots_boxplots_ui <- function(id){
 #' @rdname mod_plots_boxplots
 #' @export
 #' @keywords internal
-#' @importFrom DAPAR 
+#' @import DAPAR 
     
-mod_plots_boxplots_server <- function(input, output, session, dataIn, params, reset, base_palette){
+mod_plots_boxplots_server <- function(input, output, session, dataIn, params=NULL, reset, base_palette){
   ns <- session$ns
   
   rv.modboxplot <- reactiveValues(
@@ -48,26 +53,31 @@ mod_plots_boxplots_server <- function(input, output, session, dataIn, params, re
   )
   
   
-  rv.modboxplot$var <- callModule(mod_plots_tracking_server, "widgets", 
-                                  obj = dataIn(),
-                                  params=reactive({params()}), 
+  
+  observe({
+    print(base_palette())
+  })
+  
+  
+  rv.modboxplot$var <- callModule(mod_plots_tracking_server, "widgets",
+                                  obj = reactive({dataIn()}),
+                                  params=reactive({params()}),
                                   reset=reactive({reset()}))
   
   
   output$showTrackProt <- renderUI({
-    req(dataIn())
-    if (typeOfData(dataIn()=='protein')){
+    typeOfData(dataIn())
+    
+    if (typeOfData(dataIn())=='protein'){
       tags$div(style="display:inline-block; vertical-align: middle;",
                mod_plots_tracking_ui(ns('widgets'))
       ) } else { return(NULL)}
   })
   
-  
+
   
   observeEvent(req(rv.modboxplot$var()),{
-    print("In observe rv.modboxplot$var")
-    print(rv.modboxplot$var())
-    
+
     if (is.null(rv.modboxplot$var()$type)){
       return(NULL)
       }
@@ -75,9 +85,6 @@ mod_plots_boxplots_server <- function(input, output, session, dataIn, params, re
     
     
     switch(rv.modboxplot$var()$type,
-           #ProteinList = rv.modboxplot$ind <- rv.modboxplot$var()$list,
-           #Random = rv.modboxplot$ind <- rv.modboxplot$var()$rand,
-           # Column = rv.modboxplot$ind <- rv.modboxplot$var()$col,
            ProteinList = rv.modboxplot$indices <- rv.modboxplot$var()$list.indices,
            Random = rv.modboxplot$indices <- rv.modboxplot$var()$rand.indices,
            Column = rv.modboxplot$indices <- rv.modboxplot$var()$col.indices
@@ -85,83 +92,64 @@ mod_plots_boxplots_server <- function(input, output, session, dataIn, params, re
     #if (length(rv.modboxplot$ind)==0){rv.modboxplot$ind <- NULL}
     if (length(rv.modboxplot$indices)==0){
       rv.modboxplot$indices <- NULL
-      }
+    }
+    
+    print('indices = ')
+    print(rv.modboxplot$indices )
   })
   
   
   observeEvent(input$choosePlot, {
     shinyjs::toggle('viewViolinPlot', condition=input$choosePlot=='violinplot')
     shinyjs::toggle('BoxPlot', condition=input$choosePlot=='boxplot')
-    # switch(input$choosePlot,
-    #        boxplot={
-    #          shinyjs::hide('viewViolinPlot')
-    #          shinyjs::show('BoxPlot')
-    #        },
-    #        violinplot={
-    #          shinyjs::hide('BoxPlot')
-    #          shinyjs::show('viewViolinPlot')
-    #        }
-    # )
   })
   
   
   
   output$BoxPlot <- renderHighchart({
     dataIn()
-    #rv$current.obj.name
-    #rv$PlotParams$paletteConditions
-    #rv$PlotParams$legendForSamples
-    rv.modboxplot$indices
+     rv.modboxplot$indices
     tmp <- NULL
-    isolate({
-      
-      ll <- Biobase::fData(dataIn())[,parentProtId(dataIn())]
       
       pattern <- paste0('test',".boxplot")
-      conds <- Biobase::pData(dataIn())$Conditions
-      tmp <- DAPAR::boxPlotD_HC(dataIn(), 
-                                legend=conds, 
-                                palette=base_palette,
+      conds <- Biobase::pData(dataIn())$Condition
+      tmp <- DAPAR::boxPlotD_HC(dataIn(),
+                                legend=conds,
+                                palette=base_palette(),
                                 subset.view = rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
-    })
+
     tmp
   })
   
   
   output$viewViolinPlot<- renderImage({
     dataIn()
-    #rv$PlotParams$legendForSamples
-    #rv$PlotParams$paletteConditions
     rv.modboxplot$indices
+    print( rv.modboxplot$indices)
     tmp <- NULL
-    isolate({
-      
+    
       # A temp file to save the output. It will be deleted after renderImage
       # sends it, because deleteFile=TRUE.
       outfile <- tempfile(fileext='.png')
-      print("IN violinPlot")
-      print(rv.modboxplot$indices)
-      print("END IN violinplot")
       # Generate a png
       # png(outfile, width = 640, height = 480, units = "px")
       png(outfile)
       pattern <- paste0('test',".violinplot")
-      conds <- Biobase::pData(dataIn())$Conditions
-      tmp <- DAPAR::violinPlotD(dataIn(), 
-                                legend = conds, 
+      conds <- Biobase::pData(dataIn())$Condition
+      tmp <- DAPAR::violinPlotD(dataIn(),
+                                legend = conds,
                                 palette = base_palette(),
                                 subset.view =  rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
       dev.off()
-    })
     tmp
-    
+
     # Return a list
     list(src = outfile,
          alt = "This is alternate text")
   }, deleteFile = TRUE)
-  
+
   
   return(reactive({rv.modboxplot$var()}))
 }
