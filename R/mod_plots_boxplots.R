@@ -38,34 +38,40 @@ mod_plots_boxplots_ui <- function(id){
 #' @keywords internal
 #' @importFrom DAPAR 
     
-mod_plots_boxplots_server <- function(input, output, session, data, params, reset){
+mod_plots_boxplots_server <- function(input, output, session, dataIn, params, reset, base_palette){
   ns <- session$ns
   
   rv.modboxplot <- reactiveValues(
-    var = NULL,
+    var = NULL, #result of module tracking 
     ind = NULL,
     indices = NULL
   )
   
   
-  rv.modboxplot$var <- callModule(moduleTrackProt, "widgets", params=reactive({params()}), reset=reactive({reset()}))
+  rv.modboxplot$var <- callModule(mod_plots_tracking_server, "widgets", 
+                                  obj = dataIn(),
+                                  params=reactive({params()}), 
+                                  reset=reactive({reset()}))
   
   
   output$showTrackProt <- renderUI({
-    req(rv$current.obj)
-    if (rv$typeOfDataset=='protein'){
+    req(dataIn())
+    if (typeOfData(dataIn()=='protein')){
       tags$div(style="display:inline-block; vertical-align: middle;",
-               moduleTrackProtUI(ns('widgets'))
+               mod_plots_tracking_ui(ns('widgets'))
       ) } else { return(NULL)}
   })
+  
+  
   
   observeEvent(req(rv.modboxplot$var()),{
     print("In observe rv.modboxplot$var")
     print(rv.modboxplot$var())
     
-    
-    if (is.null(rv.modboxplot$var()$type)){return(NULL)}
-    ll <- Biobase::fData(rv$current.obj)[,rv$current.obj@experimentData@other$proteinId]
+    if (is.null(rv.modboxplot$var()$type)){
+      return(NULL)
+      }
+    ll <- Biobase::fData(dataIn())[,parentProtId(dataIn())]
     
     
     switch(rv.modboxplot$var()$type,
@@ -77,51 +83,56 @@ mod_plots_boxplots_server <- function(input, output, session, data, params, rese
            Column = rv.modboxplot$indices <- rv.modboxplot$var()$col.indices
     )
     #if (length(rv.modboxplot$ind)==0){rv.modboxplot$ind <- NULL}
-    if (length(rv.modboxplot$indices)==0){rv.modboxplot$indices <- NULL}
+    if (length(rv.modboxplot$indices)==0){
+      rv.modboxplot$indices <- NULL
+      }
   })
   
   
   observeEvent(input$choosePlot, {
-    switch(input$choosePlot,
-           boxplot={
-             shinyjs::hide('viewViolinPlot')
-             shinyjs::show('BoxPlot')
-           },
-           violinplot={
-             shinyjs::hide('BoxPlot')
-             shinyjs::show('viewViolinPlot')
-           }
-    )
+    shinyjs::toggle('viewViolinPlot', condition=input$choosePlot=='violinplot')
+    shinyjs::toggle('BoxPlot', condition=input$choosePlot=='boxplot')
+    # switch(input$choosePlot,
+    #        boxplot={
+    #          shinyjs::hide('viewViolinPlot')
+    #          shinyjs::show('BoxPlot')
+    #        },
+    #        violinplot={
+    #          shinyjs::hide('BoxPlot')
+    #          shinyjs::show('viewViolinPlot')
+    #        }
+    # )
   })
   
   
   
   output$BoxPlot <- renderHighchart({
-    data()
-    rv$current.obj.name
-    rv$PlotParams$paletteConditions
-    rv$PlotParams$legendForSamples
+    dataIn()
+    #rv$current.obj.name
+    #rv$PlotParams$paletteConditions
+    #rv$PlotParams$legendForSamples
     rv.modboxplot$indices
     tmp <- NULL
     isolate({
       
-      ll <- Biobase::fData(rv$current.obj)[,rv$current.obj@experimentData@other$proteinId]
+      ll <- Biobase::fData(dataIn())[,parentProtId(dataIn())]
       
-      pattern <- paste0(GetCurrentObjName(),".boxplot")
-      tmp <- DAPAR::boxPlotD_HC(data(), rv$PlotParams$legendForSamples, palette=rv$PlotParams$paletteConditions,
+      pattern <- paste0('test',".boxplot")
+      conds <- Biobase::pData(dataIn())$Conditions
+      tmp <- DAPAR::boxPlotD_HC(dataIn(), 
+                                legend=conds, 
+                                palette=base_palette,
                                 subset.view = rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
-      
-      
     })
     tmp
   })
   
   
   output$viewViolinPlot<- renderImage({
-    data()
-    rv$PlotParams$legendForSamples
-    rv$PlotParams$paletteConditions
+    dataIn()
+    #rv$PlotParams$legendForSamples
+    #rv$PlotParams$paletteConditions
     rv.modboxplot$indices
     tmp <- NULL
     isolate({
@@ -135,9 +146,11 @@ mod_plots_boxplots_server <- function(input, output, session, data, params, rese
       # Generate a png
       # png(outfile, width = 640, height = 480, units = "px")
       png(outfile)
-      pattern <- paste0(GetCurrentObjName(),".violinplot")
-      tmp <- DAPAR::violinPlotD(data(), legend = rv$PlotParams$legendForSamples, 
-                                palette = rv$PlotParams$paletteConditions,
+      pattern <- paste0('test',".violinplot")
+      conds <- Biobase::pData(dataIn())$Conditions
+      tmp <- DAPAR::violinPlotD(dataIn(), 
+                                legend = conds, 
+                                palette = base_palette(),
                                 subset.view =  rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
       dev.off()

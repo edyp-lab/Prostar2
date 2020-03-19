@@ -17,7 +17,7 @@ modulePlots <- function(input, output, session, dataIn, llPlots){
   
   .width <- 50
   .height <- 50
-  
+    
   
   jqui_draggable("#modalintensity .modal-content")
   

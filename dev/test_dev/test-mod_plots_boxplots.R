@@ -3,10 +3,10 @@ library(DAPAR)
 
 
 source(file.path("../../R","mod_plots_boxplots.R"), local=TRUE)$value
-
+source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 
 ui <- fluidPage(
-  mod_plots_boxplots_ui('plots_density')
+  mod_plots_boxplots_ui('plot')
 )
 
 
@@ -16,9 +16,22 @@ server <- function(input, output, session) {
   
   library(DAPARdata)
   data("Exp1_R25_prot")
+  r <- reactiveValues(
+    settings = NULL
+  )
+  #data('Exp1_R25_prot')
+  #obj <- Exp1_R25_prot
+  r$settings <- callModule(mod_settings_server, "settings")
+  
   
   # obj est un msnset
-  callModule(mod_plots_boxplots_server,'plots_density', obj = Exp1_R25_prot)
+  callModule(mod_plots_boxplots_server,'plot', 
+             data= reactive({Exp1_R25_prot}),
+             params = reactive({NULL}),
+             reset=reactive({FALSE}),
+             base_palette = r$settings()$examplePalette
+             )
+  
 }
 
 

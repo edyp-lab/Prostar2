@@ -1,4 +1,4 @@
-setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
+#setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
 
 
 library(shiny)
