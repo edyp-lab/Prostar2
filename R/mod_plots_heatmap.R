@@ -93,7 +93,7 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
     req(input$distance)
     
     isolate({ 
-      wrapper.heatmapD(obj,
+      DAPAR::wrapper.heatmapD(obj,
                        input$distance, 
                        input$linkage,
                        TRUE)

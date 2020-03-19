@@ -6,6 +6,7 @@ library(shinyBS)
 library(shinyjqui)
 library(highcharter)
 library(DAPAR)
+library(DT)
 
 
 source(file.path(".","module_plots.R"), local=TRUE)$value
@@ -18,7 +19,6 @@ source(file.path("..", "mod_plots_group_mv.R"),  local = TRUE)$value
 source(file.path("..", "mod_plots_msnset_explorer.R"),  local = TRUE)$value
 source(file.path("..", "mod_plots_var_dist.R"), local = TRUE)$value
 source(file.path("../", "global.R"), local = TRUE)$value
-# source(file.path("../", "Misc/moduleStaticDataTable.R"), local = TRUE)$value
 
 
 
@@ -34,8 +34,8 @@ server <- function(input, output, session) {
   
   callModule(modulePlots,'plots',
              dataIn = Exp1_R25_prot,
-             llPlots = reactive({"corrMatrix"})
-             ) # c("intensity", "pca", "varDist", "corrMatrix", "heatmap", "mv", "quantiTable")
+             llPlots = reactive({c("intensity", "pca", "varDist", "corrMatrix", "heatmap", "mv", "quantiTable")})
+             ) 
 
 }
 
