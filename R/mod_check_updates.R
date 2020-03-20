@@ -33,7 +33,6 @@ mod_check_updates_ui <- function(id){
 #' @import DT
 #' @importFrom BiocManager version
 #' @importFrom utils compareVersion
-#' @importFrom XML readHTMLTable
 mod_check_updates_server <- function(input, output, session){
   ns <- session$ns
   
@@ -47,11 +46,16 @@ mod_check_updates_server <- function(input, output, session){
   })
   
   
-   callModule(mod_format_DT_server,'tab_versions', table2show=reactive({getPackagesVersions()}))
+  callModule(mod_format_DT_server,'tab_versions', table2show=getPackagesVersions())
   
   
-  #
-  #
+   observe({
+    print('test')
+    print(getPackagesVersions())
+  })
+  
+
+
   output$infoForNewVersions <- renderUI({
     df <- getPackagesVersions()
     if (sum(grepl("(Out of date)",df[,1])) >= 1) {
@@ -77,20 +81,19 @@ mod_check_updates_server <- function(input, output, session){
 
   
   
-  GetBioconductorVersions <- function(){
+  GetBioconductorVersions <- reactive({
     ll.versions <- list(Prostar = "NA",
                         DAPAR = "NA",
                         DAPARdata = "NA")
 
     DAPARdata.version <- Prostar.version <- DAPAR.version <- NULL
     tryCatch({
-      require(XML)
-      Prostar.html <- readHTMLTable("http://bioconductor.org/packages/release/bioc/html/Prostar.html")
-      DAPAR.html <- readHTMLTable("http://bioconductor.org/packages/release/bioc/html/DAPAR.html")
-      DAPARdata.html <- readHTMLTable("http://bioconductor.org/packages/release/data/experiment/html/DAPARdata.html")
-      ll.versions$Prostar <-as.character(Prostar.html[[3]][2][1,])
-      ll.versions$DAPAR <-as.character(DAPAR.html[[3]][2][1,])
-      ll.versions$DAPARdata <- as.character(DAPARdata.html[[3]][2][1,])
+      bioc <-available.packages(contrib.url("http://www.bioconductor.org/packages/release/bioc/"))
+      ll.versions$Prostar <-bioc['Prostar', "Version"]
+      ll.versions$DAPAR <-bioc['DAPAR', "Version"]
+      
+      biocExperiment <- available.packages(contrib.url("http://www.bioconductor.org/packages/release/data/experiment"))
+      ll.versions$DAPARdata <- biocExperiment['DAPARdata', "Version"]
     }, warning = function(w) {
       warning(e)
       return()
@@ -101,25 +104,25 @@ mod_check_updates_server <- function(input, output, session){
       #cleanup-code
     })
 
-
-    return (ll.versions)
-  }
+    ll.versions
+    
+  })
   
   
-  GetLocalVersions <- function(){
+  GetLocalVersions <- reactive({
     local.version <- list()
     #loc.pkgs <-c("Prostar.loc", "DAPAR.loc", "DAPARdata.loc")
     local.version <- list(Prostar = installed.packages(lib.loc=Prostar.loc)["Prostar","Version"],
                           DAPAR = installed.packages(lib.loc=DAPAR.loc)["DAPAR","Version"],
                           DAPARdata = installed.packages(lib.loc=DAPARdata.loc)["DAPARdata","Version"])
 
-    return(local.version)
-  }
+    local.version
+  })
   
   
   
   getPackagesVersions <- reactive({
-
+print('in getPackageVerisons')
     outOfDate <- "(Out of date)"
     dev <- "(Devel)"
 
@@ -134,7 +137,6 @@ mod_check_updates_server <- function(input, output, session){
                      "Installed packages"= unlist(local.version),
                      "Bioc release" =  unlist(bioconductor.version),
                      stringsAsFactors = FALSE)
-
 
     if (!is.null(local.version$Prostar) && !is.null(local.version$DAPAR)) {
       tryCatch({
@@ -173,10 +175,11 @@ mod_check_updates_server <- function(input, output, session){
 
     }
 
-print(df)
     df
 
   })
+  
+  
   
 }
     
