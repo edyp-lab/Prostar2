@@ -2,6 +2,8 @@ library(shiny)
 library(DAPAR)
 library(MultiAssayExperiment)
 
+library(Prostar2)
+library(DAPAR)
 source(file.path('../../R', 'mod_open_demo_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
