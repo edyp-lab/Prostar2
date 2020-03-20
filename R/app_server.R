@@ -1,3 +1,10 @@
+options(shiny.maxRequestSize=300*1024^2) 
+options(encoding = "UTF-8")
+#options(shiny.fullstacktrace = TRUE)
+require(compiler)
+enableJIT(3)
+
+
 #' @import shiny
 app_server <- function(input, output,session) {
   # List the first level callModules here
@@ -41,6 +48,11 @@ app_server <- function(input, output,session) {
   callModule(mod_bug_report_server, "bugreport")
   callModule(mod_insert_md_server, "links_MD",URL_links)
   callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
+  
+  
+  # callModule(mod_open_dataset_ui, 'moduleOpenMSnSet')
+  # callModule(mod_convert_ms_file_ui, 'moduleProcess_Convert')
+  callModule(mod_open_demo_dataset_ui, 'mod_OpenDemoDataset')
   
   #Once the server part is loaded, hide the loading page 
   # and show th main content
