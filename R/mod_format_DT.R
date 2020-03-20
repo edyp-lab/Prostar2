@@ -40,6 +40,8 @@ mod_format_DT_server <- function(input, output, session,
   ns <- session$ns
   
   observe({
+    print("table2show")
+    print(table2show())
 
     if (is.null(table2show())){
       warning("The parameter table2show is null.")

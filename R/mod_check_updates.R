@@ -38,7 +38,8 @@ mod_check_updates_server <- function(input, output, session){
   
   output$baseVersions <- renderUI({
 
-    
+    print("getPackagesVersions()")
+    print(getPackagesVersions())
     tagList(
       tags$p("Prostar is running on ",R.version.string, style="font-size: 16px"),
       tags$p(paste0("and uses the Bioconductor Release ",as.character(BiocManager::version())), style="font-size: 16px"),
@@ -47,7 +48,7 @@ mod_check_updates_server <- function(input, output, session){
     
   })
   
-  callModule(mod_format_DT_server,'tab_versions', table2show=getPackagesVersions())
+  callModule(mod_format_DT_server,'tab_versions', table2show=reactive({getPackagesVersions()}))
 
   output$infoForNewVersions <- renderUI({
     df <- getPackagesVersions()
@@ -129,7 +130,7 @@ mod_check_updates_server <- function(input, output, session){
                      "Installed packages"= unlist(local.version),
                      "Bioc release" =  unlist(bioconductor.version),
                      stringsAsFactors = FALSE)
-9
+
     if (!is.null(local.version$Prostar) && !is.null(local.version$DAPAR)) {
       tryCatch({
         
