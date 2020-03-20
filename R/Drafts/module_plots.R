@@ -19,7 +19,28 @@ modulePlots <- function(input, output, session, dataIn, llPlots){
   .height <- 50
     
   
-  jqui_draggable("#modalintensity .modal-content")
+  #jqui_draggable(".modal-content")
+  #jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content"))
+  jqui_draggable(paste0("#",ns("modalcorrMatrix")," .modal"))
+  jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal"))
+  
+  
+  # "modalquantiTable"
+  # "modalintensity"
+  # "modalpca"
+  # "modalvarDist"
+  # "modalcorrMatrix"
+  # "modalheatmap"
+  # "modalmv"
+  # jqui_resizable(paste0("#",ns("modalmv")," .modal-content"),
+  #                options = list(minHeight = 100, maxHeight = 300,  minWidth = 200, maxWidth = 400))
+  # # jqui_resizable("#modalintensity .modal-content", options = list(handles = 'e'))
+  # jqui_resizable("#modalquantiTable .modal-content", options = list(handles = 'e'))
+  # jqui_resizable("#modalpca .modal-content", options = list(handles = 'e'))
+  # jqui_resizable("#modalvarDist .modal-content", options = list(handles = 'e'))
+  # jqui_resizable("#modalcorrMatrix .modal-content", options = list(handles = 'e'))
+  # jqui_resizable("#modalheatmap .modal-content", options = list(handles = 'e'))
+  
   
   output$plotModule <- renderUI({
     req(dataIn)
@@ -89,19 +110,6 @@ modulePlots <- function(input, output, session, dataIn, llPlots){
                ll[[n]] <- shinyBS::bsModal("modalmv", "Missing values statistics", ns("plotmvsmall"), size = "large",uiOutput(ns("plotmvlarge")))
       )
     }
-    
-    print("ll")
-    print(length(ll))
-    print(ll)
-    
-    # jqui_resizable(paste0("#",ns("modalmv")," .modal-content"), options = list(minHeight = 100, maxHeight = 300,
-    #                                                          minWidth = 200, maxWidth = 400))
-    # jqui_resizable("#modalintensity .modal-content", options = list(handles = 'e'))
-    # jqui_resizable("#modalquantiTable .modal-content", options = list(handles = 'e'))
-    # jqui_resizable("#modalpca .modal-content", options = list(handles = 'e'))
-    # jqui_resizable("#modalvarDist .modal-content", options = list(handles = 'e'))
-    # jqui_resizable("#modalcorrMatrix .modal-content", options = list(handles = 'e'))
-    # jqui_resizable("#modalheatmap .modal-content", options = list(handles = 'e'))
     
     
     ll 

@@ -20,27 +20,24 @@ server <- function(input, output, session) {
   
   .width <- 50
   .height <- 50
-  #llPlots <- c("intensity", "pca", "varDist", "corrMatrix", "heatmap", "mv", "quantiTable")
   llPlots <- "corrMatrix"
   
-  jqui_draggable("#modalintensity .modal-content")
+  
   
   output$plotModule <- renderUI({
     
     panelheight = 60*length(llPlots)
     absolutePanel(
       id  = "#AbsolutePanelPlots",
-      ###########################################
       #style= "text-align: center; color: grey; border-width:0px; z-index: 10;",
-      top = 150, right = 50,
+      #top = 150, right = 50,
       width = "70px",
       height = paste0(as.character(panelheight), "px"),
       #draggable = TRUE,fixed = TRUE,
       cursor = "default",
       tags$head(tags$style(".modal-dialog{ width:95%}")),
       tags$head(tags$style(".modal-body{ min-height:50%}")),
-      ###########################################
-      actionButton('plotBtn', 'Plots', "data-toggle"='collapse', "data-target"=paste0('#','plotDiv'), 
+      actionButton('plotBtn', 'Plots', "data-toggle"='collapse', "data-target"="#plotDiv", 
                    style='color: white;background-color: lightgrey',
                    class = actionBtnClass),
       tags$div(
@@ -59,21 +56,25 @@ server <- function(input, output, session) {
     
     print("llPlots")
     print(llPlots)
+    uiOutput('plotModule')
     
     ll <- list(NULL)
     
     ll[[1]] <- tags$div( style="display:inline-block;",
-                           imageOutput("plotcorrMatrixsmall"),
-                           height='60',
-                           width='50')
+                         imageOutput("plotcorrMatrixsmall"),
+                         height='60',
+                         width='50')
     
     n <- 1 + length(llPlots)
-    ll[[n]] <- shinyBS::bsModal("modalcorrMatrix",
-                                  "Correlation matrix",
-                                  "plotcorrMatrixsmall",
-                                  size = "large",
-                                  uiOutput("plotcorrMatrixlarge")
-                                  )
+    ll[[n]] <- jqui_draggable(
+      #jqui_resizable(
+      shinyBS::bsModal("modal",
+                       "Correlation matrix",
+                       "plotcorrMatrixsmall",
+                       size = "large",
+                       uiOutput("plotcorrMatrixlarge")
+      )#, options = list(handle="e",aspectRatio = TRUE)
+    )
     
     
     

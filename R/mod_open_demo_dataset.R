@@ -58,19 +58,17 @@ mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
   
   rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def=reactive({pipeline.def()}))
   
-  
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({
                req(rv.openDemo$dataOut)
-               rv.openDemo$dataOut[['original']]
+               rv.openDemo$dataOut#[['original']]
              })
   )
   
   
   ### function for demo mode
   output$chooseDemoDataset <- renderUI({
-    
     if(require("DAPARdata", lib.loc=DAPARdata.loc)){
       print("DAPARdata is loaded correctly")
       selectInput(ns("demoDataset"),
@@ -114,7 +112,9 @@ mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
       proteinID <- data@experimentData@other$proteinId
       typeOfData <- data@experimentData@other$typeOfData
       ll.pipeline <- rv.openDemo$pipe()
+      print("ll.pipeline")
       print(ll.pipeline)
+      print("typeOfData")
       print(typeOfData)
       switch(typeOfData,
              protein = {

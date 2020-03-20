@@ -55,12 +55,13 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   if (is.null(obj)) { return(NULL) }
   
   callModule(mod_format_DT_server,'dt',
-             #table2show = reactive({Get_mae_summary()}))
-             table2show = Get_mae_summary())
+             table2show = reactive({Get_mae_summary()}))
+             
   
   output$title <- renderUI({
-    title <- analysis(obj())
-    #print(title)
+
+    title <- DAPAR::analysis(obj())
+    print(title)
     h3(paste0("Analysis \"",title,"\":"))
   })
   
@@ -187,8 +188,8 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     if (input$selectInputMsnset != "None" && isTRUE(input$properties_button)) {
       
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
-      data@experimentData@other
-      #properties(data) # fonctionne pas 
+      #data@experimentData@other
+      DAPAR::properties(data) # fonctionne ?
     }
   })
   
@@ -204,12 +205,13 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',
-                 #table2show = reactive({Get_MSnSet_Summary()}))
-                 table2show = Get_MSnSet_Summary())
+                 table2show = reactive({Get_MSnSet_Summary()}))
+                 
       
       callModule(mod_format_DT_server,'dt3',
-                 #table2show = reactive({Biobase::pData(data)}))
-                 table2show = data.frame(MultiAssayExperiment::colData(obj())) ) 
+                 table2show = reactive({
+                   data.frame(MultiAssayExperiment::colData(obj()))})
+                 ) 
       
       tagList(
         h3(paste0("MSnSet \"",input$selectInputMsnset,"\":")),
