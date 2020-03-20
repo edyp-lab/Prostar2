@@ -144,7 +144,7 @@ getPackagesVersions <- reactive({
   
   pkgs <- c("Prostar", "DAPAR", "DAPARdata")
   loc.pkgs <-c("Prostar.loc", "DAPAR.loc", "DAPARdata.loc")
-  instPkgs <- list(Prostar = installed.packages(lib.loc=Prostar.loc)["Prostar","Version"],
+  instPkgs <- list(Prostar = installed.packages(lib.loc=Prostar.loc)["Prostar2","Version"],
                    DAPAR = installed.packages(lib.loc=DAPAR.loc)["DAPAR","Version"],
                    DAPARdata = installed.packages(lib.loc=DAPARdata.loc)["DAPARdata","Version"])
   
@@ -215,10 +215,6 @@ getPackagesVersions <- reactive({
   #}
   
 })
-
-
-
-
 
 
 

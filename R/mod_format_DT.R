@@ -40,9 +40,8 @@ mod_format_DT_server <- function(input, output, session,
   ns <- session$ns
   
   observe({
-    print('table to show')
-    print(table2show)
-    if (is.null(table2show)){
+
+    if (is.null(table2show())){
       warning("The parameter table2show is null.")
       return(NULL)
     }
@@ -50,13 +49,13 @@ mod_format_DT_server <- function(input, output, session,
   
   proxy = DT::dataTableProxy(session$ns('dt'), session)
   
-  observe({DT::replaceData(proxy, table2show, resetPaging = FALSE)  })
+  observe({DT::replaceData(proxy, table2show(), resetPaging = FALSE)  })
   
   output$dt <- DT::renderDT({
-    req(table2show)
-    if (length(table2show)==0){return(NULL)}
+    req(table2show())
+    if (length(table2show())==0){return(NULL)}
     isolate({
-      DT::datatable(table2show, 
+      DT::datatable(table2show(), 
                     extensions = c('Scroller', 'Buttons'),
                     escape = FALSE,
                     rownames= showRownames,
