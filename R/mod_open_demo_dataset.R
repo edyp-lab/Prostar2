@@ -57,7 +57,7 @@ mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
   )
   
   
-  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def=pipeline.def())
+  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def=reactive({pipeline.def()}))
   
   callModule(mod_infos_dataset_server, 
              'infos', 
@@ -91,10 +91,6 @@ mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
     }
     
   })
-  
-  
-  
-  
   
   
   observeEvent(req(input$loadDemoDataset), {

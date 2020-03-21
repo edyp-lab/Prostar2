@@ -274,6 +274,11 @@ launchGA <- function(){
 #' @export 
 ReadPipelineConfig <- function(filename) {
   
+  if(!file.exists(filename)){
+    warning(paste0('File "', filename, '" not found'))
+    return(NULL)
+  }
+  
   f <- readLines(filename)
   f <- f[f != ""]
   

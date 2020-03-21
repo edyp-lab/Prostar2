@@ -45,8 +45,8 @@ mod_navbar_menu_ui <- function(id){
                  
       ),
       navbarMenu("Data manager",
-                             tabPanel("Open MSnset",value = 'openMSnsetTab',mod_open_dataset_ui(ns("moduleOpenMSnSet"))),
-                             tabPanel("Convert",value = "convertTab",mod_convert_ms_file_ui(ns("moduleProcess_Convert"))),
+                             #tabPanel("Open MSnset",value = 'openMSnsetTab',mod_open_dataset_ui(ns("moduleOpenMSnSet"))),
+                             #tabPanel("Convert",value = "convertTab",mod_convert_ms_file_ui(ns("moduleProcess_Convert"))),
                              tabPanel("Demo data",  value='demoTab', mod_open_demo_dataset_ui(ns("mod_OpenDemoDataset"))),
                  tabPanel(title="ReloadProstar",
                           value="ReloadTab",

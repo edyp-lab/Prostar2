@@ -1,6 +1,6 @@
 options(shiny.maxRequestSize=300*1024^2) 
 options(encoding = "UTF-8")
-#options(shiny.fullstacktrace = TRUE)
+options(shiny.fullstacktrace = TRUE)
 require(compiler)
 enableJIT(3)
 
@@ -51,8 +51,9 @@ app_server <- function(input, output,session) {
   
   
   # callModule(mod_open_dataset_ui, 'moduleOpenMSnSet')
+  defs <- ReadPipelineConfig('../../R/pipeline.conf')
   # callModule(mod_convert_ms_file_ui, 'moduleProcess_Convert')
-  callModule(mod_open_demo_dataset_ui, 'mod_OpenDemoDataset')
+  rv.core$current.obj <- callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({defs}))
   
   #Once the server part is loaded, hide the loading page 
   # and show th main content
