@@ -50,10 +50,10 @@ app_server <- function(input, output,session) {
   callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
   
   
-  # callModule(mod_open_dataset_ui, 'moduleOpenMSnSet')
   defs <- ReadPipelineConfig('../../R/pipeline.conf')
+  #callModule(mod_open_dataset_ui, 'moduleOpenDataset', pipeline.def=reactive({defs}))
   # callModule(mod_convert_ms_file_ui, 'moduleProcess_Convert')
-  rv.core$current.obj <- callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({defs}))
+  callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({defs}))
   
   #Once the server part is loaded, hide the loading page 
   # and show th main content

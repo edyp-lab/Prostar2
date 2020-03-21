@@ -19,7 +19,7 @@
 mod_open_demo_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
-    
+   # br(),br(),br(),
     tags$div(
       tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
                 uiOutput(ns("chooseDemoDataset"))
@@ -48,7 +48,7 @@ mod_open_demo_dataset_ui <- function(id){
 #' @importFrom DAPAR PipelineProtein PipelinePeptide
 #' @import DAPARdata
 
-mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
+mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
   rv.openDemo <- reactiveValues(
@@ -57,13 +57,13 @@ mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
   )
   
   
-  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def=reactive({pipeline.def()}))
+  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def = reactive({pipeline.def()}))
   
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({
                req(rv.openDemo$dataOut)
-               rv.openDemo$dataOut#[['original']]
+               rv.openDemo$dataOut[['original']]
              })
   )
   
@@ -99,7 +99,7 @@ mod_open_demo_dataset_server <- function(input, output, session,pipeline.def){
     nSteps <- 1
     withProgress(message = '',detail = '', value = 0, {
       incProgress(1/nSteps, detail = 'Loading dataset')
-      utils::data(input$demoDataset)
+      utils::data(list=input$demoDataset)
       data <- get(input$demoDataset)
       if (class(data)[1]!="MSnSet") {
         shinyjs::info("Warning : this file is not a MSnSet file ! 
