@@ -12,11 +12,13 @@ actionBtnClass <- "btn-primary"
 
 
 ui <- fluidPage(
-  uiOutput('plotModule')
+  uiOutput('plotModule'),
+  uiOutput('createVignettes_large')
 )
 
 server <- function(input, output, session) {
   
+  jqui_resizable("#modal .modal-content" )
   
   .width <- 50
   .height <- 50
@@ -28,23 +30,22 @@ server <- function(input, output, session) {
     
     panelheight = 60*length(llPlots)
     absolutePanel(
-      id  = "#AbsolutePanelPlots",
+      id  = "AbsolutePanelPlots",
       #style= "text-align: center; color: grey; border-width:0px; z-index: 10;",
       #top = 150, right = 50,
       width = "70px",
       height = paste0(as.character(panelheight), "px"),
       #draggable = TRUE,fixed = TRUE,
       cursor = "default",
-      tags$head(tags$style(".modal-dialog{ width:95%}")),
-      tags$head(tags$style(".modal-body{ min-height:50%}")),
       actionButton('plotBtn', 'Plots', "data-toggle"='collapse', "data-target"="#plotDiv", 
                    style='color: white;background-color: lightgrey',
                    class = actionBtnClass),
       tags$div(
-        id = 'plotDiv',  
-        class="collapse", 
+        id = 'plotDiv',
+        class="collapse",
         style='background-color: white',
-        uiOutput('createVignettes')
+        uiOutput('createVignettes_small')
+        
       )
     )
     
@@ -52,35 +53,64 @@ server <- function(input, output, session) {
   
   
   
-  output$createVignettes <- renderUI({
+  # output$createVignettes <- renderUI({
+  #   
+  #   print("llPlots")
+  #   print(llPlots)
+  #   uiOutput('plotModule')
+  #   
+  #   ll <- list(NULL)
+  #   
+  #   ll[[1]] <- tags$div( style="display:inline-block;",
+  #                        imageOutput("plotcorrMatrixsmall"),
+  #                        height='60',
+  #                        width='50')
+  #   
+  #   n <- 1 + length(llPlots)
+  #   ll[[n]] <- jqui_draggable(
+  #     shinyBS::bsModal("modal",
+  #                      "Correlation matrix",
+  #                      trigger = "plotcorrMatrixsmall",
+  #                      size = "small",
+  #                      "bar"
+  #                      #uiOutput("plotcorrMatrixlarge")
+  #     )
+  #   )
+  #   
+  #   
+  #   ll
+  #   
+  # })
+  
+  output$createVignettes_small <- renderUI({
     
-    print("llPlots")
-    print(llPlots)
-    uiOutput('plotModule')
-    
-    ll <- list(NULL)
-    
-    ll[[1]] <- tags$div( style="display:inline-block;",
-                         imageOutput("plotcorrMatrixsmall"),
-                         height='60',
-                         width='50')
-    
-    n <- 1 + length(llPlots)
-    ll[[n]] <- jqui_draggable(
-      #jqui_resizable(
-      shinyBS::bsModal("modal",
-                       "Correlation matrix",
-                       "plotcorrMatrixsmall",
-                       size = "large",
-                       uiOutput("plotcorrMatrixlarge")
-      )#, options = list(handle="e",aspectRatio = TRUE)
+    tagList(
+      tags$div( style="display:inline-block;",
+                imageOutput("plotcorrMatrixsmall"),
+                height='60',
+                width='50')
     )
     
     
+  })
+  
+  output$createVignettes_large <- renderUI({
     
-    ll
+    tagList (   
+      
+      tags$head(tags$style(".modal-dialog{ width:75%}")),
+      
+      jqui_draggable(
+        shinyBS::bsModal("modal",
+                         "Correlation matrix",
+                         trigger = "createVignettes_small",
+                         size = "large",
+                         uiOutput("plotcorrMatrixlarge")
+        ), options = list(revert=TRUE)
+      ) )
     
   })
+  
   
   
   
@@ -102,7 +132,7 @@ server <- function(input, output, session) {
     
   })
   
-  return(NULL)
+  
   
 }
 
