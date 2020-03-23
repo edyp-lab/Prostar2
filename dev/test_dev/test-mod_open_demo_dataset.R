@@ -1,5 +1,4 @@
 library(shiny)
-library(DAPAR)
 library(MultiAssayExperiment)
 
 library(Prostar2)

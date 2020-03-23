@@ -47,6 +47,10 @@ mod_open_demo_dataset_ui <- function(id){
 #' @keywords internal
 #' @importFrom DAPAR PipelineProtein PipelinePeptide
 #' @import DAPARdata
+#' @importFrom utils data
+#' @importFrom BiocManager install
+#' @importFrom shinyjs info
+#' @importFrom Biobase pData
 
 mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
@@ -58,12 +62,12 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   
   
   rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def = reactive({pipeline.def()}))
-  
+  # mod_infos_dataset prend un objet mae
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({
                req(rv.openDemo$dataOut)
-               rv.openDemo$dataOut[['original']]
+               rv.openDemo$dataOut
              })
   )
   
