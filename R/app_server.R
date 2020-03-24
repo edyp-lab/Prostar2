@@ -36,6 +36,9 @@ app_server <- function(input, output,session) {
     # object returned by demode, openmode and convertmode
     #object that is used for modules in pipeline. C'est une instance d'une classe Pipeline
     current.obj = NULL,
+    tmp_dataManager = list(convert = NULL,
+                              openFile = NULL,
+                              openDemo = NULL),
     
     tempplot = NULL,
     loadData = NULL
@@ -50,9 +53,15 @@ app_server <- function(input, output,session) {
   
   
   print('debut de chargement des modules de data manager')
-  callModule(mod_open_dataset_server, 'moduleOpenDataset', pipeline.def=reactive({pipeline.defs}))
-  # callModule(mod_convert_ms_file_ui, 'moduleProcess_Convert')
-   rv.prostar$current.obj <- callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
+  rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', pipeline.def=reactive({pipeline.defs})),
+                                  convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', pipeline.def=reactive({pipeline.defs})),
+                                  openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
+                                  )
+  
+  observeEvent(rv.core$tmp_dataManager$openFile(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openFile()})
+  observeEvent(rv.core$tmp_dataManager$convert(),{ rv.core$current.obj <- rv.core$tmp_dataManager$convert()})
+  observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()})
+  
   
   rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
    callModule(mod_homepage_server, "homepage")

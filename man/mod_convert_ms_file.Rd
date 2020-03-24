@@ -7,7 +7,7 @@
 \usage{
 mod_convert_ms_file_ui(id)
 
-mod_convert_ms_file_server(input, output, session)
+mod_convert_ms_file_server(input, output, session, pipeline.def)
 }
 \arguments{
 \item{id}{shiny id}

@@ -18,7 +18,7 @@ mod_infos_dataset_server(input, output, session, obj = NULL)
 
 \item{session}{internal}
 
-\item{obj}{xxxx}
+\item{obj}{object mae}
 }
 \description{
 A shiny Module.

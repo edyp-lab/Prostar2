@@ -94,7 +94,7 @@ tagList(
                     ),
                     navbarMenu("Data manager",
                                tabPanel("Open MSnset",value = 'openMSnsetTab',mod_open_dataset_ui('moduleOpenDataset')),
-                               #tabPanel("Convert",value = "convertTab",mod_convert_ms_file_ui('moduleProcess_Convert')),
+                               tabPanel("Convert",value = "convertTab",mod_convert_ms_file_ui('moduleProcess_Convert')),
                                tabPanel("Demo data",  value='demoTab', mod_open_demo_dataset_ui('mod_OpenDemoDataset')),
                                           tabPanel(title="ReloadProstar",
                                                    value="ReloadTab",

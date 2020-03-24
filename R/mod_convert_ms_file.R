@@ -28,7 +28,7 @@ mod_convert_ms_file_ui <- function(id){
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs hidden toggle
     
-mod_convert_ms_file_server <- function(input, output, session){
+mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
   
@@ -588,7 +588,7 @@ mod_convert_ms_file_server <- function(input, output, session){
              })
              )
   
-  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=pipeline.defs, dataType = input$typeOfData)
+  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=reactive({pipeline.def()}), dataType = input$typeOfData)
   
   output$conversionDone <- renderUI({
     
@@ -647,7 +647,7 @@ mod_convert_ms_file_server <- function(input, output, session){
         }
 
 
-        versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar","Version"],
+        versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
                          DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR","Version"]
         )
         
@@ -666,19 +666,19 @@ mod_convert_ms_file_server <- function(input, output, session){
                                                 typeOfData = input$typeOfData,
                                                 parentProtId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
                                                 versions
-         )
+                                                )
 
          print(original.msnset)
          
-         ll.pipeline <- pipeline.defs$peptide
-         mae <- DAPAR::PipelineProtein(analysis= input$studyName,
+         #ll.pipeline <- pipeline.def()$peptide
+         mae <- DAPAR::PipelinePeptide(analysis = input$studyName,
                                        pipelineType = names(rv.convert$pipeline()),
                                        dataType = input$typeOfData,
-                                       processes=NULL,
-                                       experiments=list(original=original.msnset),
-                                       colData=Biobase::pData(original.msnset)
+                                       processes = pipeline.def()$peptide,
+                                       experiments = list(original=original.msnset),
+                                       colData = Biobase::pData(original.msnset)
 
-         )
+                                        )
 
        },
        protein = {
@@ -693,20 +693,20 @@ mod_convert_ms_file_server <- function(input, output, session){
                                                 typeOfData = input$typeOfData,
                                                 parentProtId = NULL,
                                                 versions
-         )
+                                                )
          
          
           mae <- DAPAR::PipelineProtein(analysis= input$studyName,
                                         pipelineType = names(rv.convert$pipeline()),
                                         dataType = input$typeOfData,
-                                        processes=pipeline.defs$protein,
+                                        processes=pipeline.def()$protein,
                                         experiments=list(original=original.msnset),
                                         colData=Biobase::pData(original.msnset)
-          )
+                                        )
           
        },
        p2p = {
-         # ll.pipeline <- pipeline.defs$protein
+         # ll.pipeline <- pipeline.def()$protein
          # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
          #                               pipelineType = rv.convert$pipeline, 
          #                               dataType = input$typeOfData,
@@ -743,6 +743,7 @@ mod_convert_ms_file_server <- function(input, output, session){
     })
     
     r.nav$isDone[5] <- TRUE    
+    
     rv.convert$dataOut <- mae
     
   })

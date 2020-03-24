@@ -1,4 +1,6 @@
-    for (f in list.files('../../R', pattern='.R')){
+library(rhandsontable)
+
+for (f in list.files('../../R', pattern='.R')){
   source(file.path('../../R', f), local=TRUE)$value
 }
 
@@ -11,7 +13,7 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  callModule(mod_convert_ms_file_server, 'convert')
+  callModule(mod_convert_ms_file_server, 'convert', pipeline.defs=reactive({pipeline.defs}))
 }
 
 

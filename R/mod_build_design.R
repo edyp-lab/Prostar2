@@ -16,7 +16,7 @@
 #' @importFrom shiny NS tagList 
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs useShinyjs
-#' @importFrom rhandsontable rHandsontableOutput
+#' @import rhandsontable 
 mod_build_design_ui <- function(id){
   ns <- NS(id)
   shinyjs::useShinyjs()
