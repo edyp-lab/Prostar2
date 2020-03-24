@@ -1,4 +1,4 @@
-#setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
+setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
 
 
 library(shiny)
@@ -34,8 +34,8 @@ server <- function(input, output, session) {
   
   callModule(modulePlots,'plots',
              dataIn = Exp1_R25_prot,
-             llPlots = reactive({"corrMatrix"})
-             ) # c("intensity", "pca", "varDist", "corrMatrix", "heatmap", "mv", "quantiTable")
+             llPlots = reactive({c("corrMatrix", "quantiTable")})
+             ) #c("intensity", "pca", "varDist", , "heatmap", "mv", "quantiTable"
 
 }
 
