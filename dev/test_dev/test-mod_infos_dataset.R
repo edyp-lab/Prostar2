@@ -2,7 +2,7 @@ library(DAPAR)
 library(shiny)
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
-source(file.path('../../R', 'commonFunc.R'), local=TRUE)$value
+
 
 ui <- fluidPage(
   mod_infos_dataset_ui('test_infos_DT')
@@ -15,8 +15,7 @@ server <- function(input, output, session) {
   data('Exp1_R25_prot')
   data('Exp1_R2_prot')
 
-  defs <- ReadPipelineConfig('../../R/pipeline.conf')
-  ll.pipeline <- defs$protein
+  ll.pipeline <- pipeline.defs$protein
   mae <- DAPAR::PipelineProtein(analysis= 'analysis', 
                                 pipelineType = 'protein', 
                                 dataType ='protein',

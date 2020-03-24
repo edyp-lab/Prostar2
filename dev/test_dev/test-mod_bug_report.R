@@ -1,5 +1,7 @@
+options(shiny.fullstacktrace = TRUE)
 
 source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 
 ui <- fluidPage(

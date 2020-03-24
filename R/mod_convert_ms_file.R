@@ -31,7 +31,6 @@ mod_convert_ms_file_ui <- function(id){
 mod_convert_ms_file_server <- function(input, output, session){
   ns <- session$ns
   
-  defs.pipeline <- ReadPipelineConfig('../../R/pipeline.conf')
   
   callModule(mod_popover_for_help_server,"modulePopover_convertChooseDatafile", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Data file</font></strong>")), 
@@ -589,7 +588,7 @@ mod_convert_ms_file_server <- function(input, output, session){
              })
              )
   
-  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=defs.pipeline, dataType = input$typeOfData)
+  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=pipeline.defs, dataType = input$typeOfData)
   
   output$conversionDone <- renderUI({
     
@@ -671,8 +670,7 @@ mod_convert_ms_file_server <- function(input, output, session){
 
          print(original.msnset)
          
-         defs <- ReadPipelineConfig('../../R/pipeline.conf')
-         ll.pipeline <- defs$peptide
+         ll.pipeline <- pipeline.defs$peptide
          mae <- DAPAR::PipelineProtein(analysis= input$studyName,
                                        pipelineType = names(rv.convert$pipeline()),
                                        dataType = input$typeOfData,
@@ -697,20 +695,18 @@ mod_convert_ms_file_server <- function(input, output, session){
                                                 versions
          )
          
-         defs <- ReadPipelineConfig('../../R/pipeline.conf')
-
+         
           mae <- DAPAR::PipelineProtein(analysis= input$studyName,
                                         pipelineType = names(rv.convert$pipeline()),
                                         dataType = input$typeOfData,
-                                        processes=defs$protein,
+                                        processes=pipeline.defs$protein,
                                         experiments=list(original=original.msnset),
                                         colData=Biobase::pData(original.msnset)
           )
           
        },
        p2p = {
-         # defs <- ReadPipelineConfig('../../R/pipeline.conf')
-         # ll.pipeline <- defs$protein
+         # ll.pipeline <- pipeline.defs$protein
          # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
          #                               pipelineType = rv.convert$pipeline, 
          #                               dataType = input$typeOfData,

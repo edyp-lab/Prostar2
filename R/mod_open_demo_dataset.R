@@ -19,7 +19,6 @@
 mod_open_demo_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
-   # br(),br(),br(),
     tags$div(
       tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
                 uiOutput(ns("chooseDemoDataset"))
@@ -35,7 +34,7 @@ mod_open_demo_dataset_ui <- function(id){
     ),
     mod_choose_pipeline_ui(ns("choosePipe")),
     hr(),
-    
+
     mod_infos_dataset_ui(ns("infos"))
   )
 }
@@ -47,14 +46,43 @@ mod_open_demo_dataset_ui <- function(id){
 #' @keywords internal
 #' @importFrom DAPAR PipelineProtein PipelinePeptide
 #' @import DAPARdata
+#' @importFrom BiocGenerics get
 
 mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
+  
+  require(DAPARdata)
   
   rv.openDemo <- reactiveValues(
     dataOut = NULL,
     pipe = NULL
   )
+  
+
+  ### function for demo mode
+  output$chooseDemoDataset <- renderUI({
+    print('otot')
+   # if(require("DAPARdata", lib.loc=DAPARdata.loc)){
+      print("DAPARdata is loaded correctly")
+      selectInput(ns("demoDataset"),
+                  "Demo dataset",
+                  choices = utils::data(package="DAPARdata")$results[,"Item"],
+                  width='200px')
+    # } else {
+    #   print("Trying to install DAPARdata")
+    #   BiocManager::install("DAPARdata")
+    #   if(require(DAPARdata)){
+    #     print("DAPARdata installed and loaded")
+    #     selectInput(ns("demoDataset"),
+    #                 "Demo dataset",
+    #                 choices = utils::data(package='DAPARdata')$results[,"Item"],
+    #                 width='200px'   )
+    #   } else {
+    #     stop("Could not install the package DAPARdata")
+    #   }
+    # }
+    
+  })
   
   
   rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def = reactive({pipeline.def()}))
@@ -63,59 +91,30 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
              'infos', 
              obj = reactive({
                req(rv.openDemo$dataOut)
-               rv.openDemo$dataOut[['original']]
+               rv.openDemo$dataOut
              })
   )
   
   
-  ### function for demo mode
-  output$chooseDemoDataset <- renderUI({
-    if(require("DAPARdata", lib.loc=DAPARdata.loc)){
-      print("DAPARdata is loaded correctly")
-      selectInput(ns("demoDataset"),
-                  "Demo dataset",
-                  choices = utils::data(package="DAPARdata")$results[,"Item"],
-                  width='200px')
-    } else {
-      print("Trying to install DAPARdata")
-      BiocManager::install("DAPARdata")
-      if(require(DAPARdata)){
-        print("DAPARdata installed and loaded")
-        selectInput(ns("demoDataset"),
-                    "Demo dataset",
-                    choices = utils::data(package='DAPARdata')$results[,"Item"],
-                    width='200px'   )
-      } else {
-        stop("Could not install the package DAPARdata")
-      }
-    }
-    
-  })
-  
-  
-  observeEvent(req(input$loadDemoDataset), {
-    
-    
+  observeEvent(input$loadDemoDataset, {
     nSteps <- 1
     withProgress(message = '',detail = '', value = 0, {
       incProgress(1/nSteps, detail = 'Loading dataset')
       utils::data(list=input$demoDataset)
-      data <- get(input$demoDataset)
+      data <- BiocGenerics::get(input$demoDataset)
       if (class(data)[1]!="MSnSet") {
         shinyjs::info("Warning : this file is not a MSnSet file ! 
                       Please choose another one.")
         return(NULL)
       }
-      proteinID <- data@experimentData@other$proteinId
-      typeOfData <- data@experimentData@other$typeOfData
+      
+      #proteinID <- data@experimentData@other$proteinId
+      typeOfData <- DAPAR::typeOfData(data)
       ll.pipeline <- rv.openDemo$pipe()
-      print("ll.pipeline")
-      print(ll.pipeline)
-      print("typeOfData")
-      print(typeOfData)
+
       switch(typeOfData,
              protein = {
-               rv.openDemo$dataOut <- PipelineProtein(analysis= input$demoDataset, 
+               rv.openDemo$dataOut <- DAPAR::PipelineProtein(analysis= input$demoDataset, 
                                                       pipelineType = names(ll.pipeline), 
                                                       dataType ='protein',
                                                       processes=unlist(ll.pipeline), 
@@ -123,11 +122,10 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
                                                       colData=Biobase::pData(data))
              },
              peptide = {
-               rv.openDemo$dataOut <- PipelinePeptide(analysis= input$demoDataset, 
+               rv.openDemo$dataOut <- DAPAR::PipelinePeptide(analysis= input$demoDataset, 
                                                       pipelineType = names(ll.pipeline), 
                                                       dataType ='peptide',
                                                       processes=unlist(ll.pipeline),
-                                                      proteinID = proteinID,
                                                       experiments=list(original=data), 
                                                       colData=Biobase::pData(data))
              }
@@ -141,13 +139,13 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   output$linktoDemoPdf <- renderUI({
     req(input$demoDataset)
     
-    file<- paste(system.file(package = "DAPARdata"),"/doc/",
-                 input$demoDataset,".pdf", sep="")
-    cmd <- paste("cp ",file," www/.", sep="")
-    system(cmd)
-    filename <-paste0(input$demoDataset,".pdf", sep="")
-    p("Dataset documentation ",a(href=filename, target='_blank', "(pdf)"))
-    
+    # file<- paste(system.file(package = "DAPARdata"),"/doc/",
+    #              input$demoDataset,".pdf", sep="")
+    # cmd <- paste("cp ",file," www", sep="")
+    # system(cmd)
+    # filename <-paste0(input$demoDataset,".pdf", sep="")
+    # p("Dataset documentation ",a(href=filename, target='_blank', "(pdf)"))
+    # 
   })
   
  

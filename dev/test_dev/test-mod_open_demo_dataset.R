@@ -3,14 +3,13 @@ library(DAPAR)
 library(MultiAssayExperiment)
 
 library(Prostar2)
-library(DAPAR)
-source(file.path('../../R', 'mod_open_demo_dataset.R'), local=TRUE)$value
+
+
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
-source(file.path('../../R', 'commonFunc.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-
+source(file.path('../../R', 'mod_open_demo_dataset.R'), local=TRUE)$value
 
 actionBtnClass <- "btn-primary"
 
@@ -27,8 +26,7 @@ server <- function(input, output, session) {
     demoData = NULL
   )
   
-  defs <- ReadPipelineConfig('../../R/pipeline.conf')
-  rv$demoData <- callModule(mod_open_demo_dataset_server, "rl", pipeline.def=reactive({defs}))
+  rv$demoData <- callModule(mod_open_demo_dataset_server, "rl", pipeline.def=reactive({pipeline.defs}))
 }
 
 

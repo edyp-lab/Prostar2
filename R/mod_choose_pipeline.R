@@ -27,12 +27,14 @@ mod_choose_pipeline_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_choose_pipeline_server <- function(input, output, session, pipeline.def, dataType){
+mod_choose_pipeline_server <- function(input, output, session, pipeline.def=NULL, dataType=NULL){
   ns <- session$ns
   
   rv.choosePipeline <- reactiveValues(
     choice = NULL )
   
+  
+    
   observeEvent( req(input$pipelineChoice), {
     rv.choosePipeline$choice <- pipeline.def()[input$pipelineChoice]
   })

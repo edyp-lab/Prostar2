@@ -37,14 +37,14 @@ mod_open_dataset_ui <- function(id){
 #' @rdname mod_open_dataset
 #' @export
 #' @keywords internal
-#' @importFrom DAPAR PipelineProtein PipelinePeptide
+#' @importFrom DAPAR PipelineProtein PipelinePeptide typeOfData
 #'     
 mod_open_dataset_server <- function(input, output, session,pipeline.def){
   ns <- session$ns
   
   
   rv.openDataset <- reactiveValues(
-    outut = NULL,
+    dataOut = NULL,
     pipe = NULL
   )
   
@@ -55,8 +55,8 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({
-               req(rv.openDataset$out)
-               rv.openDataset$out[['original']]
+               req(rv.openDataset$dataOut)
+               rv.openDataset$dataOut
              })
   )
   
@@ -72,23 +72,20 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
     withProgress(message = '',detail = '', value = 0, {
       incProgress(1, detail = 'Loading dataset')
       switch(class(data)[1],
-             MultiAssayExperiment= {rv.openDataset$out <- data},
+             MultiAssayExperiment= {rv.openDataset$dataOut <- data},
              MSnSet= {
-               keyId <- keyId(data)
-               parentProtId <- parentProtId(data)
-               typeOfData <- typeOfData(data)
+               typeOfData <- DAPAR::typeOfData(data)
                ll.pipeline <- rv.openDataset$pipe()
                
                switch(typeOfData,
-                      peptide = {rv.openDataset$out <- PipelinePeptide(analysis= DeleteExtension(input$file$name), 
+                      peptide = {rv.openDataset$dataOut <- PipelinePeptide(analysis= DeleteExtension(input$file$name), 
                                                                        pipelineType = names(ll.pipeline), 
                                                                        dataType ='peptide',
                                                                        processes=unlist(ll.pipeline),
-                                                                       proteinID = proteinID,
                                                                        experiments=list(original=data), 
                                                                        colData=Biobase::pData(data))
                       },
-                      protein = {rv.openDataset$out <- PipelineProtein(analysis= DeleteExtension(input$file$name), 
+                      protein = {rv.openDataset$dataOut <- PipelineProtein(analysis= DeleteExtension(input$file$name), 
                                                                        pipelineType = names(ll.pipeline), 
                                                                        dataType ='protein',
                                                                        processes=unlist(ll.pipeline), 
@@ -96,7 +93,7 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
                                                                        colData=Biobase::pData(data)
                       )
                       }, 
-                      p2p = {rv.openDataset$out <- NULL}
+                      p2p = {rv.openDataset$dataOut <- NULL}
                )
              },
              default= {
@@ -111,7 +108,7 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
   })
   
   
-  return(reactive({rv.openDataset$out }))
+  return(reactive({rv.openDataset$dataOut }))
 }
     
 ## To be copied in the UI
