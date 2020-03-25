@@ -65,9 +65,9 @@ module_plots_ui <- function(id){
       br(),br(),br(),
     shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
     shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
-    #shinyjs::hidden(div(id=ns('div_plot_pca_large'),mod_plots_pca_ui(ns('plot_pca_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_pca_large'),mod_plots_pca_ui(ns('plot_pca_large')))),
     shinyjs::hidden(div(id=ns('div_plot_var_dist_large'),mod_plots_var_dist_ui(ns('plot_var_dist_large')))),
-    shinyjs::hidden(div(id=ns('div_plot_corrMatrix_large'),mod_plots_corr_matrix_ui(ns('plot_corrMatrix_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_corr_matrix_large'),mod_plots_corr_matrix_ui(ns('plot_corr_matrix_large')))),
     shinyjs::hidden(div(id=ns('div_plot_heatmap_large'),mod_plots_heatmap_ui(ns('plot_heatmap_large')))),
     shinyjs::hidden(div(id=ns('div_plot_group_mv_large'),mod_plots_group_mv_ui(ns('plot_group_mv_large'))))
       )
@@ -108,7 +108,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({dataIn()}))
   callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", obj = reactive({dataIn()}))
   callModule(mod_plots_heatmap_server, "plot_heatmap_large", obj = reactive({dataIn()}))
-  #callModule(module=mod_plots_pca_server, 'plot_pca_large', obj=reactive({dataIn()}))
+  callModule(module=mod_plots_pca_server, 'plot_pca_large', obj=reactive({dataIn()}))
   callModule(module=mod_plots_intensity_server, 'plot_intensity_large', 
              dataIn=reactive({dataIn()}),
              params = reactive({NULL}),
@@ -189,21 +189,13 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   
 
   #### Code for PCA
-  # output$plotpcasmall <- renderImage({
-  #   filename <- normalizePath(file.path('./images','desc_pca.png'))
-  #   list(src = filename,
-  #        width = .width,
-  #        height = .height)
-  # }, deleteFile = FALSE)
-  # 
-  # 
-  # 
-  # 
-  # 
-  # output$plotpcalarge <- renderUI({
-  #   mod_plots_pca_ui(ns('pcaPlots_AbsPanel'))
-  # })
-  
+  output$plot_pca_small <- renderImage({
+    filename <- normalizePath(file.path('./images','desc_pca.png'))
+    list(src = filename,
+         width = .width,
+         height = .height)
+  }, deleteFile = FALSE)
+
   
   
   ################################################
