@@ -54,11 +54,13 @@ module_plots_ui <- function(id){
             div(class="topimg",imageOutput(ns('plot_heatmap_small'), height=30, width=30))
           )
       ),
-      tags$button(
-        id = ns("btn_group_mv"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_mv_small'), height=30, width=30))
+      div(style="display:inline-block; vertical-align: middle; padding: 7px",
+          tags$button(
+            id = ns("btn_group_mv"),
+            class = "btn action-button",
+            div(class="topimg",imageOutput(ns('plot_group_mv_small'), height=30, width=30))
       )
+    )
     ),
       br(),br(),br(),
     shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
@@ -158,7 +160,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   ##### Plots for missing values
 
   output$plot_group_mv_small <- renderImage({
-    filename <- normalizePath(file.path('./images','desc_mv.png'))
+    filename <- normalizePath(file.path('./images','desc_group_mv.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -168,7 +170,6 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   
   ############# Plots for MSnSet explorer
   output$plot_quanti_small <- renderImage({
-
     filename <- normalizePath(file.path('./images','desc_quantiData.png'))
     list(src = filename,
          width = .width,
@@ -176,17 +177,6 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   }, deleteFile = FALSE)
 
 
-
-  ###############################
-  
-  
-  output$plot_group_mv_small <- renderImage({
-    filename <- normalizePath(file.path('./images','desc_mv.png'))
-    list(src = filename,
-         width = .width,
-         height = .height)
-  }, deleteFile = FALSE)
-  
  
    ##### Code for heatmap
   
@@ -197,11 +187,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
          height = .height)
   }, deleteFile = FALSE)
   
-  output$plot_heatmap_large <- renderUI({
-    mod_plots_heatmap_ui(ns('heatmap_AbsPanel'))
-  })
-  
-  
+
   #### Code for PCA
   # output$plotpcasmall <- renderImage({
   #   filename <- normalizePath(file.path('./images','desc_pca.png'))

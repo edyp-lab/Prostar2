@@ -22,6 +22,7 @@ mod_A_ui <- function(id){
        div( style="display:inline-block; vertical-align: middle; padding: 7px",
                   tags$button(
                     id = ns("btn1"),
+                    info = 'test',
                     class = "btn action-button",
                     div(class="topimg",imageOutput(ns('image1'), height=30, width=30))
                   )
