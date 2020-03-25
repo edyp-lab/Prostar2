@@ -15,7 +15,7 @@ server <- function(input, output, session) {
   library(DAPARdata)
   data("Exp1_R25_prot")
 
-  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = Exp1_R25_prot)
+  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = reactive({Exp1_R25_prot}))
 }
 
 

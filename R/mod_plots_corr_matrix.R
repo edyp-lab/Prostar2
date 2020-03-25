@@ -57,11 +57,14 @@ mod_plots_corr_matrix_ui <- function(id){
 mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
   ns <- session$ns
   
-  if (is.null(obj) | class(obj)!="MSnSet") {return(NULL)}
+  observe({
+    req(obj())
+    if (class(obj())[1] != "MSnSet") {return(NULL)}
+  })
   
   corrMatrix <- reactive({
     
-    req(obj)
+    req(obj())
     input$expGradientRate
     
     gradient <- NULL
@@ -70,7 +73,7 @@ mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
     else{
       gradient <- input$expGradientRate}
     isolate({
-      tmp <- wrapper.corrMatrixD_HC(obj,gradient)
+      tmp <- wrapper.corrMatrixD_HC(obj(),gradient)
       
     })
     tmp

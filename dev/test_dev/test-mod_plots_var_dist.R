@@ -19,7 +19,7 @@ server <- function(input, output, session) {
 
   # obj est un msnset
   #callModule(mod_plots_var_dist_server,'varDistPlot', obj = Exp1_R25_prot)
-  callModule(mod_plots_var_dist_server,'varDistPlot', obj = Exp1_R25_prot)
+  callModule(mod_plots_var_dist_server,'varDistPlot', obj = reactive({Exp1_R25_prot}))
   #callModule(mod_plots_var_dist_server,'varDistPlot', obj = mae)
 }
 

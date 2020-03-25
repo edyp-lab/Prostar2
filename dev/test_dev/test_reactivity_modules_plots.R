@@ -1,0 +1,39 @@
+library(highcharter)
+library(DAPAR)
+library(shiny)
+library(DAPARdata)
+
+
+source(file.path("../../R","mod_plots_corr_matrix.R"), local=TRUE)$value
+
+
+ui <- fluidPage(
+  tagList(
+    uiOutput('choose_data_ui'),
+    mod_plots_corr_matrix_ui('plots_corr_matrix')
+  )
+)
+
+
+server <- function(input, output, session) {
+  
+  rv <- reactiveValues(
+    current.obj = NULL
+  )
+  
+  output$choose_data_ui <- renderUI({
+    selectInput('choose_data', "Dataset", choices = utils::data(package="DAPARdata")$results[,"Item"]
+                )
+  })
+  
+  
+  observeEvent(input$choose_data,{
+    rv$current.obj <- BiocGenerics::get(input$choose_data)
+    print(rv$current.obj)
+  })
+  
+  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = reactive({rv$current.obj}))
+}
+
+
+shinyApp(ui=ui, server=server)

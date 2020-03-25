@@ -18,7 +18,7 @@ server <- function(input, output, session) {
   data("Exp1_R25_prot")
   
   # obj est un msnset
-  callModule(mod_plots_density_server,'plots_density', obj = Exp1_R25_prot)
+  callModule(mod_plots_density_server,'plots_density', obj = reactive({Exp1_R25_prot}))
 }
 
 

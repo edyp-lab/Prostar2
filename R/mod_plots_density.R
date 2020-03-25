@@ -29,26 +29,24 @@ mod_plots_density_ui <- function(id){
 mod_plots_density_server <- function(input, output, session, obj = NULL){
   ns <- session$ns
   
-  
-  if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
-  
+  observe({
+    req(obj())
+  if (class(obj())[1] != "MSnSet") { return(NULL) }
+  })
   
   output$Densityplot <- renderHighchart({
-    req(obj)
+    req(obj())
     # settings <- rv.prostar$settings()
     # rv.prostar$settings()$examplePalette
     # rv.prostar$settings()$legendForSamples
-    legend <- Biobase::pData(obj)[,"Condition"]
+    legend <- Biobase::pData(obj())[,"Condition"]
     palette <- RColorBrewer::brewer.pal(8,"Dark2")[1:length(unique(legend))]
     palette <- rep(palette, each=length(legend)/length(unique(legend)))
-    
-    
-    print("IN : moduleDensityplot ")
     tmp <- NULL
     isolate({
       
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- densityPlotD_HC(obj, 
+        tmp <- densityPlotD_HC(obj(), 
                                # rv.prostar$settings()$legendForSamples,
                                # rv.prostar$settings()$examplePalette
                                legend = legend,
