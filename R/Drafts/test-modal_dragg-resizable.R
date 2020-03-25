@@ -23,7 +23,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  jqui_resizable("#modal .modal-content" )
+  jqui_resizable("#modal .modal-content", options = list(minHeight = 200,
+                                                         minWidth=200))
   jqui_draggable("#modal .modal-content", options = list(revert=TRUE) )
   
   
@@ -76,14 +77,13 @@ server <- function(input, output, session) {
     
     tagList (
       
-      tags$head(tags$style(".modal-dialog{ width:25px ,height:25px}")),
-      #tags$head(tags$style(".modal-body{ min-height:20px}")),
+      tags$head(tags$style(".modal-dialog { width:75% }")),
       
       
       shinyBS::bsModal("modal",
                        "Toto",
                        trigger = "createVignettes_small",
-                       #size = "small",
+                       size = "large",
                        "foo"
                        #uiOutput("plotcorrMatrixlarge")
       )
