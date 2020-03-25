@@ -35,16 +35,21 @@ mod_plots_var_dist_ui <- function(id){
 mod_plots_var_dist_server <- function(input, output, session, obj){
   ns <- session$ns
   
-  if (is.null(obj) | class(obj)!="MSnSet") { return(NULL) }
+  observe({
+    req(obj())
+    
+    if (class(obj())[1] != "MSnSet") { return(NULL) }
+  })
   
-  examplePalette = RColorBrewer::brewer.pal(ncol(Biobase::exprs(obj)),"Dark2")
+  
   
   viewDistCV <- reactive({
     
-    req(obj)
-
+    req(obj())
+    examplePalette = RColorBrewer::brewer.pal(ncol(Biobase::exprs(obj())),"Dark2")
+    
     isolate({
-      varDist <- wrapper.CVDistD_HC(obj,examplePalette)
+      varDist <- wrapper.CVDistD_HC(obj(),examplePalette)
     })
     varDist
   })

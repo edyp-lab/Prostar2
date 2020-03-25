@@ -61,12 +61,15 @@ mod_plots_heatmap_ui <- function(id){
 mod_plots_heatmap_server <- function(input, output, session, obj){
   ns <- session$ns
   
-  if (is.null(obj) | class(obj)!="MSnSet") { return(NULL) }
+  observe({
+    req(obj())
+    if (class(obj())[1] != "MSnSet") { return(NULL) }
+  })
   
   output$DS_PlotHeatmap <- renderUI({
-    req(obj)
+    req(obj())
     #if (nrow(obj) > limitHeatmap){
-    if (nrow(obj) > 20000){
+    if (nrow(obj()) > 20000){
       tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
     }else {
       tagList(
@@ -88,12 +91,12 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
   
   heatmap <- reactive({
     
-    req(obj)
+    req(obj())
     req(input$linkage)
     req(input$distance)
     
     isolate({ 
-      DAPAR::wrapper.heatmapD(obj,
+      DAPAR::wrapper.heatmapD(obj(),
                        input$distance, 
                        input$linkage,
                        TRUE)
@@ -101,8 +104,7 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
     
   })
   
-  
-  
+
 }
 
 ## To be copied in the UI

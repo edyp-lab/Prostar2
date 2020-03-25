@@ -1,9 +1,20 @@
 ######
-modulePlotsUI <- function(id){
+module_plots_ui <- function(id){
   ns <- NS(id)
-  
-  uiOutput(ns("plotModule"))
-  
+
+  tagList(
+    shinyjs::useShinyjs(),
+     uiOutput(ns("viewVignettes")),
+      br(),br(),br(),
+    shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
+    #shinyjs::hidden(div(id=ns('div_plot_pca_large'),mod_plots_pca_ui(ns('plot_pca_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_var_dist_large'),mod_plots_var_dist_ui(ns('plot_var_dist_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_corrMatrix_large'),mod_plots_corr_matrix_ui(ns('plot_corrMatrix_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_heatmap_large'),mod_plots_heatmap_ui(ns('plot_heatmap_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_group_mv_large'),mod_plots_group_mv_ui(ns('plot_group_mv_large'))))
+      )
+
 }
 
 
@@ -11,7 +22,7 @@ modulePlotsUI <- function(id){
 
 ####-----------------------------------------------------------####
 
-modulePlots <- function(input, output, session, dataIn, llPlots){
+module_plots_server <- function(input, output, session, dataIn, llPlots,base_palette){
   ns <- session$ns
   
   jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content" ))
@@ -22,89 +33,110 @@ modulePlots <- function(input, output, session, dataIn, llPlots){
   
   .width <- 50
   .height <- 50
+
   
+
+  rv <- reactiveValues(
+    current.plot = NULL
+  )
   
-  
-  output$plotModule <- renderUI({
-    req(dataIn)
-    
-    panelheight = 60*length(llPlots())
-    absolutePanel(
-      id  = "#AbsolutePanelPlots",
-      #style= "text-align: center; color: grey; border-width:0px; z-index: 10;",
-      #top = 350, right = 50,
-      width = "70px",
-      height = paste0(as.character(panelheight), "px"),
-      #draggable = TRUE,fixed = TRUE,
-      cursor = "default",
-      tags$head(tags$style(".modal-dialog{ width:95%}")),
-      tags$head(tags$style(".modal-body{ min-height:50%}")),
-      actionButton(ns('plotBtn'), 'Plots', "data-toggle"='collapse', "data-target"=paste0('#',ns('plotDiv')), 
-                   style='color: white;background-color: lightgrey',
-                   class = actionBtnClass),
-      tags$div(
-        id = ns('plotDiv'),  
-        class="collapse", 
-        style='background-color: white',
-        uiOutput(ns('createVignettes'))
+  output$viewVignettes <- renderUI({
+   
+    fluidPage(
+      tags$style(".topimg {
+                            margin-left:-20px;
+                            margin-right:-20px;
+                            margin-top:-20px;
+                            margin-bottom:-20px;
+                          }"),
+      tags$button(
+        id = ns("btn_quanti"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_quanti_small'), height=40, width=40))
+      ),
+      tags$button(
+        id = ns("btn_intensity"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_intensity_small'), height=40, width=40))
+      ),
+      tags$button(
+        id = ns("btn_pca"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_pca_small'), height=40, width=40))
+      ),
+      tags$button(
+        id = ns("btn_var_dist"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_var_dist_small'), height=40, width=40))
+      ),
+      tags$button(
+        id = ns("btn_corr_matrix"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_corr_matrix_small'), height=40, width=40))
+      ),
+      tags$button(
+        id = ns("btn_heatmap"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_heatmap_small'), height=40, width=40))
+      ),
+      tags$button(
+        id = ns("btn_group_mv"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_mv_small'), height=40, width=40))
       )
     )
+
+  })
+  
+  callModule(mod_plots_group_mv_server, 
+             "plot_group_mv_large", 
+             obj = reactive({dataIn()}),
+             base_palette = reactive({base_palette()}))
+  
+  callModule(mod_plots_var_dist_server, 'plot_var_dist_large', obj=reactive({dataIn()}))
+  callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({dataIn()}))
+  callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", obj = reactive({dataIn()}))
+  callModule(mod_plots_heatmap_server, "plot_heatmap_large", obj = reactive({dataIn()}))
+  #callModule(module=mod_plots_pca_server, 'plot_pca_large', obj=reactive({dataIn()}))
+  callModule(module=mod_plots_intensity_server, 'plot_intensity_large', 
+             dataIn=reactive({dataIn()}),
+             params = reactive({NULL}),
+             reset = reactive({FALSE}),
+             base_palette = reactive({base_palette()})
+  )
+  
+
+  
+  observeEvent(input$btn_quanti,{rv$current.plot <- 'quanti'})
+  observeEvent(input$btn_intensity,{rv$current.plot <- 'intensity'})
+  observeEvent(input$btn_pca,{rv$current.plot <- 'pca'})
+  observeEvent(input$btn_var_dist,{rv$current.plot <- 'var_dist'})
+  observeEvent(input$btn_corr_matrix,{rv$current.plot <- 'corr_matrix'})
+  observeEvent(input$btn_heatmap,{rv$current.plot <- 'heatmap'})
+  observeEvent(input$btn_group_mv,{rv$current.plot <- 'group_mv'})
+  
+  
+  
+  observeEvent(rv$current.plot,{
+    print(paste0('current.plot = ', rv$current.plot))
+    ll <- c('quanti', 'intensity', 'pca', 'var_dist', 'corr_matrix', 'heatmap', 'group_mv')
+    
+    for (i in ll){
+      if (i == rv$current.plot) {
+        shinyjs::show(paste0('div_plot_',rv$current.plot,'_large'))
+      } else {
+        shinyjs::hide(paste0('div_plot_',i,'_large'))
+      }
+    }
     
   })
   
+
   
   
-  output$createVignettes <- renderUI({
-    
-    ll <- list(NULL)
-    
-    vHeight <- 60
-    vWidth <- 50
-    
-    for (i in 1:length(llPlots())) {
-      switch(llPlots()[i],
-             quantiTable=ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotquantiTablesmall"), height='60', width='50')),
-             intensity=ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotintensitysmall"), height='60', width='50')),
-             pca = ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotpcasmall"), height='60', width='50')),
-             varDist = ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotvarDistsmall"), height='60', width='50')),
-             corrMatrix=ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotcorrMatrixsmall"), height='60', width='50')),
-             heatmap = ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotheatmapsmall"), height='60', width='50')),
-             mv = ll[[i]] <- tags$div( style="display:inline-block;",imageOutput(ns("plotmvsmall"), height='60', width='50'))
-      )
-    }
-    
-    
-    for (i in 1:length(llPlots())) {
-      n <- i + length(llPlots())
-      switch(llPlots()[i],
-             quantiTable=
-               ll[[n]] <- shinyBS::bsModal(ns("modalquantiTable"), "Data explorer", ns("plotquantiTablesmall"), size = "small",uiOutput(ns("plotquantiTablelarge"))),
-             intensity=
-               ll[[n]] <- shinyBS::bsModal("modalintensity", "Intensities distribution", ns("plotintensitysmall"), size = "small",uiOutput(ns("plotintensitylarge"))),
-             pca = 
-               ll[[n]] <- shinyBS::bsModal("modalpca", "PCA", ns("plotpcasmall"), size = "small",uiOutput(ns("plotpcalarge"))),
-             varDist = 
-               ll[[n]] <- shinyBS::bsModal("modalvarDist", "Variance distribution", ns("plotvarDistsmall"), size = "small",uiOutput(ns("plotvarDistlarge"))),
-             corrMatrix=
-               ll[[n]] <- shinyBS::bsModal(ns("modalcorrMatrix"), "Correlation matrix", ns("plotcorrMatrixsmall"), size = "small", uiOutput(ns("plotcorrMatrixlarge"))),
-             heatmap = 
-               ll[[n]] <- shinyBS::bsModal("modalheatmap", "Heatmap", ns("plotheatmapsmall"), size = "small",uiOutput(ns("plotheatmaplarge"))),
-             mv = 
-               ll[[n]] <- shinyBS::bsModal("modalmv", "Missing values statistics", ns("plotmvsmall"), size = "large",uiOutput(ns("plotmvlarge")))
-      )
-    }
-    
-    
-    ll 
-    
-  })
-  
-  
-  
-  
-  
+
   ################### Plot for correlation matrix
-  output$plotcorrMatrixsmall <- renderImage({
+  output$plot_corr_matrix_small <- renderImage({
     filename <- normalizePath(file.path('./images','desc_corrmatrix.png'))
     list(src = filename,
          width = .width,
@@ -113,20 +145,9 @@ modulePlots <- function(input, output, session, dataIn, llPlots){
   
   
   
-  callModule(mod_plots_corr_matrix_server, "corrMatrixPlot_AbsPanel", obj = dataIn)
-  
-  output$plotcorrMatrixlarge <- renderUI({
-    mod_plots_corr_matrix_ui(ns("corrMatrixPlot_AbsPanel"))
-    
-  })
-  
-  
-  
-  
   
   ##### Plots for missing values
-  
-  
+
   output$plotmvsmall <- renderImage({
     filename <- normalizePath(file.path('./images','desc_mv.png'))
     list(src = filename,
@@ -147,94 +168,82 @@ modulePlots <- function(input, output, session, dataIn, llPlots){
   
   
   ############# Plots for MSnSet explorer
-  
-  output$plotquantiTablesmall <- renderImage({
+  output$plot_quanti_small <- renderImage({
+
     filename <- normalizePath(file.path('./images','desc_quantiData.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
+
+
+
+  ###############################
   
   
+  output$plot_group_mv_small <- renderImage({
+    filename <- normalizePath(file.path('./images','desc_mv.png'))
+    list(src = filename,
+         width = .width,
+         height = .height)
+  }, deleteFile = FALSE)
   
+ 
+   ##### Code for heatmap
   
-  callModule(module=mod_plots_msnset_explorer_server, 'msnsetExplorer',
-             obj = dataIn)
-  
-  output$plotquantiTablelarge <- renderUI({
-    mod_plots_msnset_explorer_ui(ns('msnsetExplorer'))
-  })
-  
-  
-  
-  
-  ##### Code for heatmap
-  
-  output$plotheatmapsmall <- renderImage({
+  output$plot_heatmap_small <- renderImage({
     filename <- normalizePath(file.path('./images','desc_heatmap.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
   
-  callModule(mod_plots_heatmap_server, "heatmap_AbsPanel", obj = dataIn)
-  
-  output$plotheatmaplarge <- renderUI({
+  output$plot_heatmap_large <- renderUI({
     mod_plots_heatmap_ui(ns('heatmap_AbsPanel'))
   })
   
   
   #### Code for PCA
-  output$plotpcasmall <- renderImage({
-    filename <- normalizePath(file.path('./images','desc_pca.png'))
-    list(src = filename,
-         width = .width,
-         height = .height)
-  }, deleteFile = FALSE)
-  
-  
-  
-  callModule(module=mod_plots_corr_matrix_server, 'pcaPlots_AbsPanel', obj=dataIn)
-  
-  output$plotpcalarge <- renderUI({
-    mod_plots_corr_matrix_ui(ns('pcaPlots_AbsPanel'))
-  })
+  # output$plotpcasmall <- renderImage({
+  #   filename <- normalizePath(file.path('./images','desc_pca.png'))
+  #   list(src = filename,
+  #        width = .width,
+  #        height = .height)
+  # }, deleteFile = FALSE)
+  # 
+  # 
+  # 
+  # 
+  # 
+  # output$plotpcalarge <- renderUI({
+  #   mod_plots_pca_ui(ns('pcaPlots_AbsPanel'))
+  # })
   
   
   
   ################################################
   #### Code for intensity plots
-  output$plotintensitysmall <- renderImage({
+  output$plot_intensity_small <- renderImage({
     filename <- normalizePath(file.path('./images','desc_intdistrib.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
   
-  callModule(module=mod_plots_corr_matrix_server, 'intensityPlots_AbsPanel', 
-             obj=dataIn)
-  
-  output$plotintensitylarge <- renderUI({
-    mod_plots_corr_matrix_ui(ns("intensityPlots_AbsPanel"))
-  })
-  
-  
+
   
   ############ Module for variance distribution plots
   
-  output$plotvarDistsmall <- renderImage({
+  output$plot_var_dist_small <- renderImage({
     filename <- normalizePath(file.path('./images','desc_varDist.jpg'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
   
-  callModule(mod_plots_var_dist_server, 'varDist_AbsPanel', obj=dataIn)
+
   
-  output$plotvarDistlarge <- renderUI({
-    mod_plots_var_dist_ui(ns('varDist_AbsPanel'))
-  })
-  
-  
+
   return(NULL)
 }
+  
