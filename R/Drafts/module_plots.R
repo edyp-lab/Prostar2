@@ -1,7 +1,7 @@
 ######
 module_plots_ui <- function(id){
   ns <- NS(id)
-  
+
   tagList(
     shinyjs::useShinyjs(),
      uiOutput(ns("viewVignettes")),
@@ -15,8 +15,8 @@ module_plots_ui <- function(id){
     shinyjs::hidden(div(id=ns('div_plot_group_mv_large'),mod_plots_group_mv_ui(ns('plot_group_mv_large'))))
       )
 
-  
 }
+
 
 
 
@@ -25,17 +25,17 @@ module_plots_ui <- function(id){
 module_plots_server <- function(input, output, session, dataIn, llPlots,base_palette){
   ns <- session$ns
   
-  #####################
-  #jqui_resizable("#modalquantiTable .modal-content")
-  #jqui_resizable("#modalcorrMatrix .modal-content")
-  #jqui_resizable(paste0("#",ns("modalquantiTable")," .modal-content" ))
-  #jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content" ))
-  #####################
+  jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content" ))
+  jqui_draggable(paste0("#",ns("modalcorrMatrix")," .modal-content"), options = list(revert=TRUE))
+  jqui_resizable(paste0("#",ns("modalquantiTable")," .modal-content" ))
+  jqui_draggable(paste0("#",ns("modalquantiTable")," .modal-content"), options = list(revert=TRUE))
+  
   
   .width <- 50
   .height <- 50
 
   
+
   rv <- reactiveValues(
     current.plot = NULL
   )
@@ -85,8 +85,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
         div(class="topimg",imageOutput(ns('plot_mv_small'), height=40, width=40))
       )
     )
-             
-           
+
   })
   
   callModule(mod_plots_group_mv_server, 
@@ -106,8 +105,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
              base_palette = reactive({base_palette()})
   )
   
-  
-  
+
   
   observeEvent(input$btn_quanti,{rv$current.plot <- 'quanti'})
   observeEvent(input$btn_intensity,{rv$current.plot <- 'intensity'})
@@ -133,6 +131,10 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
     
   })
   
+
+  
+  
+
   ################### Plot for correlation matrix
   output$plot_corr_matrix_small <- renderImage({
     filename <- normalizePath(file.path('./images','desc_corrmatrix.png'))
@@ -144,14 +146,36 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   
   
   
-  ############# Plots for MSnSet explorer
+  ##### Plots for missing values
 
+  output$plotmvsmall <- renderImage({
+    filename <- normalizePath(file.path('./images','desc_mv.png'))
+    list(src = filename,
+         width = .width,
+         height = .height)
+  }, deleteFile = FALSE)
+  
+  callModule(mod_plots_corr_matrix_server, "MVPlots_AbsPanel", obj = dataIn)
+  
+  output$plotmvlarge <- renderUI({
+    tagList(
+      helpText("These barplots display the distribution of missing values in the dataset."),
+      mod_plots_corr_matrix_ui(ns("MVPlots_AbsPanel"))
+    )
+  })
+  
+  
+  
+  
+  ############# Plots for MSnSet explorer
   output$plot_quanti_small <- renderImage({
+
     filename <- normalizePath(file.path('./images','desc_quantiData.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
+
 
 
   ###############################
@@ -206,12 +230,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
          height = .height)
   }, deleteFile = FALSE)
   
-  
-  output$plot_intensity_large <- renderUI({
-    mod_plots_intensity_plots_ui(ns("intensityPlots_AbsPanel"))
-  })
-  
-  
+
   
   ############ Module for variance distribution plots
   
@@ -224,6 +243,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   
 
   
+
   return(NULL)
 }
   

@@ -1,3 +1,10 @@
+# Fenêtre modal déplaçable et redimentionnable
+# Taille modal modifiable
+# Ouvre un modal appelé depuis une image
+
+
+setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
+
 library(highcharter)
 library(shinyjqui)
 library(shiny)
@@ -17,6 +24,8 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   jqui_resizable("#modal .modal-content" )
+  jqui_draggable("#modal .modal-content", options = list(revert=TRUE) )
+  
   
   .width <- 50
   .height <- 50
@@ -51,35 +60,6 @@ server <- function(input, output, session) {
   
   
   
-  # output$createVignettes <- renderUI({
-  #   
-  #   print("llPlots")
-  #   print(llPlots)
-  #   uiOutput('plotModule')
-  #   
-  #   ll <- list(NULL)
-  #   
-  #   ll[[1]] <- tags$div( style="display:inline-block;",
-  #                        imageOutput("plotcorrMatrixsmall"),
-  #                        height='60',
-  #                        width='50')
-  #   
-  #   n <- 1 + length(llPlots)
-  #   ll[[n]] <- jqui_draggable(
-  #     shinyBS::bsModal("modal",
-  #                      "Correlation matrix",
-  #                      trigger = "plotcorrMatrixsmall",
-  #                      size = "small",
-  #                      "bar"
-  #                      #uiOutput("plotcorrMatrixlarge")
-  #     )
-  #   )
-  #   
-  #   
-  #   ll
-  #   
-  # })
-  
   output$createVignettes_small <- renderUI({
     
     tagList(
@@ -94,18 +74,20 @@ server <- function(input, output, session) {
   
   output$createVignettes_large <- renderUI({
     
-    tagList (   
+    tagList (
       
-      tags$head(tags$style(".modal-dialog{ width:75%}")),
+      tags$head(tags$style(".modal-dialog{ width:25px ,height:25px}")),
+      #tags$head(tags$style(".modal-body{ min-height:20px}")),
       
-      jqui_draggable(
-        shinyBS::bsModal("modal",
-                         "Correlation matrix",
-                         trigger = "createVignettes_small",
-                         size = "large",
-                         uiOutput("plotcorrMatrixlarge")
-        ), options = list(revert=TRUE)
-      ) )
+      
+      shinyBS::bsModal("modal",
+                       "Toto",
+                       trigger = "createVignettes_small",
+                       #size = "small",
+                       "foo"
+                       #uiOutput("plotcorrMatrixlarge")
+      )
+    )
     
   })
   
