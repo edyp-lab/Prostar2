@@ -4,7 +4,62 @@ module_plots_ui <- function(id){
 
   tagList(
     shinyjs::useShinyjs(),
-     uiOutput(ns("viewVignettes")),
+    fluidPage(
+      tags$style(".topimg {
+                            margin-left:-25px;
+                            margin-right:-20px;
+                            margin-top:-20px;
+                            margin-bottom:-20px;
+                            padding: 10px;
+                          }"),
+      div( style="display:inline-block; vertical-align: middle; padding: 7px",
+           tags$button(
+             id = ns("btn_quanti"),
+             class = "btn action-button",
+             div(class="topimg",imageOutput(ns('plot_quanti_small'), height=30, width=30))
+           )
+      ),
+      div( style="display:inline-block; vertical-align: middle; padding: 7px",
+           tags$button(
+             id = ns("btn_intensity"),
+             class = "btn action-button",
+             div(class="topimg",imageOutput(ns('plot_intensity_small'), height=30, width=30))
+           )
+      ),
+      div(style="display:inline-block; vertical-align: middle; padding: 7px",
+          tags$button(
+            id = ns("btn_pca"),
+            class = "btn action-button",
+            div(class="topimg",imageOutput(ns('plot_pca_small'), height=30, width=30))
+          ) 
+      ),
+      div(style="display:inline-block; vertical-align: middle; padding: 7px",
+          tags$button(
+            id = ns("btn_var_dist"),
+            class = "btn action-button",
+            div(class="topimg",imageOutput(ns('plot_var_dist_small'), height=30, width=30))
+          )
+      ),
+      div(style="display:inline-block; vertical-align: middle; padding: 7px",
+          tags$button(
+            id = ns("btn_corr_matrix"),
+            class = "btn action-button",
+            div(class="topimg",imageOutput(ns('plot_corr_matrix_small'), height=30, width=30))
+          )
+      ),
+      div(style="display:inline-block; vertical-align: middle; padding: 7px",
+          tags$button(
+            id = ns("btn_heatmap"),
+            class = "btn action-button",
+            div(class="topimg",imageOutput(ns('plot_heatmap_small'), height=30, width=30))
+          )
+      ),
+      tags$button(
+        id = ns("btn_group_mv"),
+        class = "btn action-button",
+        div(class="topimg",imageOutput(ns('plot_mv_small'), height=30, width=30))
+      )
+    ),
       br(),br(),br(),
     shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
     shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
@@ -25,14 +80,14 @@ module_plots_ui <- function(id){
 module_plots_server <- function(input, output, session, dataIn, llPlots,base_palette){
   ns <- session$ns
   
-  jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content" ))
-  jqui_draggable(paste0("#",ns("modalcorrMatrix")," .modal-content"), options = list(revert=TRUE))
-  jqui_resizable(paste0("#",ns("modalquantiTable")," .modal-content" ))
-  jqui_draggable(paste0("#",ns("modalquantiTable")," .modal-content"), options = list(revert=TRUE))
+  # jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content" ))
+  # jqui_draggable(paste0("#",ns("modalcorrMatrix")," .modal-content"), options = list(revert=TRUE))
+  # jqui_resizable(paste0("#",ns("modalquantiTable")," .modal-content" ))
+  # jqui_draggable(paste0("#",ns("modalquantiTable")," .modal-content"), options = list(revert=TRUE))
+  # 
   
-  
-  .width <- 50
-  .height <- 50
+  .width <- .height <- 40
+
 
   
 
@@ -40,53 +95,7 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
     current.plot = NULL
   )
   
-  output$viewVignettes <- renderUI({
-   
-    fluidPage(
-      tags$style(".topimg {
-                            margin-left:-20px;
-                            margin-right:-20px;
-                            margin-top:-20px;
-                            margin-bottom:-20px;
-                          }"),
-      tags$button(
-        id = ns("btn_quanti"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_quanti_small'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn_intensity"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_intensity_small'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn_pca"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_pca_small'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn_var_dist"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_var_dist_small'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn_corr_matrix"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_corr_matrix_small'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn_heatmap"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_heatmap_small'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn_group_mv"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('plot_mv_small'), height=40, width=40))
-      )
-    )
-
-  })
+ 
   
   callModule(mod_plots_group_mv_server, 
              "plot_group_mv_large", 
@@ -148,22 +157,12 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   
   ##### Plots for missing values
 
-  output$plotmvsmall <- renderImage({
+  output$plot_group_mv_small <- renderImage({
     filename <- normalizePath(file.path('./images','desc_mv.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
-  
-  callModule(mod_plots_corr_matrix_server, "MVPlots_AbsPanel", obj = dataIn)
-  
-  output$plotmvlarge <- renderUI({
-    tagList(
-      helpText("These barplots display the distribution of missing values in the dataset."),
-      mod_plots_corr_matrix_ui(ns("MVPlots_AbsPanel"))
-    )
-  })
-  
   
   
   

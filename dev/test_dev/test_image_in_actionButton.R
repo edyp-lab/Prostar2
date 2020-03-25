@@ -9,30 +9,63 @@ mod_A_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
+    
+    
     fluidPage(
       tags$style(".topimg {
-                            margin-left:-20px;
+                            margin-left:-25px;
                             margin-right:-20px;
                             margin-top:-20px;
                             margin-bottom:-20px;
+                            padding: 10px;
                           }"),
-      
-      tags$button(
-        id = ns("btn1"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('image1'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn2"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('image2'), height=40, width=40))
-      ),
-      tags$button(
-        id = ns("btn3"),
-        class = "btn action-button",
-        div(class="topimg",imageOutput(ns('image3'), height=40, width=40))
-      )      
+       div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                  tags$button(
+                    id = ns("btn1"),
+                    class = "btn action-button",
+                    div(class="topimg",imageOutput(ns('image1'), height=30, width=30))
+                  )
+                  ),
+      div( style="display:inline-block; vertical-align: middle; padding: 7px",
+                          tags$button(
+                            id = ns("btn2"),
+                            class = "btn action-button",
+                            div(class="topimg",imageOutput(ns('image2'), height=30, width=30))
+                          )),
+      div(style="display:inline-block; vertical-align: middle; padding: 7px",
+                         tags$button(
+                           id = ns("btn3"),
+                           class = "btn action-button",
+                           div(class="topimg",imageOutput(ns('image3'), height=30, width=30))
+                         ) )
     ),
+    
+    # 
+    # 
+    # fluidPage(
+    #   tags$style(".topimg {
+    #                         margin-left:-20px;
+    #                         margin-right:-20px;
+    #                         margin-top:-20px;
+    #                         margin-bottom:-20px;
+    #                       }"),
+    #   
+    #   tags$button(
+    #     id = ns("btn1"),
+    #     class = "btn action-button",
+    #     div(class="topimg",imageOutput(ns('image1'), height=40, width=40))
+    #   ),
+    #   tags$button(
+    #     id = ns("btn2"),
+    #     class = "btn action-button",
+    #     div(class="topimg",imageOutput(ns('image2'), height=40, width=40))
+    #   ),
+    #   tags$button(
+    #     id = ns("btn3"),
+    #     class = "btn action-button",
+    #     div(class="topimg",imageOutput(ns('image3'), height=40, width=40))
+    #   ) ,     
+    # ),
     br(),br(),br(),
     shinyjs::hidden(uiOutput(ns('image1_large'))),
     shinyjs::hidden(uiOutput(ns('image2_large'))),
