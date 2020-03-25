@@ -5,6 +5,7 @@ module_plots_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     fluidPage(
+      
       tags$style(".topimg {
                             margin-left:-25px;
                             margin-right:-20px;
@@ -12,6 +13,9 @@ module_plots_ui <- function(id){
                             margin-bottom:-20px;
                             padding: 10px;
                           }"),
+      div( style="display:inline-block; vertical-align: middle; padding: 7px",
+           uiOutput(ns('chooseDataset_UI'))
+      ),
       div( style="display:inline-block; vertical-align: middle; padding: 7px",
            tags$button(
              id = ns("btn_quanti"),
@@ -126,6 +130,14 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   observeEvent(input$btn_heatmap,{rv$current.plot <- 'heatmap'})
   observeEvent(input$btn_group_mv,{rv$current.plot <- 'group_mv'})
   
+  
+  output$chooseDataset_UI <- renderUI({
+    req(dataIn())
+    
+    selectInput(ns('chooseDataset'), 'Dataset',
+                choices = names(dataIn()),
+                width=150)
+  })
   
   
   observeEvent(rv$current.plot,{

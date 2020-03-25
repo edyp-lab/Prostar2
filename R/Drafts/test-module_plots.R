@@ -20,6 +20,7 @@ source(file.path("..", "mod_plots_msnset_explorer.R"),  local = TRUE)$value
 source(file.path("..", "mod_plots_var_dist.R"), local = TRUE)$value
 source(file.path("..", "global.R"), local = TRUE)$value
 source(file.path("..", "mod_format_DT.R"), local = TRUE)$value
+source(file.path("..", "mod_plots_pca.R"), local = TRUE)$value
 
 
 ui <- fluidPage(

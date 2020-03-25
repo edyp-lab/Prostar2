@@ -1,9 +1,9 @@
-# Fenêtre modal déplaçable et redimentionnable
+# Fenetre modal d?pla?able et redimentionnable
 # Taille modal modifiable
-# Ouvre un modal appelé depuis une image
+# Ouvre un modal appel? depuis une image
 
 
-setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
+#setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
 
 library(highcharter)
 library(shinyjqui)
@@ -105,7 +105,7 @@ server <- function(input, output, session) {
   
   require(DAPARdata)
   data('Exp1_R25_prot')
-  callModule(mod_plots_corr_matrix_server, "corrMatrixPlot_AbsPanel", obj = Exp1_R25_prot)
+  callModule(mod_plots_corr_matrix_server, "corrMatrixPlot_AbsPanel", obj = reactive({Exp1_R25_prot}))
   
   output$plotcorrMatrixlarge <- renderUI({
     mod_plots_corr_matrix_ui("corrMatrixPlot_AbsPanel")
