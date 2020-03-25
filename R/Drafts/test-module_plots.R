@@ -39,8 +39,21 @@ server <- function(input, output, session) {
   
   r$settings <- callModule(mod_settings_server, "settings")
   
+  library(DAPARdata)
+  data('Exp1_R25_pept')
+  data('Exp1_R25_prot')
+  obj <- Exp1_R25_pept
+  samples <- Biobase::pData(obj)
+  mae <- PipelineProtein(analysis= 'test',
+                         pipelineType = 'peptide', 
+                         dataType = 'peptide',
+                         processes='original',
+                         experiments=list(original=Exp1_R25_prot,
+                                          test = Exp1_R25_pept),
+                         colData=samples)
+ 
   callModule(module_plots_server,'plots',
-             dataIn = reactive({Exp1_R25_prot}),
+             dataIn = reactive({mae}),
              llPlots = reactive({c("intensity", "pca", "var_dist",  "heatmap", "mv", "quanti","corr_matrix", "quanti")}),
              base_palette = reactive({r$settings()$examplePalette})
              ) 

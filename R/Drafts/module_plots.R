@@ -98,23 +98,24 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   
 
   rv <- reactiveValues(
-    current.plot = NULL
+    current.plot = NULL,
+    current.obj = NULL
   )
   
  
   
   callModule(mod_plots_group_mv_server, 
              "plot_group_mv_large", 
-             obj = reactive({dataIn()}),
+             obj = reactive({rv$current.obj}),
              base_palette = reactive({base_palette()}))
   
-  callModule(mod_plots_var_dist_server, 'plot_var_dist_large', obj=reactive({dataIn()}))
-  callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({dataIn()}))
-  callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", obj = reactive({dataIn()}))
-  callModule(mod_plots_heatmap_server, "plot_heatmap_large", obj = reactive({dataIn()}))
-  callModule(module=mod_plots_pca_server, 'plot_pca_large', obj=reactive({dataIn()}))
+  callModule(mod_plots_var_dist_server, 'plot_var_dist_large', obj=reactive({rv$current.obj}))
+  callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({rv$current.obj}))
+  callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", obj = reactive({rv$current.obj}))
+  callModule(mod_plots_heatmap_server, "plot_heatmap_large", obj = reactive({rv$current.obj}))
+  callModule(module=mod_plots_pca_server, 'plot_pca_large', obj=reactive({rv$current.obj}))
   callModule(module=mod_plots_intensity_server, 'plot_intensity_large', 
-             dataIn=reactive({dataIn()}),
+             dataIn=reactive({rv$current.obj}),
              params = reactive({NULL}),
              reset = reactive({FALSE}),
              base_palette = reactive({base_palette()})
@@ -137,6 +138,11 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
     selectInput(ns('chooseDataset'), 'Dataset',
                 choices = names(dataIn()),
                 width=150)
+  })
+  
+  
+  observeEvent(input$chooseDataset,{
+    rv$current.obj <- MultiAssayExperiment::experiments(dataIn())[[input$chooseDataset]]
   })
   
   
