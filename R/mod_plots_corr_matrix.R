@@ -89,15 +89,10 @@ mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL, gra
     req(obj())
     rv.corr$gradient 
     
-    #gradient <- NULL
-    #if (is.null(input$expGradientRate)){gradient <- rv.prostar$settings()$corrMatrixGradient}
-    # if (is.null(input$expGradientRate)){gradient <- 0.9}
-    # else{
-    #   gradient <- input$expGradientRate}
-    
     isolate({
-      tmp <- wrapper.corrMatrixD_HC(obj(),rv.corr$gradient )
-      
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- wrapper.corrMatrixD_HC(obj(),rv.corr$gradient )
+      })
     })
     tmp
   })

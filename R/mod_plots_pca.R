@@ -104,19 +104,25 @@ mod_plots_pca_server <- function(input, output, session, obj){
   output$pcaPlotVar <- renderPlot({
     req(rv.pca$PCA_axes)
     req(rv.pca$res.pca)
-    plotPCA_Var(rv.pca$res.pca, rv.pca$PCA_axes)
+    withProgress(message = 'Making plot', value = 100, {
+      plotPCA_Var(rv.pca$res.pca, rv.pca$PCA_axes)
+    })
   })
   
   output$pcaPlotInd <- renderPlot({
     req(rv.pca$PCA_axes)
     req(rv.pca$res.pca)
-    plotPCA_Ind(rv.pca$res.pca, rv.pca$PCA_axes)
+    withProgress(message = 'Making plot', value = 100, {
+      plotPCA_Ind(rv.pca$res.pca, rv.pca$PCA_axes)
+    })
   })
   
   
   output$pcaPlotEigen <- renderHighchart({
     req(rv.pca$res.pca)
-    plotPCA_Eigen_hc(rv.pca$res.pca)
+    withProgress(message = 'Making plot', value = 100, {
+      plotPCA_Eigen_hc(rv.pca$res.pca)
+    })
   })
   
   

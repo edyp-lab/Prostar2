@@ -55,7 +55,9 @@ mod_plots_var_dist_server <- function(input, output, session, obj, base_palette)
   
   
   output$viewDistCV <- renderHighchart({
-    viewDistCV()
+    withProgress(message = 'Making plot', value = 100, {
+      viewDistCV()
+    })
   })
   
   
