@@ -28,10 +28,7 @@ mod_plots_corr_matrix_ui <- function(id){
                           shinyWidgets::dropdownButton(
                             tags$div(
                               tags$div(style="display:inline-block; vertical-align: bottom;",
-                                       sliderInput(ns("expGradientRate"),
-                                                   "Tune to modify the color gradient",
-                                                   #min = 0,max = 1,value = defaultGradientRate,step=0.01),
-                                                   min = 0,max = 1,value = 0.9,step=0.01),
+                                       uiOutput(ns('gradient_ui')),
                                        tooltip="Plots parameters"
                                        
                               )
@@ -44,7 +41,7 @@ mod_plots_corr_matrix_ui <- function(id){
       )
     ),
     #highchartOutput(ns("corrMatrix"),width = plotWidth,height = plotHeight)
-    highchartOutput(ns("corrMatrix"),width = "800px",height = "600px")
+    highchartOutput(ns("corrMatrix"),width = '600px',height = '500px')
   )
 }
 
@@ -54,7 +51,7 @@ mod_plots_corr_matrix_ui <- function(id){
 #' @export
 #' @keywords internal
 
-mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
+mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL, gradientRate=NULL){
   ns <- session$ns
   
   observe({
@@ -62,19 +59,40 @@ mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL){
     if (class(obj())[1] != "MSnSet") {return(NULL)}
   })
   
+  
+  rv.corr <- reactiveValues(
+    gradient = NULL
+  )
+  
+  
+  output$gradient_ui <- renderUI({
+    req(rv.corr$gradient)
+    sliderInput(ns("expGradientRate"),
+                "Tune to modify the color gradient",
+                min = 0,
+                max = 1,
+                value = rv.corr$gradient,
+                step=0.01)
+  })
+  
+  observeEvent(req(gradientRate()),{
+    rv.corr$gradient <- gradientRate()
+  })
+  
+  observeEvent(req(input$expGradientRate),{
+    rv.corr$gradient <- input$expGradientRate
+  })
+  
+  
   corrMatrix <- reactive({
     
     req(obj())
-    input$expGradientRate
+    rv.corr$gradient 
     
-    gradient <- NULL
-    #if (is.null(input$expGradientRate)){gradient <- rv.prostar$settings()$corrMatrixGradient}
-    if (is.null(input$expGradientRate)){gradient <- 0.9}
-    else{
-      gradient <- input$expGradientRate}
     isolate({
-      tmp <- wrapper.corrMatrixD_HC(obj(),gradient)
-      
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- wrapper.corrMatrixD_HC(obj(),rv.corr$gradient )
+      })
     })
     tmp
   })

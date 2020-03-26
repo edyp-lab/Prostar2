@@ -32,7 +32,7 @@ mod_plots_var_dist_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_plots_var_dist_server <- function(input, output, session, obj){
+mod_plots_var_dist_server <- function(input, output, session, obj, base_palette){
   ns <- session$ns
   
   observe({
@@ -46,17 +46,18 @@ mod_plots_var_dist_server <- function(input, output, session, obj){
   viewDistCV <- reactive({
     
     req(obj())
-    examplePalette = RColorBrewer::brewer.pal(ncol(Biobase::exprs(obj())),"Dark2")
     
     isolate({
-      varDist <- wrapper.CVDistD_HC(obj(),examplePalette)
+      varDist <- wrapper.CVDistD_HC(obj(),palette = base_palette())
     })
     varDist
   })
   
   
   output$viewDistCV <- renderHighchart({
-    viewDistCV()
+    withProgress(message = 'Making plot', value = 100, {
+      viewDistCV()
+    })
   })
   
   

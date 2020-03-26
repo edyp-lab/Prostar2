@@ -20,7 +20,6 @@ mod_plots_heatmap_ui <- function(id){
       div(
         style="display:inline-block; vertical-align: middle; padding-right: 20px;",
         selectInput(ns("distance"),"Distance",
-                    #choices = G_heatmapDistance_Choices,
                     choices = list("Euclidean" ="euclidean",
                                    "Manhattan"="manhattan",
                                    "Maximum" = "maximum",
@@ -33,7 +32,6 @@ mod_plots_heatmap_ui <- function(id){
       div(
         style="display:inline-block; vertical-align: middle;",
         selectInput(ns("linkage"),"Linkage",
-                    #choices=G_heatmapLinkage_Choices,
                     choices=list("Complete" = "complete",
                                  "Average"="average",
                                  "Ward.D"="ward.D",
@@ -66,17 +64,15 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
     if (class(obj())[1] != "MSnSet") { return(NULL) }
   })
   
+  limitHeatmap <- 20000
+  
   output$DS_PlotHeatmap <- renderUI({
     req(obj())
-    #if (nrow(obj) > limitHeatmap){
-    if (nrow(obj()) > 20000){
+    if (nrow(obj()) > limitHeatmap){
       tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
     }else {
       tagList(
         plotOutput(ns("heatmap"), width = "900px", height = "600px")
-        #%>% shinycssloaders::withSpinner(type=spinnerType)
-        
-        
       )
     }
   })
@@ -96,12 +92,13 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
     req(input$distance)
     
     isolate({ 
-      DAPAR::wrapper.heatmapD(obj(),
-                       input$distance, 
-                       input$linkage,
-                       TRUE)
+      withProgress(message = 'Making plot', value = 100, {
+        DAPAR::wrapper.heatmapD(obj(),
+                                input$distance, 
+                                input$linkage,
+                                TRUE)
+      })
     })
-    
   })
   
 

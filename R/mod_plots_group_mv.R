@@ -51,7 +51,9 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_pal
   output$histo_MV <- renderHighchart({
     req(obj())
     base_palette()
-    tmp <- wrapper.mvHisto_HC(obj(),palette=base_palette())
+    withProgress(message = 'Making plot', value = 100, {
+      tmp <- wrapper.mvHisto_HC(obj(),palette=base_palette())
+    })
     tmp
   })
   
@@ -61,7 +63,9 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_pal
     req(obj())
     
     isolate({
-      tmp <- wrapper.mvPerLinesHisto_HC(obj(), c(2:length(colnames(Biobase::pData(obj())))))
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- wrapper.mvPerLinesHisto_HC(obj(), c(2:length(colnames(Biobase::pData(obj())))))
+      })
     })
     tmp
   })
@@ -73,9 +77,11 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_pal
     req(obj())
     base_palette()
     isolate({
-      tmp <- wrapper.mvPerLinesHistoPerCondition_HC(obj(), 
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- wrapper.mvPerLinesHistoPerCondition_HC(obj(), 
                                                     c(2:length(colnames(Biobase::pData(obj()))))
                                                     ,base_palette())
+      })
       })
     tmp
   })

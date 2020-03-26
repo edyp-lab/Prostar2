@@ -85,9 +85,6 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
     if (length(rv.modboxplot$indices)==0){
       rv.modboxplot$indices <- NULL
     }
-    
-    print('indices = ')
-    print(rv.modboxplot$indices )
   })
   
   
@@ -105,12 +102,13 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
     
     pattern <- paste0('test',".boxplot")
     conds <- Biobase::pData(dataIn())$Condition
-    tmp <- DAPAR::boxPlotD_HC(dataIn(),
+    withProgress(message = 'Making plot', value = 100, {
+      tmp <- DAPAR::boxPlotD_HC(dataIn(),
                               legend=conds,
                               palette=base_palette(),
                               subset.view = rv.modboxplot$indices)
     #future(createPNGFromWidget(tmp,pattern))
-    
+    })
     tmp
   })
   
@@ -118,23 +116,24 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
   output$viewViolinPlot<- renderImage({
     dataIn()
     rv.modboxplot$indices
-    print( rv.modboxplot$indices)
     tmp <- NULL
     
     # A temp file to save the output. It will be deleted after renderImage
     # sends it, because deleteFile=TRUE.
     outfile <- tempfile(fileext='.png')
     # Generate a png
-    # png(outfile, width = 640, height = 480, units = "px")
-    png(outfile)
-    pattern <- paste0('test',".violinplot")
-    conds <- Biobase::pData(dataIn())$Condition
-    tmp <- DAPAR::violinPlotD(dataIn(),
+    withProgress(message = 'Making plot', value = 100, {
+      # png(outfile, width = 640, height = 480, units = "px")
+      png(outfile)
+      pattern <- paste0('test',".violinplot")
+      conds <- Biobase::pData(dataIn())$Condition
+      tmp <- DAPAR::violinPlotD(dataIn(),
                               legend = conds,
                               palette = base_palette(),
                               subset.view =  rv.modboxplot$indices)
-    #future(createPNGFromWidget(tmp,pattern))
-    dev.off()
+      #future(createPNGFromWidget(tmp,pattern))
+      dev.off()
+    })
     tmp
     
     # Return a list
