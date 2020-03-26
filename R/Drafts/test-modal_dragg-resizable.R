@@ -1,9 +1,9 @@
-# Fenêtre modal deplacable et redimentionnable
+# Fenetre modal d?pla?able et redimentionnable
 # Taille modal modifiable
-# Ouvre un modal called depuis une image
+# Ouvre un modal appel? depuis une image
 
 
-setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
+#setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
 
 library(highcharter)
 library(shinyjqui)
@@ -23,10 +23,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  jqui_resizable("#modal .modal-content",
-                 options = list(minHeight = 500,
-                                minWidth=500,
-                                alsoResize = "#plotcorrMatrixlarge"))
+  jqui_resizable("#modal .modal-content", options = list(minHeight = 200,
+                                                         minWidth=200))
   jqui_draggable("#modal .modal-content", options = list(revert=TRUE) )
   
   
@@ -86,7 +84,8 @@ server <- function(input, output, session) {
                        "Toto",
                        trigger = "createVignettes_small",
                        size = "large",
-                       uiOutput("plotcorrMatrixlarge")
+                       "foo"
+                       #uiOutput("plotcorrMatrixlarge")
       )
     )
     
