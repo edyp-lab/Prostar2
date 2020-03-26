@@ -21,7 +21,7 @@ server <- function(input, output, session) {
   Biobase::exprs(obj)[which(is.na(Biobase::exprs(obj)))] <- 0
   # obj est un msnset
   #callModule(mod_plots_var_dist_server,'varDistPlot', obj = Exp1_R25_prot)
-  callModule(mod_plots_pca_server,'pca', obj = reactive({obj}))
+  callModule(mod_plots_pca_server,'pca', obj = reactive({NULL}))
   #callModule(mod_plots_var_dist_server,'varDistPlot', obj = mae)
 }
 

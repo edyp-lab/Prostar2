@@ -4,6 +4,10 @@ Sam
 * rajouter les settings comme paramètre des modules graphiques
 * faire un module avec un modal resizable et draggable
 * mettre des barres de progression partout où cela est nécessaire
-
+* ajouter des mae dans DAPARdata, au format RData et au format .mae
+* corriger la cration des mae peptides (matrice adjacence et CC)
+* intégrer les CC dans les descriptive stats pour les MSnSet peptide (et pas les mae car si on a un mae p2p, il n'y aura pas que des datasets peptides dedans)
+* debugger les descriptives stats depuis le menu
+* ajouter un bouton (absolutePanel) pour qu'il reste apparent tout le temps mpour pouvoir faire apparaitre le modal
 
 Enora

@@ -93,16 +93,27 @@ tagList(
                                         value="CheckUpdatesTab",mod_check_updates_ui("modCheckUpdates"))
                     ),
                     navbarMenu("Data manager",
-                               tabPanel("Open MSnset",value = 'openMSnsetTab',mod_open_dataset_ui('moduleOpenDataset')),
-                               tabPanel("Convert",value = "convertTab",mod_convert_ms_file_ui('moduleProcess_Convert')),
-                               tabPanel("Demo data",  value='demoTab', mod_open_demo_dataset_ui('mod_OpenDemoDataset')),
-                                          tabPanel(title="ReloadProstar",
-                                                   value="ReloadTab",
-                                                   p("Due to some instability of cache memory when successively opening several datasets in a Prostar session, data management has been simplified.
-                                                   To work on another dataset than the current one, reloading Prostar first is now necessary (with the button above).  It will restart Prostar
-                                                   with a fresh R session where import menus are enabled 'Dataset manager' menu."),
-                                                   actionButton("ReloadProstar", "Reload Prostar",class = actionBtnClass)
+                               tabPanel("Open MSnset",value = 'openMSnsetTab',
+                                        mod_open_dataset_ui('moduleOpenDataset'),
+                                        mod_infos_dataset_ui("infos_openFile")
+                                        ),
+                               tabPanel("Convert",value = "convertTab",
+                                        mod_convert_ms_file_ui('moduleProcess_Convert')
+                                        ),
+                               tabPanel("Demo data",  value='demoTab', 
+                                        mod_open_demo_dataset_ui('mod_OpenDemoDataset'),
+                                        mod_infos_dataset_ui("infos_demoDataset")
+                                        ),
+                               tabPanel(title="ReloadProstar",
+                                         value="ReloadTab",
+                                         p("Due to some instability of cache memory when successively opening several datasets in a Prostar session, data management has been simplified.
+                                          To work on another dataset than the current one, reloading Prostar first is now necessary (with the button above).  It will restart Prostar
+                                          with a fresh R session where import menus are enabled 'Dataset manager' menu."),
+                                         actionButton("ReloadProstar", "Reload Prostar",class = actionBtnClass)
                                           )
+                    ),
+                    navbarMenu("Data processing",
+                               tabPanel("Descriptive statistics", value='descriptiveStats', mod_all_plots_ui('modAllPlots'))
                     ),
                     navbarMenu("Help",
                                tabPanel("Links",value="usefulLinksTab",  mod_insert_md_ui('links_MD')),

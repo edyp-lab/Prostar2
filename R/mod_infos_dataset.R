@@ -22,7 +22,6 @@ mod_infos_dataset_ui <- function(id){
       column(width=4,
              htmlOutput(ns('title')),
              br(),
-             h4("MAE summary"),
              mod_format_DT_ui(ns('dt'))
       ),
       column(width=4,
@@ -54,17 +53,17 @@ mod_infos_dataset_ui <- function(id){
 mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
   
-  if (is.null(obj)) { return(NULL) }
-  
-  callModule(mod_format_DT_server,'dt',
+    callModule(mod_format_DT_server,'dt',
              table2show = reactive({Get_mae_summary()}))
              
   
   output$title <- renderUI({
-
+    req(obj())
     title <- DAPAR::analysis(obj())
-    print(title)
-    h3(paste0("Analysis \"",title,"\":"))
+    tagList(
+      h4("MAE summary"),
+      h3(paste0("Analysis \"",title,"\":"))
+    )
   })
   
   output$choose_msnset_ui <- renderUI({
@@ -77,7 +76,6 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
   
   Get_mae_summary <- reactive({
-    
     req(obj())
     
     nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")

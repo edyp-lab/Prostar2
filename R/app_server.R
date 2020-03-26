@@ -52,7 +52,6 @@ app_server <- function(input, output,session) {
   })
   
   
-  print('debut de chargement des modules de data manager')
   rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', pipeline.def=reactive({pipeline.defs})),
                                   convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', pipeline.def=reactive({pipeline.defs})),
                                   openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
@@ -60,10 +59,34 @@ app_server <- function(input, output,session) {
   
   observeEvent(rv.core$tmp_dataManager$openFile(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openFile()})
   observeEvent(rv.core$tmp_dataManager$convert(),{ rv.core$current.obj <- rv.core$tmp_dataManager$convert()})
-  observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()})
+  observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()  })
+  
+ 
+  callModule(mod_infos_dataset_server, 
+             'infos_demoDataset', 
+             obj = reactive({
+               req(rv.core$tmp_dataManager$openDemo())
+               rv.core$tmp_dataManager$openDemo()
+             })
+  )
+  
+  callModule(mod_infos_dataset_server, 
+             'infos_openFile', 
+             obj = reactive({
+               req(rv.core$tmp_dataManager$openFile())
+               rv.core$tmp_dataManager$openFile()
+             })
+  )
   
   
   rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
+  
+  callModule(mod_all_plots_server, 'modAllPlots', 
+             dataIn = reactive({req(rv.core$current.obj)
+               rv.core$current.obj}),
+             settings = reactive({rv.prostar$settings()}))
+  
+   
    callModule(mod_homepage_server, "homepage")
    callModule(mod_release_notes_server, "modReleaseNotes")
    callModule(mod_check_updates_server, "modCheckUpdates")

@@ -100,7 +100,10 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
     current.obj = NULL
   )
   
-  
+  # observe({
+  #   if (is.null(dataIn()))
+  #     return(NULL)
+  # })
   
   callModule(mod_plots_group_mv_server, 
              "plot_group_mv_large", 
@@ -148,20 +151,32 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   output$chooseDataset_UI <- renderUI({
-    req(dataIn())
-    
+    if (length(names(dataIn()))==0){
+      choices <- list(' '=character(0))
+    } else {
+      choices <- names(dataIn())
+    }
     selectInput(ns('chooseDataset'), 'Dataset',
-                choices = names(dataIn()),
+                choices = choices,
                 width=150)
   })
   
   
-  observeEvent(input$chooseDataset,{
+  observe({
+    req(input$chooseDataset)
+    dataIn()
+    authClasses <- c('PipelineProtein', 'PipelinePeptide')
+
+    if (!(class(dataIn())[1] %in% authClasses)){
+      warning('File format not recognized. Expected MultiAssayExperiment')
+      return(NULL)
+    }
     rv$current.obj <- MultiAssayExperiment::experiments(dataIn())[[input$chooseDataset]]
   })
   
   
   observeEvent(rv$current.plot,{
+    req(rv$current.obj)
     for (i in ll){
       if (i == rv$current.plot) {
         shinyjs::show(paste0('div_plot_',rv$current.plot,'_large'))

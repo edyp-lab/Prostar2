@@ -32,10 +32,7 @@ mod_open_demo_dataset_ui <- function(id){
                 uiOutput(ns("linktoDemoPdf"))
       )
     ),
-    mod_choose_pipeline_ui(ns("choosePipe")),
-    hr(),
-
-    mod_infos_dataset_ui(ns("infos"))
+    mod_choose_pipeline_ui(ns("choosePipe"))
   )
 }
     
@@ -64,16 +61,7 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   )
 
   rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def = reactive({pipeline.def()}))
-  # mod_infos_dataset prend un objet mae
-  callModule(mod_infos_dataset_server, 
-             'infos', 
-             obj = reactive({
-               req(rv.openDemo$dataOut)
-               rv.openDemo$dataOut
-             })
-  )
   
-
   ### function for demo mode
   output$chooseDemoDataset <- renderUI({
     print('otot')
@@ -83,20 +71,6 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
                   "Demo dataset",
                   choices = utils::data(package="DAPARdata")$results[,"Item"],
                   width='200px')
-    # } else {
-    #   print("Trying to install DAPARdata")
-    #   BiocManager::install("DAPARdata")
-    #   if(require(DAPARdata)){
-    #     print("DAPARdata installed and loaded")
-    #     selectInput(ns("demoDataset"),
-    #                 "Demo dataset",
-    #                 choices = utils::data(package='DAPARdata')$results[,"Item"],
-    #                 width='200px'   )
-    #   } else {
-    #     stop("Could not install the package DAPARdata")
-    #   }
-    # }
-    
   })
   
 

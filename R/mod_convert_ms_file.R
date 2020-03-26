@@ -94,17 +94,8 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   #### END of template part of the module
   
-  
- 
-  
-  
   callModule(mod_insert_md_server, "FAQ_MD2",URL_FAQ)
-  
-  
-  
  
-  
-  
   ##
   ## Definitions of the screens
   ##
@@ -571,7 +562,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       mod_choose_pipeline_ui(ns('choose_pipeline_ui')),
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
       #uiOutput(ns("conversionDone")),
-      mod_infos_dataset_ui(ns("infos")),
+
       p("Once the 'Load' button (above) clicked, you will be automatically redirected to Prostar home page. The dataset will be accessible within Prostar 
         interface and processing menus will be enabled. However, all importing functions ('Open MSnset', 'Demo data' and 'Convert data') will be disabled 
         (because successive dataset loading can make Prostar unstable). To work on another dataset, use first the 'Reload Prostar' functionality from 
@@ -580,13 +571,6 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   })
   
 
-  
-  callModule(mod_infos_dataset_server, "infos",
-             obj = reactive({
-               req(rv.convert$dataOut)
-               rv.convert$dataOut
-             })
-             )
   
   rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=reactive({pipeline.def()}), dataType = input$typeOfData)
   
