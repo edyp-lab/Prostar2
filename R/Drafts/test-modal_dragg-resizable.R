@@ -1,6 +1,6 @@
-# Fenêtre modal déplaçable et redimentionnable
+# Fenêtre modal deplacable et redimentionnable
 # Taille modal modifiable
-# Ouvre un modal appelé depuis une image
+# Ouvre un modal called depuis une image
 
 
 setwd("~/TELETRAVAIL/github_2.0/Prostar2/R/Drafts/")
@@ -23,8 +23,10 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  jqui_resizable("#modal .modal-content", options = list(minHeight = 200,
-                                                         minWidth=200))
+  jqui_resizable("#modal .modal-content",
+                 options = list(minHeight = 500,
+                                minWidth=500,
+                                alsoResize = "#plotcorrMatrixlarge"))
   jqui_draggable("#modal .modal-content", options = list(revert=TRUE) )
   
   
@@ -84,8 +86,7 @@ server <- function(input, output, session) {
                        "Toto",
                        trigger = "createVignettes_small",
                        size = "large",
-                       "foo"
-                       #uiOutput("plotcorrMatrixlarge")
+                       uiOutput("plotcorrMatrixlarge")
       )
     )
     
@@ -105,7 +106,7 @@ server <- function(input, output, session) {
   
   require(DAPARdata)
   data('Exp1_R25_prot')
-  callModule(mod_plots_corr_matrix_server, "corrMatrixPlot_AbsPanel", obj = Exp1_R25_prot)
+  callModule(mod_plots_corr_matrix_server, "corrMatrixPlot_AbsPanel", obj = reactive({Exp1_R25_prot}))
   
   output$plotcorrMatrixlarge <- renderUI({
     mod_plots_corr_matrix_ui("corrMatrixPlot_AbsPanel")
