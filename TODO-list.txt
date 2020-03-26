@@ -1,0 +1,9 @@
+
+Sam
+* regarder pourquoi Prostar ne trouve pas tous les datasets de DAPARdata
+* rajouter les settings comme paramètre des modules graphiques
+* faire un module avec un modal resizable et draggable
+* mettre des barres de progression partout où cela est nécessaire
+
+
+Enora
