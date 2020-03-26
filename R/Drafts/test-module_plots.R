@@ -55,8 +55,7 @@ server <- function(input, output, session) {
  
   callModule(module_plots_server,'plots',
              dataIn = reactive({mae}),
-             llPlots = reactive({c("intensity", "pca", "var_dist",  "heatmap", "mv", "quanti","corr_matrix", "quanti")}),
-             base_palette = reactive({r$settings()$examplePalette})
+             settings = reactive({r$settings()})
              ) 
 
 }

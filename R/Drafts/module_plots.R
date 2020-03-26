@@ -83,7 +83,7 @@ module_plots_ui <- function(id){
 
 ####-----------------------------------------------------------####
 
-module_plots_server <- function(input, output, session, dataIn, llPlots,base_palette){
+module_plots_server <- function(input, output, session, dataIn, settings){
   ns <- session$ns
   
   # jqui_resizable(paste0("#",ns("modalcorrMatrix")," .modal-content" ))
@@ -107,18 +107,35 @@ module_plots_server <- function(input, output, session, dataIn, llPlots,base_pal
   callModule(mod_plots_group_mv_server, 
              "plot_group_mv_large", 
              obj = reactive({rv$current.obj}),
-             base_palette = reactive({base_palette()}))
+             base_palette = reactive({settings()$examplePalette}))
   
-  callModule(mod_plots_var_dist_server, 'plot_var_dist_large', obj=reactive({rv$current.obj}))
+  callModule(mod_plots_var_dist_server, 'plot_var_dist_large', 
+             obj=reactive({rv$current.obj}),
+             base_palette = reactive({settings()$examplePalette})
+             )
+
   callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({rv$current.obj}))
-  callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", obj = reactive({rv$current.obj}))
-  callModule(mod_plots_heatmap_server, "plot_heatmap_large", obj = reactive({rv$current.obj}))
-  callModule(module=mod_plots_pca_server, 'plot_pca_large', obj=reactive({rv$current.obj}))
+  
+  callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", 
+             obj = reactive({rv$current.obj}),
+             gradientRate = reactive({settings()$defaultGradientRate})
+             )
+  
+  callModule(mod_plots_heatmap_server, "plot_heatmap_large", 
+             obj = reactive({rv$current.obj})
+             )
+  
+  
+  callModule(module=mod_plots_pca_server, 'plot_pca_large', 
+             obj=reactive({rv$current.obj})
+             )
+  
+  
   callModule(module=mod_plots_intensity_server, 'plot_intensity_large', 
              dataIn=reactive({rv$current.obj}),
              params = reactive({NULL}),
              reset = reactive({FALSE}),
-             base_palette = reactive({base_palette()})
+             base_palette = reactive({settings()$examplePalette})
   )
   
 
