@@ -56,7 +56,7 @@ mod_plots_heatmap_ui <- function(id){
 #' @export
 #' @keywords internal
 
-mod_plots_heatmap_server <- function(input, output, session, obj){
+mod_plots_heatmap_server <- function(input, output, session, obj, width = 900){
   ns <- session$ns
   
   observe({
@@ -65,6 +65,11 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
   })
   
   limitHeatmap <- 20000
+  height <- paste0(2*width/3,"px")
+  width <- paste0(width,"px")
+  # print("height;width")
+  # print(height)
+  # print(width)
   
   output$DS_PlotHeatmap <- renderUI({
     req(obj())
@@ -72,14 +77,14 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
       tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
     }else {
       tagList(
-        plotOutput(ns("heatmap"), width = "900px", height = "600px")
+        plotOutput(ns("heatmap_ui"), width = width, height = height)
       )
     }
   })
   
   
   
-  output$heatmap <- renderPlot({
+  output$heatmap_ui <- renderPlot({
     heatmap()
   })
   

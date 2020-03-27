@@ -7,7 +7,7 @@ library(DAPAR)
 library(DT)
 library(shinyjs)
 
-source(file.path("../../R","mod_all_plots.R"), local=TRUE)$value
+source(file.path("../../R", "mod_all_plots.R"), local=TRUE)$value
 source(file.path("../../R", "mod_settings.R"), local = TRUE)$value
 source(file.path("../../R", "mod_popover_for_help.R"), local = TRUE)$value
 source(file.path("../../R", "mod_plots_intensity.R"), local = TRUE)$value

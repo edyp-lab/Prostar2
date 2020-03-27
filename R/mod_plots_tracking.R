@@ -86,6 +86,8 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   
 
   BuildResult <- reactive({
+    print("randSelect")
+    print(input$randSelect)
     print(paste0('input$randSelect = ', as.numeric(input$randSelect)))
 
     res <- list(type= input$typeSelect,
