@@ -25,6 +25,7 @@ mod_plots_density_ui <- function(id){
 #' @rdname mod_plots_density
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR densityPlotD_HC
     
 mod_plots_density_server <- function(input, output, session, obj = NULL, base_palette){
   ns <- session$ns
@@ -42,7 +43,7 @@ mod_plots_density_server <- function(input, output, session, obj = NULL, base_pa
     isolate({
       
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- densityPlotD_HC(obj(), 
+        tmp <- DAPAR::densityPlotD_HC(obj(), 
                                legend = legend,
                                palette = base_palette())
       })

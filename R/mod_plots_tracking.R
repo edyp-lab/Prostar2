@@ -32,13 +32,14 @@ mod_plots_tracking_ui <- function(id){
 #' @rdname mod_plots_tracking
 #' @export
 #' @keywords internal
+#' @import shinyjs
 mod_plots_tracking_server <- function(input, output, session, obj, params, reset=FALSE){
   ns <- session$ns
   
   
   
-  observe({
-    if (is.null(obj()) || class(obj()) != "MSnSet") { return(NULL) }
+  observeEvent(req(obj()),{
+    if (class(obj())[1] != "MSnSet") { return(NULL) }
   })
   
   
@@ -86,9 +87,6 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   
 
   BuildResult <- reactive({
-    print("randSelect")
-    print(input$randSelect)
-    print(paste0('input$randSelect = ', as.numeric(input$randSelect)))
 
     res <- list(type= input$typeSelect,
                 list = input$listSelect,

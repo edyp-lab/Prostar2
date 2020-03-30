@@ -80,6 +80,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")
     names_msnset <- list(names(MultiAssayExperiment::experiments(obj())))
+    browser()
     pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj()))
     
     if (pipeline == "Peptide") {

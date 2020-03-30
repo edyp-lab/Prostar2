@@ -82,7 +82,7 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
     req(rv.openDataset$dataRead )
     
 
-    
+    print('test')
       withProgress(message = '',detail = '', value = 0, {
       incProgress(1, detail = 'Loading dataset')
       switch(class(rv.openDataset$dataRead )[1],

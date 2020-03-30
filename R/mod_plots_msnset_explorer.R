@@ -1,5 +1,4 @@
-# Module UI
-  
+
 #' @title   mod_msnset_explorer_ui and mod_msnset_explorer_server
 #' @description  A shiny Module.
 #'
@@ -7,7 +6,8 @@
 #' @param input internal
 #' @param output internal
 #' @param session internal
-#'
+#' 
+#' @author Samuel Wieczorek
 #' @rdname mod_msnset_explorer
 #'
 #' @keywords internal
@@ -26,6 +26,7 @@ mod_plots_msnset_explorer_ui <- function(id){
 #' @rdname mod_msnset_explorer
 #' @export
 #' @keywords internal
+#' @import DT
     
 mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ # obj est un msnset
   ns <- session$ns
@@ -105,8 +106,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   
   
   
-  ##' show pData of the MSnset object
-  ##' @author Samuel Wieczorek
+
   output$viewpData <- DT::renderDataTable({
     req(obj())
     
@@ -142,9 +142,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
     
   })
   
-  
-  ##' show fData of the MSnset object in a table
-  ##' @author Samuel Wieczorek
+
   output$viewfData <- DT::renderDataTable({
     req(obj())
     
@@ -200,7 +198,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
     req(obj())
     df <- getDataForExprs()
 
-    dt <- datatable( df,
+    dt <- DT::datatable( df,
                      rownames=TRUE,
                      extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                      options = list(
@@ -225,8 +223,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
         backgroundRepeat = 'no-repeat',
         backgroundPosition = 'center'
       )
-    
-    
+
     dt
   })
   

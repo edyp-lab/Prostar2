@@ -12,7 +12,7 @@ mod_all_plots_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     fluidPage(
-      
+
       tags$style(".topimg {
                             margin-left:-25px;
                             margin-right:-20px;
@@ -42,7 +42,7 @@ mod_all_plots_ui <- function(id){
             id = ns("btn_pca"),
             class = "btn action-button",
             div(class="topimg",imageOutput(ns('plot_pca_small'), height=30, width=30))
-          ) 
+          )
       ),
       div(style="display:inline-block; vertical-align: middle; padding: 7px",
           tags$button(
@@ -72,7 +72,7 @@ mod_all_plots_ui <- function(id){
             div(class="topimg",imageOutput(ns('plot_group_mv_small'), height=30, width=30))
           )
       )
-    ),
+     ),
     br(),br(),br(),
     #shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
     #shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
@@ -193,7 +193,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   ################### Plot for correlation matrix
   output$plot_corr_matrix_small <- renderImage({
-    filename <- normalizePath(file.path('./images/vignettes','desc_corrmatrix.png'))
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_corrmatrix.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -205,7 +205,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   ##### Plots for missing values
   
   output$plot_group_mv_small <- renderImage({
-    filename <- normalizePath(file.path('./images/vignettes','desc_group_mv.png'))
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_group_mv.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -213,20 +213,22 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   
-  # ############# Plots for MSnSet explorer
-  # output$plot_quanti_small <- renderImage({
-  #   filename <- normalizePath(file.path('./images/vignettes','desc_quantiData.png'))
-  #   list(src = filename,
-  #        width = .width,
-  #        height = .height)
-  # }, deleteFile = FALSE)
+
+  ############# Plots for MSnSet explorer
+  output$plot_quanti_small <- renderImage({
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_quantiData.png'))
+    list(src = filename,
+         width = .width,
+         height = .height)
+  }, deleteFile = FALSE)
+
   
   
   
   ##### Code for heatmap
   
   output$plot_heatmap_small <- renderImage({
-    filename <- normalizePath(file.path('./images/vignettes','desc_heatmap.png'))
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_heatmap.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -235,7 +237,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   #### Code for PCA
   output$plot_pca_small <- renderImage({
-    filename <- normalizePath(file.path('./images/vignettes','desc_pca.png'))
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_pca.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -243,21 +245,23 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   
-  # ################################################
-  # #### Code for intensity plots
-  # output$plot_intensity_small <- renderImage({
-  #   filename <- normalizePath(file.path('./images/vignettes','desc_intdistrib.png'))
-  #   list(src = filename,
-  #        width = .width,
-  #        height = .height)
-  # }, deleteFile = FALSE)
+
+  ################################################
+  #### Code for intensity plots
+  output$plot_intensity_small <- renderImage({
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_intdistrib.png'))
+    list(src = filename,
+         width = .width,
+         height = .height)
+  }, deleteFile = FALSE)
+
   
   
   
   ############ Module for variance distribution plots
   
   output$plot_var_dist_small <- renderImage({
-    filename <- normalizePath(file.path('./images/vignettes','desc_varDist.jpg'))
+    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_varDist.jpg'))
     list(src = filename,
          width = .width,
          height = .height)

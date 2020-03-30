@@ -41,6 +41,7 @@ mod_plots_intensity_ui <- function(id){
 #' @rdname mod_plots_intensity_plots
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR violinPlotD boxPlotD_HC parentProtId
     
 mod_plots_intensity_server <- function(input, output, session, dataIn, params=NULL, reset=NULL, base_palette=NULL){
   ns <- session$ns
@@ -73,7 +74,7 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
     if (is.null(rv.modboxplot$var()$type)){
       return(NULL)
     }
-    ll <- Biobase::fData(dataIn())[,parentProtId(dataIn())]
+    ll <- Biobase::fData(dataIn())[,DAPAR::parentProtId(dataIn())]
     
     
     switch(rv.modboxplot$var()$type,
