@@ -6,11 +6,7 @@ library(DAPAR)
 source(file.path("../../R/Drafts", "/mod_bsmodal.R"), local=TRUE)$value
 
 
-library(shiny)
-library(shinyBS)
-library(shinyjqui)
 library(highcharter)
-library(DAPAR)
 library(DT)
 library(shinyjs)
 
@@ -38,11 +34,6 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   # dans body de modal
-  library(DAPARdata)
-  data("Exp1_R25_prot")
-  #data("Exp1_R2_prot")
-  
-  
   r <- reactiveValues(
     settings = NULL
   )
@@ -65,20 +56,18 @@ server <- function(input, output, session) {
   
   callModule(mod_all_plots_server,'exemple_plot',
              dataIn = reactive({mae}),
-             settings = reactive({r$settings()})
-  ) 
+             settings = reactive({r$settings()}) ) 
   
   
   
   mod_UI <- mod_all_plots_ui('exemple_plot')
-  title <- "Plot Heatmap"
+  title <- "Plots"
   
   # module d'affichage modal contenant ci-dessus
   callModule(mod_bsmodal_server,'exemple',
              title = title,
-             mod_UI = mod_UI
-             # ,datasets = reactive({c(Exp1_R25_prot,Exp1_R2_prot)})
-             ,width="95%" # en px ou % de largeur
+             mod_UI = mod_UI,
+             width="75%" # en px ou % de largeur
   )
 }
 

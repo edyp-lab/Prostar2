@@ -12,7 +12,7 @@ mod_all_plots_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     fluidPage(
-
+      
       tags$style(".topimg {
                             margin-left:-25px;
                             margin-right:-20px;
@@ -23,20 +23,20 @@ mod_all_plots_ui <- function(id){
       div( style="display:inline-block; vertical-align: middle; padding: 7px",
            uiOutput(ns('chooseDataset_UI'))
       ),
-      # div( style="display:inline-block; vertical-align: middle; padding: 7px",
-      #      tags$button(
-      #        id = ns("btn_quanti"),
-      #        class = "btn action-button",
-      #        div(class="topimg",imageOutput(ns('plot_quanti_small'), height=30, width=30))
-      #      )
-      # ),
-      # div( style="display:inline-block; vertical-align: middle; padding: 7px",
-      #      tags$button(
-      #        id = ns("btn_intensity"),
-      #        class = "btn action-button",
-      #        div(class="topimg",imageOutput(ns('plot_intensity_small'), height=30, width=30))
-      #      )
-      # ),
+      div( style="display:inline-block; vertical-align: middle; padding: 7px",
+           tags$button(
+             id = ns("btn_quanti"),
+             class = "btn action-button",
+             div(class="topimg",imageOutput(ns('plot_quanti_small'), height=30, width=30))
+           )
+      ),
+      div( style="display:inline-block; vertical-align: middle; padding: 7px",
+           tags$button(
+             id = ns("btn_intensity"),
+             class = "btn action-button",
+             div(class="topimg",imageOutput(ns('plot_intensity_small'), height=30, width=30))
+           )
+      ),
       div(style="display:inline-block; vertical-align: middle; padding: 7px",
           tags$button(
             id = ns("btn_pca"),
@@ -72,10 +72,10 @@ mod_all_plots_ui <- function(id){
             div(class="topimg",imageOutput(ns('plot_group_mv_small'), height=30, width=30))
           )
       )
-     ),
+    ),
     br(),br(),br(),
-    #shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
-    #shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
     shinyjs::hidden(div(id=ns('div_plot_pca_large'),mod_plots_pca_ui(ns('plot_pca_large')))),
     shinyjs::hidden(div(id=ns('div_plot_var_dist_large'),mod_plots_var_dist_ui(ns('plot_var_dist_large')))),
     shinyjs::hidden(div(id=ns('div_plot_corr_matrix_large'),mod_plots_corr_matrix_ui(ns('plot_corr_matrix_large')))),
@@ -84,7 +84,7 @@ mod_all_plots_ui <- function(id){
   )
   
 }
-    
+
 #' all_plots Server Function
 #'
 #' @noRd 
@@ -115,7 +115,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
              base_palette = reactive({settings()$examplePalette})
   )
   
-  #callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({rv$current.obj}))
+  callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({rv$current.obj}))
   
   callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", 
              obj = reactive({rv$current.obj}),
@@ -132,17 +132,17 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   )
   
   
-  # callModule(module=mod_plots_intensity_server, 'plot_intensity_large', 
-  #            dataIn=reactive({rv$current.obj}),
-  #            params = reactive({NULL}),
-  #            reset = reactive({FALSE}),
-  #            base_palette = reactive({settings()$examplePalette})
-  # )
+  callModule(module=mod_plots_intensity_server, 'plot_intensity_large',
+             dataIn=reactive({rv$current.obj}),
+             params = reactive({NULL}),
+             reset = reactive({FALSE}),
+             base_palette = reactive({settings()$examplePalette})
+  )
   
   
   
-  #observeEvent(input$btn_quanti,{rv$current.plot <- 'quanti'})
-  #observeEvent(input$btn_intensity,{rv$current.plot <- 'intensity'})
+  observeEvent(input$btn_quanti,{rv$current.plot <- 'quanti'})
+  observeEvent(input$btn_intensity,{rv$current.plot <- 'intensity'})
   observeEvent(input$btn_pca,{rv$current.plot <- 'pca'})
   observeEvent(input$btn_var_dist,{rv$current.plot <- 'var_dist'})
   observeEvent(input$btn_corr_matrix,{rv$current.plot <- 'corr_matrix'})
@@ -166,7 +166,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
     req(input$chooseDataset)
     dataIn()
     authClasses <- c('PipelineProtein', 'PipelinePeptide')
-
+    
     if (!(class(dataIn())[1] %in% authClasses)){
       warning('File format not recognized. Expected MultiAssayExperiment')
       return(NULL)
@@ -193,7 +193,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   ################### Plot for correlation matrix
   output$plot_corr_matrix_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_corrmatrix.png'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_corrmatrix.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -205,7 +205,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   ##### Plots for missing values
   
   output$plot_group_mv_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_group_mv.png'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_group_mv.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -213,22 +213,22 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   
-
+  
   ############# Plots for MSnSet explorer
   output$plot_quanti_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_quantiData.png'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_quantiData.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
-
+  
   
   
   
   ##### Code for heatmap
   
   output$plot_heatmap_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_heatmap.png'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_heatmap.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -237,7 +237,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   #### Code for PCA
   output$plot_pca_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_pca.png'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_pca.png'))
     list(src = filename,
          width = .width,
          height = .height)
@@ -245,34 +245,34 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   
-
+  
   ################################################
   #### Code for intensity plots
   output$plot_intensity_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_intdistrib.png'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_intdistrib.png'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
-
+  
   
   
   
   ############ Module for variance distribution plots
   
   output$plot_var_dist_small <- renderImage({
-    filename <- normalizePath(file.path('inst/app/www/images/vignettes','desc_varDist.jpg'))
+    filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_varDist.jpg'))
     list(src = filename,
          width = .width,
          height = .height)
   }, deleteFile = FALSE)
-
+  
   return(NULL)
 }
-    
+
 ## To be copied in the UI
 # mod_all_plots_ui("all_plots_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_all_plots_server, "all_plots_ui_1")
- 
+
