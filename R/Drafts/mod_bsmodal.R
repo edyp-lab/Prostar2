@@ -27,7 +27,7 @@ mod_bsmodal_server <- function(input, output, session,
     
     tagList(
       tags$head(tags$style(paste0(".modal-dialog { width:",width," }"))),
-      #actionButton(ns("button"), "Open Modal"),
+      actionButton(ns("button"), "Open Modal"),
       
       shinyBS::bsModal(ns("fenetre"),
                        title,
