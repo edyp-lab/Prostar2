@@ -22,8 +22,8 @@ server <- function(input, output, session) {
   
   
   require(DAPARdata)
-  data('Exp1_R25_prot')
-  obj <- Exp1_R25_prot
+  data('Exp1_R25_pept')
+  obj <- Exp1_R25_pept
   Biobase::fData(obj) <- cbind(Biobase::fData(obj), ProtOfInterest=rep(0,nrow(obj)))
   Biobase::fData(obj)$ProtOfInterest[10:20] <- 1
   

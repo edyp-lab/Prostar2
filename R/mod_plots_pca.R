@@ -27,6 +27,8 @@ mod_plots_pca_ui <- function(id){
 #' plots_pca Server Function
 #'
 #' @noRd 
+#' 
+#' @importFrom DAPAR wrapper.pca plotPCA_Eigen_hc plotPCA_Var plotPCA_Ind
 mod_plots_pca_server <- function(input, output, session, obj){
   ns <- session$ns
  
@@ -73,11 +75,11 @@ mod_plots_pca_server <- function(input, output, session, obj){
   
   observeEvent(input$varScale_PCA,{
     rv.pca$PCA_varScale <- input$varScale_PCA
-    rv.pca$res.pca <- wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
+    rv.pca$res.pca <- DAPAR::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
   })
   
   observeEvent(obj(), {
-    rv.pca$res.pca <- wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
+    rv.pca$res.pca <- DAPAR::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
   })
   
   
@@ -106,7 +108,7 @@ mod_plots_pca_server <- function(input, output, session, obj){
     req(rv.pca$PCA_axes)
     req(rv.pca$res.pca)
     withProgress(message = 'Making plot', value = 100, {
-      plotPCA_Var(rv.pca$res.pca, rv.pca$PCA_axes)
+      DAPAR::plotPCA_Var(rv.pca$res.pca, rv.pca$PCA_axes)
     })
   })
   
@@ -114,7 +116,7 @@ mod_plots_pca_server <- function(input, output, session, obj){
     req(rv.pca$PCA_axes)
     req(rv.pca$res.pca)
     withProgress(message = 'Making plot', value = 100, {
-      plotPCA_Ind(rv.pca$res.pca, rv.pca$PCA_axes)
+      DAPAR::plotPCA_Ind(rv.pca$res.pca, rv.pca$PCA_axes)
     })
   })
   
@@ -122,7 +124,7 @@ mod_plots_pca_server <- function(input, output, session, obj){
   output$pcaPlotEigen <- renderHighchart({
     req(rv.pca$res.pca)
     withProgress(message = 'Making plot', value = 100, {
-      plotPCA_Eigen_hc(rv.pca$res.pca)
+      DAPAR::plotPCA_Eigen_hc(rv.pca$res.pca)
     })
   })
   

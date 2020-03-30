@@ -29,6 +29,7 @@ mod_plots_group_mv_ui <- function(id){
 #' @rdname mod_plots_group_mv
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.mvPerLinesHistoPerCondition_HC wrapper.mvHisto_HC wrapper.mvPerLinesHistoPerCondition_HC
     
 mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_palette=NULL){
   ns <- session$ns
@@ -52,7 +53,7 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_pal
     req(obj())
     base_palette()
     withProgress(message = 'Making plot', value = 100, {
-      tmp <- wrapper.mvHisto_HC(obj(),palette=base_palette())
+      tmp <- DAPAR::wrapper.mvHisto_HC(obj(),palette=base_palette())
     })
     tmp
   })
@@ -64,7 +65,7 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_pal
     
     isolate({
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- wrapper.mvPerLinesHisto_HC(obj(), c(2:length(colnames(Biobase::pData(obj())))))
+        tmp <- DAPAR::wrapper.mvPerLinesHisto_HC(obj(), c(2:length(colnames(Biobase::pData(obj())))))
       })
     })
     tmp
@@ -78,7 +79,7 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_pal
     base_palette()
     isolate({
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- wrapper.mvPerLinesHistoPerCondition_HC(obj(), 
+        tmp <- DAPAR::wrapper.mvPerLinesHistoPerCondition_HC(obj(), 
                                                     c(2:length(colnames(Biobase::pData(obj()))))
                                                     ,base_palette())
       })

@@ -55,6 +55,7 @@ mod_plots_heatmap_ui <- function(id){
 #' @rdname mod_plots_heatmap
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.heatmapD
 
 mod_plots_heatmap_server <- function(input, output, session, obj){
   ns <- session$ns

@@ -36,7 +36,7 @@ app_server <- function(input, output,session) {
     # object returned by demode, openmode and convertmode
     #object that is used for modules in pipeline. C'est une instance d'une classe Pipeline
     current.obj = NULL,
-    tmp_dataManager = list(convert = NULL,
+    tmp_dataManager = reactiveValues(convert = NULL,
                               openFile = NULL,
                               openDemo = NULL),
     
@@ -62,30 +62,42 @@ app_server <- function(input, output,session) {
   observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()  })
   
  
+  
+  observe({
+    req(rv.core$current.obj)
+    print(getwd())
+  })
+  
+  
+  rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
+  
+  callModule(mod_all_plots_server, 'modAllPlots', 
+             dataIn = reactive({
+               req(rv.core$current.obj)
+               rv.core$current.obj
+             }),
+             settings = reactive({rv.prostar$settings()}))
+  
+  
   callModule(mod_infos_dataset_server, 
              'infos_demoDataset', 
              obj = reactive({
-               req(rv.core$tmp_dataManager$openDemo())
-               rv.core$tmp_dataManager$openDemo()
+               req(rv.core$current.obj)
+               print(rv.core$current.obj)
+               rv.core$current.obj
              })
   )
   
   callModule(mod_infos_dataset_server, 
              'infos_openFile', 
              obj = reactive({
-               req(rv.core$tmp_dataManager$openFile())
-               rv.core$tmp_dataManager$openFile()
+               req(rv.core$current.obj)
+               rv.core$current.obj
              })
   )
   
   
-  rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
-  
-  callModule(mod_all_plots_server, 'modAllPlots', 
-             dataIn = reactive({req(rv.core$current.obj)
-               rv.core$current.obj}),
-             settings = reactive({rv.prostar$settings()}))
-  
+
    
    callModule(mod_homepage_server, "homepage")
    callModule(mod_release_notes_server, "modReleaseNotes")

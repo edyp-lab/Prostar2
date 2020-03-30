@@ -31,6 +31,7 @@ mod_plots_var_dist_ui <- function(id){
 #' @rdname mod_var_dist_plot
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.CVDistD_HC
     
 mod_plots_var_dist_server <- function(input, output, session, obj, base_palette){
   ns <- session$ns
@@ -44,11 +45,10 @@ mod_plots_var_dist_server <- function(input, output, session, obj, base_palette)
   
   
   viewDistCV <- reactive({
-    
     req(obj())
     
     isolate({
-      varDist <- wrapper.CVDistD_HC(obj(),palette = base_palette())
+      varDist <- DAPAR::wrapper.CVDistD_HC(obj(),palette = base_palette())
     })
     varDist
   })

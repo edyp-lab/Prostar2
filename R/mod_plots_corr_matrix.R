@@ -50,6 +50,7 @@ mod_plots_corr_matrix_ui <- function(id){
 #' @rdname mod_plots_corr_matrix
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.corrMatrixD_HC
 
 mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL, gradientRate=NULL){
   ns <- session$ns
