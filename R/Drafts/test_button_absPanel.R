@@ -1,4 +1,5 @@
-
+# getwd()
+# setwd("dev/test_dev/")
 library(shiny)
 library(shinyBS)
 library(shinyjqui)
@@ -26,14 +27,15 @@ source(file.path("../../R", "mod_all_plots.R"), local=TRUE)$value
 
 
 ui <- absolutePanel(
-    style= "text-align: center; color: grey; border-width:0px; z-index: 10;",
-    top = 350, right = 50,
-    draggable = TRUE,fixed = TRUE,
-    cursor = "default",
-    actionButton('button', 'Open Modal', 
-                 style='color: white;background-color: lightgrey',
-                 class = actionBtnClass),
+    # style= "text-align: center; color: grey; border-width:0px; z-index: 10;",
+    # top = 350, right = 50,
+    # draggable = TRUE,fixed = TRUE,
+    # cursor = "default",
+  actionButton('button', 'Open Modal', 
+               style='color: white;background-color: lightgrey',
+               class = actionBtnClass),
     uiOutput("openModal")
+    
   )
 
 
@@ -44,6 +46,11 @@ server <- function(input, output, session){
   
   output$openModal <- renderUI({
     req(input$button)
+    
+   
+    mod_bsmodal_ui('exemple')
+    
+    
     
     #############################################
     ## a faire afficher dans le modal
@@ -73,16 +80,19 @@ server <- function(input, output, session){
     #############################################
     
     title <- "Exemple"
-    mod_UI <- mod_all_plots_ui('exemple_plot')
-    callModule(mod_all_plots_server,'exemple_plot',
-               dataIn = reactive({mae}),
-               settings = reactive({r$settings()}) ) 
+    mod_UI <- reactive({
+      mod_plots_msnset_explorer_ui('exemple_plot')})
+    #mod_UI <- mod_all_plots_ui('exemple_plot')
     
+    # callModule(mod_all_plots_server,'exemple_plot',
+    #            dataIn = reactive({mae}),
+    #            settings = reactive({r$settings()}) ) 
+    callModule(mod_plots_msnset_explorer_server,'exemple_plot',
+               obj = reactive({Exp1_R25_prot}) )
     
-    mod_bsmodal_ui('exemple')
     callModule(mod_bsmodal_server,'exemple',
                title = title,
-               mod_UI = mod_UI
+               mod_UI = reactive({mod_UI})
                ,width="75%" # en px ou en % de largeur
     ) 
     
