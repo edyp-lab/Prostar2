@@ -23,14 +23,5 @@ A shiny Module.
 }
 \author{
 Samuel Wieczorek
-show fData of the MSnset object in a table
-
-Samuel Wieczorek
 }
-\keyword{MSnset}
 \keyword{internal}
-\keyword{object}
-\keyword{of}
-\keyword{pData}
-\keyword{show}
-\keyword{the}

@@ -1,5 +1,4 @@
-# Module UI
-  
+
 #' @title   mod_msnset_explorer_ui and mod_msnset_explorer_server
 #' @description  A shiny Module.
 #'
@@ -7,7 +6,8 @@
 #' @param input internal
 #' @param output internal
 #' @param session internal
-#'
+#' 
+#' @author Samuel Wieczorek
 #' @rdname mod_msnset_explorer
 #'
 #' @keywords internal
@@ -26,19 +26,20 @@ mod_plots_msnset_explorer_ui <- function(id){
 #' @rdname mod_msnset_explorer
 #' @export
 #' @keywords internal
+#' @import DT
     
 mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ # obj est un msnset
   ns <- session$ns
   
-  
-  if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
-  
+  observe({
+  req(obj())
+    if(class(obj())[1] != "MSnSet") { return(NULL) }
+  })
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- Biobase::experimentData(obj)@other$typeOfData
+    typeOfDataset <- DAPAR::typeOfData(obj())
     .choices<- NULL
-    
     
     switch(typeOfDataset,
            protein = {
@@ -92,7 +93,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   #----------------------------------------------
   output$tabToShow <- renderUI({
     req(input$DS_TabsChoice)
-    req(obj)
+    req(obj())
     print(paste0('input$DS_TabsChoice', input$DS_TabsChoice))
     switch(input$DS_TabsChoice,
            None = {return(NULL)},
@@ -105,12 +106,11 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   
   
   
-  ##' show pData of the MSnset object
-  ##' @author Samuel Wieczorek
+
   output$viewpData <- DT::renderDataTable({
-    req(obj)
+    req(obj())
     
-    data <- as.data.frame(Biobase::pData(obj))
+    data <- as.data.frame(Biobase::pData(obj()))
     #pal <- unique(rv.prostar$settings()$examplePalette)
     #moduleSettings.R de prostar 2.0
     pal <- unique(RColorBrewer::brewer.pal(8,"Dark2"))
@@ -142,15 +142,13 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
     
   })
   
-  
-  ##' show fData of the MSnset object in a table
-  ##' @author Samuel Wieczorek
+
   output$viewfData <- DT::renderDataTable({
-    req(obj)
+    req(obj())
     
     
-    if ('Significant' %in% colnames(Biobase::fData(obj))){
-      dat <- DT::datatable(as.data.frame(Biobase::fData(obj)),
+    if ('Significant' %in% colnames(Biobase::fData(obj()))){
+      dat <- DT::datatable(as.data.frame(Biobase::fData(obj())),
                            rownames = TRUE,
                            extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                            options=list(initComplete = initComplete(),
@@ -171,7 +169,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
                         target = 'row',
                         background = DT::styleEqual(1, 'lightblue'))
     } else {
-      dat <- DT::datatable(as.data.frame(Biobase::fData(obj)),
+      dat <- DT::datatable(as.data.frame(Biobase::fData(obj())),
                            rownames = TRUE,
                            extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                            options=list(initComplete = initComplete(),
@@ -197,10 +195,10 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   
   #################
   output$table <- DT::renderDataTable({
-    req(obj)
-    df <- getDataForExprs(obj)
-    print(head(df))
-    dt <- datatable( df,
+    req(obj())
+    df <- getDataForExprs()
+
+    dt <- DT::datatable( df,
                      rownames=TRUE,
                      extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                      options = list(
@@ -225,22 +223,21 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
         backgroundRepeat = 'no-repeat',
         backgroundPosition = 'center'
       )
-    
-    
+
     dt
   })
   
   
   
-  getDataForExprs <- function(obj){
-    
+  getDataForExprs <- reactive({
+    req(obj())
     
     #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
-    test.table <- as.data.frame(round(Biobase::exprs(obj),digits=10))
+    test.table <- as.data.frame(round(Biobase::exprs(obj()),digits=10))
     # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
-    if (!is.null(Biobase::experimentData(obj)@other$OriginOfValues)){ #agregated dataset
+    if (!is.null(DAPAR::OriginOfValues(obj()))){ #agregated dataset
       test.table <- cbind(test.table, 
-                          Biobase::fData(obj)[,Biobase::experimentData(obj)@other$OriginOfValues])
+                          Biobase::fData(obj())[,DAPAR::OriginOfValues(obj())])
       # print(paste0("tutu:",head(test.table)))
       
     } else {
@@ -248,9 +245,9 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
                           as.data.frame(matrix(rep(NA,ncol(test.table)*nrow(test.table)), nrow=nrow(test.table))))
       #print(paste0("tata:",head(test.table)))
     }
-    return(test.table)
+    test.table
     
-  }
+  }  )
   
   initComplete <- function(){
     

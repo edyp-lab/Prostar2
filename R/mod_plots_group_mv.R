@@ -29,38 +29,44 @@ mod_plots_group_mv_ui <- function(id){
 #' @rdname mod_plots_group_mv
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.mvPerLinesHistoPerCondition_HC wrapper.mvHisto_HC wrapper.mvPerLinesHistoPerCondition_HC
     
-mod_plots_group_mv_server <- function(input, output, session, obj=NULL, settings=NULL){
+mod_plots_group_mv_server <- function(input, output, session, obj=NULL, base_palette=NULL){
   ns <- session$ns
   
   
-  rv.group.mv <- reactiveValues(
-    palette = NULL
-  )
-  
-  if (is.null(obj) || class(obj) != "MSnSet") { return(NULL) }
-  
-  observeEvent(settings()$examplePalette, {
-    rv.group.mv$palette <- settings()$examplePalette
+  # rv.group.mv <- reactiveValues(
+  #   palette = NULL
+  # )
+  # 
+  observe({
+    req(obj())
+  if (class(obj())[1] != "MSnSet") { return(NULL) }
   })
   
-  qData <- Biobase::pData(obj)
-  conds <- unique(qData$Condition)
+  # observeEvent(settings()$examplePalette, {
+  #   rv.group.mv$palette <- settings()$examplePalette
+  # })
+  
   
   output$histo_MV <- renderHighchart({
-    req(obj)
-    req(rv.group.mv$palette)
-    tmp <- wrapper.mvHisto_HC(obj,palette=rv.group.mv$palette)
+    req(obj())
+    base_palette()
+    withProgress(message = 'Making plot', value = 100, {
+      tmp <- DAPAR::wrapper.mvHisto_HC(obj(),palette=base_palette())
+    })
     tmp
   })
   
   
   
   output$histo_MV_per_lines <- renderHighchart({
-    req(obj)
+    req(obj())
     
     isolate({
-      tmp <- wrapper.mvPerLinesHisto_HC(obj, c(2:length(colnames(Biobase::pData(obj)))))
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- DAPAR::wrapper.mvPerLinesHisto_HC(obj(), c(2:length(colnames(Biobase::pData(obj())))))
+      })
     })
     tmp
   })
@@ -69,12 +75,14 @@ mod_plots_group_mv_server <- function(input, output, session, obj=NULL, settings
   
   
   output$histo_MV_per_lines_per_conditions <- renderHighchart({
-    req(obj)
-    req(rv.group.mv$palette)
+    req(obj())
+    base_palette()
     isolate({
-      tmp <- wrapper.mvPerLinesHistoPerCondition_HC(obj, 
-                                                    c(2:length(colnames(Biobase::pData(obj))))
-                                                    ,rv.group.mv$palette)
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- DAPAR::wrapper.mvPerLinesHistoPerCondition_HC(obj(), 
+                                                    c(2:length(colnames(Biobase::pData(obj()))))
+                                                    ,base_palette())
+      })
       })
     tmp
   })

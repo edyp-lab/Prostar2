@@ -7,7 +7,7 @@
 \usage{
 mod_plots_var_dist_ui(id)
 
-mod_plots_var_dist_server(input, output, session, obj)
+mod_plots_var_dist_server(input, output, session, obj, base_palette)
 }
 \arguments{
 \item{id}{shiny id}

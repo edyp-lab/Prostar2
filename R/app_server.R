@@ -6,11 +6,13 @@ enableJIT(3)
 
 
 #' @import shiny
+#' @importFrom shinyjs hide show
 app_server <- function(input, output,session) {
   # List the first level callModules here
-  env <- environment()
-  callModule(mod_loading_page_server,'loadingPage')
-  callModule(mod_navbar_menu_server,'mainMenu')
+  
+  #callModule(mod_loading_page_server,'loadingPage')
+  #callModule(mod_navbar_menu_server,'mainMenu')
+  
   #Global reactive variables for Prostar-core
   rv.prostar <- reactiveValues(
     obj = NULL,
@@ -32,31 +34,84 @@ app_server <- function(input, output,session) {
     ll.process = c('original'),
     
     # object returned by demode, openmode and convertmode
-    #object that is used for modules in pipeline. C'st une instance d'une classe Pipeline
+    #object that is used for modules in pipeline. C'est une instance d'une classe Pipeline
     current.obj = NULL,
+    tmp_dataManager = reactiveValues(convert = NULL,
+                              openFile = NULL,
+                              openDemo = NULL),
     
     tempplot = NULL,
     loadData = NULL
     
   )
   
-   rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
+  observeEvent(input$ReloadProstar, { js$reset()})
+  
+  observeEvent(input$browser,{
+    browser()
+  })
+  
+  
+  rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', pipeline.def=reactive({pipeline.defs})),
+                                  convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', pipeline.def=reactive({pipeline.defs})),
+                                  openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
+                                  )
+  
+  observeEvent(rv.core$tmp_dataManager$openFile(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openFile()})
+  observeEvent(rv.core$tmp_dataManager$convert(),{ rv.core$current.obj <- rv.core$tmp_dataManager$convert()})
+  observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()  })
+  
+ 
+  
+  observe({
+    req(rv.core$current.obj)
+    print(getwd())
+  })
+  
+  
+  rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
+  
+  callModule(mod_all_plots_server, 'modAllPlots', 
+             dataIn = reactive({
+               req(rv.core$current.obj)
+               rv.core$current.obj
+             }),
+             settings = reactive({rv.prostar$settings()}))
+  
+  
+  callModule(mod_infos_dataset_server, 
+             'infos_demoDataset', 
+             obj = reactive({
+               req(rv.core$current.obj)
+               print(rv.core$current.obj)
+               rv.core$current.obj
+             })
+  )
+  
+  callModule(mod_infos_dataset_server, 
+             'infos_openFile', 
+             obj = reactive({
+               req(rv.core$current.obj)
+               rv.core$current.obj
+             })
+  )
+  
+  
+
+   
    callModule(mod_homepage_server, "homepage")
    callModule(mod_release_notes_server, "modReleaseNotes")
    callModule(mod_check_updates_server, "modCheckUpdates")
 
-  callModule(mod_bug_report_server, "bugreport")
-  callModule(mod_insert_md_server, "links_MD",URL_links)
-  callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
+   callModule(mod_bug_report_server, "bugreport")
+   callModule(mod_insert_md_server, "links_MD",URL_links)
+   callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
+   
   
-  
-  defs <- ReadPipelineConfig('../../R/pipeline.conf')
-  #callModule(mod_open_dataset_ui, 'moduleOpenDataset', pipeline.def=reactive({defs}))
-  # callModule(mod_convert_ms_file_ui, 'moduleProcess_Convert')
-  callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({defs}))
   
   #Once the server part is loaded, hide the loading page 
   # and show th main content
-  shinyjs::hide(id = "loading_page", anim = FALSE)
-  shinyjs::show("main_content", anim = TRUE, animType = "fade")
+  #shinyjs::hide(id = "loading_page", anim = FALSE)
+  #shinyjs::show("main_content", anim = TRUE, animType = "fade")
+
 }

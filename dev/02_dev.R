@@ -7,12 +7,12 @@
 
 ## 2.1 Add modules
 ## 
-golem::add_module( name = "plots_intensity_plots" ) # Name of the module
+golem::add_module( name = "all_plots" ) # Name of the module
 golem::add_module( name = "my_other_module" ) # Name of the module
 
 ## 2.2 Add dependencies
 
-usethis::use_package( "rhandsontable" ) # To call each time you need a new package
+usethis::use_package( "DAPARdata" ) # To call each time you need a new package
 
 ## 2.3 Add tests
 
@@ -27,6 +27,14 @@ golem::browser_button()
 golem::add_js_file( "script" )
 golem::add_js_handler( "handlers" )
 golem::add_css_file( "custom_sass" )
+
+## 2.6 Add function files
+golem::add_fct( "helpers" ) 
+golem::add_utils( "Prostar" )
+#These two function create R/fct_helpers.R and R/utils_helpers.R, two file you can use to add business logic functions.
+
+## 2.7 Add other files
+usethis::use_r("config")
 
 # 3. Documentation
 

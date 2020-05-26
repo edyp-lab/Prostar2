@@ -25,34 +25,27 @@ mod_plots_density_ui <- function(id){
 #' @rdname mod_plots_density
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR densityPlotD_HC
     
-mod_plots_density_server <- function(input, output, session, obj = NULL){
+mod_plots_density_server <- function(input, output, session, obj = NULL, base_palette){
   ns <- session$ns
   
-  
-  if (is.null(obj) | class(obj) != "MSnSet") { return(NULL) }
-  
+  observe({
+    req(obj())
+  if (class(obj())[1] != "MSnSet") { return(NULL) }
+  })
   
   output$Densityplot <- renderHighchart({
-    req(obj)
-    # settings <- rv.prostar$settings()
-    # rv.prostar$settings()$examplePalette
-    # rv.prostar$settings()$legendForSamples
-    legend <- Biobase::pData(obj)[,"Condition"]
-    palette <- RColorBrewer::brewer.pal(8,"Dark2")[1:length(unique(legend))]
-    palette <- rep(palette, each=length(legend)/length(unique(legend)))
-    
-    
-    print("IN : moduleDensityplot ")
+    req(obj())
+
+    legend <- Biobase::pData(obj())[,"Condition"]
     tmp <- NULL
     isolate({
       
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- densityPlotD_HC(obj, 
-                               # rv.prostar$settings()$legendForSamples,
-                               # rv.prostar$settings()$examplePalette
+        tmp <- DAPAR::densityPlotD_HC(obj(), 
                                legend = legend,
-                               palette = palette)
+                               palette = base_palette())
       })
     })
     tmp

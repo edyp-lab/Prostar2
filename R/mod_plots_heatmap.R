@@ -20,7 +20,6 @@ mod_plots_heatmap_ui <- function(id){
       div(
         style="display:inline-block; vertical-align: middle; padding-right: 20px;",
         selectInput(ns("distance"),"Distance",
-                    #choices = G_heatmapDistance_Choices,
                     choices = list("Euclidean" ="euclidean",
                                    "Manhattan"="manhattan",
                                    "Maximum" = "maximum",
@@ -33,7 +32,6 @@ mod_plots_heatmap_ui <- function(id){
       div(
         style="display:inline-block; vertical-align: middle;",
         selectInput(ns("linkage"),"Linkage",
-                    #choices=G_heatmapLinkage_Choices,
                     choices=list("Complete" = "complete",
                                  "Average"="average",
                                  "Ward.D"="ward.D",
@@ -57,30 +55,37 @@ mod_plots_heatmap_ui <- function(id){
 #' @rdname mod_plots_heatmap
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.heatmapD
 
-mod_plots_heatmap_server <- function(input, output, session, obj){
+mod_plots_heatmap_server <- function(input, output, session, obj, width = 900){
   ns <- session$ns
   
-  if (is.null(obj) | class(obj)!="MSnSet") { return(NULL) }
+  observe({
+    req(obj())
+    if (class(obj())[1] != "MSnSet") { return(NULL) }
+  })
+  
+  limitHeatmap <- 20000
+  height <- paste0(2*width/3,"px")
+  width <- paste0(width,"px")
+  # print("height;width")
+  # print(height)
+  # print(width)
   
   output$DS_PlotHeatmap <- renderUI({
-    req(obj)
-    #if (nrow(obj) > limitHeatmap){
-    if (nrow(obj) > 20000){
+    req(obj())
+    if (nrow(obj()) > limitHeatmap){
       tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
     }else {
       tagList(
-        plotOutput(ns("heatmap"), width = "900px", height = "600px")
-        #%>% shinycssloaders::withSpinner(type=spinnerType)
-        
-        
+        plotOutput(ns("heatmap_ui"), width = width, height = height)
       )
     }
   })
   
   
   
-  output$heatmap <- renderPlot({
+  output$heatmap_ui <- renderPlot({
     heatmap()
   })
   
@@ -88,21 +93,21 @@ mod_plots_heatmap_server <- function(input, output, session, obj){
   
   heatmap <- reactive({
     
-    req(obj)
+    req(obj())
     req(input$linkage)
     req(input$distance)
     
     isolate({ 
-      DAPAR::wrapper.heatmapD(obj,
-                       input$distance, 
-                       input$linkage,
-                       TRUE)
+      withProgress(message = 'Making plot', value = 100, {
+        DAPAR::wrapper.heatmapD(obj(),
+                                input$distance, 
+                                input$linkage,
+                                TRUE)
+      })
     })
-    
   })
   
-  
-  
+
 }
 
 ## To be copied in the UI

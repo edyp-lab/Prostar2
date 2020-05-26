@@ -7,7 +7,13 @@
 \usage{
 mod_plots_corr_matrix_ui(id)
 
-mod_plots_corr_matrix_server(input, output, session, obj = NULL)
+mod_plots_corr_matrix_server(
+  input,
+  output,
+  session,
+  obj = NULL,
+  gradientRate = NULL
+)
 }
 \arguments{
 \item{id}{shiny id}

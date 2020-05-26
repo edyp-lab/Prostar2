@@ -1,10 +1,16 @@
-
+library(DAPAR)
+source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_open_dataset.R'), local=TRUE)$value
-
-
+source(file.path('../../R', 'global.R'), local=TRUE)$value
+source(file.path('../../R', 'config.R'), local=TRUE)$value
 ui <- fluidPage(
   tagList(
-    mod_open_dataset_ui('rl')
+    mod_open_dataset_ui('rl'),
+    hr(),
+    
+    mod_infos_dataset_ui("infos")
   )
 )
 
@@ -15,8 +21,15 @@ server <- function(input, output, session) {
     demoData = NULL
   )
   
-  defs <- ReadPipelineConfig('../../R/pipeline.conf')
-  rv$demoData <- callModule(mod_open_dataset_server, "rl", pipeline.def=reactive({defs}))
+  rv$openData <- callModule(mod_open_dataset_server, "rl", pipeline.def=reactive({pipeline.defs}))
+  
+  callModule(mod_infos_dataset_server, 
+             'infos', 
+             obj = reactive({
+               req(rv$openData())
+               rv$openData()
+             })
+  )
 }
 
 

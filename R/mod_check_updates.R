@@ -119,7 +119,7 @@ mod_check_updates_server <- function(input, output, session){
     outOfDate <- "(Out of date)"
     dev <- "(Devel)"
     
-    bioconductor.version <-GetBioconductorVersions()
+    bioconductor.version <- GetBioconductorVersions()
     local.version <- GetLocalVersions()
     names <- c(as.character(tags$a(href="http://www.bioconductor.org/packages/release/bioc/html/Prostar.html", "Prostar")),
                as.character(tags$a(href="http://www.bioconductor.org/packages/release/bioc/html/DAPAR.html", "DAPAR")),

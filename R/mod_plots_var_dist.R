@@ -31,27 +31,33 @@ mod_plots_var_dist_ui <- function(id){
 #' @rdname mod_var_dist_plot
 #' @export
 #' @keywords internal
+#' @importFrom DAPAR wrapper.CVDistD_HC
     
-mod_plots_var_dist_server <- function(input, output, session, obj){
+mod_plots_var_dist_server <- function(input, output, session, obj, base_palette){
   ns <- session$ns
   
-  if (is.null(obj) | class(obj)!="MSnSet") { return(NULL) }
+  observe({
+    req(obj())
+    
+    if (class(obj())[1] != "MSnSet") { return(NULL) }
+  })
   
-  examplePalette = RColorBrewer::brewer.pal(ncol(Biobase::exprs(obj)),"Dark2")
+  
   
   viewDistCV <- reactive({
+    req(obj())
     
-    req(obj)
-
     isolate({
-      varDist <- wrapper.CVDistD_HC(obj,examplePalette)
+      varDist <- DAPAR::wrapper.CVDistD_HC(obj(),palette = base_palette())
     })
     varDist
   })
   
   
   output$viewDistCV <- renderHighchart({
-    viewDistCV()
+    withProgress(message = 'Making plot', value = 100, {
+      viewDistCV()
+    })
   })
   
   

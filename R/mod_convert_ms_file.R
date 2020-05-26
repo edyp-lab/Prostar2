@@ -28,10 +28,9 @@ mod_convert_ms_file_ui <- function(id){
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs hidden toggle
     
-mod_convert_ms_file_server <- function(input, output, session){
+mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
-  defs.pipeline <- ReadPipelineConfig('../../R/pipeline.conf')
   
   callModule(mod_popover_for_help_server,"modulePopover_convertChooseDatafile", 
              data = reactive(list(title = HTML(paste0("<strong><font size=\"4\">Data file</font></strong>")), 
@@ -95,17 +94,8 @@ mod_convert_ms_file_server <- function(input, output, session){
   
   #### END of template part of the module
   
-  
- 
-  
-  
   callModule(mod_insert_md_server, "FAQ_MD2",URL_FAQ)
-  
-  
-  
  
-  
-  
   ##
   ## Definitions of the screens
   ##
@@ -572,7 +562,7 @@ mod_convert_ms_file_server <- function(input, output, session){
       mod_choose_pipeline_ui(ns('choose_pipeline_ui')),
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
       #uiOutput(ns("conversionDone")),
-      mod_infos_dataset_ui(ns("infos")),
+
       p("Once the 'Load' button (above) clicked, you will be automatically redirected to Prostar home page. The dataset will be accessible within Prostar 
         interface and processing menus will be enabled. However, all importing functions ('Open MSnset', 'Demo data' and 'Convert data') will be disabled 
         (because successive dataset loading can make Prostar unstable). To work on another dataset, use first the 'Reload Prostar' functionality from 
@@ -582,14 +572,7 @@ mod_convert_ms_file_server <- function(input, output, session){
   
 
   
-  callModule(mod_infos_dataset_server, "infos",
-             obj = reactive({
-               req(rv.convert$dataOut)
-               rv.convert$dataOut
-             })
-             )
-  
-  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=defs.pipeline, dataType = input$typeOfData)
+  rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=reactive({pipeline.def()}), dataType = input$typeOfData)
   
   output$conversionDone <- renderUI({
     
@@ -648,7 +631,7 @@ mod_convert_ms_file_server <- function(input, output, session){
         }
 
 
-        versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar","Version"],
+        versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
                          DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR","Version"]
         )
         
@@ -667,20 +650,19 @@ mod_convert_ms_file_server <- function(input, output, session){
                                                 typeOfData = input$typeOfData,
                                                 parentProtId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
                                                 versions
-         )
+                                                )
 
          print(original.msnset)
          
-         defs <- ReadPipelineConfig('../../R/pipeline.conf')
-         ll.pipeline <- defs$peptide
-         mae <- DAPAR::PipelineProtein(analysis= input$studyName,
+         #ll.pipeline <- pipeline.def()$peptide
+         mae <- DAPAR::PipelinePeptide(analysis = input$studyName,
                                        pipelineType = names(rv.convert$pipeline()),
                                        dataType = input$typeOfData,
-                                       processes=NULL,
-                                       experiments=list(original=original.msnset),
-                                       colData=Biobase::pData(original.msnset)
+                                       processes = pipeline.def()$peptide,
+                                       experiments = list(original=original.msnset),
+                                       colData = Biobase::pData(original.msnset)
 
-         )
+                                        )
 
        },
        protein = {
@@ -695,22 +677,20 @@ mod_convert_ms_file_server <- function(input, output, session){
                                                 typeOfData = input$typeOfData,
                                                 parentProtId = NULL,
                                                 versions
-         )
+                                                )
          
-         defs <- ReadPipelineConfig('../../R/pipeline.conf')
-
+         
           mae <- DAPAR::PipelineProtein(analysis= input$studyName,
                                         pipelineType = names(rv.convert$pipeline()),
                                         dataType = input$typeOfData,
-                                        processes=defs$protein,
+                                        processes=pipeline.def()$protein,
                                         experiments=list(original=original.msnset),
                                         colData=Biobase::pData(original.msnset)
-          )
+                                        )
           
        },
        p2p = {
-         # defs <- ReadPipelineConfig('../../R/pipeline.conf')
-         # ll.pipeline <- defs$protein
+         # ll.pipeline <- pipeline.def()$protein
          # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
          #                               pipelineType = rv.convert$pipeline, 
          #                               dataType = input$typeOfData,
@@ -747,6 +727,7 @@ mod_convert_ms_file_server <- function(input, output, session){
     })
     
     r.nav$isDone[5] <- TRUE    
+    
     rv.convert$dataOut <- mae
     
   })

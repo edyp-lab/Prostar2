@@ -46,10 +46,8 @@ mod_settings_ui <- function(id){
                div(id = 'showInfoColorOptions', tags$p("Color customization is available after data loading only.")),
                uiOutput(ns("defineColorsUI"))
       ),
-      tabPanel("Plots",
-               sliderInput(ns("defaultGradientRate"),
-                           "Default color gradient for correlation matrix",
-                           min = 0,max = 1,value = defaultGradientRate,step=0.01)
+      tabPanel("Plots", uiOutput(ns('gradient_ui'))
+               
       )
     )
   )
@@ -71,6 +69,9 @@ mod_settings_server <- function(input, output, session){
   
   example.Conditions <- c('A', 'B', 'A', 'B', 'B', 'B')
 
+  grey <- "#FFFFFF"
+  orangeProstar <- "#E97D5E"
+  
   
   rv.settings <- reactiveValues(
     nDigits = 10,
@@ -86,16 +87,38 @@ mod_settings_server <- function(input, output, session){
     examplePalette = NULL,
     defaultGradientRate = 0.9,
     legDS = NULL,
-    corrMatrixGradient = defaultGradientRate,
+    corrMatrixGradient = 0.9,
     legDS_Violinplot = NULL,
-    heatmap.linkage = 'complete',
-    heatmap.distance = "euclidean",
-    #paletteConditions = RColorBrewer::brewer.pal(8,"Dark2"),
     legendForSamples = NULL
     
   )
   
   
+  listBrewerPalettes <- c("Dark2 (qualit.)" = "Dark2",
+                          "Accent (qualit.)"="Accent",
+                          "Paired (qualit.)" = "Paired",
+                          "Pastel1 (qualit.)" = "Pastel1",
+                          "Pastel2 (qualit.)" = "Pastel2",
+                          "Set1 (qualit.)" = "Set1",
+                          "Set2 (qualit.)" = "Set2", 
+                          "Set3 (qualit.)" = "Set3",
+                          "BrBG (diverging)"="BrBG",
+                          "PiYG (diverging)"=  "PiYG",
+                          "PRGn (diverging)" ="PRGn",
+                          "PuOr (diverging)" ="PuOr",
+                          "RdBu (diverging)"="RdBu",
+                          "RdGy (diverging)" ="RdGy",
+                          "RdYlBu (diverging)" ="RdYlBu",
+                          "RdYlGn (diverging)" ="RdYlGn",
+                          "Spectral (diverging)"="Spectral")
+  
+  
+  output$gradient_ui <- renderUI({
+    
+    sliderInput(ns("defaultGradientRate"),
+                "Default color gradient for correlation matrix",
+                min = 0,max = 1,value = rv.settings$defaultGradientRate, step=0.01)
+  })
   
   # GetTest <- reactive({
   #   rv.settings$whichGroup2Color

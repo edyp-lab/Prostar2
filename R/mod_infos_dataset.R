@@ -7,7 +7,7 @@
 #' @param input internal
 #' @param output internal
 #' @param session internal
-#' @param obj xxxx
+#' @param obj object mae
 #'
 #' @rdname mod_infos_dataset
 #'
@@ -22,7 +22,6 @@ mod_infos_dataset_ui <- function(id){
       column(width=4,
              htmlOutput(ns('title')),
              br(),
-             h4("MAE summary"),
              mod_format_DT_ui(ns('dt'))
       ),
       column(width=4,
@@ -47,22 +46,24 @@ mod_infos_dataset_ui <- function(id){
 #' @rdname mod_infos_dataset
 #' @export
 #' @keywords internal
-#' @import MultiAssayExperiment
+#' @importFrom MultiAssayExperiment experiments colData
+#' @importFrom DAPAR analysis pipelineType matAdj CC properties
+#' @importFrom Biobase exprs pData 
 
 mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
   
-  if (is.null(obj)) { return(NULL) }
-  
-  callModule(mod_format_DT_server,'dt',
+    callModule(mod_format_DT_server,'dt',
              table2show = reactive({Get_mae_summary()}))
              
   
   output$title <- renderUI({
-
+    req(obj())
     title <- DAPAR::analysis(obj())
-    print(title)
-    h3(paste0("Analysis \"",title,"\":"))
+    tagList(
+      h4("MAE summary"),
+      h3(paste0("Analysis \"",title,"\":"))
+    )
   })
   
   output$choose_msnset_ui <- renderUI({
@@ -75,11 +76,11 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
   
   Get_mae_summary <- reactive({
-    
     req(obj())
     
     nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")
     names_msnset <- list(names(MultiAssayExperiment::experiments(obj())))
+    browser()
     pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj()))
     
     if (pipeline == "Peptide") {
@@ -128,6 +129,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   Get_MSnSet_Summary <- reactive({
+    req(obj())
     data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
     columns <- c("Number of samples",
                  "Number of conditions",
@@ -188,8 +190,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     if (input$selectInputMsnset != "None" && isTRUE(input$properties_button)) {
       
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
-      #data@experimentData@other
-      DAPAR::properties(data) # fonctionne ?
+      DAPAR::properties(data)
     }
   })
   
@@ -201,7 +202,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     
     if (input$selectInputMsnset != "None") {
-      
+
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       
       callModule(mod_format_DT_server,'dt2',

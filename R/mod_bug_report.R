@@ -36,12 +36,14 @@ mod_bug_report_server <- function(input, output, session){
   ns <- session$ns
   
   logfile <- tempfile(fileext=".log")
-  print(paste0('logfile = ',logfile))
-  con <- file(logfile,open="wt")
-  # if(!interactive()){
-  sink(con, append=TRUE)
-  sink(con, append=TRUE, type="message")
-  # }
+
+  if (isTRUE(getOption('golem.app.prod'))){
+    con <- file(logfile,open="wt")
+    sink(con, append=TRUE)
+    sink(con, append=TRUE, type="message")
+  } else {
+      sink()
+    }
   
   # ============================================================
   # This part of the code monitors the file for changes once per
