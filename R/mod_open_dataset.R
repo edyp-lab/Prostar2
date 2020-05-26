@@ -1,21 +1,30 @@
 # Module UI
   
 #' @title   mod_open_dataset_ui and mod_open_dataset_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
+#' 
 #' @param session internal
+#' 
 #' @param pipeline.def xxx
 #' 
 #' @return An object of class [`xxxx`]
+#' 
 #' @rdname mod_open_dataset
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
 #' @importFrom shinyjs useShinyjs
+#' 
 mod_open_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -33,12 +42,15 @@ mod_open_dataset_ui <- function(id){
 # Module Server
     
 #' @rdname mod_open_dataset
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @importFrom DAPAR PipelineProtein PipelinePeptide typeOfData
 #' @importFrom shinyjs info alert
 #'     
-mod_open_dataset_server <- function(input, output, session,pipeline.def){
+mod_open_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
   
@@ -86,9 +98,9 @@ mod_open_dataset_server <- function(input, output, session,pipeline.def){
       withProgress(message = '',detail = '', value = 0, {
       incProgress(1, detail = 'Loading dataset')
       switch(class(rv.openDataset$dataRead )[1],
-             MultiAssayExperiment= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
+             Features= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
              MSnSet= {
-               typeOfData <- DAPAR::typeOfData(rv.openDataset$dataRead )
+               typeOfData <- rv.openDataset$dataRead@experimentList@other$typeOfData
                ll.pipeline <- rv.openDataset$pipe()
                
                switch(typeOfData,

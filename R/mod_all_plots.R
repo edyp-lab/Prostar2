@@ -6,7 +6,8 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
+#' @importFrom shiny NS tagList
+#' 
 mod_all_plots_ui <- function(id){
   ns <- NS(id)
   tagList(

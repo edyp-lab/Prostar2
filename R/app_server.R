@@ -7,6 +7,7 @@ enableJIT(3)
 
 #' @import shiny
 #' @importFrom shinyjs hide show
+#' 
 app_server <- function(input, output,session) {
   # List the first level callModules here
   
@@ -83,7 +84,6 @@ app_server <- function(input, output,session) {
              'infos_demoDataset', 
              obj = reactive({
                req(rv.core$current.obj)
-               print(rv.core$current.obj)
                rv.core$current.obj
              })
   )

@@ -22,6 +22,7 @@ idleTimer();", timeoutSeconds*1000, timeoutSeconds, timeoutSeconds*1000)
 
 #' @importFrom shinyjs hidden extendShinyjs inlineCSS
 #' @importFrom shiny includeCSS
+#' 
 app_ui <- function() {
   
 tagList(
