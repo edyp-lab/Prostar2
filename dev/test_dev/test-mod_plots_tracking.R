@@ -1,5 +1,7 @@
 library(shinyjs)
-library(DAPAR)
+library(DAPAR2)
+library(shiny)
+library(SummarizedExperiment)
 
 source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
 
@@ -13,26 +15,27 @@ ui <- fluidPage(
     htmlOutput('show_res_list_indices'),
     htmlOutput('show_res_list_rand'),
     htmlOutput('show_res_list_col'),
-  mod_plots_tracking_ui('plots_tracking')
+    mod_plots_tracking_ui('plots_tracking')
   )
 )
 
 
 server <- function(input, output, session) {
-
-  require(DAPARdata)
+  
+  require(DAPARdata2)
   data('Exp1_R25_prot')
+  obj<-Exp1_R25_prot[[2]]
   
   r <- reactiveValues(
     res = NULL
   )
   
-  obj <- Exp1_R25_prot
-  Biobase::fData(obj) <- cbind(Biobase::fData(obj), ProtOfInterest=sample(c(0,1), nrow(obj), TRUE))
+  rowData(obj) <- cbind(rowData(obj), ProtOfInterest=sample(c(0,1), nrow(obj), TRUE))
+  
   r$res <- callModule(mod_plots_tracking_server,'plots_tracking', 
-             obj = reactive({obj}), 
-             params=reactive({NULL}), 
-             reset=({FALSE}) )
+                      obj = reactive({obj}), 
+                      params=reactive({NULL}), 
+                      reset=reactive({FALSE}) )
   #callModule(mod_plots_tracking_server,'plots_tracking', obj = NULL, params=NULL, )
   
   output$show_res <- renderText({HTML(r$res())})
