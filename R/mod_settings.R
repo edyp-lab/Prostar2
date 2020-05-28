@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_settings_ui and mod_settings_server
 #' @description  A shiny Module.
 #'
@@ -53,11 +53,11 @@ mod_settings_ui <- function(id){
   )
   #)
 }
-    
+
 
 
 # Module Server
-    
+
 #' @rdname mod_settings
 #' @export
 #' @keywords internal
@@ -68,7 +68,7 @@ mod_settings_server <- function(input, output, session){
   ns <- session$ns
   
   example.Conditions <- c('A', 'B', 'A', 'B', 'B', 'B')
-
+  
   grey <- "#FFFFFF"
   orangeProstar <- "#E97D5E"
   
@@ -76,11 +76,11 @@ mod_settings_server <- function(input, output, session){
   rv.settings <- reactiveValues(
     nDigits = 10,
     colorsVolcanoplot = reactiveValues(In=orangeProstar, 
-                             Out='lightgrey'
-                             ),
+                                       Out='lightgrey'
+    ),
     colorsTypeMV = reactiveValues(MEC=orangeProstar,
-                        POV='lightblue'
-                        ),
+                                  POV='lightblue'
+    ),
     choosePalette = 'Dark2',
     typeOfPalette = 'predefined',
     #whichGroup2Color = 'Condition',
@@ -161,11 +161,11 @@ mod_settings_server <- function(input, output, session){
     nbColors <- max(3,nbConds)
     switch(rv.settings$typeOfPalette,
            predefined={
-               palette <- RColorBrewer::brewer.pal(nbColors,rv.settings$choosePalette)[1:nbConds]
-
-               for (i in 1:nbConds){
-                 rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
-               }
+             palette <- RColorBrewer::brewer.pal(nbColors,rv.settings$choosePalette)[1:nbConds]
+             
+             for (i in 1:nbConds){
+               rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+             }
            },
            custom = {
              #browser()
@@ -174,18 +174,18 @@ mod_settings_server <- function(input, output, session){
              }
              if (is.null(palette)){return(NULL)}
              for (i in 1:nbConds){
-                 rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
-               }
+               rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+             }
            }
     )
-
+    
     rv.settings$examplePalette
   })
   
-
+  
   
   callModule(mod_popover_for_help_server,"modulePopover_numPrecision", data = list(title=HTML(paste0("<strong><font size=\"4\">Numerical precisions</font></strong>")),
-                                                                                            content= "Set the number of decimals to display for numerical values."))
+                                                                                   content= "Set the number of decimals to display for numerical values."))
   
   output$settings_nDigits_UI <- renderUI({
     numericInput(ns("settings_nDigits"), "", value=rv.settings$nDigits, min=0, width="100px")
@@ -309,7 +309,7 @@ mod_settings_server <- function(input, output, session){
     ll
   })
   
-
+  
   observeEvent(input$colMEC, {rv.settings$colorsTypeMV$MEC <- input$colMEC})
   observeEvent(input$colPOV, { rv.settings$colorsTypeMV$POV <- input$colPOV})
   observeEvent(input$colVolcanoIn, {rv.settings$colorsVolcanoplot$In <- input$colVolcanoIn})
@@ -320,7 +320,7 @@ mod_settings_server <- function(input, output, session){
     nbConds <- length(unique(example.Conditions))
     
     highcharter::highchart() %>%
-      DAPAR::dapar_hc_chart(chartType = "column") %>%
+      DAPAR2::dapar_hc_chart(chartType = "column") %>%
       highcharter::hc_add_series(data = data.frame(y= abs(1+rnorm(length(example.Conditions)))), type="column", colorByPoint = TRUE) %>%
       highcharter::hc_colors(rv.settings$examplePalette) %>%
       highcharter::hc_plotOptions( column = list(stacking = "normal"), animation=list(duration = 1)) %>%
@@ -333,10 +333,10 @@ mod_settings_server <- function(input, output, session){
   return(reactive({rv.settings}))
   
 }
-    
+
 ## To be copied in the UI
 # mod_settings_ui("settings_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_settings_server, "settings_ui_1")
- 
+
