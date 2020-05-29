@@ -31,6 +31,7 @@ mod_open_dataset_ui <- function(id){
     useShinyjs(),
     fileInput(ns("file"), "Open file", multiple = FALSE),
     mod_choose_pipeline_ui(ns("choosePipe")),
+    uiOutput(ns('ui_select_KID')) ,
     actionButton(ns("loadDataset"), "Load dataset",class = actionBtnClass),
     br(),
     p("Once the 'Load' button (above) clicked, all importing functions ('Open file', 'Demo data' and 'Convert data') will be disabled 
@@ -57,7 +58,10 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   rv.openDataset <- reactiveValues(
     dataOut = NULL,
     pipe = NULL,
-    dataRead = NULL
+    dataRead = NULL,
+    ret = NULL,
+    keyID = NULL,
+    parentProtId = NULL
   )
   
   
@@ -67,6 +71,8 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   DeleteExtension <- function(name){
     return(strsplit(name,'.', fixed=T)[[1]][1])
   }
+  
+  
   
   
   observeEvent(req(input$file),{
@@ -90,38 +96,48 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   
   
-  observeEvent( input$loadDataset,ignoreInit =TRUE,{ 
+  
+  output$ui_select_KID <- renderUI({
+    req(rv.openDataset$dataRead )
+    
+    if (!(class(rv.openDataset$dataRead )[1] == "MSnSet")){ return(NULL)}
+    
+    mod_select_keyID_ui(ns('select_KID'))
+  })
+  
+  
+  
+  rv.openDataset$ret <- callModule(mod_select_keyID_server, 
+                                   'selectKID', 
+                                   dataIn=reactive({Biobase::fData(rv.openDataset$dataRead)}), 
+                                   typeOfData = reactive({rv.openDataset$dataRead@experimentData@other$typeOfData}))
+  
+  observe({
+    rv.openDataset$keyID <- rv.openDataset$ret()$keyId
+    rv.openDataset$parentProtId <- rv.openDataset$ret()$parentProtId
+    rv.openDataset$data <- rv.openDataset$ret()$data
+  })
+  
+  observeEvent(input$loadDataset,ignoreInit =TRUE,{ 
     req(rv.openDataset$dataRead )
     
 
-    print('test')
       withProgress(message = '',detail = '', value = 0, {
       incProgress(1, detail = 'Loading dataset')
       switch(class(rv.openDataset$dataRead )[1],
              Features= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
              MSnSet= {
-               typeOfData <- rv.openDataset$dataRead@experimentList@other$typeOfData
+               typeOfData <- rv.openDataset$dataRead@experimentData@other$typeOfData
                ll.pipeline <- rv.openDataset$pipe()
                
-               switch(typeOfData,
-                      peptide = {rv.openDataset$dataOut <- PipelinePeptide(analysis= DeleteExtension(input$file$name), 
-                                                                       pipelineType = names(ll.pipeline), 
-                                                                       dataType ='peptide',
-                                                                       processes=unlist(ll.pipeline),
-                                                                       experiments=list(original=rv.openDataset$dataRead ), 
-                                                                       colData=Biobase::pData(rv.openDataset$dataRead ))
+               rv.openDataset$dataOut <- convertMSnset2Features(obj = data,
+                                                                 analysis = DeleteExtension(input$file$name),
+                                                                 parentProtId = NULL,
+                                                                 keyId = NULL,
+                                                                 pipelineType = names(ll.pipeline), 
+                                                                 processes = unlist(ll.pipeline)
+                                                                )
                       },
-                      protein = {rv.openDataset$dataOut <- PipelineProtein(analysis= DeleteExtension(input$file$name), 
-                                                                       pipelineType = names(ll.pipeline), 
-                                                                       dataType ='protein',
-                                                                       processes=unlist(ll.pipeline), 
-                                                                       experiments=list(original=rv.openDataset$dataRead ), 
-                                                                       colData=Biobase::pData(rv.openDataset$dataRead )
-                      )
-                      }, 
-                      p2p = {rv.openDataset$dataOut <- NULL}
-               )
-             },
              default= {
                shinyjs::info("Warning : This type of data is not implemented in Prostar.")
                return(NULL)

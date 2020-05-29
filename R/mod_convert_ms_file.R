@@ -59,6 +59,10 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     design = NULL,
     hot = NULL,
     tab1 = NULL,
+    
+    choose_col_Parent_Protein = NULL,
+    choose_keyID = NULL,
+    
     designChecked = NULL,
     # contient l'objet de sortie du module (ie. a MAE instance)
     dataOut = NULL, 
@@ -147,165 +151,27 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
   output$Convert_DataId <- renderUI({
-    tagList(
-      tags$div(
-        tags$div( style="display:inline-block; vertical-align: top; padding-right: 100px;",
-                  uiOutput(ns("choose_keyID_ui")),
-                  uiOutput(ns("warning_keyID_ui"))
-        ),
-         tags$div( style="display:inline-block; vertical-align: top;",
-                   uiOutput(ns("choose_col_Parent_Protein_ui")),
-                   tableOutput(ns('preview_col_Parent_Protein_ui')),
-                   uiOutput(ns("note_col_Parent_Protein_ui")),
-                   uiOutput(ns("RemoveOrphanPept_ui"))
-         )
-      )
-    )
+    mod_select_keyID_ui('mod_keyId')
+    rv.convert$IDs <- callModule(mod_select_keyID_server, 
+                                 "mod_keyId", 
+                                 dataIn = reactive({rv.convert$dataIn}), 
+                                 typeOfData = reactive({xxx}))
+    r.nav$isDone[2] <- res()
+    
+    rv.convert$choose_col_Parent_Protein <-rv.convert$IDs()$parentProtId
+    rv.convert$choose_keyID <- rv.convert$IDs()$keyId
+    rv.convert$dataIn <- rv.convert$IDs$data
+    
   })
 
-  callModule(mod_popover_for_help_server,"modulePopover_convertIdType", 
-             data = list(title = HTML(paste0("<strong><font size=\"4\">Key ID definition</font></strong>")), 
-                                  content="If you choose the automatic ID, Prostar will build an index."))
-  
-  output$choose_keyID_ui <- renderUI({
-   isolate({
-      .choices <- c("", "AutoID",colnames(rv.convert$dataIn))
-    names(.choices) <- c("None","-- Auto ID --",colnames(rv.convert$dataIn))
-    
-    tagList(
-      mod_popover_for_help_ui(ns("modulePopover_convertIdType")),
-      selectInput(ns("choose_keyID"), label = "", choices = .choices, selected=character(0))
-    )
-    })
-  })
    
-  
-  
-  output$warning_keyID_ui <- renderUI({
-    req(input$choose_keyID)
-    
-    #isolate({
-      if (input$choose_keyID =="AutoID") {
-        text <- "<img src=\"images/Ok\" height=\"24\"></img><font color=\"green\">
-        This column is valid to serve as a unique ID for entities"
-      }
-      else {
-        t <- (length(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])
-              == length(unique(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])))
-        
-        if (!t){
-          text <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">
-        Warning ! Your ID contains duplicate data.
-        Please choose another one."
-        }
-        else {
-          text <- "<img src=\"images/Ok\" height=\"24\"></img><font color=\"green\">
-        This column is valid to serve as a unique ID for entities"
-        }
-      }
-      HTML(text)
-      
-    #})
+  observe({
+    rv.convert$IDs()
+    rv.convert$choose_col_Parent_Protein <- rv.convert$IDs()$parentProtId
+    rv.convert$choose_keyID <- rv.convert$IDs()$keyId
+    r.nav$isDone[2] <- !is.null(rv.convert$IDs())
   })
-  
-  
-  callModule(mod_popover_for_help_server,"parentProtein", 
-             data = list(title = HTML(paste0("<strong><font size=\"4\">Select col for parent protein IDs</font></strong>")), 
-                                  content="Select the column containing the parent protein IDs."))
-  
-  
-  
-  output$choose_col_Parent_Protein_ui <- renderUI({
-    req(input$typeOfData)
-    if (input$typeOfData != 'peptide') { return(NULL)}
-    isolate({
-      .choices <- c("",colnames(rv.convert$dataIn))
-      names(.choices) <- c("",colnames(rv.convert$dataIn))
-      tagList(
-        mod_popover_for_help_ui(ns("parentProtein")),
-        selectInput(ns("choose_col_Parent_Protein"),"",choices =  .choices , selected = character(0))
-      )
-    })
-  })
-  
-  
-  output$preview_col_Parent_Protein_ui <- renderTable(
-   # req(input$choose_col_Parent_Protein)
-    if (input$typeOfData != 'peptide' || is.null(input$choose_col_Parent_Protein) || input$choose_col_Parent_Protein == "") {
-      return (NULL)
-      } else{
-     head(rv.convert$dataIn[,input$choose_col_Parent_Protein])
-        },colnames=FALSE
-    
-  )
-  
-  output$note_col_Parent_Protein_ui <- renderUI({
-    req(input$typeOfData)
-    if (input$typeOfData != 'peptide') { return(NULL)}
-    
-    tagList(
-      p("Please note that in case of multiple parent protein for one peptide, their IDs must be
-          separated by a semi-colon. If not, the agregation tool and peptide-protein graphs 
-          cannot be run."),
-      checkboxInput(ns('confirm_separator'), 
-                    'I confirm that the separator is correct',
-                    value = FALSE)
-    )
-  })
-
-  
-  output$RemoveOrphanPept_ui <- renderUI({
-    req(input$typeOfData)
-    if (input$typeOfData != 'peptide') { return(NULL)}
-    req(input$choose_col_Parent_Protein)
-    
-    index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
-      
-      
-      if (length(index) > 0) {
-        
-        ifelse (length(index)==1, 
-                txt <-"One peptide does not have any parent protein.",
-                txt <- paste0(length(index), " peptides don't have any parent protein.")
-        )
-        tagList(
-          p(txt),
-          actionButton(ns('RemoveOrphanPept_btn'), 'Remove orphan peptides')
-        )
-      } else {
-        p("No orphan peptides were detected.")
-      }
-    }) 
-    
-  
-    observeEvent(input$RemoveOrphanPept_btn, {
-      req(input$choose_col_Parent_Protein)
-      index <- which(is.na(rv.convert$dataIn[,input$choose_col_Parent_Protein]))
-      rv.convert$dataIn <- rv.convert$dataIn[-index,]
-    })
-    
-    
-    
-    observe({
-      req(rv.convert$dataIn)
-      req(input$choose_keyID)
-      test_keyID <- test_parentProt <- TRUE
-      
-      if(input$typeOfData == "peptide"){
-        test_parentProt <- !(input$choose_col_Parent_Protein == "") && !is.null(input$choose_col_Parent_Protein) && isTRUE(input$confirm_separator)
-       }
-      
-      
-      if (input$choose_keyID =="AutoID") {
-        test_keyID <- TRUE
-      } else {
-        test_keyID <- (length(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])
-                  == length(unique(as.data.frame(rv.convert$dataIn)[, input$choose_keyID])))
-      }
-      
-      r.nav$isDone[2] <- test_keyID && test_parentProt
-    })
-    
+ 
     
     
     
