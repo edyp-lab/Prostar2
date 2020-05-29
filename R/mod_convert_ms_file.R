@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_convert_ms_file_ui and mod_convert_ms_file_server
 #' @description  A shiny Module.
 #'
@@ -19,15 +19,15 @@ mod_convert_ms_file_ui <- function(id){
     mod_navigation_ui(ns('nav_convert'))
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_convert_ms_file
 #' @export
 #' @keywords internal
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs hidden toggle
-    
+
 mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
@@ -45,7 +45,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
                   screenStep3 = uiOutput(ns("Convert_ExpFeatData")),
                   screenStep4 = uiOutput(ns("Convert_BuildDesign")),
                   screenStep5 = uiOutput(ns("Convert_Convert"))
-                  ),
+    ),
     isDone =  rep(FALSE,5),
     mandatory =  rep(FALSE,5),
     reset = FALSE
@@ -92,14 +92,14 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   callModule(mod_navigation_server, 'nav_convert',style=2,pages=r.nav)
   
- 
+  
   
   
   
   #### END of template part of the module
   
   callModule(mod_insert_md_server, "FAQ_MD2",URL_FAQ)
- 
+  
   ##
   ## Definitions of the screens
   ##
@@ -118,7 +118,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   output$ConvertOptions <- renderUI({
-        tagList(
+    tagList(
       radioButtons(ns("typeOfData"),
                    "Choose the pipeline to use with the data",
                    choices=c("peptide" = "peptide",
@@ -145,26 +145,22 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   observeEvent(req(rv.convert$data2convert()),{ 
     rv.convert$dataIn <- rv.convert$data2convert()
     r.nav$isDone[1] <- TRUE
-    })
-
+  })
+  
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
   output$Convert_DataId <- renderUI({
+
     mod_select_keyID_ui('mod_keyId')
     rv.convert$IDs <- callModule(mod_select_keyID_server, 
                                  "mod_keyId", 
                                  dataIn = reactive({rv.convert$dataIn}), 
                                  typeOfData = reactive({xxx}))
-    r.nav$isDone[2] <- res()
-    
-    rv.convert$choose_col_Parent_Protein <-rv.convert$IDs()$parentProtId
-    rv.convert$choose_keyID <- rv.convert$IDs()$keyId
-    rv.convert$dataIn <- rv.convert$IDs$data
-    
-  })
 
    
+  })
+  
   observe({
     rv.convert$IDs()
     rv.convert$choose_col_Parent_Protein <- rv.convert$IDs()$parentProtId
@@ -172,38 +168,37 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     r.nav$isDone[2] <- !is.null(rv.convert$IDs())
   })
  
-    
-    
-    
-  
-###---------------------------------------------------------------------------------###
-###                                 Screen 3                                        ###
-###---------------------------------------------------------------------------------###
-  output$Convert_ExpFeatData <- renderUI({
 
+  
+  
+  ###---------------------------------------------------------------------------------###
+  ###                                 Screen 3                                        ###
+  ###---------------------------------------------------------------------------------###
+  output$Convert_ExpFeatData <- renderUI({
+    
     tagList(
       fluidRow(
         column(width=4,uiOutput(ns("choose_quanti_data_col_ui"),width = "400px"))
-         ,column(width=8,
-                 shinyjs::hidden(checkboxInput(ns("select_Identification"), 
-                               "Select columns for identification method", 
-                               value = NULL))
-                 ,uiOutput(ns("check_Identification_Tab_ui"))
-                 
-                 ,tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
+        ,column(width=8,
+                shinyjs::hidden(checkboxInput(ns("select_Identification"), 
+                                              "Select columns for identification method", 
+                                              value = NULL))
+                ,uiOutput(ns("check_Identification_Tab_ui"))
+                
+                ,tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
                                    Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());
                                    })"))
-                 ,uiOutput(ns('show_Identification_Tab_ui'))
-               )
-         )
+                ,uiOutput(ns('show_Identification_Tab_ui'))
+        )
       )
+    )
   })
   
   
   
   callModule(mod_popover_for_help_server,"modulePopover_convertDataQuanti", 
              data = list(title = h3('Quantitative data'), 
-                        content="Select the columns that are quantitation values by clicking in the field below."))
+                         content="Select the columns that are quantitation values by clicking in the field below."))
   
   
   
@@ -255,15 +250,15 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
         }
       }
     }
-     
+    
     rep <- list(isOk=isOk, msg = msg)
     rep
-})
+  })
   
   output$check_Identification_Tab_ui <- renderUI({
-     rep <- check_Identification_Tab()
+    rep <- check_Identification_Tab()
     
-     if (isTRUE(rep$isOk)){
+    if (isTRUE(rep$isOk)){
       img <- "images/Ok.png"
     } else {
       img <-"images/Problem.png"
@@ -306,7 +301,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   #####################
   
-
+  
   
   
   # observeEvent(input$fData.box,ignoreInit = TRUE,{
@@ -321,7 +316,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   # })
   # 
   
-
+  
   output$show_Identification_Tab_ui <- renderUI({
     
     if (length(input$choose_quanti_data_col) == 0 || !isTRUE(input$select_Identification)){
@@ -355,24 +350,24 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       scrollY = 500,
       scroller = TRUE,
       ajax = list(url = dataTableAjax(session, quantiDataTable()))
-
+      
     )
-
+    
   )
   
-
+  
   
   quantiDataTable <- reactive({
     req(input$choose_quanti_data_col)
     req(rv.convert$dataIn)
-
+    
     session$sendCustomMessage('unbind-DT', 'show_table')
     df <- NULL
     choices <- c("None",colnames(rv.convert$dataIn))
     names(choices) <- c("None",colnames(rv.convert$dataIn))
-
+    
     if (isTRUE(input$select_Identification)) {
-
+      
       df <- data.frame(as.data.frame(input$choose_quanti_data_col),
                        shinyInput(selectInput,
                                   ns("colForOriginValue_"),
@@ -384,7 +379,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       df <- data.frame(Sample = as.data.frame(input$choose_quanti_data_col))
       colnames(df) <- c("Sample")
     }
-
+    
     df
   })
   
@@ -398,24 +393,24 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   })
   
   
-   observeEvent(shinyValue("colForOriginValue_",nrow(quantiDataTable())),{})
+  observeEvent(shinyValue("colForOriginValue_",nrow(quantiDataTable())),{})
   
-
+  
   ###---------------------------------------------###
   ###                 Screen 4                    ###
   ###---------------------------------------------###
-   rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({input$choose_quanti_data_col}))
-   
+  rv.convert$design <- callModule(mod_build_design_server, 'buildDesign', sampleNames=reactive({input$choose_quanti_data_col}))
+  
   output$Convert_BuildDesign <- renderUI({
     mod_build_design_ui(ns('buildDesign'))
- })
-
+  })
+  
   
   observeEvent(req(rv.convert$design()), {
     r.nav$isDone[4] <- TRUE
   })
   
-
+  
   ###---------------------------------------------###
   ###                 Screen 5                    ###
   ###---------------------------------------------###
@@ -428,15 +423,15 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       mod_choose_pipeline_ui(ns('choose_pipeline_ui')),
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
       #uiOutput(ns("conversionDone")),
-
+      
       p("Once the 'Load' button (above) clicked, you will be automatically redirected to Prostar home page. The dataset will be accessible within Prostar 
         interface and processing menus will be enabled. However, all importing functions ('Open MSnset', 'Demo data' and 'Convert data') will be disabled 
         (because successive dataset loading can make Prostar unstable). To work on another dataset, use first the 'Reload Prostar' functionality from 
         the 'Dataset manager' menu: it will make Prostar restart with a fresh R session where import functions are enabled.")
-      )
+    )
   })
   
-
+  
   
   rv.convert$pipeline <- callModule(mod_choose_pipeline_server,'choose_pipeline_ui', pipeline.def=reactive({pipeline.def()}), dataType = input$typeOfData)
   
@@ -447,7 +442,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
        vizualize your data.")
   })
   
-
+  
   
   observeEvent(input$createMSnsetBtn,{
     print('In observeEvent de input$createMSnsetBtn')
@@ -459,117 +454,117 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # 
     
     
-        #ext <- GetExtension(rv.convert$datafile$name)
-        ## quanti data
-        tmp_quanti_data <- input$choose_quanti_data_col
-        indexForQuantiData <- match(tmp_quanti_data, colnames(rv.convert$dataIn))
-        quanti_order <- order(input$choose_quanti_data_col)
-        samples_order <- order(rownames(rv.convert$design()))
-
-        if (sum(quanti_order != samples_order) > 0){
-          tmp_quanti_data <- tmp_quanti_data[samples_order]
-          indexForQuantiData <- indexForQuantiData[samples_order]
-        }
-
-        indexForFData <- seq(1,ncol(rv.convert$dataIn))[-indexForQuantiData]
-
-        ## key id of entities
-        key_id_index <- NULL
-        if (input$choose_keyID != "AutoID") {
-          key_id_index <- match(input$choose_keyID, colnames(rv.convert$dataIn))
-        }
-
-
-        ### Sample data
-        design <- rv.convert$design()
-
-        ### Are data alearady logged ?
-        logged_data <- (input$checkDataLogged == "no")
-
-
-        ### Origin of Values
-        indexForOriginOfValue <- NULL
-        colNamesForOriginofValues <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
-        if (!is.null(colNamesForOriginofValues) && (length(grep("None", colNamesForOriginofValues))==0)  && (sum(is.na(colNamesForOriginofValues)) == 0)){
-          for (i in 1:length(tmp_quanti_data)){
-            indexForOriginOfValue <- c(indexForOriginOfValue, which(colnames(rv.convert$dataIn) == input[[paste0("colForOriginValue_", i)]]))
-          }
-        }
-
-
-        versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
-                         DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR","Version"]
-        )
-        
- 
-        tryCatch({
+    #ext <- GetExtension(rv.convert$datafile$name)
+    ## quanti data
+    tmp_quanti_data <- input$choose_quanti_data_col
+    indexForQuantiData <- match(tmp_quanti_data, colnames(rv.convert$dataIn))
+    quanti_order <- order(input$choose_quanti_data_col)
+    samples_order <- order(rownames(rv.convert$design()))
+    
+    if (sum(quanti_order != samples_order) > 0){
+      tmp_quanti_data <- tmp_quanti_data[samples_order]
+      indexForQuantiData <- indexForQuantiData[samples_order]
+    }
+    
+    indexForFData <- seq(1,ncol(rv.convert$dataIn))[-indexForQuantiData]
+    
+    ## key id of entities
+    key_id_index <- NULL
+    if (input$choose_keyID != "AutoID") {
+      key_id_index <- match(input$choose_keyID, colnames(rv.convert$dataIn))
+    }
+    
+    
+    ### Sample data
+    design <- rv.convert$design()
+    
+    ### Are data alearady logged ?
+    logged_data <- (input$checkDataLogged == "no")
+    
+    
+    ### Origin of Values
+    indexForOriginOfValue <- NULL
+    colNamesForOriginofValues <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
+    if (!is.null(colNamesForOriginofValues) && (length(grep("None", colNamesForOriginofValues))==0)  && (sum(is.na(colNamesForOriginofValues)) == 0)){
+      for (i in 1:length(tmp_quanti_data)){
+        indexForOriginOfValue <- c(indexForOriginOfValue, which(colnames(rv.convert$dataIn) == input[[paste0("colForOriginValue_", i)]]))
+      }
+    }
+    
+    
+    versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
+                     DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR","Version"]
+    )
+    
+    
+    tryCatch({
       switch(names(rv.convert$pipeline()),
-       peptide = {
-         original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
-                                                metadata = design,
-                                                indExpData = indexForQuantiData,
-                                                indFData = indexForFData,
-                                                keyId = key_id_index,
-                                                indexForOriginOfValue = indexForOriginOfValue,
-                                                logData = logged_data,
-                                                replaceZeros = input$replaceAllZeros,
-                                                typeOfData = input$typeOfData,
-                                                parentProtId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
-                                                versions
-                                                )
-
-         print(original.msnset)
-         
-         #ll.pipeline <- pipeline.def()$peptide
-         mae <- DAPAR::PipelinePeptide(analysis = input$studyName,
-                                       pipelineType = names(rv.convert$pipeline()),
-                                       dataType = input$typeOfData,
-                                       processes = pipeline.def()$peptide,
-                                       experiments = list(original=original.msnset),
-                                       colData = Biobase::pData(original.msnset)
-
-                                        )
-
-       },
-       protein = {
-         original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
-                                                metadata = design,
-                                                indExpData = indexForQuantiData,
-                                                indFData = indexForFData,
-                                                keyId = key_id_index,
-                                                indexForOriginOfValue = indexForOriginOfValue,
-                                                logData = logged_data,
-                                                replaceZeros = input$replaceAllZeros,
-                                                typeOfData = input$typeOfData,
-                                                parentProtId = NULL,
-                                                versions
-                                                )
-         
-         
-          mae <- DAPAR::PipelineProtein(analysis= input$studyName,
-                                        pipelineType = names(rv.convert$pipeline()),
-                                        dataType = input$typeOfData,
-                                        processes=pipeline.def()$protein,
-                                        experiments=list(original=original.msnset),
-                                        colData=Biobase::pData(original.msnset)
-                                        )
-          
-       },
-       p2p = {
-         # ll.pipeline <- pipeline.def()$protein
-         # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
-         #                               pipelineType = rv.convert$pipeline, 
-         #                               dataType = input$typeOfData,
-         #                               processes=NULL, 
-         #                               experiments=list(original=Exp1_R25_prot), 
-         #                               colData=Biobase::pData(Exp1_R25_prot)
-         # )
-       },
-       default=NULL)
-        
-       
-        #loadObjectInMemoryFromConverter()
-       
+             peptide = {
+               original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
+                                                      metadata = design,
+                                                      indExpData = indexForQuantiData,
+                                                      indFData = indexForFData,
+                                                      keyId = key_id_index,
+                                                      indexForOriginOfValue = indexForOriginOfValue,
+                                                      logData = logged_data,
+                                                      replaceZeros = input$replaceAllZeros,
+                                                      typeOfData = input$typeOfData,
+                                                      parentProtId =  gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
+                                                      versions
+               )
+               
+               print(original.msnset)
+               
+               #ll.pipeline <- pipeline.def()$peptide
+               mae <- DAPAR::PipelinePeptide(analysis = input$studyName,
+                                             pipelineType = names(rv.convert$pipeline()),
+                                             dataType = input$typeOfData,
+                                             processes = pipeline.def()$peptide,
+                                             experiments = list(original=original.msnset),
+                                             colData = Biobase::pData(original.msnset)
+                                             
+               )
+               
+             },
+             protein = {
+               original.msnset <- DAPAR::createMSnset(file = rv.convert$dataIn,
+                                                      metadata = design,
+                                                      indExpData = indexForQuantiData,
+                                                      indFData = indexForFData,
+                                                      keyId = key_id_index,
+                                                      indexForOriginOfValue = indexForOriginOfValue,
+                                                      logData = logged_data,
+                                                      replaceZeros = input$replaceAllZeros,
+                                                      typeOfData = input$typeOfData,
+                                                      parentProtId = NULL,
+                                                      versions
+               )
+               
+               
+               mae <- DAPAR::PipelineProtein(analysis= input$studyName,
+                                             pipelineType = names(rv.convert$pipeline()),
+                                             dataType = input$typeOfData,
+                                             processes=pipeline.def()$protein,
+                                             experiments=list(original=original.msnset),
+                                             colData=Biobase::pData(original.msnset)
+               )
+               
+             },
+             p2p = {
+               # ll.pipeline <- pipeline.def()$protein
+               # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
+               #                               pipelineType = rv.convert$pipeline, 
+               #                               dataType = input$typeOfData,
+               #                               processes=NULL, 
+               #                               experiments=list(original=Exp1_R25_prot), 
+               #                               colData=Biobase::pData(Exp1_R25_prot)
+               # )
+             },
+             default=NULL)
+      
+      
+      #loadObjectInMemoryFromConverter()
+      
     }
     , warning = function(w) {
       if (conditionMessage(w) %in% c("NaNs produced", "production de NaN")){
@@ -597,21 +592,21 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     rv.convert$dataOut <- mae
     
   })
-    
-
- #  
- #  ############################################################################
- #  ####### ENd definitino of UI   ##################
- #  #############################################################################
- 
+  
+  
+  #  
+  #  ############################################################################
+  #  ####### ENd definitino of UI   ##################
+  #  #############################################################################
+  
   
   return(reactive({rv.convert$dataOut}))
-
+  
 }
-    
+
 ## To be copied in the UI
 # mod_convert_ms_file_ui("convert_ms_file_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_convert_ms_file_server, "convert_ms_file_ui_1")
- 
+

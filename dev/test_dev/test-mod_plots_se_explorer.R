@@ -14,14 +14,16 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  require(DAPARdata)
+  require(DAPARdata2)
   data('Exp1_R25_prot')
+  obj <- Exp1_R25_prot[[2]]
+  metadata <- metadata(Exp1_R25_prot)
+  colData <- colData(Exp1_R25_prot)
   
-  callModule(mod_plots_msnset_explorer_server,'msnset_explorer', obj = reactive({Exp1_R25_prot}))
-  #callModule(mod_plots_msnset_explorer_server,'msnset_explorer', obj = NULL)
-  #callModule(mod_plots_msnset_explorer_server,'msnset_explorer', obj = mae)
-
-  
+  callModule(mod_plots_msnset_explorer_server,'msnset_explorer',
+             obj = reactive({obj}),
+             metadata = reactive({metadata}),
+             colData = reactive({colData}))
 }
 
 

@@ -55,26 +55,24 @@ mod_plots_heatmap_ui <- function(id){
 #' @rdname mod_plots_heatmap
 #' @export
 #' @keywords internal
-#' @importFrom DAPAR wrapper.heatmapD
+#' @importFrom DAPAR2 heatmapD
+#' @importFrom SummarizedExperiment assay
 
 mod_plots_heatmap_server <- function(input, output, session, obj, width = 900){
   ns <- session$ns
   
   observe({
     req(obj())
-    if (class(obj())[1] != "MSnSet") { return(NULL) }
+    if (class(obj()) != "SummarizedExperiment") { return(NULL) }
   })
   
   limitHeatmap <- 20000
   height <- paste0(2*width/3,"px")
   width <- paste0(width,"px")
-  # print("height;width")
-  # print(height)
-  # print(width)
   
   output$DS_PlotHeatmap <- renderUI({
     req(obj())
-    if (nrow(obj()) > limitHeatmap){
+    if (nrow(assay(obj())) > limitHeatmap){
       tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
     }else {
       tagList(
@@ -99,15 +97,15 @@ mod_plots_heatmap_server <- function(input, output, session, obj, width = 900){
     
     isolate({ 
       withProgress(message = 'Making plot', value = 100, {
-        DAPAR::wrapper.heatmapD(obj(),
-                                input$distance, 
-                                input$linkage,
-                                TRUE)
+        DAPAR2::heatmapD(assay(obj()),
+                         input$distance, 
+                         input$linkage,
+                         TRUE)
       })
     })
   })
   
-
+  
 }
 
 ## To be copied in the UI

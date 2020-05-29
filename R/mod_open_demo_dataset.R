@@ -1,12 +1,17 @@
 # Module UI
   
 #' @title   mod_open_demo_dataset_ui and mod_open_demo_dataset_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
+#' 
 #' @param session internal
+#' 
 #' @param pipeline.def xxx
 #' 
 #' @return An object of class [`xxxx`]
@@ -14,8 +19,11 @@
 #' @rdname mod_open_demo_dataset
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
+#' 
 mod_open_demo_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -39,8 +47,11 @@ mod_open_demo_dataset_ui <- function(id){
 # Module Server
     
 #' @rdname mod_open_demo_dataset
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @importFrom DAPAR PipelineProtein PipelinePeptide
 #' @import DAPARdata
 #' @importFrom BiocGenerics get
@@ -48,12 +59,11 @@ mod_open_demo_dataset_ui <- function(id){
 #' @importFrom BiocManager install
 #' @importFrom shinyjs info
 #' @importFrom Biobase pData
-
-
+#' 
 mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
-  require(DAPARdata)
+  require(DAPARdata2)
   
   rv.openDemo <- reactiveValues(
     dataOut = NULL,
@@ -69,7 +79,7 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
       print("DAPARdata is loaded correctly")
       selectInput(ns("demoDataset"),
                   "Demo dataset",
-                  choices = utils::data(package="DAPARdata")$results[,"Item"],
+                  choices = utils::data(package="DAPARdata2")$results[,"Item"],
                   width='200px')
   })
   
@@ -81,34 +91,14 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
       incProgress(1/nSteps, detail = 'Loading dataset')
       utils::data(list=input$demoDataset)
       data <- BiocGenerics::get(input$demoDataset)
-      if (class(data)[1]!="MSnSet") {
+      if (class(data)[1]!="Features") {
         shinyjs::info("Warning : this file is not a MSnSet file ! 
                       Please choose another one.")
         return(NULL)
       }
       
-      #proteinID <- data@experimentData@other$proteinId
-      typeOfData <- DAPAR::typeOfData(data)
       ll.pipeline <- rv.openDemo$pipe()
 
-      switch(typeOfData,
-             protein = {
-               rv.openDemo$dataOut <- DAPAR::PipelineProtein(analysis= input$demoDataset, 
-                                                      pipelineType = names(ll.pipeline), 
-                                                      dataType ='protein',
-                                                      processes=unlist(ll.pipeline), 
-                                                      experiments=list(original=data), 
-                                                      colData=Biobase::pData(data))
-             },
-             peptide = {
-               rv.openDemo$dataOut <- DAPAR::PipelinePeptide(analysis= input$demoDataset, 
-                                                      pipelineType = names(ll.pipeline), 
-                                                      dataType ='peptide',
-                                                      processes=unlist(ll.pipeline),
-                                                      experiments=list(original=data), 
-                                                      colData=Biobase::pData(data))
-             }
-      ) # end swith
       
     }) # End withProgress
     

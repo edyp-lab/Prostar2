@@ -7,7 +7,7 @@
 \usage{
 mod_plots_heatmap_ui(id)
 
-mod_plots_heatmap_server(input, output, session, obj)
+mod_plots_heatmap_server(input, output, session, obj, width = 900)
 }
 \arguments{
 \item{id}{shiny id}

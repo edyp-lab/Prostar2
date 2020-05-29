@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_popover_for_help_ui and mod_popover_for_help_server
 #' @description  A shiny Module.
 #'
@@ -29,26 +29,26 @@ mod_popover_for_help_ui <- function(id){
         uiOutput(ns("write_title_ui"))
       ),
       div(style="display:inline-block; vertical-align: middle;padding-bottom: 5px;",
-        uiOutput(ns('dot')),
-        uiOutput(ns('show_Pop'))
-          )
-  )
+          uiOutput(ns("dot")),
+          uiOutput(ns("show_Pop"))
+      )
+    )
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_popover_for_help
 #' @export
 #' @keywords internal
 #' @importFrom shinyBS bsPopover addPopover bsTooltip
-    
+
 mod_popover_for_help_server <- function(input, output, session, data){
   ns <- session$ns
   
   output$write_title_ui <- renderUI({
     req(data)
-  data$title
+    data$title
   })
   
   output$dot <- renderUI({
@@ -56,11 +56,11 @@ mod_popover_for_help_server <- function(input, output, session, data){
   })
   
   output$show_Pop <- renderUI({
-    shinyBS::bsTooltip(ns("dot"), data$content, trigger = 'hover')
-
+    shinyBS::bsTooltip(ns("dot"), data$content, trigger = "hover")
+    
   })
-
-
+  
+  
 }
 
 
@@ -111,10 +111,10 @@ button.Prostar_tooltip_white {
     
 }"
 
-    
+
 ## To be copied in the UI
 # mod_popover_for_help_ui("popover_for_help_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_popover_for_help_server, "popover_for_help_ui_1")
- 
+

@@ -16,7 +16,7 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-  require(DAPARdata)
+  require(DAPARdata2)
   r <- reactiveValues(
     settings = NULL
   )
@@ -30,7 +30,7 @@ server <- function(input, output, session) {
   output$showSettings <- renderText({
     #r$settings()
     HTML(r$settings()$examplePalette)
-
+    
   })
   
 }
