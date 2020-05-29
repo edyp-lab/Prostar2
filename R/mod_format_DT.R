@@ -1,6 +1,7 @@
 # Module UI
   
 #' @title   mod_format_DT_ui and mod_format_DT_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
@@ -11,9 +12,12 @@
 #' @rdname mod_format_DT
 #'
 #' @keywords internal
-#' @export 
+#' 
+#' @export
+#'  
 #' @importFrom shiny NS tagList 
 #' @importFrom DT dataTableOutput
+#' 
 mod_format_DT_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -28,10 +32,21 @@ mod_format_DT_ui <- function(id){
 # Module Server
     
 #' @rdname mod_format_DT
+#' 
+#' @param input internal
+#' @param output internal
+#' @param session internal
+#' @param withBtns xxx
+#' @param showRownames xxxx
+#' @param dom xxx
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @importFrom DT dataTableProxy renderDT replaceData datatable
 #' @importFrom htmlwidgets JS    
+#' 
 mod_format_DT_server <- function(input, output, session,
                                  table2show,
                                  withBtns=NULL,

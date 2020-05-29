@@ -25,6 +25,12 @@ mod_format_DT_server(
 \item{output}{internal}
 
 \item{session}{internal}
+
+\item{withBtns}{xxx}
+
+\item{showRownames}{xxxx}
+
+\item{dom}{xxx}
 }
 \description{
 A shiny Module.

@@ -14,6 +14,7 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
+#' 
 mod_infos_dataset_ui <- function(id){
   ns <- NS(id)
   
@@ -25,13 +26,13 @@ mod_infos_dataset_ui <- function(id){
              mod_format_DT_ui(ns('dt'))
       ),
       column(width=4,
-             uiOutput(ns('choose_msnset_ui')),
+             uiOutput(ns('choose_Features_ui')),
              uiOutput(ns('properties_ui')),
              verbatimTextOutput(ns('properties'))
                  
       ),
       column(width=4,
-             uiOutput(ns('selectMsnset_ui'))   
+             uiOutput(ns('selectFeatures_ui'))   
     )
     )
   )
@@ -44,12 +45,13 @@ mod_infos_dataset_ui <- function(id){
 # Module Server
 
 #' @rdname mod_infos_dataset
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @importFrom MultiAssayExperiment experiments colData
-#' @importFrom DAPAR analysis pipelineType matAdj CC properties
-#' @importFrom Biobase exprs pData 
-
+#' 
 mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
   
@@ -58,17 +60,19 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
              
   
   output$title <- renderUI({
+    print("1")
     req(obj())
-    title <- DAPAR::analysis(obj())
+    title <- metadata(obj())$analysis
     tagList(
       h4("MAE summary"),
       h3(paste0("Analysis \"",title,"\":"))
     )
   })
   
-  output$choose_msnset_ui <- renderUI({
+  output$choose_Features_ui <- renderUI({
+    print("2")
     req(obj())
-    selectInput(ns("selectInputMsnset"),
+    selectInput(ns("selectInputFeatures"),
                 "Select a dataset for further information",
                 choices = c("None",names(MultiAssayExperiment::experiments(obj())))
     )
@@ -76,45 +80,46 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
   
   Get_mae_summary <- reactive({
+    print("3")
     req(obj())
     
-    nb_msnset <- paste0(length(names(MultiAssayExperiment::experiments(obj()))), " MsnSet")
-    names_msnset <- list(names(MultiAssayExperiment::experiments(obj())))
+    nb_assay <- paste0(length(obj()), " assay(s)")
+    names_assay <- as.list(names(obj()))
     browser()
-    pipeline <- gsub("Pipeline","",DAPAR::pipelineType(obj()))
+    pipeline <- gsub("Pipeline", "", metadata(obj())$pipelineType)
     
     if (pipeline == "Peptide") {
       
-      if(length(DAPAR::matAdj(obj()))!=0){
-        txt <- "matAdj <span style=\"color: lime\">OK</span>"
+      if(length(metadata(obj()[[input$selectInputFeatures]])$list.matAdj) > 0){
+        txt <- "Adjacency matrices <span style=\"color: lime\">OK</span>"
       }
       else{ 
-        txt <- "matAdj <span style=\"color: red\">Missing</span>"
+        txt <- "Adjacency matrices <span style=\"color: red\">Missing</span>"
       }
       
-      if(length(DAPAR::CC(obj()))!=0){
+      if(length(metadata(obj()[[input$selectInputFeatures]])$list.cc) > 0){
         txt <- paste0(txt, " ; Comp Connex <span style=\"color: lime\">OK</span>")
       }
       else{
         txt <- paste0(txt, " ; Comp Connex <span style=\"color: red\">Missing</span>") }
       
-      columns <- c("Number of msnset", "List of msnset", "Pipeline Type", "Specific to Peptide Pipeline")
-      val <- c(nb_msnset,
-               names_msnset,
+      columns <- c("Number of assay", "List of assays", "Pipeline Type", "Specific to Peptide Pipeline")
+      val <- c(nb_assay,
+               names_assay,
                pipeline,
                HTML(txt)
       )
     }
     else{
-      columns <- c("Number of msnset", "List of msnset", "Pipeline Type")
-      val <- c(nb_msnset,
-               names_msnset,
+      columns <- c("Number of assay", "List of assays", "Pipeline Type")
+      val <- c(nb_assay,
+               names_assay,
                pipeline
       )
     }
     
     do <- data.frame(Definition= columns,
-                     Value=rep(0,length(columns)))
+                     Value=rep(0, length(columns)))
     
     if (is.null(obj())){
       return(do)
@@ -128,13 +133,13 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   
-  Get_MSnSet_Summary <- reactive({
+  Get_Features_Summary <- reactive({
+    print("4")
     req(obj())
-    data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
+    data <- obj()[[input$selectInputFeatures]]
     columns <- c("Number of samples",
                  "Number of conditions",
                  "Number of lines",
-                 "Number of missing values",
                  "% of missing values", 
                  "Number of empty lines")
     
@@ -144,18 +149,15 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
       do
     }
     
-    NA.count<- length(which(is.na(Biobase::exprs(data)==TRUE)))
-    pourcentage <- 100 * round(NA.count/(ncol(data)*nrow(data)), digits=4)
-    nb.empty.lines <- sum(apply(
-      is.na(as.matrix(Biobase::exprs(data))), 1, all))
+    nb.empty.lines <- nNA(obj()[[input$selectInputFeatures]])$nNArows[as.character(ncol(obj()[[input$selectInputFeatures]]))]
     
     
-    val <- c(ncol(Biobase::exprs(data)),
-             length(unique(Biobase::pData(data)$Condition)),
-             nrow(Biobase::exprs(data)),
-             NA.count,
-             pourcentage,
-             nb.empty.lines)
+    val <- c(obj()[[input$selectInputFeatures]],
+             length(unique(colData(obj())$Condition)),
+             nrow(obj()[[input$selectInputFeatures]]),
+             nNA(obj()[[input$selectInputFeatures]])$nNA,
+             nNA(obj()[[input$selectInputFeatures]])$nNArows[as.character(ncol(obj()[[input$selectInputFeatures]]))]
+             )
     do$Value <- val
     
     do
@@ -164,18 +166,20 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   output$properties_ui <- renderUI({
-    req(input$selectInputMsnset)
+    print("5")
+    req(input$selectInputFeatures)
     req(obj())
     
-    if (input$selectInputMsnset != "None") {
+    if (input$selectInputFeatures != "None") {
       checkboxInput(ns('properties_button'), "Display details?", value=FALSE)
     }
   })
   
-  observeEvent(input$selectInputMsnset,{
+  
+  
+  observeEvent(input$selectInputFeatures,{
     
     if (isTRUE(input$properties_button)) {
-      
       output$properties_ui <- renderUI({
         checkboxInput(ns('properties_button'), "Display details?", value=TRUE)
       })
@@ -185,9 +189,10 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   output$properties <- renderPrint({
+    print("6")
     req(input$properties_button)
     
-    if (input$selectInputMsnset != "None" && isTRUE(input$properties_button)) {
+    if (input$selectInputFeatures != "None" && isTRUE(input$properties_button)) {
       
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
       DAPAR::properties(data)
@@ -196,17 +201,18 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   
-  output$selectMsnset_ui <- renderUI({
-    req(input$selectInputMsnset)
+  output$selectFeatures_ui <- renderUI({
+    print("7")
+    req(input$selectInputFeatures)
     req(obj())
     
     
-    if (input$selectInputMsnset != "None") {
+    if (input$selectInputFeatures != "None") {
 
-      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputFeatures]]
       
       callModule(mod_format_DT_server,'dt2',
-                 table2show = reactive({Get_MSnSet_Summary()}))
+                 table2show = reactive({Get_Features_Summary()}))
                  
       
       callModule(mod_format_DT_server,'dt3',
@@ -215,9 +221,9 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
                  ) 
       
       tagList(
-        h3(paste0("MSnSet \"",input$selectInputMsnset,"\":")),
+        h3(paste0("MSnSet \"",input$selectInputFeatures,"\":")),
         br(),
-        h4("MsnSet summary"),
+        h4("Features summary"),
         mod_format_DT_ui(ns('dt2')),
         br(),
         uiOutput(ns('info')),
@@ -236,19 +242,20 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
   output$info <- renderUI({
-    req(input$selectInputMsnset)
+    print('8')
+    req(input$selectInputFeatures)
     req(obj())
     
-    if (input$selectInputMsnset != "None") {
+    if (input$selectInputFeatures != "None") {
       
-      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputFeatures]]
       
-      typeOfDataset <-  data@experimentData@other$typeOfData
+      typeOfDataset <- metadata(obj())$typeOfData
       
+      pourcentage <- nNA(obj()[[input$selectInputFeatures]])$nNA
       
+      nb.empty.lines <- nNA(obj()[[input$selectInputFeatures]])$nNArows[as.character(ncol(obj()[[input$selectInputFeatures]]))]
       
-      NA.count <- length(which(is.na(Biobase::exprs(data))))
-      nb.empty.lines <- sum(apply(is.na(as.matrix(Biobase::exprs(data))), 1, all))
       tagList(
         tags$h4("Info"),
         if (typeOfDataset == "protein"){
@@ -257,7 +264,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
                  protein quantitative data.")
         },
         
-        if (NA.count > 0){
+        if (pourcentage > 0){
           tags$p("As your dataset contains missing values, you should
                  impute them prior to proceed to the differential analysis.")
         },

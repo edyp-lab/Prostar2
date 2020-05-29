@@ -1,4 +1,3 @@
-library(MSnbase)
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'config.R'), local=TRUE)$value
@@ -12,38 +11,17 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
 
-   require(DAPARdata)
+   require(DAPARdata2)
    data('Exp1_R25_prot')
   # callModule(mod_infos_dataset_server,'test_infos_DT',
   #            obj = reactive({Exp1_R25_prot}))
   
-   defs <- ReadPipelineConfig('../../R/pipeline.conf')
-  ll.pipeline <- defs$protein
-  dat <- DAPAR::PipelineProtein(analysis= 'analysis', 
-                         pipelineType = 'protein', 
-                         dataType ='protein',
-                         processes=defs$protein, 
-                         experiments=list(original=Exp1_R25_prot), 
-                         colData=Biobase::pData(Exp1_R25_prot)
+  #ll.pipeline <- pipeline.defs$protein
+  #dat <- Exp1_R25_prot[[2]]
 
-  # require(DAPARdata)
-  # data('Exp1_R25_pept')
-  # data('Exp1_R2_pept')
-  # 
-  # ll.pipeline <- pipeline.defs$peptide
-  # mae <- DAPAR::PipelinePeptide(analysis= 'analysis', 
-  #                               pipelineType = 'peptide', 
-  #                               dataType ='peptide',
-  #                               processes=NULL, 
-  #                               experiments=list(original=Exp1_R25_pept, second=Exp1_R25_pept), 
-  #                               colData=Biobase::pData(Exp1_R25_pept)
-  # 
-   )
-                         
-                  
-  # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
+   # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
   callModule(mod_infos_dataset_server,'test_infos_DT',
-             obj = dat)
+             obj = Exp1_R25_prot[[2]])
 }
 
 
