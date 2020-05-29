@@ -32,18 +32,20 @@ mod_plots_density_server <- function(input, output, session, obj = NULL, base_pa
   
   observe({
     req(obj())
-  if (class(obj())[1] != "MSnSet") { return(NULL) }
+  if (class(obj()) != "SummarizedExperiment") { return(NULL) }
   })
   
   output$Densityplot <- renderHighchart({
     req(obj())
 
-    legend <- Biobase::pData(obj())[,"Condition"]
+    #legend <- Biobase::pData(obj())[,"Condition"]
+    legend <- colnames(SummarizedExperiment::assay(obj()))
     tmp <- NULL
     isolate({
       
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- DAPAR::densityPlotD_HC(obj(), 
+        tmp <- DAPAR2::densityPlotD_HC(assay(obj()),
+                                       legend,
                                legend = legend,
                                palette = base_palette())
       })

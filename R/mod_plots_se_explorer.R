@@ -20,25 +20,29 @@ mod_plots_msnset_explorer_ui <- function(id){
     uiOutput(ns("tabToShow"))
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_msnset_explorer
 #' @export
 #' @keywords internal
 #' @import DT
-    
-mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ # obj est un msnset
+
+mod_plots_msnset_explorer_server <- function(input, output, session,
+                                             obj=NULL,
+                                             metadata=NULL,
+                                             colData=NULL){ 
   ns <- session$ns
   
   observe({
-  req(obj())
-    if(class(obj())[1] != "MSnSet") { return(NULL) }
+    req(obj())
+    if(class(obj()) != "SummarizedExperiment") { return(NULL) }
   })
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- DAPAR::typeOfData(obj())
+    typeOfDataset <- metadata()[['typeOfData']]
+    
     .choices<- NULL
     
     switch(typeOfDataset,
@@ -106,11 +110,11 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   
   
   
-
+  
   output$viewpData <- DT::renderDataTable({
     req(obj())
     
-    data <- as.data.frame(Biobase::pData(obj()))
+    data <- as.data.frame(colData())
     #pal <- unique(rv.prostar$settings()$examplePalette)
     #moduleSettings.R de prostar 2.0
     pal <- unique(RColorBrewer::brewer.pal(8,"Dark2"))
@@ -142,13 +146,13 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
     
   })
   
-
+  
   output$viewfData <- DT::renderDataTable({
     req(obj())
     
     
-    if ('Significant' %in% colnames(Biobase::fData(obj()))){
-      dat <- DT::datatable(as.data.frame(Biobase::fData(obj())),
+    if ('Significant' %in% colnames(SummarizedExperiment::rowData(obj()))){
+      dat <- DT::datatable(as.data.frame(SummarizedExperiment::rowData(obj())),
                            rownames = TRUE,
                            extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                            options=list(initComplete = initComplete(),
@@ -169,7 +173,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
                         target = 'row',
                         background = DT::styleEqual(1, 'lightblue'))
     } else {
-      dat <- DT::datatable(as.data.frame(Biobase::fData(obj())),
+      dat <- DT::datatable(as.data.frame(SummarizedExperiment::rowData(obj())),
                            rownames = TRUE,
                            extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                            options=list(initComplete = initComplete(),
@@ -197,23 +201,23 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   output$table <- DT::renderDataTable({
     req(obj())
     df <- getDataForExprs()
-
+    
     dt <- DT::datatable( df,
-                     rownames=TRUE,
-                     extensions = c('Scroller', 'Buttons', 'FixedColumns'),
-                     options = list(
-                       dom = 'Bfrtip',
-                       initComplete = initComplete(),
-                       displayLength = 20,
-                       deferRender = TRUE,
-                       bLengthChange = FALSE,
-                       scrollX = 200,
-                       scrollY = 600,
-                       scroller = TRUE,
-                       ordering=FALSE,
-                       server = TRUE,
-                       fixedColumns = list(leftColumns = 1),
-                       columnDefs = list(list(targets = c(((ncol(df)/2)+1):ncol(df)), visible = FALSE)))) %>%
+                         rownames=TRUE,
+                         extensions = c('Scroller', 'Buttons', 'FixedColumns'),
+                         options = list(
+                           dom = 'Bfrtip',
+                           initComplete = initComplete(),
+                           displayLength = 20,
+                           deferRender = TRUE,
+                           bLengthChange = FALSE,
+                           scrollX = 200,
+                           scrollY = 600,
+                           scroller = TRUE,
+                           ordering=FALSE,
+                           server = TRUE,
+                           fixedColumns = list(leftColumns = 1),
+                           columnDefs = list(list(targets = c(((ncol(df)/2)+1):ncol(df)), visible = FALSE)))) %>%
       DT::formatStyle(
         colnames(df)[1:(ncol(df)/2)],
         colnames(df)[((ncol(df)/2)+1):ncol(df)],
@@ -223,7 +227,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
         backgroundRepeat = 'no-repeat',
         backgroundPosition = 'center'
       )
-
+    
     dt
   })
   
@@ -233,11 +237,11 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
     req(obj())
     
     #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
-    test.table <- as.data.frame(round(Biobase::exprs(obj()),digits=10))
+    test.table <- as.data.frame(round(SummarizedExperiment::assay(obj()),digits=10))
     # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
-    if (!is.null(DAPAR::OriginOfValues(obj()))){ #agregated dataset
+    if (!is.null(metadata()[['OriginOfValues']])){ #agregated dataset
       test.table <- cbind(test.table, 
-                          Biobase::fData(obj())[,DAPAR::OriginOfValues(obj())])
+                          as.data.frame(SummarizedExperiment::rowData(obj())[ metadata()[['OriginOfValues']] ]))
       # print(paste0("tutu:",head(test.table)))
       
     } else {
@@ -259,10 +263,10 @@ mod_plots_msnset_explorer_server <- function(input, output, session, obj=NULL){ 
   
   
 }
-    
+
 ## To be copied in the UI
 # mod_plots_msnset_explorer_ui("msnset_explorer_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_msnset_explorer_server, "msnset_explorer_ui_1")
- 
+

@@ -1,4 +1,5 @@
-library(DAPAR)
+library(DAPAR2)
+library(SummarizedExperiment)
 
 source(file.path("../../R","mod_plots_heatmap.R"), local=TRUE)$value
 
@@ -10,12 +11,11 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  require(DAPARdata)
+  require(DAPARdata2)
   data('Exp1_R25_prot')
+  obj <- Exp1_R25_prot[[2]]
   
-  callModule(mod_plots_heatmap_server,'plots_heatmap', obj = reactive({Exp1_R25_prot}))
-  # callModule(mod_plots_heatmap_server,'plots_heatmap', obj = NULL)
-  # callModule(mod_plots_heatmap_server,'plots_heatmap', obj = mae)
+  callModule(mod_plots_heatmap_server,'plots_heatmap', obj = reactive({obj}))
   
 }
 
