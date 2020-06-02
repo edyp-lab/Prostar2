@@ -15,7 +15,8 @@ server <- function(input, output, session) {
   data('Exp1_R25_prot')
   obj <- Exp1_R25_prot[[2]]
   
-  callModule(mod_plots_heatmap_server,'plots_heatmap', obj = reactive({obj}))
+  callModule(mod_plots_heatmap_server,'plots_heatmap',
+             obj = reactive({obj}))
   
 }
 
