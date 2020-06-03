@@ -16,19 +16,21 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  
   library(DAPARdata2)
   data("Exp1_R25_prot")
   obj <- Exp1_R25_prot[[2]]
+  conds <- colData(Exp1_R25_prot)[["Condition"]]
+  legend <- colData(Exp1_R25_prot)[["Sample.name"]]
   
   r <- reactiveValues(
     settings = NULL
   )
   r$settings <- callModule(mod_settings_server, "settings")
   
-  # obj est un msnset
   callModule(mod_plots_density_server,'plots_density', 
              obj = reactive({obj}),
+             conds = reactive({conds}),
+             legend = reactive({legend}),
              base_palette = reactive({r$settings()$examplePalette}))
 }
 

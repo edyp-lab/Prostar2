@@ -1,18 +1,25 @@
 # Module UI
 
 #' @title   mod_plots_corr_matrix_ui and mod_plots_corr_matrix_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
+#' 
 #' @param session internal
 #'
 #' @rdname mod_plots_corr_matrix
 #'
 #' @keywords internal
+#' 
 #' @export 
-#' @importFrom shiny NS tagList 
+#' 
+#' @importFrom shiny NS tagList
+#' 
 mod_plots_corr_matrix_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -34,7 +41,7 @@ mod_plots_corr_matrix_ui <- function(id){
                               )
                             ),
                             tooltip="Plots parameters",
-                            icon = icon("gear"), status = "info" #status = optionsBtnClass
+                            icon = icon("gear"), status = optionsBtnClass
                           ))
                )
                
@@ -48,17 +55,21 @@ mod_plots_corr_matrix_ui <- function(id){
 # Module Server
 
 #' @rdname mod_plots_corr_matrix
+#' 
 #' @export
+#' 
 #' @keywords internal
-#' @importFrom DAPAR wrapper.corrMatrixD_HC
-
-mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL, gradientRate=NULL){
-  ns <- session$ns
+#' 
+#' @importFrom SummarizedExperiment assay
+#' 
+#' @importFrom DAPAR2 corrMatrixD_HC
+#' 
+mod_plots_corr_matrix_server <- function(input, output, session,
+                                         res,
+                                         names=NULL,
+                                         gradientRate=NULL){
   
-  observe({
-    req(obj())
-    if (class(obj())[1] != "MSnSet") {return(NULL)}
-  })
+  ns <- session$ns
   
   
   rv.corr <- reactiveValues(
@@ -86,13 +97,12 @@ mod_plots_corr_matrix_server <- function(input, output, session, obj = NULL, gra
   
   
   corrMatrix <- reactive({
-    
-    req(obj())
+    req(res())
     rv.corr$gradient 
     
     isolate({
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- wrapper.corrMatrixD_HC(obj(),rv.corr$gradient )
+        tmp <- DAPAR2::corrMatrixD_HC(res(), names(), rv.corr$gradient)
       })
     })
     tmp

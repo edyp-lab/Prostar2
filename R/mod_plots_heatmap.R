@@ -1,17 +1,21 @@
-# Module UI
-
 #' @title   mod_plots_heatmap_ui and mod_plots_heatmap_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
+#' 
 #' @param session internal
 #'
 #' @rdname mod_plots_heatmap
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
 mod_plots_heatmap_ui <- function(id){
   ns <- NS(id)
@@ -30,7 +34,7 @@ mod_plots_heatmap_ui <- function(id){
                     width="150px")
       ),
       div(
-        style="display:inline-block; vertical-align: middle;",
+        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
         selectInput(ns("linkage"),"Linkage",
                     choices=list("Complete" = "complete",
                                  "Average"="average",
@@ -50,15 +54,19 @@ mod_plots_heatmap_ui <- function(id){
   )
 }
 
-# Module Server
 
 #' @rdname mod_plots_heatmap
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @importFrom DAPAR2 heatmapD
+#' 
 #' @importFrom SummarizedExperiment assay
-
-mod_plots_heatmap_server <- function(input, output, session, obj, width = 900){
+mod_plots_heatmap_server <- function(input, output, session, 
+                                     obj, 
+                                     width = 900){
   ns <- session$ns
   
   observe({
@@ -104,8 +112,6 @@ mod_plots_heatmap_server <- function(input, output, session, obj, width = 900){
       })
     })
   })
-  
-  
 }
 
 ## To be copied in the UI

@@ -29,11 +29,18 @@ mod_plots_tracking_ui <- function(id){
 
 #' plots_tracking Server Function
 #'
+#' @param obj Object SummarizedExperiment
+#' @param metadata Metadata of Fetaures conaining the SummarizedExperiment
+#'
 #' @rdname mod_plots_tracking
 #' @export
 #' @keywords internal
 #' @import shinyjs
-mod_plots_tracking_server <- function(input, output, session, obj, params, reset=FALSE){
+mod_plots_tracking_server <- function(input, output, session,
+                                      obj,
+                                      params,
+                                      metadata,
+                                      reset=FALSE){
   ns <- session$ns
   
   
@@ -69,8 +76,7 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
   })
   
   output$listSelect_UI <- renderUI({
-    #ll <-  Biobase::fData(obj())[,DAPAR::keyId(obj())]
-    ll <-  SummarizedExperiment::rowData(obj())[["Protein_IDs"]]
+    ll <-  SummarizedExperiment::rowData(obj())[[ metadata()[["keyId"]] ]]
     selectInput(ns("listSelect"), "Protein for normalization", choices=ll, multiple = TRUE, width='400px')
   })
   
@@ -95,7 +101,7 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
                 list.indices = if (is.null(input$listSelect) || length(input$listSelect)==0){
                   NULL
                 } else {
-                  match(input$listSelect, SummarizedExperiment::rowData(obj())[['Protein_IDs']])
+                  match(input$listSelect, SummarizedExperiment::rowData(obj())[[ metadata()[["keyId"]] ]])
                 },
                 rand.indices = if (is.null(input$randSelect) || input$randSelect==""){
                   NULL
@@ -105,7 +111,7 @@ mod_plots_tracking_server <- function(input, output, session, obj, params, reset
                 col.indices =  if (is.null(input$colSelect) || length(input$colSelect)==0){
                   NULL
                 } else {
-                  which(SummarizedExperiment::rowData(obj())[,input$colSelect] == 1)
+                  which(SummarizedExperiment::rowData(obj())[[input$colSelect]] == 1)
                 }
     )
     res

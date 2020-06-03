@@ -24,6 +24,7 @@ server <- function(input, output, session) {
   
   require(DAPARdata2)
   data('Exp1_R25_prot')
+  metadata <- metadata(Exp1_R25_prot)
   obj<-Exp1_R25_prot[[2]]
   
   r <- reactiveValues(
@@ -34,7 +35,8 @@ server <- function(input, output, session) {
   
   r$res <- callModule(mod_plots_tracking_server,'plots_tracking', 
                       obj = reactive({obj}), 
-                      params=reactive({NULL}), 
+                      params=reactive({NULL}),
+                      metadata=reactive({metadata}),
                       reset=reactive({FALSE}) )
   #callModule(mod_plots_tracking_server,'plots_tracking', obj = NULL, params=NULL, )
   
