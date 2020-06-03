@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_plots_group_mv_ui and mod_plots_group_mv_server
 #' 
 #' @description  A shiny Module.
@@ -30,9 +30,9 @@ mod_plots_group_mv_ui <- function(id){
     )
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_plots_group_mv
 #' 
 #' @export
@@ -45,31 +45,26 @@ mod_plots_group_mv_ui <- function(id){
 #' 
 mod_plots_group_mv_server <- function(input, output, session,
                                       obj,
-                                      colData,
-                                      base_palette=NULL){
+                                      conds,
+                                      base_palette){
   ns <- session$ns
   
   
-  # rv.group.mv <- reactiveValues(
-  #   palette = NULL
-  # )
-  # 
   observe({
     req(obj())
-  if (class(obj()) != "SummarizedExperiment") { return(NULL) }
+    if (class(obj()) != "SummarizedExperiment") { return(NULL) }
   })
   
-  # observeEvent(settings()$examplePalette, {
-  #   rv.group.mv$palette <- settings()$examplePalette
-  # })
   
   
   output$histo_MV <- renderHighchart({
     req(obj())
+    conds()
     base_palette()
+    
     withProgress(message = 'Making plot', value = 100, {
       tmp <- DAPAR2::mvHisto_HC(SummarizedExperiment::assay(obj()),
-                                conds=colData()[['Condition']],
+                                conds=conds()[['Condition']],
                                 palette=base_palette())
     })
     tmp
@@ -83,7 +78,7 @@ mod_plots_group_mv_server <- function(input, output, session,
     isolate({
       withProgress(message = 'Making plot', value = 100, {
         tmp <- DAPAR2::mvPerLinesHisto_HC(SummarizedExperiment::assay(obj()),
-                                          colData())
+                                          conds())
       })
     })
     tmp
@@ -94,22 +89,22 @@ mod_plots_group_mv_server <- function(input, output, session,
   
   output$histo_MV_per_lines_per_conditions <- renderHighchart({
     req(obj())
+    conds()
     base_palette()
-    isolate({
-      withProgress(message = 'Making plot', value = 100, {
-        tmp <- DAPAR2::mvPerLinesHistoPerCondition_HC(SummarizedExperiment::assay(obj()), 
-                                                    colData(),
-                                                    base_palette())
-      })
-      })
+    
+    withProgress(message = 'Making plot', value = 100, {
+      tmp <- DAPAR2::mvPerLinesHistoPerCondition_HC(SummarizedExperiment::assay(obj()),
+                                                    samplesData=conds(),
+                                                    palette=base_palette())
+    })
     tmp
   })
   
 }
-    
+
 ## To be copied in the UI
 # mod_plots_group_mv_ui("plots_group_mv_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_group_mv_server, "plots_group_mv_ui_1")
- 
+
