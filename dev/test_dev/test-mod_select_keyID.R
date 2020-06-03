@@ -20,7 +20,8 @@ server <- function(input, output, session) {
   require(DAPARdata)
   data('Exp1_R25_pept')
  
-  rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({Exp1_R25_pept}))
+  #rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({Exp1_R25_pept}))
+  rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({NULL}))
   
   observe({
     rv$dataIn <- rv$IDs()

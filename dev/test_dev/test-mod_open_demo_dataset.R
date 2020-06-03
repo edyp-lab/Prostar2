@@ -1,8 +1,6 @@
 library(shiny)
 library(MultiAssayExperiment)
 
-library(Prostar2)
-
 
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value

@@ -28,11 +28,11 @@
 mod_open_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     fileInput(ns("file"), "Open file", multiple = FALSE),
-    mod_choose_pipeline_ui(ns("choosePipe")),
     uiOutput(ns('ui_select_KID')) ,
-    actionButton(ns("loadDataset"), "Load dataset",class = actionBtnClass),
+    mod_choose_pipeline_ui(ns("choosePipe")),
+    shinyjs::hidden(actionButton(ns("loadDataset"), "Load dataset",class = actionBtnClass)),
     br(),
     p("Once the 'Load' button (above) clicked, all importing functions ('Open file', 'Demo data' and 'Convert data') will be disabled 
       (because successive dataset loading can make Prostar unstable). To work on another dataset, use first the 'Reload Prostar' functionality from 
@@ -72,8 +72,17 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
     return(strsplit(name,'.', fixed=T)[[1]][1])
   }
   
-  
-  
+ 
+  observe({
+    cond <- !is.null(rv.openDataset$pipe())
+    if (class(rv.openDataset$dataRead)=='MSnSet'){
+      cond <- cond && 
+        !is.null(rv.openDataset$keyID) && 
+        !is.null(rv.openDataset$parentProtId) && 
+        !is.null(rv.openDataset$data)
+    }
+    shinyjs::toggle('loadDataset', condition=cond)
+  })
   
   observeEvent(req(input$file),{
     
@@ -99,8 +108,7 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   output$ui_select_KID <- renderUI({
     req(rv.openDataset$dataRead )
-    
-    if (!(class(rv.openDataset$dataRead )[1] == "MSnSet")){ return(NULL)}
+    if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
     
     mod_select_keyID_ui(ns('select_KID'))
   })
@@ -108,9 +116,8 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   
   rv.openDataset$ret <- callModule(mod_select_keyID_server, 
-                                   'selectKID', 
-                                   dataIn=reactive({Biobase::fData(rv.openDataset$dataRead)}), 
-                                   typeOfData = reactive({rv.openDataset$dataRead@experimentData@other$typeOfData}))
+                                   'select_KID', 
+                                   dataIn = reactive({rv.openDataset$dataRead}))
   
   observe({
     rv.openDataset$keyID <- rv.openDataset$ret()$keyId
@@ -118,22 +125,23 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
     rv.openDataset$data <- rv.openDataset$ret()$data
   })
   
+  
+  
   observeEvent(input$loadDataset,ignoreInit =TRUE,{ 
     req(rv.openDataset$dataRead )
-    
 
-      withProgress(message = '',detail = '', value = 0, {
+    withProgress(message = '',detail = '', value = 0, {
       incProgress(1, detail = 'Loading dataset')
-      switch(class(rv.openDataset$dataRead )[1],
+      switch(class(rv.openDataset$dataRead ),
              Features= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
              MSnSet= {
                typeOfData <- rv.openDataset$dataRead@experimentData@other$typeOfData
                ll.pipeline <- rv.openDataset$pipe()
                
-               rv.openDataset$dataOut <- convertMSnset2Features(obj = data,
+               rv.openDataset$dataOut <- convertMSnset2Features(obj = rv.openDataset$dataRead,
                                                                  analysis = DeleteExtension(input$file$name),
-                                                                 parentProtId = NULL,
-                                                                 keyId = NULL,
+                                                                 parentProtId = rv.openDataset$parentProtId,
+                                                                 keyId = rv.openDataset$keyID,
                                                                  pipelineType = names(ll.pipeline), 
                                                                  processes = unlist(ll.pipeline)
                                                                 )

@@ -6,7 +6,7 @@ library(shinyjs)
 
 moduleTestUI <- function(id, label='ui1'){
   ns <- NS(id)
-  useShinyjs()
+  shinyjs:: useShinyjs()
   tagList(
     #shinyUI(fluidPage(
     actionButton(ns("btn"), "Submit", class='btn-primary'),
@@ -71,7 +71,7 @@ moduleTest <- function(input, output, session) {
 #ui <- tagList(useShinyjs(), htmlOutput("page"))
 
 ui <- fluidPage(
-  useShinyjs(),
+  shinyjs::useShinyjs(),
   tagList(
     #htmlOutput("page")
     moduleTestUI('ui1')

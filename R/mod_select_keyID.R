@@ -7,6 +7,8 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' @importFrom Biobase fData
+#' 
 mod_select_keyID_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -39,7 +41,7 @@ mod_select_keyID_server <- function(input, output, session, dataIn){
   )
   
   observe({
-    dataIn()
+   req(dataIn())
     rv$dataOut <- dataIn() 
     rv$typeOfData <- dataIn()@experimentData@other$typeOfData
     })
@@ -49,6 +51,7 @@ mod_select_keyID_server <- function(input, output, session, dataIn){
                          content="If you choose the automatic ID, Prostar will build an index."))
   
   output$choose_keyID_ui <- renderUI({
+    req(rv$dataOut)
     isolate({
       .choices <- c("", "AutoID",colnames(Biobase::fData(rv$dataOut)))
       names(.choices) <- c("None","-- Auto ID --",colnames(Biobase::fData(rv$dataOut)))
@@ -71,8 +74,8 @@ mod_select_keyID_server <- function(input, output, session, dataIn){
         This column is valid to serve as a unique ID for entities"
     }
     else {
-      t <- (length(as.data.frame(Biobase::fData(rv$dataOut))[, input$choose_keyID])
-            == length(unique(Biobase::fData(as.data.frame(rv$dataOut))[, input$choose_keyID])))
+      dat <- as.data.frame(Biobase::fData(rv$dataOut))[ ,input$choose_keyID]
+        t <- (length(dat) == length(unique(dat)))
       
       if (!t){
         text <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">
@@ -110,15 +113,18 @@ mod_select_keyID_server <- function(input, output, session, dataIn){
   })
   
   
-  output$preview_col_Parent_Protein_ui <- renderTable(
-    # req(input$choose_col_Parent_Protein)
+  output$preview_col_Parent_Protein_ui <- renderTable({
+     req(input$choose_col_Parent_Protein)
+
     if (rv$typeOfData != 'peptide' || is.null(input$choose_col_Parent_Protein) || input$choose_col_Parent_Protein == "") {
       return (NULL)
     } else{
-      head(rv$dataOut[,input$choose_col_Parent_Protein])
-    },colnames=FALSE
+      head(Biobase::fData(rv$dataOut)[ ,input$choose_col_Parent_Protein])
+    }
+    #,colnames=FALSE
     
-  )
+    
+  })
   
   output$note_col_Parent_Protein_ui <- renderUI({
     req(rv$typeOfData)
@@ -172,7 +178,7 @@ mod_select_keyID_server <- function(input, output, session, dataIn){
     req(input$choose_keyID)
     test_keyID <- test_parentProt <- TRUE
     
-    if(typeOfData() == "peptide"){
+    if(rv$typeOfData == "peptide"){
       test_parentProt <- !(input$choose_col_Parent_Protein == "") && !is.null(input$choose_col_Parent_Protein) && isTRUE(input$confirm_separator)
     }
     
