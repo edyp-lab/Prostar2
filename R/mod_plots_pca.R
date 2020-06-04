@@ -23,13 +23,15 @@ mod_plots_pca_ui <- function(id){
     )
   )
 }
-    
+
 #' plots_pca Server Function
 #'
 #' @noRd 
 #' 
 #' @importFrom DAPAR wrapper.pca plotPCA_Eigen_hc plotPCA_Var plotPCA_Ind
-mod_plots_pca_server <- function(input, output, session, obj){
+mod_plots_pca_server <- function(input, output, session,
+                                 obj,
+                                 ){
   ns <- session$ns
  
   
@@ -75,11 +77,11 @@ mod_plots_pca_server <- function(input, output, session, obj){
   
   observeEvent(input$varScale_PCA,{
     rv.pca$PCA_varScale <- input$varScale_PCA
-    rv.pca$res.pca <- DAPAR::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
+    rv.pca$res.pca <- DAPAR2::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
   })
   
   observeEvent(obj(), {
-    rv.pca$res.pca <- DAPAR::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
+    rv.pca$res.pca <- DAPAR2::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
   })
   
   

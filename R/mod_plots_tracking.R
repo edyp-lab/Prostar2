@@ -30,7 +30,7 @@ mod_plots_tracking_ui <- function(id){
 #' plots_tracking Server Function
 #'
 #' @param obj Object SummarizedExperiment
-#' @param metadata Metadata of Fetaures conaining the SummarizedExperiment
+#' @param metadata Metadata of Fetaures containing the SummarizedExperiment
 #'
 #' @rdname mod_plots_tracking
 #' @export
