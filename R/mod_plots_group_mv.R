@@ -64,7 +64,7 @@ mod_plots_group_mv_server <- function(input, output, session,
     
     withProgress(message = 'Making plot', value = 100, {
       tmp <- DAPAR2::mvHisto_HC(SummarizedExperiment::assay(obj()),
-                                conds=conds()[['Condition']],
+                                conds=conds(),
                                 palette=base_palette())
     })
     tmp
