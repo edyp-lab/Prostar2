@@ -1,6 +1,7 @@
 # Module UI
   
 #' @title   mod_var_dist_plot_ui and mod_var_dist_plot_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
@@ -11,8 +12,11 @@
 #' @rdname mod_var_dist_plot
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
+#' 
 mod_plots_var_dist_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -29,17 +33,25 @@ mod_plots_var_dist_ui <- function(id){
 # Module Server
     
 #' @rdname mod_var_dist_plot
+#' 
 #' @export
+#' 
 #' @keywords internal
-#' @importFrom DAPAR wrapper.CVDistD_HC
-    
-mod_plots_var_dist_server <- function(input, output, session, obj, base_palette){
+#' 
+#' @importFrom DAPAR2 CVDistD_HC
+#' 
+#' @importFrom SummarizedExperiment assay
+#' 
+mod_plots_var_dist_server <- function(input, output, session,
+                                      obj,
+                                      conds,
+                                      base_palette=NULL){
   ns <- session$ns
   
   observe({
     req(obj())
     
-    if (class(obj())[1] != "MSnSet") { return(NULL) }
+    if (class(obj()) != "Summarizedexperiment") { return(NULL) }
   })
   
   
@@ -48,7 +60,7 @@ mod_plots_var_dist_server <- function(input, output, session, obj, base_palette)
     req(obj())
     
     isolate({
-      varDist <- DAPAR::wrapper.CVDistD_HC(obj(),palette = base_palette())
+      varDist <- DAPAR2::CVDistD_HC(SummarizedExperiment::assay(obj()),conds(),palette = base_palette())
     })
     varDist
   })

@@ -38,7 +38,7 @@ server <- function(input, output, session) {
                       params=reactive({NULL}),
                       metadata=reactive({metadata}),
                       reset=reactive({FALSE}) )
-  #callModule(mod_plots_tracking_server,'plots_tracking', obj = NULL, params=NULL, )
+  
   
   output$show_res <- renderText({HTML(r$res())})
   output$show_res_type <- renderText({HTML(r$res()$type)})

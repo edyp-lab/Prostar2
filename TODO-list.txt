@@ -1,4 +1,4 @@
-
+﻿
 Sam
 * regarder pourquoi Prostar ne trouve pas tous les datasets de DAPARdata
 * rajouter les settings comme paramètre des modules graphiques
@@ -13,4 +13,5 @@ Enora
 * DAPAR2 filtration ajouter un vecteur pour un seuil de fitrage par condition
 * DAPAR2 filtration ajouter les checks/warnings adéquats pour que la fonction soit indépendante
 * Prostar2 keyId Features::metatata(<Features>)[['keyId']]
+* mod_plot_heatmap : + bouton export + dendro colored sur les echantillons
 * ANOVA Hélène

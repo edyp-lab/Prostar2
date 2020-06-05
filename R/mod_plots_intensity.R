@@ -1,19 +1,27 @@
 # Module UI
-  
+
 #' @title   mod_plots_intensity_plots_ui and mod_plots_intensity_plots_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
+#' 
 #' @param session internal
 #'
 #' @rdname mod_plots_intensity_plots
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
+#' 
 #' @import shinyjs
+#' 
 mod_plots_intensity_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -35,19 +43,30 @@ mod_plots_intensity_ui <- function(id){
     )  
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_plots_intensity_plots
+#' 
 #' @export
+#' 
 #' @keywords internal
-#' @importFrom DAPAR violinPlotD boxPlotD_HC parentProtId
-    
-mod_plots_intensity_server <- function(input, output, session, dataIn, params=NULL, reset=NULL, base_palette=NULL){
+#' 
+#' @importFrom DAPAR2 violinPlotD boxPlotD_HC 
+#' 
+#' @importFrom SummarizedExperiment rowData
+#' 
+mod_plots_intensity_server <- function(input, output, session,
+                                       dataIn,
+                                       metadata,
+                                       conds,
+                                       params=NULL,
+                                       reset=NULL,
+                                       base_palette=NULL){
   ns <- session$ns
   
   rv.modboxplot <- reactiveValues(
-    var = NULL, #result of module tracking 
+    var = NULL,
     ind = NULL,
     indices = NULL
   )
@@ -55,13 +74,15 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
   rv.modboxplot$var <- callModule(mod_plots_tracking_server, "widgets",
                                   obj = reactive({dataIn()}),
                                   params=reactive({params()}),
+                                  metadata=reactive({metadata}),
                                   reset=reactive({reset()}))
   
   
+  
   output$showTrackProt <- renderUI({
-    typeOfData(dataIn())
+    dataIn()
     
-    if (typeOfData(dataIn())=='protein'){
+    if (metadata(dataIn())[["typeOfData"]]=='protein'){
       tags$div(style="display:inline-block; vertical-align: middle;",
                mod_plots_tracking_ui(ns('widgets'))
       ) } else { return(NULL)}
@@ -74,7 +95,7 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
     if (is.null(rv.modboxplot$var()$type)){
       return(NULL)
     }
-    ll <- Biobase::fData(dataIn())[,DAPAR::parentProtId(dataIn())]
+    ll <- SummarizedExperiment::rowData(dataIn())[,DAPAR::metadata()[['parentProtId']]]
     
     
     switch(rv.modboxplot$var()$type,
@@ -102,13 +123,12 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
     tmp <- NULL
     
     pattern <- paste0('test',".boxplot")
-    conds <- Biobase::pData(dataIn())$Condition
     withProgress(message = 'Making plot', value = 100, {
-      tmp <- DAPAR::boxPlotD_HC(dataIn(),
-                              legend=conds,
-                              palette=base_palette(),
-                              subset.view = rv.modboxplot$indices)
-    #future(createPNGFromWidget(tmp,pattern))
+      tmp <- DAPAR2::boxPlotD_HC(SummarizedExperiment::assay(dataIn()),
+                                conds=conds(),
+                                palette=base_palette(),
+                                subset.view = rv.modboxplot$indices)
+      #future(createPNGFromWidget(tmp,pattern))
     })
     tmp
   })
@@ -127,11 +147,11 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
       # png(outfile, width = 640, height = 480, units = "px")
       png(outfile)
       pattern <- paste0('test',".violinplot")
-      conds <- Biobase::pData(dataIn())$Condition
-      tmp <- DAPAR::violinPlotD(dataIn(),
-                              legend = conds,
-                              palette = base_palette(),
-                              subset.view =  rv.modboxplot$indices)
+      tmp <- DAPAR2::violinPlotD(SummarizedExperiment::assay(dataIn()),
+                                fData = rowData(dataIn()),
+                                legend = conds(),
+                                palette = base_palette(),
+                                subset.view =  rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
       dev.off()
     })
@@ -145,10 +165,10 @@ mod_plots_intensity_server <- function(input, output, session, dataIn, params=NU
   
   return(reactive({rv.modboxplot$var()}))
 }
-    
+
 ## To be copied in the UI
 # mod_plots_intensity_plots_ui("plots_intensity_plots_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_intensity_plots_server, "plots_intensity_plots_ui_1")
- 
+

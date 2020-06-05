@@ -1,5 +1,5 @@
 library(highcharter)
-library(DAPAR)
+library(DAPAR2)
 library(shiny)
 library(SummarizedExperiment)
 
