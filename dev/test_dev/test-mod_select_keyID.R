@@ -1,6 +1,9 @@
-for (f in list.files('../../R', pattern='.R')){
-  source(file.path('../../R', f), local=TRUE)$value
-}
+# for (f in list.files('../../R', pattern='.R')){
+#   source(file.path('../../R', f), local=TRUE)$value
+# }
+
+source(file.path('../../R', 'mod_select_keyID.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
@@ -17,11 +20,11 @@ server <- function(input, output, session) {
     dataIn = NULL
   )
   
-  require(DAPARdata)
-  data('Exp1_R25_pept')
- 
-  #rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({Exp1_R25_pept}))
-  rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({NULL}))
+  #utils::data(Exp1_R25_pept, package='DAPARdata2')
+  utils::data(Exp1_R25_pept, package='DAPARdata')
+  
+  rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({Exp1_R25_pept}))
+  #rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({NULL}))
   
   observe({
     rv$dataIn <- rv$IDs()

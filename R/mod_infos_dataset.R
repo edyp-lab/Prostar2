@@ -26,8 +26,9 @@ mod_infos_dataset_ui <- function(id){
              mod_format_DT_ui(ns('dt')),
              br(),
              br(),
-             h4("Samples"),
-             mod_format_DT_ui(ns('samples_tab'))
+
+             uiOutput(ns('samples_tab_ui'))
+             
       ),
        column(width=6,
               uiOutput(ns('choose_SE_ui')),
@@ -58,10 +59,21 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
   
   observe({
-    obj()
+    req(obj())
     if (class(obj()) != 'Features')
+      {
       warning("'obj' is not of class 'Features'")
-    return(NULL)
+      return(NULL)
+    }
+    
+    callModule(mod_format_DT_server,'samples_tab',
+               table2show = reactive({data.frame(colData(obj()))}),
+               style = reactive({list(cols = colnames(colData(obj())),
+                                      vals = colnames(colData(obj()))[2],
+                                      unique = unique(colData(obj())$Condition),
+                                      pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
+               })
+    )
   })
   
   
@@ -70,15 +82,18 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
              style=reactive({NULL}))
              
     
-    callModule(mod_format_DT_server,'samples_tab',
-               table2show = reactive({data.frame(MultiAssayExperiment::colData(obj()))}),
-               style = reactive({list(cols = colnames(MultiAssayExperiment::colData(obj())),
-                                      vals = colnames(MultiAssayExperiment::colData(obj()))[2],
-                                      unique = unique(MultiAssayExperiment::colData(obj())$Condition),
-                                      pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
-               })
-    )
     
+    
+    
+    output$samples_tab_ui <- renderUI({
+      req(obj())
+      
+      tagList(
+        h4("Samples"),
+        mod_format_DT_ui(ns('samples_tab'))
+      )
+      
+    })
     
   output$title <- renderUI({
     req(obj())
@@ -103,8 +118,9 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   Get_Features_summary <- reactive({
     req(obj())
     
+    print(names(obj()))
     nb_assay <- length(obj())
-    names_assay <- as.vector(names(obj()))
+    names_assay <- unlist(names(obj()))
     pipeline <- metadata(obj())$pipelineType
     nSamples <- nrow(colData(obj()))
     nConds <- length(unique(colData(obj())$Condition))
@@ -292,7 +308,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
 
   NeedsUpdate <- reactive({
-
+    req(obj())
     PROSTAR.version <- metadata(MultiAssayExperiment::experiments(obj()))$versions$Prostar_Version
     
     if(compareVersion(PROSTAR.version,"1.12.9") != -1 && !is.na(PROSTAR.version) && PROSTAR.version != "NA") {

@@ -50,6 +50,8 @@ mod_select_keyID_server <- function(input, output, session, dataIn){
              data = list(title = HTML(paste0("<strong><font size=\"4\">Key ID definition</font></strong>")), 
                          content="If you choose the automatic ID, Prostar will build an index."))
   
+  
+  
   output$choose_keyID_ui <- renderUI({
     req(rv$dataOut)
     isolate({

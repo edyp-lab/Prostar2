@@ -108,16 +108,20 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   output$ui_select_KID <- renderUI({
     req(rv.openDataset$dataRead )
+    print(class(rv.openDataset$dataRead ))
+    
     if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
     
     mod_select_keyID_ui(ns('select_KID'))
+    
+    
   })
-  
-  
   
   rv.openDataset$ret <- callModule(mod_select_keyID_server, 
                                    'select_KID', 
                                    dataIn = reactive({rv.openDataset$dataRead}))
+  
+  
   
   observe({
     rv.openDataset$keyID <- rv.openDataset$ret()$keyId

@@ -12,12 +12,7 @@ server <- function(input, output, session) {
   
 
   utils::data(Exp1_R25_prot, package='DAPARdata2')
-  # callModule(mod_infos_dataset_server,'test_infos_DT',
-  #            obj = reactive({Exp1_R25_prot}))
   
-  #ll.pipeline <- pipeline.defs$protein
-  #dat <- Exp1_R25_prot[[2]]
-
    # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
   callModule(mod_infos_dataset_server,'test_infos_DT',
              obj = reactive({Exp1_R25_prot}))
