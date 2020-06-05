@@ -19,21 +19,23 @@ mod_infos_dataset_ui <- function(id){
   ns <- NS(id)
   
   tagList(
+    htmlOutput(ns('title')),
+    
     fluidRow(
-      column(width=4,
-             htmlOutput(ns('title')),
+      column(width=6,
+             mod_format_DT_ui(ns('dt')),
              br(),
-             mod_format_DT_ui(ns('dt'))
+             br(),
+             h4("Samples"),
+             mod_format_DT_ui(ns('samples_tab'))
       ),
-       column(width=4,
-              uiOutput(ns('choose_SE_ui'))
-    #          uiOutput(ns('properties_ui')),
-    #          verbatimTextOutput(ns('properties'))
-    #              
+       column(width=6,
+              uiOutput(ns('choose_SE_ui')),
+              uiOutput(ns('show_SE_ui'))
+             # uiOutput(ns('properties_ui')),
+             # verbatimTextOutput(ns('properties'))
+
        )
-    #   column(width=4,
-    #          uiOutput(ns('select_SE_ui'))   
-    # )
     )
   )
 }
@@ -64,23 +66,32 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
     callModule(mod_format_DT_server,'dt',
-             table2show = reactive({as.data.frame(Get_Features_summary())}))
+             table2show = reactive({as.data.frame(Get_Features_summary())}),
+             style=reactive({NULL}))
              
-  
+    
+    callModule(mod_format_DT_server,'samples_tab',
+               table2show = reactive({data.frame(MultiAssayExperiment::colData(obj()))}),
+               style = reactive({list(cols = colnames(MultiAssayExperiment::colData(obj())),
+                                      vals = colnames(MultiAssayExperiment::colData(obj()))[2],
+                                      unique = unique(MultiAssayExperiment::colData(obj())$Condition),
+                                      pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
+               })
+    )
+    
+    
   output$title <- renderUI({
-    print("1")
     req(obj())
     title <- metadata(obj())$analysis
     tagList(
-      h4("Assay summary"),
-      h3(paste0("Analysis \"",title,"\":"))
+      h3("Dataset summary"),
+      p(paste0("Name of analysis:",title))
     )
   })
   
   
   
   output$choose_SE_ui <- renderUI({
-    print("2")
     req(obj())
     selectInput(ns("selectInputSE"),
                 "Select a dataset for further information",
@@ -90,51 +101,31 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
 
   Get_Features_summary <- reactive({
-    print("3")
-
-    columns <- c("Number of assay", "List of assays", "Pipeline Type")
-    do <- data.frame(Definition= columns,
-                     Value=rep(0, length(columns)))
+    req(obj())
     
-    if (!is.null(obj())){
-    nb_assay <- paste0(length(obj()), " assay(s)")
-    names_assay <- as.list(names(obj()))
+    nb_assay <- length(obj())
+    names_assay <- as.vector(names(obj()))
+    pipeline <- metadata(obj())$pipelineType
+    nSamples <- nrow(colData(obj()))
+    nConds <- length(unique(colData(obj())$Condition))
+    eqConds <- TRUE
+    
+     
+    columns <- c("Number of assay(s)",
+                 "List of assay(s)",
+                 "Pipeline Type")
 
-    typeOfData <- metadata(obj())[[input$selectInputSE]]$typeOfData
-  
-    if (typeOfData == "Peptide") {
-
-      if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
-        txt <- "Adjacency matrices <span style=\"color: lime\">OK</span>"
-      }
-      else{
-        txt <- "Adjacency matrices <span style=\"color: red\">Missing</span>"
-      }
-
-      if(length(metadata(obj()[[input$selectInputSE]])$list.cc) > 0){
-        txt <- paste0(txt, " ; Comp Connex <span style=\"color: lime\">OK</span>")
-      }
-      else{
-        txt <- paste0(txt, " ; Comp Connex <span style=\"color: red\">Missing</span>") }
-
-      columns <- c("Number of assay", "List of assays", "Pipeline Type", "Specific to Peptide Pipeline")
-      val <- c(nb_assay,
-               names_assay,
-               pipeline,
-               HTML(txt)
-      )
-    }
-    else{
-      
-      val <- c(nb_assay,
-               names_assay,
-               pipeline
-      )
-    }
-
-   
-    do$Value <- val
-    }
+    vals <- c( if(is.null(metadata(obj())$pipelineType)) '-' else metadata(obj())$pipelineType,
+               length(obj()),
+               if (length(obj())==0) '-' else HTML(paste0('<ul>', paste0('<li>', names_assay, "</li>", collapse=""), '</ul>', collapse=""))
+    )
+    
+    
+    
+    do <- data.frame(Definition= columns,
+                     Value=vals
+                     )
+    
     
     do
   })
@@ -142,52 +133,72 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
 
 
-  # Get_SE_Summary <- reactive({
-  #   print("4")
-  #   req(obj())
-  #   data <- obj()[[input$selectInputSE]]
-  #   columns <- c("Number of samples",
-  #                "Number of conditions",
-  #                "Number of lines",
-  #                "% of missing values", 
-  #                "Number of empty lines")
-  #   
-  #   do <- data.frame(Definition= columns,
-  #                    Value=rep(0,length(columns)))
-  #   if (is.null(obj())){
-  #     do
-  #   }
-  #   
-  #   nb.empty.lines <- nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
-  #   
-  #   
-  #   val <- c(obj()[[input$selectInputSE]],
-  #            length(unique(colData(obj())$Condition)),
-  #            nrow(obj()[[input$selectInputSE]]),
-  #            nNA(obj()[[input$selectInputSE]])$nNA,
-  #            nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
-  #            )
-  #   do$Value <- val
-  #   
-  #   do
-  # })
-  # 
-  # 
-  # 
+  Get_SE_Summary <- reactive({
+    req(obj())
+    req(input$selectInputSE)
+    data <- obj()[[input$selectInputSE]]
+    
+    columns <- c("Type of data",
+                 "Number of lines",
+                 "% of missing values",
+                 "Number of empty lines")
+                 
+   
+   
+    typeOfData <- metadata(data)$typeOfData
+    nLines <- nrow(obj()[[input$selectInputSE]])
+    percentMV <- nNA(obj()[[input$selectInputSE]])$nNA
+    nEmptyLines <-nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
+
+    val <- c(typeOfData,
+             nLines,
+             percentMV,
+             nEmptyLines
+             )
+    
+    
+    
+    if (typeOfData=='Peptide'){
+      columns <- c(columns,
+                   "Adjacency matrices",
+                   "Connex components")
+      
+      if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
+        adjMat.txt <- "Adjacency matrices <span style=\"color: lime\">OK</span>"
+      } else{
+        adjMat.txt <- "Adjacency matrices <span style=\"color: red\">Missing</span>"
+      }
+      
+      if(length(metadata(obj()[[input$selectInputSE]])$list.cc) > 0){
+        cc.txt <- "Comp Connex <span style=\"color: lime\">OK</span>"
+      } else{
+        cc.txt <- "Comp Connex <span style=\"color: red\">Missing</span>"
+      }
+      
+      val <- c(val, adjMat.txt, cc.txt)
+      
+    }
+    
+    do <- data.frame(Definition= columns,
+                     Value=val)
+    do
+  })
+
+
+
   # output$properties_ui <- renderUI({
-  #   print("5")
   #   req(input$selectInputSE)
   #   req(obj())
-  #   
+  # 
   #   if (input$selectInputSE != "None") {
   #     checkboxInput(ns('properties_button'), "Display details?", value=FALSE)
   #   }
   # })
-  # 
-  # 
-  # 
+
+
+
   # observeEvent(input$selectInputSE,{
-  #   
+  # 
   #   if (isTRUE(input$properties_button)) {
   #     output$properties_ui <- renderUI({
   #       checkboxInput(ns('properties_button'), "Display details?", value=TRUE)
@@ -195,114 +206,102 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   #   }
   #   else{ return(NULL)}
   # })
-  # 
-  # 
+
+
   # output$properties <- renderPrint({
-  #   print("6")
   #   req(input$properties_button)
-  #   
+  # 
   #   if (input$selectInputSE != "None" && isTRUE(input$properties_button)) {
-  #     
-  #     data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
-  #     #DAPAR::properties(data)
-  #   }
-  # })
-  # 
-  # 
-  # 
-  # output$select_SE_ui <- renderUI({
-  #   print("7")
-  #   req(input$selectInputSE)
-  #   req(obj())
-  #   
-  #   
-  #   if (input$selectInputFeatures != "None") {
   # 
   #     data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
-  #     
-  #     callModule(mod_format_DT_server,'dt2',
-  #                table2show = reactive({Get_SE_Summary()}))
-  #                
-  #     
-  #     callModule(mod_format_DT_server,'dt3',
-  #                table2show = reactive({
-  #                  data.frame(MultiAssayExperiment::colData(obj()))})
-  #                ) 
-  #     
-  #     tagList(
-  #       h3(paste0("MSnSet \"",input$selectInputSE,"\":")),
-  #       br(),
-  #       h4("SE summary"),
-  #       mod_format_DT_ui(ns('dt2')),
-  #       br(),
-  #       uiOutput(ns('info')),
-  #       br(),
-  #       h4("pData"),
-  #       mod_format_DT_ui(ns('dt3'))
-  #       
-  #     )
-  #   }
-  #   else {
-  #     return(NULL)
-  #   }
-  #   
-  # })
-  # 
-  # 
-  # 
-  # output$info <- renderUI({
-  #   print('8')
-  #   req(input$selectInputSE)
-  #   req(obj())
-  #   
-  #   if (input$selectInputSE != "None") {
-  #     
-  #     data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
-  #     
-  #     typeOfDataset <- metadata(obj())$typeOfData
-  #     
-  #     pourcentage <- nNA(obj()[[input$selectInputSE]])$nNA
-  #     
-  #     nb.empty.lines <- nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
-  #     
-  #     tagList(
-  #       tags$h4("Info"),
-  #       if (typeOfDataset == "protein"){
-  #         tags$p("The aggregation tool
-  #                has been disabled because the dataset contains
-  #                protein quantitative data.")
-  #       },
-  #       
-  #       if (pourcentage > 0){
-  #         tags$p("As your dataset contains missing values, you should
-  #                impute them prior to proceed to the differential analysis.")
-  #       },
-  #       if (nb.empty.lines > 0){
-  #         tags$p("As your dataset contains lines with no values, you
-  #                should remove them with the filter tool
-  #                prior to proceed to the analysis of the data.")
-  #       }
-  #       
-  #     )
+  #     metadata(data)
   #   }
   # })
-  # 
+
+
+
+  output$show_SE_ui <- renderUI({
+    req(input$selectInputSE)
+    req(obj())
+
+
+    if (input$selectInputSE != "None") {
+
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
+
+      callModule(mod_format_DT_server,'dt2',
+                 table2show = reactive({Get_SE_Summary()}),
+                 style=reactive({NULL}))
+
+
+
+      tagList(
+        # h3(paste0("MSnSet \"",input$selectInputSE,"\":")),
+        # br(),
+        # h4("SE summary"),
+        mod_format_DT_ui(ns('dt2')),
+        br(),
+        uiOutput(ns('info'))
+      )
+    }
+    else {
+      return(NULL)
+    }
+
+  })
+
+
+
+  output$info <- renderUI({
+    req(input$selectInputSE)
+    req(obj())
+
+    if (input$selectInputSE != "None") {
+
+      data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
+
+      typeOfDataset <- metadata(obj()[[input$selectInputSE]])$typeOfData
+
+      pourcentage <- nNA(obj()[[input$selectInputSE]])$nNA
+
+      nb.empty.lines <- nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
+
+      tagList(
+        tags$h4("Info"),
+        if (typeOfDataset == "protein"){
+          tags$p("The aggregation tool
+                 has been disabled because the dataset contains
+                 protein quantitative data.")
+        },
+
+        if (pourcentage > 0){
+          tags$p("As your dataset contains missing values, you should
+                 impute them prior to proceed to the differential analysis.")
+        },
+        if (nb.empty.lines > 0){
+          tags$p("As your dataset contains lines with no values, you
+                 should remove them with the filter tool
+                 prior to proceed to the analysis of the data.")
+        }
+
+      )
+    }
+  })
+
   
   
-  # 
-  # NeedsUpdate <- reactive({
-  #   
-  #   data <- MultiAssayExperiment::experiments(obj())[[input$selectInputMsnset]]
-  #   PROSTAR.version <- data@experimentData@other$Prostar_Version
-  # 
-  #   re(compareVersion(PROSTAR.version,"1.12.9") != -1))
-  #   {return (FALSE)}
-  # 
-  #   else {
-  #     return(TRUE)
-  #   }
-  # })
-  # 
+
+  NeedsUpdate <- reactive({
+
+    PROSTAR.version <- metadata(MultiAssayExperiment::experiments(obj()))$versions$Prostar_Version
+    
+    if(compareVersion(PROSTAR.version,"1.12.9") != -1 && !is.na(PROSTAR.version) && PROSTAR.version != "NA") {
+      return (FALSE)
+      } else {
+      return(TRUE)
+    }
+  })
+
   
 }
 

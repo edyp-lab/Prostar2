@@ -44,14 +44,15 @@ mod_format_DT_ui <- function(id){
 #' 
 #' @keywords internal
 #' 
-#' @importFrom DT dataTableProxy renderDT replaceData datatable
+#' @import DT
 #' @importFrom htmlwidgets JS    
 #' 
 mod_format_DT_server <- function(input, output, session,
                                  table2show,
                                  withBtns=NULL,
                                  showRownames=FALSE,
-                                 dom='Bt'){
+                                 dom='Bt',
+                                 style = NULL){
   ns <- session$ns
   
   observe({
@@ -70,6 +71,7 @@ mod_format_DT_server <- function(input, output, session,
     req(table2show())
     
     isolate({
+      if (is.null(style()) || length(style())==0){
       DT::datatable(table2show(), 
                     extensions = c('Scroller', 'Buttons'),
                     escape = FALSE,
@@ -82,6 +84,26 @@ mod_format_DT_server <- function(input, output, session,
                                 ordering = FALSE
                     )
       )
+        } else {
+          
+          DT::datatable(table2show(), 
+                        extensions = c('Scroller', 'Buttons'),
+                        escape = FALSE,
+                        rownames= showRownames,
+                        option=list(initComplete = initComplete(),
+                                    dom = dom,
+                                    server = FALSE,
+                                    autoWidth=TRUE,
+                                    columnDefs = list(list(width='150px',targets= "_all")),
+                                    ordering = FALSE
+                        )
+          )  %>%
+        formatStyle(
+          columns = style()$cols,
+          valueColumns = style()$vals,
+          backgroundColor = styleEqual(style()$unique, style()$pal)
+        )
+        }
     })
     
   })
