@@ -21,7 +21,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   rv <- reactiveValues(
-    demoData = NULL
+    openData = NULL
   )
   
   rv$openData <- callModule(mod_open_dataset_server, "rl", pipeline.def=reactive({pipeline.defs}))

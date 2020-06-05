@@ -23,23 +23,15 @@
 #' @export 
 #' 
 #' @importFrom shiny NS tagList 
+#' @import shinyjs
 #' 
 mod_open_demo_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
-    tags$div(
-      tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-                uiOutput(ns("chooseDemoDataset"))
-      ),
-      tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-                p(""),
-                actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass)
-      ),
-      tags$div( style="display:inline-block; vertical-align: middle;",
-                p(""),
-                uiOutput(ns("linktoDemoPdf"))
-      )
-    ),
+    shinyjs::useShinyjs(),
+    uiOutput(ns("chooseDemoDataset")),
+    shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass)),
+    uiOutput(ns("linktoDemoPdf")),
     mod_choose_pipeline_ui(ns("choosePipe"))
   )
 }
@@ -66,20 +58,26 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   require(DAPARdata2)
   
   rv.openDemo <- reactiveValues(
-    dataOut = NULL,
-    pipe = NULL
+    dataRead = NULL,
+    pipe = NULL,
+    dataOut = NULL
   )
 
   rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def = reactive({pipeline.def()}))
   
+  
+  observe({
+    shinyjs::toggle('loadDemoDataset', condition= (!is.null(rv.openDemo$pipe())) && rv.openDemo$pipe() != '' && length(input$demoDataset) >0)
+  })
+  
+  
   ### function for demo mode
   output$chooseDemoDataset <- renderUI({
-    print('otot')
-   # if(require("DAPARdata", lib.loc=DAPARdata.loc)){
-      print("DAPARdata is loaded correctly")
+     print("DAPARdata is loaded correctly")
       selectInput(ns("demoDataset"),
                   "Demo dataset",
                   choices = utils::data(package="DAPARdata2")$results[,"Item"],
+                  selected = character(0),
                   width='200px')
   })
   
@@ -90,18 +88,18 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
     withProgress(message = '',detail = '', value = 0, {
       incProgress(1/nSteps, detail = 'Loading dataset')
       utils::data(list=input$demoDataset)
-      data <- BiocGenerics::get(input$demoDataset)
-      if (class(data)[1]!="Features") {
+      rv.openDemo$dataRead <- BiocGenerics::get(input$demoDataset)
+      if (class(rv.openDemo$dataRead)!="Features") {
         shinyjs::info("Warning : this file is not a MSnSet file ! 
                       Please choose another one.")
         return(NULL)
       }
-      
-      ll.pipeline <- rv.openDemo$pipe()
 
-      
+      rv.openDemo$dataOut <- rv.openDemo$dataRead
+      metadata(rv.openDemo$dataOut)$pipelineType <- names(rv.openDemo$pipe)
     }) # End withProgress
     
+    return(reactive({rv.openDemo$dataRead }))
   }) # End observeEvent
   
   
