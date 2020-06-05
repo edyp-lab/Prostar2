@@ -16,8 +16,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  library(DAPARdata2)
-  data("Exp1_R25_prot")
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
   obj <- Exp1_R25_prot[[2]]
   conds <- colData(Exp1_R25_prot)[["Condition"]]
   legend <- colData(Exp1_R25_prot)[["Sample.name"]]

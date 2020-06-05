@@ -74,6 +74,7 @@ mod_plots_group_mv_server <- function(input, output, session,
   
   output$histo_MV_per_lines <- renderHighchart({
     req(obj())
+    conds()
     
     isolate({
       withProgress(message = 'Making plot', value = 100, {

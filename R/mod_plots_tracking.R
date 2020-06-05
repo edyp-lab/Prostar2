@@ -1,16 +1,23 @@
 #' @title   mod_plots_boxplots_ui and mod_plots_boxplots_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
-#' @param session internal
+#' 
+#' @param session internal 
 #'
 #' @rdname mod_plots_tracking
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
+#' 
 mod_plots_tracking_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -30,16 +37,21 @@ mod_plots_tracking_ui <- function(id){
 #' plots_tracking Server Function
 #'
 #' @param obj Object SummarizedExperiment
+#' 
 #' @param metadata Metadata of Fetaures containing the SummarizedExperiment
 #'
 #' @rdname mod_plots_tracking
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @import shinyjs
+#' 
 mod_plots_tracking_server <- function(input, output, session,
                                       obj,
                                       params,
-                                      metadata,
+                                      keyId,
                                       reset=FALSE){
   ns <- session$ns
   
@@ -76,7 +88,7 @@ mod_plots_tracking_server <- function(input, output, session,
   })
   
   output$listSelect_UI <- renderUI({
-    ll <-  SummarizedExperiment::rowData(obj())[[ metadata()[["keyId"]] ]]
+    ll <-  SummarizedExperiment::rowData(obj())[[keyId()]]
     selectInput(ns("listSelect"), "Protein for normalization", choices=ll, multiple = TRUE, width='400px')
   })
   
@@ -101,7 +113,7 @@ mod_plots_tracking_server <- function(input, output, session,
                 list.indices = if (is.null(input$listSelect) || length(input$listSelect)==0){
                   NULL
                 } else {
-                  match(input$listSelect, SummarizedExperiment::rowData(obj())[[ metadata()[["keyId"]] ]])
+                  match(input$listSelect, SummarizedExperiment::rowData(obj())[[keyId()]])
                 },
                 rand.indices = if (is.null(input$randSelect) || input$randSelect==""){
                   NULL

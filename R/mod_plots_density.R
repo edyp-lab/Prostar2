@@ -43,13 +43,10 @@ mod_plots_density_server <- function(input, output, session,
     if (class(obj()) != "SummarizedExperiment") { return(NULL) }
   })
   
-  observe({
-    req(conds())
-    if (is.null(conds())) { return(NULL) }
-  })
   
   output$Densityplot <- renderHighchart({
     req(obj())
+    req(conds())
     
     tmp <- NULL
     isolate({

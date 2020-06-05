@@ -58,11 +58,13 @@ mod_plots_intensity_ui <- function(id){
 #' 
 mod_plots_intensity_server <- function(input, output, session,
                                        dataIn,
-                                       metadata,
+                                       meta,
                                        conds,
                                        params=NULL,
                                        reset=NULL,
                                        base_palette=NULL){
+  
+  
   ns <- session$ns
   
   rv.modboxplot <- reactiveValues(
@@ -74,9 +76,8 @@ mod_plots_intensity_server <- function(input, output, session,
   rv.modboxplot$var <- callModule(mod_plots_tracking_server, "widgets",
                                   obj = reactive({dataIn()}),
                                   params=reactive({params()}),
-                                  metadata=reactive({metadata}),
+                                  keyId=reactive({meta()[['keyId']]}),
                                   reset=reactive({reset()}))
-  
   
   
   output$showTrackProt <- renderUI({
@@ -95,7 +96,7 @@ mod_plots_intensity_server <- function(input, output, session,
     if (is.null(rv.modboxplot$var()$type)){
       return(NULL)
     }
-    ll <- SummarizedExperiment::rowData(dataIn())[,DAPAR::metadata()[['parentProtId']]]
+    ll <- SummarizedExperiment::rowData(dataIn())[,meta()[['parentProtId']]]
     
     
     switch(rv.modboxplot$var()$type,
@@ -120,14 +121,16 @@ mod_plots_intensity_server <- function(input, output, session,
   output$BoxPlot <- renderHighchart({
     dataIn()
     rv.modboxplot$indices
+    sequence()
     tmp <- NULL
     
     pattern <- paste0('test',".boxplot")
     withProgress(message = 'Making plot', value = 100, {
       tmp <- DAPAR2::boxPlotD_HC(SummarizedExperiment::assay(dataIn()),
-                                conds=conds(),
-                                palette=base_palette(),
-                                subset.view = rv.modboxplot$indices)
+                                 conds=conds(),
+                                 sequence=rowData(dataIn())[[ meta()[['keyId']] ]],
+                                 palette=base_palette(),
+                                 subset.view = rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
     })
     tmp
@@ -148,10 +151,10 @@ mod_plots_intensity_server <- function(input, output, session,
       png(outfile)
       pattern <- paste0('test',".violinplot")
       tmp <- DAPAR2::violinPlotD(SummarizedExperiment::assay(dataIn()),
-                                fData = rowData(dataIn()),
-                                legend = conds(),
-                                palette = base_palette(),
-                                subset.view =  rv.modboxplot$indices)
+                                 fData = SummarizedExperiment::rowData(dataIn()),
+                                 legend = conds(),
+                                 palette = base_palette(),
+                                 subset.view =  rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
       dev.off()
     })

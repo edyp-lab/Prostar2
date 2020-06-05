@@ -30,10 +30,9 @@ mod_plots_pca_ui <- function(id){
 #' 
 #' @importFrom DAPAR wrapper.pca plotPCA_Eigen_hc plotPCA_Var plotPCA_Ind
 mod_plots_pca_server <- function(input, output, session,
-                                 obj,
-                                 ){
+                                 obj){
   ns <- session$ns
- 
+  
   
   rv.pca <- reactiveValues(
     PCA_axes =NULL,
@@ -132,10 +131,10 @@ mod_plots_pca_server <- function(input, output, session,
   
   
 }
-    
+
 ## To be copied in the UI
 # mod_plots_pca_ui("plots_pca_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_pca_server, "plots_pca_ui_1")
- 
+

@@ -18,8 +18,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  require(DAPARdata2)
-  data('Exp1_R25_prot')
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
   obj <- Exp1_R25_prot[[2]]
   r <- reactiveValues(
     settings = NULL

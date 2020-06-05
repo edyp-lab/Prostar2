@@ -1,7 +1,6 @@
-library(shinyjs)
-library(DAPAR2)
 library(shiny)
 library(SummarizedExperiment)
+
 
 source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
 
@@ -22,9 +21,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  require(DAPARdata2)
-  data('Exp1_R25_prot')
-  metadata <- metadata(Exp1_R25_prot)
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  keyId <- metadata(Exp1_R25_prot)[['keyId']]
   obj<-Exp1_R25_prot[[2]]
   
   r <- reactiveValues(
@@ -36,7 +34,7 @@ server <- function(input, output, session) {
   r$res <- callModule(mod_plots_tracking_server,'plots_tracking', 
                       obj = reactive({obj}), 
                       params=reactive({NULL}),
-                      metadata=reactive({metadata}),
+                      keyId=reactive({keyId}),
                       reset=reactive({FALSE}) )
   
   
