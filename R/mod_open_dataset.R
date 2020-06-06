@@ -112,12 +112,12 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
     
     if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
     
-    mod_select_keyID_ui(ns('select_KID'))
+    mod_select_keyID_from_MSnset_ui(ns('select_KID'))
     
     
   })
   
-  rv.openDataset$ret <- callModule(mod_select_keyID_server, 
+  rv.openDataset$ret <- callModule(mod_select_keyID_from_MSnset_server, 
                                    'select_KID', 
                                    dataIn = reactive({rv.openDataset$dataRead}))
   

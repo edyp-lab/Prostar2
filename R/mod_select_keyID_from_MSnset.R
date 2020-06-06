@@ -9,7 +9,7 @@
 #' @importFrom shiny NS tagList 
 #' @importFrom Biobase fData
 #' 
-mod_select_keyID_ui <- function(id){
+mod_select_keyID_from_MSnset_ui <- function(id){
   ns <- NS(id)
   tagList(
     tags$div(
@@ -26,13 +26,13 @@ mod_select_keyID_ui <- function(id){
     )
   )
 }
-    
+
 #' select_keyID Server Function
 #'
 #' @noRd 
-mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
+mod_select_keyID_from_MSnset_server <- function(input, output, session, dataIn){
   ns <- session$ns
- 
+  
   
   rv <- reactiveValues(
     dataOut = NULL,
@@ -41,10 +41,10 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
   )
   
   observe({
-   req(dataIn())
+    req(dataIn())
     rv$dataOut <- dataIn() 
-    rv$typeOfData <-typeOfData()
-    })
+    rv$typeOfData <- dataIn()@experimentData@other$typeOfData
+  })
   
   callModule(mod_popover_for_help_server,"modulePopover_convertIdType", 
              data = list(title = HTML(paste0("<strong><font size=\"4\">Key ID definition</font></strong>")), 
@@ -55,8 +55,8 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
   output$choose_keyID_ui <- renderUI({
     req(rv$dataOut)
     isolate({
-      .choices <- c("", "AutoID",colnames(rv$dataOut))
-      names(.choices) <- c("None","-- Auto ID --",colnames(rv$dataOut))
+      .choices <- c("", "AutoID",colnames(Biobase::fData(rv$dataOut)))
+      names(.choices) <- c("None","-- Auto ID --",colnames(Biobase::fData(rv$dataOut)))
       
       tagList(
         mod_popover_for_help_ui(ns("modulePopover_convertIdType")),
@@ -76,8 +76,8 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
         This column is valid to serve as a unique ID for entities"
     }
     else {
-      dat <- as.data.frame(rv$dataOut)[ ,input$choose_keyID]
-        t <- (length(dat) == length(unique(dat)))
+      dat <- as.data.frame(Biobase::fData(rv$dataOut))[ ,input$choose_keyID]
+      t <- (length(dat) == length(unique(dat)))
       
       if (!t){
         text <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">
@@ -104,10 +104,9 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
   output$choose_col_Parent_Protein_ui <- renderUI({
     req(rv$typeOfData)
     if (rv$typeOfData != 'peptide') { return(NULL)}
-    
     isolate({
-      .choices <- c("",colnames(rv$dataOut))
-      names(.choices) <- c("",colnames(rv$dataOut))
+      .choices <- c("",colnames(Biobase::fData(rv$dataOut)))
+      names(.choices) <- c("",colnames(Biobase::fData(rv$dataOut)))
       tagList(
         mod_popover_for_help_ui(ns("parentProtein")),
         selectInput(ns("choose_col_Parent_Protein"),"",choices =  .choices , selected = character(0))
@@ -117,12 +116,12 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
   
   
   output$preview_col_Parent_Protein_ui <- renderTable({
-     req(input$choose_col_Parent_Protein)
-
+    req(input$choose_col_Parent_Protein)
+    
     if (rv$typeOfData != 'peptide' || is.null(input$choose_col_Parent_Protein) || input$choose_col_Parent_Protein == "") {
       return (NULL)
     } else{
-      head(rv$dataOut[ ,input$choose_col_Parent_Protein])
+      head(Biobase::fData(rv$dataOut)[ ,input$choose_col_Parent_Protein])
     }
     #,colnames=FALSE
     
@@ -147,9 +146,10 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
   output$RemoveOrphanPept_ui <- renderUI({
     req(rv$typeOfData)
     if (rv$typeOfData != 'peptide') { return(NULL)}
+    
     req(input$choose_col_Parent_Protein)
     
-    index <- which(is.na(rv$dataOut[,input$choose_col_Parent_Protein]))
+    index <- which(is.na(Biobase::fData(rv$dataOut)[,input$choose_col_Parent_Protein]))
     
     
     if (length(index) > 0) {
@@ -170,7 +170,7 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
   
   observeEvent(input$RemoveOrphanPept_btn, {
     req(input$choose_col_Parent_Protein)
-    index <- which(is.na(rv$dataOut[,input$choose_col_Parent_Protein]))
+    index <- which(is.na(Biobase::fData(rv$dataOut)[,input$choose_col_Parent_Protein]))
     rv$dataOut <- rv$dataOut[-index,]
   })
   
@@ -189,29 +189,29 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
     if (input$choose_keyID =="AutoID") {
       test_keyID <- TRUE
     } else {
-      test_keyID <- (length(as.data.frame(rv$dataOut)[, input$choose_keyID])
-                     == length(unique(as.data.frame(rv$dataOut)[, input$choose_keyID])))
+      test_keyID <- (length(as.data.frame(Biobase::fData(rv$dataOut))[, input$choose_keyID])
+                     == length(unique(as.data.frame(Biobase::fData(rv$dataOut))[, input$choose_keyID])))
     }
     
-   
-     if (isTRUE(test_keyID && test_parentProt)){
-       rv$out <- list(keyId = input$choose_keyID,
-                   parentProtId = input$choose_col_Parent_Protein, 
-                   data = rv$dataOut)
-     } else {
-       rv$out <- NULL
-     }
     
-   
+    if (isTRUE(test_keyID && test_parentProt)){
+      rv$out <- list(keyId = input$choose_keyID,
+                     parentProtId = input$choose_col_Parent_Protein, 
+                     data = rv$dataOut)
+    } else {
+      rv$out <- NULL
+    }
+    
+    
   })
   
   return(reactive({rv$out}))
   
 }
-    
+
 ## To be copied in the UI
 # mod_select_keyID_ui("select_keyID_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_select_keyID_server, "select_keyID_ui_1")
- 
+

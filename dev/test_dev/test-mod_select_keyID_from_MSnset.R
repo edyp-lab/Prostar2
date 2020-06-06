@@ -2,12 +2,12 @@
 #   source(file.path('../../R', f), local=TRUE)$value
 # }
 
-source(file.path('../../R', 'mod_select_keyID.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_select_keyID_from_MSnset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
-    mod_select_keyID_ui('selectID'),
+    mod_select_keyID_from_MSnset_ui('selectID'),
     uiOutput('state')
   )
 )
@@ -20,12 +20,10 @@ server <- function(input, output, session) {
     dataIn = NULL
   )
   
-  utils::data(Exp1_R25_pept, package='DAPARdata2')
+  #utils::data(Exp1_R25_pept, package='DAPARdata2')
+  utils::data(Exp1_R25_pept, package='DAPARdata')
   
-  rv$IDs <- callModule(mod_select_keyID_server, 'selectID', 
-                       dataIn = reactive({rowData(Exp1_R25_pept[['original']])}),
-                       typeOfData = reactive({'peptide'}))
-  
+  rv$IDs <- callModule(mod_select_keyID_from_MSnset_server, 'selectID', dataIn=reactive({Exp1_R25_pept}))
   #rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({NULL}))
   
   observe({

@@ -1,8 +1,25 @@
 library(rhandsontable)
 
-for (f in list.files('../../R', pattern='.R')){
-  source(file.path('../../R', f), local=TRUE)$value
-}
+# for (f in list.files('../../R', pattern='.R')){
+#   source(file.path('../../R', f), local=TRUE)$value
+# }
+
+library(DAPAR2)
+source(file.path('../../R', 'config.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_select_keyID.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_open_dataset.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_insert_md.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_import_file_from.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_build_design.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_build_design_example.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_convert_ms_file.R'), local=TRUE)$value
+
 
 ui <- fluidPage(
   tagList(
@@ -23,11 +40,8 @@ server <- function(input, output, session) {
   
   callModule(mod_infos_dataset_server, 
              'infos', 
-             obj = reactive({
-               req(rv$convertData())
-               rv$convertData()
-             })
-  )
+             obj = reactive({rv$convertData() })
+            )
 }
 
 

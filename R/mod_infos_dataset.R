@@ -54,6 +54,7 @@ mod_infos_dataset_ui <- function(id){
 #' @keywords internal
 #' 
 #' @importFrom MultiAssayExperiment experiments colData
+#' @import S4Vectors
 #' 
 mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   ns <- session$ns
@@ -67,10 +68,10 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     }
     
     callModule(mod_format_DT_server,'samples_tab',
-               table2show = reactive({data.frame(colData(obj()))}),
-               style = reactive({list(cols = colnames(colData(obj())),
-                                      vals = colnames(colData(obj()))[2],
-                                      unique = unique(colData(obj())$Condition),
+               table2show = reactive({data.frame(MultiAssayExperiment::colData(obj()))}),
+               style = reactive({list(cols = colnames(MultiAssayExperiment::colData(obj())),
+                                      vals = colnames(MultiAssayExperiment::colData(obj()))[2],
+                                      unique = unique(MultiAssayExperiment::colData(obj())$Condition),
                                       pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
                })
     )
@@ -122,8 +123,8 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     nb_assay <- length(obj())
     names_assay <- unlist(names(obj()))
     pipeline <- metadata(obj())$pipelineType
-    nSamples <- nrow(colData(obj()))
-    nConds <- length(unique(colData(obj())$Condition))
+    nSamples <- nrow(MultiAssayExperiment::colData(obj()))
+    nConds <- length(unique(MultiAssayExperiment::colData(obj())$Condition))
     eqConds <- TRUE
     
      

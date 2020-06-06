@@ -8,7 +8,7 @@
 ## 2.1 Add modules
 ## 
 golem::add_module( name = "all_plots" ) # Name of the module
-golem::add_module( name = "select_keyID" ) # Name of the module
+golem::add_module( name = "select_keyID_from_MSnset" ) # Name of the module
 
 ## 2.2 Add dependencies
 

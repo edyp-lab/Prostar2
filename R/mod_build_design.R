@@ -54,12 +54,15 @@ mod_build_design_ui <- function(id){
 # Module Server
     
 #' @rdname mod_build_design
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @import rhandsontable
-#' @importFrom DAPAR check.design check.conditions
+#' @importFrom DAPAR2 CheckDesign check.conditions
 #' @import shinyjs
-    
+#' 
 mod_build_design_server <- function(input, output, session, sampleNames){
   ns <- session$ns
   
@@ -117,7 +120,7 @@ mod_build_design_server <- function(input, output, session, sampleNames){
       rv.buildDesign$design_df <- rv.buildDesign$design_df[rv.buildDesign$newOrder,]
     }
 
-    rv.buildDesign$conditionsChecked <- DAPAR::check.conditions(rv.buildDesign$design_df$Condition)
+    rv.buildDesign$conditionsChecked <- DAPAR2::check.conditions(rv.buildDesign$design_df$Condition)
 
   })
 
@@ -313,7 +316,7 @@ mod_build_design_server <- function(input, output, session, sampleNames){
   
   #------------------------------------------------------------------------------
   observeEvent(input$btn_checkDesign,{
-    rv.buildDesign$designChecked <- DAPAR::check.design(rv.buildDesign$design_df)
+    rv.buildDesign$designChecked <- DAPAR2::CheckDesign(rv.buildDesign$design_df)
     })
   
   

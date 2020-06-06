@@ -11,7 +11,7 @@
 #' @return A histogram
 #' @author Alexia Dorffer
 #' @examples
-#' utils::data(Exp1_R25_pept, package='DAPARdata')
+#' utils::data(Exp1_R25_pept, package='DAPARdata2')
 #' wrapper.mvPerLinesHisto(Exp1_R25_pept)
 #' @export
 wrapper.mvPerLinesHisto <- function(obj, indLegend="auto", showValues=FALSE){
@@ -34,7 +34,7 @@ wrapper.mvPerLinesHisto <- function(obj, indLegend="auto", showValues=FALSE){
 #' @return A histogram
 #' @author Alexia Dorffer
 #' @examples
-#' utils::data(Exp1_R25_pept, package='DAPARdata')
+#' utils::data(Exp1_R25_pept, package='DAPARdata2')
 #' wrapper.mvPerLinesHisto(Exp1_R25_pept)
 #' @export
 wrapper.mvPerLinesHisto_HC <- function(obj, indLegend="auto", showValues=FALSE){
@@ -62,7 +62,7 @@ wrapper.mvPerLinesHisto_HC <- function(obj, indLegend="auto", showValues=FALSE){
 #' @return A bar plot
 #' @author Florence Combes, Samuel Wieczorek
 #' @examples
-#' utils::data(Exp1_R25_pept, package='DAPARdata')
+#' utils::data(Exp1_R25_pept, package='DAPARdata2')
 #' qData <- Biobase::exprs(Exp1_R25_pept)
 #' samplesData <- Biobase::pData(Exp1_R25_pept)
 #' mvPerLinesHisto(qData, samplesData)
@@ -123,7 +123,7 @@ mvPerLinesHisto <- function(qData, samplesData, indLegend="auto", showValues=FAL
 #' @return A bar plot
 #' @author Florence Combes, Samuel Wieczorek
 #' @examples
-#' utils::data(Exp1_R25_pept, package='DAPARdata')
+#' utils::data(Exp1_R25_pept, package='DAPARdata2')
 #' qData <- Biobase::exprs(Exp1_R25_pept)
 #' samplesData <- Biobase::pData(Exp1_R25_pept)
 #' mvPerLinesHisto_HC(qData, samplesData)
@@ -174,7 +174,7 @@ mvPerLinesHisto_HC <- function(qData, samplesData, indLegend="auto", showValues=
                     animation=list(duration = 100)) %>%
     hc_legend(enabled = FALSE) %>%
     hc_xAxis(categories = row.names(df), title = list(text = "#[NA values] per line")) %>%
-    DAPAR::dapar_hc_ExportMenu(filename = "missingValuesPlot1") %>%
+    DAPAR2::dapar_hc_ExportMenu(filename = "missingValuesPlot1") %>%
     hc_tooltip(enabled = TRUE,
                headerFormat= '',
                pointFormat = "{point.y} ")
