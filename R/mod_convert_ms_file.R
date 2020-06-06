@@ -155,9 +155,9 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
   output$Convert_DataId <- renderUI({
-
+    
     mod_select_keyID_ui(ns('mod_keyId'))
-   })
+  })
   
   rv.convert$IDs <- callModule(mod_select_keyID_server, 
                                "mod_keyId", 
@@ -172,8 +172,8 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     rv.convert$choose_keyID <- rv.convert$IDs()$keyId
     r.nav$isDone[2] <- !is.null(rv.convert$IDs())
   })
- 
-
+  
+  
   
   
   ###---------------------------------------------------------------------------------###
@@ -522,31 +522,31 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       switch(names(rv.convert$pipeline()),
              peptide = {
                rv.convert$dataOut <- DAPAR2::createFeatures(data = rv.convert$dataIn,
-                                              sample = design,
-                                              indExpData = indexForQuantiData,
-                                              keyId = key_id_index,
-                                              namesOrigin = colNamesForOriginofValues,
-                                              logTransform = logged_data,
-                                              typeOfData = input$typeOfData,
-                                              parentProtId = gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
-                                              analysis= input$studyName,
-                                              processes=pipeline.def()$peptide,
-                                              pipelineType = names(rv.convert$pipeline())
-                                              )
+                                                            sample = design,
+                                                            indExpData = indexForQuantiData,
+                                                            keyId = key_id_index,
+                                                            namesOrigin = colNamesForOriginofValues,
+                                                            logTransform = logged_data,
+                                                            typeOfData = input$typeOfData,
+                                                            parentProtId = gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
+                                                            analysis= input$studyName,
+                                                            processes=pipeline.def()$peptide,
+                                                            pipelineType = names(rv.convert$pipeline())
+               )
              },
              protein = {
                rv.convert$dataOut <- DAPAR2::createFeatures(data = rv.convert$dataIn,
-                                              sample = design,
-                                              indExpData = indexForQuantiData,
-                                              keyId = key_id_index,
-                                              namesOrigin = colNamesForOriginofValues,
-                                              logTransform = logged_data,
-                                              typeOfData = input$typeOfData,
-                                              parentProtId = NULL,
-                                              analysis= input$studyName,
-                                              processes=pipeline.def()$protein,
-                                              pipelineType = names(rv.convert$pipeline())
-                                              )
+                                                            sample = design,
+                                                            indExpData = indexForQuantiData,
+                                                            keyId = key_id_index,
+                                                            namesOrigin = colNamesForOriginofValues,
+                                                            logTransform = logged_data,
+                                                            typeOfData = input$typeOfData,
+                                                            parentProtId = NULL,
+                                                            analysis= input$studyName,
+                                                            processes=pipeline.def()$protein,
+                                                            pipelineType = names(rv.convert$pipeline())
+               )
              },
              p2p = {
                # ll.pipeline <- pipeline.def()$protein
@@ -607,4 +607,3 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
 
 ## To be copied in the server
 # callModule(mod_convert_ms_file_server, "convert_ms_file_ui_1")
-
