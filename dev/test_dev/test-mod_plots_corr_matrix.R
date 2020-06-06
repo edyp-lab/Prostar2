@@ -1,7 +1,8 @@
-library(highcharter)
-library(DAPAR2)
 library(shiny)
+library(highcharter)
 library(SummarizedExperiment)
+
+
 
 source(file.path("../../R","mod_plots_corr_matrix.R"), local=TRUE)$value
 source(file.path("../../R","mod_settings.R"), local=TRUE)$value
@@ -15,8 +16,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  library(DAPARdata2)
-  data("Exp1_R25_prot")
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
   res <- cor(assay(Exp1_R25_prot[[2]]),use = 'pairwise.complete.obs')
   r <- reactiveValues(
     settings = NULL
@@ -26,7 +27,7 @@ server <- function(input, output, session) {
   
   callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
              res = reactive({res}),
-             names = reactive({names}),
+             names = reactive({NULL}),
              gradientRate = reactive({r$settings()$defaultGradientRate}))
 }
 

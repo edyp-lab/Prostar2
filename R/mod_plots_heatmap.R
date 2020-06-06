@@ -17,6 +17,7 @@
 #' @export 
 #' 
 #' @importFrom shiny NS tagList 
+#' 
 mod_plots_heatmap_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -64,8 +65,10 @@ mod_plots_heatmap_ui <- function(id){
 #' @importFrom DAPAR2 heatmapD
 #' 
 #' @importFrom SummarizedExperiment assay
+#' 
 mod_plots_heatmap_server <- function(input, output, session, 
-                                     obj, 
+                                     obj,
+                                     conds,
                                      width = 900){
   ns <- session$ns
   
@@ -105,10 +108,11 @@ mod_plots_heatmap_server <- function(input, output, session,
     
     isolate({ 
       withProgress(message = 'Making plot', value = 100, {
-        DAPAR2::heatmapD(assay(obj()),
-                         input$distance, 
-                         input$linkage,
-                         TRUE)
+        DAPAR2::heatmapD(qData=assay(obj()),
+                         conds=conds(),
+                         distance=input$distance, 
+                         cluster=input$linkage,
+                         dendro=TRUE)
       })
     })
   })

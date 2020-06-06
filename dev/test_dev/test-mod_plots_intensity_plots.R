@@ -1,7 +1,7 @@
-library(highcharter)
-library(DAPAR2)
 library(shiny)
+library(highcharter)
 library(SummarizedExperiment)
+
 
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
@@ -22,18 +22,18 @@ server <- function(input, output, session) {
   )
   r$settings <- callModule(mod_settings_server, "settings")
   
-  
-  require(DAPARdata2)
-  data('Exp1_R25_pept')
-  metadata <- metadata(Exp1_R25_pept)
-  conds <- colData(Exp1_R25_pept)[['Conditon']]
-  obj <- Exp1_R25_pept[[2]]
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  metadata <- metadata(Exp1_R25_prot)
+  conds <- colData(Exp1_R25_prot)[['Conditon']]
+  obj <- Exp1_R25_prot[[2]]
+  sequence <- 'Protein_IDs' # for protein datasets
+  sequence <- 'Sequence' # for peptide datasets
   SummarizedExperiment::rowData(obj) <- cbind(SummarizedExperiment::rowData(obj), ProtOfInterest=rep(0,nrow(obj)))
   SummarizedExperiment::rowData(obj)$ProtOfInterest[10:20] <- 1
   
   callModule(mod_plots_intensity_server,'plots_boxplots', 
              dataIn = reactive({obj}),
-             metadata = reactive({metadata}),
+             meta = reactive({metadata}),
              conds = reactive({conds}),
              params = reactive({NULL}),
              reset = reactive({FALSE}),

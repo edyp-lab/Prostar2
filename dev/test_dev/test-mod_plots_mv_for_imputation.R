@@ -13,8 +13,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  library(DAPARdata2)
-  data("Exp1_R25_prot")
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   obj <- Exp1_R25_prot[[2]]
   
   callModule(mod_plots_mv_server,'plots_mv_impute', obj = reactive({obj}))

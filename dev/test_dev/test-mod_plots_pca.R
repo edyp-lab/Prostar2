@@ -14,9 +14,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  library(DAPARdata)
-  data("Exp1_R25_prot")
   obj <- Exp1_R25_prot
   Biobase::exprs(obj)[which(is.na(Biobase::exprs(obj)))] <- 0
   # obj est un msnset

@@ -29,8 +29,8 @@ mod_plots_msnset_explorer_ui <- function(id){
 #' @import DT
 
 mod_plots_msnset_explorer_server <- function(input, output, session,
-                                             obj=NULL,
-                                             metadata=NULL,
+                                             obj,
+                                             originOfValues=NULL,
                                              colData=NULL){ 
   ns <- session$ns
   
@@ -41,7 +41,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session,
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- metadata()[['typeOfData']]
+    typeOfDataset <- metadata(obj())[['typeOfData']]
     
     .choices<- NULL
     
@@ -239,9 +239,9 @@ mod_plots_msnset_explorer_server <- function(input, output, session,
     #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
     test.table <- as.data.frame(round(SummarizedExperiment::assay(obj()),digits=10))
     # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
-    if (!is.null(metadata()[['OriginOfValues']])){ #agregated dataset
+    if (!is.null(originOfValues())){ #agregated dataset
       test.table <- cbind(test.table, 
-                          as.data.frame(SummarizedExperiment::rowData(obj())[ metadata()[['OriginOfValues']] ]))
+                          as.data.frame(SummarizedExperiment::rowData(obj())[originOfValues()]))
       # print(paste0("tutu:",head(test.table)))
       
     } else {
