@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_format_DT_ui and mod_format_DT_server
 #' 
 #' @description  A shiny Module.
@@ -28,9 +28,9 @@ mod_format_DT_ui <- function(id){
     )
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_format_DT
 #' 
 #' @param input internal
@@ -56,7 +56,7 @@ mod_format_DT_server <- function(input, output, session,
   ns <- session$ns
   
   observe({
-
+    
     if (is.null(table2show()) || length(table2show())==0){
       warning("The parameter table2show is null.")
       return(NULL)
@@ -72,38 +72,38 @@ mod_format_DT_server <- function(input, output, session,
     
     isolate({
       if (is.null(style()) || length(style())==0){
-      DT::datatable(table2show(), 
-                    extensions = c('Scroller', 'Buttons'),
-                    escape = FALSE,
-                    rownames= showRownames,
-                    option=list(initComplete = initComplete(),
-                                dom = dom,
-                                server = FALSE,
-                                autoWidth=TRUE,
-                                columnDefs = list(list(width='150px',targets= "_all")),
-                                ordering = FALSE
-                    )
-      )
-        } else {
-          
-          DT::datatable(table2show(), 
-                        extensions = c('Scroller', 'Buttons'),
-                        escape = FALSE,
-                        rownames= showRownames,
-                        option=list(initComplete = initComplete(),
-                                    dom = dom,
-                                    server = FALSE,
-                                    autoWidth=TRUE,
-                                    columnDefs = list(list(width='150px',targets= "_all")),
-                                    ordering = FALSE
-                        )
-          )  %>%
-        formatStyle(
-          columns = style()$cols,
-          valueColumns = style()$vals,
-          backgroundColor = styleEqual(style()$unique, style()$pal)
+        DT::datatable(table2show(), 
+                      extensions = c('Scroller', 'Buttons'),
+                      escape = FALSE,
+                      rownames= showRownames,
+                      option=list(initComplete = initComplete(),
+                                  dom = dom,
+                                  server = FALSE,
+                                  autoWidth=TRUE,
+                                  columnDefs = list(list(width='150px',targets= "_all")),
+                                  ordering = FALSE
+                      )
         )
-        }
+      } else {
+        
+        DT::datatable(table2show(), 
+                      extensions = c('Scroller', 'Buttons'),
+                      escape = FALSE,
+                      rownames= showRownames,
+                      option=list(initComplete = initComplete(),
+                                  dom = dom,
+                                  server = FALSE,
+                                  autoWidth=TRUE,
+                                  columnDefs = list(list(width='150px',targets= "_all")),
+                                  ordering = FALSE
+                      )
+        )  %>%
+          formatStyle(
+            columns = style()$cols,
+            valueColumns = style()$vals,
+            backgroundColor = styleEqual(style()$unique, style()$pal)
+          )
+      }
     })
     
   })
@@ -116,10 +116,10 @@ mod_format_DT_server <- function(input, output, session,
       "}"))
   }
 }
-    
+
 ## To be copied in the UI
 # mod_format_DT_ui("format_DT_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_format_DT_server, "format_DT_ui_1")
- 
+

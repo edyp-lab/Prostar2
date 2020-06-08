@@ -1,4 +1,5 @@
 library(shiny)
+
 library(highcharter)
 library(SummarizedExperiment)
 
@@ -24,10 +25,8 @@ server <- function(input, output, session) {
   
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   metadata <- metadata(Exp1_R25_prot)
-  conds <- colData(Exp1_R25_prot)[['Conditon']]
+  conds <- colData(Exp1_R25_prot)[['Condition']]
   obj <- Exp1_R25_prot[[2]]
-  sequence <- 'Protein_IDs' # for protein datasets
-  sequence <- 'Sequence' # for peptide datasets
   SummarizedExperiment::rowData(obj) <- cbind(SummarizedExperiment::rowData(obj), ProtOfInterest=rep(0,nrow(obj)))
   SummarizedExperiment::rowData(obj)$ProtOfInterest[10:20] <- 1
   
