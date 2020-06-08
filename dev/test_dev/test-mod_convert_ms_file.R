@@ -1,10 +1,11 @@
 library(rhandsontable)
-
+library(Features)
+library(S4Vectors)
 # for (f in list.files('../../R', pattern='.R')){
 #   source(file.path('../../R', f), local=TRUE)$value
 # }
 
-library(DAPAR2)
+#library(DAPAR2)
 source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
@@ -38,6 +39,10 @@ server <- function(input, output, session) {
   
   rv$convertData <- callModule(mod_convert_ms_file_server, 'convert', pipeline.def=reactive({pipeline.defs}))
   
+  observe({
+    rv$convertData()
+    print(rv$convertData())
+  })
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({rv$convertData() })

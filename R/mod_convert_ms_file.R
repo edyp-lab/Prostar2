@@ -124,10 +124,9 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   output$ConvertOptions <- renderUI({
     tagList(
       radioButtons(ns("typeOfData"),
-                   "Choose the pipeline to use with the data",
+                   "Choose the type of your data",
                    choices=c("peptide" = "peptide",
-                             "protein" = "protein",
-                             "peptide to protein (p2p)" = "p2p")
+                             "protein" = "protein")
       )
       
       ,radioButtons(ns("checkDataLogged"),
@@ -490,8 +489,11 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     ### Origin of Values
     #indexForOriginOfValue <- NULL
     colNamesForOriginofValues <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
+
     if (sum(is.na(colNamesForOriginofValues))==length(colNamesForOriginofValues))
       colNamesForOriginofValues <- NULL
+
+    
     # if (!is.null(colNamesForOriginofValues) && (length(grep("None", colNamesForOriginofValues))==0)  && (sum(is.na(colNamesForOriginofValues)) == 0)){
     #   for (i in 1:length(tmp_quanti_data)){
     #     indexForOriginOfValue <- c(indexForOriginOfValue, which(colnames(rv.convert$dataIn) == input[[paste0("colForOriginValue_", i)]]))
@@ -502,20 +504,6 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
     #                  DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR2","Version"]
     # )
-    
-    
-    print(head(rv.convert$dataIn))
-    print(design)
-    print(indexForQuantiData)
-    print(key_id_index)
-    print(colNamesForOriginofValues)
-    print(logged_data)
-    print(input$replaceAllZeros)
-    print(input$typeOfData)
-    print(gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE))
-    print(pipeline.def()$peptide)
-    print(names(rv.convert$pipeline()))
-    
     
     
     tryCatch({
@@ -587,8 +575,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     
     r.nav$isDone[5] <- TRUE    
     
-    print(rv.convert$dataOut)
-    
+     
   })
   
   

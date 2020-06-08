@@ -11,11 +11,11 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
 
-  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  utils::data(Exp1_R25_pept, package='DAPARdata2')
   
    # dat est un objet MAE, type PipelinePeptide ou PipelineProtein
   callModule(mod_infos_dataset_server,'test_infos_DT',
-             obj = reactive({Exp1_R25_prot}))
+             obj = reactive({Exp1_R25_pept}))
 }
 
 

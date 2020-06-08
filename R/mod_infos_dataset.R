@@ -175,21 +175,20 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     
     
     
-    if (typeOfData=='Peptide'){
+    if (tolower(typeOfData) == 'peptide'){
       columns <- c(columns,
                    "Adjacency matrices",
                    "Connex components")
-      
       if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
-        adjMat.txt <- "Adjacency matrices <span style=\"color: lime\">OK</span>"
+        adjMat.txt <- "<span style=\"color: lime\">OK</span>"
       } else{
-        adjMat.txt <- "Adjacency matrices <span style=\"color: red\">Missing</span>"
+        adjMat.txt <- "<span style=\"color: red\">Missing</span>"
       }
       
       if(length(metadata(obj()[[input$selectInputSE]])$list.cc) > 0){
-        cc.txt <- "Comp Connex <span style=\"color: lime\">OK</span>"
+        cc.txt <- "<span style=\"color: lime\">OK</span>"
       } else{
-        cc.txt <- "Comp Connex <span style=\"color: red\">Missing</span>"
+        cc.txt <- "<span style=\"color: red\">Missing</span>"
       }
       
       val <- c(val, adjMat.txt, cc.txt)
