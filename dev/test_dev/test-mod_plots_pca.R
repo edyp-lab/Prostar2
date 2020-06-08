@@ -18,7 +18,7 @@ server <- function(input, output, session) {
   
   obj <- Exp1_R25_pept[[2]]
   conds <- colData(obj)[['Condition']]
-  SummarizedExperiment::assay(obj)[which(is.na(SummarizedExperiment::assay(obj)))] <- 0
+  #SummarizedExperiment::assay(obj)[which(is.na(SummarizedExperiment::assay(obj)))] <- 0
   
   callModule(mod_plots_pca_server,'pca',
              obj=reactive({obj}),
