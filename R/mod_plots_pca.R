@@ -7,6 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' 
 mod_plots_pca_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -28,9 +29,13 @@ mod_plots_pca_ui <- function(id){
 #'
 #' @noRd 
 #' 
-#' @importFrom DAPAR wrapper.pca plotPCA_Eigen_hc plotPCA_Var plotPCA_Ind
+#' @importFrom DAPAR2 wrapper.pca plotPCA_Eigen_hc plotPCA_Var plotPCA_Ind
+#' @importFrom SummarizedExperiment assay
+#' 
 mod_plots_pca_server <- function(input, output, session,
-                                 obj){
+                                 obj,
+                                 conds,
+                                 style) {
   ns <- session$ns
   
   
@@ -41,16 +46,16 @@ mod_plots_pca_server <- function(input, output, session,
   )
   
   callModule(mod_format_DT_server,"PCAvarCoord", 
-             table2show=reactive({if (!is.null(rv.pca$res.pca)) round(rv.pca$res.pca$var$coord, digits=7)}), 
-             showRownames=TRUE)
+             table2show=reactive({ if (!is.null(rv.pca$res.pca)) round(rv.pca$res.pca$var$coord, digits=7) }), 
+             showRownames=TRUE,
+             style=style)
   
   output$pcaOptions <- renderUI({
     req(obj())
     
     tagList(
       
-      if (length(which(is.na(Biobase::exprs(obj())))) > 0)
-      {
+      if (length(which(is.na(SummarizedExperiment::assay(obj())))) > 0) {
         tags$p("Warning: As your dataset contains missing values, the PCA cannot be computed.
                Please impute them first.")
       }
@@ -76,11 +81,17 @@ mod_plots_pca_server <- function(input, output, session,
   
   observeEvent(input$varScale_PCA,{
     rv.pca$PCA_varScale <- input$varScale_PCA
-    rv.pca$res.pca <- DAPAR2::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
+    rv.pca$res.pca <- DAPAR2::wrapper.pca(SummarizedExperiment::assay(obj()),
+                                          conds(),
+                                          rv.pca$PCA_varScale,
+                                          ncp=Compute_PCA_dim())
   })
   
   observeEvent(obj(), {
-    rv.pca$res.pca <- DAPAR2::wrapper.pca(obj(), rv.pca$PCA_varScale, ncp=Compute_PCA_dim())
+    rv.pca$res.pca <- DAPAR2::wrapper.pca(SummarizedExperiment::assay(obj()),
+                                          conds(),
+                                          rv.pca$PCA_varScale,
+                                          ncp=Compute_PCA_dim())
   })
   
   
@@ -88,14 +99,14 @@ mod_plots_pca_server <- function(input, output, session,
   
   Compute_PCA_dim <- reactive({
     nmax <- 12 # ncp should not be greater than... 
-    # pour info, ncp = nombre de composantes ou de dimensions dans les r?sultats de l'ACP
+    # for info, ncp = number of components or dimensions in PCA results
     
-    y <- Biobase::exprs(obj())
+    y <- SummarizedExperiment::assay(obj())
     nprot <- dim(y)[1]
     n <- dim(y)[2] # If too big, take the number of conditions.
     
     if (n > nmax){
-      n <- length(unique(Biobase::pData(obj())$Condition))
+      n <- length(unique(conds()))
     }
     
     ncp <- min(n, nmax)
@@ -109,7 +120,7 @@ mod_plots_pca_server <- function(input, output, session,
     req(rv.pca$PCA_axes)
     req(rv.pca$res.pca)
     withProgress(message = 'Making plot', value = 100, {
-      DAPAR::plotPCA_Var(rv.pca$res.pca, rv.pca$PCA_axes)
+      DAPAR2::plotPCA_Var(rv.pca$res.pca, rv.pca$PCA_axes)
     })
   })
   
@@ -117,7 +128,7 @@ mod_plots_pca_server <- function(input, output, session,
     req(rv.pca$PCA_axes)
     req(rv.pca$res.pca)
     withProgress(message = 'Making plot', value = 100, {
-      DAPAR::plotPCA_Ind(rv.pca$res.pca, rv.pca$PCA_axes)
+      DAPAR2::plotPCA_Ind(rv.pca$res.pca, rv.pca$PCA_axes)
     })
   })
   
@@ -125,7 +136,7 @@ mod_plots_pca_server <- function(input, output, session,
   output$pcaPlotEigen <- renderHighchart({
     req(rv.pca$res.pca)
     withProgress(message = 'Making plot', value = 100, {
-      DAPAR::plotPCA_Eigen_hc(rv.pca$res.pca)
+      DAPAR2::plotPCA_Eigen_hc(rv.pca$res.pca)
     })
   })
   

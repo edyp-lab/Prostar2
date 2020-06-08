@@ -1,3 +1,4 @@
+library(shiny)
 library(Features)
 library(DT)
 source(file.path('../../R', 'global.R'), local=TRUE)$value
@@ -17,9 +18,9 @@ server <- function(input, output, session) {
   callModule(mod_format_DT_server,'test_format_DT', 
              table2show = reactive({as.data.frame(colData(obj))}),
              style = reactive({ list(cols = colnames(colData(obj)),
-                                              vals = colnames(colData(obj))[2],
-                                              unique = unique(colData(obj)$Condition),
-                                              pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})) 
+                                     vals = colnames(colData(obj))[2],
+                                     unique = unique(colData(obj)$Condition),
+                                     pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})) 
   
   #callModule(mod_format_DT_server,'test_format_DT', table2show = reactive({NULL}))
   
