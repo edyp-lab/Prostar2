@@ -96,8 +96,6 @@ mod_plots_intensity_server <- function(input, output, session,
     if (is.null(rv.modboxplot$var()$type)){
       return(NULL)
     }
-    ll <- SummarizedExperiment::rowData(dataIn())[,meta()[['parentProtId']]]
-    
     
     switch(rv.modboxplot$var()$type,
            ProteinList = rv.modboxplot$indices <- rv.modboxplot$var()$list.indices,
@@ -121,7 +119,6 @@ mod_plots_intensity_server <- function(input, output, session,
   output$BoxPlot <- renderHighchart({
     dataIn()
     rv.modboxplot$indices
-    sequence()
     tmp <- NULL
     
     pattern <- paste0('test',".boxplot")
@@ -141,7 +138,7 @@ mod_plots_intensity_server <- function(input, output, session,
     dataIn()
     rv.modboxplot$indices
     tmp <- NULL
-    
+
     # A temp file to save the output. It will be deleted after renderImage
     # sends it, because deleteFile=TRUE.
     outfile <- tempfile(fileext='.png')
@@ -151,7 +148,7 @@ mod_plots_intensity_server <- function(input, output, session,
       png(outfile)
       pattern <- paste0('test',".violinplot")
       tmp <- DAPAR2::violinPlotD(SummarizedExperiment::assay(dataIn()),
-                                 fData = SummarizedExperiment::rowData(dataIn()),
+                                 keyId = rowData(dataIn())[[ meta()[['keyId']] ]],
                                  legend = conds(),
                                  palette = base_palette(),
                                  subset.view =  rv.modboxplot$indices)
