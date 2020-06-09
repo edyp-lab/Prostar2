@@ -74,8 +74,9 @@ mod_all_plots_ui <- function(id){
           )
       )
     ),
+    
     br(),br(),br(),
-    shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_msnset_explorer_ui(ns('plot_quanti_large')))),
+    shinyjs::hidden(div(id=ns('div_plot_quanti_large'),mod_plots_se_explorer_ui(ns('plot_quanti_large')))),
     shinyjs::hidden(div(id=ns('div_plot_intensity_large'),mod_plots_intensity_ui(ns('plot_intensity_large')))),
     shinyjs::hidden(div(id=ns('div_plot_pca_large'),mod_plots_pca_ui(ns('plot_pca_large')))),
     shinyjs::hidden(div(id=ns('div_plot_var_dist_large'),mod_plots_var_dist_ui(ns('plot_var_dist_large')))),
@@ -98,49 +99,71 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   rv <- reactiveValues(
     current.plot = NULL,
-    current.obj = NULL
+    current.obj = NULL,
+    settings = NULL
   )
+  rv$settings <- callModule(mod_settings_server, "settings")
   
   # observe({
   #   if (is.null(dataIn()))
   #     return(NULL)
   # })
   
-  callModule(mod_plots_group_mv_server, 
-             "plot_group_mv_large", 
+  
+  callModule(mod_plots_se_explorer_server, 'plot_quanti_large',
              obj = reactive({rv$current.obj}),
-             base_palette = reactive({settings()$examplePalette}))
-  
-  callModule(mod_plots_var_dist_server, 'plot_var_dist_large', 
-             obj=reactive({rv$current.obj}),
-             base_palette = reactive({settings()$examplePalette})
+             originOfValues = reactive({ S4Vectors::metadata(dataIn())[['OriginOfValues']] }),
+             colData = reactive({ SummarizedExperiment::colData(dataIn()) })
   )
   
-  callModule(mod_plots_msnset_explorer_server, 'plot_quanti_large', obj = reactive({rv$current.obj}))
-  
-  callModule(mod_plots_corr_matrix_server, "plot_corr_matrix_large", 
-             obj = reactive({rv$current.obj}),
-             gradientRate = reactive({settings()$defaultGradientRate})
-  )
-  
-  callModule(mod_plots_heatmap_server, "plot_heatmap_large", 
-             obj = reactive({rv$current.obj})
-  )
-  
-  
-  callModule(module=mod_plots_pca_server, 'plot_pca_large', 
-             obj=reactive({rv$current.obj})
-  )
-  
-  
+
   callModule(module=mod_plots_intensity_server, 'plot_intensity_large',
              dataIn=reactive({rv$current.obj}),
+             meta = reactive({ S4Vectors::metadata(dataIn()) }),
+             conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] }),
              params = reactive({NULL}),
              reset = reactive({FALSE}),
-             base_palette = reactive({settings()$examplePalette})
+             base_palette = reactive({rv$settings()$examplePalette})
   )
   
   
+  callModule(module=mod_plots_pca_server, 'plot_pca_large',
+             obj=reactive({rv$current.obj}),
+             conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] })
+  )
+  
+  
+  callModule(mod_plots_var_dist_server, 'plot_var_dist_large',
+             obj=reactive({rv$current.obj}),
+             conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] }),
+             base_palette = reactive({rv$settings()$examplePalette})
+  )
+  
+  # callModule(mod_plots_corr_matrix_server,'plot_corr_matrix_large', 
+  #            res = reactive({ cor(rv$current.obj, use = 'pairwise.complete.obs')}),
+  #            names = reactive({NULL}),
+  #            gradientRate = reactive({rv$settings()$defaultGradientRate}))
+  
+  
+  callModule(mod_plots_heatmap_server, "plot_heatmap_large",
+             obj = reactive({rv$current.obj}),
+             conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] })
+  )
+
+  ########################################################
+  # callModule(mod_plots_group_mv_server,'plots_group_mv', 
+  #            obj = reactive({obj}),
+  #            conds = reactive({conds}),
+  #            base_palette=reactive({r$settings()$examplePalette})
+  # )
+  ########################################################
+
+  callModule(mod_plots_group_mv_server, "plot_group_mv_large",
+             obj = reactive({rv$current.obj}),
+             conds = reactive({ SummarizedExperiment::colData(dataIn()) }),
+             base_palette = reactive({rv$settings()$examplePalette})
+  )
+
   
   observeEvent(input$btn_quanti,{rv$current.plot <- 'quanti'})
   observeEvent(input$btn_intensity,{rv$current.plot <- 'intensity'})
@@ -152,7 +175,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   output$chooseDataset_UI <- renderUI({
-    if (length(names(dataIn()))==0){
+    if (length(SummarizedExperiment::assays(dataIn())) == 0){
       choices <- list(' '=character(0))
     } else {
       choices <- names(dataIn())
@@ -166,13 +189,12 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   observe({
     req(input$chooseDataset)
     dataIn()
-    authClasses <- c('PipelineProtein', 'PipelinePeptide')
     
-    if (!(class(dataIn())[1] %in% authClasses)){
-      warning('File format not recognized. Expected MultiAssayExperiment')
+    if ((class(dataIn()) != "Features")){
+      warning('File format not recognized. Expected Features')
       return(NULL)
     }
-    rv$current.obj <- MultiAssayExperiment::experiments(dataIn())[[input$chooseDataset]]
+    rv$current.obj <- dataIn()[[input$chooseDataset]]
   })
   
   
@@ -215,7 +237,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
   
   
   
-  ############# Plots for MSnSet explorer
+  ############# Plots for SE explorer
   output$plot_quanti_small <- renderImage({
     filename <- normalizePath(file.path('../../inst/app/www/images/vignettes','desc_quantiData.png'))
     list(src = filename,

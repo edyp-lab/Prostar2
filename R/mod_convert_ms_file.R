@@ -411,6 +411,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   observeEvent(req(rv.convert$design()), {
+    
     r.nav$isDone[4] <- TRUE
   })
   
@@ -457,19 +458,19 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # } 
     # 
     
-    
+    print("1")
     #ext <- GetExtension(rv.convert$datafile$name)
     ## quanti data
     tmp_quanti_data <- input$choose_quanti_data_col
     indexForQuantiData <- match(tmp_quanti_data, colnames(rv.convert$dataIn))
     quanti_order <- order(input$choose_quanti_data_col)
     samples_order <- order(rownames(rv.convert$design()))
-    
+    print("2")
     if (sum(quanti_order != samples_order) > 0){
       tmp_quanti_data <- tmp_quanti_data[samples_order]
       indexForQuantiData <- indexForQuantiData[samples_order]
     }
-    
+    print("3")
     indexForFData <- seq(1,ncol(rv.convert$dataIn))[-indexForQuantiData]
     
     ## key id of entities
@@ -478,14 +479,14 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       key_id_index <- match(rv.convert$choose_keyID, colnames(rv.convert$dataIn))
     }
     
-    
+    print("4")
     ### Sample data
     design <- rv.convert$design()
     
     ### Are data alearady logged ?
     logged_data <- (input$checkDataLogged == "no")
     
-    
+    print("5")
     ### Origin of Values
     #indexForOriginOfValue <- NULL
     colNamesForOriginofValues <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
@@ -504,7 +505,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
     #                  DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR2","Version"]
     # )
-    
+    print("6")
     
     tryCatch({
       switch(names(rv.convert$pipeline()),
@@ -565,7 +566,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     }, finally = {
       #cleanup-code 
     })
-    
+    print("7")
     r.nav$isDone[5] <- TRUE    
     
      

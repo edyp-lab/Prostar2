@@ -83,7 +83,7 @@ mod_plots_heatmap_server <- function(input, output, session,
   
   output$DS_PlotHeatmap <- renderUI({
     req(obj())
-    if (nrow(assay(obj())) > limitHeatmap){
+    if (nrow(SummarizedExperiment::assay(obj())) > limitHeatmap){
       tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
     }else {
       tagList(
@@ -108,7 +108,7 @@ mod_plots_heatmap_server <- function(input, output, session,
     
     isolate({ 
       withProgress(message = 'Making plot', value = 100, {
-        DAPAR2::heatmapD(qData=assay(obj()),
+        DAPAR2::heatmapD(qData=SummarizedExperiment::assay(obj()),
                          conds=conds(),
                          distance=input$distance, 
                          cluster=input$linkage,

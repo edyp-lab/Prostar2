@@ -26,8 +26,7 @@ mod_plots_pca_ui <- function(id){
 #' 
 mod_plots_pca_server <- function(input, output, session,
                                  obj,
-                                 conds,
-                                 style) {
+                                 conds) {
   ns <- session$ns
   
   
@@ -137,7 +136,7 @@ mod_plots_pca_server <- function(input, output, session,
   callModule(mod_format_DT_server,"PCAvarCoord", 
              table2show=reactive({ if (!is.null(rv.pca$res.pca)) round(rv.pca$res.pca$var$coord, digits=7) }), 
              showRownames=TRUE,
-             style=style)
+             style=reactive({NULL}))
   
   
   

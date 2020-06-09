@@ -1,6 +1,9 @@
+library(shiny)
 library(rhandsontable)
 library(Features)
 library(S4Vectors)
+library(htmlwidgets)
+library(DT)
 # for (f in list.files('../../R', pattern='.R')){
 #   source(file.path('../../R', f), local=TRUE)$value
 # }

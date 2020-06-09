@@ -28,7 +28,8 @@ server <- function(input, output, session) {
   callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
              res = reactive({res}),
              names = reactive({NULL}),
-             gradientRate = reactive({r$settings()$defaultGradientRate}))
+             gradientRate = reactive({r$settings()$defaultGradientRate})
+             )
 }
 
 

@@ -83,7 +83,7 @@ mod_plots_intensity_server <- function(input, output, session,
   output$showTrackProt <- renderUI({
     dataIn()
     
-    if (metadata(dataIn())[["typeOfData"]]=='protein'){
+    if (S4Vectors::metadata(dataIn())[["typeOfData"]]=='protein'){
       tags$div(style="display:inline-block; vertical-align: middle;",
                mod_plots_tracking_ui(ns('widgets'))
       ) } else { return(NULL)}
@@ -125,7 +125,7 @@ mod_plots_intensity_server <- function(input, output, session,
     withProgress(message = 'Making plot', value = 100, {
       tmp <- DAPAR2::boxPlotD_HC(SummarizedExperiment::assay(dataIn()),
                                  conds=conds(),
-                                 sequence=rowData(dataIn())[[ meta()[['keyId']] ]],
+                                 sequence=SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
                                  palette=base_palette(),
                                  subset.view = rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
@@ -148,7 +148,7 @@ mod_plots_intensity_server <- function(input, output, session,
       png(outfile)
       pattern <- paste0('test',".violinplot")
       tmp <- DAPAR2::violinPlotD(SummarizedExperiment::assay(dataIn()),
-                                 keyId = rowData(dataIn())[[ meta()[['keyId']] ]],
+                                 keyId = SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
                                  legend = conds(),
                                  palette = base_palette(),
                                  subset.view =  rv.modboxplot$indices)

@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_plots_mv_ui and mod_plots_mv_server
 #' @description  A shiny Module.
 #'
@@ -24,20 +24,43 @@ mod_plots_mv_ui <- function(id){
     )
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_plots_mv
 #' @export
 #' @keywords internal
-    
-mod_plots_mv_server <- function(input, output, session, obj=NULL){
+
+mod_plots_mv_server <- function(input, output, session,
+                                obj,
+                                conds,
+                                title=NULL,
+                                palette=NULL){
+  
   ns <- session$ns
-}
+  
+  
+  output$plot_viewNAbyMean <- renderHighchart({
+    req(obj())
     
+    DAPAR2::hc_mvTypePlot2(SummarizedExperiment::assay(obj()), conds(), title(), palette())
+  })
+  
+  
+  output$plot_showImageNA <- renderPlot({
+    req(obj())
+    
+    isolate({
+      DAPAR2::mvImage(SummarizedExperiment::assay(obj()), conds())
+    })
+    
+  })
+  
+}
+
 ## To be copied in the UI
 # mod_plots_mv_ui("plots_mv_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_mv_server, "plots_mv_ui_1")
- 
+

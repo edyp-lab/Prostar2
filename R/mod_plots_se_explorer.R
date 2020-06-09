@@ -1,5 +1,5 @@
 
-#' @title   mod_msnset_explorer_ui and mod_msnset_explorer_server
+#' @title   mod_se_explorer_ui and mod_se_explorer_server
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
@@ -8,12 +8,12 @@
 #' @param session internal
 #' 
 #' @author Samuel Wieczorek
-#' @rdname mod_msnset_explorer
+#' @rdname mod_se_explorer
 #'
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
-mod_plots_msnset_explorer_ui <- function(id){
+mod_plots_se_explorer_ui <- function(id){
   ns <- NS(id)
   tagList(
     uiOutput(ns("DS_sidebarPanel_tab")),
@@ -23,12 +23,12 @@ mod_plots_msnset_explorer_ui <- function(id){
 
 # Module Server
 
-#' @rdname mod_msnset_explorer
+#' @rdname mod_se_explorer
 #' @export
 #' @keywords internal
 #' @import DT
 
-mod_plots_msnset_explorer_server <- function(input, output, session,
+mod_plots_se_explorer_server <- function(input, output, session,
                                              obj,
                                              originOfValues=NULL,
                                              colData=NULL){ 
@@ -41,7 +41,7 @@ mod_plots_msnset_explorer_server <- function(input, output, session,
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- metadata(obj())[['typeOfData']]
+    typeOfDataset <- S4Vectors::metadata(obj())[['typeOfData']]
     
     .choices<- NULL
     
@@ -265,8 +265,8 @@ mod_plots_msnset_explorer_server <- function(input, output, session,
 }
 
 ## To be copied in the UI
-# mod_plots_msnset_explorer_ui("msnset_explorer_ui_1")
+# mod_plots_se_explorer_ui("se_explorer_ui_1")
 
 ## To be copied in the server
-# callModule(mod_plots_msnset_explorer_server, "msnset_explorer_ui_1")
+# callModule(mod_plots_se_explorer_server, "se_explorer_ui_1")
 

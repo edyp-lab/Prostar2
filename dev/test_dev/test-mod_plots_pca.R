@@ -14,16 +14,15 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  utils::data(Exp1_R25_pept, package='DAPARdata2')
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  obj <- Exp1_R25_pept[[2]]
+  obj <- Exp1_R25_prot[[2]]
   conds <- colData(obj)[['Condition']]
-  #SummarizedExperiment::assay(obj)[which(is.na(SummarizedExperiment::assay(obj)))] <- 0
+  SummarizedExperiment::assay(obj)[which(is.na(SummarizedExperiment::assay(obj)))] <- 0
   
   callModule(mod_plots_pca_server,'pca',
              obj=reactive({obj}),
-             conds=reactive({conds}),
-             style=reactive({NULL})
+             conds=reactive({conds})
   )
 }
 

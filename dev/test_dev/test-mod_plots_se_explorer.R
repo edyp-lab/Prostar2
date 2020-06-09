@@ -8,7 +8,7 @@ source(file.path("../../R","mod_plots_legend_colored_exprs.R"), local=TRUE)$valu
 
 
 ui <- fluidPage(
-  mod_plots_msnset_explorer_ui('msnset_explorer')
+  mod_plots_se_explorer_ui('se_explorer')
 )
 
 # Define server logic to summarize and view selected dataset ----
@@ -20,7 +20,7 @@ server <- function(input, output, session) {
   originOfValues <- metadata(Exp1_R25_prot)[['OriginOfValues']]
   colData <- colData(Exp1_R25_prot)
   
-  callModule(mod_plots_msnset_explorer_server,'msnset_explorer',
+  callModule(mod_plots_se_explorer_server,'se_explorer',
              obj = reactive({obj}),
              originOfValues = reactive({originOfValues}),
              colData = reactive({colData}))
