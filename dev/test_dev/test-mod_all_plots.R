@@ -16,7 +16,7 @@ source(file.path("../../R", "mod_plots_legend_colored_exprs.R"), local = TRUE)$v
 source(file.path("../../R", "mod_plots_corr_matrix.R"), local = TRUE)$value
 source(file.path("../../R", "mod_plots_heatmap.R"), local = TRUE)$value
 source(file.path("../../R", "mod_plots_group_mv.R"),  local = TRUE)$value
-source(file.path("../../R", "mod_plots_msnset_explorer.R"),  local = TRUE)$value
+source(file.path("../../R", "mod_plots_se_explorer.R"),  local = TRUE)$value
 source(file.path("../../R", "mod_plots_var_dist.R"), local = TRUE)$value
 source(file.path("../../R", "global.R"), local = TRUE)$value
 source(file.path("../../R", "mod_format_DT.R"), local = TRUE)$value
@@ -30,31 +30,20 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  require(DAPARdata2)
-  data('Exp1_R25_prot')
+  utils::data(Exp1_R25_pept, package='DAPARdata2')
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   r <- reactiveValues(
     settings = NULL
   )
   
   r$settings <- callModule(mod_settings_server, "settings")
+ obj <- Exp1_R25_pept
+  samples <- colData(obj)
   
- library(DAPARdata2)
-  datasets <- utils::data(package="DAPARdata2")$results[,"Item"]
-  data('Exp1_R25_pept')
-  data('Exp1_R25_prot')
-  obj <- Exp1_R25_pept
-  samples <- Biobase::pData(obj)
-  mae <- PipelineProtein(analysis= 'test',
-                         pipelineType = 'peptide', 
-                         dataType = 'peptide',
-                         processes='original',
-                         experiments=list(original=Exp1_R25_prot,
-                                          test = Exp1_R25_pept),
-                         colData=samples)
  
   callModule(mod_all_plots_server,'plots',
-             dataIn = reactive({mae}),
+             dataIn = reactive({obj}),
              settings = reactive({r$settings()})
              ) 
 
