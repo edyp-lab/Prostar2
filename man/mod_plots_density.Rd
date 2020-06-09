@@ -7,7 +7,15 @@
 \usage{
 mod_plots_density_ui(id)
 
-mod_plots_density_server(input, output, session, obj = NULL, base_palette)
+mod_plots_density_server(
+  input,
+  output,
+  session,
+  obj,
+  conds,
+  legend = NULL,
+  base_palette = NULL
+)
 }
 \arguments{
 \item{id}{shiny id}

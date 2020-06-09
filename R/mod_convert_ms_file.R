@@ -537,14 +537,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
                )
              },
              p2p = {
-               # ll.pipeline <- pipeline.def()$protein
-               # mae <- DAPAR::PipelineProtein(analysis= input$studyName, 
-               #                               pipelineType = rv.convert$pipeline, 
-               #                               dataType = input$typeOfData,
-               #                               processes=NULL, 
-               #                               experiments=list(original=Exp1_R25_prot), 
-               #                               colData=Biobase::pData(Exp1_R25_prot)
-               # )
+               
              },
              default=NULL)
       

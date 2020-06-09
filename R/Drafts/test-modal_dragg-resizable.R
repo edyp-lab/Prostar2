@@ -9,7 +9,7 @@ library(highcharter)
 library(shinyjqui)
 library(shiny)
 library(shinyBS)
-library(DAPAR)
+library(DAPAR2)
 
 source(file.path("..", "mod_plots_corr_matrix.R"), local = TRUE)$value
 
@@ -103,8 +103,7 @@ server <- function(input, output, session) {
   }, deleteFile = FALSE)
   
   
-  require(DAPARdata)
-  data('Exp1_R25_prot')
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   callModule(mod_plots_corr_matrix_server, "corrMatrixPlot_AbsPanel", obj = reactive({Exp1_R25_prot}))
   
   output$plotcorrMatrixlarge <- renderUI({

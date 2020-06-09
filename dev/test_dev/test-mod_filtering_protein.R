@@ -3,13 +3,13 @@ source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 
 source(file.path('../../R', 'mod_filtering_protein.R'), local=TRUE)$value
 source(file.path('../../R', 'missingValuesFilter.R'), local=TRUE)$value
-source(file.path('~/Github/2.0/DAPAR/R', 'utils.R'), local=TRUE)$value
 source(file.path("~/Github/2.0/Prostar/inst/ProstarApp/src", "modules/Misc/modulePopover.R"),  local = TRUE)$value
 source(file.path("~/Github/2.0/Prostar/inst/ProstarApp/src", "modules/Plots/moduleGroupMVPlots.R"),  local = TRUE)$value
 source(file.path("~/Github/2.0/Prostar/inst/ProstarApp/src/modules/Menu_Home/moduleSettings.R"),  local = TRUE)$value
 
 library(MSnbase)
 library(rhandsontable)
+library(DAPAR2)
 
 
 ui <- fluidPage(
@@ -19,7 +19,7 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  library(DAPARdata)
+  library(DAPARdata2)
   data("Exp1_R25_prot")
   data <- get("Exp1_R25_prot")
   

@@ -1,7 +1,7 @@
 library(shiny)
 library(shinyjqui)
 library(shinyBS)
-library(DAPAR)
+library(DAPAR2)
 
 source(file.path("../../R/Drafts", "/mod_bsmodal.R"), local=TRUE)$value
 
@@ -40,8 +40,8 @@ server <- function(input, output, session) {
   
   r$settings <- callModule(mod_settings_server, "settings")
   
-  library(DAPARdata)
-  datasets <- utils::data(package="DAPARdata")$results[,"Item"]
+  library(DAPARdata2)
+  datasets <- utils::data(package="DAPARdata2")$results[,"Item"]
   data('Exp1_R25_pept')
   data('Exp1_R25_prot')
   obj <- Exp1_R25_pept

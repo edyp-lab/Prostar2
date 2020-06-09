@@ -1,4 +1,4 @@
-library(DAPAR)
+library(DAPAR2)
 library(shiny)
 
 # files <- list.files('../../R', pattern='.R')

@@ -30,7 +30,8 @@ mod_plots_density_ui <- function(id){
 #' 
 #' @keywords internal
 #' 
-#' @importFrom DAPAR densityPlotD_HC
+#' @importFrom DAPAR2 densityPlotD_HC
+#' 
 mod_plots_density_server <- function(input, output, session, 
                                      obj,
                                      conds,

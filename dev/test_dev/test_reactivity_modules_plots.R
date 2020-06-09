@@ -1,7 +1,7 @@
 library(highcharter)
-library(DAPAR)
+library(DAPAR2)
 library(shiny)
-library(DAPARdata)
+library(DAPARdata2)
 
 
 source(file.path("../../R","mod_plots_corr_matrix.R"), local=TRUE)$value
@@ -22,7 +22,7 @@ server <- function(input, output, session) {
   )
   
   output$choose_data_ui <- renderUI({
-    selectInput('choose_data', "Dataset", choices = utils::data(package="DAPARdata")$results[,"Item"]
+    selectInput('choose_data', "Dataset", choices = utils::data(package="DAPARdata2")$results[,"Item"]
                 )
   })
   

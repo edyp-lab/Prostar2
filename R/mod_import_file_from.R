@@ -31,7 +31,7 @@ mod_import_file_from_ui <- function(id){
 #' @rdname mod_import_file_from
 #' @export
 #' @keywords internal
-#' @importFrom DAPAR readExcel listSheets
+#' @importFrom DAPAR2 readExcel listSheets
 #' @importFrom shinyjs info disabled disable enable
     
 mod_import_file_from_server <- function(input, output, session, reset=FALSE){
@@ -123,7 +123,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
     
       selectInput(ns("XLSsheets"), 
                   "Select sheet with quant. data", 
-                  choices = as.list(DAPAR::listSheets(input$file2Convert$datapath)),
+                  choices = as.list(DAPAR2::listSheets(input$file2Convert$datapath)),
                   width='200px')
 
     
@@ -141,7 +141,7 @@ mod_import_file_from_server <- function(input, output, session, reset=FALSE){
               Excel = if (is.null(input$XLSsheets)) {
                       return(NULL)
                 } else {
-                    rv.importFrom$out <- DAPAR::readExcel(input$file2Convert$datapath, ext, sheet=input$XLSsheets)
+                    rv.importFrom$out <- DAPAR2::readExcel(input$file2Convert$datapath, ext, sheet=input$XLSsheets)
                 },
               Maxquant = rv.importFrom$out <- read.csv(input$file2Convert$datapath,  header=TRUE, sep="\t", as.is=T)
        )

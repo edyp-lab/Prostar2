@@ -7,7 +7,15 @@
 \usage{
 mod_plots_tracking_ui(id)
 
-mod_plots_tracking_server(input, output, session, obj, params, reset = FALSE)
+mod_plots_tracking_server(
+  input,
+  output,
+  session,
+  obj,
+  params,
+  keyId,
+  reset = FALSE
+)
 }
 \arguments{
 \item{id}{shiny id}
@@ -17,6 +25,10 @@ mod_plots_tracking_server(input, output, session, obj, params, reset = FALSE)
 \item{output}{internal}
 
 \item{session}{internal}
+
+\item{obj}{Object SummarizedExperiment}
+
+\item{metadata}{Metadata of Fetaures containing the SummarizedExperiment}
 }
 \description{
 A shiny Module.

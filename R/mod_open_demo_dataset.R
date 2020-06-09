@@ -44,8 +44,7 @@ mod_open_demo_dataset_ui <- function(id){
 #' 
 #' @keywords internal
 #' 
-#' @importFrom DAPAR PipelineProtein PipelinePeptide
-#' @import DAPARdata
+#' @import DAPARdata2
 #' @importFrom BiocGenerics get
 #' @importFrom utils data
 #' @importFrom BiocManager install
@@ -55,8 +54,7 @@ mod_open_demo_dataset_ui <- function(id){
 mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
   
-  require(DAPARdata2)
-  
+
   rv.openDemo <- reactiveValues(
     dataRead = NULL,
     pipe = NULL,

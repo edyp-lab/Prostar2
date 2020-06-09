@@ -25,7 +25,7 @@ This method plots a bar plot which represents the distribution of the
 number of missing values (NA) per lines (ie proteins).
 }
 \examples{
-utils::data(Exp1_R25_pept, package='DAPARdata')
+utils::data(Exp1_R25_pept, package='DAPARdata2')
 qData <- Biobase::exprs(Exp1_R25_pept)
 samplesData <- Biobase::pData(Exp1_R25_pept)
 mvPerLinesHisto(qData, samplesData)

@@ -14,7 +14,8 @@ mod_format_DT_server(
   table2show,
   withBtns = NULL,
   showRownames = FALSE,
-  dom = "Bt"
+  dom = "Bt",
+  style = NULL
 )
 }
 \arguments{

@@ -1,5 +1,5 @@
 library(highcharter)
-library(DAPAR)
+library(DAPAR2)
 
 source(file.path("../../R","mod_popover_for_help.R"), local=TRUE)$value
 source(file.path("../../R","mod_plots_group_mv.R"), local=TRUE)$value
@@ -20,8 +20,7 @@ server <- function(input, output, session) {
   r <- reactiveValues(
     settings = NULL
   )
-  require(DAPARdata)
-  data('Exp1_R25_prot')
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   
    r$settings <- callModule(mod_settings_server, "settings")
   callModule(mod_plots_group_mv_server,'plots_group_mv', 

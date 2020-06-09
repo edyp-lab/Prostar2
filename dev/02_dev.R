@@ -12,7 +12,7 @@ golem::add_module( name = "select_keyID_from_MSnset" ) # Name of the module
 
 ## 2.2 Add dependencies
 
-usethis::use_package( "DAPARdata" ) # To call each time you need a new package
+usethis::use_package( "DAPARdata2" ) # To call each time you need a new package
 
 ## 2.3 Add tests
 

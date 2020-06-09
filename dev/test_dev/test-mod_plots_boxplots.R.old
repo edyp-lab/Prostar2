@@ -1,5 +1,5 @@
 library(highcharter)
-library(DAPAR)
+library(DAPAR2)
 
 
 source(file.path("../../R","mod_plots_boxplots.R"), local=TRUE)$value

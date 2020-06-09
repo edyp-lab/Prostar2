@@ -3,7 +3,7 @@ library(shiny)
 library(shinyBS)
 library(shinyjqui)
 library(highcharter)
-library(DAPAR)
+library(DAPAR2)
 library(DT)
 library(shinyjs)
 
@@ -30,7 +30,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  require(DAPARdata)
+  require(DAPARdata2)
   data('Exp1_R25_prot')
   
   r <- reactiveValues(
@@ -39,8 +39,8 @@ server <- function(input, output, session) {
   
   r$settings <- callModule(mod_settings_server, "settings")
   
-  library(DAPARdata)
-  datasets <- utils::data(package="DAPARdata")$results[,"Item"]
+ library(DAPARdata2)
+  datasets <- utils::data(package="DAPARdata2")$results[,"Item"]
   data('Exp1_R25_pept')
   data('Exp1_R25_prot')
   obj <- Exp1_R25_pept

@@ -48,7 +48,6 @@ mod_open_dataset_ui <- function(id){
 #' 
 #' @keywords internal
 #' 
-#' @importFrom DAPAR PipelineProtein PipelinePeptide typeOfData
 #' @importFrom shinyjs info alert
 #'     
 mod_open_dataset_server <- function(input, output, session, pipeline.def){

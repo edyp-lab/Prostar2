@@ -11,7 +11,8 @@ mod_plots_corr_matrix_server(
   input,
   output,
   session,
-  obj = NULL,
+  res,
+  names = NULL,
   gradientRate = NULL
 )
 }

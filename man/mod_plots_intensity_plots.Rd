@@ -12,6 +12,8 @@ mod_plots_intensity_server(
   output,
   session,
   dataIn,
+  meta,
+  conds,
   params = NULL,
   reset = NULL,
   base_palette = NULL
