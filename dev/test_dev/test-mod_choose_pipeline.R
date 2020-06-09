@@ -1,4 +1,4 @@
-
+source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 
 

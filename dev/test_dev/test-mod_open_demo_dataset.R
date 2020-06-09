@@ -28,11 +28,6 @@ server <- function(input, output, session) {
   
   rv$demoData <- callModule(mod_open_demo_dataset_server, "rl", pipeline.def=reactive({pipeline.defs}))
 
-  observe({
-    req(rv$demoData())
-    rv$demoData()
-    
-  })
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({rv$demoData() })

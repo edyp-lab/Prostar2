@@ -38,11 +38,7 @@ server <- function(input, output, session) {
   
   
   rv$convertData <- callModule(mod_convert_ms_file_server, 'convert', pipeline.def=reactive({pipeline.defs}))
-  
-  observe({
-    rv$convertData()
-    print(rv$convertData())
-  })
+ 
   callModule(mod_infos_dataset_server, 
              'infos', 
              obj = reactive({rv$convertData() })

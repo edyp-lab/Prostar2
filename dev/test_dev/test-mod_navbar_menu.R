@@ -15,13 +15,13 @@ source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_open_demo_dataset.R'), local=TRUE)$val
 source(file.path('../../R', 'mod_navbar_menu.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_homepage.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_insert_md.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_release_notes.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_check_updates.R'), local=TRUE)$value
-#source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_homepage.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_insert_md.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_release_notes.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_check_updates.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
 
 ui <- function() {
   tagList(

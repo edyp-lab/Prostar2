@@ -30,9 +30,9 @@ mod_open_demo_dataset_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     uiOutput(ns("chooseDemoDataset")),
-    shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass)),
     uiOutput(ns("linktoDemoPdf")),
-    mod_choose_pipeline_ui(ns("choosePipe"))
+    mod_choose_pipeline_ui(ns("choosePipe")),
+    shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass))
   )
 }
     
@@ -49,7 +49,6 @@ mod_open_demo_dataset_ui <- function(id){
 #' @importFrom utils data
 #' @importFrom BiocManager install
 #' @importFrom shinyjs info
-#' @importFrom Biobase pData
 #' 
 mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
@@ -85,7 +84,7 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
     nSteps <- 1
     withProgress(message = '',detail = '', value = 0, {
       incProgress(1/nSteps, detail = 'Loading dataset')
-      utils::data(list=input$demoDataset)
+      utils::data(list=input$demoDataset, packages='DAPARdata2')
       rv.openDemo$dataRead <- BiocGenerics::get(input$demoDataset)
       if (class(rv.openDemo$dataRead)!="Features") {
         shinyjs::info("Warning : this file is not a MSnSet file ! 

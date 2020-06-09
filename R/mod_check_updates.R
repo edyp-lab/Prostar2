@@ -48,7 +48,9 @@ mod_check_updates_server <- function(input, output, session){
     
   })
   
-  callModule(mod_format_DT_server,'tab_versions', table2show=reactive({getPackagesVersions()}))
+  callModule(mod_format_DT_server,'tab_versions',
+             table2show=reactive({getPackagesVersions()}),
+             style = reactive({NULL}))
 
   output$infoForNewVersions <- renderUI({
     df <- getPackagesVersions()
