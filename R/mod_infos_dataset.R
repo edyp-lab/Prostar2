@@ -117,16 +117,12 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
 
   Get_Features_summary <- reactive({
-    req(obj())
-    
-    print(names(obj()))
-    nb_assay <- length(obj())
+    #req(obj())
+    if (is.null(obj())) { return(NULL)}
+    print(obj())
+   nb_assay <- length(obj())
     names_assay <- unlist(names(obj()))
     pipeline <- metadata(obj())$pipelineType
-    nSamples <- nrow(MultiAssayExperiment::colData(obj()))
-    nConds <- length(unique(MultiAssayExperiment::colData(obj())$Condition))
-    eqConds <- TRUE
-    
      
     columns <- c("Number of assay(s)",
                  "List of assay(s)",
@@ -142,8 +138,7 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     do <- data.frame(Definition= columns,
                      Value=vals
                      )
-    
-    
+
     do
   })
 

@@ -30,16 +30,16 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
   r <- reactiveValues(
     settings = NULL
   )
   
   r$settings <- callModule(mod_settings_server, "settings")
-  
-  utils::data('Exp1_R25_prot', package="DAPARdata2")
   obj <- Exp1_R25_prot
+  
   obj <- Features::addAssay(Exp1_R25_prot, (Features::filterNA(Exp1_R25_prot,i=2))[[2]], "original_log_NAfiltered")
-   
   
   callModule(mod_all_plots_server,'plots',
              dataIn = reactive({obj}),

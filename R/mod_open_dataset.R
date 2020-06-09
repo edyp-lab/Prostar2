@@ -83,8 +83,9 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
     shinyjs::toggle('loadDataset', condition=cond)
   })
   
+  
+  
   observeEvent(req(input$file),{
-    
     tryCatch({
       rv.openDataset$dataRead <- readRDS(input$file$datapath)
       
@@ -107,18 +108,16 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   output$ui_select_KID <- renderUI({
     req(rv.openDataset$dataRead )
-    print(class(rv.openDataset$dataRead ))
-    
+   
     if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
     
     mod_select_keyID_from_MSnset_ui(ns('select_KID'))
-    
-    
   })
   
   rv.openDataset$ret <- callModule(mod_select_keyID_from_MSnset_server, 
                                    'select_KID', 
-                                   dataIn = reactive({rv.openDataset$dataRead}))
+                                   dataIn = reactive({if (class(rv.openDataset$dataRead ) == "MSnSet") 
+                                     rv.openDataset$dataRead else NULL}))
   
   
   

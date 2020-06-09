@@ -384,6 +384,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       colnames(df) <- c("Sample")
     }
     
+    print('toto')
     df
   })
   
@@ -427,7 +428,6 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       textInput(ns("studyName"),"Enter the name of the study"),
       mod_choose_pipeline_ui(ns('choose_pipeline_ui')),
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
-      #uiOutput(ns("conversionDone")),
       
       p("Once the 'Load' button (above) clicked, you will be automatically redirected to Prostar home page. The dataset will be accessible within Prostar 
         interface and processing menus will be enabled. However, all importing functions ('Open MSnset', 'Demo data' and 'Convert data') will be disabled 
@@ -507,6 +507,8 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # )
     print("6")
     
+    
+
     tryCatch({
       switch(names(rv.convert$pipeline()),
              peptide = {
@@ -538,37 +540,37 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
                )
              },
              p2p = {
-               
+
              },
              default=NULL)
-      
-      
+
+
       #loadObjectInMemoryFromConverter()
-      
+
     }
     , warning = function(w) {
       if (conditionMessage(w) %in% c("NaNs produced", "production de NaN")){
         shinyjs::info(paste("Warning : Your original dataset may contain negative values",
-                            "so that they cannot be logged. Please check back the dataset or", 
+                            "so that they cannot be logged. Please check back the dataset or",
                             "the log option in the first tab.",
                             sep=" "))
-      } 
+      }
       # else {
       #       shinyjs::info(paste("Warning in CreateMSnSet",":",
-      #                           conditionMessage(w), 
+      #                           conditionMessage(w),
       #                           sep=" "))
       #   }
     }, error = function(e) {
       print(e)
       # shinyjs::info(paste("Error :","CreateMSnSet",":",
-      #                     conditionMessage(e), 
+      #                     conditionMessage(e),
       #                     sep=" "))
     }, finally = {
-      #cleanup-code 
+      #cleanup-code
     })
     print("7")
     r.nav$isDone[5] <- TRUE    
-    
+    print(rv.convert$dataOut)
      
   })
   

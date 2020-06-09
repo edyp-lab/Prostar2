@@ -1,6 +1,9 @@
 library(shiny)
 library(shinyjs)
 
+source(file.path('../../R', 'config.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
+
 # Method 1 - passing a string of valid CSS
 
 ## code inspire de  : https://codepen.io/cjl750/pen/mXbMyo

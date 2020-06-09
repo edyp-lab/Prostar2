@@ -1,5 +1,6 @@
 library(DAPAR2)
 source(file.path('../../R', 'mod_select_keyID.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_select_keyID_from_MSnset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
