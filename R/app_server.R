@@ -1,6 +1,6 @@
 options(shiny.maxRequestSize=300*1024^2) 
 options(encoding = "UTF-8")
-options(shiny.fullstacktrace = FALSE)
+options(shiny.fullstacktrace = TRUE)
 require(compiler)
 enableJIT(3)
 

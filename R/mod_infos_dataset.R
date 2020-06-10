@@ -68,8 +68,10 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
     }
     
     callModule(mod_format_DT_server,'samples_tab',
-               table2show = reactive({data.frame(MultiAssayExperiment::colData(obj()))}),
-               style = reactive({list(cols = colnames(MultiAssayExperiment::colData(obj())),
+               table2show = reactive({req(obj())
+                              data.frame(colData(obj()))}),
+               style = reactive({req(obj())
+                 list(cols = colnames(MultiAssayExperiment::colData(obj())),
                                       vals = colnames(MultiAssayExperiment::colData(obj()))[2],
                                       unique = unique(MultiAssayExperiment::colData(obj())$Condition),
                                       pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
@@ -174,13 +176,15 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
       columns <- c(columns,
                    "Adjacency matrices",
                    "Connex components")
+      
+      print(names(metadata(obj()[[input$selectInputSE]])))
       if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
         adjMat.txt <- "<span style=\"color: lime\">OK</span>"
       } else{
         adjMat.txt <- "<span style=\"color: red\">Missing</span>"
       }
       
-      if(length(metadata(obj()[[input$selectInputSE]])$list.cc) > 0){
+      if(!is.null(metadata(obj()[[input$selectInputSE]])$list.cc)){
         cc.txt <- "<span style=\"color: lime\">OK</span>"
       } else{
         cc.txt <- "<span style=\"color: red\">Missing</span>"
