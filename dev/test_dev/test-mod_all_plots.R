@@ -1,8 +1,9 @@
-
+library(shiny)
+library(highcharter)
 
 # library(shinyBS)
 # library(shinyjqui)
-library(highcharter)
+# 
 # library(DAPAR2)
 # library(DT)
 # library(shinyjs)

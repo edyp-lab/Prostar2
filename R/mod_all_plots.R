@@ -139,25 +139,18 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
              base_palette = reactive({rv$settings()$examplePalette})
   )
   
-  # callModule(mod_plots_corr_matrix_server,'plot_corr_matrix_large', 
-  #            res = reactive({ cor(rv$current.obj, use = 'pairwise.complete.obs')}),
-  #            names = reactive({NULL}),
-  #            gradientRate = reactive({rv$settings()$defaultGradientRate}))
+  callModule(mod_plots_corr_matrix_server,'plot_corr_matrix_large',
+             obj = reactive({rv$current.obj}),
+             names = reactive({NULL}),
+             gradientRate = reactive({rv$settings()$defaultGradientRate}))
   
   
   callModule(mod_plots_heatmap_server, "plot_heatmap_large",
              obj = reactive({rv$current.obj}),
              conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] })
   )
-
-  ########################################################
-  # callModule(mod_plots_group_mv_server,'plots_group_mv', 
-  #            obj = reactive({obj}),
-  #            conds = reactive({conds}),
-  #            base_palette=reactive({r$settings()$examplePalette})
-  # )
-  ########################################################
-
+  
+  
   callModule(mod_plots_group_mv_server, "plot_group_mv_large",
              obj = reactive({rv$current.obj}),
              conds = reactive({ SummarizedExperiment::colData(dataIn()) }),

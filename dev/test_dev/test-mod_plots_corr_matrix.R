@@ -3,7 +3,6 @@ library(highcharter)
 library(SummarizedExperiment)
 
 
-
 source(file.path("../../R","mod_plots_corr_matrix.R"), local=TRUE)$value
 source(file.path("../../R","mod_settings.R"), local=TRUE)$value
 source(file.path("../../R","mod_popover_for_help.R"), local=TRUE)$value
@@ -18,15 +17,15 @@ server <- function(input, output, session) {
   
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  res <- cor(assay(Exp1_R25_prot[[2]]),use = 'pairwise.complete.obs')
   r <- reactiveValues(
     settings = NULL
   )
+  obj <- Exp1_R25_prot[[2]]
   names <- gsub('Intensity_','',colnames(assay(Exp1_R25_prot[[2]])))
   r$settings <- callModule(mod_settings_server, "settings")
   
   callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
-             res = reactive({res}),
+             obj = reactive({obj}),
              names = reactive({NULL}),
              gradientRate = reactive({r$settings()$defaultGradientRate})
              )
