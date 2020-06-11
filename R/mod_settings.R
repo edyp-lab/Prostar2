@@ -1,27 +1,28 @@
 # Module UI
 
 #' @title   mod_settings_ui and mod_settings_server
+#' 
 #' @description  A shiny Module.
 #'
 #' @param id shiny id
+#' 
 #' @param input internal
+#' 
 #' @param output internal
+#' 
 #' @param session internal
 #'
 #' @rdname mod_settings
 #'
 #' @keywords internal
+#' 
 #' @export 
+#' 
 #' @importFrom shiny NS tagList 
+#' 
 mod_settings_ui <- function(id){
   ns <- NS(id)
   tagList(
-    # tabPanel(title="Global settings",
-    #          value="GlobalSettingsTab",
-    #          # selectInput("settings_InteractivePlots",
-    #          #             "Type of plots",
-    #          #             choices = c("Interactive (nice but slower)" = "Interactive",
-    #          #                     "Static (faster)" = "Static")),
     tabsetPanel(
       tabPanel("Miscallenous",
                div(
@@ -59,31 +60,40 @@ mod_settings_ui <- function(id){
 # Module Server
 
 #' @rdname mod_settings
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @import shiny
+#' 
 #' @import highcharter
-
-mod_settings_server <- function(input, output, session){
+#' 
+mod_settings_server <- function(input, output, session, obj){
   ns <- session$ns
   
-  example.Conditions <- c('A', 'B', 'A', 'B', 'B', 'B')
   
   grey <- "#FFFFFF"
   orangeProstar <- "#E97D5E"
   
-  
+  observe({
+    req(obj())
+    rv.settings$conditions <- colData(obj())[['Condition']]
+    print(rv.settings$conditions)
+  })
+
+
   rv.settings <- reactiveValues(
     nDigits = 10,
+    conditions = c('A', 'B', 'A', 'B', 'B', 'B'),
     colorsVolcanoplot = reactiveValues(In=orangeProstar, 
                                        Out='lightgrey'
-    ),
+                                        ),
     colorsTypeMV = reactiveValues(MEC=orangeProstar,
                                   POV='lightblue'
-    ),
+                                  ),
     choosePalette = 'Dark2',
     typeOfPalette = 'predefined',
-    #whichGroup2Color = 'Condition',
     examplePalette = NULL,
     defaultGradientRate = 0.9,
     legDS = NULL,
@@ -151,10 +161,8 @@ mod_settings_server <- function(input, output, session){
   ############
   GetExamplePalette <- reactive({
     rv.settings$choosePalette
-    #rv.settings$whichGroup2Color
-    #GetTest()
     rv.settings$typeOfPalette
-    nbConds <- length(unique(example.Conditions))
+    nbConds <- length(unique(rv.settings$conditions))
     
     
     palette <- NULL
@@ -164,17 +172,16 @@ mod_settings_server <- function(input, output, session){
              palette <- RColorBrewer::brewer.pal(nbColors,rv.settings$choosePalette)[1:nbConds]
              
              for (i in 1:nbConds){
-               rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+               rv.settings$examplePalette[ which(rv.settings$conditions == unique(rv.settings$conditions)[i])] <- palette[i]
              }
            },
            custom = {
-             #browser()
              for(i in 1:nbConds){
                palette <- c(palette,input[[paste0("customColorCondition_",i)]])
              }
              if (is.null(palette)){return(NULL)}
              for (i in 1:nbConds){
-               rv.settings$examplePalette[i] <- palette[ which(example.Conditions[i] == unique(example.Conditions))]
+               rv.settings$examplePalette[ which(rv.settings$conditions == unique(rv.settings$conditions)[i])] <- palette[i]
              }
            }
     )
@@ -253,7 +260,7 @@ mod_settings_server <- function(input, output, session){
       fluidRow(
         column(width=3,radioButtons(ns("typeOfPalette"), "Type of palette for conditions",
                                     choices=c("predefined"="predefined", "custom"="custom"), selected=GetTypeOfPalette())),
-        column(width=6,highcharter::highchartOutput(ns("displayPalette"), width="300px", height = "200px"))
+        column(width=6,highcharter::highchartOutput(ns("displayPalette")))
       ),
       
       uiOutput(ns("predefinedPaletteUI")),
@@ -295,8 +302,8 @@ mod_settings_server <- function(input, output, session){
     
     ll <- list()
     nbColors <- NULL
-    nbColors <- length(unique(example.Conditions))
-    labels <- unique(example.Conditions)
+    nbColors <- length(unique(rv.settings$conditions))
+    labels <- unique(rv.settings$conditions)
     
     for (i in 1:nbColors) {
       ll <- list(ll,
@@ -311,17 +318,23 @@ mod_settings_server <- function(input, output, session){
   
   
   observeEvent(input$colMEC, {rv.settings$colorsTypeMV$MEC <- input$colMEC})
+  
   observeEvent(input$colPOV, { rv.settings$colorsTypeMV$POV <- input$colPOV})
+  
   observeEvent(input$colVolcanoIn, {rv.settings$colorsVolcanoplot$In <- input$colVolcanoIn})
+  
   observeEvent(input$colVolcanoOut, {rv.settings$colorsVolcanoplot$Out <- input$colVolcanoOut})
+  
+  
   
   output$displayPalette <- highcharter::renderHighchart({
     rv.settings$examplePalette
-    nbConds <- length(unique(example.Conditions))
-    
+    nbConds <- length(unique(rv.settings$conditions))
+    df <- data.frame(y= abs(10+rnorm(length(rv.settings$conditions))))
+
     highcharter::highchart() %>%
       DAPAR2::dapar_hc_chart(chartType = "column") %>%
-      highcharter::hc_add_series(data = data.frame(y= abs(1+rnorm(length(example.Conditions)))), type="column", colorByPoint = TRUE) %>%
+      highcharter::hc_add_series(data = df, type="column", colorByPoint = TRUE) %>%
       highcharter::hc_colors(rv.settings$examplePalette) %>%
       highcharter::hc_plotOptions( column = list(stacking = "normal"), animation=list(duration = 1)) %>%
       highcharter::hc_legend(enabled = FALSE) %>%

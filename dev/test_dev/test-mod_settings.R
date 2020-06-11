@@ -16,13 +16,15 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-  require(DAPARdata2)
+  
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
   r <- reactiveValues(
     settings = NULL
   )
   #data('Exp1_R25_prot')
   #obj <- Exp1_R25_prot
-  r$settings <- callModule(mod_settings_server, "settings")
+  r$settings <- callModule(mod_settings_server, "settings", obj = reactive({Exp1_R25_prot}))
   
   # observeEvent(r$settings(),{
   #   print(r$settings())

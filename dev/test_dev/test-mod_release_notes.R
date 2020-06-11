@@ -1,4 +1,4 @@
-
+source(file.path('../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_release_notes.R'), local=TRUE)$value
 
 
