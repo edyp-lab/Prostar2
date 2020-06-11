@@ -40,10 +40,13 @@ mod_plots_mv_server <- function(input, output, session,
   ns <- session$ns
   
   
+  
   output$plot_viewNAbyMean <- renderHighchart({
     req(obj())
     
-    DAPAR2::hc_mvTypePlot2(SummarizedExperiment::assay(obj()), conds(), title(), palette())
+    withProgress(message = 'Making MV Intensity plot', value = 100, {
+      DAPAR2::hc_mvTypePlot2(SummarizedExperiment::assay(obj()), conds(), title(), palette())
+    })
   })
   
   
@@ -51,11 +54,15 @@ mod_plots_mv_server <- function(input, output, session,
     req(obj())
     
     isolate({
-      DAPAR2::mvImage(SummarizedExperiment::assay(obj()), conds())
+      withProgress(message = 'Making MV Heatmap plot', value = 100, {
+        DAPAR2::mvImage(SummarizedExperiment::assay(obj()), conds())
+      })
     })
     
   })
   
+
+
 }
 
 ## To be copied in the UI

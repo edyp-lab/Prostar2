@@ -146,11 +146,10 @@ mod_plots_pca_server <- function(input, output, session,
              table2show=reactive({ if (!is.null(rv.pca$res.pca)) as.data.frame(round(rv.pca$res.pca$var$coord, digits=7)) }), 
              showRownames=TRUE,
              #style=reactive({NULL})
-             style = reactive({ list(cols = colnames(rv.pca$res.pca$var$coord)[1],
-                                     #vals = coldata()[['Condition']],
-                                     unique = coldata()[['Condition']],
-                                     pal = c(rep("#1B9E77",3), rep("#D95F02",3)) )
-               })
+             style = reactive({ list(cols = colnames(rv.pca$res.pca$var$coord),
+                                     vals = colnames(rv.pca$res.pca$var$coord),
+                                     unique = unique(coldata()[['Condition']]),
+                                     pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})
   )
   # style = reactive({ list(cols = colnames(colData(obj)),
   #                         vals = colnames(colData(obj))[2],
