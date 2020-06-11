@@ -98,7 +98,7 @@ mod_plots_corr_matrix_server <- function(input, output, session,
   
   corrMatrix <- reactive({
     req(obj())
-    rv.corr$gradient 
+    rv.corr$gradient
     
     isolate({
       withProgress(message = 'Making plot', value = 100, {
