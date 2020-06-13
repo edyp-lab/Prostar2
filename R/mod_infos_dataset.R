@@ -55,8 +55,9 @@ mod_infos_dataset_ui <- function(id){
 #' 
 #' @importFrom MultiAssayExperiment experiments colData
 #' @import S4Vectors
+#' @importFrom tibble as_tibble
 #' 
-mod_infos_dataset_server <- function(input, output, session, obj=NULL){
+mod_infos_dataset_server <- function(input, output, session, obj){
   ns <- session$ns
   
   observe({
@@ -81,7 +82,8 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
   
   
     callModule(mod_format_DT_server,'dt',
-             table2show = reactive({as.data.frame(Get_Features_summary())}),
+             table2show = reactive({req(Get_Features_summary())
+               as_tibble(Get_Features_summary())}),
              style=reactive({NULL}))
              
     
@@ -119,9 +121,8 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
 
 
   Get_Features_summary <- reactive({
-    #req(obj())
-    if (is.null(obj())) { return(NULL)}
-    print(obj())
+    
+    req(obj())
    nb_assay <- length(obj())
     names_assay <- unlist(names(obj()))
     pipeline <- metadata(obj())$pipelineType
@@ -177,7 +178,6 @@ mod_infos_dataset_server <- function(input, output, session, obj=NULL){
                    "Adjacency matrices",
                    "Connex components")
       
-      print(names(metadata(obj()[[input$selectInputSE]])))
       if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
         adjMat.txt <- "<span style=\"color: lime\">OK</span>"
       } else{

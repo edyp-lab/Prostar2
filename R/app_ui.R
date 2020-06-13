@@ -77,7 +77,7 @@ tagList(
                            tags$head(tags$style('.headerrow{height:10vh;}'))
                            ),
                   fluidPage(
-                    navbarPage("Navbar !",
+                    navbarPage("Prostar",
                     position = "fixed-top",
                     id = "navPage",
                     inverse = FALSE,

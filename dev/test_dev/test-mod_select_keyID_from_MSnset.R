@@ -32,7 +32,6 @@ server <- function(input, output, session) {
   
   output$state <- renderUI({
     req(rv$dataIn)
-    print(str(rv$dataIn))
     tagList(
       p(paste0('keyId = ',rv$dataIn$keyId)),
       br(),

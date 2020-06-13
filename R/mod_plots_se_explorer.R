@@ -24,10 +24,14 @@ mod_plots_se_explorer_ui <- function(id){
 # Module Server
 
 #' @rdname mod_se_explorer
+#' 
 #' @export
+#' 
 #' @keywords internal
+#' 
 #' @import DT
-
+#' @importFrom tibble as_tibble
+#' 
 mod_plots_se_explorer_server <- function(input, output, session,
                                              obj,
                                              originOfValues=NULL,
@@ -98,7 +102,6 @@ mod_plots_se_explorer_server <- function(input, output, session,
   output$tabToShow <- renderUI({
     req(input$DS_TabsChoice)
     req(obj())
-    print(paste0('input$DS_TabsChoice', input$DS_TabsChoice))
     switch(input$DS_TabsChoice,
            None = {return(NULL)},
            tabExprs = DT::dataTableOutput(ns("table")),
@@ -114,7 +117,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
   output$viewpData <- DT::renderDataTable({
     req(obj())
     
-    data <- as.data.frame(colData())
+    data <- tibble::as_tibble(colData())
     #pal <- unique(rv.prostar$settings()$examplePalette)
     #moduleSettings.R de prostar 2.0
     pal <- unique(RColorBrewer::brewer.pal(8,"Dark2"))
@@ -152,7 +155,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
     
     
     if ('Significant' %in% colnames(SummarizedExperiment::rowData(obj()))){
-      dat <- DT::datatable(as.data.frame(SummarizedExperiment::rowData(obj())),
+      dat <- DT::datatable(tibble::as_tibble(SummarizedExperiment::rowData(obj())),
                            rownames = TRUE,
                            extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                            options=list(initComplete = initComplete(),
@@ -173,7 +176,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
                         target = 'row',
                         background = DT::styleEqual(1, 'lightblue'))
     } else {
-      dat <- DT::datatable(as.data.frame(SummarizedExperiment::rowData(obj())),
+      dat <- DT::datatable(tibble::as_tibble(SummarizedExperiment::rowData(obj())),
                            rownames = TRUE,
                            extensions = c('Scroller', 'Buttons', 'FixedColumns'),
                            options=list(initComplete = initComplete(),
@@ -237,16 +240,16 @@ mod_plots_se_explorer_server <- function(input, output, session,
     req(obj())
     
     #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
-    test.table <- as.data.frame(round(SummarizedExperiment::assay(obj()),digits=10))
+    test.table <- tibble::as_tibble(round(SummarizedExperiment::assay(obj()),digits=10))
     # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
     if (!is.null(originOfValues())){ #agregated dataset
       test.table <- cbind(test.table, 
-                          as.data.frame(SummarizedExperiment::rowData(obj())[originOfValues()]))
+                          tibble::as_tibble(SummarizedExperiment::rowData(obj())[originOfValues()]))
       # print(paste0("tutu:",head(test.table)))
       
     } else {
       test.table <- cbind(test.table, 
-                          as.data.frame(matrix(rep(NA,ncol(test.table)*nrow(test.table)), nrow=nrow(test.table))))
+                          tibble::as_tibble(matrix(rep(NA,ncol(test.table)*nrow(test.table)), nrow=nrow(test.table))))
       #print(paste0("tata:",head(test.table)))
     }
     test.table

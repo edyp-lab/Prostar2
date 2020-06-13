@@ -70,7 +70,7 @@ app_server <- function(input, output,session) {
   })
   
   
-  rv.prostar$settings <- callModule(mod_settings_server, "modSettings")
+  rv.prostar$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
   
   callModule(mod_all_plots_server, 'modAllPlots', 
              dataIn = reactive({

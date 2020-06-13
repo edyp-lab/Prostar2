@@ -93,9 +93,7 @@ mvPerLinesHisto <- function(qData, samplesData, indLegend="auto", showValues=FAL
   if (sum(NbNAPerRow) == 0){
     nb.na2barplot <- rep(0,1+ncol(qData))
   }
-  
-  print(nb.na2barplot[-1])
-  
+
   x <- barplot(nb.na2barplot[-1], 
                main = "# lines by # of NA",
                xlab = "# NA per lines",

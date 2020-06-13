@@ -38,8 +38,6 @@ mod_check_updates_server <- function(input, output, session){
   
   output$baseVersions <- renderUI({
 
-    print("getPackagesVersions()")
-    print(getPackagesVersions())
     tagList(
       tags$p("Prostar is running on ",R.version.string, style="font-size: 16px"),
       tags$p(paste0("and uses the Bioconductor Release ",as.character(BiocManager::version())), style="font-size: 16px"),

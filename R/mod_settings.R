@@ -78,8 +78,11 @@ mod_settings_server <- function(input, output, session, obj){
   
   observe({
     req(obj())
+    if(class(obj()) != 'Features'){
+      warning("mod_settings: 'obj()' is not of class 'Features'.")
+      return(NULL)
+    }
     rv.settings$conditions <- colData(obj())[['Condition']]
-    print(rv.settings$conditions)
   })
 
 

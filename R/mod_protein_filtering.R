@@ -48,8 +48,7 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
   
  
   observeEvent(req(r.nav$reset),{
-    print("execute reset")
-    r.nav$isDone <- c(TRUE,FALSE, FALSE, FALSE, FALSE) #rep(FALSE, 5)
+     r.nav$isDone <- c(TRUE,FALSE, FALSE, FALSE, FALSE) #rep(FALSE, 5)
     
     r.nav$reset <- FALSE
     
@@ -103,7 +102,6 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
   ###################################################
   
   output$screen1 <- renderUI({
-    print("### Screen 1 ###")
     tagList(
         div(
           div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
@@ -176,7 +174,6 @@ mod_filtering_protein_server <- function(input, output, session, obj) {
 
 
   output$screen2 <- renderUI({
-    print("### Screen 2 ###")
     tagList(
       tags$div(
         tags$div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",

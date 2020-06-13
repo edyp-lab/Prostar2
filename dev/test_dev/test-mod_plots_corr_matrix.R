@@ -21,8 +21,8 @@ server <- function(input, output, session) {
     settings = NULL
   )
   obj <- Exp1_R25_prot[[2]]
-  names <- gsub('Intensity_','',colnames(assay(Exp1_R25_prot[[2]])))
-  r$settings <- callModule(mod_settings_server, "settings")
+  names <- gsub('Intensity_','',colnames(assay(obj)))
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({obj}))
   
   callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
              obj = reactive({obj}),

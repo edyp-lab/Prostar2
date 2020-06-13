@@ -33,7 +33,6 @@ mod_insert_md_server <- function(input, output, session, url){
   output$insertMD <- renderUI({
     tryCatch(
       {
-        print(url)
         includeMarkdown(url)
       }
       , warning = function(w) {

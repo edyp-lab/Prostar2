@@ -18,12 +18,13 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   r <- reactiveValues(
     settings = NULL
   )
-  r$settings <- callModule(mod_settings_server, "settings")
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   
-  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
   metadata <- metadata(Exp1_R25_prot)
   conds <- colData(Exp1_R25_prot)[['Condition']]
   obj <- Exp1_R25_prot[[2]]

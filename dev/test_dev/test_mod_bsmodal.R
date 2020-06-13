@@ -38,12 +38,14 @@ server <- function(input, output, session) {
     settings = NULL
   )
   
-  r$settings <- callModule(mod_settings_server, "settings")
   
-  library(DAPARdata2)
   datasets <- utils::data(package="DAPARdata2")$results[,"Item"]
   data('Exp1_R25_pept')
   data('Exp1_R25_prot')
+  
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
+  
+  
   obj <- Exp1_R25_pept
   samples <- Biobase::pData(obj)
   mae <- PipelineProtein(analysis= 'test',

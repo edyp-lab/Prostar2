@@ -23,7 +23,7 @@ server <- function(input, output, session) {
   r <- reactiveValues(
     settings = NULL
   )
-  r$settings <- callModule(mod_settings_server, "settings")
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   
   
   callModule(mod_plots_var_dist_server,'varDistPlot', 

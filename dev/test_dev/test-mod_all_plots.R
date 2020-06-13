@@ -37,7 +37,7 @@ server <- function(input, output, session) {
     settings = NULL
   )
   
-  r$settings <- callModule(mod_settings_server, "settings")
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   obj <- Exp1_R25_prot
   
   obj <- Features::addAssay(Exp1_R25_prot, (Features::filterNA(Exp1_R25_prot,i=2))[[2]], "original_log_NAfiltered")

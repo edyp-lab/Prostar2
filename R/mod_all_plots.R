@@ -102,7 +102,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
     current.obj = NULL,
     settings = NULL
   )
-  rv$settings <- callModule(mod_settings_server, "settings")
+  rv$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv$current.obj}))
   
   # observe({
   #   if (is.null(dataIn()))

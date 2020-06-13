@@ -36,8 +36,7 @@ server <- function(input, output, session) {
   
   
   observeEvent(req(r.nav$reset),{
-    print("execute reset")
-    r.nav$isDone <- rep(FALSE, 3)
+     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     r.params$select1 <- NULL
     r.params$select2 <- NULL

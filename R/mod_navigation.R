@@ -412,7 +412,6 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     
     #status <- rep('',current$nbSteps)
     status[which(pages$isDone)] <- 'complete'
-    print(status)
     
     active  <- rep('',current$nbSteps)
     active[current$val] <- 'active'

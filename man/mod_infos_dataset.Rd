@@ -7,7 +7,7 @@
 \usage{
 mod_infos_dataset_ui(id)
 
-mod_infos_dataset_server(input, output, session, obj = NULL)
+mod_infos_dataset_server(input, output, session, obj)
 }
 \arguments{
 \item{id}{shiny id}

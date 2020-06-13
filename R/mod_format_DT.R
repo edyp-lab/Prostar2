@@ -56,13 +56,13 @@ mod_format_DT_server <- function(input, output, session,
   ns <- session$ns
   
   observe({
-    
-    if (is.null(table2show()) || length(table2show())==0){
-      warning("The parameter table2show is null.")
-      return(NULL)
-    } else {
+    req(table2show())
+    # if (is.null() || length(table2show())==0){
+    #   #warning("The parameter table2show is null.")
+    #   return(NULL)
+    # } else {
       DT::replaceData(proxy, table2show(), resetPaging = FALSE)  
-    }
+   # }
   })
   
   proxy = DT::dataTableProxy(session$ns('dt'), session)

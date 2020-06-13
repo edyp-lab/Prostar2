@@ -268,8 +268,7 @@ mod_build_design_server <- function(input, output, session, sampleNames){
   # #------------------------------------------------------------------------------
   observeEvent(input$btn_helpDesign,{
     #req(input$chooseExpDesign)
-      print(input$btn_helpDesign)
-        shinyjs::toggle(id = "showExamples", anim = TRUE)
+      shinyjs::toggle(id = "showExamples", anim = TRUE)
 
   })
 
