@@ -149,7 +149,7 @@ mod_plots_intensity_server <- function(input, output, session,
       pattern <- paste0('test',".violinplot")
       tmp <- DAPAR2::violinPlotD(SummarizedExperiment::assay(dataIn()),
                                  keyId = SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
-                                 legend = conds(),
+                                 conds = conds(),
                                  palette = base_palette(),
                                  subset.view =  rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))

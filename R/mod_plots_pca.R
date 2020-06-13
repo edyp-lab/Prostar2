@@ -26,7 +26,7 @@ mod_plots_pca_ui <- function(id){
 #' 
 mod_plots_pca_server <- function(input, output, session,
                                  obj,
-                                 conds) {
+                                 coldata) {
   ns <- session$ns
   
   
@@ -38,36 +38,40 @@ mod_plots_pca_server <- function(input, output, session,
   
   
   output$WarningNA_PCA <- renderUI({
-    req(obj())
+
     
-    tagList(
-      if (length(which(is.na(SummarizedExperiment::assay(obj())))) > 0) {
+    if (length(which(is.na(SummarizedExperiment::assay(obj())))) > 0) {
+      req(obj())
+      
+      tagList(
         tags$p("Warning: As your dataset contains missing values, the PCA cannot be computed.
                Please impute them first.",
                style="color:red;font-size: 20px")
-      }
-    )
+      )
+    }
   })
   
   
   
   output$pcaOptions <- renderUI({
-    req(obj())
-    req(rv.pca$res.pca)
-    
-    tagList(
+    if (length(which(is.na(SummarizedExperiment::assay(obj())))) == 0) {
+      req(obj())
+      req(rv.pca$res.pca)
       
-      tags$div(
-        tags$div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                  numericInput(ns('pca.axe1'), "Dimension 1", min=1, max=Compute_PCA_dim(),value=1,width='100px')
-        ),
-        tags$div( style="display:inline-block; vertical-align: middle;",
-                  numericInput(ns('pca.axe2'), "Dimension 2", min=1, max=Compute_PCA_dim(),value=2,width='100px')
-        ),
-        tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-                  checkboxInput(ns('varScale_PCA'), "Variance scaling", value=rv.pca$PCA_varScale))
+      tagList(
+        
+        tags$div(
+          tags$div( style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                    numericInput(ns('pca.axe1'), "Dimension 1", min=1, max=Compute_PCA_dim(),value=1,width='100px')
+          ),
+          tags$div( style="display:inline-block; vertical-align: middle;",
+                    numericInput(ns('pca.axe2'), "Dimension 2", min=1, max=Compute_PCA_dim(),value=2,width='100px')
+          ),
+          tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+                    checkboxInput(ns('varScale_PCA'), "Variance scaling", value=rv.pca$PCA_varScale))
+        )
       )
-    )
+    }
   })
   
   
@@ -79,7 +83,7 @@ mod_plots_pca_server <- function(input, output, session,
   observeEvent(input$varScale_PCA,{
     rv.pca$PCA_varScale <- input$varScale_PCA
     rv.pca$res.pca <- DAPAR2::wrapper.pca(SummarizedExperiment::assay(obj()),
-                                          conds(),
+                                          coldata()[["Condition"]],
                                           rv.pca$PCA_varScale,
                                           ncp=Compute_PCA_dim())
   })
@@ -87,7 +91,7 @@ mod_plots_pca_server <- function(input, output, session,
   observeEvent(obj(), {
     if (length(which(is.na(SummarizedExperiment::assay(obj())))) == 0) {
       rv.pca$res.pca <- DAPAR2::wrapper.pca(SummarizedExperiment::assay(obj()),
-                                            conds(),
+                                            coldata()[["Condition"]],
                                             rv.pca$PCA_varScale,
                                             ncp=Compute_PCA_dim())
     }
@@ -95,17 +99,21 @@ mod_plots_pca_server <- function(input, output, session,
   
   
   output$pcaPlots <- renderUI({
-    req(rv.pca$res.pca)
-    tagList(
-      fluidRow(
-        column(width=6,  plotOutput(ns("pcaPlotVar"))),
-        column(width=6,  plotOutput(ns("pcaPlotInd")))
-      ),
-      fluidRow(
-        column(width=6,  highchartOutput(ns("pcaPlotEigen"))),
-        column(width=6,  mod_format_DT_ui(ns("PCAvarCoord")))
+    if (length(which(is.na(SummarizedExperiment::assay(obj())))) == 0) {
+      req(obj())
+      req(rv.pca$res.pca)
+      
+      tagList(
+        fluidRow(
+          column(width=6,  plotOutput(ns("pcaPlotVar"))),
+          column(width=6,  plotOutput(ns("pcaPlotInd")))
+        ),
+        fluidRow(
+          column(width=6,  highchartOutput(ns("pcaPlotEigen"))),
+          column(width=6,  mod_format_DT_ui(ns("PCAvarCoord")))
+        )
       )
-    )
+    }
   })
   
   
@@ -128,16 +136,25 @@ mod_plots_pca_server <- function(input, output, session,
   
   output$pcaPlotEigen <- renderHighchart({
     req(rv.pca$res.pca)
+
     withProgress(message = 'Making plot', value = 100, {
       DAPAR2::plotPCA_Eigen_hc(rv.pca$res.pca)
     })
   })
   
   callModule(mod_format_DT_server,"PCAvarCoord", 
-             table2show=reactive({ if (!is.null(rv.pca$res.pca)) round(rv.pca$res.pca$var$coord, digits=7) }), 
+             table2show=reactive({ if (!is.null(rv.pca$res.pca)) as.data.frame(round(rv.pca$res.pca$var$coord, digits=7)) }), 
              showRownames=TRUE,
-             style=reactive({NULL}))
-  
+             #style=reactive({NULL})
+             style = reactive({ list(cols = colnames(rv.pca$res.pca$var$coord),
+                                     vals = colnames(rv.pca$res.pca$var$coord),
+                                     unique = unique(coldata()[['Condition']]),
+                                     pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})
+  )
+  # style = reactive({ list(cols = colnames(colData(obj)),
+  #                         vals = colnames(colData(obj))[2],
+  #                         unique = unique(colData(obj)$Condition),
+  #                         pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})) 
   
   
   
@@ -150,7 +167,7 @@ mod_plots_pca_server <- function(input, output, session,
     n <- dim(y)[2] # If too big, take the number of conditions.
     
     if (n > nmax){
-      n <- length(unique(conds()))
+      n <- length(unique(coldata()[["Condition"]]))
     }
     
     ncp <- min(n, nmax)
