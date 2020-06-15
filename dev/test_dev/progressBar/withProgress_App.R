@@ -1,5 +1,5 @@
 library(shiny)
-source(file.path('./progressBar', 'withProgress_Calcul.R'), local=TRUE)$value
+source(file.path('.', 'withProgress_Calcul.R'), local=TRUE)$value
 
 ui <- fluidPage(
   plotOutput("plot")
@@ -19,7 +19,7 @@ server <- function(input, output) {
     withProgress_appCalcul(connexion=T)
     details <- reactiveFileReader(500,
                                   NULL,
-                                  "../../inst/app/www/sink-steps.txt",
+                                  "sink-steps.txt",
                                   readLines)
     
     for (i in 1:N) {

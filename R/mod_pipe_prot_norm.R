@@ -103,7 +103,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
              obj = reactive({rv.norm$dataIn[[ind()]]}),
              conds = reactive({colData(rv.norm$dataIn)[["Condition"]]}),
              legend = reactive({colData(rv.norm$dataIn)[["Sample.name"]]}),
-             base_palette = reactive({rv.norm$settings()$examplePalette}))
+             base_palette = reactive({rv.norm$settings()$basePalette}))
   
   
   
@@ -131,7 +131,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
                                          params = reactive({if (isTRUE(input$SyncForNorm)) 
                                                                 {rv.norm$selectProt()} else {NULL}}),
                                          reset = reactive({rv.norm$resetTracking}),
-                                         base_palette = reactive({rv.norm$settings()$examplePalette})
+                                         base_palette = reactive({rv.norm$settings()$basePalette})
                                           )
                                          
                                          
