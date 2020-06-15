@@ -124,9 +124,9 @@ mod_plots_intensity_server <- function(input, output, session,
     pattern <- paste0('test',".boxplot")
     withProgress(message = 'Making plot', value = 100, {
       tmp <- DAPAR2::boxPlotD_HC(SummarizedExperiment::assay(dataIn()),
-                                 conds=conds(),
-                                 sequence=SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
-                                 palette=base_palette(),
+                                 conds = conds(),
+                                 keyId = SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
+                                 palette = base_palette(),
                                  subset.view = rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
     })

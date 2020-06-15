@@ -8,7 +8,7 @@
 ## 2.1 Add modules
 ## 
 golem::add_module( name = "all_plots" ) # Name of the module
-golem::add_module( name = "pipe_prot_norm" ) # Name of the module
+golem::add_module( name = "observe_dynamic_colourPicker_input" ) # Name of the module
 
 ## 2.2 Add dependencies
 

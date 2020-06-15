@@ -27,8 +27,13 @@ server <- function(input, output, session) {
   metadata <- metadata(Exp1_R25_prot)
   conds <- colData(Exp1_R25_prot)[['Condition']]
   obj <- Exp1_R25_prot[[2]]
-  SummarizedExperiment::rowData(obj) <- cbind(SummarizedExperiment::rowData(obj), ProtOfInterest=rep(0,nrow(obj)))
+  SummarizedExperiment::rowData(obj) <- cbind(SummarizedExperiment::rowData(obj), 
+                                              ProtOfInterest=rep(0,nrow(obj)))
   SummarizedExperiment::rowData(obj)$ProtOfInterest[10:20] <- 1
+  
+  observe({
+    print(r$settings()$examplePalette)
+  })
   
   callModule(mod_plots_intensity_server,'plots_boxplots', 
              dataIn = reactive({obj}),

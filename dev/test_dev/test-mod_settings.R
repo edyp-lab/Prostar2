@@ -5,11 +5,13 @@ library(dplyr)
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
+
 
 
 ui <- fluidPage(
   tagList(
-    verbatimTextOutput('showSettings'),
+    uiOutput('showSettings'),
     mod_settings_ui('settings')
   )
 )
@@ -22,8 +24,7 @@ server <- function(input, output, session) {
   r <- reactiveValues(
     settings = NULL
   )
-  #data('Exp1_R25_prot')
-  #obj <- Exp1_R25_prot
+  
   r$settings <- callModule(mod_settings_server, 
                            "settings", 
                            obj = reactive({Exp1_R25_prot}))
@@ -31,11 +32,17 @@ server <- function(input, output, session) {
   # observeEvent(r$settings(),{
   #   print(r$settings())
   # })
-  output$showSettings <- renderText({
-    #r$settings()
-    HTML(r$settings()$examplePalette)
-    
-  })
+  
+  # output$showSettings <- renderUI({
+  #   #r$settings()
+  #   tagList(
+  #     h3('Example full palette'),
+  #     HTML(unlist(r$settings()$examplePalette)),
+  #     h3('Example base palette'),
+  #     HTML(unlist(r$settings()$basePalette))
+  #   )
+  #   
+  # })
   
 }
 
