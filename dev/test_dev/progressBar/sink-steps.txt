@@ -1,5 +1,0 @@
-[1] "1. Parameters checks"
-[1] "2. Variables initialization"
-[1] "3. plop"
-[1] "4. Making Plot"
-[1] "5. Making series"

@@ -1,8 +1,5 @@
 library(shiny)
-library(highcharter)
-library(DAPAR2)
-
-source("~/Github/AdaptedForFeatures/withProgress_Calcul.R")
+source(file.path('./progressBar', 'withProgress_Calcul.R'), local=TRUE)$value
 
 ui <- fluidPage(
   plotOutput("plot")
@@ -10,27 +7,32 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
-  utils::data(Exp1_R25_pept, package='DAPARdata2')
-  
   output$plot <- renderPlot({
     
-    hc_mvTypePlot2(SummarizedExperiment::assay(Exp1_R25_pept[[2]]),
-                   SummarizedExperiment::colData(Exp1_R25_pept)[['Condition']]  )
+    N=5
     
     progress <- shiny::Progress$new()
+    on.exit(progress$close())
     
     progress$set(message = "Calculation in progress", value = 0)
     
-    details<-read.csv("~/Github/AdaptedForFeatures/sink-steps.txt",h=F)[,1]
+    withProgress_appCalcul(connexion=T)
+    details <- reactiveFileReader(500,
+                                  NULL,
+                                  "../../inst/app/www/sink-steps.txt",
+                                  readLines)
     
-    for (i in 1:length(details)) {
-      
-      progress$inc(1/length(details), detail = details[i])
-      Sys.sleep(2)
-
+    for (i in 1:N) {
+      # virer les "[1] "
+      progress$inc(1/N, detail = details()[i] )
+      Sys.sleep(5)
     }
     
   })
+  
+  # session$onSessionEnded(function() {
+  #   system(paste("rm -f", ../../inst/app/www/sink-steps.txt))
+  # })
   
 }
 
