@@ -23,9 +23,8 @@ server <- function(input, output) {
                                   readLines)
     
     for (i in 1:N) {
-      # virer les "[1] "
-      progress$inc(1/N, detail = details()[i] )
-      Sys.sleep(5)
+      progress$inc(1/N, detail = gsub("^....", "", details()[i] ) )
+      #Sys.sleep(5)
     }
     
   })
