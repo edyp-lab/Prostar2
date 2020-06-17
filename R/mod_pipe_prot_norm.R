@@ -34,7 +34,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     name = "Normalization",
     stepsNames = c("Normalization", "Save"),
     ll.UI = list( screenStep1 = uiOutput(ns("Screen_Prot_norm_1")),
-                  screenStep2 = uiOutput(ns("ScreenProt_norm_2"))
+                  screenStep2 = uiOutput(ns("Screen_Prot_norm_2"))
                 ),
     isDone =  rep(FALSE,2),
     mandatory =  rep(TRUE,2),
@@ -45,6 +45,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   rv.norm <- reactiveValues(
     name = "processProtNorm",
     dataIn = NULL,
+    i = NULL,
     settings = NULL,
     # contient l'objet de sortie du module (ie. a MAE instance)
     dataOut = NULL,
@@ -78,7 +79,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     rv.norm$resetTracking <- TRUE
     
     rv.norm$dataIn <- obj()
-    
+    rv.norm$i <- ind()
     
     ## do not modify this part
     r.nav$isDone <- rep(FALSE, 2)
@@ -100,7 +101,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   ##
   callModule(mod_plots_density_server,
              "densityPlot_Norm",
-             obj = reactive({rv.norm$dataIn[[ind()]]}),
+             obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
              conds = reactive({colData(rv.norm$dataIn)[["Condition"]]}),
              legend = reactive({colData(rv.norm$dataIn)[["Sample.name"]]}),
              base_palette = reactive({rv.norm$settings()$basePalette}))
@@ -109,13 +110,14 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   
   callModule(mod_popover_for_help_server,
              "modulePopover_normQuanti", 
-             data = reactive(list(title = HTML(paste0("<strong>Normalization quantile</strong>")), 
-                                  content="lower limit/noise (quantile = 0.15), median (quantile = 0.5). Min value=0, max value=1")))
+             data = list(title = HTML(paste0("<strong>Normalization quantile</strong>")), 
+                                  content="lower limit/noise (quantile = 0.15), median (quantile = 0.5). Min value=0, max value=1")
+             )
   
   rv.norm$selectProt <- callModule(mod_plots_tracking_server, 
                                    "ProtSelection", 
-                                   obj = reactive({rv.norm$dataIn}),
-                                   params=reactive({NULL}),
+                                   obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
+                                   params = reactive({NULL}),
                                    keyId = reactive({metadata(obj())[['keyId']]}),
                                    reset = reactive({rv.norm$resetTracking}))
 
@@ -125,11 +127,16 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   
   rv.norm$trackFromBoxplot <- callModule(mod_plots_intensity_server,
                                          "boxPlot_Norm",
-                                         dataIn = reactive({rv.norm$dataIn[[ind()]]}),
+                                         dataIn = reactive({rv.norm$dataIn[[rv.norm$i]]}),
                                          meta = reactive({metadata(obj())}),
                                          conds = reactive({colData(obj())[['Condition']]}),
-                                         params = reactive({if (isTRUE(input$SyncForNorm)) 
-                                                                {rv.norm$selectProt()} else {NULL}}),
+                                         params = reactive({
+                                           input$SyncForNorm
+                                           if (isTRUE(input$SyncForNorm)) 
+                                               rv.norm$selectProt() 
+                                           else 
+                                             NULL
+                                           }),
                                          reset = reactive({rv.norm$resetTracking}),
                                          base_palette = reactive({rv.norm$settings()$basePalette})
                                           )
@@ -145,6 +152,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   observe({
     req(obj())
     rv.norm$dataIn <- obj()
+    rv.norm$i <- ind()
   })
   
   
@@ -178,7 +186,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
           ),
           div(
             style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-            hidden(div(id='DivProtSelection',mod_plots_tracking_ui(ns('ProtSelection'))))
+            hidden(div(id=ns('DivProtSelection'),mod_plots_tracking_ui(ns('ProtSelection'))))
           ),
           div(
             style="display:inline-block; vertical-align: middle; padding-right: 20px;",
@@ -193,11 +201,9 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
                  hidden(checkboxInput(ns("SyncForNorm"), "Synchronise with selection above", value=FALSE)),
                  withProgress(message = 'Building plot',detail = '', value = 0, {
                    mod_plots_intensity_ui(ns("boxPlot_Norm"))
-                 }))
-          # column(width=4,withProgress(message = 'Building plot',detail = '', value = 0, {
-          #   imageOutput(ns("viewComparisonNorm_DS"))
-          # })
-          # )
+                 })),
+           column(width=4,highchartOutput(ns("viewComparisonNorm_UI"))
+           )
         )
       )
     })
@@ -318,18 +324,19 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     shinyjs::toggle("normalization.type", 
                     condition=( rv.norm$widgets$method %in% DAPAR2::normalizeMethods.dapar()))
     
-    cond <- metadata(rv.norm$dataIn[[ind()]])$typeOfData == 'protein'
-    shinyjs::toggle('DivProtSelection', condition= cond)
-    shinyjs::toggle('SyncForNorm', condition= cond)
+    cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
+    trackAvailable <- rv.norm$widgets$method %in% normalizeMethodsWithTracking.dapar()
+    shinyjs::toggle('DivProtSelection', condition= cond && trackAvailable)
+    shinyjs::toggle('SyncForNorm', condition= cond && trackAvailable)
   })
   
   
   GetIndicesOfSelectedProteins <- reactive({
     rv.norm$trackFromBoxplot()
-    if(is.null(rv.norm$trackFromBoxplot()$type)){return(NULL)}
+    req(rv.norm$trackFromBoxplot()$type)
     
     ind <- NULL
-    ll <- rowData(rv.norm$dataIn[[ind()]])[,metadata(rv.norm$dataIn)$keyId]
+    ll <- rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
     tt <- rv.norm$trackFromBoxplot()$type
     switch(tt,
            ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
@@ -349,14 +356,15 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     rv.norm$dataIn
     # isolate({
     conds <- colData(rv.norm$dataIn)$Condition
-    
     switch(rv.norm$widgets$method, 
-           G_noneStr = rv.norm$dataIn <- obj(),
+           None = rv.norm$dataIn <- obj(),
            
            GlobalQuantileAlignment = {
-             rv.norm$dataIn <- addAssay(rv.norm$dataIn, 
-                                        normalizeD(rv.norm$dataIn[[ind()]], method='GlobalQuantileAlignment'), 
-                                        "protein_norm")
+             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+                                          i = rv.norm$i,
+                                          name = "protein_norm",
+                                          method='GlobalQuantileAlignment'
+                                        )
            },
            
            QuantileCentering = {
@@ -364,148 +372,91 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
              if (!is.null(rv.norm$widgets$quantile))
                 quant <- as.numeric(rv.norm$widgets$quantile)
       
-             rv.norm$dataIn <- addAssay(rv.norm$dataIn, 
-                                        normalizeD(rv.norm$dataIn[[ind()]], 
-                                                   method = 'QuantileCentering', 
-                                                   conds = conds, 
-                                                   type = rv.norm$widgets$type,
-                                                   subset.norm = GetIndicesOfSelectedProteins(), 
-                                                   quantile = quant),
-                                        "proteins_norm")
+             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn, 
+                                          i = rv.norm$i, 
+                                          name = "proteins_norm",
+                                          method = 'QuantileCentering', 
+                                          conds = conds, 
+                                          type = rv.norm$widgets$type,
+                                          subset.norm = GetIndicesOfSelectedProteins(), 
+                                          quantile = quant
+                                        )
              
            } ,
            
            MeanCentering = {
-             rv.norm$dataIn <- addAssay(rv.norm$dataIn, 
-                                        normalizeD(rv.norm$dataIn[[ind()]], 
+             rv.norm$dataIn <- normalizeD(object =rv.norm$dataIn,
+                                                   i = rv.norm$i, 
+                                                   name ="proteins_norm",
                                                    method = 'MeanCentering', 
                                                    conds = conds, 
                                                    type = rv.norm$widgets$type,
                                                    subset.norm = GetIndicesOfSelectedProteins(), 
-                                                   scaling = rv.norm$widgets$varReduction),
-                                        "proteins_norm")
+                                                   scaling = rv.norm$widgets$varReduction
+                                        )
            }, 
            
            SumByColumns = {
-              rv.norm$dataIn <- addAssay(rv.norm$dataIn, 
-                                        normalizeD(rv.norm$dataIn[[ind()]], 
-                                                   method = 'SumByColumns', 
-                                                   conds = conds, 
-                                                   type = rv.norm$widgets$type,
-                                                   subset.norm = GetIndicesOfSelectedProteins()),
-                                        "proteins_norm")
-             
+              rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+                                           i =rv.norm$i,
+                                           name = "proteins_norm",
+                                           method = 'SumByColumns', 
+                                           conds = conds, 
+                                           type = rv.norm$widgets$type,
+                                           subset.norm = GetIndicesOfSelectedProteins()
+                                        )
            },
            
            LOESS = { 
-             rv.norm$dataIn <- addAssay(rv.norm$dataIn, 
-                                        normalizeD(rv.norm$dataIn[[ind()]], 
-                                                   method = 'LOESS', 
-                                                   conds = conds, 
-                                                   type = rv.norm$widgets$type,
-                                                   span = as.numeric(rv.norm$widgets$spanLOESS)
-                                                   ),
-                                        "proteins_norm")
+             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+                                          i = rv.norm$i,
+                                          name = "proteins_norm",
+                                          method = 'LOESS', 
+                                          conds = conds, 
+                                          type = rv.norm$widgets$type,
+                                          span = as.numeric(rv.norm$widgets$spanLOESS)
+                                        )
            },
            
            vsn = {
-             rv.norm$dataIn <- addAssay(rv.norm$dataIn, 
-                                        normalizeD(rv.norm$dataIn[[ind()]], 
-                                                   method = 'vsn', 
-                                                   conds = conds, 
-                                                   type = rv.norm$widgets$type),
-                                        "proteins_norm")
+             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+                                          i = rv.norm$i, 
+                                          name = "proteins_norm",
+                                          method = 'vsn', 
+                                          conds = conds, 
+                                          type = rv.norm$widgets$type)
            }
     )
     # })
-    rvModProcess$moduleNormalizationDone[1] <- TRUE
-    shinyjs::toggle("valid.normalization", condition=input$perform.normalization >= 1)
+    
+    rv.norm$i <- ind() +1
+    r.nav$isDone[1] <- TRUE
+    #shinyjs::toggle("valid.normalization", condition=input$perform.normalization >= 1)
   })
   
   
  
  
   
-  ################
-  # viewComparisonNorm <- reactive({
-  #   rv.norm$settings()$examplePalette
-  #   req(rv.norm$dataIn)
-  #   GetIndicesOfSelectedProteins()
-  #   leg <- NULL
-  #   grp <- NULL
-  #   
-  #   labelsNorm <- NULL
-  #   labelsToShowNorm <- NULL
-  #   gToColorNorm <- NULL
-  #   if (is.null(input$lab2Show)) { 
-  #     labelsToShowNorm <- c(1:nrow(colData(rv.norm$dataIn)))
-  #   } else { 
-  #     labelsToShowNorm <- input$lab2Show
-  #     }
-  #   
-  #   # if (is.null(rv$whichGroup2Color)){
-  #   #   gToColorNorm <- "Condition"
-  #   # } else {
-  #   #   gToColorNorm <- rv$whichGroup2Color
-  #   #   }
-  #   # 
-  #   
-  #   #if (is.null(rv$whichGroup2Color)){
-  #     labelsNorm <- colData(rv.norm$dataIn)[,"Condition"]
-  #   # } else {
-  #   #   labelsNorm <- apply(colData(rv.norm$dataIn), 1, function(x){paste0(x, collapse='_')})
-  #   #   names(labelsNorm)<- NULL
-  #   #   labelsNorm <- setNames(as.list(c(1:length(labs))),labs)
-  #   # }
-  #   
-  #   
-  #   dname <- paste0("Normalized.", metadata(rv.norm$dataIn[[ind()]])$typeOfData)
-  #   #if (input$datasets == dname){
-  #   #  obj1 <- rv$dataset[[(which(names(rv$dataset)==dname) - 1)]]
-  #   #  obj2 <- obj()[[ind()]]
-  #   #}
-  #   #else {
-  #   #  obj1 <- obj()[[ind()]]
-  #   #  obj2 <- rv.norm$dataIn
-  #   #  
-  #   #}
-  #   
-  #   obj1 <- obj2 <- NULL
-  #   
-  #   if (length(GetIndicesOfSelectedProteins())==0) {
-  #     wrapper.compareNormalizationD(obj1, 
-  #                                   obj2,
-  #                                   labelsNorm,
-  #                                   as.numeric(labelsToShowNorm),
-  #                                   palette = rv.norm$settings()$examplePalette) }
-  #   else {
-  #     ll <- rowData(rv.norm$dataIn[[ind()]])[,metadata(rv.norm$dataIn[[ind()]])$keyId]
-  #     wrapper.compareNormalizationDSubset(obj1, 
-  #                                         obj2,
-  #                                         labelsNorm,
-  #                                         as.numeric(labelsToShowNorm),
-  #                                         idsForLegend = ll,
-  #                                         palette = NULL,
-  #                                         subset.view= GetIndicesOfSelectedProteins()
-  #     )
-  #     
-  #   }
-  #   
-  # })
   
   
   #######################
-  # output$viewComparisonNorm_DS <- renderImage({
-  #   outfile <- tempfile(fileext='.png')
-  #   # Generate a png
-  #   png(outfile)
-  #   viewComparisonNorm()
-  #   dev.off()
-  #   
-  #   # Return a list
-  #   list(src = outfile,
-  #        alt = "This is alternate text")
-  # }, deleteFile = FALSE)
+  output$viewComparisonNorm_UI <- renderHighchart({
+    rv.norm$settings()$basePalette
+    req(rv.norm$dataIn)
+    obj()
+    GetIndicesOfSelectedProteins()
+    
+    
+    
+    
+    DAPAR2::compareNormalizationD_HC(qDataBefore = assay(rv.norm$dataIn),
+                                   qDataAfter = assay(rv.norm$dataIn),
+                                   conds= metadata(obj())$Condition,
+                                   palette = rv.norm$settings()$basePalette,
+                                   subset.view= GetIndicesOfSelectedProteins())
+
+    })
   
   
   
@@ -564,7 +515,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   ###---------------------------------------------------------------------------------###
   
   output$Screen_Prot_norm_2 <- renderUI({
-    
+    print('screen 2')
     tagList(
       actionButton(ns("valid.normalization"),
                    "Save normalization", 
@@ -579,13 +530,9 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   ##' -- Validate and save the normalization ---------------------------------------
   ##' @author Samuel Wieczorek
   observeEvent(input$valid.normalization,{ 
-    req(input$perform.normalization)
-    
-    isolate({
-      if (rv.norm$widgets$method != G_noneStr) {
-        typeOfDataset <- metadata(rv.norm$dataIn[[ind()]])$typeOfData
-        name <- paste0("Normalized", ".", typeOfDataset)
-        metadata(rv.norm$dataIn[[ind()]])$Params <- list(
+   
+      if (rv.norm$widgets$method != "None") {
+        metadata(rv.norm$dataIn[[rv.norm$i]])$Params <- list(
                                 method = rv.norm$widgets$method,
                                 type = rv.norm$widgets$type,
                                 varReduction = rv.norm$widgets$varReduction,
@@ -596,58 +543,11 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
         rv.norm$dataOut <- rv.norm$dataIn
         r.nav$isDone[2] <- TRUE
        # UpdateDatasetWidget(rv$current.obj, name)
-        
       }
-      
-    } )
-    
-    
-    return({reactive(rv.norm$dataOut)})
+
   })
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  return({reactive(rv.norm$dataOut)})
  
 }
     

@@ -93,9 +93,8 @@ mod_plots_intensity_server <- function(input, output, session,
   
   observeEvent(req(rv.modboxplot$var()),{
     
-    if (is.null(rv.modboxplot$var()$type)){
-      return(NULL)
-    }
+    req(rv.modboxplot$var()$type)
+    params()
     
     switch(rv.modboxplot$var()$type,
            ProteinList = rv.modboxplot$indices <- rv.modboxplot$var()$list.indices,
@@ -103,7 +102,7 @@ mod_plots_intensity_server <- function(input, output, session,
            Column = rv.modboxplot$indices <- rv.modboxplot$var()$col.indices
     )
     #if (length(rv.modboxplot$ind)==0){rv.modboxplot$ind <- NULL}
-    if (length(rv.modboxplot$indices)==0){
+    if ((length(rv.modboxplot$indices)==0) || is.null(params())){
       rv.modboxplot$indices <- NULL
     }
   })
