@@ -23,6 +23,7 @@ ui <- fluidPage(
   tagList(
     mod_pipe_prot_norm_ui('pipe_norm'),
     mod_infos_dataset_ui('infos')
+   # highchartOutput('test')
   )
 )
 
@@ -35,6 +36,18 @@ server <- function(input, output, session) {
     ret = NULL,
     current.obj = Exp1_R25_prot
   )
+  
+  
+  # output$test <- renderHighchart({
+  #   
+  #   utils::data(Exp1_R25_pept, package='DAPARdata2')
+  #   obj <- Exp1_R25_pept[1:1000,]
+  #   conds <- colData(obj)[["Condition"]]
+  #   obj <- normalizeD(obj, 2, name='norm', method='SumByColumns', conds=conds, type='overall')
+  #   compareNormalizationD_HC(assay(obj, 2), assay(obj, 3), conds=conds, palette=NULL)
+  # 
+  # })
+  # 
   
   rv$ret <- callModule(mod_pipe_prot_norm_server,
              'pipe_norm',

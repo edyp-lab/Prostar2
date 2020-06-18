@@ -448,14 +448,13 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     GetIndicesOfSelectedProteins()
     
     
-    
-    
-    DAPAR2::compareNormalizationD_HC(qDataBefore = assay(rv.norm$dataIn),
-                                   qDataAfter = assay(rv.norm$dataIn),
-                                   conds= metadata(obj())$Condition,
+    hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = assay(obj()[[ind()]]),
+                                   qDataAfter = assay(rv.norm$dataIn[[rv.norm$i]]),
+                                   conds= colData(obj())$Condition,
                                    palette = rv.norm$settings()$basePalette,
-                                   subset.view= GetIndicesOfSelectedProteins())
-
+                                   subset.view= GetIndicesOfSelectedProteins(),
+                                   n = 50)
+    hc
     })
   
   

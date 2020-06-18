@@ -1,0 +1,11 @@
+step0
+step1
+step2
+[1] "affci "affcih
+[1] "affci "affcih
+[1] "affci "affcih
+[1] "affci "affcih
+WarningWarninstallinstall.p :
+  packagepackage ‘DAPAR2’ is in use and will not be in
+alled
+DAPAR2’ is in use and will not be installed
