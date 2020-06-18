@@ -37,7 +37,8 @@ mod_bug_report_server <- function(input, output, session){
   
   logfile <- tempfile(fileext=".log")
   
-  if (isTRUE(getOption('golem.app.prod'))){
+  if (isTRUE(getOption('golem.app.prod'))==FALSE){
+  #if (isTRUE(getOption('golem.app.prod'))){
     con <- file(logfile,open="wt")
     sink(con, append=TRUE)
     sink(con, append=TRUE, type="message")
@@ -61,7 +62,7 @@ mod_bug_report_server <- function(input, output, session){
   
   output$BugReport_output <- renderUI({
     
-    mail <- unlist(strsplit(maintainer("Prostar"), "<"))[2]
+    mail <- unlist(strsplit(maintainer("Prostar2"), "<"))[2]
     mail <- unlist(strsplit(mail, ">"))[1]
     
     tagList(
