@@ -1,4 +1,4 @@
-#source(file.path('.', 'learn_reactiveFileReaderCalcul.R'), local=TRUE)$value
+source(file.path('.', 'learn_reactiveFileReaderCalcul.R'), local=TRUE)$value
 
 ui <- fluidPage(
   verbatimTextOutput("fileReaderText")
@@ -7,7 +7,7 @@ ui <- fluidPage(
 server <- function(input, output,session) {
   
   logFile="./sink-steps.txt"
-  #toto(logFile)
+  toto(logFile)
   fileReaderData <- reactiveFileReader(500, session, logFile, readLines)
   
   

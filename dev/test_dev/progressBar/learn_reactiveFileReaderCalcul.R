@@ -1,16 +1,15 @@
-
 toto <- function(logFile) {
   
-  #sink(logFile, split=T)
-  
-  writeLines("step0",logFile)
+  sink(logFile, split=T)
   Sys.sleep(5)
-  #sink(logFile,append=T, split=T)
+  cat("step0\n")
+  sink(logFile,append=T, split=T)
+  
   for (i in 1:2) {
     Sys.sleep(5)
-    writeLines(paste0("step",i), logFile)
+    cat(paste0("step",i,"\n"))
   }
-  #sink()
+  
+  sink()
   
 }
-
