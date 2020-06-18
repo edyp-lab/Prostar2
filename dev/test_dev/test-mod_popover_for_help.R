@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyBS)
 
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 

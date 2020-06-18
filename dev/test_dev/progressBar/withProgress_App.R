@@ -1,7 +1,10 @@
 library(shiny)
 
+<<<<<<< HEAD
 #source(file.path('.', 'withProgress_Calcul.R'), local=TRUE)$value
 
+=======
+>>>>>>> 8fb2e4da154f9ba836595f830180f580f1ed76f1
 ui <- fluidPage(
   actionButton("btn_start",label = "Let's stream"),
   actionButton("btn_stop",label = "Stop"),

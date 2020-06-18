@@ -38,8 +38,7 @@ mod_bug_report_server <- function(input, output, session){
   logfile <- tempfile(fileext=".log")
   
   if (isTRUE(getOption('golem.app.prod'))==FALSE){
-  #if (isTRUE(getOption('golem.app.prod'))){
-    con <- file(logfile,open="wt")
+    con <- file(logfile, open="wt")
     sink(con, append=TRUE)
     sink(con, append=TRUE, type="message")
   } else {
@@ -49,7 +48,7 @@ mod_bug_report_server <- function(input, output, session){
   # ============================================================
   # This part of the code monitors the file for changes once per
   # 0.5 second (500 milliseconds).
-  fileReaderData <- reactiveFileReader(500, session,logfile, readLines)
+  fileReaderData <- reactiveFileReader(500, session, logfile, readLines)
   
   output$fileReaderText <- renderText({
     # Read the text, and make it a consistent number of lines so
@@ -68,7 +67,7 @@ mod_bug_report_server <- function(input, output, session){
     tagList(
       a(actionButton(inputId = ns("email1"), label = "Contact maintainer", 
                      icon = icon("envelope", lib = "font-awesome"), class = actionBtnClass),
-        href=paste0("mailto:", mail,"?subject=[Prostar bug report]&body=")
+        href=paste0("mailto:", mail,"?subject=[Prostar2 bug report]&body=")
       )
     ) 
     
