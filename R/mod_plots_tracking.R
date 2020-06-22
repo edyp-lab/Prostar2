@@ -55,6 +55,13 @@ mod_plots_tracking_server <- function(input, output, session,
                                       reset=FALSE){
   ns <- session$ns
   
+  rv.track <- reactiveValues(
+    typeSelect = "None",
+    listSelect = NULL,
+    randSelect = "1",
+    colSelect = NULL
+  )
+  
   
   observeEvent(req(obj()),{
     if (class(obj()) != "SummarizedExperiment") { return(NULL) }
@@ -66,56 +73,89 @@ mod_plots_tracking_server <- function(input, output, session,
     if (reset() > 0) {
       updateSelectInput(session, "typeSelect", selected="None")
       updateSelectInput(session, "listSelect", NULL)
-      updateSelectInput(session, "randSelect", selected="1")
+      updateSelectInput(session, "randSelect", selected=1)
       updateSelectInput(session, "colSelect", selected=NULL)
     }
   })
   
   observe({
     params()
+    
+    print('in params de slave')
+    print(params())
     updateSelectInput(session, "typeSelect", selected=params()$type)
-    updateSelectInput(session, "listSelect", selected=params()$list)
-    updateSelectInput(session, "randSelect", selected=params()$rand)
+    updateSelectInput(session, "listSelect", selected=if(is.null(params()$list)) character(0) else params()$list)
+    
+    if (is.null(params()$rand))
+      updateSelectInput(session, "randSelect", selected=character(0))
+    else
+      updateSelectInput(session, "randSelect", selected=params()$rand)
+    
     updateSelectInput(session, "colSelect", selected=params()$col)
   })
   
   
   
   observeEvent(input$typeSelect, ignoreInit = TRUE, {
+    
     shinyjs::toggle("listSelect_UI", condition=input$typeSelect=="ProteinList")
     shinyjs::toggle("randomSelect_UI", condition=input$typeSelect=="Random")
     shinyjs::toggle("columnSelect_UI", condition=input$typeSelect=="Column")
   })
   
   output$listSelect_UI <- renderUI({
-    ll <-  SummarizedExperiment::rowData(obj())[[keyId()]]
-    selectInput(ns("listSelect"), "Protein for normalization", choices=ll, multiple = TRUE, width='400px')
+    selectInput(ns("listSelect"), 
+                "Protein for normalization", 
+                choices=SummarizedExperiment::rowData(obj())[[keyId()]], 
+                multiple = TRUE, 
+                width='400px'
+                )
   })
   
   
   output$randomSelect_UI <- renderUI({
-    textInput(ns("randSelect"), "Random", value="1", width=('120px'))
+    textInput(ns("randSelect"), 
+              "Random", 
+              value=1, 
+              width=('120px'))
   })
   
   output$columnSelect_UI <- renderUI({
-    ll <-  colnames(SummarizedExperiment::rowData(obj()))
-    selectInput(ns("colSelect"), "Column", choices=ll)
+    selectInput(ns("colSelect"), 
+                "Column", 
+                choices=colnames(SummarizedExperiment::rowData(obj())))
   })
   
   
   
   BuildResult <- reactive({
+    input$listSelect
+    input$randSelect
+    input$colSelect
+    
+    
     
     res <- list(type= input$typeSelect,
                 list = input$listSelect,
-                rand = as.numeric(input$randSelect),
+                rand = if (is.null(input$randSelect) 
+                           || input$randSelect=="" 
+                           || input$randSelect=="-"
+                           || (as.numeric(input$randSelect) <0))
+                           character(0)
+                       else 
+                         as.numeric(input$randSelect),
                 col = input$colSelect,
-                list.indices = if (is.null(input$listSelect) || length(input$listSelect)==0){
+                list.indices = if (is.null(input$listSelect) 
+                                   || length(input$listSelect)==0
+                                   || input$listSelect==''){
                   NULL
                 } else {
                   match(input$listSelect, SummarizedExperiment::rowData(obj())[[keyId()]])
                 },
-                rand.indices = if (is.null(input$randSelect) || input$randSelect==""){
+                rand.indices = if (is.null(input$randSelect) 
+                                   || input$randSelect=="" 
+                                   || input$randSelect=="-"
+                                   || (as.numeric(input$randSelect) <0)){
                   NULL
                 } else {
                   sample(1:nrow(obj()), as.numeric(input$randSelect), replace=FALSE)

@@ -60,7 +60,6 @@ server <- function(input, output, session) {
   
   observe({
     req(rv$ret())
-    print(rv$ret())
     rv$current.obj <- rv$ret()
   })
 }

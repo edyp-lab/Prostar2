@@ -131,8 +131,8 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
                                          meta = reactive({metadata(obj())}),
                                          conds = reactive({colData(obj())[['Condition']]}),
                                          params = reactive({
-                                           input$SyncForNorm
-                                           if (isTRUE(input$SyncForNorm)) 
+                                           req(input$SyncForNorm)
+                                           if (input$SyncForNorm==TRUE)
                                                rv.norm$selectProt() 
                                            else 
                                              NULL
@@ -227,8 +227,13 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   observeEvent(input$spanLOESS, ignoreInit=TRUE,{
     rv.norm$widgets$spanLOESS <- input$spanLOESS
   })
-  
-  
+  # 
+  # observeEvent(input$SyncForNorm, {
+  #      if (isTRUE(input$SyncForNorm)) 
+  #                rv.normrv.norm$selectProt() 
+  #              else 
+  #                NULL)
+  # 
   
   output$test_spanLOESS <- renderUI({
     req(rv.norm$widgets$spanLOESS)
@@ -322,7 +327,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     shinyjs::toggle("spanLOESS", condition = rv.norm$widgets$method == "LOESS")
     
     shinyjs::toggle("normalization.type", 
-                    condition=( rv.norm$widgets$method %in% DAPAR2::normalizeMethods.dapar()))
+                    condition=( rv.norm$widgets$method %in% c(DAPAR2::normalizeMethods.dapar()[-which(DAPAR2::normalizeMethods.dapar()=="GlobalQuantileAlignment")])))
     
     cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
     trackAvailable <- rv.norm$widgets$method %in% normalizeMethodsWithTracking.dapar()
@@ -332,9 +337,11 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   
   
   GetIndicesOfSelectedProteins <- reactive({
-    rv.norm$trackFromBoxplot()
-    req(rv.norm$trackFromBoxplot()$type)
+    req(rv.norm$trackFromBoxplot())
     
+    
+    print('in GetIndicesOfSelectedProteins')
+    print(rv.norm$trackFromBoxplot())
     ind <- NULL
     ll <- rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
     tt <- rv.norm$trackFromBoxplot()$type
@@ -345,6 +352,9 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     )
     if (length(ind)==0)
       ind <- NULL
+    
+    print('ind = ')
+    print(ind)
     ind
   })
   
@@ -356,6 +366,11 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     rv.norm$dataIn
     # isolate({
     conds <- colData(rv.norm$dataIn)$Condition
+    
+    ## the dataset whihc will be normalized is always the original one
+    rv.norm$dataIn <- obj()
+    rv.norm$i <- ind()
+    
     switch(rv.norm$widgets$method, 
            None = rv.norm$dataIn <- obj(),
            
@@ -429,9 +444,9 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     )
     # })
     
-    rv.norm$i <- ind() +1
+    rv.norm$i <- ind() + 1
     r.nav$isDone[1] <- TRUE
-    #shinyjs::toggle("valid.normalization", condition=input$perform.normalization >= 1)
+    #shinyjs::hide("perform.normalization")
   })
   
   
@@ -446,7 +461,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     req(rv.norm$dataIn)
     obj()
     GetIndicesOfSelectedProteins()
-    
+    print(GetIndicesOfSelectedProteins())
     
     hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = assay(obj()[[ind()]]),
                                    qDataAfter = assay(rv.norm$dataIn[[rv.norm$i]]),
