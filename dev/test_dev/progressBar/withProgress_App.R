@@ -10,42 +10,38 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   cat(NULL,file="sink-steps.txt")
-  N=5
+  N=6
   rv <- reactiveValues(textstream = c(""),
                        timer = reactiveTimer(500),
                        started = FALSE)
-  details <- ""
-  
+  progress <- NULL
   
   observeEvent(input$btn_start, {
     
     rv$started <- TRUE
     
-    
     system2("Rscript", "withProgress_Calcul.R", wait = FALSE)
     
-    progress <- Progress$new(session, min=0, max=N+1)
-    #observe({ if (rv$textstream == "end") on.exit(progress$close()) })
+    progress <- Progress$new(session, min=1, max=N+1)
     
-    progress$set(value=NA, message='plop')
+    progress$set(value=0, message='plop')
     
     output$textstream_output <- renderUI({
       
-      if (rv$textstream != details) {
-        for (i in 1:N) {
-          
-          print(paste("OLD details : ", details))
-          print(paste("NEW 'sink-steps.txt' : ", rv$textstream))
-          
-          details <- gsub("<br/>"," ",rv$textstream)
-          
-          progress$set(i, detail = details)
-        }
+      for (i in 1:N) {
+        progress$inc(1/N, detail = tail(rv$textstream,1))
       }
       
-      HTML(rv$textstream)
+      HTML(paste(rv$textstream, collapse = "<br/>"))
       
-      
+    })
+    
+    # remove bar at the end of script, <=> when print("end")
+    observe({
+      if( identical(tail(rv$textstream,1), "end") ) {
+        Sys.sleep(1)
+        progress$close()
+      }
     })
     
     
@@ -56,7 +52,7 @@ server <- function(input, output, session) {
     rv$timer()
     if (isolate(rv$started)){
       # as soon as started==TRUE, every 1/2 sec, check sink-steps.txt
-      rv$textstream <- paste(readLines("sink-steps.txt"), collapse = "<br/>")
+      rv$textstream <- readLines("sink-steps.txt")
     }
   })
   
@@ -64,7 +60,6 @@ server <- function(input, output, session) {
   observeEvent(input$btn_stop, { 
     rv$started <- FALSE
   })
-  
   
   plop <- observe({
     rv$started <- FALSE
@@ -76,6 +71,7 @@ server <- function(input, output, session) {
   })
   
 }
+
 
 shinyApp(ui, server)
 
