@@ -28,7 +28,7 @@ mod_plots_tracking_server(
 
 \item{obj}{Object SummarizedExperiment}
 
-\item{metadata}{Metadata of Fetaures containing the SummarizedExperiment}
+\item{metadata}{Metadata of Features containing the SummarizedExperiment}
 }
 \description{
 A shiny Module.

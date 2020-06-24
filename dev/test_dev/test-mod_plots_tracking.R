@@ -6,6 +6,7 @@ source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
+  checkboxInput('sync', 'sync Slave with Master', value=FALSE),
    fluidRow(
      column(6,tagList(h3('Master'),
                       mod_plots_tracking_ui('master_tracking')
@@ -15,6 +16,17 @@ ui <- fluidPage(
                              mod_plots_tracking_ui('slave_tracking')
             )
             )
+  ),
+  
+  fluidRow(
+    column(6,tagList(h3('Output of master'),
+                     uiOutput('master_out')
+    )
+    ),
+    column(6,tagList(h3('Output of slave'),
+                     uiOutput('slave_out')
+    )
+    )
   )
 )
 
@@ -36,13 +48,15 @@ server <- function(input, output, session) {
                       obj = reactive({obj}), 
                       params=reactive({NULL}),
                       keyId=reactive({keyId}),
-                      reset=reactive({FALSE}) )
+                      reset=reactive({FALSE}),
+                      slave = reactive({FALSE}))
   
   r$slave <- callModule(mod_plots_tracking_server,'slave_tracking', 
                       obj = reactive({obj}), 
-                      params=reactive({r$master()}),
+                      params=reactive({if (input$sync) r$master() else NULL}),
                       keyId=reactive({keyId}),
-                      reset=reactive({FALSE}) )
+                      reset=reactive({FALSE}),
+                      slave=reactive({input$sync}))
   
   
   # observe({
@@ -50,11 +64,37 @@ server <- function(input, output, session) {
   #   print(r$slave())
   # })
   
+  
+  output$master_out <- renderUI({
+    r$master()
+    
+     tagList(
+      p(paste0('type = ', r$master()$type)),
+      p(paste0('list = ', r$master()$listSelect)),
+      p(paste0('rand = ', r$master()$randSelect)),
+      p(paste0('col = ', r$master()$colSelect)),
+      p(paste0('list.indices = ', paste0(r$master()$list.indices, collapse=', '))),
+      p(paste0('rand.indices = ', paste0(r$master()$rand.indices, collapse=', '))),
+      p(paste0('col.indices = ', paste0(r$master()$col.indices, collapse=', ')))
+    )
+  })
 
   
-  # observeEvent(r$master(),{
-  #   print(r$master())
-  # })
+  output$slave_out <- renderUI({
+    r$slave()
+    
+    tagList(
+      p(paste0('type = ', r$slave()$type)),
+      p(paste0('list = ', r$slave()$listSelect)),
+      p(paste0('rand = ', r$slave()$randSelect)),
+      p(paste0('col = ', r$slave()$colSelect)),
+      p(paste0('list.indices = ', paste0(r$slave()$list.indices, collapse=', '))),
+      p(paste0('rand.indices = ', paste0(r$slave()$rand.indices, collapse=', '))),
+      p(paste0('col.indices = ', paste0(r$slave()$col.indices, collapse=', ')))
+    )
+  })
+  
+  
 }
 
 
