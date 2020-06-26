@@ -70,7 +70,7 @@ server <- function(input, output, session) {
     
      tagList(
       p(paste0('type = ', r$master()$type)),
-      p(paste0('list = ', r$master()$listSelect)),
+      p(paste0('list = ', paste0(r$master()$listSelect, collapse=', '))),
       p(paste0('rand = ', r$master()$randSelect)),
       p(paste0('col = ', r$master()$colSelect)),
       p(paste0('list.indices = ', paste0(r$master()$list.indices, collapse=', '))),
@@ -85,7 +85,7 @@ server <- function(input, output, session) {
     
     tagList(
       p(paste0('type = ', r$slave()$type)),
-      p(paste0('list = ', r$slave()$listSelect)),
+      p(paste0('list = ', paste0(r$slave()$listSelect, collapse=', '))),
       p(paste0('rand = ', r$slave()$randSelect)),
       p(paste0('col = ', r$slave()$colSelect)),
       p(paste0('list.indices = ', paste0(r$slave()$list.indices, collapse=', '))),

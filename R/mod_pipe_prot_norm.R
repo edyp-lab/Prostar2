@@ -115,11 +115,13 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
              )
   
   rv.norm$selectProt <- callModule(mod_plots_tracking_server, 
-                                   "ProtSelection", 
+                                   "master_ProtSelection", 
                                    obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
                                    params = reactive({NULL}),
                                    keyId = reactive({metadata(obj())[['keyId']]}),
-                                   reset = reactive({rv.norm$resetTracking}))
+                                   reset = reactive({rv.norm$resetTracking}),
+                                   slave = reactive({FALSE})
+                                   )
 
   rv.norm$settings <- callModule(mod_settings_server,
                                  "settings", 
@@ -131,13 +133,13 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
                                          meta = reactive({metadata(obj())}),
                                          conds = reactive({colData(obj())[['Condition']]}),
                                          params = reactive({
-                                           req(input$SyncForNorm)
-                                           if (input$SyncForNorm==TRUE)
+                                           if (input$SyncForNorm)
                                                rv.norm$selectProt() 
                                            else 
                                              NULL
                                            }),
                                          reset = reactive({rv.norm$resetTracking}),
+                                         slave = reactive({input$SyncForNorm}),
                                          base_palette = reactive({rv.norm$settings()$basePalette})
                                           )
                                          
@@ -186,7 +188,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
           ),
           div(
             style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-            hidden(div(id=ns('DivProtSelection'),mod_plots_tracking_ui(ns('ProtSelection'))))
+            hidden(div(id=ns('DivMasterProtSelection'),mod_plots_tracking_ui(ns('master_ProtSelection'))))
           ),
           div(
             style="display:inline-block; vertical-align: middle; padding-right: 20px;",
@@ -331,7 +333,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     
     cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
     trackAvailable <- rv.norm$widgets$method %in% normalizeMethodsWithTracking.dapar()
-    shinyjs::toggle('DivProtSelection', condition= cond && trackAvailable)
+    shinyjs::toggle('DivMasterProtSelection', condition= cond && trackAvailable)
     shinyjs::toggle('SyncForNorm', condition= cond && trackAvailable)
   })
   

@@ -51,8 +51,8 @@ mod_plots_tracking_ui <- function(id){
 #' 
 mod_plots_tracking_server <- function(input, output, session,
                                       obj,
-                                      params,
                                       keyId,
+                                      params,
                                       reset=FALSE, 
                                       slave = FALSE){
   ns <- session$ns
@@ -175,12 +175,23 @@ mod_plots_tracking_server <- function(input, output, session,
   })
   
   
-  
+  observe({
+    rv.track$res
+    
+    print(rv.track$res)
+  })
   
   
   observeEvent(input$typeSelect,{
     if (!is.null(params())) return(NULL)
-    rv.track$res$typeSelect <- input$typeSelect
+    
+    rv.track$res <- list(typeSelect = input$typeSelect,
+                          listSelect = NULL,
+                         randSelect = '',
+                         colSelect = NULL,
+                         list.indices = NULL,
+                         rand.indices = '',
+                         col.indices = NULL)
     
     updateSelectInput(session, "listSelect", NULL)
     updateSelectInput(session, "randSelect", selected='')

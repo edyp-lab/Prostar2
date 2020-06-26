@@ -10,6 +10,8 @@ source(file.path("../../R","mod_popover_for_help.R"), local=TRUE)$value
 
 
 ui <- fluidPage(
+  checkboxInput('sync', 'sync Slave with Master', value=FALSE),
+  mod_plots_tracking_ui('master_tracking'),
   mod_plots_intensity_ui('plots_boxplots')
 )
 
@@ -18,11 +20,16 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   utils::data(Exp1_R25_prot, package='DAPARdata2')
+  keyId <- metadata(Exp1_R25_prot)[['keyId']]
+  
   r <- reactiveValues(
-    settings = NULL
+    settings = NULL,
+    master = NULL
   )
+  
   r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   
+                      
   
   metadata <- metadata(Exp1_R25_prot)
   conds <- colData(Exp1_R25_prot)[['Condition']]
@@ -31,17 +38,24 @@ server <- function(input, output, session) {
                                               ProtOfInterest=rep(0,nrow(obj)))
   SummarizedExperiment::rowData(obj)$ProtOfInterest[10:20] <- 1
   
-  observe({
-    print(r$settings()$examplePalette)
-  })
+  r$master <- callModule(mod_plots_tracking_server,'master_tracking', 
+                         obj = reactive({obj}),
+                         keyId=reactive({keyId}),
+                         params=reactive({NULL}),
+                         reset=reactive({FALSE}),
+                         slave = reactive({FALSE})
+  )
   
   callModule(mod_plots_intensity_server,'plots_boxplots', 
              dataIn = reactive({obj}),
              meta = reactive({metadata}),
              conds = reactive({conds}),
-             params = reactive({NULL}),
+             base_palette = reactive({r$settings()$examplePalette}),
+             params = reactive({if(input$sync) 
+               r$master() else NULL}),
              reset = reactive({FALSE}),
-             base_palette = reactive({r$settings()$examplePalette})
+             slave = reactive({input$sync})
+             
   )
   
 }
