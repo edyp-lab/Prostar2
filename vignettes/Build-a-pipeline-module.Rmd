@@ -1,11 +1,24 @@
 ---
-title: "Build-a-pipeline-module"
-output: rmarkdown::html_vignette
+title: "Build-a-pipeline-module tutorial"
+author:
+  -name: Samuel Wieczorek
+abstract: >
+  This vignette describes how to develop a module for a treatment process in prostar. Such a process
+  is part of a pipeline.
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+    number_sections: true
+    keep_md: true
 vignette: >
   %\VignetteIndexEntry{Build-a-pipeline-module}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -14,6 +27,232 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(Prostar2)
+
+# Introduction
+
+A module of treatment of a dataset is an independant Shinyapp which take at least one dataset adn return at least the same dataset with new informations.
+As in Prostar (>=2.0.0), the class of the dataset is Features.
+Along this tutorial, on will create a module with 3 screens and aims to modify some values in the iris dataset.
+
+
+# Global architecture
+
+A module can then be seen as a blackbox with inputs and outputs. As it must be self-contained, all informations (global variables, etc..) needed by the module are created and instanciated inside the module.
+When some informations are managed in a module and are used by a large number of modules in Prostar, they can be passed as parameters.
+
+Modules of processes can use one or several screens UIs. In the later, we will use the navigation module which provides an engine to
+manage the set of screens for a module
+
+From the file where the module is called, it is useful to send the result of a process module in a reactive variable. So as to get directly access to a change in the return value of the module.
+
+
+# Detailed architecture
+
+
+For this example, one assume that  cxxxxx. All the following code is from the file dev/module_pipeline_process_skeleton.R.
+The following parts, we detail each section of this skeleton.
+
+## Ui function
+
+```{r ui, eval=FALSE}
+mod_pipe_process_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+    dataTableOutput(ns('iris_before')),
+   
+    # mandatory
+    mod_navigation_ui(ns('nav_pipe_process')),
+    
+    dataTableOutput(ns('iris_after'))
+  )
+}
 ```
+
+
+Here is a typical ui function of a module with the call to the 'NS' function.
+The most important line is the declaration of the UI for the navigation module. In reality, the different screens are not displayed by
+the process module but they are via the navigation module. That is why there is no declaration for the ui of the process module in this function.
+
+The two other lines are only for the example.
+
+
+## Server function
+
+
+In this section, on describes all the necessary code for making the module runnable. Several steps are needed:
+
+* xxxx
+* xxxx
+* xxxx
+* xxxx
+
+
+They are detailed in the following sections.
+
+### Declaring reactive variables
+
+Two types of reactive variables are used in the module:
+
+* r.nav which is used to manage the navigation module
+* rv.process which manages the variables specific for the module process
+
+
+The following code defines the reactive variable to interact with the navigation module:
+
+```{r nav_module, eval=FALSE}
+ ## Section navigation module
+  # Variable to manage the different screens of the module
+  r.nav <- reactiveValues(
+    name = "Foo",
+    stepsNames = c("Normalization", "Save"),
+    ll.UI = list( screenStep1 = uiOutput(ns("Screen_Process_1")),
+                  screenStep2 = uiOutput(ns("Screen_Process_2")),
+                  screenStep3 = uiOutput(ns("Screen_Process_3"))
+    ),
+    isDone =  rep(FALSE,3),
+    mandatory =  rep(TRUE,3),
+    reset = FALSE
+  )
+```
+
+
+The name of this list of reactive variables is always the same (r.nav). It is composed of:
+
+* **name**: this is the name of the process,
+* **stepsNames**: this is a vector of names where each correspond to a step of the process. These names are written at each point of the timeline in the navigation process,
+* **ll.UI**: A list of uiOutput where each one correspond to a step screen of the process. In order to respect the same nomenclature all over
+Prostar's code, it is advised to name the different elements of the list as in the example. For example, for the ith step, one would write: 
+screenStepi=uiOutput(ns("Screen_Process_i)),
+* **isDone**: A vector of boolean which length is equal to the number of steps in the process. Each element indicates whether the corresponding step has been done. If it is the case, then the navigation module change the color of the timeline (e.g. from red to green)
+* **mandatory**:  A vector of boolean which length is equal to the number of steps in the process. Each element indicates whether the corresponding step is mandatory in the process or not. If it is, then it is colored in red when undone and the user cannot skip this step in the navigation module. If it is not mandatory, the default color is orange and the user can skip it,
+* **reset**: A boolean which indicates to the navigation process if it has to reset all widgets or not
+
+These values are default values and may change during the use of the module.
+
+
+Then, we describe the reactive variables specific to the module process.
+In general, it is good to name this list with the name of the process. For example, for the normalization process, one can
+create a list named 'rv.norm'.
+
+
+```{r rv_process, eval=FALSE}
+rv.process <- reactiveValues(
+  name = "processX",
+  i = NULL,
+  dataIn = NULL,
+  dataOut = NULL,
+  widgets = list(column = "None"),
+  
+  #Not mandatory; just for example
+  settings = NULL,
+)
+```
+
+
+* **name**: the name of the process
+* **dataIn**: A Features object
+* **i**: the indice of the dataset in the Features object (can target the right assay)
+* **dataOut**: A Features object 
+* **widgets**: A list of values for all the widgets used in the process module. This list acts as temporary reactive variables for the widgets. They also can initialise the widgets and set them to as custom default value. These are the variables that are used all over the code of the module (one do not manipulate the value of the widgets from input[[]], except to instantiate this list)
+* **settings**: This is not a mandatory code but it is there only to explain how to pass reactive values as parameters through modules (here, settings will receive the output of another module)
+
+
+### Reset function
+
+In this function (observeEvent), we look at the changes of the reactive variable r.nav$reset. The changes will operate within the module navigation process (with an actionButton) and is new value will be automatically viewed by the process module.
+
+```{r rv_reset, eval=FALSE}
+observeEvent(req(r.nav$reset),{
+    
+  # Just for the example: set the widget to its default value
+  rv.process$widgets$column <- "None"
+
+  ## do not modify this part
+  # Set the dataIn object to the original object sent to the process module
+  rv.process$dataIn <- obj()
+  rv.process$i <- ind()
+  
+  #All the steps are undone
+  r.nav$isDone <- rep(FALSE, 3)
+  
+  # Set the reset variable back to FALSE (if we are in this observeEvent, it is because the variable has been set to TRUE)
+  r.nav$reset <- FALSE
+    ## end of no modifiable part
+  })
+```
+
+### Call navigation module
+
+After the previous code, one can place the line to call the navigation module. It cannot be placed above because we need both r.nav and rv.process variables
+
+```{r callNav, eval=FALSE}
+callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+```
+
+
+### Calls to other modules
+
+
+### Observe parameters
+
+
+```{r observe_parameters, eval=FALSE}
+observe({
+    ## instanciation of the RV in the module with parameters
+    req(obj())
+    rv.process$dataIn <- obj()
+    rv.process$i <- ind()
+  })
+```  
+  
+### Definition of the screens
+
+
+For each screen declared previously, we write the corresponding renderUI function. 
+
+```{r def_screen, eval=FALSE}
+output$Screen_Process_1 <- renderUI({
+    
+    
+  })
+  
+ output$Screen_Process_1 <- renderUI({
+    
+    
+  })
+  
+  output$Screen_Process_1 <- renderUI({
+    
+    
+  })
+```   
+
+And for each widget in these functions, we have to write an observe function to set tne reactive variable to the value of the widgets
+
+
+```{r observe_var, eval=FALSE}  
+observeEvent(input$column, ignoreInit=TRUE,{
+    rv.process$widgets$column <- input$column
+  })
+``` 
+
+
+### Validating the step
+
+```{r observe_var, eval=FALSE}
+observeEvent(input$perform1,{
+    rv.process$widgets$column
+    rv.process$dataIn
+
+    conds <- colData(rv.process$dataIn)$Condition
+    
+    ## the dataset which will be normalized is always the original one
+    rv.process$dataIn <- obj()
+    rv.process$i <- ind()
+
+    rv.process$i <- ind() + 1
+    r.nav$isDone[1] <- TRUE
+  })
+``` 
+
+
