@@ -39,7 +39,7 @@ usethis::use_r("config")
 # 3. Documentation
 
 ## 3.1 Vignette
-usethis::use_vignette("Prostar2")
+usethis::use_vignette("Build-a-pipeline-module")
 devtools::build_vignettes()
 
 ## 3.2 Code coverage

@@ -1,11 +1,29 @@
 ---
 title: "Prostar2"
-output: rmarkdown::html_vignette
+author:
+  -name: Samuel Wieczorek, Enora Fremy, Thomas Burger
+abstract: >
+  This vignette describes Prostar (Proteomics statistical analysis with R)
+  which is a Bioconductor distributed R package which provides all the necessary
+  functions to analyze quantitative data from label-free proteomics 
+  experiments. Contrarily to most other similar R packages, it is endowed
+  with rich and user-friendly graphical interfaces, so that no programming 
+  skill is required. This document covers the functionalities available 
+  in Prostar2.
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+    number_sections: true
+    keep_md: true
 vignette: >
   %\VignetteIndexEntry{Prostar2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -14,6 +32,164 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(Prostar2)
+
+# Introduction
+
+`r BiocStyle::Biocpkg("DAPAR")` and `r BiocStyle::Biocpkg("Prostar")`
+package are a series of software dedicated to the processing of proteomics data. More precisely, they are devoted to the analysis of quantitative datasets produced by bottom-up discovery proteomics experiments with a LC-MS/MS pipeline (Liquid Chromatography and Tandem Mass spectrometry).
+`r BiocStyle::Biocpkg("DAPAR")` (Differential Analysis of Protein Abundance with R) is an R 
+package that contains all the necessary functions to process the data in 
+command lines. It can be used on its own; or as a complement to the numerous 
+Bioconductor packages (\url{https://www.bioconductor.org/}) it is compliant with; 
+or through the `r BiocStyle::Biocpkg("Prostar")` interface.
+`r BiocStyle::Biocpkg("Prostar")` (Proteomics statistical analysis with R) is a 
+web interface based on Shiny technology (\url{http://shiny.rstudio.com/}) that provides GUI 
+(Graphical User Interfaces) to all the `r BiocStyle::Biocpkg("DAPAR")` functionalities, so as to guide any practitioner that is not comfortable with R programming through the complete 
+quantitative analysis process.
+ The experiment package `r BiocStyle::Biocpkg("DAPARdata")` contains 
+many datasets that can be used as examples.
+`r BiocStyle::Biocpkg("Prostar")` functionalities make it possible to easily:
+
+* **Manage quantitative datasets** Here, a quantitative dataset 
+denotes a table where each analyte (either a peptide or a protein) is represented
+by a line and each replicate (or sample) is represented by a column; 
+each cell of the table contains the abundance of a given analyte in a given replicate; 
+the replicates are clustered into different conditions (or groups). This includes
+import/export, conversion and report generation functionalities.
+* **Perform a complete data processing chain**: (*i*) filtering and data cleaning; 
+(*ii*) cross-replicate normalization; (*iii*) missing value imputation; (*iv*) aggregation of peptide intensities into protein intensities (optional); (*v*) null hypothesis significance testing.
+* **Mine the dataset** at any step of the processing chain with various tools such as:
+(*i*) descriptive statistics; (*ii*) differential analysis; (*iii*) Gene Ontology (GO) analysis.
+
+
+
+# Installation
+
+There are many ways to install `r BiocStyle::Biocpkg("Prostar")`, as well as its dependencies (i.e. Packages that are necessary for `r BiocStyle::Biocpkg("Prostar")` to correctly run:
+
+* **Zero-install**: The easiest way, so far only available on Microsoft Windows desktop machines.
+* **Stand-alone Bioconductor install**: The standard method to install Bioconductor distributed software. This method works for any operating systems (Unix/Linux, Mac OS X and Windows) as long as R is installed.
+* **Server install**: When one wants `r BiocStyle::Biocpkg("Prostar")` to run on a Unix server, on which remote users connect.
+
+In addition, it is also possible to only install `r BiocStyle::Biocpkg("DAPAR")` or `r BiocStyle::Biocpkg("DAPARdata")`, so as to work in command lines (for expert users only).
+
+For all the desktop installs, we advise to use a machine with a minimum of 8GB of RAM (although there are no strict constraints).
+
+## Zero-install
+This method works for any desktop machine with Microsoft Windows. It is not necessary to have R already installed.
+Go to \url{http://www.prostar-proteomics.org} and click on Zero-install download (Prostar menu). Download the zip file and unzip it.
+The unzipped folder contains an executable file which directly launches `r BiocStyle::Biocpkg("Prostar")`. Notice that at the first launch,
+an internet connection is necessary, so as to finish the install.
+
+## Stand-alone Bioconductor install
+
+For this type of install, the operating system of the desktop machine can be of any type (Unix/Linux, Mac OS X or Windows).
+However, it is necessary to have the latest version of R (see Section~\ref{sec:sessionInfo}) installed in a directory where the user has read/write permissions. 
+Optionally, an IDE (integrated development environment) such as R Studio (\url{https://www.rstudio.com/}) may be useful to conveniently deal with the various R package installs.
+
+To install `r BiocStyle::Biocpkg("Prostar")`, enter in the R console the following instructions:
+
+```{r install, eval=FALSE}
+install.packages("BiocManager")
+BiocManager::install("Prostar")
 ```
+
+Once the package is installed, to launch `r BiocStyle::Biocpkg("Prostar")`, then enter:
+
+```{r launch, eval=FALSE, echo=TRUE}
+library(Prostar)
+Prostar()
+```
+
+A new window of the default web browser opens. 
+
+## Server install
+
+In the case of several `r BiocStyle::Biocpkg("Prostar")` users that are not 
+confortable with R (programming or installing), it is best to have a single 
+version of `r BiocStyle::Biocpkg("Prostar")` running on a Shiny server 
+installed on a Unix/Linux server. The users will use `r BiocStyle::Biocpkg("Prostar")` through 
+a web browser, exactly if it were locally installed, yet, a single install has 
+to be administrated. In that case, `r BiocStyle::Biocpkg("DAPAR")` has to be classically 
+installed (see Section~\ref{sec:daparalone}), while on the other hand, the 
+installation of `r BiocStyle::Biocpkg("Prostar")` is slightly different.
+
+Shiny Server (\url{https://github.com/rstudio/shiny-server}) is a server program that 
+makes Shiny applications available over the web. If Shiny Server is not installed yet, 
+follow Shiny installation instructions.
+
+Once a Shiny server is available, first install `r BiocStyle::Biocpkg("Prostar")` as described in 
+Section~\ref{sec:daparProstarstandalone}, so as to have the dependencies 
+installed.
+
+Then, execute the following line to get the install directory of Prostar:
+
+```{r server, eval=FALSE}
+installed.packages()["Prostar","LibPath"]
+```
+
+The result of this command is now referred as *path_to_Prostar*.
+
+Change the owner of the Shiny Server directory and log as shiny
+```{code}
+sudo chown shiny /srv/shiny-server
+sudo su shiny
+```
+
+Create a directory named `r BiocStyle::Biocpkg("Prostar")` in the Shiny Server directory with 
+the user shiny as owner and then copy the Prostar files.
+
+Create the directory for the shiny application 
+
+```{code}
+mkdir /srv/shiny-server/Prostar
+```
+
+Copy the ProstarApp directory within the shiny-server directory
+
+```{code}
+sudo cp -r /path\_to\_Prostar/ProstarApp/ /srv/shiny-server/Prostar
+```
+
+Change the owner of the Shiny Server directory
+
+```{code}
+sudo chown -R shiny /srv/shiny-server
+```
+
+Give the following permissions to the www directory
+
+```{code}
+chmod 755 /srv/shiny-server/Prostar/www
+```
+
+Check if the configuration file of Shiny Server is correct.
+For more details, please visit 
+\url{http://rstudio.github.io/shiny-server/latest/}.
+
+Now, the application should be available via a web browser at 
+http://*servername*:*port*/Prostar.
+
+
+
+## `r BiocStyle::Biocpkg("DAPAR")` and `r BiocStyle::Biocpkg("DAPARdata")` (alone)
+
+This type of install should only be performed by advanced R users/programmers, or by the admin of a server version of `r BiocStyle::Biocpkg("Prostar")`.
+
+To install the package `r BiocStyle::Biocpkg("DAPAR")` from the source file with administrator 
+rights, start R and enter:
+
+```{r install_DAPAR, eval=FALSE}
+BiocManager::install("DAPAR")
+```
+
+`r BiocStyle::Biocpkg("DAPARdata")` is automatically installed with `r BiocStyle::Biocpkg("Prostar")` or `r BiocStyle::Biocpkg("DAPAR")`. However, it is possible to install it alone. Then, it  follows 
+the classical way for Bioconductor packages. In a R console, enter:
+
+```{r install_DAPARdata, eval=FALSE}
+BiocManager::install("DAPARdata")
+```
+
+
+# Navigating through `r BiocStyle::Biocpkg("Prostar")` interface
+
