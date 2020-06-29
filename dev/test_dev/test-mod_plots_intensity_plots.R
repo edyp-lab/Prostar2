@@ -44,7 +44,7 @@ server <- function(input, output, session) {
                          params=reactive({NULL}),
                          reset=reactive({FALSE}),
                          slave = reactive({FALSE})
-  )
+                        )
   
   callModule(mod_plots_intensity_server,'plots_boxplots', 
              dataIn = reactive({obj}),
@@ -52,7 +52,8 @@ server <- function(input, output, session) {
              conds = reactive({conds}),
              base_palette = reactive({r$settings()$examplePalette}),
              params = reactive({if(input$sync) 
-               r$master() else NULL}),
+               r$master() else NULL
+               }),
              reset = reactive({FALSE}),
              slave = reactive({input$sync})
              

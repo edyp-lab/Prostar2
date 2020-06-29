@@ -56,7 +56,8 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
                    spanLOESS = 0.7),
     trackFromBoxplot = NULL,
     selectProt = NULL, 
-    resetTracking = FALSE
+    resetTracking = FALSE,
+    sync = FALSE
   )
   
   
@@ -77,6 +78,8 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     rv.norm$widgets$quantile <- 0.15
     rv.norm$widgets$spanLOESS <- 0.7
     rv.norm$resetTracking <- TRUE
+    
+    rv.norm$sync <- FALSE
     
     rv.norm$dataIn <- obj()
     rv.norm$i <- ind()
@@ -132,15 +135,15 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
                                          dataIn = reactive({rv.norm$dataIn[[rv.norm$i]]}),
                                          meta = reactive({metadata(obj())}),
                                          conds = reactive({colData(obj())[['Condition']]}),
+                                         base_palette = reactive({rv.norm$settings()$basePalette}),
                                          params = reactive({
-                                           if (input$SyncForNorm)
+                                           if(rv.norm$sync)
                                                rv.norm$selectProt() 
                                            else 
                                              NULL
                                            }),
                                          reset = reactive({rv.norm$resetTracking}),
-                                         slave = reactive({input$SyncForNorm}),
-                                         base_palette = reactive({rv.norm$settings()$basePalette})
+                                         slave = reactive({rv.norm$sync})
                                           )
                                          
                                          
@@ -152,6 +155,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   
   
   observe({
+    ## instanciation of the RV in the module with parameters
     req(obj())
     rv.norm$dataIn <- obj()
     rv.norm$i <- ind()
@@ -188,7 +192,10 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
           ),
           div(
             style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-            hidden(div(id=ns('DivMasterProtSelection'),mod_plots_tracking_ui(ns('master_ProtSelection'))))
+            #hidden(
+              div(id=ns('DivMasterProtSelection'),
+                       mod_plots_tracking_ui(ns('master_ProtSelection')))
+                   #)
           ),
           div(
             style="display:inline-block; vertical-align: middle; padding-right: 20px;",
@@ -229,13 +236,11 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
   observeEvent(input$spanLOESS, ignoreInit=TRUE,{
     rv.norm$widgets$spanLOESS <- input$spanLOESS
   })
-  # 
-  # observeEvent(input$SyncForNorm, {
-  #      if (isTRUE(input$SyncForNorm)) 
-  #                rv.normrv.norm$selectProt() 
-  #              else 
-  #                NULL)
-  # 
+
+  observeEvent(input$SyncForNorm, {
+       rv.norm$sync <- input$SyncForNorm
+       })
+
   
   output$test_spanLOESS <- renderUI({
     req(rv.norm$widgets$spanLOESS)

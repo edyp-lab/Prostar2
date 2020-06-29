@@ -65,7 +65,7 @@ mod_plots_tracking_server <- function(input, output, session,
                list.indices = NULL,
                rand.indices = NULL,
                col.indices = NULL),
-    params = NULL
+    sync = FALSE
   )
   
  
@@ -74,7 +74,12 @@ mod_plots_tracking_server <- function(input, output, session,
   })
   
   
-  
+  observeEvent(slave(),{
+    if(is.null(slave()))
+      rv.track$sync <- FALSE
+    else
+      rv.track$sync <- slave()
+  })
   
   output$listSelect_UI <- renderUI({
     selectInput(ns("listSelect"), 
@@ -127,8 +132,7 @@ mod_plots_tracking_server <- function(input, output, session,
   observe({
     params()
     
-    print('params() changed')
-    if (is.null(params())){
+    if (rv.track$sync == TRUE && is.null(params())){
       updateSelectInput(session, "typeSelect", selected='None')
       updateSelectInput(session, "listSelect", NULL)
       updateSelectInput(session, "randSelect", selected='')
@@ -142,23 +146,28 @@ mod_plots_tracking_server <- function(input, output, session,
                           col.indices = NULL)
       
     } else {
-      rv.track$res$typeSelect <- params()$type
-      
-      rv.track$res$listSelect <- params()$listSelect
-      rv.track$res$randSelect <- params()$randSelect
-      rv.track$res$colSelect <- params()$colSelect
-      
-      rv.track$res$list.indices <- params()$list.indices
-      rv.track$res$rand.indices <- params()$rand.indices
-      rv.track$res$col.indices <- params()$col.indices
+      rv.track$res <-list(typeSelect = params()$typeSelect,
+                          listSelect = params()$listSelect,
+                          randSelect = params()$randSelect,
+                          colSelect = params()$colSelect,
+                          list.indices = params()$list.indices,
+                          rand.indices = params()$rand.indices,
+                          col.indices = params()$col.indices)
     }
   })
   
   
   
-  observe({
-    slave()
-    if (slave() == FALSE) {
+  observeEvent(rv.track$sync, ignoreNULL = TRUE,{
+
+    if (rv.track$sync == FALSE) {
+      rv.track$res <- list(typeSelect = 'None',
+                           listSelect = NULL,
+                           randSelect = '',
+                           colSelect = NULL,
+                           list.indices = NULL,
+                           rand.indices = '',
+                           col.indices = NULL)
       shinyjs::show("typeSelect")
       } else {
       updateSelectInput(session, "typeSelect", selected='None')
@@ -175,17 +184,12 @@ mod_plots_tracking_server <- function(input, output, session,
   })
   
   
-  observe({
-    rv.track$res
-    
-    print(rv.track$res)
-  })
-  
   
   observeEvent(input$typeSelect,{
     if (!is.null(params())) return(NULL)
     
-    rv.track$res <- list(typeSelect = input$typeSelect,
+    
+    rv.track$res <- list(typeSelect = if (is.null(input$typeSelect)) 'None' else input$typeSelect,
                           listSelect = NULL,
                          randSelect = '',
                          colSelect = NULL,
@@ -193,9 +197,9 @@ mod_plots_tracking_server <- function(input, output, session,
                          rand.indices = '',
                          col.indices = NULL)
     
-    updateSelectInput(session, "listSelect", NULL)
-    updateSelectInput(session, "randSelect", selected='')
-    updateSelectInput(session, "colSelect", selected=NULL)
+    updateSelectInput(session, "listSelect", selected = NULL)
+    updateSelectInput(session, "randSelect", selected = '')
+    updateSelectInput(session, "colSelect", selected = NULL)
     
     shinyjs::toggle("listSelect_UI", condition = input$typeSelect=="ProteinList")
     shinyjs::toggle("randomSelect_UI", condition = input$typeSelect=="Random")
@@ -206,10 +210,10 @@ mod_plots_tracking_server <- function(input, output, session,
   
   
   
-  observeEvent(input$listSelect,{
+  observeEvent(input$listSelect, ignoreNULL = FALSE,{
     if (!is.null(params())) return(NULL)
-    rv.track$res$listSelect <- input$listSelect
     
+    rv.track$res$listSelect <- input$listSelect
     updateSelectInput(session, "randSelect", selected='')
     updateSelectInput(session, "colSelect", selected=NULL)
     
@@ -223,7 +227,7 @@ mod_plots_tracking_server <- function(input, output, session,
   
   
   
-  observeEvent(input$randSelect,{
+  observeEvent(input$randSelect,ignoreNULL = FALSE,{
     if (!is.null(params())) return(NULL)
     rv.track$res$randSelect <- input$randSelect
     
@@ -239,7 +243,7 @@ mod_plots_tracking_server <- function(input, output, session,
     }
   })
   
-  observeEvent(input$colSelect,{
+  observeEvent(input$colSelect,ignoreNULL = FALSE,{
     if (!is.null(params())) return(NULL)
     rv.track$res$colSelect <- input$colSelect
     

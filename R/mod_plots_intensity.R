@@ -35,10 +35,8 @@ mod_plots_intensity_ui <- function(id){
                selectInput(ns("choosePlot"), "Choose plot", 
                            choices=c( "violinplot"="violinplot",
                                       "boxplot"="boxplot"), 
-                           width='100px')
-      ),
-      tags$div(style="display:inline-block; vertical-align: middle;",
-          shinyjs::hidden(mod_plots_tracking_ui(ns('slave_tracking')))
+                           width='100px'),
+               uiOutput(ns('slave_tracking_ui'))
       )
     )  
   )
@@ -85,14 +83,32 @@ mod_plots_intensity_server <- function(input, output, session,
   
   
   observe({
-    req(dataIn())
-    shinyjs::toggle('tracking_slave', condition=S4Vectors::metadata(dataIn())[["typeOfData"]]=='protein')
+    params()
+    print('params() = ')
+    print(params())
+  })
+  
+  observe({
+    slave()
+    print('slave() = ')
+    print(slave())
   })
   
   
-  observeEvent(slave(),{
+  output$slave_tracking_ui <- renderUI({
     slave()
-    
+    dataIn()
+    if ((slave()==FALSE) && S4Vectors::metadata(dataIn())[["typeOfData"]]=='protein')
+      {
+      mod_plots_tracking_ui(ns('slave_tracking'))
+    }
+    else 
+      return(NULL)
+  })
+  
+  
+  
+  observeEvent(c(slave(),rv.modboxplot$varTrack()),ignoreInit = TRUE, ignoreNULL=FALSE, {
     if (slave() == TRUE){
       switch(params()$typeSelect,
              ProteinList = rv.modboxplot$indices <- params()$list.indices,
@@ -100,19 +116,19 @@ mod_plots_intensity_server <- function(input, output, session,
              Column = rv.modboxplot$indices <- params()$col.indices,
              None = rv.modboxplot$indices <- NULL
       )
-    }
-    })
-  
-  observeEvent(rv.modboxplot$varTrack(),{
-    if(!is.null(slave()) && slave()==FALSE){
-      switch(rv.modboxplot$varTrack()$typeSelect,
+    } else {
+      tmp <- if (is.null(rv.modboxplot$varTrack()$typeSelect)) 'None' 
+                else rv.modboxplot$varTrack()$typeSelect
+        switch(tmp,
              ProteinList = rv.modboxplot$indices <- rv.modboxplot$varTrack()$list.indices,
              Random =  rv.modboxplot$indices <- rv.modboxplot$varTrack()$rand.indices,
              Column =  rv.modboxplot$indices <- rv.modboxplot$varTrack()$col.indices,
              None = rv.modboxplot$indices <- NULL
       )
     }
-  })
+    })
+  
+  
   
   
   

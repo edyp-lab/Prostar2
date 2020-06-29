@@ -53,10 +53,11 @@ server <- function(input, output, session) {
   
   r$slave <- callModule(mod_plots_tracking_server,'slave_tracking', 
                       obj = reactive({obj}), 
-                      params=reactive({if (input$sync) r$master() else NULL}),
+                      params=reactive({if (input$sync) r$master() 
+                        else NULL}),
                       keyId=reactive({keyId}),
                       reset=reactive({FALSE}),
-                      slave=reactive({input$sync}))
+                      slave=reactive({NULL}))
   
   
   # observe({
