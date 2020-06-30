@@ -237,22 +237,41 @@ observeEvent(input$column, ignoreInit=TRUE,{
 ``` 
 
 
-### Validating the step
+### Validating the steps
 
+To validate a step, one have to observe an event which can be:
+
+* an event triggered by a widget (i.e. an actionButton)
+* a test on one or several variables in the process module.
+
+In this example, for the first step,the event is triggered by an action button named 'perform1'.
+When the user has selected the right column to change in the dataset (via the widget
+selectInput), he clicks on the 'perform1' button. Then:
+
+1. the value of the selected column is stored in another reacive variable,
+2. The first position of the variable r.nav$isDone is set to TRUE. That indicates to the navigation
+module to color in green the corresponding label. The other effect is that it enables the 'Next' button to
+go to the second step.
+ 
 ```{r observe_var, eval=FALSE}
 observeEvent(input$perform1,{
-    rv.process$widgets$column
-    rv.process$dataIn
-
-    conds <- colData(rv.process$dataIn)$Condition
-    
-    ## the dataset which will be normalized is always the original one
-    rv.process$dataIn <- obj()
-    rv.process$i <- ind()
-
-    rv.process$i <- ind() + 1
+    rv.process$column <- rv.process$widget$column
     r.nav$isDone[1] <- TRUE
   })
 ``` 
 
+
+There must be a reactive function for each step in the process module. This function can be: 
+
+* An observe function
+* An observeEvent function
+* A reactive function
+
+The most important point is that this function contains a line to indicate that the step is done. For the i th step, there
+must be the folloing line:
+
+```{r observe_var, eval=FALSE}
+    r.nav$isDone[i] <- TRUE
+  })
+``` 
 
