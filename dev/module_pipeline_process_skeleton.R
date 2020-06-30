@@ -1,32 +1,18 @@
-#' pipe_prot_norm UI Function
-#'
-#' @description A shiny Module.
-#'
-#' @param id,input,output,session Internal parameters for {shiny}.
-#'
-#' @noRd 
-#'
+
+
+source(file.path('../R', 'mod_navigation.R'), local=TRUE)$value
+
 #' @importFrom shiny NS tagList 
 mod_pipe_process_ui <- function(id){
   ns <- NS(id)
   tagList(
-    dataTableOutput(ns('iris_before')),
-    mod_navigation_ui(ns('nav_pipe_process')),
-    dataTableOutput(ns('iris_after'))
+    mod_navigation_ui(ns('nav_pipe_process'))
   )
 }
 
 #' pipe_process Server Function
-#'
-#' @noRd
-#' 
-#' @param input,output,session
-#' 
-#' @param obj
-#' 
-#' @param samplesTab
-#' 
-mod_pipe_process_server <- function(input, output, session, obj, ind){
+ 
+mod_pipe_process_server <- function(input, output, session, obj, settings){
   ns <- session$ns
   
   
@@ -34,7 +20,7 @@ mod_pipe_process_server <- function(input, output, session, obj, ind){
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
     name = "Foo",
-    stepsNames = c("Normalization", "Save"),
+    stepsNames = c("Choose assay", "Change", "Save"),
     ll.UI = list( screenStep1 = uiOutput(ns("Screen_Process_1")),
                   screenStep2 = uiOutput(ns("Screen_Process_2")),
                   screenStep3 = uiOutput(ns("Screen_Process_3"))
@@ -47,29 +33,30 @@ mod_pipe_process_server <- function(input, output, session, obj, ind){
   ## reactive values for variables in the module
   rv.process <- reactiveValues(
     name = "processProtNorm",
-    i = NULL,
     dataIn = NULL,
     dataOut = NULL,
-    widgets = list(column = "None"),
-    settings = NULL,
-    
+    widgets = list(assay = 0,
+                   operator = NULL,
+                   operand = NULL)
     )
   
   
   observeEvent(req(r.nav$reset),{
     
-    rv.process$widgets$column <- "None"
+    rv.process$widgets <- list(assay = 0,
+                               operator = NULL,
+                               operand = NULL)
 
     ## do not modify this part
     rv.process$dataIn <- obj()
-    rv.process$i <- ind()
+    rv.process$data <- data.frame()
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     ## end of no modifiable part
   })
   
   
-  callModule(mod_navigation_server, 'nav_pipe_prot_norm', style=2, pages=r.nav)
+  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -92,10 +79,8 @@ mod_pipe_process_server <- function(input, output, session, obj, ind){
  
   
   observe({
-    ## instanciation of the RV in the module with parameters
     req(obj())
     rv.process$dataIn <- obj()
-    rv.process$i <- ind()
   })
   
   
@@ -109,226 +94,144 @@ mod_pipe_process_server <- function(input, output, session, obj, ind){
   ###                                 Screen 1                                        ###
   ###---------------------------------------------------------------------------------###
   output$Screen_Process_1 <- renderUI({
-    
-    
+    selectInput(ns('selectAssay'), 
+                 'Select assay', 
+                 choices=0:length(rv.process$dataIn), 
+                 selected=rv.process$widgets$assay)
   })
   
   
-  
-  observeEvent(input$column, ignoreInit=TRUE,{
-    rv.process$widgets$column <- input$column
+  observeEvent(input$selectAssay, {
+    rv.process$widgets$assay <- as.numeric(input$selectAssay)
   })
   
   
-  ##' Reactive behavior : Normalization of data
-  ##' @author Samuel Wieczorek
-  observeEvent(input$perform.normalization,{
-    rv.process$widgets$method
-    rv.process$dataIn
-    # isolate({
-    conds <- colData(rv.process$dataIn)$Condition
-    
-    ## the dataset whihc will be normalized is always the original one
-    rv.process$dataIn <- obj()
-    rv.process$i <- ind()
-    
-    switch(rv.process$widgets$method, 
-           None = rv.process$dataIn <- obj(),
-           
-           GlobalQuantileAlignment = {
-             rv.process$dataIn <- normalizeD(object = rv.process$dataIn,
-                                          i = rv.process$i,
-                                          name = "protein_norm",
-                                          method='GlobalQuantileAlignment'
-             )
-           },
-           
-           QuantileCentering = {
-             quant <-NA
-             if (!is.null(rv.process$widgets$quantile))
-               quant <- as.numeric(rv.process$widgets$quantile)
-             
-             rv.process$dataIn <- normalizeD(object = rv.process$dataIn, 
-                                          i = rv.process$i, 
-                                          name = "proteins_norm",
-                                          method = 'QuantileCentering', 
-                                          conds = conds, 
-                                          type = rv.process$widgets$type,
-                                          subset.norm = GetIndicesOfSelectedProteins(), 
-                                          quantile = quant
-             )
-             
-           } ,
-           
-           MeanCentering = {
-             rv.process$dataIn <- normalizeD(object =rv.process$dataIn,
-                                          i = rv.process$i, 
-                                          name ="proteins_norm",
-                                          method = 'MeanCentering', 
-                                          conds = conds, 
-                                          type = rv.process$widgets$type,
-                                          subset.norm = GetIndicesOfSelectedProteins(), 
-                                          scaling = rv.process$widgets$varReduction
-             )
-           }, 
-           
-           SumByColumns = {
-             rv.process$dataIn <- normalizeD(object = rv.process$dataIn,
-                                          i =rv.process$i,
-                                          name = "proteins_norm",
-                                          method = 'SumByColumns', 
-                                          conds = conds, 
-                                          type = rv.process$widgets$type,
-                                          subset.norm = GetIndicesOfSelectedProteins()
-             )
-           },
-           
-           LOESS = { 
-             rv.process$dataIn <- normalizeD(object = rv.process$dataIn,
-                                          i = rv.process$i,
-                                          name = "proteins_norm",
-                                          method = 'LOESS', 
-                                          conds = conds, 
-                                          type = rv.process$widgets$type,
-                                          span = as.numeric(rv.process$widgets$spanLOESS)
-             )
-           },
-           
-           vsn = {
-             rv.process$dataIn <- normalizeD(object = rv.process$dataIn,
-                                          i = rv.process$i, 
-                                          name = "proteins_norm",
-                                          method = 'vsn', 
-                                          conds = conds, 
-                                          type = rv.process$widgets$type)
-           }
-    )
-    # })
-    
-    rv.process$i <- ind() + 1
-    r.nav$isDone[1] <- TRUE
-    #shinyjs::hide("perform.normalization")
+  observe({
+    if (rv.process$widgets$assay > 0)
+        r.nav$isDone[1] <- TRUE
   })
-  
-  
-  
-  
-  
-  
-  
-  #######################
-  output$viewComparisonNorm_UI <- renderHighchart({
-    rv.process$settings()$basePalette
-    req(rv.process$dataIn)
-    obj()
-    GetIndicesOfSelectedProteins()
-    print(GetIndicesOfSelectedProteins())
-    
-    hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = assay(obj()[[ind()]]),
-                                           qDataAfter = assay(rv.process$dataIn[[rv.process$i]]),
-                                           conds= colData(obj())$Condition,
-                                           palette = rv.process$settings()$basePalette,
-                                           subset.view= GetIndicesOfSelectedProteins(),
-                                           n = 50)
-    hc
-  })
-  
-  
-  
-  
-  #######################
-  
-  #viewComparisonNorm2 <- reactive({
-  #  rv$PlotParams$paletteConditions
-  #  leg <- NULL
-  #  grp <- NULL
-  #  
-  #  labelsNorm <- NULL
-  #  labelsToShowNorm <- NULL
-  #  gToColorNorm <- NULL
-  #  
-  #  labelsToShowNorm <- c(1:nrow(Biobase::pData(rv$current.obj)))
-  #  
-  #  
-  #  
-  #  if (is.null(rv$whichGroup2Color) 
-  #      || (rv$whichGroup2Color == "Condition")){
-  #    labelsNorm <- Biobase::pData(rv$current.obj)[,"Condition"]
-  #  }else {
-  #    labelsNorm <- paste(Biobase::pData(rv$current.obj)[,"Condition"],
-  #                        Biobase::pData(rv$current.obj)[,"Bio.Rep"],
-  #                        Biobase::pData(rv$current.obj)[,"Tech.Rep"],
-  #                        Biobase::pData(rv$current.obj)[,"Analyt.Rep"],
-  #                        sep= "_")
-  #  }
-  #  
-  #  
-  #  if (input$datasets == paste0("Normalized.", rv$typeOfDataset)){
-  #    obj1 <- rv$dataset[[(which(names(rv$dataset)==dname) - 1)]]
-  #    obj2 <- rv$dataset[[input$datasets]]
-  #  }
-  #  else {
-  #    obj1 <-rv$dataset[[input$datasets]]
-  #    obj2 <- rv$current.obj
-  #    
-  #  }
-  #  
-  #  wrapper.compareNormalizationD(obj1, obj2,
-  #                                labelsNorm,
-  #                                as.numeric(labelsToShowNorm),
-  #                                palette = rv$PlotParams$paletteConditions)
-  #  
-  #})
-  
-  
-  
-  
   
   
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
   
-  output$Screen_Prot_norm_2 <- renderUI({
-    print('screen 2')
-    tagList(
-      actionButton(ns("valid.normalization"),
-                   "Save normalization", 
-                   class = actionBtnClass, 
-                   width="170px")
-    )
-    
+  output$Screen_Process_2 <- renderUI({
+  tagList(
+    radioButtons(ns('operator'), 'Choose operator',
+                 choices =c('addition' = 'addition',
+                               'soustraction' = 'soustraction',
+                               'product' = 'product')
+    ),
+    numericInput(ns('operand'), 
+                 'Choose operand', 
+                 value = rv.process$widgets$operand, 
+                 min=0, 
+                 max=10),
+    actionButton(ns('change'), 'Apply operator')
+  )
   })
   
   
   
-  ##' -- Validate and save the normalization ---------------------------------------
-  ##' @author Samuel Wieczorek
-  observeEvent(input$valid.normalization,{ 
+  
+  observeEvent(input$operator, ignoreInit=TRUE,{
+    rv.process$widgets$operator <- input$operator
+  })
+  
+  observeEvent(input$operand, ignoreInit=TRUE,{
+    rv.process$widgets$operand <- input$operand
+  })
+  
+  
+  
+  observeEvent(input$change,{
     
-    if (rv.process$widgets$method != "None") {
-      metadata(rv.process$dataIn[[rv.process$i]])$Params <- list(
-        method = rv.process$widgets$method,
-        type = rv.process$widgets$type,
-        varReduction = rv.process$widgets$varReduction,
-        quantile = rv.process$widgets$quantile,
-        spanLOESS =rv.process$widgets$spanLOESS
-      )
-      
+    tmp <- rv.process$dataIn[[rv.process$widgets$assay]]
+    
+    switch (rv.process$widgets$operator,
+            addition = assay(tmp) <- assay(tmp) + rv.process$widgets$operand,
+            soustraction = assay(tmp) <- assay(tmp) - rv.process$widgets$operand,
+            product = assay(tmp) <- assay(tmp) * rv.process$widgets$operand
+    )
+   
+    rv.process$dataIn <- Features::addAssay(rv.process$dataIn,
+                                            tmp,
+                                            'tutorial')
+    r.nav$isDone[2] <- TRUE
+  })
+  
+  
+  ###---------------------------------------------------------------------------------###
+  ###                                 Screen 3                                        ###
+  ###---------------------------------------------------------------------------------###
+  
+  output$Screen_Process_3 <- renderUI({
+      actionButton(ns("save"), "Save")
+  })
+  
+  
+
+  observeEvent(input$save,{ 
+      metadata(rv.process$dataIn[[rv.process$widgets$assay+1]])$Params <- list(
+                          operand = rv.process$widgets$operand,
+                          operator = rv.process$widgets$operator
+                          )
+
       rv.process$dataOut <- rv.process$dataIn
-      r.nav$isDone[2] <- TRUE
-      # UpdateDatasetWidget(rv$current.obj, name)
-    }
-    
+      r.nav$isDone[3] <- TRUE
   })
   
   return({reactive(rv.process$dataOut)})
   
 }
 
-## To be copied in the UI
-# mod_pipe_prot_norm_ui("pipe_prot_norm_ui_1")
 
-## To be copied in the server
-# callModule(mod_pipe_prot_norm_server, "pipe_prot_norm_ui_1")
 
+
+
+
+
+
+ui <- fluidPage(
+  dataTableOutput('dataset'),
+  mod_pipe_process_ui('foo')
+)
+
+
+server <- function(input, output, session) {
+  
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  obj<-Exp1_R25_prot
+  
+  
+  rv <- reactiveValues(
+    test = obj,
+    data = data.frame()
+  )
+  
+  
+
+ rv$test <- callModule(mod_pipe_process_server,'foo', obj=reactive({obj}) )
+ 
+ 
+ observeEvent(rv$test(),{
+   
+   if (is.null(rv$test()))
+     rv$data <- data.frame()
+   else
+    {
+      for (i in 1:length(rv$test()))
+      rv$data <- rbind(rv$data, assay(rv$test()[[i]])[1,])
+    colnames(rv$data) <- colnames(assay(rv$test()))
+    }
+ })
+ 
+ 
+ output$dataset <- renderDataTable({
+   rv$data
+ })
+  
+}
+                         
+shinyApp(ui, server)                    
