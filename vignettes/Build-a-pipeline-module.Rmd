@@ -30,29 +30,31 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-A module of treatment of a dataset is an independant Shinyapp which take at least one dataset adn return at least the same dataset with new informations.
+A data processing module in Prostar is an independant Shinyapp which operate one or several treatments to a dataset. Its input has at least one dataset and its output is at least the modified input dataset.
 As in Prostar (>=2.0.0), the class of the dataset is Features.
-Along this tutorial, on will create a module with 3 screens and aims to modify some values in the iris dataset.
+The aim of this tutorial is to show how to develop a process module for Prostar (ie a module which belongs to a pipeline and operates transformations on the dataset). Along this tutorial, one will create a module with 3 steps and aims to modify some values in the input dataset. For that, we will also use another module available in Prostar: the navigation module which manages modules wkith several steps.
 
 
-# Global architecture
+# Global architecture of the module
 
-A module can then be seen as a blackbox with inputs and outputs. As it must be self-contained, all informations (global variables, etc..) needed by the module are created and instanciated inside the module.
-When some informations are managed in a module and are used by a large number of modules in Prostar, they can be passed as parameters.
+A process module can be seen as a blackbox with inputs and outputs. As it must be self-contained, all informations (global variables, etc..) needed by the module are created and instanciated inside the module.
+However, when some information are managed in a module and are used by a large number of modules in Prostar, they can be passed as parameters.
 
-Modules of processes can use one or several screens UIs. In the later, we will use the navigation module which provides an engine to
-manage the set of screens for a module
+Modules of processes can use one or several screens UIs. In the later case, we will use the navigation module which provides an engine to manage the set of steps for a module. Thus, the development of a process module only consists in coding the UI and server-side functions ; the managment of the sequence of steps is devoted to the navigation process.
 
-From the file where the module is called, it is useful to send the result of a process module in a reactive variable. So as to get directly access to a change in the return value of the module.
-
-
-# Detailed architecture
+From the file where the module is called, it is often useful to keep the result of this module in a reactive variable, so as to get directly access to a change in the return value of the module.
 
 
 For this example, one assume that  cxxxxx. All the following code is from the file dev/module_pipeline_process_skeleton.R.
-The following parts, we detail each section of this skeleton.
+In the following parts, we detail each part of this code
 
-## Ui function
+The module that will be built is named *pipe_process* and have thw two functions present in a shiny module: the ui side (**mod_pipe_process_ui**) and the server side (**mod_pipe_process_server**).
+
+
+# Ui-side function
+
+Here is a typical ui function of a shiny module with the call to the 'NS' function.
+The most important line is the declaration of the UI for the navigation module *mod_navigation_ui* which is used to manage the screens of the module. Those screens are not displayed by the process module itself but they are sent to the navigation module. That is the reason why no declaration for the ui of the process module is present in this function.
 
 ```{r ui, eval=FALSE}
 mod_pipe_process_ui <- function(id){
@@ -62,30 +64,28 @@ mod_pipe_process_ui <- function(id){
 ```
 
 
-Here is a typical ui function of a module with the call to the 'NS' function.
-The most important line is the declaration of the UI for the navigation module. In reality, the different screens are not displayed by
-the process module but they are via the navigation module. That is why there is no declaration for the ui of the process module in this function.
 
 
-## Server function
+
+# Server-side function
 
 
 In this section, on describes all the necessary code for making the module runnable. Several steps are needed:
 
-* Declaring reactive variables
-* xxxx
+* Declaring reactive variables for the navigation module and the process module itself
+* xxx
 * xxxx
 * xxxx
 
 
 They are detailed in the following sections.
 
-### Declaring reactive variables
+# Declaring reactive variables
 
-Two types of reactive variables are used in the module:
+Two types of reactive variables are used in a process module:
 
-* r.nav which is used to manage the navigation module
-* rv.process which manages the variables specific for the module process
+* **r.nav**: a list of variables sent to the navigation module to manage screens
+* **rv.process**: a list of specific variables used by the module process
 
 
 The following code defines the reactive variable to interact with the navigation module:
@@ -107,22 +107,20 @@ The following code defines the reactive variable to interact with the navigation
 ```
 
 
-The name of this list of reactive variables is always the same (r.nav). It is composed of:
+The name (**r.nav**) of the reactiveValues is always the same in all modules that could be develop in Prostar. The list is composed of the following items:
 
-* **name**: this is the name of the process,
-* **stepsNames**: this is a vector of names where each correspond to a step of the process. These names are written at each point of the timeline in the navigation process,
-* **ll.UI**: A list of uiOutput where each one correspond to a step screen of the process. In order to respect the same nomenclature all over
-Prostar's code, it is advised to name the different elements of the list as in the example. For example, for the ith step, one would write: 
-screenStepi=uiOutput(ns("Screen_Process_i)),
-* **isDone**: A vector of boolean which length is equal to the number of steps in the process. Each element indicates whether the corresponding step has been done. If it is the case, then the navigation module change the color of the timeline (e.g. from red to green)
-* **mandatory**:  A vector of boolean which length is equal to the number of steps in the process. Each element indicates whether the corresponding step is mandatory in the process or not. If it is, then it is colored in red when undone and the user cannot skip this step in the navigation module. If it is not mandatory, the default color is orange and the user can skip it,
-* **reset**: A boolean which indicates to the navigation process if it has to reset all widgets or not
+* **name**: The id of the navigation process.
+* **stepsNames**: A vector of names where each element correspond to a step of the process. These names are written at each point of the timeline in the navigation process,
+* **ll.UI**: A list of uiOutput functions where each one correspond to a screen (UI) of the process. In order to respect the same nomenclature all over Prostar's code, it is advised to name the different elements of the list as in the example. For example, for the ith step, one would write: screenStepi=uiOutput(ns("Screen_Process_i)),
+* **isDone**: A vector of boolean which length is equal to the number of steps in the process. Each element indicates whether the corresponding step has been done. If it is the case, then the navigation module change the color of the timeline (e.g. from red to green) and enable the 'next' button.
+* **mandatory**:  A vector of boolean which length is equal to the number of steps in the process. Each element indicates whether the corresponding step is mandatory in the process or not. If it is, then it is colored in red when undone and the user cannot skip this step in the navigation module. If it is not mandatory, the default color is orange and the user can skip it. If a step is mandatory, it must be tagged as Done to go to the next step.
+* **reset**: A boolean which indicates to the navigation process if it has to reset all widgets of the module or not.
 
 These values are default values and may change during the use of the module.
 
 
 Then, we describe the reactive variables specific to the module process.
-In general, it is good to name this list with the name of the process. For example, for the normalization process, one can create a list named 'rv.norm'.
+In general, it is good to name this list with the prefix 'rv.' followed by the name of the process. For example, for the normalization process, one can create a list named 'rv.norm'.
 
 
 ```{r rv_process, eval=FALSE}
@@ -131,22 +129,24 @@ rv.process <- reactiveValues(
   dataIn = NULL,
   dataOut = NULL,
   widgets = list(assay = 0,
-                   operator = NULL,
-                   operand = NULL)
+                 operator = NULL,
+                 operand = NULL)
 )
 ```
 
 
-* **name**: the name of the process
+* **name**: the id of the process.  This name is important because it is used seveal times by the core of Prostar. It must be referenced in only one pipeline (see the file R/config.R)
 * **dataIn**: A Features object
-* **i**: the indice of the dataset in the Features object (can target the right assay)
-* **dataOut**: A Features object 
+* **i**: the indice of the dataset in the Features object on which operations have to be processed
+* **dataOut**: A Features object which is the return value of the module
 * **widgets**: A list of values for all the widgets used in the process module. This list acts as temporary reactive variables for the widgets. They also can initialise the widgets and set them to as custom default value. These are the variables that are used all over the code of the module (one do not manipulate the value of the widgets from input[[]], except to instantiate this list)
 
 
-### Reset function
+# Reset function
 
-In this function (observeEvent), we look at the changes of the reactive variable r.nav$reset. The changes will operate within the module navigation process (with an actionButton) and is new value will be automatically viewed by the process module.
+In this function (observeEvent), we look at the changes of the reactive variable r.nav$reset. The changes of this variable occur within the module navigation process (with an actionButton) and its new value will be automatically viewed by the process module.
+
+When its value is equal to TRUE, all the reactive variables in the module process are set to their initial value.
 
 ```{r rv_reset, eval=FALSE}
 observeEvent(req(r.nav$reset),{
@@ -171,13 +171,13 @@ observeEvent(req(r.nav$reset),{
 ```
 
 
-### Observe module parameters
+
+# Observe for module parameters
 
 In this section, there is an observe function to set the local reactive variable with the values of parameters of the module.
 These local variables are used as temporary reactive variables.
 
-The last thing in this section is to observe changes in the parameters of the module. This is done by adding an observe function where the values of
-each parameter are used to set the reactive values of the module process:
+The last thing in this section is to observe changes in the parameters of the module. This is done by adding an observe function where the values of each parameter are used to set the reactive values of the module process:
 
 ```{r obs, eval=FALSE}
 observe({
@@ -187,16 +187,16 @@ observe({
 ```  
   
   
-### Call navigation module
+# Call for navigation module
 
-After the previous code, one can place the line to call the navigation module. It cannot be placed above because we need both r.nav and rv.process variables
+After the previous code, one can place the line to call the navigation module (server-side). It cannot be placed above because we need both r.nav and rv.process variables
 
 ```{r callNav, eval=FALSE}
 callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
 ```
 
 
-### Calls to other modules
+# Calls to other modules
 
 
 Here, one can put the call to other modules used in the process module. For example, if one want to include the module settings, add the following line
@@ -210,17 +210,16 @@ rv.process$settings <- callModule(mod_settings_server,
 
 
 
-### Definition of the screens
+# Definition of the screens
 
 
-For each screen declared previously (in the r.nav list), we write the corresponding renderUI function. 
+For each screen declared previously (the 'uiOutput' in the r.nav$ll.UI list), there is a corresponding renderUI function. 
 
-Note: The content of these screens in for educational purpose and is not mandatory for the process module. The only necessary code is the liste of the screens.
+Note: The content of these screens is for educational purpose and is not mandatory for the process module. The only necessary code is the list of the screens.
 
-Eachccsreen section contains the renderUI function  and the set of functions
-used to make the screen work
+Each screen section contains the renderUI function  and the set of functions used to make the screen work
 
-#### Screen 1
+## Screen 1
 
 In the first function, one declare a selectInput widget to choose the assay on which operations will be done
 
@@ -235,13 +234,18 @@ output$Screen_Process_1 <- renderUI({
 ```
 
 
+For each input declared in UI functions, there must be on observeEvent to watch its value and instanciate the corresponding reactive value in the list named *rv.process$widgets*.
 
 ```{r func_screen_1, eval=FALSE}
 observeEvent(input$selectAssay, {
     rv.process$widgets$assay <- as.numeric(input$selectAssay)
   })
-  
-  
+```
+
+
+The last function for the screen 1 is used to watch the variable *rv.process$widgets$assay*. If its value is greater then 0 (i.e. the user has selected an assay in the Features object), then he can pass to the second step of the module. For that, the first element of the vector r.nav$isDone is set to TRUE, telling the navigation process to change the color in the timeline (see xxx).
+
+```{r done_screen_1, eval=FALSE}  
   observe({
     if (rv.process$widgets$assay > 0)
         r.nav$isDone[1] <- TRUE
@@ -249,12 +253,13 @@ observeEvent(input$selectAssay, {
 ```  
   
   
-#### Screen 2
+## Screen 2
 
-In the second screen, one define three widgets:
+In the second screen, three widgets are defined:
+
 * a radioButtons to choose which operation will be applied to the dataset,
 * a numericInput to choose the other operand,
-* an actionButton to apply changes in the temporary reactive variable
+* an actionButton to apply changes in the temporary reactive variable.
 
 ```{r ui_screen_2, eval=FALSE}
  output$Screen_Process_2 <- renderUI({
@@ -274,7 +279,9 @@ In the second screen, one define three widgets:
   })
 ```  
   
-  
+
+As previously, there are observe functions to update each of the widgets reactive values.
+
 ```{r func_screen_2, eval=FALSE}  
   observeEvent(input$operator, ignoreInit=TRUE,{
     rv.process$widgets$operator <- input$operator
@@ -285,7 +292,11 @@ In the second screen, one define three widgets:
   })
 ```  
   
-  
+
+
+Here, the validation of the step is not processed by the watching of a reactive variable but is made by an actionButton. When the user clicks on the button, the operation is done on the dataset. The variable *rv.process$dataIn* is then updated with the new value. The variable *rv.process$dataOut* is not yet instantiated because other steps may occur in the module and they need a temporary variable.
+Finally, the vector *r.nav$isDone* is updated.
+
 ```{r end_screen_2, eval=FALSE}  
   observeEvent(input$change,{
     
@@ -306,18 +317,18 @@ In the second screen, one define three widgets:
 
 
 
-#### Screen 3
+## Screen 3
 
 
-In this last screen, one define an actionButton to validate the changes.
+In this last screen, an actionButton is defined to validate all the changes that have been processed in the module.
+
 ```{r def_screen_3, eval=FALSE} 
   output$Screen_Process_3 <- renderUI({
       actionButton(ns("save"), "Save")
   })
 ```   
 
-And for each widget in these functions, we have to write an observe function to set the reactive variable to the value of the widgets
-
+The validation is made via a watching function on the value of the actionButton. An important point is to set the *Params* list in the metadata of the recently created assay of the Features object. This is a manner to keep in memory all the parameters that have conducted to this new assay. Those parameters will also be used in other modules of Prostar.
 
 ```{r observe_var_col, eval=FALSE}  
 observeEvent(input$save,{ 
@@ -331,8 +342,11 @@ observeEvent(input$save,{
   })
 ``` 
 
+Once the parameters have been saved, the variable *rv.process$dataOut* is set with the current dataset. From this time, the return of the module is functional (the value is not NULL) and the caller module will receive an update value.
 
-### Validating the steps
+
+
+## Validating the steps
 
 To validate a step, one have to observe an event which can be:
 
@@ -372,7 +386,7 @@ must be the following line:
 
 
 
-### Server functions for process module
+## Server functions for process module
 
 At this step, one have declared all necessary functions for UI and the management of widgets with reactive variables.
 It is time to code the core functions of the process. For the example in this tutorial, one have to write
@@ -415,8 +429,9 @@ Note : It is not necessary to create specific variables for the input of actionB
 
 
 
-### Return value of the module
+## Return value of the module
 
+The return value of a module is always the reactive value named dataOut. It is set at the final step of the module.
 
 ```{r return, eval=FALSE}
 return(reactive({rv.process$dataOut}))

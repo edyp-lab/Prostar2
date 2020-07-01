@@ -12,7 +12,7 @@ mod_pipe_process_ui <- function(id){
 
 #' pipe_process Server Function
  
-mod_pipe_process_server <- function(input, output, session, obj, settings){
+mod_pipe_process_server <- function(input, output, session, obj){
   ns <- session$ns
   
   
@@ -209,7 +209,6 @@ server <- function(input, output, session) {
     test = obj,
     data = data.frame()
   )
-  
   
 
  rv$test <- callModule(mod_pipe_process_server,'foo', obj=reactive({obj}) )
