@@ -62,15 +62,7 @@ app_server <- function(input, output,session) {
   observeEvent(rv.core$tmp_dataManager$convert(),{ rv.core$current.obj <- rv.core$tmp_dataManager$convert()})
   observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()  })
   
- 
-  
-  observe({
-    req(rv.core$current.obj)
-    print(getwd())
-  })
-  
-  
-  rv.prostar$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
+ rv.prostar$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
   
   callModule(mod_all_plots_server, 'modAllPlots', 
              dataIn = reactive({
