@@ -14,11 +14,7 @@ app_server <- function(input, output,session) {
   #callModule(mod_loading_page_server,'loadingPage')
   #callModule(mod_navbar_menu_server,'mainMenu')
   
-  #Global reactive variables for Prostar-core
-  rv.prostar <- reactiveValues(
-    obj = NULL,
-    settings = NULL
-  )
+ 
   
   
   ## definition des variables globales liees a un pipeline
@@ -29,47 +25,79 @@ app_server <- function(input, output,session) {
     ## indice du dataset courant dans la liste ll.process.
     current.indice = 1,
     
-    ## liste qui contiendra les noms des différents datasets enregsitres au cours 
-    ## de l'execution sdu module. Il est initialisé à Original car dans tous les cas,
-    ## on démarre avec un dataset intitule original
-    ll.process = c('original'),
-    
-    # object returned by demode, openmode and convertmode
-    #object that is used for modules in pipeline. C'est une instance d'une classe Pipeline
+     
+    # Current Features object in Prostar
     current.obj = NULL,
+    
+    ## indice of the current assay in current.obj, corresponding to a step in the pipeline
+    current.indice = 1,
+    
+    # pipeline choosen by the user for its dataset
+    current.pipeline = NULL,
+    
+    
+    # objects returned by demode, openmode and convertmode
     tmp_dataManager = reactiveValues(convert = NULL,
                               openFile = NULL,
                               openDemo = NULL),
     
+    # return value of the settings module
+    settings = NULL,
+    
+    #
     tempplot = NULL,
+    
+    #
     loadData = NULL
     
   )
   
   observeEvent(input$ReloadProstar, { js$reset()})
   
-  observeEvent(input$browser,{
-    browser()
-  })
+  observeEvent(input$browser,{browser() })
   
   
+  ## Get the return values of modules in charge of loading datasets
   rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', pipeline.def=reactive({pipeline.defs})),
                                   convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', pipeline.def=reactive({pipeline.defs})),
                                   openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
                                   )
   
-  observeEvent(rv.core$tmp_dataManager$openFile(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openFile()})
-  observeEvent(rv.core$tmp_dataManager$convert(),{ rv.core$current.obj <- rv.core$tmp_dataManager$convert()})
-  observeEvent(rv.core$tmp_dataManager$openDemo(),{ rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()  })
+  observeEvent(rv.core$tmp_dataManager$openFile(),{ 
+    rv.core$current.obj <- rv.core$tmp_dataManager$openFile()
+    setCoreRV()
+  })
   
- rv.prostar$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
+  observeEvent(rv.core$tmp_dataManager$convert(),{ 
+    rv.core$current.obj <- rv.core$tmp_dataManager$convert()
+    setCoreRV()
+    })
+  
+  
+  observeEvent(rv.core$tmp_dataManager$openDemo(),{
+    rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()
+    setCoreRV()
+    })
+  
+  
+  
+  # Update several reactive variable once a dataset is loaded
+  setCoreRV <- reactive({
+    rv.core$current.indice <- 1
+    rv.core$current.pipeline <- metadata(rv.core$current.obj)$pipeline
+  })
+  
+  
+  # Store the return value of the module settings
+  rv.core$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
+  
   
   callModule(mod_all_plots_server, 'modAllPlots', 
              dataIn = reactive({
                req(rv.core$current.obj)
                rv.core$current.obj
              }),
-             settings = reactive({rv.prostar$settings()}))
+             settings = reactive({rv.core$settings()}))
   
   
   callModule(mod_infos_dataset_server, 
@@ -95,7 +123,7 @@ app_server <- function(input, output,session) {
    callModule(mod_release_notes_server, "modReleaseNotes")
    callModule(mod_check_updates_server, "modCheckUpdates")
 
-   callModule(mod_bug_report_server, "bugreport")
+   #callModule(mod_bug_report_server, "bugreport")
    callModule(mod_insert_md_server, "links_MD",URL_links)
    callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
    

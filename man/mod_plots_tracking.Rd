@@ -12,9 +12,10 @@ mod_plots_tracking_server(
   output,
   session,
   obj,
-  params,
   keyId,
-  reset = FALSE
+  params,
+  reset = FALSE,
+  slave = FALSE
 )
 }
 \arguments{

@@ -118,7 +118,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
     req(obj())
     
     data <- tibble::as_tibble(colData())
-    #pal <- unique(rv.prostar$settings()$examplePalette)
+    #pal <- unique(rv.core$settings()$examplePalette)
     #moduleSettings.R de prostar 2.0
     pal <- unique(RColorBrewer::brewer.pal(8,"Dark2"))
     
@@ -224,7 +224,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
       DT::formatStyle(
         colnames(df)[1:(ncol(df)/2)],
         colnames(df)[((ncol(df)/2)+1):ncol(df)],
-        #backgroundColor = DT::styleEqual(c("POV", "MEC"), c(rv.prostar$settings()$colorsTypeMV$POV, rv.prostar$settings()$colorsTypeMV$MEC)),
+        #backgroundColor = DT::styleEqual(c("POV", "MEC"), c(rv.core$settings()$colorsTypeMV$POV, rv.core$settings()$colorsTypeMV$MEC)),
         backgroundColor = DT::styleEqual(c("POV", "MEC"), c("lightblue", "#E97D5E")), #orangeProstar)),
         backgroundSize = '98% 48%',
         backgroundRepeat = 'no-repeat',
@@ -239,18 +239,13 @@ mod_plots_se_explorer_server <- function(input, output, session,
   getDataForExprs <- reactive({
     req(obj())
     
-    #test.table <- as.data.frame(round(Biobase::exprs(obj),digits=rv.prostar$settings()$nDigits))
     test.table <- tibble::as_tibble(round(SummarizedExperiment::assay(obj()),digits=10))
-    # print(paste0("tutu:",obj@experimentData@other$OriginOfValues))
     if (!is.null(originOfValues())){ #agregated dataset
       test.table <- cbind(test.table, 
                           tibble::as_tibble(SummarizedExperiment::rowData(obj())[originOfValues()]))
-      # print(paste0("tutu:",head(test.table)))
-      
     } else {
       test.table <- cbind(test.table, 
                           tibble::as_tibble(matrix(rep(NA,ncol(test.table)*nrow(test.table)), nrow=nrow(test.table))))
-      #print(paste0("tata:",head(test.table)))
     }
     test.table
     
