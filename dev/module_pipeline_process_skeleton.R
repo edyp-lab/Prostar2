@@ -1,4 +1,7 @@
-
+library(Features)
+library(shiny)
+library(Prostar2)
+source(file.path('../R', 'global.R'), local=TRUE)$value
 
 source(file.path('../R', 'mod_navigation.R'), local=TRUE)$value
 
@@ -11,7 +14,7 @@ mod_pipe_process_ui <- function(id){
 }
 
 #' pipe_process Server Function
- 
+
 mod_pipe_process_server <- function(input, output, session, obj){
   ns <- session$ns
   
@@ -38,7 +41,7 @@ mod_pipe_process_server <- function(input, output, session, obj){
     widgets = list(assay = 0,
                    operator = NULL,
                    operand = NULL)
-    )
+  )
   
   
   observeEvent(req(r.nav$reset),{
@@ -46,7 +49,7 @@ mod_pipe_process_server <- function(input, output, session, obj){
     rv.process$widgets <- list(assay = 0,
                                operator = NULL,
                                operand = NULL)
-
+    
     ## do not modify this part
     rv.process$dataIn <- obj()
     rv.process$data <- data.frame()
@@ -72,11 +75,11 @@ mod_pipe_process_server <- function(input, output, session, obj){
   # for example, the module for settings: mod_settings
   
   rv.process$settings <- callModule(mod_settings_server,
-                                 "settings", 
-                                 obj = reactive({obj()}))
+                                    "settings", 
+                                    obj = reactive({obj()}))
   
   
- 
+  
   
   observe({
     req(obj())
@@ -95,9 +98,9 @@ mod_pipe_process_server <- function(input, output, session, obj){
   ###---------------------------------------------------------------------------------###
   output$Screen_Process_1 <- renderUI({
     selectInput(ns('selectAssay'), 
-                 'Select assay', 
-                 choices=0:length(rv.process$dataIn), 
-                 selected=rv.process$widgets$assay)
+                'Select assay', 
+                choices=0:length(rv.process$dataIn), 
+                selected=rv.process$widgets$assay)
   })
   
   
@@ -108,7 +111,7 @@ mod_pipe_process_server <- function(input, output, session, obj){
   
   observe({
     if (rv.process$widgets$assay > 0)
-        r.nav$isDone[1] <- TRUE
+      r.nav$isDone[1] <- TRUE
   })
   
   
@@ -117,19 +120,20 @@ mod_pipe_process_server <- function(input, output, session, obj){
   ###---------------------------------------------------------------------------------###
   
   output$Screen_Process_2 <- renderUI({
-  tagList(
-    radioButtons(ns('operator'), 'Choose operator',
-                 choices =c('addition' = 'addition',
-                               'soustraction' = 'soustraction',
-                               'product' = 'product')
-    ),
-    numericInput(ns('operand'), 
-                 'Choose operand', 
-                 value = rv.process$widgets$operand, 
-                 min=0, 
-                 max=10),
-    actionButton(ns('change'), 'Apply operator')
-  )
+    tagList(
+      radioButtons(ns('operator'), 'Choose operator',
+                   choices = c('addition' = 'addition',
+                              'soustraction' = 'soustraction',
+                              'product' = 'product'),
+                   selected = rv.process$widgets$operator
+      ),
+      numericInput(ns('operand'), 
+                   'Choose operand', 
+                   value = rv.process$widgets$operand, 
+                   min=0, 
+                   max=10),
+      actionButton(ns('change'), 'Apply operator')
+    )
   })
   
   
@@ -154,7 +158,7 @@ mod_pipe_process_server <- function(input, output, session, obj){
             soustraction = assay(tmp) <- assay(tmp) - rv.process$widgets$operand,
             product = assay(tmp) <- assay(tmp) * rv.process$widgets$operand
     )
-   
+    
     rv.process$dataIn <- Features::addAssay(rv.process$dataIn,
                                             tmp,
                                             'tutorial')
@@ -167,19 +171,19 @@ mod_pipe_process_server <- function(input, output, session, obj){
   ###---------------------------------------------------------------------------------###
   
   output$Screen_Process_3 <- renderUI({
-      actionButton(ns("save"), "Save")
+    actionButton(ns("save"), "Save")
   })
   
   
-
+  
   observeEvent(input$save,{ 
-      metadata(rv.process$dataIn[[rv.process$widgets$assay+1]])$Params <- list(
-                          operand = rv.process$widgets$operand,
-                          operator = rv.process$widgets$operator
-                          )
-
-      rv.process$dataOut <- rv.process$dataIn
-      r.nav$isDone[3] <- TRUE
+    metadata(rv.process$dataIn[[rv.process$widgets$assay+1]])$Params <- list(
+      operand = rv.process$widgets$operand,
+      operator = rv.process$widgets$operator
+    )
+    
+    rv.process$dataOut <- rv.process$dataIn
+    r.nav$isDone[3] <- TRUE
   })
   
   return({reactive(rv.process$dataOut)})
@@ -210,27 +214,27 @@ server <- function(input, output, session) {
     data = data.frame()
   )
   
-
- rv$test <- callModule(mod_pipe_process_server,'foo', obj=reactive({obj}) )
- 
- 
- observeEvent(rv$test(),{
-   
-   if (is.null(rv$test()))
-     rv$data <- data.frame()
-   else
+  
+  rv$test <- callModule(mod_pipe_process_server,'foo', obj=reactive({obj}) )
+  
+  
+  observeEvent(rv$test(),{
+    
+    if (is.null(rv$test()))
+      rv$data <- data.frame()
+    else
     {
       for (i in 1:length(rv$test()))
-      rv$data <- rbind(rv$data, assay(rv$test()[[i]])[1,])
-    colnames(rv$data) <- colnames(assay(rv$test()))
+        rv$data <- rbind(rv$data, assay(rv$test()[[i]])[1,])
+      colnames(rv$data) <- colnames(assay(rv$test()))
     }
- })
- 
- 
- output$dataset <- renderDataTable({
-   rv$data
- })
+  })
+  
+  
+  output$dataset <- renderDataTable({
+    rv$data
+  })
   
 }
-                         
+
 shinyApp(ui, server)                    
