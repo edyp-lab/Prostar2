@@ -39,7 +39,7 @@ server <- function(input, output, session) {
   
   r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   
-  obj <- Features::addAssay(Exp1_R25_prot, (Features::filterNA(Exp1_R25_prot,i=2))[[2]], "original_log_NAfiltered")
+  obj <- QFeatures::addAssay(Exp1_R25_prot, (QFeatures::filterNA(Exp1_R25_prot,i=2))[[2]], "original_log_NAfiltered")
   
   callModule(mod_all_plots_server,'plots',
              dataIn = reactive({obj}),

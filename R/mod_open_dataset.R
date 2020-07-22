@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_open_dataset_ui and mod_open_dataset_server
 #' 
 #' @description  A shiny Module.
@@ -39,9 +39,9 @@ mod_open_dataset_ui <- function(id){
       the 'Dataset manager' menu: it will make Prostar restart with a fresh R session where import functions are enabled.")
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_open_dataset
 #' 
 #' @export
@@ -65,13 +65,13 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   
   rv.openDataset$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def=reactive({pipeline.def()}))
-
+  
   
   DeleteExtension <- function(name){
     return(strsplit(name,'.', fixed=T)[[1]][1])
   }
   
- 
+  
   observe({
     cond <- !is.null(rv.openDataset$pipe())
     if (class(rv.openDataset$dataRead)=='MSnSet'){
@@ -108,7 +108,7 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   output$ui_select_KID <- renderUI({
     req(rv.openDataset$dataRead )
-   
+    
     if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
     
     mod_select_keyID_from_MSnset_ui(ns('select_KID'))
@@ -131,23 +131,23 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   observeEvent(input$loadDataset,ignoreInit =TRUE,{ 
     req(rv.openDataset$dataRead )
-
+    
     withProgress(message = '',detail = '', value = 0, {
       incProgress(1, detail = 'Loading dataset')
       switch(class(rv.openDataset$dataRead ),
-             Features= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
+             QFeatures= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
              MSnSet= {
                typeOfData <- rv.openDataset$dataRead@experimentData@other$typeOfData
                ll.pipeline <- rv.openDataset$pipe()
                
-               rv.openDataset$dataOut <- convertMSnset2Features(obj = rv.openDataset$dataRead,
+               rv.openDataset$dataOut <- convertMSnset2QFeatures(obj = rv.openDataset$dataRead,
                                                                  analysis = DeleteExtension(input$file$name),
                                                                  parentProtId = rv.openDataset$parentProtId,
                                                                  keyId = rv.openDataset$keyID,
                                                                  pipelineType = names(ll.pipeline), 
                                                                  processes = unlist(ll.pipeline)
-                                                                )
-                      },
+               )
+             },
              default= {
                shinyjs::info("Warning : This type of data is not implemented in Prostar.")
                return(NULL)
@@ -161,10 +161,10 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
   
   return(reactive({rv.openDataset$dataOut }))
 }
-    
+
 ## To be copied in the UI
 # mod_open_dataset_ui("open_dataset_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_open_dataset_server, "open_dataset_ui_1")
- 
+

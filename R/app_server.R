@@ -26,7 +26,7 @@ app_server <- function(input, output,session) {
     current.indice = 1,
     
      
-    # Current Features object in Prostar
+    # Current QFeatures object in Prostar
     current.obj = NULL,
     
     ## indice of the current assay in current.obj, corresponding to a step in the pipeline

@@ -21,7 +21,7 @@ BiocStyle::markdown()
 
 # Introduction
 
-This vignette explains how to create a new pipeline in the Prostar framework. A pipeline is a set of data processes applied to a dataset (ie an object of class Features).
+This vignette explains how to create a new pipeline in the Prostar framework. A pipeline is a set of data processes applied to a dataset (ie an object of class QFeatures).
 
 
 A pipeline can be associated with datasets of specific type. Such, the use of a certain dataset restraint the set of possible pipelines. For example, if the current dataset is a protein one, it can be processed only by a protein pipeline.

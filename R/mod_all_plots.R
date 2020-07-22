@@ -179,8 +179,8 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
     req(input$chooseDataset)
     dataIn()
     
-    if ((class(dataIn()) != "Features")){
-      warning('File format not recognized. Expected Features')
+    if ((class(dataIn()) != "QFeatures")){
+      warning('File format not recognized. Expected QFeatures')
       return(NULL)
     }
     rv$current.obj <- dataIn()[[input$chooseDataset]]

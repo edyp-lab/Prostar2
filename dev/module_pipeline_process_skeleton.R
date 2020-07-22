@@ -1,4 +1,4 @@
-library(Features)
+library(QFeatures)
 library(shiny)
 library(Prostar2)
 source(file.path('../R', 'global.R'), local=TRUE)$value
@@ -123,8 +123,8 @@ mod_pipe_process_server <- function(input, output, session, obj){
     tagList(
       radioButtons(ns('operator'), 'Choose operator',
                    choices = c('addition' = 'addition',
-                              'soustraction' = 'soustraction',
-                              'product' = 'product'),
+                               'soustraction' = 'soustraction',
+                               'product' = 'product'),
                    selected = rv.process$widgets$operator
       ),
       numericInput(ns('operand'), 
@@ -159,9 +159,9 @@ mod_pipe_process_server <- function(input, output, session, obj){
             product = assay(tmp) <- assay(tmp) * rv.process$widgets$operand
     )
     
-    rv.process$dataIn <- Features::addAssay(rv.process$dataIn,
-                                            tmp,
-                                            'tutorial')
+    rv.process$dataIn <- QFeatures::addAssay(rv.process$dataIn,
+                                             tmp,
+                                             'tutorial')
     r.nav$isDone[2] <- TRUE
   })
   

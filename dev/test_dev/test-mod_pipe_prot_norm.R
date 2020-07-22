@@ -14,7 +14,7 @@ library(shinyjs)
 library(DAPAR2)
 library(DT)
 library(tibble)
-library(Features)
+library(QFeatures)
 
 options(shiny.fullstacktrace = FALSE)
 

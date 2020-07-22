@@ -26,14 +26,14 @@ mod_infos_dataset_ui <- function(id){
              mod_format_DT_ui(ns('dt')),
              br(),
              br(),
-
+             
              uiOutput(ns('samples_tab_ui'))
              
       ),
-       column(width=6,
-              uiOutput(ns('choose_SE_ui')),
-              uiOutput(ns('show_SE_ui'))
-       )
+      column(width=6,
+             uiOutput(ns('choose_SE_ui')),
+             uiOutput(ns('show_SE_ui'))
+      )
     )
   )
 }
@@ -59,44 +59,44 @@ mod_infos_dataset_server <- function(input, output, session, obj){
   
   observe({
     req(obj())
-    if (class(obj()) != 'Features')
-      {
-      warning("'obj' is not of class 'Features'")
+    if (class(obj()) != 'QFeatures')
+    {
+      warning("'obj' is not of class 'QFeatures'")
       return(NULL)
     }
     
     callModule(mod_format_DT_server,'samples_tab',
                table2show = reactive({req(obj())
-                              data.frame(colData(obj()))}),
+                 data.frame(colData(obj()))}),
                style = reactive({req(obj())
                  list(cols = colnames(MultiAssayExperiment::colData(obj())),
-                                      vals = colnames(MultiAssayExperiment::colData(obj()))[2],
-                                      unique = unique(MultiAssayExperiment::colData(obj())$Condition),
-                                      pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
+                      vals = colnames(MultiAssayExperiment::colData(obj()))[2],
+                      unique = unique(MultiAssayExperiment::colData(obj())$Condition),
+                      pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
                })
     )
   })
   
   
-    callModule(mod_format_DT_server,'dt',
-             table2show = reactive({req(Get_Features_summary())
-               as_tibble(Get_Features_summary())}),
+  callModule(mod_format_DT_server,'dt',
+             table2show = reactive({req(Get_QFeatures_summary())
+               as_tibble(Get_QFeatures_summary())}),
              style=reactive({NULL}))
-             
+  
+  
+  
+  
+  
+  output$samples_tab_ui <- renderUI({
+    req(obj())
     
+    tagList(
+      h4("Samples"),
+      mod_format_DT_ui(ns('samples_tab'))
+    )
     
-    
-    
-    output$samples_tab_ui <- renderUI({
-      req(obj())
-      
-      tagList(
-        h4("Samples"),
-        mod_format_DT_ui(ns('samples_tab'))
-      )
-      
-    })
-    
+  })
+  
   output$title <- renderUI({
     req(obj())
     title <- metadata(obj())$analysis
@@ -115,19 +115,19 @@ mod_infos_dataset_server <- function(input, output, session, obj){
                 choices = c("None",names(MultiAssayExperiment::experiments(obj())))
     )
   })
-
-
-  Get_Features_summary <- reactive({
+  
+  
+  Get_QFeatures_summary <- reactive({
     
     req(obj())
-   nb_assay <- length(obj())
+    nb_assay <- length(obj())
     names_assay <- unlist(names(obj()))
     pipeline <- metadata(obj())$pipelineType
-     
+    
     columns <- c("Number of assay(s)",
                  "List of assay(s)",
                  "Pipeline Type")
-
+    
     vals <- c( if(is.null(metadata(obj())$pipelineType)) '-' else metadata(obj())$pipelineType,
                length(obj()),
                if (length(obj())==0) '-' else HTML(paste0('<ul>', paste0('<li>', names_assay, "</li>", collapse=""), '</ul>', collapse=""))
@@ -137,14 +137,14 @@ mod_infos_dataset_server <- function(input, output, session, obj){
     
     do <- data.frame(Definition= columns,
                      Value=vals
-                     )
-
+    )
+    
     do
   })
-
-
-
-
+  
+  
+  
+  
   Get_SE_Summary <- reactive({
     req(obj())
     req(input$selectInputSE)
@@ -155,19 +155,19 @@ mod_infos_dataset_server <- function(input, output, session, obj){
                  "Number of lines",
                  "% of missing values",
                  "Number of empty lines")
-                 
-   
-   
+    
+    
+    
     typeOfData <- metadata(data)$typeOfData
     nLines <- nrow(obj()[[input$selectInputSE]])
     percentMV <- nNA(obj()[[input$selectInputSE]])$nNA
     nEmptyLines <-nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
-
+    
     val <- c(typeOfData,
              nLines,
              percentMV,
              nEmptyLines
-             )
+    )
     
     
     
@@ -196,9 +196,9 @@ mod_infos_dataset_server <- function(input, output, session, obj){
                      Value=val)
     do
   })
-
-
-
+  
+  
+  
   # output$properties_ui <- renderUI({
   #   req(input$selectInputSE)
   #   req(obj())
@@ -207,9 +207,9 @@ mod_infos_dataset_server <- function(input, output, session, obj){
   #     checkboxInput(ns('properties_button'), "Display details?", value=FALSE)
   #   }
   # })
-
-
-
+  
+  
+  
   # observeEvent(input$selectInputSE,{
   # 
   #   if (isTRUE(input$properties_button)) {
@@ -219,8 +219,8 @@ mod_infos_dataset_server <- function(input, output, session, obj){
   #   }
   #   else{ return(NULL)}
   # })
-
-
+  
+  
   # output$properties <- renderPrint({
   #   req(input$properties_button)
   # 
@@ -230,17 +230,17 @@ mod_infos_dataset_server <- function(input, output, session, obj){
   #     metadata(data)
   #   }
   # })
-
-
-
+  
+  
+  
   output$show_SE_ui <- renderUI({
     req(input$selectInputSE)
     req(obj())
     
     if (input$selectInputSE != "None") {
-
+      
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
-     print(class(data))
+      print(class(data))
       callModule(mod_format_DT_server,'dt2',
                  table2show = reactive({Get_SE_Summary()}),
                  style=reactive({NULL}))
@@ -253,25 +253,25 @@ mod_infos_dataset_server <- function(input, output, session, obj){
     else {
       return(NULL)
     }
-
+    
   })
-
-
-
+  
+  
+  
   output$info <- renderUI({
     req(input$selectInputSE)
     req(obj())
-
+    
     if (input$selectInputSE != "None") {
-
+      
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
-
+      
       typeOfDataset <- metadata(obj()[[input$selectInputSE]])$typeOfData
-
+      
       pourcentage <- nNA(obj()[[input$selectInputSE]])$nNA
-
+      
       nb.empty.lines <- nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
-
+      
       tagList(
         tags$h4("Info"),
         if (typeOfDataset == "protein"){
@@ -279,7 +279,7 @@ mod_infos_dataset_server <- function(input, output, session, obj){
                  has been disabled because the dataset contains
                  protein quantitative data.")
         },
-
+        
         if (pourcentage > 0){
           tags$p("As your dataset contains missing values, you should
                  impute them prior to proceed to the differential analysis.")
@@ -289,25 +289,25 @@ mod_infos_dataset_server <- function(input, output, session, obj){
                  should remove them with the filter tool
                  prior to proceed to the analysis of the data.")
         }
-
+        
       )
     }
   })
-
   
   
-
+  
+  
   NeedsUpdate <- reactive({
     req(obj())
     PROSTAR.version <- metadata(MultiAssayExperiment::experiments(obj()))$versions$Prostar_Version
     
     if(compareVersion(PROSTAR.version,"1.12.9") != -1 && !is.na(PROSTAR.version) && PROSTAR.version != "NA") {
       return (FALSE)
-      } else {
+    } else {
       return(TRUE)
     }
   })
-
+  
   
 }
 

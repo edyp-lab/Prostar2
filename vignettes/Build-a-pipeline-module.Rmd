@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 # Introduction
 
 A data processing module in Prostar is an independant Shinyapp which operate one or several treatments to a dataset. Its input has at least one dataset and its output is at least the modified input dataset.
-As in Prostar (>=2.0.0), the class of the dataset is Features.
+As in Prostar (>=2.0.0), the class of the dataset is QFeatures.
 The aim of this tutorial is to show how to develop a process module for Prostar (ie a module which belongs to a pipeline and operates transformations on the dataset). Along this tutorial, one will create a module with 3 steps and aims to modify some values in the input dataset. For that, we will also use another module available in Prostar: the navigation module which manages modules wkith several steps.
 
 
@@ -136,9 +136,9 @@ rv.process <- reactiveValues(
 
 
 * **name**: the id of the process.  This name is important because it is used seveal times by the core of Prostar. It must be referenced in only one pipeline (see the file R/config.R)
-* **dataIn**: A Features object
-* **i**: the indice of the dataset in the Features object on which operations have to be processed
-* **dataOut**: A Features object which is the return value of the module
+* **dataIn**: A QFeatures object
+* **i**: the indice of the dataset in the QFeatures object on which operations have to be processed
+* **dataOut**: A QFeatures object which is the return value of the module
 * **widgets**: A list of values for all the widgets used in the process module. This list acts as temporary reactive variables for the widgets. They also can initialise the widgets and set them to as custom default value. These are the variables that are used all over the code of the module (one do not manipulate the value of the widgets from input[[]], except to instantiate this list)
 
 
@@ -243,7 +243,7 @@ observeEvent(input$selectAssay, {
 ```
 
 
-The last function for the screen 1 is used to watch the variable *rv.process$widgets$assay*. If its value is greater then 0 (i.e. the user has selected an assay in the Features object), then he can pass to the second step of the module. For that, the first element of the vector r.nav$isDone is set to TRUE, telling the navigation process to change the color in the timeline (see xxx).
+The last function for the screen 1 is used to watch the variable *rv.process$widgets$assay*. If its value is greater then 0 (i.e. the user has selected an assay in the QFeatures object), then he can pass to the second step of the module. For that, the first element of the vector r.nav$isDone is set to TRUE, telling the navigation process to change the color in the timeline (see xxx).
 
 ```{r done_screen_1, eval=FALSE}  
   observe({
@@ -308,7 +308,7 @@ Finally, the vector *r.nav$isDone* is updated.
             product = assay(tmp) <- assay(tmp) * rv.process$widgets$operand
     )
    
-    rv.process$dataIn <- Features::addAssay(rv.process$dataIn,
+    rv.process$dataIn <- QFeatures::addAssay(rv.process$dataIn,
                                             tmp,
                                             'tutorial')
     r.nav$isDone[2] <- TRUE
@@ -328,7 +328,7 @@ In this last screen, an actionButton is defined to validate all the changes that
   })
 ```   
 
-The validation is made via a watching function on the value of the actionButton. An important point is to set the *Params* list in the metadata of the recently created assay of the Features object. This is a manner to keep in memory all the parameters that have conducted to this new assay. Those parameters will also be used in other modules of Prostar.
+The validation is made via a watching function on the value of the actionButton. An important point is to set the *Params* list in the metadata of the recently created assay of the QFeatures object. This is a manner to keep in memory all the parameters that have conducted to this new assay. Those parameters will also be used in other modules of Prostar.
 
 ```{r observe_var_col, eval=FALSE}  
 observeEvent(input$save,{ 
