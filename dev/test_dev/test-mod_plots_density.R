@@ -7,6 +7,7 @@ library(SummarizedExperiment)
 source(file.path("../../R","mod_plots_density.R"), local=TRUE)$value
 source(file.path("../../R","mod_settings.R"), local=TRUE)$value
 source(file.path("../../R","mod_popover_for_help.R"), local=TRUE)$value
+source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 
 ui <- fluidPage(
   mod_plots_density_ui('plots_density')
@@ -31,7 +32,8 @@ server <- function(input, output, session) {
              obj = reactive({obj}),
              conds = reactive({conds}),
              legend = reactive({legend}),
-             base_palette = reactive({r$settings()$examplePalette}))
+             base_palette = reactive({r$settings()$examplePalette})
+  )
 }
 
 
