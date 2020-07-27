@@ -21,15 +21,11 @@ server <- function(input, output, session) {
   
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   obj<-filterNA(Exp1_R25_prot,pNA=0,i=2)
+  obj<-filterNA(obj,pNA=0,i=1)
   
   
-  rv <- reactiveValues(
-    test = obj
-  )
-  
-  
-  rv$test <- callModule(mod_pipe_hypotest_server,'pipe_hypothesis_test',
-                        obj=reactive({obj}),
+  callModule(mod_pipe_hypotest_server,'pipe_hypothesis_test',
+                        obj= reactive({obj}),
                         ind = reactive({2})
                         )
   

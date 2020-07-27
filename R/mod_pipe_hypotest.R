@@ -46,26 +46,25 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
     name = "processHypotest",
     dataIn = NULL,
     i = NULL,
-    settings = NULL,
+    #settings = NULL,
     # contient l'objet de sortie du module (ie. a QFeatures instance)
     dataOut = NULL,
     widgets = list(design = "None",
                    method = "None",
                    ttest_options = "Student",
                    th_logFC = 0,
-                   listNomsComparaison = NULL),
+                   listNamesComparison = NULL),
     res_AllPairwiseComparisons = NULL
   )
   
   
   observeEvent(req(r.nav$reset),{
     
-    
     rv.hypotest$widgets <- list(design = "None",
                                 method = "None",
                                 ttest_options = "Student",
                                 th_logFC = 0,
-                                listNomsComparaison = NULL)
+                                listNomsComparison = NULL)
     rv.hypotest$res_AllPairwiseComparisons = NULL
     
     rv.hypotest$dataIn <- obj()
@@ -153,8 +152,7 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
                       actionButton("PerformLogFCPlot", "Perform log FC plot",class = actionBtnClass )
                       
             )
-          )
-          ,
+          ),
           tags$hr(),
           highchartOutput(ns("FoldChangePlot"), height="100%")
         )
@@ -164,33 +162,35 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   })
   #######################################################################################################################
   
-  observeEvent(input$anaDiff_Design, {
+  observeEvent(input$anaDiff_Design, ignoreInit = TRUE, {
     rv.hypotest$widgets$design <- as.numeric(input$anaDiff_Design)
   })
-  observeEvent(input$diffAnaMethod, {
+  observeEvent(input$diffAnaMethod, ignoreInit = TRUE,  {
     rv.hypotest$widgets$method <- as.numeric(input$diffAnaMethod)
   })
-  observeEvent(input$ttest_options, {
-    rv.hypotest$widgets$assay <- as.numeric(input$ttest_options)
+  observeEvent(input$ttest_options, ignoreInit = TRUE,  {
+    rv.hypotest$widgets$ttest_options <- as.numeric(input$ttest_options)
   })
-  observeEvent(input$seuilLogFC, {
-    rv.hypotest$widgets$assay <- as.numeric(input$seuilLogFC)
+  observeEvent(input$seuilLogFC, ignoreInit = TRUE,  {
+    rv.hypotest$widgets$th_logFC <- as.numeric(input$seuilLogFC)
   })
   
   
   
   output$FoldChangePlot <- renderHighchart({
-    #req(input$PerformLogFCPlot)
+    
+    req(input$diffAnaMethod)
+    req(input$anaDiff_Design)
+    input$ttest_options
     
     data <- ComputeComparisons()
     
-    print("logFC")
-    print(head(data$logFC))
-    print("seuilLogFC")
-    print(as.numeric(input$seuilLogFC))
+    ind <- grep('_logFC', colnames(metadata(data)$t_test))
+    df <- setNames(as.data.frame(metadata(data)$t_test[,ind]), colnames(metadata(data)$t_test)[ind])
     
+    if (length(ind)>0) { hc_logFC_DensityPlot(df,as.numeric(input$seuilLogFC)) }
     
-    hc_logFC_DensityPlot(data$logFC,as.numeric(input$seuilLogFC))
+    #hc_logFC_DensityPlot(data$logFC,as.numeric(input$seuilLogFC))
     
   })
   
@@ -202,34 +202,39 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
     req(input$diffAnaMethod)
     req(input$anaDiff_Design)
     input$ttest_options
+    
     if ((input$diffAnaMethod=="None")|| (input$anaDiff_Design=="None")) {return (NULL)}
     if (length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]])))) > 0) { return(NULL)}
     
     
+
     isolate({
       switch(input$diffAnaMethod,
              Limma={
-               rv.hypotest$res_AllPairwiseComparisons <- limma.complete.test(obj=rv.hypotest$dataIn[[rv.hypotest$i]],
-                                                                             sampleTab=colData(rv.hypotest$dataIn),
-                                                                             comp.type=input$anaDiff_Design) 
-               
+               rv.hypotest$res_AllPairwiseComparisons <- t_test_sam(object=rv.hypotest$dataIn[[rv.hypotest$i]],
+                                                                    sampleTab=data.frame(colData(rv.hypotest$dataIn)),
+                                                                    FUN="limma.complete.test",
+                                                                    comp.type=input$anaDiff_Design)
              },
              ttests={
-               rv.hypotest$res_AllPairwiseComparisons <- compute.t.test(obj=rv.hypotest$dataIn[[rv.hypotest$i]],
-                                                                        sampleTab=colData(rv.hypotest$dataIn),
-                                                                        type='compute.t.test',
-                                                                        contrast=input$anaDiff_Design)
-             })
-      print("res_AllPairwiseComparisons")
-      print(rv.hypotest$res_AllPairwiseComparisons)
+               rv.hypotest$res_AllPairwiseComparisons <- t_test_sam(object=rv.hypotest$dataIn[[rv.hypotest$i]],
+                                                                    sampleTab=data.frame(colData(rv.hypotest$dataIn)),
+                                                                    FUN="compute.t.test",
+                                                                    contrast = input$anaDiff_Design,
+                                                                    type=input$ttest_options)
+               })
+
+
+      rv.hypotest$widgets$listNamesComparison <- names(metadata(rv.hypotest$res_AllPairwiseComparisons)[['t_test']])[1]
+        
       
-      rv.hypotest$widgets$listNomsComparaison <- colnames(rv.hypotest$res_AllPairwiseComparisons$logFC)
-      
-      print("listNomsComparaison")
-      print(rv.hypotest$widgets$listNomsComparaison)
+      rv.hypotest$res_AllPairwiseComparisons
       
     })
+    
   })
+  
+  
   
   observeEvent(input$PerformLogFCPlot, {
     r.nav$isDone[1] <- TRUE
@@ -250,7 +255,7 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   })
   
   output$btn_valid <- renderUI({
-    cond <- (input$diffAnaMethod != "None")&&(input$anaDiff_Design != "None")
+    cond <- (rv.hypotest$widgets$method != "None")&&(rv.hypotest$widgets$design != "None")
     if (!cond){return(NULL)}
     actionButton(ns("ValidTest"),"Save significance test", class = actionBtnClass)
   })
@@ -262,7 +267,7 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
       method = rv.hypotest$widgets$method,
       ttest_options = rv.hypotest$widgets$ttest_options,
       th_logFC = rv.hypotest$widgets$th_logFC,
-      listNomsComparaison =rv.hypotest$widgets$listNomsComparaison
+      listNamesComparison =rv.hypotest$widgets$listNamesComparison
     )
     
     rv.hypotest$dataOut <- rv.hypotest$dataIn
