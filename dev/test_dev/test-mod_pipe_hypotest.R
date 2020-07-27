@@ -1,6 +1,9 @@
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_pipe_hypotest.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 
 
 library(QFeatures)
@@ -24,10 +27,9 @@ server <- function(input, output, session) {
   
   
   callModule(mod_pipe_hypotest_server,'pipe_hypothesis_test',
-                        obj= reactive({obj}),
-                        ind = reactive({2})
-                        )
-  
+             obj= reactive({obj}),
+             ind = reactive({2})
+  )
   
 }
 

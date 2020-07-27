@@ -28,10 +28,11 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   ns <- session$ns
   
   
+  
   ## Section navigation module
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
-    name = "Hypothesis Test",
+    name = "HypothesisTest",
     stepsNames = c("HypothesisTest", "Save"),
     ll.UI = list( screenStep1 = uiOutput(ns("Screen_Hypotest_1")),
                   screenStep2 = uiOutput(ns("Screen_Hypotest_2"))
@@ -46,7 +47,7 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
     name = "processHypotest",
     dataIn = NULL,
     i = NULL,
-    #settings = NULL,
+    settings = NULL,
     # contient l'objet de sortie du module (ie. a QFeatures instance)
     dataOut = NULL,
     widgets = list(design = "None",
@@ -92,9 +93,9 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   ##
   ##
   
-  # rv.process$settings <- callModule(mod_settings_server,
-  #                                   "settings", 
-  #                                   obj = reactive({obj()}))
+  rv.hypotest$settings <- callModule(mod_settings_server,
+                                    "settings",
+                                    obj = reactive({obj()}))
   
   
   
@@ -110,32 +111,13 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   
   
   
-  observeEvent(input$anaDiff_Design, {
-    rv.hypotest$widgets$design <- as.numeric(input$anaDiff_Design)
-  })
-  observeEvent(input$diffAnaMethod,  {
-    rv.hypotest$widgets$method <- as.numeric(input$diffAnaMethod)
-  })
-  observeEvent(input$ttest_options,  {
-    rv.hypotest$widgets$ttest_options <- as.numeric(input$ttest_options)
-  })
-  
-  observeEvent(input$diffAnaMethod,{
-    toggle(id = "ttest_options",  condition = (input$diffAnaMethod == "ttests"))
-  })
-  
-  observeEvent(input$seuilLogFC,  {
-    rv.hypotest$widgets$th_logFC <- as.numeric(input$seuilLogFC)
-  })
-  
-  
   
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 1                                        ###
   ###---------------------------------------------------------------------------------###
   output$Screen_Hypotest_1 <- renderUI({
     
-    
+    print('screen 1')
     isolate({
       NA.count<- length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]]))))
       if (NA.count > 0){
@@ -184,6 +166,28 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
         
       }
     })
+  })
+  
+  
+  
+  observeEvent(input$anaDiff_Design, ignoreInit=TRUE,{
+    rv.hypotest$widgets$design <- input$anaDiff_Design
+  })
+  
+  observeEvent(input$diffAnaMethod, ignoreInit=TRUE,{
+    rv.hypotest$widgets$method <- input$diffAnaMethod
+  })
+  
+  observeEvent(input$ttest_options, ignoreInit=TRUE,{
+    rv.hypotest$widgets$ttest_options <- input$ttest_options
+  })
+  
+  observeEvent(input$diffAnaMethod, ignoreInit=TRUE,{
+    toggle(id = "ttest_options",  condition = (input$diffAnaMethod == "ttests"))
+  })
+  
+  observeEvent(input$seuilLogFC, ignoreInit=TRUE,{
+    rv.hypotest$widgets$th_logFC <- as.numeric(input$seuilLogFC)
   })
   
   
@@ -262,21 +266,25 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
-  
-  output$Screen_HypoTest_2 <- renderUI({
+
+  output$Screen_Hypotest_2 <- renderUI({
+    
+    print('screen 2')
     tagList(
       uiOutput(ns("btn_valid"))
     )
   })
   
+  
   output$btn_valid <- renderUI({
     
     cond <- (input$diffAnaMethod != "None")&&(input$anaDiff_Design != "None")
-    print(conds)
     if (!cond){return(NULL)}
     actionButton(ns("ValidTest"),"Save significance test", class = actionBtnClass)
     
   })
+  
+  
   
   observeEvent(input$ValidTest,{
     
@@ -289,11 +297,14 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
     )
     
     rv.hypotest$dataOut <- rv.hypotest$dataIn
+    
     r.nav$isDone[2] <- TRUE
   })
   
   
+  
   return({reactive(rv.hypotest$dataOut)})
+  
   
 }
 
