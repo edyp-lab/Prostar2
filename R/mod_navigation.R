@@ -1,6 +1,6 @@
 
 code_sass_timeline <- list(
-style1 ="$numDots:3;
+  style1 ="$numDots:3;
 $parentWidthBase: 0.4;
 $parentWidth: $parentWidthBase * 100vw;
 $parentMaxWidth: 800px;
@@ -285,7 +285,7 @@ $lineWidth: 5px;
 style3 = "")
 
 # Module UI
-  
+
 #' @title   mod_navigation_ui and mod_navigation_server
 #' @description  A shiny Module. The sass source code for timeline was inspired by 
 #'  : https://codepen.io/cjl750/pen/mXbMyo
@@ -315,20 +315,20 @@ mod_navigation_ui <- function(id){
       column(width=2,
              div( style="display:inline-block; vertical-align: middle; padding: 7px",
                   actionButton(ns("rstBtn"), "reset",
-                                                 class = PrevNextBtnClass,
-                                                 style='padding:4px; font-size:80%')),
+                               class = PrevNextBtnClass,
+                               style='padding:4px; font-size:80%')),
              div( id='test',style="display:inline-block; vertical-align: middle; padding: 7px",
                   actionButton(ns("prevBtn"), "<<",
-                                                 class = PrevNextBtnClass,
-                                                 style='padding:4px; font-size:80%'))
-            ),
+                               class = PrevNextBtnClass,
+                               style='padding:4px; font-size:80%'))
+      ),
       column(width=8,div( style="display:inline-block; vertical-align: middle; padding: 7px",
                           uiOutput(ns("timelineStyle")))
       ),
       column(width=2,div(style="display:inline-block; vertical-align: middle; padding: 7px",
                          shinyjs::disabled(actionButton(ns("nextBtn"), ">>",
-                                      class = PrevNextBtnClass,
-                                      style='padding:4px; font-size:80%')))
+                                                        class = PrevNextBtnClass,
+                                                        style='padding:4px; font-size:80%')))
       )
     ),
     hr(),
@@ -338,15 +338,15 @@ mod_navigation_ui <- function(id){
     
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_navigation
 #' @export
 #' @keywords internal
 #' @import shiny shinyjs
 #' @importFrom sass sass
-    
+
 mod_navigation_server <- function(input, output, session, style=1, pages){
   ns <- session$ns
   
@@ -367,9 +367,9 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
     
     code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
-   
+    
     shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-
+    
   })
   
   
@@ -383,7 +383,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     }
     current$val <- 1
   })
-
+  
   
   output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
   
@@ -397,7 +397,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
     for (i in 1:current$nbSteps){
       txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
-     }
+    }
     txt <- paste0(txt,"</div></div>")
     HTML(txt)
   })
@@ -422,7 +422,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
       txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
     }
     txt <- paste0(txt,"</ul>")
-
+    
     HTML(txt)
   })
   
@@ -460,7 +460,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     
     html.table
   })
-
+  
   
   
   observeEvent(req(input$rstBtn),{
@@ -474,7 +474,7 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
     newval <- current$val + direction 
     newval <- max(1, newval)
     newval <- min(newval, current$nbSteps)
-   current$val <- newval
+    current$val <- newval
   }
   
   
@@ -489,14 +489,14 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
   
   observeEvent(current$val, {
     lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
-    })
-
-
+  })
+  
+  
   output$screens <- renderUI({
     tagList(pages$ll.UI)
   })
-
-
+  
+  
 }
 
 

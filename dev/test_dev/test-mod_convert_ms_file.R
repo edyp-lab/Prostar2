@@ -1,6 +1,6 @@
 library(shiny)
 library(rhandsontable)
-library(Features)
+library(QFeatures)
 library(S4Vectors)
 library(htmlwidgets)
 library(DT)

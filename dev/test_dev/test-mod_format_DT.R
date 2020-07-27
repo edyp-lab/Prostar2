@@ -1,5 +1,5 @@
 library(shiny)
-library(Features)
+library(QFeatures)
 library(DT)
 
 source(file.path('../../R', 'global.R'), local=TRUE)$value

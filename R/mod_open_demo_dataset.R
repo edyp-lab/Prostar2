@@ -86,8 +86,8 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
       incProgress(1/nSteps, detail = 'Loading dataset')
       utils::data(list=input$demoDataset, package='DAPARdata2')
       rv.openDemo$dataRead <- BiocGenerics::get(input$demoDataset)
-      if (class(rv.openDemo$dataRead)!="Features") {
-        shinyjs::info("Warning : this file is not a MSnSet file ! 
+      if (class(rv.openDemo$dataRead)!="QFeatures") {
+        shinyjs::info("Warning : this file is not a QFeatures file ! 
                       Please choose another one.")
         return(NULL)
       }

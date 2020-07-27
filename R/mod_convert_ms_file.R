@@ -327,11 +327,11 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   output$show_Identification_Tab_ui <- renderUI({
-   if (length(input$choose_quanti_data_col) == 0 || !isTRUE(input$select_Identification)){
+    if (length(input$choose_quanti_data_col) == 0 || !isTRUE(input$select_Identification)){
       return(NULL)
     }
     
-     DT::dataTableOutput(ns("show_table"), width='500px')
+    DT::dataTableOutput(ns("show_table"), width='500px')
   })
   
   
@@ -370,12 +370,12 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     
     # #if(is.null(input$choose_quanti_data_col)) return(NULL)
     # #if(is.null(rv.convert$dataIn)) return(NULL)
-     
+    
     #session$sendCustomMessage('unbind-DT', 'show_table')
     df <- NULL
     choices <- c("None", colnames(rv.convert$dataIn))
     names(choices) <- c("None",colnames(rv.convert$dataIn))
-
+    
     if (isTRUE(input$select_Identification)) {
       df <- data.frame(tibble::as_tibble(input$choose_quanti_data_col),
                        shinyInput(selectInput,
@@ -388,8 +388,8 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       df <- data.frame(Sample = tibble::as_tibble(input$choose_quanti_data_col))
       colnames(df) <- c("Sample")
     }
-     
-     df
+    
+    df
   })
   
   
@@ -461,12 +461,12 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     indexForQuantiData <- match(tmp_quanti_data, colnames(rv.convert$dataIn))
     quanti_order <- order(input$choose_quanti_data_col)
     samples_order <- order(rownames(rv.convert$design()))
-
+    
     if (sum(quanti_order != samples_order) > 0){
       tmp_quanti_data <- tmp_quanti_data[samples_order]
       indexForQuantiData <- indexForQuantiData[samples_order]
     }
-
+    
     indexForFData <- seq(1,ncol(rv.convert$dataIn))[-indexForQuantiData]
     
     ## key id of entities
@@ -475,21 +475,21 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       key_id_index <- match(rv.convert$choose_keyID, colnames(rv.convert$dataIn))
     }
     
-
+    
     ### Sample data
     design <- rv.convert$design()
     
     ### Are data alearady logged ?
     logged_data <- (input$checkDataLogged == "no")
     
-
+    
     ### Origin of Values
     #indexForOriginOfValue <- NULL
     colNamesForOriginofValues <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
-
+    
     if (sum(is.na(colNamesForOriginofValues))==length(colNamesForOriginofValues))
       colNamesForOriginofValues <- NULL
-
+    
     
     # if (!is.null(colNamesForOriginofValues) && (length(grep("None", colNamesForOriginofValues))==0)  && (sum(is.na(colNamesForOriginofValues)) == 0)){
     #   for (i in 1:length(tmp_quanti_data)){
@@ -503,47 +503,47 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # )
     
     
-
+    
     
     
     tryCatch({
       switch(names(rv.convert$pipeline()),
              peptide = {
-               rv.convert$dataOut <- DAPAR2::createFeatures(data = rv.convert$dataIn,
-                                                            sample = design,
-                                                            indExpData = indexForQuantiData,
-                                                            keyId = key_id_index,
-                                                            namesOrigin = colNamesForOriginofValues,
-                                                            logTransform = logged_data,
-                                                            typeOfData = input$typeOfData,
-                                                            parentProtId = gsub(".", "_", rv.convert$choose_col_Parent_Protein, fixed=TRUE),
-                                                            analysis= input$studyName,
-                                                            processes=pipeline.def()$peptide,
-                                                            pipelineType = names(rv.convert$pipeline())
+               rv.convert$dataOut <- DAPAR2::createQFeatures(data = rv.convert$dataIn,
+                                                             sample = design,
+                                                             indExpData = indexForQuantiData,
+                                                             keyId = key_id_index,
+                                                             namesOrigin = colNamesForOriginofValues,
+                                                             logTransform = logged_data,
+                                                             typeOfData = input$typeOfData,
+                                                             parentProtId = gsub(".", "_", rv.convert$choose_col_Parent_Protein, fixed=TRUE),
+                                                             analysis= input$studyName,
+                                                             processes=pipeline.def()$peptide,
+                                                             pipelineType = names(rv.convert$pipeline())
                )
              },
              protein = {
-               rv.convert$dataOut <- DAPAR2::createFeatures(data = rv.convert$dataIn,
-                                                            sample = design,
-                                                            indExpData = indexForQuantiData,
-                                                            keyId = key_id_index,
-                                                            namesOrigin = colNamesForOriginofValues,
-                                                            logTransform = logged_data,
-                                                            typeOfData = input$typeOfData,
-                                                            parentProtId = NULL,
-                                                            analysis= input$studyName,
-                                                            processes=pipeline.def()$protein,
-                                                            pipelineType = names(rv.convert$pipeline())
+               rv.convert$dataOut <- DAPAR2::createQFeatures(data = rv.convert$dataIn,
+                                                             sample = design,
+                                                             indExpData = indexForQuantiData,
+                                                             keyId = key_id_index,
+                                                             namesOrigin = colNamesForOriginofValues,
+                                                             logTransform = logged_data,
+                                                             typeOfData = input$typeOfData,
+                                                             parentProtId = NULL,
+                                                             analysis= input$studyName,
+                                                             processes=pipeline.def()$protein,
+                                                             pipelineType = names(rv.convert$pipeline())
                )
              },
              p2p = {
-
+               
              },
              default=NULL)
-
-
+      
+      
       #loadObjectInMemoryFromConverter()
-
+      
     }
     , warning = function(w) {
       if (conditionMessage(w) %in% c("NaNs produced", "production de NaN")){
@@ -566,9 +566,9 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       #cleanup-code
     })
     
-
+    
     r.nav$isDone[5] <- TRUE    
-     
+    
   })
   
   
