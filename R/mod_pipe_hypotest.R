@@ -109,6 +109,27 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   })
   
   
+  
+  observeEvent(input$anaDiff_Design, {
+    rv.hypotest$widgets$design <- as.numeric(input$anaDiff_Design)
+  })
+  observeEvent(input$diffAnaMethod,  {
+    rv.hypotest$widgets$method <- as.numeric(input$diffAnaMethod)
+  })
+  observeEvent(input$ttest_options,  {
+    rv.hypotest$widgets$ttest_options <- as.numeric(input$ttest_options)
+  })
+  
+  observeEvent(input$diffAnaMethod,{
+    toggle(id = "ttest_options",  condition = (input$diffAnaMethod == "ttests"))
+  })
+  
+  observeEvent(input$seuilLogFC,  {
+    rv.hypotest$widgets$th_logFC <- as.numeric(input$seuilLogFC)
+  })
+  
+  
+  
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 1                                        ###
   ###---------------------------------------------------------------------------------###
@@ -149,7 +170,11 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
                       #module_Not_a_numericUI(ns("test_seuillogFC"))
             ),
             tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-                      actionButton("PerformLogFCPlot", "Perform log FC plot",class = actionBtnClass )
+                      uiOutput(ns("correspondingRatio"))
+                      
+            ),
+            tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+                      actionButton(ns("PerformLogFCPlot"), "Perform log FC plot",class = actionBtnClass )
                       
             )
           ),
@@ -160,37 +185,16 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
       }
     })
   })
-  #######################################################################################################################
-  
-  observeEvent(input$anaDiff_Design, ignoreInit = TRUE, {
-    rv.hypotest$widgets$design <- as.numeric(input$anaDiff_Design)
-  })
-  observeEvent(input$diffAnaMethod, ignoreInit = TRUE,  {
-    rv.hypotest$widgets$method <- as.numeric(input$diffAnaMethod)
-  })
-  observeEvent(input$ttest_options, ignoreInit = TRUE,  {
-    rv.hypotest$widgets$ttest_options <- as.numeric(input$ttest_options)
-  })
-  observeEvent(input$seuilLogFC, ignoreInit = TRUE,  {
-    rv.hypotest$widgets$th_logFC <- as.numeric(input$seuilLogFC)
-  })
   
   
   
   output$FoldChangePlot <- renderHighchart({
-    
-    req(input$diffAnaMethod)
-    req(input$anaDiff_Design)
-    input$ttest_options
+    req(input$PerformLogFCPlot)
     
     data <- ComputeComparisons()
     
-    ind <- grep('_logFC', colnames(metadata(data)$t_test))
-    df <- setNames(as.data.frame(metadata(data)$t_test[,ind]), colnames(metadata(data)$t_test)[ind])
+    if (length(ind)>0) { hc_logFC_DensityPlot(data,as.numeric(input$seuilLogFC)) }
     
-    if (length(ind)>0) { hc_logFC_DensityPlot(df,as.numeric(input$seuilLogFC)) }
-    
-    #hc_logFC_DensityPlot(data$logFC,as.numeric(input$seuilLogFC))
     
   })
   
@@ -207,7 +211,7 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
     if (length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]])))) > 0) { return(NULL)}
     
     
-
+    
     isolate({
       switch(input$diffAnaMethod,
              Limma={
@@ -222,25 +226,36 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
                                                                     FUN="compute.t.test",
                                                                     contrast = input$anaDiff_Design,
                                                                     type=input$ttest_options)
-               })
-
-
-      rv.hypotest$widgets$listNamesComparison <- names(metadata(rv.hypotest$res_AllPairwiseComparisons)[['t_test']])[1]
-        
+             })
       
-      rv.hypotest$res_AllPairwiseComparisons
+      
+      rv.hypotest$widgets$listNamesComparison <- names(metadata(rv.hypotest$res_AllPairwiseComparisons)[['t_test']])[1]
+      
+      
+      ind <- grep('_logFC', colnames(metadata(rv.hypotest$res_AllPairwiseComparisons)$t_test))
+      df <- setNames(as.data.frame(metadata(rv.hypotest$res_AllPairwiseComparisons)$t_test[,ind]),
+                     colnames(metadata(rv.hypotest$res_AllPairwiseComparisons)$t_test)[ind])
+      df
       
     })
     
   })
   
   
-  
-  observeEvent(input$PerformLogFCPlot, {
-    r.nav$isDone[1] <- TRUE
+  output$correspondingRatio <- renderUI({
+    
+    ratio <- as.numeric(rv.hypotest$widgets$th_logFC)
+    
+    p("(FC = ", 2^(ratio), ")")
+    
   })
   
   
+  observeEvent(input$PerformLogFCPlot, {
+    
+    r.nav$isDone[1] <- TRUE
+    
+  })
   
   
   
@@ -255,12 +270,15 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   })
   
   output$btn_valid <- renderUI({
-    cond <- (rv.hypotest$widgets$method != "None")&&(rv.hypotest$widgets$design != "None")
+    
+    cond <- (input$diffAnaMethod != "None")&&(input$anaDiff_Design != "None")
+    print(conds)
     if (!cond){return(NULL)}
     actionButton(ns("ValidTest"),"Save significance test", class = actionBtnClass)
+    
   })
   
-  observeEvent(input$btn_valid,{
+  observeEvent(input$ValidTest,{
     
     metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
       design = rv.hypotest$widgets$design,
