@@ -27,7 +27,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   utils::data(Exp1_R25_pept, package='DAPARdata2')
-  obj<-filterNA(Exp1_R25_pept,pNA=0,i=2)
+  obj<- addAssay(Exp1_R25_pept, filterNA(Exp1_R25_pept, i=2)[[2]], name = "filtered_log") 
   
   
   rv <-reactiveValues(
@@ -38,7 +38,7 @@ server <- function(input, output, session) {
   rv$ret <-
     callModule(mod_pipe_pept_hypotest_server,'pipe_hypothesis_test',
                obj = reactive({obj}),
-               ind = reactive({2}))
+               ind = reactive({3}))
   
   
   callModule(mod_infos_dataset_server,'infos',

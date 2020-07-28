@@ -60,6 +60,13 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
   
   
   observeEvent(req(r.nav$reset),{
+    # update widgets whose names are in r.widgets with the value in this list
+    # This part must be before the reinitialization of r.nav$isDone
+    updateSelectInput(session,'anaDiff_Design', selected="None")
+    updateSelectInput(session,'diffAnaMethod', selected="None")
+    updateRadioButtons(session, "ttest_options", selected="Student")
+    updateTextInput(session, "seuilLogFC", value=0)
+    
     
     rv.hypotest$widgets <- list(design = "None",
                                 method = "None",
@@ -94,8 +101,8 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
   ##
   
   rv.hypotest$settings <- callModule(mod_settings_server,
-                                    "settings",
-                                    obj = reactive({obj()}))
+                                     "settings",
+                                     obj = reactive({obj()}))
   
   
   
@@ -176,14 +183,11 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
   
   observeEvent(input$diffAnaMethod, ignoreInit=TRUE,{
     rv.hypotest$widgets$method <- input$diffAnaMethod
+    toggle(id = "ttest_options",  condition = (input$diffAnaMethod == "ttests"))
   })
   
   observeEvent(input$ttest_options, ignoreInit=TRUE,{
     rv.hypotest$widgets$ttest_options <- input$ttest_options
-  })
-  
-  observeEvent(input$diffAnaMethod, ignoreInit=TRUE,{
-    toggle(id = "ttest_options",  condition = (input$diffAnaMethod == "ttests"))
   })
   
   observeEvent(input$seuilLogFC, ignoreInit=TRUE,{
@@ -195,51 +199,10 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
   output$FoldChangePlot <- renderHighchart({
     req(input$PerformLogFCPlot)
     
-    data <- ComputeComparisons()
     
-    hc_logFC_DensityPlot(data,as.numeric(input$seuilLogFC))
+    rv.hypotest$res_AllPairwiseComparisons <- rv.hypotest$dataIn
     
-    
-    
-    
-  })
-  
-  ########################################################
-  
-  ### calcul des comparaisons                         ####
-  ########################################################
-  ComputeComparisons <- reactive({
-    req(input$diffAnaMethod)
-    req(input$anaDiff_Design)
-    input$ttest_options
-    
-    rv.hypotest$dataIn <- obj()
-    rv.hypotest$i <- ind()
-    
-    if ((input$diffAnaMethod=="None")|| (input$anaDiff_Design=="None")) {return (NULL)}
-    if (length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]])))) > 0) { return(NULL)}
-    
-    
-    
-    isolate({
-      switch(input$diffAnaMethod,
-             Limma={
-               rv.hypotest$res_AllPairwiseComparisons <- t_test_sam(object = rv.hypotest$dataIn,
-                                                                    i = rv.hypotest$i,
-                                                                    name = "peptides_hypotest",
-                                                                    FUN = "limma.complete.test",
-                                                                    comp.type = input$anaDiff_Design)
-             },
-             ttests={
-               rv.hypotest$res_AllPairwiseComparisons <- t_test_sam(object = rv.hypotest$dataIn,
-                                                                    i = rv.hypotest$i,
-                                                                    name = "peptides_hypotest",
-                                                                    FUN = "compute.t.test",
-                                                                    contrast = input$anaDiff_Design,
-                                                                    type = input$ttest_options)
-             })
-      
-      
+    if(!is.null(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])){
       
       ind <- grep('_logFC', colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test))
       
@@ -248,13 +211,58 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
       df <- setNames(as.data.frame(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test[,ind]),
                      colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test)[ind])
       
-      df
+      
+      hc_logFC_DensityPlot(df,as.numeric(input$seuilLogFC))
+      
+    }
+    
+  })
+  
+  ########################################################
+  ### calcul des comparaisons                         ####
+  ########################################################
+  
+  observeEvent(input$PerformLogFCPlot, {
+    req(input$diffAnaMethod)
+    req(input$anaDiff_Design)
+    input$ttest_options
+    
+    
+    if ((input$diffAnaMethod=="None")|| (input$anaDiff_Design=="None")) {return (NULL)}
+    if (length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]])))) > 0) { return(NULL)}
+    
+    
+    rv.hypotest$dataIn <- obj()
+    rv.hypotest$i <- ind()
+    
+    
+    
+    isolate({
+      switch(input$diffAnaMethod,
+             Limma={
+               rv.hypotest$dataIn <- t_test_sam(object = rv.hypotest$dataIn,
+                                                i = rv.hypotest$i,
+                                                name = "peptides_hypotest",
+                                                FUN = "limma.complete.test",
+                                                comp.type = input$anaDiff_Design)
+             },
+             ttests={
+               rv.hypotest$dataIn <- t_test_sam(object = rv.hypotest$dataIn,
+                                                i = rv.hypotest$i,
+                                                name = "peptides_hypotest",
+                                                FUN = "compute.t.test",
+                                                contrast = input$anaDiff_Design,
+                                                type = input$ttest_options)
+             })
+      
+      rv.hypotest$i <- ind() + 1
+      r.nav$isDone[1] <- TRUE
       
       
     })
     
-    
   })
+ 
   
   
   output$correspondingRatio <- renderUI({
@@ -266,21 +274,11 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
   })
   
   
-  observeEvent(input$PerformLogFCPlot, {
-    
-    rv.hypotest$dataIn <- rv.hypotest$res_AllPairwiseComparisons
-    rv.hypotest$i <- ind() + 1
-    
-    r.nav$isDone[1] <- TRUE
-
-  })
-  
-  
   
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
-
+  
   output$Screen_Pept_hypotest_2 <- renderUI({
     
     print('screen 2')
@@ -318,9 +316,9 @@ mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
         listNamesComparison =rv.hypotest$widgets$listNamesComparison
       )
     }
-
     
     rv.hypotest$dataOut <- rv.hypotest$dataIn
+    
     r.nav$isDone[2] <- TRUE
   })
   
