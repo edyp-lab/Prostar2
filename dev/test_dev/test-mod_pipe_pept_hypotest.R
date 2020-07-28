@@ -1,12 +1,11 @@
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_pipe_hypotest.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_pipe_pept_hypotest.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
-
 
 library(QFeatures)
 library(shiny)
@@ -17,10 +16,9 @@ library(tibble)
 library(DT)
 
 
-
 ui <- fluidPage(
   tagList(
-    mod_pipe_hypotest_ui('pipe_hypothesis_test'),
+    mod_pipe_pept_hypotest_ui('pipe_hypothesis_test'),
     mod_infos_dataset_ui('infos')
   )
 )
@@ -28,27 +26,29 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  utils::data(Exp1_R25_prot, package='DAPARdata2')
-  obj<-filterNA(Exp1_R25_prot,pNA=0,i=2)
+  utils::data(Exp1_R25_pept, package='DAPARdata2')
+  obj<-filterNA(Exp1_R25_pept,pNA=0,i=2)
   
-  # rv <-reactiveValues(
-  #   ret = NULL,
-  #   current.obj = obj
-  # )
   
-  # rv$ret <- 
-    callModule(mod_pipe_hypotest_server,'pipe_hypothesis_test',
+  rv <-reactiveValues(
+    ret = NULL,
+    current.obj = obj
+  )
+  
+  rv$ret <-
+    callModule(mod_pipe_pept_hypotest_server,'pipe_hypothesis_test',
                obj = reactive({obj}),
                ind = reactive({2}))
   
   
-  # callModule(mod_infos_dataset_server,'infos',
-  #            obj = reactive({rv$current.obj}))
-  # 
-  # observe({
-  #   req(rv$ret())
-  #   rv$current.obj <- rv$ret()
-  # })
+  callModule(mod_infos_dataset_server,'infos',
+             obj = reactive({rv$current.obj}))
+  
+  observe({
+    req(rv$ret())
+    rv$current.obj <- rv$ret()
+  })
+  
   
   
 }
