@@ -288,15 +288,26 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   
   observeEvent(input$ValidTest,{
     
-    metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
-      design = rv.hypotest$widgets$design,
-      method = rv.hypotest$widgets$method,
-      ttest_options = rv.hypotest$widgets$ttest_options,
-      th_logFC = rv.hypotest$widgets$th_logFC,
-      listNamesComparison =rv.hypotest$widgets$listNamesComparison
-    )
+    if (rv.hypotest$widgets$method != 'Limma') {
+      metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
+        design = rv.hypotest$widgets$design,
+        method = rv.hypotest$widgets$method,
+        ttest_options = rv.hypotest$widgets$ttest_options,
+        th_logFC = rv.hypotest$widgets$th_logFC,
+        listNamesComparison =rv.hypotest$widgets$listNamesComparison
+      )
+    } else {
+      metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
+        design = rv.hypotest$widgets$design,
+        method = rv.hypotest$widgets$method,
+        th_logFC = rv.hypotest$widgets$th_logFC,
+        listNamesComparison =rv.hypotest$widgets$listNamesComparison
+      )
+    }
+
     
     rv.hypotest$dataOut <- rv.hypotest$dataIn
+    View(rv.hypotest$dataOut)
     
     r.nav$isDone[2] <- TRUE
   })
