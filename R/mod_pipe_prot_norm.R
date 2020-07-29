@@ -384,7 +384,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
            GlobalQuantileAlignment = {
              rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i,
-                                          name = "protein_norm",
+                                          name = "proteins_norm",
                                           method='GlobalQuantileAlignment'
              )
            },

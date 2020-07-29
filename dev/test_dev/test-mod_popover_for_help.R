@@ -20,8 +20,8 @@ server <- function(input, output, session) {
   #   title = tags$h3('Test of the module Popover.'),
   # content = tags$p("The content of the window.")
   # )
-  callModule(mod_popover_for_help_server, 
-             "pop", 
+  callModule(mod_popover_for_help_server,
+             "pop",
              data = dat)
 }
 
