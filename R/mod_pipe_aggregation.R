@@ -39,8 +39,8 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
                   screenStep2 = uiOutput(ns("Screen_Aggregation_2")),
                   screenStep3 = uiOutput(ns("Screen_Aggregation_3"))
     ),
-    isDone =  rep(FALSE,2),
-    mandatory =  rep(TRUE,2),
+    isDone =  rep(FALSE,3),
+    mandatory =  rep(TRUE,3),
     reset = FALSE
   )
   
@@ -56,8 +56,8 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     widgets = list(includeSharedPeptides = "Yes2",
                    operator = "Mean",
                    considerPeptides = 'allPeptides',
-                   proteinId = "None",
-                   topN = 3)
+                   topN = 3,
+                   meta.names = NULL)
   )
   
   
@@ -66,25 +66,21 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     ## update widgets whose names are in r.widgets with the value in this list
     ## This part must be before the reinitialization of r.nav$isDone
     updateRadioButtons(session, "radioBtn_includeShared", selected="Yes2")
-    updateRadioButtons(session, "AggregationConsider", selected='allPeptides')
-    updateNumericInput(session, "nTopn", value=3)
-    updateSelectInput(session,'proteinId', selected="None")
     updateRadioButtons(session, "AggregationOperator", selected='Mean')
-    updateNumericInput(session, "nbPeptides", value=0)
-    # updateCheckboxInput(session,"replaceAllZeros", value=NULL)
+    updateRadioButtons(session, "AggregationConsider", selected='allPeptides')
+    #updateNumericInput(session, "nTopn", value=3)
     
     rv.aggregation$widgets$includeSharedPeptides <- "Yes2"
     rv.aggregation$widgets$operator <- "Mean"
     rv.aggregation$widgets$considerPeptides <- 'allPeptides'
-    rv.aggregation$widgets$proteinId <- "None"
     rv.aggregation$widgets$topN <- 3
-    
+    rv.aggregation$widget$meta.names <- NULL
     
     rv.aggregation$dataIn <- obj()
     rv.aggregation$i <- ind()
     
     ## do not modify this part
-    r.nav$isDone <- rep(FALSE, 2)
+    r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     ## end of no modifiable part
   })
@@ -133,6 +129,27 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   })
   
   
+  observeEvent(input$radioBtn_includeShared,{
+    rv.aggregation$widgets$includeSharedPeptides <- input$radioBtn_includeShared
+  })
+  
+  observeEvent(input$AggregationOperator,{
+    rv.aggregation$widgets$operator <- input$AggregationOperator
+  })
+  
+  observeEvent(input$AggregationConsider,{
+    rv.aggregation$widgets$considerPeptides <- input$AggregationConsider
+  })
+  
+  observeEvent(input$nTopn,{
+    rv.aggregation$widgets$topN <- as.numeric(input$nTopn)
+  })
+  
+  observeEvent(input$columnsForProteinDataset.box, ignoreInit=TRUE,{
+    rv.aggregation$widgets$meta.names <- input$columnsForProteinDataset.box
+  })
+  
+  
   ##
   ## Definitions of the screens
   ##
@@ -146,8 +163,6 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     tagList(
       uiOutput(ns("warningAggregationMethod")),
       div(
-        div( style="display:inline-block; vertical-align: top;",
-             uiOutput(ns("chooseProteinId"))),
         div( style="display:inline-block; vertical-align: top;",       
              mod_popover_for_help_ui(ns("modulePopover_includeShared")),
              radioButtons(ns("radioBtn_includeShared"), NULL,
@@ -161,11 +176,9 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
                                     "N most abundant"="onlyN"), 
                           selected=rv.aggregation$widgets$considerPeptides)),
         div( style="display:inline-block; vertical-align: top; padding-right: 10px;",
-             numericInput(ns("nTopn"), "N",value = rv.aggregation$widgets$topN, min = 0, step=1, width='100px')),
-        
+             uiOutput(ns("nTopn_widget"))),
         div( style="display:inline-block; vertical-align: top;",
-             uiOutput(ns("operatorChoice"))
-        )
+             uiOutput(ns("operatorChoice")))
       ),
       actionButton(ns("perform.aggregation"),"Perform aggregation", class = actionBtnClass),
       uiOutput(ns("ObserverAggregationDone")),
@@ -175,9 +188,9 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
         div( style="display:inline-block; vertical-align: top;",
              uiOutput(ns("specificPeptideBarplot"))),
         div( style="display:inline-block; vertical-align: top; padding-right: 20px;",       
-             uiOutput(ns("allPeptideBarplot"))),
-        div( style="display:inline-block; vertical-align: top;",
-             DT::dataTableOutput(ns("aggregationStats")))
+             uiOutput(ns("allPeptideBarplot")))
+        # , div( style="display:inline-block; vertical-align: top;",
+        #        DT::dataTableOutput(ns("aggregationStats")))
       )
     )
   })
@@ -190,7 +203,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
       GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlySpec"]]))
     )
   })
-
+  
   
   output$allPeptideBarplot <- renderUI({
     tagList(
@@ -205,41 +218,13 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   output$warningAggregationMethod <- renderUI({
     req(rv.aggregation$dataIn[[rv.aggregation$i]])
     
-    if (length(which(is.na(assay(rv.aggregation$dataIn[[rv.aggregation$i]])))) > 0)
-    {
+    if (length(which(is.na(assay(rv.aggregation$dataIn[[rv.aggregation$i]])))) > 0) {
       tags$p(tags$b('Warning:')," Your dataset contains missing values.
              For better results, you should impute them first")
     }
-    
   })
   
-  
-  output$chooseProteinId <- renderUI({
-    if (!is.null(metadata(rv.aggregation$dataIn)[["parentProtId"]])) {return(NULL)}
-    
-    selectInput(ns("proteinId"), 
-                "Choose the protein ID",
-                choices = c("None",colnames(rowData(rv.aggregation$dataIn[[rv.aggregation$i]]))),
-                selected = rv.aggregation$widgets$proteinId)
-  })
-  
-  
-  observeEvent(input$radioBtn_includeShared, {
-    if (input$radioBtn_includeShared=='Yes2'){
-      ch <- c("Mean"="Mean")  
-    } else {
-      ch <- c("Sum"='Sum', "Mean"="Mean")
-    }
-    #updateRadioButtons(session,"AggregationOperator", choices=ch, selected=input$AggregationOperator)
-  })
-  
-  
-  observeEvent(input$AggregationConsider,{
-    shinyjs::toggle('nTopn', condition=input$AggregationConsider=='onlyN')
-  })
-  
-  
-  
+
   
   output$operatorChoice <- renderUI({
     input$radioBtn_includeShared
@@ -255,6 +240,25 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
                  selected=rv.aggregation$widgets$operator)
   })
   
+  #&#
+  # observeEvent(input$AggregationConsider,{# hide=allPeptides or show=onlyN
+  #   shinyjs::toggle('nTopn',condition = input$AggregationConsider=='onlyN')
+  # })
+  output$nTopn_widget <- renderUI({
+    req(rv.aggregation$widgets$considerPeptides)
+    if (rv.aggregation$widgets$considerPeptides!='onlyN'){return(NULL)}
+    numericInput("nTopn", "N",value = rv.aggregation$widgets$topN, min = 0, step=1, width='100px')
+  })
+  
+  
+  observeEvent(input$radioBtn_includeShared, {
+    if (input$radioBtn_includeShared=='Yes2'){
+      ch <- c("Mean"="Mean")  
+    } else {
+      ch <- c("Sum"='Sum', "Mean"="Mean")
+    }
+    updateRadioButtons(session,"AggregationOperator", choices=ch, selected=input$AggregationOperator)
+  })
   
   
   observeEvent(input$perform.aggregation,{
@@ -263,106 +267,14 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     input$AggregationConsider
     input$nTopn
     
-    print(paste0("agg",input$AggregationOperator))
-    
-    rv.aggregation$dataIn <- obj()
-    rv.aggregation$i <- ind()
-    
-    isolate({
-      withProgress(message = '',detail = '', value = 0, {
-        incProgress(0.2, detail = 'loading foreach package')
-        
-        
-        require(foreach)
-        incProgress(0.5, detail = 'Aggregation in progress')
-        
-        if(input$radioBtn_includeShared %in% c("Yes2", "Yes1")){
-          #X <- rv$matAdj$matWithSharedPeptides
-          X <- "onlyShared"
-          if (input$radioBtn_includeShared == 'Yes1'){
-            if (input$AggregationConsider == 'allPeptides') {
-              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
-                                                             i = rv.aggregation$i,
-                                                             aggType = X,
-                                                             name = "peptides_aggregation",
-                                                             fun = paste0("agg",input$AggregationOperator)
-              )
-              #do.call(paste0('aggregate',input$AggregationOperator),list( obj.pep=rv$current.obj,X=X))
-            } else {
-              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
-                                                             i = rv.aggregation$i,
-                                                             aggType = X,
-                                                             name = "peptides_aggregation",
-                                                             fun = 'aggTopn',
-                                                             method = input$AggregationOperator,
-                                                             n = as.numeric(input$nTopn)
-              )
-              #aggregateTopn(rv$current.obj, X,input$AggregationOperator, n=as.numeric(input$nTopn))
-            }
-          } else {
-            if (input$AggregationConsider == 'allPeptides') {
-              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
-                                                             i = rv.aggregation$i,
-                                                             aggType = X,
-                                                             name = "peptides_aggregation",
-                                                             fun = "aggIterParallel",
-                                                             init.method = 'Sum',
-                                                             method = 'Mean',
-                                                             conditions = colData(rv.aggregation$dataIn)[['Condition']]
-              )
-              #aggregateIterParallel(rv$current.obj, X,init.method='Sum', method='Mean')
-            } else {
-              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
-                                                             i = rv.aggregation$i,
-                                                             aggType = X,
-                                                             name = "peptides_aggregation",
-                                                             fun = "aggIterParallel",
-                                                             init.method = 'Sum',
-                                                             method = 'onlyN',
-                                                             n=input$nTopn,
-                                                             conditions = colData(rv.aggregation$dataIn)[['Condition']]
-              )
-              #aggregateIterParallel(rv$current.obj, X, init.method='Sum', method='onlyN', n=input$nTopn)
-            }
-          }
-        } else {
-          #X <- rv$matAdj$matWithUniquePeptides
-          X <- "onlySpec"
-          if (input$AggregationConsider == 'allPeptides') {
-            rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
-                                                           i = rv.aggregation$i,
-                                                           aggType = X,
-                                                           name = "peptides_aggregation",
-                                                           fun = paste0("agg",input$AggregationOperator)
-            )
-            #do.call(paste0('aggregate',input$AggregationOperator),list(obj.pep=rv$current.obj,X=X))
-          } else {
-            rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
-                                                           i = rv.aggregation$i,
-                                                           aggType = X,
-                                                           name = "peptides_aggregation",
-                                                           fun = 'aggTopn',
-                                                           method = input$AggregationOperator,
-                                                           n = as.numeric(input$nTopn)
-            )
-            #aggregateTopn(rv$current.obj, X, input$AggregationOperator,n=as.numeric(input$nTopn))
-          }
-        }
-      } )
-      rv.aggregation$i <- ind() + 1
-      r.nav$isDone[1] <- TRUE
-      
-    })
+    r.nav$isDone[1] <- TRUE
   })
-  
-  
   
   
   output$ObserverAggregationDone <- renderUI({
     req(input$perform.aggregation)
     isolate({
       h3("Aggregation done")
-      
     })
   })
   
@@ -371,38 +283,38 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   
   
   
-  output$aggregationStats <- DT::renderDataTable ({
-    #req(input$proteinId)
-    #req(rv.aggregation$dataIn[[rv.aggregation$i]])
-    #print("toto")
-    #print(rv.aggregation$widgets$proteinId)
-    if (is.null(rv.aggregation$widgets$proteinId) || rv.aggregation$widgets$proteinId == "None") {return(NULL)}
-    
-    res <- getProteinsStats(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]])
-    #print(res)
-    rv$AggregProtStats$nb <- c(res$nbPeptides,
-                               res$nbSpecificPeptides,
-                               res$nbSharedPeptides,
-                               res$nbProt,
-                               length(res$protOnlyUniquePep),
-                               length(res$protOnlySharedPep),
-                               length(res$protMixPep))
-    
-    df <- as.data.frame(rv$AggregProtStats)
-    names(df) <- c('Description', 'Value')
-    DT::datatable(df, 
-                  escape = FALSE,
-                  rownames= FALSE,
-                  extensions = c('Scroller', 'Buttons'),
-                  option=list(initComplete = initComplete(),
-                              dom = 'Brt',
-                              autoWidth=TRUE,
-                              ordering=F,
-                              columnDefs = list(list(width='150px',targets= 0),
-                                                list(width='100px',targets= 1))
-                  )
-    )
-  })
+  # output$aggregationStats <- DT::renderDataTable ({
+  #   #req(input$proteinId)
+  #   #req(rv.aggregation$dataIn[[rv.aggregation$i]])
+  #   #print("toto")
+  #   #print(rv.aggregation$widgets$proteinId)
+  #   if (is.null(rv.aggregation$widgets$proteinId) || rv.aggregation$widgets$proteinId == "None") {return(NULL)}
+  #   
+  #   res <- getProteinsStats(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]])
+  #   #print(res)
+  #   rv$AggregProtStats$nb <- c(res$nbPeptides,
+  #                              res$nbSpecificPeptides,
+  #                              res$nbSharedPeptides,
+  #                              res$nbProt,
+  #                              length(res$protOnlyUniquePep),
+  #                              length(res$protOnlySharedPep),
+  #                              length(res$protMixPep))
+  #   
+  #   df <- as.data.frame(rv$AggregProtStats)
+  #   names(df) <- c('Description', 'Value')
+  #   DT::datatable(df, 
+  #                 escape = FALSE,
+  #                 rownames= FALSE,
+  #                 extensions = c('Scroller', 'Buttons'),
+  #                 option=list(initComplete = initComplete(),
+  #                             dom = 'Brt',
+  #                             autoWidth=TRUE,
+  #                             ordering=F,
+  #                             columnDefs = list(list(width='150px',targets= 0),
+  #                                               list(width='100px',targets= 1))
+  #                 )
+  #   )
+  # })
   
   
   ###---------------------------------------------------------------------------------###
@@ -420,7 +332,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
       div(
         div(
           style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-          mod_popover_for_help_ui(ns("modulePopover_colsForAggreg"))
+          mod_popover_for_help_ui("modulePopover_colsForAggreg")
         ),
         div(
           style="display:inline-block; vertical-align: middle;",
@@ -445,13 +357,110 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     
   })
   
-
+  
   
   observeEvent(input$columnsForProteinDataset.box, {
     print(input$columnsForProteinDataset.box)
+    
+    input$radioBtn_includeShared
+    input$AggregationOperator
+    input$AggregationConsider
+    input$nTopn
+    input$columnsForProteinDataset.box
+    
+    
+    rv.aggregation$dataIn <- obj()
+    rv.aggregation$i <- ind()
+    
+    isolate({
+      withProgress(message = '',detail = '', value = 0, {
+        incProgress(0.2, detail = 'loading foreach package')
+        
+        
+        require(foreach)
+        incProgress(0.5, detail = 'Aggregation in progress')
+        
+        if(input$radioBtn_includeShared %in% c("Yes2", "Yes1")){
+          X <- "onlyShared"
+          if (input$radioBtn_includeShared == 'Yes1'){
+            if (input$AggregationConsider == 'allPeptides') {
+              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
+                                                             i = rv.aggregation$i,
+                                                             aggType = X,
+                                                             name = "peptides_aggregation",
+                                                             meta.names = input$columnsForProteinDataset.box,
+                                                             fun = paste0("agg",input$AggregationOperator)
+              )
+            } else {
+              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
+                                                             i = rv.aggregation$i,
+                                                             aggType = X,
+                                                             name = "peptides_aggregation",
+                                                             meta.names = input$columnsForProteinDataset.box,
+                                                             fun = 'aggTopn',
+                                                             method = input$AggregationOperator,
+                                                             n = as.numeric(input$nTopn)
+              )
+            }
+          } else {
+            if (input$AggregationConsider == 'allPeptides') {
+              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
+                                                             i = rv.aggregation$i,
+                                                             aggType = X,
+                                                             name = "peptides_aggregation",
+                                                             meta.names = input$columnsForProteinDataset.box,
+                                                             fun = "aggIterParallel",
+                                                             init.method = 'Sum',
+                                                             method = 'Mean',
+                                                             conditions = colData(rv.aggregation$dataIn)[['Condition']]
+              )
+            } else {
+              rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
+                                                             i = rv.aggregation$i,
+                                                             aggType = X,
+                                                             name = "peptides_aggregation",
+                                                             meta.names = input$columnsForProteinDataset.box,
+                                                             fun = "aggIterParallel",
+                                                             init.method = 'Sum',
+                                                             method = 'onlyN',
+                                                             n=input$nTopn,
+                                                             conditions = colData(rv.aggregation$dataIn)[['Condition']]
+              )
+            }
+          }
+        } else {
+          X <- "onlySpec"
+          if (input$AggregationConsider == 'allPeptides') {
+            rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
+                                                           i = rv.aggregation$i,
+                                                           aggType = X,
+                                                           name = "peptides_aggregation",
+                                                           meta.names = input$columnsForProteinDataset.box, 
+                                                           fun = paste0("agg",input$AggregationOperator)
+            )
+          } else {
+            rv.aggregation$dataIn <- aggregateFeatures_sam(object = rv.aggregation$dataIn,
+                                                           i = rv.aggregation$i,
+                                                           aggType = X,
+                                                           name = "peptides_aggregation",
+                                                           meta.names = input$columnsForProteinDataset.box,
+                                                           fun = 'aggTopn',
+                                                           method = input$AggregationOperator,
+                                                           n = as.numeric(input$nTopn)
+            )
+          }
+        }
+      })
+    })
+    rv.aggregation$i <- ind() + 1
+    
     r.nav$isDone[2] <- TRUE
+    
+    View(rv.aggregation$dataIn)
   })
-
+  
+  
+  
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 3                                        ###
   ###---------------------------------------------------------------------------------###
@@ -463,57 +472,36 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   
   
   
-  observeEvent(input$valid.aggregation,{ 
-    
-    isolate({
-      withProgress(message = '',detail = '', value = 0, {
-        
-        X <- NULL
-        if(input$radioBtn_includeShared %in% c("Yes2", "Yes1")){
-          X <- metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]]}
-        else { X <- metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlySpec"]]}
-        
-        
-        total <- 60
-        delta <- round(total / length(input$columnsForProteinDataset.box))
-        cpt <- 10
-        for(c in input$columnsForProteinDataset.box){
-          newCol <- BuildColumnToProteinDataset(
-            rowfData(rv.aggregation$dataIn[[rv.aggregation$i]]), X, c, rownames(rowData(rv$temp.aggregate)))
-          cnames <- colnames(rowData(rv$temp.aggregate))
-          rowData(rv.aggregation$temp.aggregate) <- 
-            data.frame(rowData(rv.aggregation$temp.aggregate), newCol)
-          colnames(rowData(rv.aggregation$temp.aggregate)) <- c(cnames, c)
-          cpt <- cpt + delta
-          incProgress(cpt/100, detail = paste0('Processing column ', c))
-        }
-        
-        rv.aggregation$dataIn[[rv.aggregation$i]] <- rv.aggregation$temp.aggregate
-        
-        rv$current.obj@experimentData@other$Prostar_Version <- 
-          installed.packages(lib.loc = Prostar.loc)["Prostar","Version"]
-        rv$current.obj@experimentData@other$DAPAR_Version <- 
-          installed.packages(lib.loc = DAPAR.loc)["DAPAR","Version"]
-        rv$typeOfDataset <- rv$current.obj@experimentData@other$typeOfData
-        
-        name <- paste0("Aggregated", ".", rv$typeOfDataset)
-        rv.aggregation$dataIn[[rv.aggregation$i]] <- saveParameters(rv.aggregation$dataIn[[rv.aggregation$i]], name,"Aggregation",build_ParamsList_Aggregation())
-        
-        rv$dataset[[name]] <- rv.aggregation$dataIn[[rv.aggregation$i]]
-        r.nav$isDone[3] <- TRUE
-        #updatePB(session,inputId="pb_SaveAggregation",value=70,text_value="70 %", striped = TRUE, active=TRUE)
-        #updatePB(session,inputId="pb_SaveAggregation",value=90,text_value="90 %", striped = TRUE, active=TRUE)
-        #}
-        
-        updateSelectInput(session, "datasets",  choices = names(rv$dataset), selected = name)
-        
-        
-      })
-    })
+  observeEvent(input$valid.aggregation,{
+    print("rv.aggregation$dataIn[[rv.aggregation$i]]")
+    print(rv.aggregation$dataIn)
+    print(rv.aggregation$i)
     
     
-    return(reactive({rv.aggregation$dataOut}))
+    metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[['typeOfData']] <- 'protein'
+    metadata(rv.aggregation$dataIn[[rv.aggregation$i]])$Params <- list(
+      includeSharedPeptides = input$radioBtn_includeShared,
+      operator = input$AggregationOperator,
+      considerPeptides = input$AggregationConsider,
+      topN = input$nTopn,
+      meta.names = input$columnsForProteinDataset.box
+      )
+    
+    
+    
+    #updatePB(session,inputId="pb_SaveAggregation",value=70,text_value="70 %", striped = TRUE, active=TRUE)
+    #updatePB(session,inputId="pb_SaveAggregation",value=90,text_value="90 %", striped = TRUE, active=TRUE)
+    #}
+    
+    
+    rv.aggregation$dataOut <- rv.aggregation$dataIn
+    r.nav$isDone[3] <- TRUE
+    
     
   })
+  ###})
+  
+  
+  return(reactive({rv.aggregation$dataOut}))
   
 }
