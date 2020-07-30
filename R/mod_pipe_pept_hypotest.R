@@ -1,4 +1,4 @@
-#' pipe_hypotest UI Function
+#' pipe_pept_hypotest UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,14 +7,14 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_pipe_hypotest_ui <- function(id){
+mod_pipe_pept_hypotest_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_navigation_ui(ns('nav_pipe_hypotest'))
+    mod_navigation_ui(ns('nav_pipe_pept_hypotest'))
   )
 }
 
-#' pipe_hypotest Server Function
+#' pipe_pept_hypotest Server Function
 #'
 #' @noRd
 #' 
@@ -24,17 +24,18 @@ mod_pipe_hypotest_ui <- function(id){
 #' 
 #' @param ind
 #' 
-mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
+mod_pipe_pept_hypotest_server <- function(input, output, session, obj, ind){
   ns <- session$ns
+  
   
   
   ## Section navigation module
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
-    name = "Hypothesis Test",
+    name = "processPeptHypothesisTest",
     stepsNames = c("HypothesisTest", "Save"),
-    ll.UI = list( screenStep1 = uiOutput(ns("Screen_Hypotest_1")),
-                  screenStep2 = uiOutput(ns("Screen_Hypotest_2"))
+    ll.UI = list( screenStep1 = uiOutput(ns("Screen_Pept_hypotest_1")),
+                  screenStep2 = uiOutput(ns("Screen_Pept_hypotest_2"))
     ),
     isDone =  rep(FALSE,2),
     mandatory =  rep(TRUE,2),
@@ -53,19 +54,25 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
                    method = "None",
                    ttest_options = "Student",
                    th_logFC = 0,
-                   listNomsComparaison = NULL),
+                   listNamesComparison = NULL),
     res_AllPairwiseComparisons = NULL
   )
   
   
   observeEvent(req(r.nav$reset),{
+    # update widgets whose names are in r.widgets with the value in this list
+    # This part must be before the reinitialization of r.nav$isDone
+    updateSelectInput(session,'anaDiff_Design', selected="None")
+    updateSelectInput(session,'diffAnaMethod', selected="None")
+    updateRadioButtons(session, "ttest_options", selected="Student")
+    updateTextInput(session, "seuilLogFC", value=0)
     
     
     rv.hypotest$widgets <- list(design = "None",
                                 method = "None",
                                 ttest_options = "Student",
                                 th_logFC = 0,
-                                listNomsComparaison = NULL)
+                                listNomsComparison = NULL)
     rv.hypotest$res_AllPairwiseComparisons = NULL
     
     rv.hypotest$dataIn <- obj()
@@ -81,7 +88,7 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   })
   
   
-  callModule(mod_navigation_server, 'nav_pipe_hypotest', style=2, pages=r.nav)
+  callModule(mod_navigation_server, 'nav_pipe_pept_hypotest', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -93,9 +100,9 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   ##
   ##
   
-  # rv.process$settings <- callModule(mod_settings_server,
-  #                                   "settings", 
-  #                                   obj = reactive({obj()}))
+  rv.hypotest$settings <- callModule(mod_settings_server,
+                                     "settings",
+                                     obj = reactive({obj()}))
   
   
   
@@ -110,12 +117,14 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   })
   
   
+  
+  
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 1                                        ###
   ###---------------------------------------------------------------------------------###
-  output$Screen_Hypotest_1 <- renderUI({
+  output$Screen_Pept_hypotest_1 <- renderUI({
     
-    
+    print('screen 1')
     isolate({
       NA.count<- length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]]))))
       if (NA.count > 0){
@@ -150,11 +159,14 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
                       #module_Not_a_numericUI(ns("test_seuillogFC"))
             ),
             tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-                      actionButton("PerformLogFCPlot", "Perform log FC plot",class = actionBtnClass )
+                      uiOutput(ns("correspondingRatio"))
+                      
+            ),
+            tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+                      actionButton(ns("PerformLogFCPlot"), "Perform log FC plot",class = actionBtnClass )
                       
             )
-          )
-          ,
+          ),
           tags$hr(),
           highchartOutput(ns("FoldChangePlot"), height="100%")
         )
@@ -162,80 +174,104 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
       }
     })
   })
-  #######################################################################################################################
   
-  observeEvent(input$anaDiff_Design, {
-    rv.hypotest$widgets$design <- as.numeric(input$anaDiff_Design)
+  
+  
+  observeEvent(input$anaDiff_Design, ignoreInit=TRUE,{
+    rv.hypotest$widgets$design <- input$anaDiff_Design
   })
-  observeEvent(input$diffAnaMethod, {
-    rv.hypotest$widgets$method <- as.numeric(input$diffAnaMethod)
+  
+  observeEvent(input$diffAnaMethod, ignoreInit=TRUE,{
+    rv.hypotest$widgets$method <- input$diffAnaMethod
+    toggle(id = "ttest_options",  condition = (input$diffAnaMethod == "ttests"))
   })
-  observeEvent(input$ttest_options, {
-    rv.hypotest$widgets$assay <- as.numeric(input$ttest_options)
+  
+  observeEvent(input$ttest_options, ignoreInit=TRUE,{
+    rv.hypotest$widgets$ttest_options <- input$ttest_options
   })
-  observeEvent(input$seuilLogFC, {
-    rv.hypotest$widgets$assay <- as.numeric(input$seuilLogFC)
+  
+  observeEvent(input$seuilLogFC, ignoreInit=TRUE,{
+    rv.hypotest$widgets$th_logFC <- as.numeric(input$seuilLogFC)
   })
   
   
   
   output$FoldChangePlot <- renderHighchart({
-    #req(input$PerformLogFCPlot)
-    
-    data <- ComputeComparisons()
-    
-    print("logFC")
-    print(head(data$logFC))
-    print("seuilLogFC")
-    print(as.numeric(input$seuilLogFC))
+    req(input$PerformLogFCPlot)
     
     
-    hc_logFC_DensityPlot(data$logFC,as.numeric(input$seuilLogFC))
+    rv.hypotest$res_AllPairwiseComparisons <- rv.hypotest$dataIn
+    
+    if(!is.null(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])){
+      
+      ind <- grep('_logFC', colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test))
+      
+      rv.hypotest$widgets$listNamesComparison <- names(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test)[ind]
+      
+      df <- setNames(as.data.frame(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test[,ind]),
+                     colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['peptides_hypotest']])$t_test)[ind])
+      
+      
+      hc_logFC_DensityPlot(df,as.numeric(input$seuilLogFC))
+      
+    }
     
   })
   
   ########################################################
-  
   ### calcul des comparaisons                         ####
   ########################################################
-  ComputeComparisons <- reactive({
+  
+  observeEvent(input$PerformLogFCPlot, {
     req(input$diffAnaMethod)
     req(input$anaDiff_Design)
     input$ttest_options
+    
+    
     if ((input$diffAnaMethod=="None")|| (input$anaDiff_Design=="None")) {return (NULL)}
     if (length(which(is.na(assay(rv.hypotest$dataIn[[rv.hypotest$i]])))) > 0) { return(NULL)}
+    
+    
+    rv.hypotest$dataIn <- obj()
+    rv.hypotest$i <- ind()
+    
     
     
     isolate({
       switch(input$diffAnaMethod,
              Limma={
-               rv.hypotest$res_AllPairwiseComparisons <- limma.complete.test(obj=rv.hypotest$dataIn[[rv.hypotest$i]],
-                                                                             sampleTab=colData(rv.hypotest$dataIn),
-                                                                             comp.type=input$anaDiff_Design) 
-               
+               rv.hypotest$dataIn <- t_test_sam(object = rv.hypotest$dataIn,
+                                                i = rv.hypotest$i,
+                                                name = "peptides_hypotest",
+                                                FUN = "limma.complete.test",
+                                                comp.type = input$anaDiff_Design)
              },
              ttests={
-               rv.hypotest$res_AllPairwiseComparisons <- compute.t.test(obj=rv.hypotest$dataIn[[rv.hypotest$i]],
-                                                                        sampleTab=colData(rv.hypotest$dataIn),
-                                                                        type='compute.t.test',
-                                                                        contrast=input$anaDiff_Design)
+               rv.hypotest$dataIn <- t_test_sam(object = rv.hypotest$dataIn,
+                                                i = rv.hypotest$i,
+                                                name = "peptides_hypotest",
+                                                FUN = "compute.t.test",
+                                                contrast = input$anaDiff_Design,
+                                                type = input$ttest_options)
              })
-      print("res_AllPairwiseComparisons")
-      print(rv.hypotest$res_AllPairwiseComparisons)
       
-      rv.hypotest$widgets$listNomsComparaison <- colnames(rv.hypotest$res_AllPairwiseComparisons$logFC)
+      rv.hypotest$i <- ind() + 1
+      r.nav$isDone[1] <- TRUE
       
-      print("listNomsComparaison")
-      print(rv.hypotest$widgets$listNomsComparaison)
       
     })
+    
   })
+ 
   
-  observeEvent(input$PerformLogFCPlot, {
-    r.nav$isDone[1] <- TRUE
+  
+  output$correspondingRatio <- renderUI({
+    
+    ratio <- as.numeric(rv.hypotest$widgets$th_logFC)
+    
+    p("(FC = ", round(2^(ratio),3), ")")
+    
   })
-  
-  
   
   
   
@@ -243,41 +279,60 @@ mod_pipe_hypotest_server <- function(input, output, session, obj, ind){
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
   
-  output$Screen_HypoTest_2 <- renderUI({
+  output$Screen_Pept_hypotest_2 <- renderUI({
+    
+    print('screen 2')
     tagList(
       uiOutput(ns("btn_valid"))
     )
   })
   
+  
   output$btn_valid <- renderUI({
+    
     cond <- (input$diffAnaMethod != "None")&&(input$anaDiff_Design != "None")
     if (!cond){return(NULL)}
     actionButton(ns("ValidTest"),"Save significance test", class = actionBtnClass)
+    
   })
   
-  observeEvent(input$btn_valid,{
+  
+  
+  observeEvent(input$ValidTest,{
     
-    metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
-      design = rv.hypotest$widgets$design,
-      method = rv.hypotest$widgets$method,
-      ttest_options = rv.hypotest$widgets$ttest_options,
-      th_logFC = rv.hypotest$widgets$th_logFC,
-      listNomsComparaison =rv.hypotest$widgets$listNomsComparaison
-    )
+    if (rv.hypotest$widgets$method != 'Limma') {
+      metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
+        design = rv.hypotest$widgets$design,
+        method = rv.hypotest$widgets$method,
+        ttest_options = rv.hypotest$widgets$ttest_options,
+        th_logFC = rv.hypotest$widgets$th_logFC,
+        listNamesComparison =rv.hypotest$widgets$listNamesComparison
+      )
+    } else {
+      metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
+        design = rv.hypotest$widgets$design,
+        method = rv.hypotest$widgets$method,
+        th_logFC = rv.hypotest$widgets$th_logFC,
+        listNamesComparison =rv.hypotest$widgets$listNamesComparison
+      )
+    }
     
     rv.hypotest$dataOut <- rv.hypotest$dataIn
+    
     r.nav$isDone[2] <- TRUE
   })
   
   
+  
   return({reactive(rv.hypotest$dataOut)})
+  
   
 }
 
 
 ## To be copied in the UI
-# mod_pipe_hypotest_ui("pipe_hypotest_ui_1")
+# mod_pipe_pept_hypotest_ui("pipe_hypotest_ui_1")
 
 ## To be copied in the server
-# callModule(mod_pipe_hypotest_server, "pipe_hypotest_ui_1")
+# callModule(mod_pipe_pept_hypotest_server, "pipe_hypotest_ui_1")
 

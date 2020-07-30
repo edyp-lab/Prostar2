@@ -149,52 +149,60 @@ mod_infos_dataset_server <- function(input, output, session, obj){
     req(obj())
     req(input$selectInputSE)
     #browser()
-    data <- obj()[[input$selectInputSE]]
     
-    columns <- c("Type of data",
-                 "Number of lines",
-                 "% of missing values",
-                 "Number of empty lines")
-    
-    
-    
-    typeOfData <- metadata(data)$typeOfData
-    nLines <- nrow(obj()[[input$selectInputSE]])
-    percentMV <- nNA(obj()[[input$selectInputSE]])$nNA
-    nEmptyLines <-nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
-    
-    val <- c(typeOfData,
-             nLines,
-             percentMV,
-             nEmptyLines
-    )
-    
-    
-    
-    if (tolower(typeOfData) == 'peptide'){
-      columns <- c(columns,
-                   "Adjacency matrices",
-                   "Connex components")
+    if(input$selectInputSE!="None"){
       
-      if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
-        adjMat.txt <- "<span style=\"color: lime\">OK</span>"
-      } else{
-        adjMat.txt <- "<span style=\"color: red\">Missing</span>"
+      data <- obj()[[input$selectInputSE]]
+      
+      columns <- c("Type of data",
+                   "Number of lines",
+                   "% of missing values",
+                   "Number of empty lines")
+      
+      
+      
+      typeOfData <- metadata(data)$typeOfData
+      nLines <- nrow(obj()[[input$selectInputSE]])
+      percentMV <- nNA(obj()[[input$selectInputSE]])$nNA
+      nEmptyLines <-nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
+      if(is.na(nEmptyLines)) {nEmptyLines=0}
+      
+      val <- c(typeOfData,
+               nLines,
+               percentMV,
+               nEmptyLines
+      )
+      
+      
+      
+      if (tolower(typeOfData) == 'peptide'){
+        columns <- c(columns,
+                     "Adjacency matrices",
+                     "Connex components")
+        
+        if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
+          adjMat.txt <- "<span style=\"color: lime\">OK</span>"
+        } else{
+          adjMat.txt <- "<span style=\"color: red\">Missing</span>"
+        }
+        
+        if(!is.null(metadata(obj()[[input$selectInputSE]])$list.cc)){
+          cc.txt <- "<span style=\"color: lime\">OK</span>"
+        } else{
+          cc.txt <- "<span style=\"color: red\">Missing</span>"
+        }
+        
+        val <- c(val, adjMat.txt, cc.txt)
+        
       }
       
-      if(!is.null(metadata(obj()[[input$selectInputSE]])$list.cc)){
-        cc.txt <- "<span style=\"color: lime\">OK</span>"
-      } else{
-        cc.txt <- "<span style=\"color: red\">Missing</span>"
-      }
-      
-      val <- c(val, adjMat.txt, cc.txt)
+      do <- data.frame(Definition= columns,
+                       Value=val)
+      do
       
     }
     
-    do <- data.frame(Definition= columns,
-                     Value=val)
-    do
+    
   })
   
   
@@ -271,26 +279,28 @@ mod_infos_dataset_server <- function(input, output, session, obj){
       pourcentage <- nNA(obj()[[input$selectInputSE]])$nNA
       
       nb.empty.lines <- nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
+      #if (is.na(nb.empty.lines)) { nb.empty.lines=0 }
       
-      tagList(
-        tags$h4("Info"),
-        if (typeOfDataset == "protein"){
-          tags$p("The aggregation tool
+      if (pourcentage!=0 && !is.na(nb.empty.lines)) {
+        tagList(
+          tags$h4("Info"),
+          if (typeOfDataset == "protein"){
+            tags$p("The aggregation tool
                  has been disabled because the dataset contains
                  protein quantitative data.")
-        },
-        
-        if (pourcentage > 0){
-          tags$p("As your dataset contains missing values, you should
+          },
+          
+          if (pourcentage > 0){
+            tags$p("As your dataset contains missing values, you should
                  impute them prior to proceed to the differential analysis.")
-        },
-        if (nb.empty.lines > 0){
-          tags$p("As your dataset contains lines with no values, you
+          },
+          if (nb.empty.lines > 0){
+            tags$p("As your dataset contains lines with no values, you
                  should remove them with the filter tool
                  prior to proceed to the analysis of the data.")
-        }
-        
-      )
+          }
+        )
+      }
     }
   })
   
