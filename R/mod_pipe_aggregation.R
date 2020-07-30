@@ -57,8 +57,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
                    operator = "Mean",
                    considerPeptides = 'allPeptides',
                    proteinId = "None",
-                   topN = 3),
-    temp.aggregate = NULL
+                   topN = 3)
   )
   
   
@@ -79,7 +78,6 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     rv.aggregation$widgets$considerPeptides <- 'allPeptides'
     rv.aggregation$widgets$proteinId <- "None"
     rv.aggregation$widgets$topN <- 3
-    rv.aggregation$temp.aggregate <- NULL
     
     
     rv.aggregation$dataIn <- obj()
@@ -183,6 +181,25 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
       )
     )
   })
+  
+  
+  
+  output$specificPeptideBarplot <- renderUI({
+    tagList(
+      h4("Only specific peptides"),
+      GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlySpec"]]))
+    )
+  })
+
+  
+  output$allPeptideBarplot <- renderUI({
+    tagList(
+      h4("All (specific & shared) peptides"),
+      GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]]))
+    )
+  })
+  
+  
   
   
   output$warningAggregationMethod <- renderUI({
@@ -342,41 +359,12 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   
   
   output$ObserverAggregationDone <- renderUI({
-    req(rv.aggregation$temp.aggregate)
     req(input$perform.aggregation)
     isolate({
       h3("Aggregation done")
       
     })
   })
-  
-  
-  # output$specificPeptideBarplot <- renderUI({
-  #   #req(rv$matAdj)
-  #   tagList(
-  #     h4("Only specific peptides"),
-  #     plotOutput(ns("aggregationPlotUnique"), width="400px") #%>% shinycssloaders::withSpinner(type=spinnerType)
-  #   )
-  # })
-  # 
-  # 
-  # output$aggregationPlotUnique <- renderPlot({
-  #   GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlySpec"]]))
-  # })
-  # 
-  # 
-  # output$allPeptideBarplot <- renderUI({
-  #   #req(rv$matAdj)
-  #   tagList(
-  #     h4("All (specific & shared) peptides"),
-  #     plotOutput(ns("aggregationPlotShared"), width="400px") #%>% shinycssloaders::withSpinner(type=spinnerType)
-  #   )
-  # })
-  # 
-  # output$aggregationPlotShared <- renderPlot({
-  #   GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]]))
-  # })
-  # 
   
   
   
@@ -421,7 +409,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   ###                                 Screen 2                                        ###
   ###---------------------------------------------------------------------------------###
   
-  output$Aggregation_Step2 <- renderUI({
+  output$Screen_Aggregation_2 <- renderUI({
     
     req(rv.aggregation$dataIn[[rv.aggregation$i]])
     
@@ -429,8 +417,6 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     choices <- colnames(rowData(rv.aggregation$dataIn[[rv.aggregation$i]]))
     names(choices) <- colnames(rowData(rv.aggregation$dataIn[[rv.aggregation$i]]))
     tagList(
-      uiOutput(ns("displayNbPeptides")),
-      
       div(
         div(
           style="display:inline-block; vertical-align: middle; padding-right: 20px;",
@@ -459,37 +445,17 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     
   })
   
+
   
-  output$displayNbPeptides <- renderUI({
-    req(input$filterProtAfterAggregation)
-    
-    if (input$filterProtAfterAggregation) {
-      numericInput(ns("nbPeptides"), "Nb of peptides defining a protein", 
-                   value = 0, min =0, step=1,
-                   width = "250px")
-    }
+  observeEvent(input$columnsForProteinDataset.box, {
+    print(input$columnsForProteinDataset.box)
+    r.nav$isDone[2] <- TRUE
   })
-  
-  
-  output$columnsForProteinDataset <- renderUI({
-    req(rv.aggregation$dataIn[[rv.aggregation$i]])
-    
-    choices <- colnames(rowData(rv.aggregation$dataIn[[rv.aggregation$i]]))
-    names(choices) <- colnames(rowData(rv.aggregation$dataIn[[rv.aggregation$i]]))
-    
-    selectInput(ns("columnsForProteinDataset.box"),
-                label = "",
-                choices = choices,
-                multiple = TRUE, width='200px',
-                size = 20,
-                selectize = FALSE)
-    
-  })
-  
+
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 3                                        ###
   ###---------------------------------------------------------------------------------###
-  output$screenAggregation3 <- renderUI({
+  output$Screen_Aggregation_3 <- renderUI({
     tagList(
       actionButton(ns("valid.aggregation"),"Save aggregation", class = actionBtnClass)
     )
@@ -498,8 +464,6 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   
   
   observeEvent(input$valid.aggregation,{ 
-    
-    req(rv.aggregation$temp.aggregate)
     
     isolate({
       withProgress(message = '',detail = '', value = 0, {
