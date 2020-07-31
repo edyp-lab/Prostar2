@@ -13,6 +13,7 @@ library(shiny)
 library(highcharter)
 library(DAPAR2)
 library(tibble)
+library(Matrix)
 
 
 ui <- fluidPage(
@@ -23,27 +24,28 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   utils::data(Exp1_R25_pept, package='DAPARdata2')
-  obj<- addAssay(Exp1_R25_pept, filterNA(Exp1_R25_pept, i=2)[[2]], name = "filtered_log") 
+  obj <- Exp1_R25_pept
+  #obj<- addAssay(Exp1_R25_pept, filterNA(Exp1_R25_pept, i=2)[[2]], name = "filtered_log")
   
   
-  # rv <-reactiveValues(
-  #   ret = NULL,
-  #   current.obj = obj
-  # )
+  rv <-reactiveValues(
+    ret = NULL,
+    current.obj = obj
+  )
   
-  #rv$ret <-
+  rv$ret <-
     callModule(mod_pipe_aggregation_server,'pipe_aggregation',
                obj = reactive({obj}),
-               ind = reactive({3}))
+               ind = reactive({2}))
   
   
-  # callModule(mod_infos_dataset_server,'infos',
-  #            obj = reactive({rv$current.obj}))
-  # 
-  # observe({
-  #   req(rv$ret())
-  #   rv$current.obj <- rv$ret()
-  # })
+  callModule(mod_infos_dataset_server,'infos',
+             obj = reactive({rv$current.obj}))
+
+  observe({
+    req(rv$ret())
+    rv$current.obj <- rv$ret()
+  })
   
   
   

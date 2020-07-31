@@ -231,7 +231,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     
     choice <- NULL
     if (input$radioBtn_includeShared %in% c("No", "Yes1")){
-      choice <- c("Mean"="Mean","Sum"="Sum")
+      choice <- c("Mean"="Mean", "Sum"="Sum")
     } else {choice <- c("Mean"="Mean")}
     choice
     
@@ -255,7 +255,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     if (input$radioBtn_includeShared=='Yes2'){
       ch <- c("Mean"="Mean")  
     } else {
-      ch <- c("Sum"='Sum', "Mean"="Mean")
+      ch <- c("Mean"="Mean", "Sum"='Sum')
     }
     updateRadioButtons(session,"AggregationOperator", choices=ch, selected=input$AggregationOperator)
   })
@@ -456,7 +456,6 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
     
     r.nav$isDone[2] <- TRUE
     
-    View(rv.aggregation$dataIn)
   })
   
   
@@ -473,28 +472,21 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   
   
   observeEvent(input$valid.aggregation,{
-    print("rv.aggregation$dataIn[[rv.aggregation$i]]")
-    print(rv.aggregation$dataIn)
-    print(rv.aggregation$i)
     
-    
-    metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[['typeOfData']] <- 'protein'
-    metadata(rv.aggregation$dataIn[[rv.aggregation$i]])$Params <- list(
-      includeSharedPeptides = input$radioBtn_includeShared,
-      operator = input$AggregationOperator,
-      considerPeptides = input$AggregationConsider,
-      topN = input$nTopn,
-      meta.names = input$columnsForProteinDataset.box
-      )
-    
-    
-    
-    #updatePB(session,inputId="pb_SaveAggregation",value=70,text_value="70 %", striped = TRUE, active=TRUE)
-    #updatePB(session,inputId="pb_SaveAggregation",value=90,text_value="90 %", striped = TRUE, active=TRUE)
-    #}
+    # metadata(rv.aggregation$dataIn[[rv.aggregation$i]])$Params <- list(
+    #   includeSharedPeptides = input$radioBtn_includeShared,
+    #   operator = input$AggregationOperator,
+    #   considerPeptides = input$AggregationConsider,
+    #   topN = input$nTopn,
+    #   meta.names = input$columnsForProteinDataset.box
+    #   )
+    # 
+    # metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[['typeOfData']] <- 'protein'
     
     
     rv.aggregation$dataOut <- rv.aggregation$dataIn
+    View(rv.aggregation$dataOut)
+    
     r.nav$isDone[3] <- TRUE
     
     
