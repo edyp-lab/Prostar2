@@ -236,7 +236,7 @@ mod_pipe_prot_hypotest_server <- function(input, output, session, obj, ind){
     rv.hypotest$i <- ind()
     
     
-    
+    browser()
     isolate({
       switch(input$diffAnaMethod,
              Limma={
@@ -281,7 +281,6 @@ mod_pipe_prot_hypotest_server <- function(input, output, session, obj, ind){
   
   output$Screen_Prot_hypotest_2 <- renderUI({
     
-    print('screen 2')
     tagList(
       uiOutput(ns("btn_valid"))
     )

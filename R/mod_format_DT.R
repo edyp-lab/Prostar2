@@ -57,8 +57,7 @@ mod_format_DT_server <- function(input, output, session,
   
   observe({
     req(table2show())
-    # if (is.null() || length(table2show())==0){
-    #   #warning("The parameter table2show is null.")
+ #   #warning("The parameter table2show is null.")
     #   return(NULL)
     # } else {
       DT::replaceData(proxy, table2show(), resetPaging = FALSE)  

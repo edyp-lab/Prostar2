@@ -18,7 +18,7 @@ server <- function(input, output, session) {
   #obj <- NULL
   
   callModule(mod_format_DT_server,'test_format_DT', 
-             table2show = reactive({NULL}),
+             table2show = reactive({as.data.frame(assay(obj[[2]]))}),
              style = reactive({ list(cols = colnames(colData(obj)),
                                      vals = colnames(colData(obj))[2],
                                      unique = unique(colData(obj)$Condition),
