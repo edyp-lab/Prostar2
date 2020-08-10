@@ -1,15 +1,15 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
-source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_pipe_prot_norm.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_pipe_pept_norm.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_plots_density.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_plots_intensity.R'), local=TRUE)$value
 source(file.path("../../R", "mod_popover_for_help.R"), local = TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
 
 
 library(highcharter)
@@ -24,7 +24,7 @@ options(shiny.fullstacktrace = FALSE)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_prot_norm_ui('pipe_norm'),
+    mod_pipe_pept_norm_ui('pipe_norm'),
     mod_infos_dataset_ui('infos')
     # highchartOutput('test')
   )
@@ -33,28 +33,17 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  utils::data(Exp1_R25_pept, package='DAPARdata2')
   
   rv <-reactiveValues(
     ret = NULL,
-    current.obj = Exp1_R25_prot
+    current.obj = Exp1_R25_pept
   )
   
   
-  # output$test <- renderHighchart({
-  #   
-  #   utils::data(Exp1_R25_pept, package='DAPARdata2')
-  #   obj <- Exp1_R25_pept[1:1000,]
-  #   conds <- colData(obj)[["Condition"]]
-  #   obj <- normalizeD(obj, 2, name='norm', method='SumByColumns', conds=conds, type='overall')
-  #   compareNormalizationD_HC(assay(obj, 2), assay(obj, 3), conds=conds, palette=NULL)
-  # 
-  # })
-  # 
-  
-  rv$ret <- callModule(mod_pipe_prot_norm_server,
+  rv$ret <- callModule(mod_pipe_pept_norm_server,
                        'pipe_norm',
-                       obj = reactive({Exp1_R25_prot}),
+                       obj = reactive({Exp1_R25_pept}),
                        ind = reactive({2}))
   
   callModule(mod_infos_dataset_server,'infos',

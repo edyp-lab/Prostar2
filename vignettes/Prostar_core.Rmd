@@ -61,7 +61,7 @@ It is based on the navbarPage layout (see xxx) in the shiny package. There are s
   * Check for updates
 * **Data manager**:
   * Open MSnset: ui to open a dataset previously created by the user,
-  * Convert: through several steps, converts Excel or CSV files containing quantitative data to an object of class Features,
+  * Convert: through several steps, converts Excel or CSV files containing quantitative data to an object of class QFeatures,
   which is the format admitted in Prostar,
   * Demo data
   * Reload Prostar
