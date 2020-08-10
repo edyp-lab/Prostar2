@@ -39,7 +39,7 @@ mod_navbar_menu_ui <- function(id){
       #                     value="CheckUpdatesTab",mod_check_updates_ui("modCheckUpdates"))
       # ),
       navbarMenu("Data manager",
-      #                        tabPanel("Open MSnset",value = 'openMSnsetTab',mod_open_dataset_ui('moduleOpenDataset')),
+      #                        tabPanel("Open Dataset",value = 'openMSnsetTab',mod_open_dataset_ui('moduleOpenDataset')),
       #                        tabPanel("Convert",value = "convertTab",mod_convert_ms_file_ui('moduleProcess_Convert')),
                               tabPanel("Demo data",  value='demoTab', mod_open_demo_dataset_ui(ns('mod_OpenDemoDataset')))
       #            tabPanel(title="ReloadProstar",

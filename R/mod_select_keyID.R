@@ -8,6 +8,7 @@
 #'
 #' @importFrom shiny NS tagList 
 #' @importFrom Biobase fData
+#' @importFrom tibble as_tibble
 #' 
 mod_select_keyID_ui <- function(id){
   ns <- NS(id)
@@ -76,7 +77,7 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
         This column is valid to serve as a unique ID for entities"
     }
     else {
-      dat <- as.data.frame(rv$dataOut)[ ,input$choose_keyID]
+      dat <- tibble::as_tibble(rv$dataOut)[ ,input$choose_keyID]
         t <- (length(dat) == length(unique(dat)))
       
       if (!t){
@@ -189,8 +190,8 @@ mod_select_keyID_server <- function(input, output, session, dataIn, typeOfData){
     if (input$choose_keyID =="AutoID") {
       test_keyID <- TRUE
     } else {
-      test_keyID <- (length(as.data.frame(rv$dataOut)[, input$choose_keyID])
-                     == length(unique(as.data.frame(rv$dataOut)[, input$choose_keyID])))
+      test_keyID <- (length(tibble::as_tibble(rv$dataOut)[, input$choose_keyID])
+                     == length(unique(tibble::as_tibble(rv$dataOut)[, input$choose_keyID])))
     }
     
    

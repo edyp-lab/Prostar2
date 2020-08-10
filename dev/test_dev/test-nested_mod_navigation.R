@@ -34,7 +34,6 @@ server <- function(input, output, session) {
   callModule(mod_navigation_server, "test_nav",pages = r.nav)
   
   observeEvent(req(r.nav$reset),{
-    print("execute reset")
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     updateSelectInput(session,'select1', selected=r.params[['select1']])

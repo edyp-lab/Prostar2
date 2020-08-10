@@ -1,10 +1,15 @@
+library(shiny)
+library(MultiAssayExperiment)
+
+
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
+source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_open_demo_dataset.R'), local=TRUE)$value
 
-options(shiny.fullstacktrace = TRUE)
+#options(shiny.fullstacktrace = TRUE)
 
 # files <- list.files('../../R', pattern='.R')
 # files <- files[-which(files=='app_server.R')]

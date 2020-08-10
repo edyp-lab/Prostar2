@@ -35,11 +35,9 @@ mod_plots_intensity_ui <- function(id){
                selectInput(ns("choosePlot"), "Choose plot", 
                            choices=c( "violinplot"="violinplot",
                                       "boxplot"="boxplot"), 
-                           width='100px')
-      ),
-      
-      uiOutput(ns('showTrackProt'))
-      
+                           width='100px'),
+               uiOutput(ns('slave_tracking_ui'))
+      )
     )  
   )
 }
@@ -60,53 +58,78 @@ mod_plots_intensity_server <- function(input, output, session,
                                        dataIn,
                                        meta,
                                        conds,
+                                       base_palette=NULL,
                                        params=NULL,
                                        reset=NULL,
-                                       base_palette=NULL){
+                                       slave = FALSE){
   
   
   ns <- session$ns
   
   rv.modboxplot <- reactiveValues(
-    var = NULL,
-    ind = NULL,
-    indices = NULL
+    indices = NULL,
+    varTrack = NULL
   )
   
-  rv.modboxplot$var <- callModule(mod_plots_tracking_server, "widgets",
+  
+  
+  rv.modboxplot$varTrack <- callModule(mod_plots_tracking_server, "slave_tracking",
                                   obj = reactive({dataIn()}),
-                                  params=reactive({params()}),
                                   keyId=reactive({meta()[['keyId']]}),
-                                  reset=reactive({reset()}))
+                                  params=reactive({params()}),
+                                  reset=reactive({reset()}),
+                                  slave = reactive({slave()})
+                                  )
   
   
-  output$showTrackProt <- renderUI({
+  observe({
+    params()
+    print('params() = ')
+    print(params())
+  })
+  
+  observe({
+    slave()
+    print('slave() = ')
+    print(slave())
+  })
+  
+  
+  output$slave_tracking_ui <- renderUI({
+    slave()
     dataIn()
-    
-    if (S4Vectors::metadata(dataIn())[["typeOfData"]]=='protein'){
-      tags$div(style="display:inline-block; vertical-align: middle;",
-               mod_plots_tracking_ui(ns('widgets'))
-      ) } else { return(NULL)}
-  })
-  
-  
-  
-  observeEvent(req(rv.modboxplot$var()),{
-    
-    if (is.null(rv.modboxplot$var()$type)){
+    if ((slave()==FALSE) && S4Vectors::metadata(dataIn())[["typeOfData"]]=='protein')
+      {
+      mod_plots_tracking_ui(ns('slave_tracking'))
+    }
+    else 
       return(NULL)
-    }
-    
-    switch(rv.modboxplot$var()$type,
-           ProteinList = rv.modboxplot$indices <- rv.modboxplot$var()$list.indices,
-           Random = rv.modboxplot$indices <- rv.modboxplot$var()$rand.indices,
-           Column = rv.modboxplot$indices <- rv.modboxplot$var()$col.indices
-    )
-    #if (length(rv.modboxplot$ind)==0){rv.modboxplot$ind <- NULL}
-    if (length(rv.modboxplot$indices)==0){
-      rv.modboxplot$indices <- NULL
-    }
   })
+  
+  
+  
+  observeEvent(c(slave(),rv.modboxplot$varTrack()),ignoreInit = TRUE, ignoreNULL=FALSE, {
+    if (slave() == TRUE){
+      switch(params()$typeSelect,
+             ProteinList = rv.modboxplot$indices <- params()$list.indices,
+             Random = rv.modboxplot$indices <- params()$rand.indices,
+             Column = rv.modboxplot$indices <- params()$col.indices,
+             None = rv.modboxplot$indices <- NULL
+      )
+    } else {
+      tmp <- if (is.null(rv.modboxplot$varTrack()$typeSelect)) 'None' 
+                else rv.modboxplot$varTrack()$typeSelect
+        switch(tmp,
+             ProteinList = rv.modboxplot$indices <- rv.modboxplot$varTrack()$list.indices,
+             Random =  rv.modboxplot$indices <- rv.modboxplot$varTrack()$rand.indices,
+             Column =  rv.modboxplot$indices <- rv.modboxplot$varTrack()$col.indices,
+             None = rv.modboxplot$indices <- NULL
+      )
+    }
+    })
+  
+  
+  
   
   
   observeEvent(input$choosePlot, {
@@ -121,12 +144,13 @@ mod_plots_intensity_server <- function(input, output, session,
     rv.modboxplot$indices
     tmp <- NULL
     
+    
     pattern <- paste0('test',".boxplot")
     withProgress(message = 'Making plot', value = 100, {
       tmp <- DAPAR2::boxPlotD_HC(SummarizedExperiment::assay(dataIn()),
-                                 conds=conds(),
-                                 sequence=SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
-                                 palette=base_palette(),
+                                 conds = conds(),
+                                 keyId = SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
+                                 palette = base_palette(),
                                  subset.view = rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
     })
@@ -149,7 +173,7 @@ mod_plots_intensity_server <- function(input, output, session,
       pattern <- paste0('test',".violinplot")
       tmp <- DAPAR2::violinPlotD(SummarizedExperiment::assay(dataIn()),
                                  keyId = SummarizedExperiment::rowData(dataIn())[[ meta()[['keyId']] ]],
-                                 legend = conds(),
+                                 conds = conds(),
                                  palette = base_palette(),
                                  subset.view =  rv.modboxplot$indices)
       #future(createPNGFromWidget(tmp,pattern))
@@ -163,7 +187,7 @@ mod_plots_intensity_server <- function(input, output, session,
   }, deleteFile = TRUE)
   
   
-  return(reactive({rv.modboxplot$var()}))
+  return(reactive({rv.modboxplot$varTrack()}))
 }
 
 ## To be copied in the UI

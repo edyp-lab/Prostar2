@@ -12,9 +12,10 @@ mod_plots_tracking_server(
   output,
   session,
   obj,
-  params,
   keyId,
-  reset = FALSE
+  params,
+  reset = FALSE,
+  slave = FALSE
 )
 }
 \arguments{
@@ -28,7 +29,7 @@ mod_plots_tracking_server(
 
 \item{obj}{Object SummarizedExperiment}
 
-\item{metadata}{Metadata of Fetaures containing the SummarizedExperiment}
+\item{metadata}{Metadata of Features containing the SummarizedExperiment}
 }
 \description{
 A shiny Module.

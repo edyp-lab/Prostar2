@@ -32,7 +32,10 @@ server <- function(input, output, session) {
     print(rv$current.obj)
   })
   
-  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', obj = reactive({rv$current.obj}))
+  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
+             obj = reactive({rv$current.obj}),
+             names = reactive({NULL}),
+             gradientRate = reactive({0.8}))
 }
 
 

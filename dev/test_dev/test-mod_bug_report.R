@@ -12,7 +12,6 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   callModule(mod_bug_report_server,'home')
   warning("Test warning message")
-  print("test de print")
 }
 
 

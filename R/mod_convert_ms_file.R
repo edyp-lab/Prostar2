@@ -31,6 +31,7 @@ mod_convert_ms_file_ui <- function(id){
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs hidden toggle
 #' @importFrom htmlwidgets JS
+#' @importFrom tibble as_tibble
 #' 
 mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
@@ -235,12 +236,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     req(input$select_Identification)
     #req(input$choose_quanti_data_col)
     
-    
-    print(input$select_Identification)
-    print(input$choose_quanti_data_col)
-    
     temp <- shinyValue("colForOriginValue_", length(input$choose_quanti_data_col))
-    print(temp)
     
     isOk <- TRUE
     msg <- NULL
@@ -381,15 +377,15 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     names(choices) <- c("None",colnames(rv.convert$dataIn))
 
     if (isTRUE(input$select_Identification)) {
-      df <- data.frame(as.data.frame(input$choose_quanti_data_col),
+      df <- data.frame(tibble::as_tibble(input$choose_quanti_data_col),
                        shinyInput(selectInput,
                                   "colForOriginValue_",
-                                  nrow(as.data.frame(input$choose_quanti_data_col)),
+                                  nrow(tibble::as_tibble(input$choose_quanti_data_col)),
                                   choices=choices)
       )
       colnames(df) <- c("Sample", "Identification method")
     } else {
-      df <- data.frame(Sample = as.data.frame(input$choose_quanti_data_col))
+      df <- data.frame(Sample = tibble::as_tibble(input$choose_quanti_data_col))
       colnames(df) <- c("Sample")
     }
      
@@ -440,7 +436,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
       
       p("Once the 'Load' button (above) clicked, you will be automatically redirected to Prostar home page. The dataset will be accessible within Prostar 
-        interface and processing menus will be enabled. However, all importing functions ('Open MSnset', 'Demo data' and 'Convert data') will be disabled 
+        interface and processing menus will be enabled. However, all importing functions ('Open dataset', 'Demo data' and 'Convert data') will be disabled 
         (because successive dataset loading can make Prostar unstable). To work on another dataset, use first the 'Reload Prostar' functionality from 
         the 'Dataset manager' menu: it will make Prostar restart with a fresh R session where import functions are enabled.")
     )

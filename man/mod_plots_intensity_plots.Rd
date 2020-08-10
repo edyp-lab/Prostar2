@@ -14,9 +14,10 @@ mod_plots_intensity_server(
   dataIn,
   meta,
   conds,
+  base_palette = NULL,
   params = NULL,
   reset = NULL,
-  base_palette = NULL
+  slave = FALSE
 )
 }
 \arguments{

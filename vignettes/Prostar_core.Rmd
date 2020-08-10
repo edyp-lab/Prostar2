@@ -1,0 +1,90 @@
+---
+title: "Prostar core"
+author: "Samuel Wieczorek"
+date: "01/07/2020"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Build-a-pipeline-module}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+
+# Introduction
+
+This vignette aims to describe the core code of Prostar and is addressed to developers.
+
+# Generalities
+
+
+
+## Nomenclature 
+
+
+All the files containing code are stored in the directory R.
+The modules are prefixed with 'mod_'
+
+
+
+## Test modules
+
+Each module in the directory 'R' has a test file, located in 'dev/test_dev'.
+
+
+
+## Files
+
+
+
+
+# UI side
+
+The code for the ui side of Prostar is in the file 'R/app_ui.R'. It consists in two main parts:
+* a loading page (div id = 'loading_page'),
+* the ui of Prostar ('main_content')
+
+It is based on the navbarPage layout (see xxx) in the shiny package. There are several static menus (and submenus) that are present even if no dataset is loaded:
+
+* **Prostar**:
+  * Home: 
+  * Global settings:
+  * Release notes:
+  * Check for updates
+* **Data manager**:
+  * Open MSnset: ui to open a dataset previously created by the user,
+  * Convert: through several steps, converts Excel or CSV files containing quantitative data to an object of class Features,
+  which is the format admitted in Prostar,
+  * Demo data
+  * Reload Prostar
+* **Data processing**:
+  * Descriptive statistics:
+* **Help**:
+  * Links:
+  * FAQ:
+  * Bug report
+
+All of these submenus are implemented as modules : there ui parts are called her and their server part are called from the server side of Prostar (R/app_server.R).
+
+
+
+
+
+# Server side
+
+The code for the server side of Prostar is in the file 'R/app_server.R'.
+
+## Declaration of global reactive variables
+
+
+## Call to server modules
+
+The server-side of all the modules which ui are declared in the app_ui.R file are called in this file.

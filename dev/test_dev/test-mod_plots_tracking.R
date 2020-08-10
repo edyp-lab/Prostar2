@@ -6,15 +6,27 @@ source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
-  tagList(
-    htmlOutput('show_res_type'),
-    htmlOutput('show_res_list'),
-    htmlOutput('show_res_rand'),
-    htmlOutput('show_res_col'),
-    htmlOutput('show_res_list_indices'),
-    htmlOutput('show_res_list_rand'),
-    htmlOutput('show_res_list_col'),
-    mod_plots_tracking_ui('plots_tracking')
+  checkboxInput('sync', 'sync Slave with Master', value=FALSE),
+   fluidRow(
+     column(6,tagList(h3('Master'),
+                      mod_plots_tracking_ui('master_tracking')
+                      )
+            ),
+            column(6,tagList(h3('Slave'),
+                             mod_plots_tracking_ui('slave_tracking')
+            )
+            )
+  ),
+  
+  fluidRow(
+    column(6,tagList(h3('Output of master'),
+                     uiOutput('master_out')
+    )
+    ),
+    column(6,tagList(h3('Output of slave'),
+                     uiOutput('slave_out')
+    )
+    )
   )
 )
 
@@ -26,26 +38,64 @@ server <- function(input, output, session) {
   obj<-Exp1_R25_prot[[2]]
   
   r <- reactiveValues(
-    res = NULL
+    master = NULL,
+    slave = NULL
   )
   
   rowData(obj) <- cbind(rowData(obj), ProtOfInterest=sample(c(0,1), nrow(obj), TRUE))
   
-  r$res <- callModule(mod_plots_tracking_server,'plots_tracking', 
+  r$master <- callModule(mod_plots_tracking_server,'master_tracking', 
                       obj = reactive({obj}), 
                       params=reactive({NULL}),
                       keyId=reactive({keyId}),
-                      reset=reactive({FALSE}) )
+                      reset=reactive({FALSE}),
+                      slave = reactive({FALSE}))
+  
+  r$slave <- callModule(mod_plots_tracking_server,'slave_tracking', 
+                      obj = reactive({obj}), 
+                      params=reactive({if (input$sync) r$master() 
+                        else NULL}),
+                      keyId=reactive({keyId}),
+                      reset=reactive({FALSE}),
+                      slave=reactive({NULL}))
   
   
-  output$show_res <- renderText({HTML(r$res())})
-  output$show_res_type <- renderText({HTML(r$res()$type)})
-  output$show_res_list <- renderText({HTML(r$res()$list)})
-  output$show_res_rand <- renderText({HTML(r$res()$rand)})
-  output$show_res_col <- renderText({HTML(r$res()$col)})
-  output$show_res_list_indices <- renderText({HTML(r$res()$list_indices)})
-  output$show_res_list_rand <- renderText({HTML(r$res()$list_rand)})
-  output$show_res_list_col <- renderText({HTML(r$res()$list_col)})
+  # observe({
+  #   r$slave()
+  #   print(r$slave())
+  # })
+  
+  
+  output$master_out <- renderUI({
+    r$master()
+    
+     tagList(
+      p(paste0('type = ', r$master()$type)),
+      p(paste0('list = ', paste0(r$master()$listSelect, collapse=', '))),
+      p(paste0('rand = ', r$master()$randSelect)),
+      p(paste0('col = ', r$master()$colSelect)),
+      p(paste0('list.indices = ', paste0(r$master()$list.indices, collapse=', '))),
+      p(paste0('rand.indices = ', paste0(r$master()$rand.indices, collapse=', '))),
+      p(paste0('col.indices = ', paste0(r$master()$col.indices, collapse=', ')))
+    )
+  })
+
+  
+  output$slave_out <- renderUI({
+    r$slave()
+    
+    tagList(
+      p(paste0('type = ', r$slave()$type)),
+      p(paste0('list = ', paste0(r$slave()$listSelect, collapse=', '))),
+      p(paste0('rand = ', r$slave()$randSelect)),
+      p(paste0('col = ', r$slave()$colSelect)),
+      p(paste0('list.indices = ', paste0(r$slave()$list.indices, collapse=', '))),
+      p(paste0('rand.indices = ', paste0(r$slave()$rand.indices, collapse=', '))),
+      p(paste0('col.indices = ', paste0(r$slave()$col.indices, collapse=', ')))
+    )
+  })
+  
+  
 }
 
 

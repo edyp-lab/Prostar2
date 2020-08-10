@@ -7,7 +7,7 @@
 \usage{
 mod_settings_ui(id)
 
-mod_settings_server(input, output, session)
+mod_settings_server(input, output, session, obj)
 }
 \arguments{
 \item{id}{shiny id}

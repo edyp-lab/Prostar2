@@ -244,7 +244,6 @@ $inactive: #AEB6BF;
       suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
       
       code[[1]][1] <- paste0(prefix, input$nSteps, suffix, collapse='')
-      print( code[[1]][1])
       code_sass <- paste(unlist(code), collapse = '')
       shinyjs::inlineCSS( sass::sass(code_sass))
     })

@@ -1,6 +1,8 @@
 library(shiny)
 library(MultiAssayExperiment)
 
+options(shiny.fullstacktrace = TRUE)
+
 
 source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value

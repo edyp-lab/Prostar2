@@ -7,7 +7,15 @@
 \usage{
 mod_plots_mv_ui(id)
 
-mod_plots_mv_server(input, output, session, obj = NULL)
+mod_plots_mv_server(
+  input,
+  output,
+  session,
+  obj,
+  conds,
+  title = NULL,
+  palette = NULL
+)
 }
 \arguments{
 \item{id}{shiny id}

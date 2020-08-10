@@ -25,7 +25,7 @@ server <- function(input, output, session) {
     settings = NULL
   )
   conds <- SummarizedExperiment::colData(Exp1_R25_prot)
-  r$settings <- callModule(mod_settings_server, "settings")
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   callModule(mod_plots_group_mv_server,'plots_group_mv', 
              obj = reactive({obj}),
              conds = reactive({conds}),

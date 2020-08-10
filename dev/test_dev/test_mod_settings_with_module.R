@@ -22,9 +22,12 @@ server <- function(input, output, session) {
   )
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-   r$settings <- callModule(mod_settings_server, "settings")
+   r$settings <- callModule(mod_settings_server, "settings",
+                            obj = reactive({Exp1_R25_prot}))
+   
   callModule(mod_plots_group_mv_server,'plots_group_mv', 
-             obj = reactive({Exp1_R25_prot}), 
+             obj = reactive({Exp1_R25_prot}),
+             conds = reactive({colData(Exp1_R25_prot)}),
              base_palette=reactive({r$settings()$examplePalette})
              )
   # callModule(mod_plots_group_mv_server,'plots_group_mv', obj = NULL)

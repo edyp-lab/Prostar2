@@ -102,12 +102,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
     current.obj = NULL,
     settings = NULL
   )
-  rv$settings <- callModule(mod_settings_server, "settings")
-  
-  # observe({
-  #   if (is.null(dataIn()))
-  #     return(NULL)
-  # })
+  rv$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv$current.obj}))
   
   
   callModule(mod_plots_se_explorer_server, 'plot_quanti_large',
@@ -123,13 +118,14 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
              conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] }),
              params = reactive({NULL}),
              reset = reactive({FALSE}),
+             slave = reactive({FALSE}),
              base_palette = reactive({rv$settings()$examplePalette})
   )
   
   
   callModule(module=mod_plots_pca_server, 'plot_pca_large',
              obj=reactive({rv$current.obj}),
-             conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] })
+             coldata = reactive({ SummarizedExperiment::colData(dataIn()) })
   )
   
   

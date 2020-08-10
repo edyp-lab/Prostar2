@@ -8,7 +8,7 @@
 ## 2.1 Add modules
 ## 
 golem::add_module( name = "all_plots" ) # Name of the module
-golem::add_module( name = "select_keyID_from_MSnset" ) # Name of the module
+golem::add_module( name = "observe_dynamic_colourPicker_input" ) # Name of the module
 
 ## 2.2 Add dependencies
 
@@ -39,7 +39,7 @@ usethis::use_r("config")
 # 3. Documentation
 
 ## 3.1 Vignette
-usethis::use_vignette("Prostar2")
+usethis::use_vignette("Build-a-pipeline-module")
 devtools::build_vignettes()
 
 ## 3.2 Code coverage
