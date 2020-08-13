@@ -2,7 +2,6 @@ library(QFeatures)
 library(shiny)
 library(Prostar2)
 source(file.path('../R', 'global.R'), local=TRUE)$value
-
 source(file.path('../R', 'mod_navigation.R'), local=TRUE)$value
 
 #' @importFrom shiny NS tagList 
@@ -38,6 +37,8 @@ mod_pipe_process_server <- function(input, output, session, obj){
     name = "processProtNorm",
     dataIn = NULL,
     dataOut = NULL,
+    i = NULL,
+    settings = NULL,
     widgets = list(assay = 0,
                    operator = NULL,
                    operand = NULL)
