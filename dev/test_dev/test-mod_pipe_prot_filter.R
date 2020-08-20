@@ -7,6 +7,8 @@ source(file.path("../../R", "mod_popover_for_help.R"), local = TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path("../../R", "mod_plots_group_mv.R"), local=TRUE)$value
+source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
+
 
 library(highcharter)
 library(shinyjs)
@@ -49,7 +51,7 @@ server <- function(input, output, session) {
   
   rv$ret <- callModule(mod_pipe_prot_filter_server,
                        'pipe_filter',
-                       obj = reactive({Exp1_R25_prot}),
+                       obj = reactive({rv$current.obj}),
                        ind = reactive({2}))
   
   callModule(mod_infos_dataset_server,'infos',
