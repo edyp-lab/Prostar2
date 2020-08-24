@@ -27,14 +27,13 @@ mod_pipe_prot_filter_server <- function(input, output, session, obj, ind){
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
     name = "Filtering",
-    stepsNames = c("MV filtering", "Field filtering", "Summary", "Validate"),
+    stepsNames = c("MV filtering", "Field filtering", "Validate"),
     ll.UI = list( screenStep1 = uiOutput(ns("Screen_Filtering_1")),
                   screenStep2 = uiOutput(ns("Screen_Filtering_2")),
-                  screenStep3 = uiOutput(ns("Screen_Filtering_3")),
-                  screenStep4 = uiOutput(ns("Screen_Filtering_4"))
+                  screenStep3 = uiOutput(ns("Screen_Filtering_3"))
                   ),
-    isDone =  rep(FALSE,4),
-    mandatory =  rep(FALSE,4),
+    isDone =  rep(FALSE,3),
+    mandatory =  rep(FALSE,3),
     reset = FALSE
   )
   
@@ -50,12 +49,12 @@ mod_pipe_prot_filter_server <- function(input, output, session, obj, ind){
     deleted.mvLines = NULL,
     widgets = list(ChooseFilters = "None",
                    seuilNA = 0,
-                   DT_filterSummary = data.frame(Filter=NULL, 
-                                                 Prefix=NULL,
+                   DT_naFilterSummary = data.frame(Filter=NULL, 
+                                                 seuilNA=NULL,
                                                  nbDeleted=NULL, 
                                                  Total=NULL, 
                                                  stringsAsFactors=F),
-                   DT_numfilterSummary = data.frame(Filter=NULL, 
+                   DT_fieldFilterSummary = data.frame(Filter=NULL, 
                                                     Condition=NULL,
                                                     nbDeleted=NULL, 
                                                     Total=NULL, 
@@ -84,11 +83,11 @@ mod_pipe_prot_filter_server <- function(input, output, session, obj, ind){
     
     rv.filter$widgets <- list(ChooseFilters = "None",
                                seuilNA = 0,
-                               DT_filterSummary = data.frame(Filter=NULL, 
-                                                             Prefix=NULL,
-                                                             nbDeleted=NULL, 
-                                                             Total=NULL, 
-                                                             stringsAsFactors=F),
+                               DT_naFilterSummary = data.frame(Filter=NULL, 
+                                                               seuilNA=NULL,
+                                                               nbDeleted=NULL, 
+                                                               Total=NULL, 
+                                                               stringsAsFactors=F),
                                DT_fieldFilterSummary = data.frame(Filter=NULL, 
                                                                 Condition=NULL,
                                                                 nbDeleted=NULL, 
@@ -104,7 +103,7 @@ mod_pipe_prot_filter_server <- function(input, output, session, obj, ind){
     rv.filter.deleted.field <- NULL
     rv.filter$data <- data.frame()
     
-    r.nav$isDone <- rep(FALSE, 4)
+    r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     ## end of no modifiable part
   })
@@ -177,6 +176,12 @@ callModule(mod_popover_for_help_server,
                actionButton(ns("perform.filtering.MV"), "Perform MV filtering", class = actionBtnClass)
           ),
           hr(),
+          tags$hr(),
+          tags$div(
+            tags$div( style="display:inline-block; vertical-align: middle; align: center;",
+                      mod_format_DT_ui(ns('DT_naFilterSummary'))
+            )
+          ),
           mod_plots_group_mv_ui(ns("MVPlots_filtering")),
           uiOutput(ns("ObserverMVFilteringDone"))
         )
@@ -238,6 +243,16 @@ callModule(mod_popover_for_help_server,
                                            rowData(rv.filter$dataIn[[to]])[,metadata(rv.filter$dataIn)$keyId])
       
       
+      .total <- ifelse(length(experiments(rv.filter$dataIn )) > 0, nrow(rv.filter$dataIn[[rv.filter$i]]), 0)
+      df <- data.frame(Filter = rv.filter$widgets$ChooseFilters, 
+                       seuilNA = as.integer(rv.filter$widgets$seuilNA), 
+                       nbDeleted = length(rv.filter$deleted.mvLines), 
+                       Total = .total)
+      
+      rv.filter$widgets$DT_naFilterSummary <- rbind(rv.filter$widgets$DT_naFilterSummary, df)
+      
+      
+      
       r.nav$isDone[1] <- TRUE
      # }
     }
@@ -285,7 +300,9 @@ callModule(mod_popover_for_help_server,
     helpText("After checking the data, validate the filters.")
   })
   
-  
+  callModule(mod_format_DT_server,'DT_naFilterSummary', 
+             table2show = reactive({rv.filter$widgets$DT_naFilterSummary}),
+             style = reactive({NULL})) 
   
   observeEvent(input$ChooseFilters, ignoreInit=TRUE,{
     rv.filter$widgets$ChooseFilters <- input$ChooseFilters
@@ -319,7 +336,7 @@ callModule(mod_popover_for_help_server,
         ),
         
         tags$div( style="display:inline-block; vertical-align: middle;",
-                  actionButton(ns("btn_test_fieldFilter"), "Perform", class = actionBtnClass)
+                  actionButton(ns("btn_test_fieldFilter"), "Test", class = actionBtnClass)
                   ),
         tags$div( style="display:inline-block; vertical-align: middle;",
                   shinyjs::disabled(actionButton(ns("btn_perform_fieldFilter"), "Perform", class = actionBtnClass))
@@ -425,11 +442,8 @@ callModule(mod_popover_for_help_server,
        if(is.na(as.numeric(rv.filter$widgets$fieldFilter_value)))
          return(NULL)
  
-    
-    
     fieldname <- rv.filter$widgets$fieldName
     tagValue <- rv.filter$widgets$fieldFilter_value
-    
     
     # create a duplicate of the last assay
     rv.filter$tmp <-addAssay(rv.filter$tmp, 
@@ -481,6 +495,8 @@ callModule(mod_popover_for_help_server,
     else 
       rv.filter$i <- NULL
     
+    
+    
     .total <- ifelse(length(experiments(rv.filter$dataIn )) > 0, nrow(rv.filter$dataIn[[rv.filter$i]]), 0)
     df <- data.frame(Filter = rv.filter$widgets$fieldName, 
                      Condition = paste0(rv.filter$widgets$operator,' ',rv.filter$widgets$fieldFilter_value), 
@@ -489,6 +505,10 @@ callModule(mod_popover_for_help_server,
     
     rv.filter$widgets$DT_fieldfilterSummary <- rbind(rv.filter$widgets$DT_fieldfilterSummary, df)
     
+    ## remove previous SE and get their params
+    #browser()
+    metadata(rv.filter$dataIn[[rv.filter$i]])$Params <- list(param = 'toto')
+   
     r.nav$isDone[2] <- TRUE
     
   })
@@ -514,7 +534,7 @@ callModule(mod_popover_for_help_server,
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 3                                        ###
   ###---------------------------------------------------------------------------------###
-  output$Screen_Filtering_3 <- renderUI({
+  # output$Screen_Filtering_3 <- renderUI({
     
   #   tagList(
   #     fluidRow(
@@ -710,12 +730,12 @@ callModule(mod_popover_for_help_server,
   #   # }
   #   dt
   #   
-   })
+  #  })
   
   ###---------------------------------------------------------------------------------###
-  ###                                 Screen 4                                        ###
+  ###                                 Screen 3                                        ###
   ###---------------------------------------------------------------------------------###
-  output$Screen_Filtering_4 <- renderUI({     
+  output$Screen_Filtering_3 <- renderUI({     
     
     tagList(
       actionButton(ns("ValidateFilters"),"Save filtered dataset",class = actionBtnClass)
@@ -741,19 +761,21 @@ callModule(mod_popover_for_help_server,
       #     quantile = rv.filter$widgets$quantile,
       #     spanLOESS =rv.filter$widgets$spanLOESS
       #   )
-        
-      rv.filter$dataOut <- rv.filter$dataIn
+       browser() 
+      rv.filter$dataOut <- obj()
+      rv.filter$dataOut <- addAssay(obj(),
+                                    rv.filter$dataIn[[rv.filter$i]],
+                                    'filtered')
+      #get indices of temporary SE
+      
+      
       if (metadata(rv.filter$dataOut[[length(experiments(rv.filter$dataOut))]])$typeOfData == "peptide"  
             && !is.null(metadata(rv.filter$dataOut)$parentProtId)){
           #ComputeAdjacencyMatrices()
           #ComputeConnexComposants()
         }
-        
-       # UpdateDatasetWidget(rv.filter$dataIn, name)
-      #}
-      
-      
-      r.nav$isDone[4] <- TRUE
+       
+      r.nav$isDone[3] <- TRUE
     })
     
   })

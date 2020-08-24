@@ -482,7 +482,9 @@ mod_navigation_server <- function(input, output, session, style=1, pages){
   observeEvent(input$nextBtn,ignoreInit = TRUE,{navPage(1)})
   
   observeEvent( pages$isDone[current$val],{
-    shinyjs::toggleState(id = "nextBtn", condition = isTRUE(pages$isDone[current$val]))
+    shinyjs::toggleState(id = "nextBtn", 
+                         condition = isTRUE(pages$isDone[current$val]) ||
+                           !isTRUE(pages$mandatory[current$val]))
     shinyjs::toggle(id = "nextBtn", condition = current$val< current$nbSteps)
     shinyjs::toggle(id = "prevBtn", condition = current$val > 1)
   })
