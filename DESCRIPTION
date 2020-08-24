@@ -1,6 +1,6 @@
 Package: Prostar2
 Title: PKG_TITLE
-Version: 2.0
+Version: 2.0.1
 Date: 2020-01-28
 Authors@R: c(person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut')),
                 person('Thomas', 'Burger', email = 'thomas.burger@cea.fr', role = c('aut')),
@@ -33,7 +33,7 @@ Imports:
     BiocManager,
     sass,
     rhandsontable
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

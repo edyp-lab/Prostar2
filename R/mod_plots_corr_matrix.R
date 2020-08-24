@@ -104,13 +104,8 @@ mod_plots_corr_matrix_server <- function(input, output, session,
   
   corrMatrix <- reactive({
     req(obj())
-<<<<<<< HEAD
     rv.corr$gradient 
-  
-=======
-    rv.corr$gradient
-    
->>>>>>> 458eb0449a9e761ed4dae492bfd18ecb4471e5f1
+1
     isolate({
       withProgress(message = 'Making plot', value = 100, {
         tmp <- DAPAR2::corrMatrixD_HC(obj(), names(), rv.corr$gradient)

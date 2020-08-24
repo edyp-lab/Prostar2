@@ -1,6 +1,6 @@
 library(rhandsontable)
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
-
+source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(

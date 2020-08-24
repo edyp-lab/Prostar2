@@ -24,6 +24,12 @@ mod_plots_corr_matrix_server(
 \item{output}{internal}
 
 \item{session}{internal}
+
+\item{obj}{xxx}
+
+\item{names}{xxx}
+
+\item{gradientRate}{xxx}
 }
 \description{
 A shiny Module.

@@ -580,9 +580,8 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     }, finally = {
       #cleanup-code
     })
-    print(paste0('data = ', str(rv.convert$dataIn)))print("7")
+    
     r.nav$isDone[5] <- TRUE    
-    print(rv.convert$dataOut)
      
   })
   
