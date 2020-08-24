@@ -232,12 +232,15 @@ callModule(mod_popover_for_help_server,
        from <- rv.filter$i -1
        to <- rv.filter$i
       # rv.filter$dataIn <- addAssayLink(rv.filter$dataIn, from = from, to = to, varFrom = key, varTo = key)
-      # 
+       
       ## keep track of deleted rows
       rv.filter$deleted.mvLines <- setdiff(rowData(rv.filter$dataIn[[from]])[,metadata(rv.filter$dataIn)$keyId], 
                                            rowData(rv.filter$dataIn[[to]])[,metadata(rv.filter$dataIn)$keyId])
-      
-      
+      #browser()
+      #record parameters of filtering
+      n_names <- grep('na_filter_', names(metadata(rv.filter$dataIn[[rv.filter$i]])))
+      param_name <- paste0('na_filter_', 1+length(n_names))
+      metadata(rv.filter$dataIn[[rv.filter$i]])[[param_name]] <- paste0('type=',rv.filter$widgets$ChooseFilters,' th=',rv.filter$widgets$seuilNA, ' percent=', rv.filter$widgets$percent)
       r.nav$isDone[1] <- TRUE
      # }
     }
@@ -488,6 +491,9 @@ callModule(mod_popover_for_help_server,
                      Total = .total)
     
     rv.filter$widgets$DT_fieldfilterSummary <- rbind(rv.filter$widgets$DT_fieldfilterSummary, df)
+    n_names <- grep('field_filter_', names(metadata(rv.filter$dataIn[[rv.filter$i]])))
+    param_name <- paste0('field_filter_', 1+length(n_names))
+    metadata(rv.filter$dataIn[[rv.filter$i]])[[param_name]] <- paste0('type=',rv.filter$widgets$ChooseFilters,' th=',rv.filter$widgets$seuilNA, ' percent=', rv.filter$widgets$percent)
     
     r.nav$isDone[2] <- TRUE
     

@@ -31,7 +31,6 @@ mod_convert_ms_file_ui <- function(id){
 #' @importFrom shinyBS bsModal
 #' @importFrom shinyjs hidden toggle
 #' @importFrom htmlwidgets JS
-#' @importFrom tibble as_tibble
 #' 
 mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
@@ -159,8 +158,6 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     mod_select_keyID_ui(ns('mod_keyId'))
   })
   
-  
-  
   rv.convert$IDs <- callModule(mod_select_keyID_server, 
                                "mod_keyId", 
                                dataIn = reactive({rv.convert$dataIn}),
@@ -168,11 +165,8 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   )
   
   
-  
-  
   observe({
     req(rv.convert$IDs())
-    
     rv.convert$choose_col_Parent_Protein <- rv.convert$IDs()$parentProtId
     rv.convert$choose_keyID <- rv.convert$IDs()$keyId
     r.nav$isDone[2] <- !is.null(rv.convert$IDs())
@@ -188,16 +182,17 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     
     tagList(
       fluidRow(
-        column(width=4, uiOutput(ns("choose_quanti_data_col_ui"),width = "400px"))
+        column(width=4,uiOutput(ns("choose_quanti_data_col_ui"),width = "400px"))
         ,column(width=8,
                 shinyjs::hidden(checkboxInput(ns("select_Identification"), 
                                               "Select columns for identification method", 
                                               value = NULL))
                 ,uiOutput(ns("check_Identification_Tab_ui"))
-                ,uiOutput(ns('show_Identification_Tab_ui'))
+                
                 ,tags$script(HTML("Shiny.addCustomMessageHandler('unbind-DT', function(id) {
                                    Shiny.unbindAll($('#'+id).find('table').DataTable().table().node());
                                    })"))
+                ,uiOutput(ns('show_Identification_Tab_ui'))
         )
       )
     )
@@ -234,13 +229,13 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   check_Identification_Tab <- reactive({
     req(input$select_Identification)
-    #req(input$choose_quanti_data_col)
+    req(input$choose_quanti_data_col)
     
-    temp <- shinyValue("colForOriginValue_", length(input$choose_quanti_data_col))
+    temp <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
     
     isOk <- TRUE
     msg <- NULL
-    if ((sum(is.na(temp))==length(temp)) || (length(which(temp == "None")) == length(temp)))
+    if ((length(which(temp == "None")) == length(temp)))
     {
       isOk <- TRUE
       msg <- "Correct"
@@ -281,7 +276,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   })
   
   
-  shinyOutput <- function(FUN, id, num, ...) {
+  shinyOutput <- function(FUN,id,num,...) {
     inputs <- character(num)
     for (i in seq_len(num)) {
       inputs[i] <- as.character(FUN(paste0(id,i),label=NULL,...))
@@ -291,10 +286,10 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   # function for dynamic inputs in DT
-  shinyInput <- function(FUN, id, num, ...) {
+  shinyInput <- function(FUN,id,num,...) {
     inputs <- character(num)
     for (i in seq_len(num)) {
-      inputs[i] <- as.character(FUN(ns(paste0(id, i)), label=NULL, ...))
+      inputs[i] <- as.character(FUN(paste0(id,i),label=NULL,...))
     }
     inputs
   }
@@ -303,7 +298,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   # function to read DT inputs
   shinyValue <- function(id, num) {
     unlist(lapply(seq_len(num),function(i) {
-      value <- input[[paste0(id, i)]]
+      value <- input[[paste0(id,i)]]
       if (is.null(value)) NA else value
     }))
   }
@@ -327,16 +322,15 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   output$show_Identification_Tab_ui <- renderUI({
+    
     if (length(input$choose_quanti_data_col) == 0 || !isTRUE(input$select_Identification)){
       return(NULL)
     }
-    
     DT::dataTableOutput(ns("show_table"), width='500px')
   })
   
   
   output$show_table <- DT::renderDataTable(
-    
     quantiDataTable(),
     escape=FALSE,
     rownames = FALSE,
@@ -360,6 +354,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       scrollY = 500,
       scroller = TRUE,
       ajax = list(url = dataTableAjax(session, quantiDataTable()))
+      
     )
     
   )
@@ -367,32 +362,31 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   quantiDataTable <- reactive({
+    if(is.null(input$choose_quanti_data_col)) return(NULL)
+    if(is.null(rv.convert$dataIn)) return(NULL)
     
-    # #if(is.null(input$choose_quanti_data_col)) return(NULL)
-    # #if(is.null(rv.convert$dataIn)) return(NULL)
-    
-    #session$sendCustomMessage('unbind-DT', 'show_table')
+    session$sendCustomMessage('unbind-DT', 'show_table')
     df <- NULL
-    choices <- c("None", colnames(rv.convert$dataIn))
+    choices <- c("None",colnames(rv.convert$dataIn))
     names(choices) <- c("None",colnames(rv.convert$dataIn))
     
     if (isTRUE(input$select_Identification)) {
-      df <- data.frame(tibble::as_tibble(input$choose_quanti_data_col),
+      
+      df <- data.frame(as.data.frame(input$choose_quanti_data_col),
                        shinyInput(selectInput,
-                                  "colForOriginValue_",
-                                  nrow(tibble::as_tibble(input$choose_quanti_data_col)),
+                                  ns("colForOriginValue_"),
+                                  nrow(as.data.frame(input$choose_quanti_data_col)),
                                   choices=choices)
       )
       colnames(df) <- c("Sample", "Identification method")
     } else {
-      df <- data.frame(Sample = tibble::as_tibble(input$choose_quanti_data_col))
+      df <- data.frame(Sample = as.data.frame(input$choose_quanti_data_col))
       colnames(df) <- c("Sample")
     }
     
+    print('toto')
     df
   })
-  
-  
   
   observe({
     input$select_Identification
@@ -436,7 +430,7 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       actionButton(ns("createMSnsetBtn"),"Convert data", class = actionBtnClass),
       
       p("Once the 'Load' button (above) clicked, you will be automatically redirected to Prostar home page. The dataset will be accessible within Prostar 
-        interface and processing menus will be enabled. However, all importing functions ('Open dataset', 'Demo data' and 'Convert data') will be disabled 
+        interface and processing menus will be enabled. However, all importing functions ('Open MSnset', 'Demo data' and 'Convert data') will be disabled 
         (because successive dataset loading can make Prostar unstable). To work on another dataset, use first the 'Reload Prostar' functionality from 
         the 'Dataset manager' menu: it will make Prostar restart with a fresh R session where import functions are enabled.")
     )
@@ -456,17 +450,27 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
   
   
   observeEvent(input$createMSnsetBtn,{
+    print('In observeEvent de input$createMSnsetBtn')
+    # colNamesForOriginofValues <- NULL
+    # if (isTRUE(rv$widgets$Convert$selectIdent)) {
+    #   colNamesForOriginofValues <- shinyValue("colForOriginValue_",nrow(quantiDataTable()))
+    #   if (length(which(colNamesForOriginofValues == "None")) >0){ return (NULL)   }
+    # } 
+    # 
+    
+    print("1")
+    #ext <- GetExtension(rv.convert$datafile$name)
     ## quanti data
     tmp_quanti_data <- input$choose_quanti_data_col
     indexForQuantiData <- match(tmp_quanti_data, colnames(rv.convert$dataIn))
     quanti_order <- order(input$choose_quanti_data_col)
     samples_order <- order(rownames(rv.convert$design()))
-    
+    print("2")
     if (sum(quanti_order != samples_order) > 0){
       tmp_quanti_data <- tmp_quanti_data[samples_order]
       indexForQuantiData <- indexForQuantiData[samples_order]
     }
-    
+    print("3")
     indexForFData <- seq(1,ncol(rv.convert$dataIn))[-indexForQuantiData]
     
     ## key id of entities
@@ -475,21 +479,21 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
       key_id_index <- match(rv.convert$choose_keyID, colnames(rv.convert$dataIn))
     }
     
-    
+    print("4")
     ### Sample data
     design <- rv.convert$design()
     
     ### Are data alearady logged ?
     logged_data <- (input$checkDataLogged == "no")
     
-    
+    print("5")
     ### Origin of Values
     #indexForOriginOfValue <- NULL
     colNamesForOriginofValues <- shinyValue("colForOriginValue_",length(input$choose_quanti_data_col))
-    
+
     if (sum(is.na(colNamesForOriginofValues))==length(colNamesForOriginofValues))
       colNamesForOriginofValues <- NULL
-    
+
     
     # if (!is.null(colNamesForOriginofValues) && (length(grep("None", colNamesForOriginofValues))==0)  && (sum(is.na(colNamesForOriginofValues)) == 0)){
     #   for (i in 1:length(tmp_quanti_data)){
@@ -501,49 +505,60 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     # versions <- list(Prostar_Version = installed.packages(lib.loc = Prostar.loc)["Prostar2","Version"],
     #                  DAPAR_Version = installed.packages(lib.loc = DAPAR.loc)["DAPAR2","Version"]
     # )
+    print("6")
     
     
+
     
+    print(paste0('data = ', str(rv.convert$dataIn)))
+    print(paste0('str(sample) = ', str(design)))
+    print(paste0('design = ', str(design)))
+    print(paste0('indexForQuantiData = ', indexForQuantiData))
+    print(paste0('data = ', str(rv.convert$dataIn)))
+    print(paste0('data = ', str(rv.convert$dataIn)))
+    print(paste0('data = ', str(rv.convert$dataIn)))
+    print(paste0('data = ', str(rv.convert$dataIn)))
+    print(paste0('data = ', str(rv.convert$dataIn)))
     
     
     tryCatch({
       switch(names(rv.convert$pipeline()),
              peptide = {
-               rv.convert$dataOut <- DAPAR2::createQFeatures(data = rv.convert$dataIn,
-                                                             sample = design,
-                                                             indExpData = indexForQuantiData,
-                                                             keyId = key_id_index,
-                                                             namesOrigin = colNamesForOriginofValues,
-                                                             logTransform = logged_data,
-                                                             typeOfData = input$typeOfData,
-                                                             parentProtId = gsub(".", "_", rv.convert$choose_col_Parent_Protein, fixed=TRUE),
-                                                             analysis= input$studyName,
-                                                             processes=pipeline.def()$peptide,
-                                                             pipelineType = names(rv.convert$pipeline())
+               rv.convert$dataOut <- DAPAR2::createFeatures(data = rv.convert$dataIn,
+                                                            sample = design,
+                                                            indExpData = indexForQuantiData,
+                                                            keyId = key_id_index,
+                                                            namesOrigin = colNamesForOriginofValues,
+                                                            logTransform = logged_data,
+                                                            typeOfData = input$typeOfData,
+                                                            parentProtId = gsub(".", "_", input$choose_col_Parent_Protein, fixed=TRUE),
+                                                            analysis= input$studyName,
+                                                            processes=pipeline.def()$peptide,
+                                                            pipelineType = names(rv.convert$pipeline())
                )
              },
              protein = {
-               rv.convert$dataOut <- DAPAR2::createQFeatures(data = rv.convert$dataIn,
-                                                             sample = design,
-                                                             indExpData = indexForQuantiData,
-                                                             keyId = key_id_index,
-                                                             namesOrigin = colNamesForOriginofValues,
-                                                             logTransform = logged_data,
-                                                             typeOfData = input$typeOfData,
-                                                             parentProtId = NULL,
-                                                             analysis= input$studyName,
-                                                             processes=pipeline.def()$protein,
-                                                             pipelineType = names(rv.convert$pipeline())
+               rv.convert$dataOut <- DAPAR2::createFeatures(data = rv.convert$dataIn,
+                                                            sample = design,
+                                                            indExpData = indexForQuantiData,
+                                                            keyId = key_id_index,
+                                                            namesOrigin = colNamesForOriginofValues,
+                                                            logTransform = logged_data,
+                                                            typeOfData = input$typeOfData,
+                                                            parentProtId = NULL,
+                                                            analysis= input$studyName,
+                                                            processes=pipeline.def()$protein,
+                                                            pipelineType = names(rv.convert$pipeline())
                )
              },
              p2p = {
-               
+
              },
              default=NULL)
-      
-      
+
+
       #loadObjectInMemoryFromConverter()
-      
+
     }
     , warning = function(w) {
       if (conditionMessage(w) %in% c("NaNs produced", "production de NaN")){
@@ -565,10 +580,10 @@ mod_convert_ms_file_server <- function(input, output, session, pipeline.def){
     }, finally = {
       #cleanup-code
     })
-    
-    
+    print(paste0('data = ', str(rv.convert$dataIn)))print("7")
     r.nav$isDone[5] <- TRUE    
-    
+    print(rv.convert$dataOut)
+     
   })
   
   
