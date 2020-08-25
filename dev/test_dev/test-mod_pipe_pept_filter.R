@@ -1,6 +1,6 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_pipe_prot_filter.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_pipe_pept_filter.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path("../../R", "mod_popover_for_help.R"), local = TRUE)$value
@@ -22,7 +22,7 @@ options(shiny.fullstacktrace = FALSE)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_prot_filter_ui('pipe_filter'),
+    mod_pipe_pept_filter_ui('pipe_filter'),
     mod_infos_dataset_ui('infos')
   )
 )
@@ -30,11 +30,11 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  utils::data(Exp1_R25_pept, package='DAPARdata2')
   
   rv <-reactiveValues(
     ret = NULL,
-    current.obj = Exp1_R25_prot
+    current.obj = Exp1_R25_pept
   )
   
   
@@ -49,7 +49,7 @@ server <- function(input, output, session) {
   # })
   # 
   
-  rv$ret <- callModule(mod_pipe_prot_filter_server,
+  rv$ret <- callModule(mod_pipe_pept_filter_server,
                        'pipe_filter',
                        obj = reactive({rv$current.obj}),
                        ind = reactive({2}))

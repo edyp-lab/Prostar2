@@ -560,14 +560,15 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
   observeEvent(input$ValidateFilters,ignoreInit = TRUE,{ 
     
     isolate({
+      browser()
       rv.filter$dataOut <- obj()
       rv.filter$dataOut <- addAssay(obj(),
                                     rv.filter$dataIn[[length(names(rv.filter$dataIn))]],
                                     'filtered')
       
       if (!is.null(metadata(rv.filter$dataOut)$parentProtId)){
-        ComputeAdjacencyMatrices()
-        ComputeConnexComposants()
+        rv.filter$dataOut <- addListAdjacencyMatrices(rv.filter$dataOut, length(names(rv.filter$dataOut)))
+        rv.filter$dataOut <- addConnexComp(rv.filter$dataOut, length(names(rv.filter$dataOut)))
       } else {
         
       }
