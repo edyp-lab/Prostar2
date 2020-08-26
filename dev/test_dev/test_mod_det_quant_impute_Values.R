@@ -5,22 +5,21 @@ library(SummarizedExperiment)
 
 
 source(file.path("../../R","mod_plots_mv_for_imputation.R"), local=TRUE)$value
-
+source(file.path("../../R","mod_format_DT.R"), local=TRUE)$value
 
 ui <- fluidPage(
-  mod_plots_mv_ui('plots_mv_impute')
+  mod_det_quant_impute_Values_ui('plots_mv_impute')
 )
 
 
 server <- function(input, output, session) {
   
   utils::data(Exp1_R25_pept, package='DAPARdata2')
- 
-  callModule(mod_plots_mv_server,'plots_mv_impute',
-             qData=reactive({assay(obj[[2]])}),
-             conds=reactive({colData(Exp1_R25_pept)[['Condition']]}),
-             title=reactive({NULL}),
-             palette=reactive({NULL})
+  
+  callModule(mod_det_quant_impute_Values_server,'plots_mv_impute',
+             qData=reactive({NULL}),
+             quant=reactive({1}),
+             factor=reactive({0.5})
   )
 }
 

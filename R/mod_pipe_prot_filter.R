@@ -39,7 +39,7 @@ mod_pipe_prot_filter_server <- function(input, output, session, obj, ind){
   
   ## reactive values for variables in the module
   rv.filter <- reactiveValues(
-    name = "processProtNorm",
+    name = "processProtFilter",
     dataIn = NULL,
     dataOut = NULL,
     i = NULL,

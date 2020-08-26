@@ -32,7 +32,7 @@ mod_plots_mv_ui <- function(id){
 #' @keywords internal
 
 mod_plots_mv_server <- function(input, output, session,
-                                obj,
+                                qData,
                                 conds,
                                 title=NULL,
                                 palette=NULL){
@@ -42,23 +42,21 @@ mod_plots_mv_server <- function(input, output, session,
   
   
   output$plot_viewNAbyMean <- renderHighchart({
-    req(obj())
+    req(qData())
     
     withProgress(message = 'Making MV Intensity plot', value = 100, {
-      DAPAR2::hc_mvTypePlot2(SummarizedExperiment::assay(obj()), conds(), title(), palette())
+      DAPAR2::hc_mvTypePlot2(qData(), conds(), title(), palette())
     })
   })
   
   
   output$plot_showImageNA <- renderPlot({
-    req(obj())
+    req(qData())
     
-    isolate({
       withProgress(message = 'Making MV Heatmap plot', value = 100, {
-        DAPAR2::mvImage(SummarizedExperiment::assay(obj()), conds())
+        DAPAR2::mvImage(qData(), conds())
       })
-    })
-    
+
   })
   
 
