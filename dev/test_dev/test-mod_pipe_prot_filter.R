@@ -51,8 +51,8 @@ server <- function(input, output, session) {
   
   rv$ret <- callModule(mod_pipe_prot_filter_server,
                        'pipe_filter',
-                       obj = reactive({rv$current.obj}),
-                       ind = reactive({2}))
+                       obj = reactive({rv$current.obj})
+                       )
   
   callModule(mod_infos_dataset_server,'infos',
              obj = reactive({rv$current.obj}))
