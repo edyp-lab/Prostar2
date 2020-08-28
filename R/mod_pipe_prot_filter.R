@@ -42,7 +42,7 @@ mod_pipe_prot_filter_server <- function(input, output, session, obj){
     name = "processProtFilter",
     dataIn = NULL,
     dataOut = NULL,
-    i = NULL,
+    #i = NULL,
     settings = NULL,
     tmp = NULL,
     
@@ -219,7 +219,7 @@ callModule(mod_popover_for_help_server,
       
       rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
                                                     i = i, 
-                                                    name = paste0('na_filtered',i), 
+                                                    name = paste0('na_filtered_',i), 
                                                     filter=na_filter)
       i <- i +1
       rv.filter$dataIn <- removeAdditionalCol(rv.filter$dataIn, "tagNA")
@@ -439,7 +439,6 @@ callModule(mod_popover_for_help_server,
     req(rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
     
     
-    isolate({
     rv.filter$tmp <- rv.filter$dataIn
     i <- length(experiments(rv.filter$dataIn))
     if (rv.filter$widgets$fieldFilter_value %in% c('', 'None')){return(NULL)}
@@ -451,13 +450,6 @@ callModule(mod_popover_for_help_server,
     fieldname <- rv.filter$widgets$fieldName
     tagValue <- rv.filter$widgets$fieldFilter_value
     
-    # create a duplicate of the last assay
-    # rv.filter$tmp <-addAssay(rv.filter$tmp, 
-    #                             rv.filter$tmp[[length(experiments(rv.filter$dataIn))]],
-    #                             paste0('field_filtered_', length(experiments(rv.filter$dataIn)))
-    #                             )
-    # i <- i +1
-   # browser()
     field_filter <- NULL
     if (is.numeric(vec)){
       field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
@@ -470,20 +462,18 @@ callModule(mod_popover_for_help_server,
                                      condition = rv.filter$widgets$operator)
     }
     
-    .tmp <- DAPAR2::filterFeaturesSam(object = rv.filter$tmp, 
+    rv.filter$tmp <- DAPAR2::filterFeaturesSam(object = rv.filter$tmp, 
                                i = i, 
                                filter = field_filter, 
                                name=paste0('field_filtered_', i)
                               )
     
-    if (length(experiments(.tmp)) > 0) {
-      rv.filter$tmp[[i]] <- .tmp[[i]]
+    if (length(experiments(rv.filter$tmp)) > 0) {
       rv.filter$deleted.field <- setdiff(rowData(rv.filter$tmp[[i-1]])[,metadata(rv.filter$tmp)$keyId],
                                        rowData(rv.filter$tmp[[i]])[,metadata(rv.filter$tmp)$keyId])
-      #browser()
       shinyjs::enable('btn_perform_fieldFilter')
     } else {
-      rv.filter$tmp <- .tmp
+      rv.filter$tmp <- NULL
       rv.filter$deleted.field <- NULL
       return(NULL)
     }
@@ -498,15 +488,34 @@ callModule(mod_popover_for_help_server,
     if (rv.filter$widgets$fieldName == 'None'){return(NULL)}
     req(rowData(rv.filter$dataIn[[length(names(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
     
-    #browser()
+    browser()
     
-    #rv.filter$dataIn <- obj()
+    i <- length(experiments(rv.filter$dataIn))
+    if (rv.filter$widgets$fieldFilter_value %in% c('', 'None')){return(NULL)}
+    vec <- rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
+    if(is.numeric(vec)) 
+      if(is.na(as.numeric(rv.filter$widgets$fieldFilter_value)))
+        return(NULL)
     
-    # 
-    # rv.filter$dataIn <- addAssay(rv.filter$dataIn,
-    #                               rv.filter$tmp[[length(names(rv.filter$tmp))]],
-    #                               paste0('field_filtered_',length(names(rv.filter$tmp)))
-    #                             )
+    fieldname <- rv.filter$widgets$fieldName
+    tagValue <- rv.filter$widgets$fieldFilter_value
+    
+    field_filter <- NULL
+    if (is.numeric(vec)){
+      field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
+                                     value = as.numeric(rv.filter$widgets$fieldFilter_value), 
+                                     condition = rv.filter$widgets$operator)
+    } else { 
+      if (is.character(vec))
+        field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
+                                       value = as.character(rv.filter$widgets$fieldFilter_value), 
+                                       condition = rv.filter$widgets$operator)
+    }
+    rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
+                                               i = length(names(rv.filter$dataIn)), 
+                                               filter = field_filter, 
+                                               name=paste0('field_filtered_', length(names(rv.filter$dataIn)),)
+                                                )
     # 
     i <- length(names(rv.filter$dataIn))
     # ind <- grep('_filtered_', names(rv.filter$dataIn))
