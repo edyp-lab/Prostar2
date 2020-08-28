@@ -176,6 +176,9 @@ callModule(mod_popover_for_help_server,
           div( style="display:inline-block; vertical-align: middle;",
                actionButton(ns("perform.filtering.MV"), "Perform MV filtering", class = actionBtnClass)
           ),
+          tags$div( style="display:inline-block; vertical-align: middle;",
+                    actionButton(ns("btn_remove_naFilter"), "Remove last filter", class = actionBtnClass)
+          ),
           hr(),
           tags$hr(),
           tags$div(
@@ -219,7 +222,7 @@ callModule(mod_popover_for_help_server,
       
       rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
                                                     i = i, 
-                                                    name = paste0('na_filtered_',i), 
+                                                    name = paste0('na_filter_',i), 
                                                     filter=na_filter)
       i <- i +1
       rv.filter$dataIn <- removeAdditionalCol(rv.filter$dataIn, "tagNA")
@@ -265,6 +268,22 @@ callModule(mod_popover_for_help_server,
       
     })
   })
+  
+  # observe({
+  #   rv.filter$dataIn
+  #   shinyjs::toggle('btn_remove_naFilter', condition=length(grep('na_filter_', names(rv.filter$dataIn))))
+  # })
+  
+  observeEvent(input$btn_remove_naFilter, ignoreInit = TRUE,{
+    rv.filter$dataIn
+    browser()
+    ind <- grep('na_filter_', names(rv.filter$dataIn))
+    if (length(ind) >= 1){
+      rv.filter$dataIn <- rv.filter$dataIn[ ,  , -ind[length(ind)]]
+      rv.filter$widgets$DT_naFilterSummary <- rv.filter$widgets$DT_naFilterSummary[-nrow(rv.filter$widgets$DT_naFilterSummary),]
+    }
+  })
+  
   
   output$seuilNADelete <- renderUI({ 
     req(rv.filter$widgets$ChooseFilters)
@@ -341,11 +360,14 @@ callModule(mod_popover_for_help_server,
                   uiOutput(ns('filterFieldOptions'))
         ),
         
+        # tags$div( style="display:inline-block; vertical-align: middle;",
+        #           actionButton(ns("btn_test_fieldFilter"), "Test", class = actionBtnClass)
+        #           ),
         tags$div( style="display:inline-block; vertical-align: middle;",
-                  actionButton(ns("btn_test_fieldFilter"), "Test", class = actionBtnClass)
-                  ),
+                  actionButton(ns("btn_perform_fieldFilter"), "Perform", class = actionBtnClass)
+        ),
         tags$div( style="display:inline-block; vertical-align: middle;",
-                  shinyjs::disabled(actionButton(ns("btn_perform_fieldFilter"), "Perform", class = actionBtnClass))
+                  actionButton(ns("btn_remove_fieldFilter"), "Remove last filter", class = actionBtnClass)
         )
       ),
       uiOutput(ns('preview_msg')),
@@ -403,20 +425,7 @@ callModule(mod_popover_for_help_server,
   })
   
   
-  
-  # observeEvent(rv.filter$widgets$fieldFilter_value,{
-  #   #req(rv.filter$widgets$fieldFilter_value)
-  #   req(rv.filter$widgets$fieldName)
-  #   if (rv.filter$widgets$fieldName %in% c('', 'None')) {return(NULL)}
-  #   
-  #    vec <- rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
-  #    cond <- (is.numeric(vec) && as.numeric(rv.filter$widgets$fieldFilter_value)) || TRUE
-  #   #   (is.character(vec) && rv.filter$widgets$fieldFilter_value)
-  #   shinyjs::toggleState(id='toto', condition=TRUE)
-  # })
-  # 
-  # 
-  
+
   
   output$preview_msg <- renderUI({
     req(rv.filter$tmp)
@@ -430,65 +439,24 @@ callModule(mod_popover_for_help_server,
   })
   
   
-  ## ----------------------------------------------
-  # Perform field filtering
-  observeEvent(input$btn_test_fieldFilter,ignoreInit=TRUE,{
-    req(rv.filter$widgets$fieldName)
-    if (rv.filter$widgets$fieldName == 'None'){return(NULL)}
-    req(rv.filter$dataIn)
-    req(rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
-    
-    
-    rv.filter$tmp <- rv.filter$dataIn
-    i <- length(experiments(rv.filter$dataIn))
-    if (rv.filter$widgets$fieldFilter_value %in% c('', 'None')){return(NULL)}
-    vec <- rowData(rv.filter$tmp[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
-    if(is.numeric(vec)) 
-       if(is.na(as.numeric(rv.filter$widgets$fieldFilter_value)))
-         return(NULL)
- 
-    fieldname <- rv.filter$widgets$fieldName
-    tagValue <- rv.filter$widgets$fieldFilter_value
-    
-    field_filter <- NULL
-    if (is.numeric(vec)){
-      field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
-                                     value = as.numeric(rv.filter$widgets$fieldFilter_value), 
-                                     condition = rv.filter$widgets$operator)
-    } else { 
-      if (is.character(vec))
-        field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
-                                     value = as.character(rv.filter$widgets$fieldFilter_value), 
-                                     condition = rv.filter$widgets$operator)
-    }
-    
-    rv.filter$tmp <- DAPAR2::filterFeaturesSam(object = rv.filter$tmp, 
-                               i = i, 
-                               filter = field_filter, 
-                               name=paste0('field_filtered_', i)
-                              )
-    
-    if (length(experiments(rv.filter$tmp)) > 0) {
-      rv.filter$deleted.field <- setdiff(rowData(rv.filter$tmp[[i-1]])[,metadata(rv.filter$tmp)$keyId],
-                                       rowData(rv.filter$tmp[[i]])[,metadata(rv.filter$tmp)$keyId])
-      shinyjs::enable('btn_perform_fieldFilter')
-    } else {
-      rv.filter$tmp <- NULL
-      rv.filter$deleted.field <- NULL
-      return(NULL)
-    }
-    })
-    
-    
-  })
   
+  observeEvent(input$btn_remove_fieldFilter, ignoreInit = TRUE,{
+    rv.filter$dataIn
+   
+      ind <- grep('field_filter_', names(rv.filter$dataIn))
+      if (length(ind) >= 1){
+        rv.filter$dataIn <- rv.filter$dataIn[ ,  , -ind[length(ind)]]
+        rv.filter$widgets$DT_fieldfilterSummary <- rv.filter$widgets$DT_fieldfilterSummary[-nrow(rv.filter$widgets$DT_fieldfilterSummary),]
+      }
+    })
+
   
   observeEvent(input$btn_perform_fieldFilter,ignoreInit=TRUE,{
     req(rv.filter$widgets$fieldName)
     if (rv.filter$widgets$fieldName == 'None'){return(NULL)}
     req(rowData(rv.filter$dataIn[[length(names(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
     
-    browser()
+   # browser()
     
     i <- length(experiments(rv.filter$dataIn))
     if (rv.filter$widgets$fieldFilter_value %in% c('', 'None')){return(NULL)}
@@ -511,33 +479,45 @@ callModule(mod_popover_for_help_server,
                                        value = as.character(rv.filter$widgets$fieldFilter_value), 
                                        condition = rv.filter$widgets$operator)
     }
-    rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
+    tryCatch({
+      rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
                                                i = length(names(rv.filter$dataIn)), 
                                                filter = field_filter, 
-                                               name=paste0('field_filtered_', length(names(rv.filter$dataIn)),)
+                                               name=paste0('field_filter_', length(names(rv.filter$dataIn)))
                                                 )
-    # 
-    i <- length(names(rv.filter$dataIn))
-    # ind <- grep('_filtered_', names(rv.filter$dataIn))
-    # if (length(ind) >= 2)
-    #   metadata(rv.filter$dataIn[[i]])$Params <- metadata(rv.filter$dataIn[[ind[length(ind)-1]]])$Params
-    # 
-    metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
-                                                                            ' operator=',rv.filter$widgets$operator, 
-                                                                            ' value=', rv.filter$widgets$fieldFilter_value)
-    
-    #browser()
-    .total <- ifelse(length(experiments(rv.filter$dataIn )) > 0, nrow(rv.filter$dataIn[[i]]), 0)
-    df <- data.frame(Filter = rv.filter$widgets$fieldName, 
-                     Condition = paste0(rv.filter$widgets$operator,' ',rv.filter$widgets$fieldFilter_value), 
-                     nbDeleted = length(rv.filter$deleted.field), 
-                     Total = .total)
-    
-    rv.filter$widgets$DT_fieldfilterSummary <- rbind(rv.filter$widgets$DT_fieldfilterSummary, df)
-   
+    }
+    , warning = function(w) {
+       shinyjs::info(paste("Warning in CreateMSnSet",":",
+                           conditionMessage(w),
+                           sep=" "))
+     
+    }, error = function(e) {
+      print(e)
+      # shinyjs::info(paste("Error :","CreateMSnSet",":",
+      #                     conditionMessage(e),
+      #                     sep=" "))
+    }, finally = {
+      #cleanup-code
+      
+      if (i < length(names(rv.filter$dataIn))) {
+        i <- length(names(rv.filter$dataIn))
+        metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
+                                                                                      ' operator=',rv.filter$widgets$operator, 
+                                                                                      ' value=', rv.filter$widgets$fieldFilter_value)
+        df <- data.frame(Filter = rv.filter$widgets$fieldName, 
+                       Condition = paste0(rv.filter$widgets$operator,' ',rv.filter$widgets$fieldFilter_value), 
+                       nbDeleted = nrow(rv.filter$dataIn[[i-1]]) -nrow(rv.filter$dataIn[[i]]) , 
+                       Total = nrow(rv.filter$dataIn[[i]]))
+ 
+        rv.filter$widgets$DT_fieldfilterSummary <- rbind(rv.filter$widgets$DT_fieldfilterSummary, df)
+      }
+      
     r.nav$isDone[2] <- TRUE
     
   })
+  })
+  
+  
   
   callModule(mod_format_DT_server,'DT_fieldfilterSummary', 
              table2show = reactive({rv.filter$widgets$DT_fieldfilterSummary}),
@@ -560,207 +540,6 @@ callModule(mod_popover_for_help_server,
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 3                                        ###
   ###---------------------------------------------------------------------------------###
-  # output$Screen_Filtering_3 <- renderUI({
-    
-  #   tagList(
-  #     fluidRow(
-  #       column(width=3,radioButtons(ns("ChooseTabAfterFiltering"),  "Choose the data to display",
-  #                                   choices= list("Quantitative data" = "quantiData", "Meta data" = "metaData"),selected=character(0))),
-  #       column(width=3,radioButtons(ns("ChooseViewAfterFiltering"), "Type of filtered data", 
-  #                                   choices= list("Deleted on missing values" = "MissingValues",
-  #                                                 "Deleted field based" = "FieldBased"),
-  #                                   selected=character(0))),
-  #       column(width=3,uiOutput(ns("legendForExprsData2")))
-  #     ),
-  #     hr(),
-  #     uiOutput(ns("helpTextMV")),
-  #     uiOutput(ns("Warning_VizualizeFilteredData")),
-  #     DT::dataTableOutput(ns("VizualizeFilteredData"))
-  #     
-  #   )
-  # })
-  # 
-  # 
-  # output$FilterSummaryData <- DT::renderDataTable(server=TRUE,{
-  #   req(rv.filter$dataIn)
-  #   req(rv.filter$widgets$DT_fieldfilterSummary)
-  #   isolate({
-  #     
-  #     if (nrow(rv.filter$widgets$DT_filterSummary )==0){
-  #       df <- data.frame(Filter="-", 
-  #                        Prefix="-", 
-  #                        nbDeleted=0, 
-  #                        Total=nrow(rv.filter$dataIn), 
-  #                        stringsAsFactors = FALSE)
-  #       rv.filter$widgets$DT_filterSummary <- df
-  #     }
-  #     
-  #     
-  #     DT::datatable(rv.filter$widgets$DT_filterSummary,
-  #                   extensions = c('Scroller', 'Buttons'),
-  #                   rownames = FALSE,
-  #                   options=list(buttons = list('copy',
-  #                                               list(
-  #                                                 extend = 'csv',
-  #                                                 filename = 'na_Filtering_summary'
-  #                                               ),'print'),
-  #                                dom='Brt',
-  #                                initComplete = initComplete(),
-  #                                deferRender = TRUE,
-  #                                bLengthChange = FALSE
-  #                   ))
-  #   })
-  # })
-  # 
-  # 
-  # 
-  # getDataForFieldFiltered <- reactive({
-  #   req(rv$settings_nDigits)
-  #   rv$deleted.field
-  #   table <- as.data.frame(round(Biobase::exprs(rv$deleted.field),digits=rv$settings_nDigits))
-  #   table <- cbind(table, Biobase::fData(rv$deleted.field)[,rv$deleted.numeric@experimentData@other$OriginOfValues])
-  #   
-  #   table
-  # })
-  # 
-  # 
-  # 
-  # getDataForMVFiltered <- reactive({
-  #   req(rv$settings_nDigits)
-  #   rv$deleted.mvLines
-  #   
-  #   table <- as.data.frame(round(Biobase::exprs(rv$deleted.mvLines),digits=rv$settings_nDigits))
-  #   table <- cbind(table, Biobase::fData(rv$deleted.mvLines)[,rv$deleted.mvLines@experimentData@other$OriginOfValues])
-  #   
-  #   table
-  # })
-  # 
-  # 
-  # 
-  # 
-  # getDataForMVStringFiltered <- reactive({
-  #   req(rv$settings_nDigits)
-  #   rv$deleted.stringBased
-  #   table <- as.data.frame(round(Biobase::exprs(rv$deleted.stringBased),digits=rv$settings_nDigits))
-  #   table <- cbind(table, Biobase::fData(rv$deleted.stringBased)[,rv$deleted.stringBased@experimentData@other$OriginOfValues])
-  #   
-  #   table
-  # })
-  # 
-  # 
-  # output$legendForExprsData2 <- renderUI({
-  #   req(input$ChooseTabAfterFiltering)
-  #   
-  #   if (input$ChooseTabAfterFiltering != "quantiData"){return(NULL)}
-  #   moduleLegendColoredExprsUI(ns("FilterColorLegend_DS"), rv$colorsTypeMV)
-  #   
-  # })
-  # 
-  # 
-  # 
-  # output$Warning_VizualizeFilteredData <- renderUI({
-  #   if (length(GetDataFor_VizualizeFilteredData())==0){return(NULL)}
-  #   if (nrow(GetDataFor_VizualizeFilteredData())>153) 
-  #     p(MSG_WARNING_SIZE_DT)
-  #   
-  # })
-  # 
-  # 
-  # 
-  # GetDataFor_VizualizeFilteredData <- reactive({
-  #   req(rv$settings_nDigits)
-  #   rv$deleted.mvLines
-  #   req(input$ChooseViewAfterFiltering)
-  #   req(input$ChooseTabAfterFiltering)
-  #   rv$deleted.stringBased
-  #   rv$deleted.numeric
-  #   
-  #   
-  #   data <- NULL
-  #   if ((input$ChooseViewAfterFiltering == "MissingValues") && !is.null(rv$deleted.mvLines))
-  #   {
-  #      switch(input$ChooseTabAfterFiltering,
-  #            quantiData =  data <- getDataForMVFiltered(),
-  #            metaData = data <- cbind(ID = rownames(Biobase::fData(rv$deleted.mvLines)), Biobase::fData(rv$deleted.mvLines))
-  #     )
-  #   } 
-  #   
-  #   else if ((input$ChooseViewAfterFiltering == "StringBased") && !is.null(rv$deleted.stringBased)) {
-  #     
-  #     #print("DANS REACTIVE : If 2")
-  #     switch(input$ChooseTabAfterFiltering,
-  #            quantiData =  data <- getDataForMVStringFiltered(),
-  #            metaData = data <- Biobase::fData(rv$deleted.stringBased)
-  #     )
-  #   }  else if ((input$ChooseViewAfterFiltering == "Numerical") && !is.null(rv$deleted.numeric)) {
-  #     #print("DANS REACTIVE : If 3")
-  #     switch(input$ChooseTabAfterFiltering,
-  #            quantiData =  data <- getDataForNumericalFiltered(),
-  #            metaData = data <- Biobase::fData(rv$deleted.numeric)
-  #     )
-  #   }
-  #   
-  #   # print("END OF REACTIVE")
-  #   #print(data)
-  #   data
-  # })
-  # 
-  # 
-  # 
-  # #----------------------------------------------
-  # output$VizualizeFilteredData <- DT::renderDataTable(server=TRUE,{
-  #   input$ChooseTabAfterFiltering
-  #   req(GetDataFor_VizualizeFilteredData())
-  #   dt <- NULL
-  #   data <- GetDataFor_VizualizeFilteredData()
-  #   
-  #   if(input$ChooseTabAfterFiltering =="quantiData"){
-  #     dt <- DT::datatable( data,
-  #                          extensions = c('Scroller', 'Buttons'),
-  #                          options = list(
-  #                            buttons = list('copy',
-  #                                           list(
-  #                                             extend = 'csv',
-  #                                             filename = 'Prostar_export'),
-  #                                           'print'),
-  #                            dom='Brtip',
-  #                            initComplete = initComplete(),
-  #                            displayLength = 20,
-  #                            deferRender = TRUE,
-  #                            bLengthChange = FALSE,
-  #                            scrollX = 200,
-  #                            scrollY = 600,
-  #                            scroller = TRUE,
-  #                            ordering=FALSE,
-  #                            columnDefs = list(list(targets = c(((ncol(data)/2)+1):ncol(data)), visible = FALSE),
-  #                                              list(width='150px',targets= "_all"))
-  #                          )
-  #     ) %>%
-  #       formatStyle(
-  #         colnames(data)[1:(ncol(data)/2)],
-  #         colnames(data)[((ncol(data)/2)+1):ncol(data)],
-  #         backgroundColor = styleEqual(c("POV", "MEC"), c(rv$colorsTypeMV$POV, rv$colorsTypeMV$MEC))
-  #       )
-  #   } else {
-  #     dt <- DT::datatable( data,
-  #                          extensions = 'Scroller',
-  #                          options = list(initComplete = initComplete(),
-  #                                         displayLength = 20,
-  #                                         deferRender = TRUE,
-  #                                         bLengthChange = FALSE,
-  #                                         scrollX = 200,
-  #                                         scrollY = 600,
-  #                                         scroller = TRUE,
-  #                                         ordering=FALSE)) 
-  #   }
-  #   # }
-  #   dt
-  #   
-  #  })
-  
-  ###---------------------------------------------------------------------------------###
-  ###                                 Screen 3                                        ###
-  ###---------------------------------------------------------------------------------###
   output$Screen_Filtering_3 <- renderUI({     
     
     tagList(
@@ -771,35 +550,16 @@ callModule(mod_popover_for_help_server,
   
   observeEvent(input$ValidateFilters,ignoreInit = TRUE,{ 
     
-    isolate({
-      rv.filter$dataOut <- rv.filter$dataIn
-      
-      #rv.filter$dataOut <- obj()
-      #rv.filter$dataOut <- addAssay(obj(),
-      #                              rv.filter$dataIn[[length(names(rv.filter$dataIn))]],
-      #                              'filtered')
-      
-      # build list of params from the previous temporary datasets
-      # browser()
-      # param_names <- grep('_filtered_', names(rv.filter$dataIn))
-      # for (j in param_names)
-      #   metadata(rv.filter$dataOut[[length(experiments(rv.filter$dataIn))]])[[paste0('filter_', j)]] <- metadata(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[[j]]
-      # 
-      # 
-      
+    browser()
       
       #get indices of temporary SE
+      ind <- grep('_filter_', names(rv.filter$dataIn))
+      ind <- ind[-length(ind)]
+      rv.filter$dataIn <- rv.filter$dataIn[ , ,-ind]
+      names(rv.filter$dataIn)[length(names(rv.filter$dataIn))] <- 'filtered'
+      rv.filter$dataOut <- rv.filter$dataIn
       
-      
-      if (metadata(rv.filter$dataOut[[length(experiments(rv.filter$dataOut))]])$typeOfData == "peptide"  
-            && !is.null(metadata(rv.filter$dataOut)$parentProtId)){
-          #ComputeAdjacencyMatrices()
-          #ComputeConnexComposants()
-        }
-       
       r.nav$isDone[3] <- TRUE
-    })
-    
   })
   
   

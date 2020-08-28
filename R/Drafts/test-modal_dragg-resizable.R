@@ -13,7 +13,6 @@ library(DAPAR2)
 
 source(file.path("..", "mod_plots_corr_matrix.R"), local = TRUE)$value
 
-actionBtnClass <- "btn-primary"
 
 
 ui <- fluidPage(

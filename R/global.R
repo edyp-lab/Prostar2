@@ -17,6 +17,8 @@ URL_versionNotes <- paste0(base_URL, "versionNotes.md")
 
 
 actionBtnClass <- "btn-primary"
+
+redBtnClass <- "btn-danger"
 PrevNextBtnClass <- "btn-info"
 optionsBtnClass <- "info"
 

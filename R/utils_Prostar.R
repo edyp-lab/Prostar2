@@ -29,10 +29,10 @@ shinyOutput <- function(FUN,id,num,...) {
 
 # function for dynamic inputs in DT
 #' @export
-shinyInput <- function(FUN,id,num,...) {
+shinyInput <- function(FUN, id ,num,...) {
   inputs <- character(num)
   for (i in seq_len(num)) {
-    inputs[i] <- as.character(FUN(paste0(id,i),label=NULL,...))
+    inputs[i] <- as.character(FUN(paste0(id, i),label=NULL,...))
   }
   inputs
 }
