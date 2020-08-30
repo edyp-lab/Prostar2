@@ -18,7 +18,7 @@ mod_pipe_prot_impute_ui <- function(id){
 #' pipe_prot_impute Server Function
 #'
 #' @noRd 
-mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
+mod_pipe_prot_impute_server <- function(input, output, session, obj){
   ns <- session$ns
  
   
@@ -71,7 +71,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
     
     ## do not modify this part
     rv.impute$dataIn <- obj()
-    rv.impute$i <- ind()
+    rv.impute$i <- length(names(obj()))
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     ## end of no modifiable part
@@ -102,19 +102,19 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
   rv.impute$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.impute$dataIn}))
   
   callModule(mod_plots_mv_server,"mvImputationPlots_MV", 
-             qData=reactive({rv.impute$dataIn[[rv.impute$i]]}),
+             qData=reactive({assay(rv.impute$dataIn, rv.impute$i)}),
              conds = reactive({colData(rv.impute$dataIn)}),
              title = reactive("POV distribution"),
              palette =reactive(unique(rv.impute$settings()$basePalette)))
   
   callModule(mod_plots_mv_server,"mvImputationPlots_MEC", 
-             qData=reactive({rv.impute$dataIn[[rv.impute$i]]}),
+             qData=reactive({assay(rv.impute$dataIn, rv.impute$i)}),
              conds = reactive({colData(rv.impute$dataIn)}),
              title = reactive("Distribution after POV imputation"),
              palette =reactive(unique(rv.impute$settings()$basePalette)))
   
   callModule(mod_plots_mv_server,"mvImputationPlots_Valid", 
-             qData=reactive({rv.impute$dataIn[[rv.impute$i]]}),
+             qData=reactive({assay(rv.impute$dataIn, rv.impute$i)}),
              conds = reactive({colData(rv.impute$dataIn)}),
              title = reactive("Distribution after POV and MEC imputation"),
              palette =reactive(unique(rv.impute$settings()$basePalette)))
@@ -139,7 +139,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
   observe({
     req(obj())
     rv.impute$dataIn <- obj()
-    rv.impute$i <- ind()
+    rv.impute$i <- length(names(obj()))
   })
   
   
@@ -204,7 +204,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
       
       rv.impute$MECIndex <-NULL
       rv.impute$dataIn <- rv.impute$imputePlotsSteps[["step0"]]
-      nbMVBefore <- length(which(is.na(Biobase::exprs(rv.impute$dataIn))==TRUE))
+      nbMV_Before <- length(which(is.na(assay(rv.impute$dataIn, rv.impute$i))))
       
       withProgress(message = '',detail = '', value = 0, {
         incProgress(0.25, detail = 'Find MEC blocks')
@@ -212,33 +212,38 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
         incProgress(0.5, detail = 'POV Imputation')
         switch(rv.impute$widgets$POV_algorithm,
                slsa = {
-                 rv.impute$MECIndex <- findMECBlock(rv.impute$dataIn)
-                 rv.impute$dataIn <- wrapper.impute.slsa(rv.impute$dataIn)
-                 rv.impute$dataIn <- reIntroduceMEC(rv.impute$dataIn, rv.impute$MECIndex)
-                 
-               },
+                 rv.impute$dataIn <- impute_dapar(obj = rv.impute$dataIn,
+                                                  i = rv.impute$i,
+                                                  'POV_slsa',
+                                                  sampleTab = colData(rv.impute$dataIn))
+                 },
                detQuantile = {
-                 rv.impute$MECIndex <- findMECBlock(rv.impute$dataIn)
-                 rv.impute$dataIn <- wrapper.impute.detQuant(rv.impute$dataIn,
-                                                           qval = rv.impute$widgets$POV_detQuant_quantile/100,
-                                                           factor = rv.impute$widgets$POV_detQuant_factor)
-                 rv.impute$dataIn <- reIntroduceMEC(rv.impute$dataIn, rv.impute$MECIndex)
-                 
-               },
+                 rv.impute$dataIn <- impute_dapar(obj = rv.impute$dataIn,
+                                                  i = rv.impute$i,
+                                                  'POV_det_quant',
+                                                  qval = rv.impute$widgets$POV_detQuant_quantile/100,
+                                                  factor = rv.impute$widgets$POV_detQuant_factor)
+                 },
                KNN = {
-                 rv.impute$dataIn <- wrapper.impute.KNN(rv.impute$dataIn , rv.impute$widgets$POV_KNN_n)
+                 rv.impute$dataIn <- impute_dapar(obj = rv.impute$dataIn,
+                                                  i = rv.impute$i,
+                                                  'knn_by_conds',
+                                                  conds = colData(rv.impute$dataIn)$Condition,
+                                                  k = rv.impute$widgets$POV_KNN_n)
                }
         )
         incProgress(0.75, detail = 'Reintroduce MEC blocks')
         incProgress(1, detail = 'Finalize POV imputation')
-        nbMVAfter <- length(which(is.na(Biobase::exprs(rv.impute$dataIn))==TRUE))
-        rv.impute$nbPOVimputed <-  nbMVBefore - nbMVAfter
+        
+        nbMV_After <- length(which(is.na(assay(rv.impute$dataIn, rv.impute$i))))
+        rv.impute$nbPOVimputed <-  nbMV_Before - nbMV_After
         
         rv.impute$impute_Step <- 1
         rv.impute$imputePlotsSteps[["step1"]] <- rv.impute$dataIn
-        rvModProcess$moduleProtImputationDone[1] <- TRUE
-        shinyjs::enable("perform.imputationMEC.button")
-        shinyjs::enable("ValidImputation")
+        rv.nav$isDone[1] <- TRUE
+        # 
+        # shinyjs::enable("btn.perform.imputationMEC)
+        # shinyjs::enable("ValidImputation")
         
       })
     })
@@ -283,7 +288,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
     # req(rv.impute$dataIn)
     
     isolate({
-      if (length(grep("Imputed", input$datasets))==0){
+      if (length(grep("Imputed", names(rv.impute$dataIn)))==0){
         rv.impute$imputePlotsSteps[["step0"]] <- obj()
         shinyjs::enable("perform.imputationClassical.button")
         
@@ -324,7 +329,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
     #isolate({
     if (isTRUE(r.nav$isDone[1])) {
       tagList(
-        h5(paste0("POV imputation done.", rv.filter$nbPOVimputed, " were imputed")),
+        h5(paste0("POV imputation done.", rv.impute$nbPOVimputed, " were imputed")),
         # br(),
         h5("Updated graphs can be seen on step \"2 - Missing on the Entire Condition\".")
       )
@@ -351,7 +356,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
       
       tagList(
         tags$div( style="display:inline-block; vertical-align: top; padding-right: 20px;",
-                  actionButton(ns("perform.imputationMEC.button"),"Perform imputation", class = actionBtnClass)),
+                  actionButton(ns("btn.perform.imputationMEC"),"Perform imputation", class = actionBtnClass)),
         tags$div( style="display:inline-block; vertical-align: top; padding-right: 20px;",
                   uiOutput(ns("ImputationStep2Done")))),
       tags$hr(),
@@ -376,8 +381,6 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
     rv.impute$widgets$MEC_detQuant_factor <- input$MEC_detQuant_factor
   })
   
-  
-  
   observeEvent(input$MEC_missing.value.algorithm, {
     rv.impute$widgets$MEC_algorithm <- input$MEC_missing.value.algorithm
   })
@@ -393,29 +396,34 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
   
   
   
-  observeEvent(input$perform.imputationMEC.button,{
+  observeEvent(input$btn.perform.imputationMEC,{
     
     isolate({
       withProgress(message = '',detail = '', value = 0, {
         incProgress(0.25, detail = 'Reintroduce MEC')
         
-        rv.impute$dataIn <- reIntroduceMEC(rv.impute$dataIn, rv.impute$MECIndex)
-        nbMVBefore <- length(which(is.na(Biobase::exprs(rv.impute$dataIn))==TRUE))
+        #rv.impute$dataIn <- reIntroduceMEC(rv.impute$dataIn, rv.impute$MECIndex)
+        
+        nbMV_Before <- length(which(is.na(assay(rv.impute$dataIn, rv.impute$i))))
         incProgress(0.75, detail = 'MEC Imputation')
         switch(rv.impute$widgets$MEC_algorithm,
                detQuantile = {
-                 rv.impute$dataIn <- wrapper.impute.detQuant(rv.impute$dataIn ,
-                                                           qval = rv.impute$widgets$MEC_detQuant_quantile/100,
-                                                           factor = rv.impute$widgets$MEC_detQuant_factor)
+                 rv.impute$dataIn <- impute_dapar(rv.impute$dataIn , 
+                                                  rv.impute$i,
+                                                  'det_quant',
+                                                  qval = rv.impute$widgets$MEC_detQuant_quantile/100,
+                                                  factor = rv.impute$widgets$MEC_detQuant_factor)
                },
                fixedValue = {
-                 rv.impute$dataIn <- wrapper.impute.fixedValue(rv.impute$dataIn,
-                                                             fixVal = rv.impute$widgets$MEC_fixedValue)
+                 rv.impute$dataIn <- impute_dapar(obj = rv.impute$dataIn,
+                                                  i = rv.impute$i,
+                                                   'impute_fixed_value',
+                                                   value = rv.impute$widgets$MEC_fixedValue)
                }
         )
         
-        nbMVAfter <- length(which(is.na(Biobase::exprs(rv.impute$dataIn))==TRUE))
-        rv.impute$nbMECimputed <-  nbMVBefore - nbMVAfter
+        nbMV_After <- length(which(is.na(assay(rv.impute$dataIn , rv.impute$i))))
+        rv.impute$nbMECimputed <-  nbMV_Before - nbMV_After
         
         incProgress(1, detail = 'Finalize MEC imputation')
         rv.impute$impute_Step <- 2
@@ -451,9 +459,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
                              value = rv.impute$widgets$MEC_fixedValue, 
                              step=0.1, min=0, max=100,
                              width='100px')
-                
               })
-      
     })
   })
   
@@ -486,7 +492,7 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj, ind){
   
   output$ImputationStep2Done <- renderUI({
     #isolate({
-    if (isTRUE(rvModProcess$moduleProtImputationDone[2])) {
+    if (rv.nav$isDone[2]) {
       tagList(
         h5("MEC imputation done.", rv.impute$nbMECimputed, " were imputed"),
         h5("Updated graphs cans be seen on step \"3 - Save\"."))
