@@ -7,7 +7,7 @@
 
 ## 2.1 Add modules
 ## 
-golem::add_module( name = "det_quant_impute_Values" ) # Name of the module
+golem::add_module( name = "pipe_pept_impute" ) # Name of the module
 golem::add_module( name = "observe_dynamic_colourPicker_input" ) # Name of the module
 
 ## 2.2 Add dependencies

@@ -1,6 +1,6 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_pipe_prot_impute.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_pipe_pept_impute.R'), local=TRUE)$value
 source(file.path("../../R", "mod_plots_mv_for_imputation.R"), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
@@ -24,36 +24,49 @@ options(shiny.fullstacktrace = FALSE)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_prot_impute_ui('pipe_impute'),
-    mod_infos_dataset_ui('infos')
+    mod_pipe_pept_impute_ui('pipe_impute')
   )
 )
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  utils::data(Exp1_R25_pept, package='DAPARdata2')
   
-  rv <-reactiveValues(
-    ret = NULL,
-    current.obj = Exp1_R25_prot
+  
+  rv <- reactiveValues(
+    dataIn = Exp1_R25_pept
+  )
+  
+  toto <- reactive({
+    
+    isolate({
+      rv$dataIn <- MVrowsTagToOne(object =rv$dataIn, 
+                                       type = 'EmptyLines', 
+                                       percent = FALSE)
+    
+    ## keep rows where tagNA==0
+    na_filter <- VariableFilter(field = "tagNA", value = "0", condition = "==")
+    
+    rv$dataIn <- DAPAR2::filterFeaturesSam(object = rv$dataIn, 
+                                                  i = length(names(rv$dataIn)), 
+                                                  name = 'na_filter_', 
+                                                  filter=na_filter)
+    
+    rv$dataIn <- removeAdditionalCol(rv$dataIn, "tagNA")
+    
+    })
+    rv$dataIn
+  })
+  
+  
+  
+  callModule(mod_pipe_pept_impute_server,
+                       'pipe_impute',
+                       obj = reactive({toto()})
   )
   
   
-  rv$ret <- callModule(mod_pipe_prot_impute_server,
-                       'pipe_impute',
-                       obj = reactive({Exp1_R25_prot})
-                       )
-  
-  # callModule(mod_infos_dataset_server,'infos',
-  #            obj = reactive({req(rv$ret)
-  #              rv$ret}))
-  # 
-  
-  # observe({
-  #   req(rv$ret())
-  #   rv$current.obj <- rv$ret()
-  # })
 }
 
 

@@ -73,12 +73,13 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj){
                               MEC_fixedValue = 0
                               )
     
-    rv.impute$imputePlotsSteps <- list(step0 = NULL,
+    rv.impute$imputePlotsSteps <- list(step0 = obj(),
                                        step1 = NULL,
                                        step2 = NULL)
     
     ## do not modify this part
     rv.impute$dataIn <- obj()
+    rv.impute$dataOut <- NULL
     rv.impute$i <- length(names(obj()))
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
@@ -117,13 +118,13 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj){
   
   callModule(mod_plots_mv_for_imputation_server,"mvImputationPlots_MEC", 
              obj = reactive({rv.impute$imputePlotsSteps$step1}),
-             ind = reactive({length(names(rv.impute$dataIn))}),
+             ind = reactive({length(names(rv.impute$imputePlotsSteps$step1))}),
              title = reactive({"Distribution after POV imputation"}),
              palette = reactive({rv.impute$settings()$basePalette}))
   
   callModule(mod_plots_mv_for_imputation_server,"mvImputationPlots_Valid", 
              obj = reactive({rv.impute$imputePlotsSteps$step2}),
-             ind = reactive({length(names(rv.impute$dataIn))}),
+             ind = reactive({length(names(rv.impute$imputePlotsSteps$step2))}),
              title = reactive({"Distribution after POV and MEC imputation"}),
              palette = reactive({rv.impute$settings()$basePalette}))
   
