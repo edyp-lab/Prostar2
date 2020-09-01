@@ -8,12 +8,12 @@
 #' @param output internal
 #' @param session internal
 #'
-#' @rdname mod_plots_mv
+#' @rdname mod_plots_mv_for_imputation
 #'
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
-mod_plots_mv_ui <- function(id){
+mod_plots_mv_for_imputation_ui <- function(id){
   ns <- NS(id)
   tagList(
     tags$div(
@@ -27,13 +27,13 @@ mod_plots_mv_ui <- function(id){
 
 # Module Server
 
-#' @rdname mod_plots_mv
+#' @rdname mod_plots_mv_for_imputation
 #' @export
 #' @keywords internal
 
-mod_plots_mv_server <- function(input, output, session,
-                                qData,
-                                conds,
+mod_plots_mv_for_imputation_server <- function(input, output, session,
+                                obj,
+                                ind,
                                 title=NULL,
                                 palette=NULL){
   
@@ -42,19 +42,22 @@ mod_plots_mv_server <- function(input, output, session,
   
   
   output$plot_viewNAbyMean <- renderHighchart({
-    req(qData())
+    req(obj())
     
     withProgress(message = 'Making MV Intensity plot', value = 100, {
-      DAPAR2::hc_mvTypePlot2(qData(), conds(), title(), palette())
+      DAPAR2::hc_mvTypePlot2(obj = obj(), 
+                             i = ind(),
+                             title = title(), 
+                             palette = palette())
     })
   })
   
   
   output$plot_showImageNA <- renderPlot({
-    req(qData())
+    req(obj())
     
       withProgress(message = 'Making MV Heatmap plot', value = 100, {
-        DAPAR2::mvImage(qData(), conds())
+        DAPAR2::mvImage(obj(), ind())
       })
 
   })

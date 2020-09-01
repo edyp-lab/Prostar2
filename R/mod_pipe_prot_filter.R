@@ -549,9 +549,7 @@ callModule(mod_popover_for_help_server,
   
   
   observeEvent(input$ValidateFilters,ignoreInit = TRUE,{ 
-    
-    browser()
-      
+     #browser()
       #get indices of temporary SE
       ind <- grep('_filter_', names(rv.filter$dataIn))
       ind <- ind[-length(ind)]

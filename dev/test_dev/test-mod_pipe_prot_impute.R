@@ -1,13 +1,12 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_pipe_prot_impute.R'), local=TRUE)$value
-source(file.path("../../R","mod_plots_mv_for_imputation.R"), local=TRUE)$value
+source(file.path("../../R", "mod_plots_mv_for_imputation.R"), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path("../../R", "mod_popover_for_help.R"), local = TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_infos_dataset.R'), local=TRUE)$value
-source(file.path("../../R", "mod_plots_group_mv.R"), local=TRUE)$value
 source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_det_quant_impute_Values.R'), local=TRUE)$value
 
