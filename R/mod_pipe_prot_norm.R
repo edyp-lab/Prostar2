@@ -359,9 +359,7 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
     )
     if (length(ind)==0)
       ind <- NULL
-    
-    print('ind = ')
-    print(ind)
+
     ind
   })
   
