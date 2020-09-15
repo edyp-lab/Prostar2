@@ -1,12 +1,18 @@
 options(shiny.maxRequestSize=300*1024^2) 
 options(encoding = "UTF-8")
-options(shiny.fullstacktrace = F)
+options(shiny.fullstacktrace = T)
 require(compiler)
 enableJIT(3)
 
 
+lapply(list.files('R/DataManager/', pattern='.R'), 
+       function(x) {source(file.path('R/DataManager',x), local=TRUE)$value })
+
+lapply(list.files('R/Plots/', pattern='.R'), 
+       function(x) {source(file.path('R/Plots', x), local=TRUE)$value })
+
 #source(file.path('R/Plots', 'mod_homepage.R'), local=TRUE)$value
-#files <- list.files('R', recursive=T, pattern='.R')
+#files <- list.files('R/DataManager', pattern='.R')
 # files <- files[-which(files=='app_server.R')]
 # files <- files[-which(files=='app_ui.R')]
 # 
@@ -17,6 +23,11 @@ enableJIT(3)
 #' @importFrom shinyjs hide show
 #' 
 app_server <- function(input, output,session) {
+  
+  
+  
+  
+  
   # List the first level callModules here
   
   #callModule(mod_loading_page_server,'loadingPage')
@@ -146,16 +157,15 @@ app_server <- function(input, output,session) {
    # to this pipeline
    observeEvent(req(rv.core$current.pipeline), {
      
-     #browser()
      
      ## Get list des process du pipeline
      proc <- pipeline.defs[[rv.core$current.pipeline]]
-     dir <- paste0('R/PipelineCode/',rv.core$current.pipeline)
+     dir <- paste0('R/PipelineCode',rv.core$current.pipeline)
      process.files <- list.files(dir)[grep('mod_pipe', list.files(dir))]
-     lapply(process.files, function(x) {source(file.path(dir,x), local=TRUE)$value })
+     lapply(process.files, function(x) {source(file.path(dir,x), local=F)$value })
        
      watchcode.files <- list.files(dir)[grep('watch_', list.files(dir))]
-     lapply(watchcode.files, function(x) {source(file.path(dir,x), local=TRUE)$value })
+     lapply(watchcode.files, function(x) {source(file.path(dir,x), local=F)$value })
      
      
      # BuildSidebarMenu()

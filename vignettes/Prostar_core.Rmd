@@ -115,6 +115,6 @@ pipeline.defs <- list(
 }
 ```
 
-If a developper wants to implement a new pipeline, he has to complete the definition while respecting the nomenlature of the items of the list. This is very important since Prostar maps theses names with source code files.
+If a developer wants to implement a new pipeline, he has to complete the definition while respecting the nomenclature of the items of the list. This is very important since Prostar maps theses names with source code files.
 
 

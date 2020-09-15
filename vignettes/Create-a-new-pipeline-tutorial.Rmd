@@ -4,7 +4,7 @@ author: "Samuel Wieczorek"
 date: "01/07/2020"
 output: html_document
 vignette: >
-  %\VignetteIndexEntry{Build-a-pipeline-module}
+  %\VignetteIndexEntry{Create-a-new-pipeline-module}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

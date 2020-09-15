@@ -69,8 +69,7 @@ mod_homepage_server <- function(input, output, session){
     #t <- sessionInfo()
     daparVersion <- installed.packages(lib.loc=DAPAR.loc)["DAPAR","Version"]
     ProstarVersion <- installed.packages(lib.loc=Prostar.loc)["Prostar2","Version"]
-    print(daparVersion)
-    print(ProstarVersion)
+
     tagList(
       tags$p(class="body",
              tags$b("DAPAR"),

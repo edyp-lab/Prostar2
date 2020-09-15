@@ -20,6 +20,16 @@ idleTimer();", timeoutSeconds*1000, timeoutSeconds, timeoutSeconds*1000)
 
 
 
+
+#browser()
+lapply(list.files('R/DataManager/', pattern='.R'), 
+       function(x) {source(file.path('R/DataManager',x), local=FALSE)$value })
+
+lapply(list.files('R/Plots/', pattern='.R'), 
+       function(x) {source(file.path('R/Plots', x), local=FALSE)$value })
+
+
+
 #' @importFrom shinyjs hidden extendShinyjs inlineCSS
 #' @importFrom shiny includeCSS
 #' 
