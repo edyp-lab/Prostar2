@@ -13,14 +13,15 @@ mod_params_LOESS_ui <- function(id){
 }
 
 
-mod_params_LOESS_server <- function(input, output, session, paramsIn){
+mod_params_LOESS_server <- function(input, output, session, obj, paramsIn){
   ns <- session$ns
   
   params <- reactiveValues(
     fun = 'loess',
     args = list(
       span = 0.7,
-      type = "overall"
+      type = "overall",
+      conds = NULL
     )
   )
   
@@ -31,9 +32,11 @@ mod_params_LOESS_server <- function(input, output, session, paramsIn){
       params$fun = 'loess'
       params$args$span=0.7
       params$args$type = "overall"
+      params$args$conds = colData(obj())$Condition
     } else {
       params$args$span= paramsIn()$args$span
       params$args$type = paramsIn()$args$type
+      params$args$conds = colData(obj())$Condition
     }
   })
   

@@ -1,6 +1,6 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_pipe_prot_norm.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_pipe_protein_Normalization'), local=TRUE)$value
 source(file.path('../../R', 'mod_plots_tracking.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
@@ -24,7 +24,7 @@ options(shiny.fullstacktrace = FALSE)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_prot_norm_ui('pipe_norm'),
+    mod_pipe_protein_Normalization_ui('pipe_norm'),
     mod_infos_dataset_ui('infos')
     # highchartOutput('test')
   )
@@ -52,7 +52,7 @@ server <- function(input, output, session) {
   # })
   # 
   
-  rv$ret <- callModule(mod_pipe_prot_norm_server,
+  rv$ret <- callModule(mod_pipe_protein_Normalization_server,
                        'pipe_norm',
                        obj = reactive({Exp1_R25_prot}),
                        ind = reactive({2}))

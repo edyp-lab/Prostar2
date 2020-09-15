@@ -1,6 +1,6 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_pipe_prot_impute.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_pipe_protein_Imputation.R'), local=TRUE)$value
 source(file.path("../../R", "mod_plots_mv_for_imputation.R"), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
@@ -24,7 +24,7 @@ options(shiny.fullstacktrace = FALSE)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_prot_impute_ui('pipe_impute'),
+    mod_pipe_protein_Imputation_ui('pipe_impute'),
     mod_infos_dataset_ui('infos')
   )
 )
@@ -40,7 +40,7 @@ server <- function(input, output, session) {
   )
   
   
-  rv$ret <- callModule(mod_pipe_prot_impute_server,
+  rv$ret <- callModule(mod_pipe_protein_Imputation_server,
                        'pipe_impute',
                        obj = reactive({Exp1_R25_prot})
                        )

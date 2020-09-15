@@ -18,7 +18,7 @@ library(DT)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_prot_hypotest_ui('pipe_hypothesis_test'),
+    mod_pipe_protein_hypothesisTest_ui('pipe_hypothesis_test'),
     mod_infos_dataset_ui('infos')
   )
 )
@@ -36,7 +36,7 @@ server <- function(input, output, session) {
   )
   
   rv$ret <-
-    callModule(mod_pipe_prot_hypotest_server,'pipe_hypothesis_test',
+    callModule(mod_pipe_protein_hypothesisTest_server,'pipe_hypothesis_test',
                obj = reactive({obj}),
                ind = reactive({3}))
   

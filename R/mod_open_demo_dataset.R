@@ -60,7 +60,8 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
     dataOut = NULL
   )
 
-  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def = reactive({pipeline.def()}))
+  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", 
+                                 pipeline.def = reactive({pipeline.defs}))
   
   
   observe({
@@ -92,11 +93,12 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
         return(NULL)
       }
 
+      metadata(rv.openDemo$dataRead)$pipelineType <- rv.openDemo$pipe()
       rv.openDemo$dataOut <- rv.openDemo$dataRead
-      metadata(rv.openDemo$dataOut)$pipelineType <- names(rv.openDemo$pipe)
+     
     }) # End withProgress
     
-    return(reactive({rv.openDemo$dataRead }))
+    return(reactive({rv.openDemo$dataOut }))
   }) # End observeEvent
   
   

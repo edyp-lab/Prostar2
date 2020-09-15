@@ -7,6 +7,9 @@ source(file.path("../../R","mod_plots_corr_matrix.R"), local=TRUE)$value
 source(file.path("../../R","mod_settings.R"), local=TRUE)$value
 source(file.path("../../R","mod_popover_for_help.R"), local=TRUE)$value
 source(file.path("../../R","global.R"), local=TRUE)$value
+source(file.path("../../R","mod_observe_dynamic_colourPicker_input.R"), local=TRUE)$value
+
+
 
 ui <- fluidPage(
   mod_plots_corr_matrix_ui('plots_corr_matrix')
@@ -20,9 +23,9 @@ server <- function(input, output, session) {
   r <- reactiveValues(
     settings = NULL
   )
-  obj <- Exp1_R25_prot[[2]]
-  names <- gsub('Intensity_','',colnames(assay(obj)))
-  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({obj}))
+  obj <- Exp1_R25_prot[[length(names(Exp1_R25_prot))]]
+  names <- gsub('Intensity_','',colnames(assay(Exp1_R25_prot)))
+  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   
   callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
              obj = reactive({obj}),

@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_pipe_prot_norm_ui <- function(id){
+mod_pipe_protein_Normalization_ui <- function(id){
   ns <- NS(id)
   tagList(
     mod_navigation_ui(ns('nav_pipe_prot_norm'))
@@ -24,7 +24,7 @@ mod_pipe_prot_norm_ui <- function(id){
 #' 
 #' @param samplesTab
 #' 
-mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
+mod_pipe_protein_Normalization_server <- function(input, output, session, obj, ind){
   ns <- session$ns
   
   
@@ -571,8 +571,8 @@ mod_pipe_prot_norm_server <- function(input, output, session, obj, ind){
 }
 
 ## To be copied in the UI
-# mod_pipe_prot_norm_ui("pipe_prot_norm_ui_1")
+# mod_pipe_protein_Normalization_ui("pipe_prot_norm_ui_1")
 
 ## To be copied in the server
-# callModule(mod_pipe_prot_norm_server, "pipe_prot_norm_ui_1")
+# callModule(mod_pipe_protein_Normalization_server, "pipe_prot_norm_ui_1")
 

@@ -1,9 +1,17 @@
 options(shiny.maxRequestSize=300*1024^2) 
 options(encoding = "UTF-8")
-options(shiny.fullstacktrace = TRUE)
+options(shiny.fullstacktrace = F)
 require(compiler)
 enableJIT(3)
 
+
+#source(file.path('R/Plots', 'mod_homepage.R'), local=TRUE)$value
+#files <- list.files('R', recursive=T, pattern='.R')
+# files <- files[-which(files=='app_server.R')]
+# files <- files[-which(files=='app_ui.R')]
+# 
+# for (f in files)
+#   source(file.path('R',f), local=TRUE)$value
 
 #' @import shiny
 #' @importFrom shinyjs hide show
@@ -22,10 +30,6 @@ app_server <- function(input, output,session) {
     # current working data from current pipeline
     type = NULL,
     
-    ## indice du dataset courant dans la liste ll.process.
-    current.indice = 1,
-    
-     
     # Current QFeatures object in Prostar
     current.obj = NULL,
     
@@ -58,9 +62,12 @@ app_server <- function(input, output,session) {
   
   
   ## Get the return values of modules in charge of loading datasets
-  rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', pipeline.def=reactive({pipeline.defs})),
-                                  convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', pipeline.def=reactive({pipeline.defs})),
-                                  openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
+  rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', 
+                                                        pipeline.def=reactive({pipeline.defs})),
+                                  convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', 
+                                                       pipeline.def=reactive({pipeline.defs})),
+                                  openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', 
+                                                        pipeline.def=reactive({pipeline.defs}))
                                   )
   
   observeEvent(rv.core$tmp_dataManager$openFile(),{ 
@@ -84,7 +91,7 @@ app_server <- function(input, output,session) {
   # Update several reactive variable once a dataset is loaded
   setCoreRV <- reactive({
     rv.core$current.indice <- 1
-    rv.core$current.pipeline <- metadata(rv.core$current.obj)$pipeline
+    rv.core$current.pipeline <- metadata(rv.core$current.obj)$pipelineType
   })
   
   
@@ -128,10 +135,79 @@ app_server <- function(input, output,session) {
    callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
    
   
+   
+   
+   
+   
+   
+   
+   #Once the type of pipeline is known (ie a dataset has been loaded),
+   #call the server parts of the processing modules that belongs
+   # to this pipeline
+   observeEvent(req(rv.core$current.pipeline), {
+     
+     #browser()
+     
+     ## Get list des process du pipeline
+     proc <- pipeline.defs[[rv.core$current.pipeline]]
+     dir <- paste0('R/PipelineCode/',rv.core$current.pipeline)
+     process.files <- list.files(dir)[grep('mod_pipe', list.files(dir))]
+     lapply(process.files, function(x) {source(file.path(dir,x), local=TRUE)$value })
+       
+     watchcode.files <- list.files(dir)[grep('watch_', list.files(dir))]
+     lapply(watchcode.files, function(x) {source(file.path(dir,x), local=TRUE)$value })
+     
+     
+     # BuildSidebarMenu()
+     # # Load UI code for modules
+     # rvNav$Done = rep(FALSE,length(def))
+     # rvNav$def = list(name = type.pipeline,
+     #                  stepsNames = def,
+     #                  isMandatory = rep(TRUE,length(def)),
+     #                  ll.UI = LoadModulesUI(def)
+     #                  )
+     # 
+     # pipeline$current.indice <- 1
+     # pipeline$current.obj <- obj.openDataset()
+     # 
+     # ## Lancement du module de navigation du pipeline pour suivre les différents process
+     # ## de traitement liés au pipeline
+     # pipeline$nav2 <- callModule(moduleNavigation2, "moduleGeneral",
+     #                             isDone = reactive({rvNav$Done}),
+     #                             pages = reactive({rvNav$def}),
+     #                             rstFunc = resetNavPipeline,
+     #                             type = reactive({'rectangle'})
+     #                             )
+     #BuildDataminingMenu("Data mining")
+   })
+   
+   
+   
+   
+   # 
+   # LoadModulesUI <- function(ll.modules){
+   #   ll <- lapply(ll.modules, function(i) {
+   #     UIfunc <- paste0(i, "UI")
+   #     do.call(UIfunc, list(i))
+   #   })
+   #   
+   #   return(ll)
+   # }
+   
+   
+   
+   
+   
+  
+   
+   
+   
+   
+   
   
   #Once the server part is loaded, hide the loading page 
   # and show th main content
-  #shinyjs::hide(id = "loading_page", anim = FALSE)
-  #shinyjs::show("main_content", anim = TRUE, animType = "fade")
+  shinyjs::hide(id = "loading_page", anim = FALSE)
+  shinyjs::show("main_content", anim = TRUE, animType = "fade")
 
 }

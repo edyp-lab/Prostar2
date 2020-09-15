@@ -35,6 +35,7 @@ mod_plots_corr_matrix_ui <- function(id){
                           shinyWidgets::dropdownButton(
                             tags$div(
                               tags$div(style="display:inline-block; vertical-align: bottom;",
+                                       uiOutput(ns('showValues_ui')),
                                        uiOutput(ns('gradient_ui')),
                                        tooltip="Plots parameters"
                                        
@@ -79,7 +80,8 @@ mod_plots_corr_matrix_server <- function(input, output, session,
   
   
   rv.corr <- reactiveValues(
-    gradient = NULL
+    gradient = NULL,
+    showValues = FALSE
   )
   
   
@@ -91,6 +93,17 @@ mod_plots_corr_matrix_server <- function(input, output, session,
                 max = 1,
                 value = rv.corr$gradient,
                 step=0.01)
+  })
+  
+  
+  output$showValues_ui <- renderUI({
+    
+    checkboxInput(ns('showDataLabels'), 'Show labels', value=rv.corr$showValues)
+    
+  })
+  
+  observeEvent(req(input$showDataLabels),{
+    rv.corr$showValues <- input$showDataLabels
   })
   
   observeEvent(req(gradientRate()),{
@@ -105,12 +118,16 @@ mod_plots_corr_matrix_server <- function(input, output, session,
   corrMatrix <- reactive({
     req(obj())
     rv.corr$gradient 
-1
-    isolate({
+    rv.corr$showValues
+    
+ 
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- DAPAR2::corrMatrixD_HC(obj(), names(), rv.corr$gradient)
+        tmp <- DAPAR2::corrMatrixD_HC(obj = obj(), 
+                                      names = names(), 
+                                      rate = rv.corr$gradient,
+                                      showValues = rv.corr$showValues)
       })
-    })
+
     tmp
   })
   

@@ -21,15 +21,6 @@ source(file.path('.', 'mod_norm_loess_UI.R'), local=TRUE)$value
 
 
 
-
-
-
-
-
-
-
-
-
 ###############################################################################
 ##
 ## Light module of normalisation
@@ -59,7 +50,9 @@ mod_norm_server <- function(input, output, session, obj, ind){
     dataOut = NULL,
     tmp = NULL,
     widgets = list(method = "None"),
-    params = list()
+    params_loess = list(),
+    params_vsn = list(),
+    params_QuantileCentering = list()
   )
   
 
@@ -70,12 +63,7 @@ mod_norm_server <- function(input, output, session, obj, ind){
     rv.norm$dataOut <- obj()
   })
   
-  rv.norm$tmp <- callModule(mod_params_LOESS_server, 'params_loess', paramsIn = reactive({rv.norm$params})  )
-  rv.norm$tmp <- callModule(mod_params_LOESS_server, 'params_vsn', paramsIn = reactive({rv.norm$params})  )
-  rv.norm$tmp <- callModule(mod_params_QuantileCentering_server, 'params_QuantileCentering', paramsIn = reactive({rv.norm$params})  )
-  
-  observeEvent(rv.norm$tmp,{ rv.norm$params <- rv.norm$tmp()})
-  
+ 
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 1                                        ###
   ###---------------------------------------------------------------------------------###
@@ -87,8 +75,8 @@ mod_norm_server <- function(input, output, session, obj, ind){
                     ),
         
         hidden(div(id=ns("div_params_loess"),mod_params_LOESS_ui(ns("params_loess")))),
-        hidden(div(id=ns("div_params_vsn"),mod_params_LOESS_ui(ns("params_vsn")))),
-        hidden(div(id=ns("div_params_QuantileCentering"),mod_params_LOESS_ui(ns("params_QuantileCentering")))),
+        hidden(div(id=ns("div_params_vsn"),mod_params_vsn_ui(ns("params_vsn")))),
+        hidden(div(id=ns("div_params_QuantileCentering"),mod_params_QuantileCentering_ui(ns("params_QuantileCentering")))),
         
         actionButton(ns("perform.normalization"), "Perform normalization"))
   })
@@ -111,7 +99,23 @@ mod_norm_server <- function(input, output, session, obj, ind){
   })
   
   
- 
+  rv.norm$tmp1 <- callModule(mod_params_LOESS_server, 'params_loess', 
+                             obj=reactive({rv.norm$dataIn}),
+                             paramsIn = reactive({rv.norm$params_loess})  
+                             )
+  rv.norm$tmp2 <- callModule(mod_params_vsn_server, 'params_vsn', 
+                             obj=reactive({rv.norm$dataIn}),
+                             paramsIn = reactive({rv.norm$params_vsn})
+                             )
+  rv.norm$tmp3 <- callModule(mod_params_QuantileCentering_server, 'params_QuantileCentering', 
+                             obj=reactive({rv.norm$dataIn}),
+                             paramsIn = reactive({rv.norm$params_QuantileCentering})
+                             )
+  
+  observeEvent(rv.norm$tmp1,{ rv.norm$params_loess <- rv.norm$tmp1()})
+  observeEvent(rv.norm$tmp2,{ rv.norm$params_vsn <- rv.norm$tmp2()})
+  observeEvent(rv.norm$tmp3,{ rv.norm$params_QuantileCentering <- rv.norm$tmp3()})
+  
   
   ##' Reactive behavior : Normalization of data
   ##' @author Samuel Wieczorek
@@ -135,28 +139,24 @@ mod_norm_server <- function(input, output, session, obj, ind){
            },
            
            QuantileCentering = {
+             ll <- append(ll, list(subset.norm = NULL))
+             
              rv.norm$dataOut <- do.call(normalizeD, append(ll,  
-                                                           subset.norm = NULL,
-                                                           rv.norm$params$args)
+                                                           rv.norm$params_QuantileCentering$args)
              )
            },
            LOESS = {
-             ll <- append(ll,list(conds = colData(rv.norm$dataIn)$Condition))
-             ll <- append(ll, rv.norm$params$args)
+             ll <- append(ll, rv.norm$params_loess$args)
              rv.norm$dataOut <- do.call(normalizeD, ll)
            },
            vsn = {
-             rv.norm$dataOut <- do.call(normalizeD, append(ll,  
-                                                           rv.norm$params$args)
-                                        )
+             browser()
+             ll <- append(ll, rv.norm$params_vsn$args)
+             rv.norm$dataOut <- do.call(normalizeD, ll)
            }
-           
-           
     )
-    
      
   })
-  
   
   return({reactive(rv.norm$dataOut)})
   

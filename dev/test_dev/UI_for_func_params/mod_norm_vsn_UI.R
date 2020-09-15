@@ -13,24 +13,27 @@ mod_params_vsn_ui <- function(id){
 }
 
 
-mod_params_vsn_server <- function(input, output, session, paramsIn){
+mod_params_vsn_server <- function(input, output, session, obj, paramsIn){
   ns <- session$ns
   
   params <- reactiveValues(
     fun = 'vsn',
     args = list(
-      type = "overall"
+      type = "overall",
+      conds = NULL
     )
   )
   
   
-  observeEvent(paramsIn(), ignoreNULL = FALSE, {
+  observeEvent(paramsIn(), ignoreNULL = FALSE,{
     
     if (is.null(paramsIn()) || length(paramsIn())==0){
       params$fun = 'vsn'
       params$args$type = "overall"
+      params$args$conds = colData(obj())$Condition
     } else {
       params$args$type = paramsIn()$args$type
+      params$args$conds = colData(obj())$Condition
     }
   })
   
@@ -39,7 +42,7 @@ mod_params_vsn_server <- function(input, output, session, paramsIn){
   observeEvent(input$normalization.type, ignoreInit=TRUE,{params$args$type <- input$normalization.type})
   
   
-  output$loess_ui <- renderUI({
+  output$vsn_ui <- renderUI({
     
     tagList(
       selectInput(ns("normalization.type"), "Normalization type",  

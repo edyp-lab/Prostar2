@@ -143,3 +143,11 @@ progressBar_css <- ".progress {
   100% {
     left: 107%;
     right: -8%; } }"
+
+    
+## To be copied in the UI
+# mod_loading_page_ui("loading_page_ui_1")
+    
+## To be copied in the server
+# callModule(mod_loading_page_server, "loading_page_ui_1")
+ 

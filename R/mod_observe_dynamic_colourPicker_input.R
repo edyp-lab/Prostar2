@@ -6,7 +6,7 @@
 #' 
 #' @param n The number of inputs to create
 #' 
-#' @value A vector containing n hex color values
+#' @return A vector containing n hex color values
 #'
 #' @noRd 
 #'

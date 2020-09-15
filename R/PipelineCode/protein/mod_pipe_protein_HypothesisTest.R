@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_pipe_prot_hypotest_ui <- function(id){
+mod_pipe_protein_hypothesisTest_ui <- function(id){
   ns <- NS(id)
   tagList(
     mod_navigation_ui(ns('nav_pipe_prot_hypotest'))
@@ -24,7 +24,7 @@ mod_pipe_prot_hypotest_ui <- function(id){
 #' 
 #' @param ind
 #' 
-mod_pipe_prot_hypotest_server <- function(input, output, session, obj, ind){
+mod_pipe_protein_hypothesisTest_server <- function(input, output, session, obj, ind){
   ns <- session$ns
   
   
@@ -330,8 +330,8 @@ mod_pipe_prot_hypotest_server <- function(input, output, session, obj, ind){
 
 
 ## To be copied in the UI
-# mod_pipe_prot_hypotest_ui("pipe_hypotest_ui_1")
+# mod_pipe_protein_hypothesisTest_ui("pipe_hypotest_ui_1")
 
 ## To be copied in the server
-# callModule(mod_pipe_prot_hypotest_server, "pipe_hypotest_ui_1")
+# callModule(mod_pipe_protein_hypothesisTest_server, "pipe_hypotest_ui_1")
 

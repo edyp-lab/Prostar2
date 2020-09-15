@@ -36,10 +36,10 @@ mod_choose_pipeline_server <- function(input, output, session, pipeline.def=NULL
   
     
   observeEvent( req(input$pipelineChoice), {
-    rv.choosePipeline$choice <- pipeline.def()[input$pipelineChoice]
+    rv.choosePipeline$choice <- input$pipelineChoice
   })
   
-  output$selectWidgetPipeline<- renderUI({
+  output$selectWidgetPipeline <- renderUI({
     req(pipeline.def())
     
     selectizeInput(ns("pipelineChoice"),

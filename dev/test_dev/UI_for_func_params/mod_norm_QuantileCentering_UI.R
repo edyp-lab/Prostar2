@@ -13,7 +13,7 @@ mod_params_QuantileCentering_ui <- function(id){
 }
 
 
-mod_params_QuantileCentering_server <- function(input, output, session, paramsIn){
+mod_params_QuantileCentering_server <- function(input, output, session, obj, paramsIn){
   ns <- session$ns
   
   params <- reactiveValues(
@@ -21,7 +21,8 @@ mod_params_QuantileCentering_server <- function(input, output, session, paramsIn
     args = list(
       type = "overall",
       quantile = 0.15,
-      subset.norm = NULL
+      subset.norm = NULL,
+      conds = NULL
     )
   )
   
@@ -33,10 +34,12 @@ mod_params_QuantileCentering_server <- function(input, output, session, paramsIn
       params$args$type = "overall"
       params$args$quantile = 0.15
       params$args$subset.norm = NULL
+      params$args$conds = colData(obj())$Condition
     } else {
       params$args$type = paramsIn()$args$type
       params$args$quantile = as.numeric(paramsIn()$args$quantile)
       params$args$subset.norm = paramsIn()$args$subset.norm
+      params$args$conds = colData(obj())$Condition
     }
   })
   

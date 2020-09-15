@@ -584,8 +584,8 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
 }
 
 ## To be copied in the UI
-# mod_pipe_prot_filter_ui("pipe_prot_filter_ui_1")
+# mod_pipe_protein_Filtering_ui("pipe_prot_filter_ui_1")
 
 ## To be copied in the server
-# callModule(mod_pipe_prot_filter_server, "pipe_prot_filter_ui_1")
+# callModule(mod_pipe_protein_Filtering_server, "pipe_prot_filter_ui_1")
 

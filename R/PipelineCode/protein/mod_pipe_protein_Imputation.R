@@ -7,7 +7,8 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_pipe_prot_impute_ui <- function(id){
+#' 
+mod_pipe_protein_Imputation_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
@@ -18,7 +19,7 @@ mod_pipe_prot_impute_ui <- function(id){
 #' pipe_prot_impute Server Function
 #'
 #' @noRd 
-mod_pipe_prot_impute_server <- function(input, output, session, obj){
+mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
   ns <- session$ns
  
   
@@ -546,8 +547,8 @@ mod_pipe_prot_impute_server <- function(input, output, session, obj){
 }
     
 ## To be copied in the UI
-# mod_pipe_prot_impute_ui("pipe_prot_impute_ui_1")
+# mod_pipe_protein_Imputation_ui("pipe_prot_impute_ui_1")
     
 ## To be copied in the server
-# callModule(mod_pipe_prot_impute_server, "pipe_prot_impute_ui_1")
+# callModule(mod_pipe_protein_Imputation_server, "pipe_prot_impute_ui_1")
  

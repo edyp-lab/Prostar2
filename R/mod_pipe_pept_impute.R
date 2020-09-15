@@ -1,4 +1,4 @@
-#' pipe_pept_impute UI Function
+#' @title pipe_pept_impute UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,6 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' 
 mod_pipe_pept_impute_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -18,6 +19,7 @@ mod_pipe_pept_impute_ui <- function(id){
 #' pipe_pept_impute Server Function
 #'
 #' @noRd 
+#' 
 mod_pipe_pept_impute_server <- function(input, output, session, obj){
   ns <- session$ns
   

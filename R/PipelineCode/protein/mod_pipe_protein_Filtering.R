@@ -9,7 +9,7 @@
 #' @importFrom shiny NS tagList
 #' @import shinyjs
 #' 
-mod_pipe_prot_filter_ui <- function(id){
+mod_pipe_protein_Filtering_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
@@ -20,7 +20,7 @@ mod_pipe_prot_filter_ui <- function(id){
 #' pipe_prot_filter Server Function
 #'
 #' @noRd 
-mod_pipe_prot_filter_server <- function(input, output, session, obj){
+mod_pipe_protein_Filtering_server <- function(input, output, session, obj){
   ns <- session$ns
  
   ## Section navigation module
@@ -566,8 +566,8 @@ callModule(mod_popover_for_help_server,
 }
     
 ## To be copied in the UI
-# mod_pipe_prot_filter_ui("pipe_prot_filter_ui_1")
+# mod_pipe_protein_Filtering_ui("pipe_prot_filter_ui_1")
     
 ## To be copied in the server
-# callModule(mod_pipe_prot_filter_server, "pipe_prot_filter_ui_1")
+# callModule(mod_pipe_protein_Filtering_server, "pipe_prot_filter_ui_1")
  

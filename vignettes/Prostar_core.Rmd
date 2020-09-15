@@ -2,15 +2,21 @@
 title: "Prostar core"
 author: "Samuel Wieczorek"
 date: "01/07/2020"
-output: html_document
+output: 
+  BiocStyle::html_document:
+
+    keep_md: true
+    papersize: a4
 vignette: >
-  %\VignetteIndexEntry{Build-a-pipeline-module}
+  %\VignetteIndexEntry{Prostar core}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      collapse = TRUE,
+                      comment = "#>")
 ```
 
 
@@ -21,7 +27,8 @@ BiocStyle::markdown()
 
 # Introduction
 
-This vignette aims to describe the core code of Prostar and is addressed to developers.
+This vignette aims to describe the core code of Prostar and is addressed to developers. It describes how
+Prostar works in terms of information system
 
 # Generalities
 
@@ -88,3 +95,26 @@ The code for the server side of Prostar is in the file 'R/app_server.R'.
 ## Call to server modules
 
 The server-side of all the modules which ui are declared in the app_ui.R file are called in this file.
+
+
+# Load a dataset and corresponding modules
+
+Once a dataset is loaded in prostar (the variable xxx is instanciated), Prostar launches the different modules that are part of the pipeline previously choosen by the user.
+The list of modules in that pipeline are stored in the file 'config.R'
+
+## Config.R
+
+This file contains the definition of pipelines, ie the list of processing modules included in the pipeline. For example, here is the definition for the protein pipeline.
+
+```{r ui, eval=FALSE}
+pipeline.defs <- list(
+  protein = c('Filtering',
+              'Normalization',
+              'Imputation')
+)
+}
+```
+
+If a developper wants to implement a new pipeline, he has to complete the definition while respecting the nomenlature of the items of the list. This is very important since Prostar maps theses names with source code files.
+
+
