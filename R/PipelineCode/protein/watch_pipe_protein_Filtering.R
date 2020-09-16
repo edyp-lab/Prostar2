@@ -5,7 +5,7 @@
 ### connexes, on les donne en parametre du module
 ####################
 Watch_mod_pipe_protein_Filtering <- callModule(mod_pipe_protein_Filtering_server,
-                                               'moduleProteinFiltering',  
+                                               'mod_pipe_protein_Filtering',  
                                                 obj = reactive({rv.core$current.obj})
                                        )
 
@@ -19,8 +19,6 @@ observeEvent(req(Watch_mod_pipe_protein_Filtering()),{
   
   ## doit avoir le meme nom que celui qui est indique dans la definition des modules pour le pipeline
   ## (fichier pipelineDefinition.R)
-  #rv.core$current.indice <- which(pipeline$current.obj@processes == 'moduleProteinFiltering')
+  rv.core$current.indice <- length(names(rv.core$current.obj))
   #DeleteDatasetsAfter('moduleProteinFiltering')
-  #rvNav$Done[rv.core$current.indice-1] <- TRUE
-  
 })

@@ -129,17 +129,18 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
              ind = reactive({length(names(rv.impute$imputePlotsSteps$step2))}),
              title = reactive({"Distribution after POV and MEC imputation"}),
              palette = reactive({rv.impute$settings()$basePalette}))
-  
+
   callModule(mod_det_quant_impute_Values_server, "POV_DetQuantValues_DT", 
              qData = reactive({req(rv.impute$dataIn)
-               SummarizedExperiment::assay(rv.impute$dataIn,length(names(rv.impute$dataIn)))
+  
+               SummarizedExperiment::assay(rv.impute$dataIn[[length(names(rv.impute$dataIn))]])
                                    }),
              quant = reactive({rv.impute$widgets$POV_detQuant_quantile}), 
              factor = reactive({rv.impute$widgets$POV_detQuant_factor}))
   
   callModule(mod_det_quant_impute_Values_server, "MEC_DetQuantValues_DT", 
              qData = reactive({req(rv.impute$dataIn)
-                              SummarizedExperiment::assay(rv.impute$dataIn, length(names(rv.impute$dataIn)))
+                              SummarizedExperiment::assay(rv.impute$dataIn[[length(names(rv.impute$dataIn))]])
                               }),
              quant = reactive({rv.impute$widgets$MEC_detQuant_quantile}), 
              factor = reactive({rv.impute$widgets$MEC_detQuant_factor}))

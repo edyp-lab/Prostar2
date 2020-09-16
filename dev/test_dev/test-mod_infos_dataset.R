@@ -20,4 +20,3 @@ server <- function(input, output, session) {
 
 
 shinyApp(ui, server)
-# library(shiny); runApp('dev/test_dev/test-mod_infos_dataset.R')

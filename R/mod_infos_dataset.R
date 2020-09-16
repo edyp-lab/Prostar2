@@ -14,6 +14,7 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
+#' @import QFeatures
 #' 
 mod_infos_dataset_ui <- function(id){
   ns <- NS(id)
@@ -163,8 +164,8 @@ mod_infos_dataset_server <- function(input, output, session, obj){
       
       typeOfData <- metadata(data)$typeOfData
       nLines <- nrow(obj()[[input$selectInputSE]])
-      percentMV <- nNA(obj()[[input$selectInputSE]])$nNA
-      nEmptyLines <-nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
+      percentMV <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNA
+      nEmptyLines <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
       if(is.na(nEmptyLines)) {nEmptyLines=0}
       
       val <- c(typeOfData,
@@ -276,9 +277,9 @@ mod_infos_dataset_server <- function(input, output, session, obj){
       
       typeOfDataset <- metadata(obj()[[input$selectInputSE]])$typeOfData
       
-      pourcentage <- nNA(obj()[[input$selectInputSE]])$nNA
+      pourcentage <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNA
       
-      nb.empty.lines <- nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
+      nb.empty.lines <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
       #if (is.na(nb.empty.lines)) { nb.empty.lines=0 }
       
       if (pourcentage!=0 && !is.na(nb.empty.lines)) {

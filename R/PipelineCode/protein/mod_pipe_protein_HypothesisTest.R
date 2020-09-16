@@ -7,7 +7,7 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_pipe_protein_hypothesisTest_ui <- function(id){
+mod_pipe_protein_HypothesisTest_ui <- function(id){
   ns <- NS(id)
   tagList(
     mod_navigation_ui(ns('nav_pipe_prot_hypotest'))
@@ -24,7 +24,7 @@ mod_pipe_protein_hypothesisTest_ui <- function(id){
 #' 
 #' @param ind
 #' 
-mod_pipe_protein_hypothesisTest_server <- function(input, output, session, obj, ind){
+mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, ind){
   ns <- session$ns
   
   
@@ -236,7 +236,7 @@ mod_pipe_protein_hypothesisTest_server <- function(input, output, session, obj, 
     rv.hypotest$i <- ind()
     
     
-    browser()
+    #browser()
     isolate({
       switch(input$diffAnaMethod,
              Limma={

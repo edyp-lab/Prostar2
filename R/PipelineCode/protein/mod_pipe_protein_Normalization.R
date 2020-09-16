@@ -22,9 +22,14 @@ mod_pipe_protein_Normalization_ui <- function(id){
 #' 
 #' @param input,output,session
 #' 
-#' @param obj
+#' @param obj xxx
 #' 
-#' @param samplesTab
+#' @param samplesTab xxx
+#' 
+#' @param ind xxx
+#' 
+#' @importFrom DAPAR2 noramlizeD compareNormalizationD_HC
+#' @importFrom SummarizedExperiment rowData
 #' 
 mod_pipe_protein_Normalization_server <- function(input, output, session, obj, ind){
   ns <- session$ns
@@ -339,7 +344,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
                     condition=( rv.norm$widgets$method %in% c(DAPAR2::normalizeMethods.dapar()[-which(DAPAR2::normalizeMethods.dapar()=="GlobalQuantileAlignment")])))
     
     cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
-    trackAvailable <- rv.norm$widgets$method %in% normalizeMethods.dapar()
+    trackAvailable <- rv.norm$widgets$method %in% DAPAR2::normalizeMethods.dapar()
     shinyjs::toggle('DivMasterProtSelection', condition= cond && trackAvailable)
     shinyjs::toggle('SyncForNorm', condition= cond && trackAvailable)
   })
@@ -352,7 +357,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     print('in GetIndicesOfSelectedProteins')
     print(rv.norm$trackFromBoxplot())
     ind <- NULL
-    ll <- rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
+    ll <- SummarizedExperiment::rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
     tt <- rv.norm$trackFromBoxplot()$type
     switch(tt,
            ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
@@ -382,7 +387,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
            None = rv.norm$dataIn <- obj(),
            
            GlobalQuantileAlignment = {
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i,
                                           name = "proteins_norm",
                                           method='GlobalQuantileAlignment'
@@ -394,7 +399,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
              if (!is.null(rv.norm$widgets$quantile))
                quant <- as.numeric(rv.norm$widgets$quantile)
              
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn, 
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn, 
                                           i = rv.norm$i, 
                                           name = "proteins_norm",
                                           method = 'QuantileCentering', 
@@ -407,7 +412,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
            } ,
            
            MeanCentering = {
-             rv.norm$dataIn <- normalizeD(object =rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object =rv.norm$dataIn,
                                           i = rv.norm$i, 
                                           name ="proteins_norm",
                                           method = 'MeanCentering', 
@@ -419,7 +424,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
            }, 
            
            SumByColumns = {
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i =rv.norm$i,
                                           name = "proteins_norm",
                                           method = 'SumByColumns', 
@@ -430,7 +435,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
            },
            
            LOESS = { 
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i,
                                           name = "proteins_norm",
                                           method = 'LOESS', 
@@ -441,7 +446,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
            },
            
            vsn = {
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i, 
                                           name = "proteins_norm",
                                           method = 'vsn', 

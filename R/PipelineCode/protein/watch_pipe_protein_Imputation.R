@@ -5,7 +5,7 @@
 ### connexes, on les donne en parametre du module
 ####################
 Watch_mod_pipe_protein_Imputation <- callModule(module=mod_pipe_protein_Imputation_server,
-                                                'moduleProtImputation',  
+                                                'mod_pipe_protein_Imputation',  
                                                 obj = reactive({rv.core$current.obj})
                                                 )
 
@@ -14,11 +14,10 @@ Watch_mod_pipe_protein_Imputation <- callModule(module=mod_pipe_protein_Imputati
 
 observeEvent(req(Watch_mod_pipe_protein_Imputation()),{
   
-  rv.core$current.obj <- WatchmoduleProtImputation()
+  rv.core$current.obj <- Watch_mod_pipe_protein_Imputation()
   
   ## doit avoir le meme nom que celui qui est indique dans la definition des modules pour le pipeline
   ## (fichier pipelineDefinition.R)
-  # rv.core$current.indice <- which(rv.core$current.obj@processes == 'moduleProtImputation')
+  rv.core$current.indice <- length(names(rv.core$current.obj))
   # DeleteDatasetsAfter('moduleProtImputation')
-  # rvNav$Done[rv.core$current.indice-1] <- TRUE
 })
