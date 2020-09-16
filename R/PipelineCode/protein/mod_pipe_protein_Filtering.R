@@ -136,6 +136,7 @@ callModule(mod_popover_for_help_server,
   
   observe({
     req(obj())
+
     if (metadata(obj()[[length(experiments(obj()))]])$typeOfData != 'protein'){
       stop("The type of data contained in the dataset is not 'protein'")
       return(NULL)

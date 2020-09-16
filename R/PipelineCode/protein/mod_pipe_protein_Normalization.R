@@ -7,6 +7,8 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' @importFrom DAPAR2 normalizeMethods.dapar normalizeD
+#' 
 mod_pipe_protein_Normalization_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -337,7 +339,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
                     condition=( rv.norm$widgets$method %in% c(DAPAR2::normalizeMethods.dapar()[-which(DAPAR2::normalizeMethods.dapar()=="GlobalQuantileAlignment")])))
     
     cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
-    trackAvailable <- rv.norm$widgets$method %in% normalizeMethodsWithTracking.dapar()
+    trackAvailable <- rv.norm$widgets$method %in% normalizeMethods.dapar()
     shinyjs::toggle('DivMasterProtSelection', condition= cond && trackAvailable)
     shinyjs::toggle('SyncForNorm', condition= cond && trackAvailable)
   })

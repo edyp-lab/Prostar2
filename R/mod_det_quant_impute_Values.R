@@ -7,6 +7,9 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' @importFrom DAPAR2 getQuantile4Imp
+#' @importFrom tibble as_tibble_row
+#' 
 mod_det_quant_impute_Values_ui <- function(id){
   ns <- NS(id)
     tagList(
@@ -33,7 +36,7 @@ mod_det_quant_impute_Values_server <- function(input, output, session, qData, qu
   observe({
     req(qData(), quant(), factor())
     
-    tmp <- getQuantile4Imp(qData(), quant()/100, factor())
+    tmp <- DAPAR2::getQuantile4Imp(qData(), quant()/100, factor())
     values(tmp)
   })
 }

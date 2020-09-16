@@ -157,16 +157,19 @@ app_server <- function(input, output,session) {
    # to this pipeline
    observeEvent(req(rv.core$current.pipeline), {
      
-     
      ## Get list des process du pipeline
      proc <- pipeline.defs[[rv.core$current.pipeline]]
-     dir <- paste0('R/PipelineCode',rv.core$current.pipeline)
+     dir <- paste0('R/PipelineCode/',rv.core$current.pipeline)
+     
      process.files <- list.files(dir)[grep('mod_pipe', list.files(dir))]
-     lapply(process.files, function(x) {source(file.path(dir,x), local=F)$value })
+     ## Use here a for loop instead of a lapply, otherwise the functions are not
+     ## correctly instanciated in environnment
+     for (f in process.files)
+      source(file.path(dir, f), local=T)
        
      watchcode.files <- list.files(dir)[grep('watch_', list.files(dir))]
-     lapply(watchcode.files, function(x) {source(file.path(dir,x), local=F)$value })
-     
+     for (f in watchcode.files)
+       source(file.path(dir, f), local=T)
      
      # BuildSidebarMenu()
      # # Load UI code for modules

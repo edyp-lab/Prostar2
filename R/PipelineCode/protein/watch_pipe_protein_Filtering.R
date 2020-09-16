@@ -13,8 +13,8 @@ Watch_mod_pipe_protein_Filtering <- callModule(mod_pipe_protein_Filtering_server
 
 
 observeEvent(req(Watch_mod_pipe_protein_Filtering()),{
+  cat('In observeEvent(req(Watch_mod_pipe_protein_Filtering())')
   
-  browser()
   rv.core$current.obj <- Watch_mod_pipe_protein_Filtering()
   
   ## doit avoir le meme nom que celui qui est indique dans la definition des modules pour le pipeline
