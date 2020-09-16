@@ -20,6 +20,11 @@ mod_pipe_protein_Filtering_ui <- function(id){
 #' pipe_prot_filter Server Function
 #'
 #' @noRd 
+#' 
+#' @import DAPAR2
+#' @importFrom QFeatures VariableFilter 
+#' @importFrom SummarizedExperiment rowData
+#' 
 mod_pipe_protein_Filtering_server <- function(input, output, session, obj){
   ns <- session$ns
  
@@ -213,27 +218,27 @@ callModule(mod_popover_for_help_server,
       i <- length(names(rv.filter$dataIn))
       
      #browser()
-      rv.filter$dataIn <- MVrowsTagToOne(object =rv.filter$dataIn, 
+      rv.filter$dataIn <- DAPAR2::MVrowsTagToOne(object =rv.filter$dataIn, 
                                          type = rv.filter$widgets$ChooseFilters, 
                                          th = as.integer(rv.filter$widgets$seuilNA), 
                                          percent = FALSE)
       
       ## keep rows where tagNA==0
-      na_filter <- VariableFilter(field = "tagNA", value = "0", condition = "==")
+      na_filter <- QFeatures::VariableFilter(field = "tagNA", value = "0", condition = "==")
       
       rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
                                                     i = i, 
                                                     name = paste0('na_filter_',i), 
                                                     filter=na_filter)
       i <- i +1
-      rv.filter$dataIn <- removeAdditionalCol(rv.filter$dataIn, "tagNA")
+      rv.filter$dataIn <- DAPAR2::removeAdditionalCol(rv.filter$dataIn, "tagNA")
       key <- metadata(rv.filter$dataIn)$keyId
       
       # rv.filter$dataIn <- addAssayLink(rv.filter$dataIn, from = from, to = to, varFrom = key, varTo = key)
        
       ## keep track of deleted rows
-      rv.filter$deleted.mvLines <- setdiff(rowData(rv.filter$dataIn[[i-1]])[,metadata(rv.filter$dataIn)$keyId], 
-                                           rowData(rv.filter$dataIn[[i]])[,metadata(rv.filter$dataIn)$keyId])
+      rv.filter$deleted.mvLines <- setdiff(SummarizedExperiment::rowData(rv.filter$dataIn[[i-1]])[,metadata(rv.filter$dataIn)$keyId], 
+                                           SummarizedExperiment::rowData(rv.filter$dataIn[[i]])[,metadata(rv.filter$dataIn)$keyId])
 
       #browser()
       # i <- length(names(rv.filter$dataIn))
@@ -277,7 +282,7 @@ callModule(mod_popover_for_help_server,
   
   observeEvent(input$btn_remove_naFilter, ignoreInit = TRUE,{
     rv.filter$dataIn
-    browser()
+    #browser()
     ind <- grep('na_filter_', names(rv.filter$dataIn))
     if (length(ind) >= 1){
       rv.filter$dataIn <- rv.filter$dataIn[ ,  , -ind[length(ind)]]
@@ -346,7 +351,7 @@ callModule(mod_popover_for_help_server,
     req(rv.filter$dataIn)
     if (length(experiments(rv.filter$dataIn)) == 0){ return(NULL)}
     
-    choice_field <- c("None",colnames(rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])))
+    choice_field <- c("None",colnames(SummarizedExperiment::rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])))
 
       tagList(
       h4("Build the filter for the data you want to keep"),
@@ -401,7 +406,7 @@ callModule(mod_popover_for_help_server,
     character_operators <- c( '==' = '==',
                              '!=' = '!=')
      
-   vec <- rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
+   vec <- SummarizedExperiment::rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
    if (is.numeric(vec))
       operators <- numeric_operators
     else if (is.character(vec))
@@ -455,13 +460,13 @@ callModule(mod_popover_for_help_server,
   observeEvent(input$btn_perform_fieldFilter,ignoreInit=TRUE,{
     req(rv.filter$widgets$fieldName)
     if (rv.filter$widgets$fieldName == 'None'){return(NULL)}
-    req(rowData(rv.filter$dataIn[[length(names(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
+    req(SummarizedExperiment::rowData(rv.filter$dataIn[[length(names(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
     
    # browser()
     
     i <- length(experiments(rv.filter$dataIn))
     if (rv.filter$widgets$fieldFilter_value %in% c('', 'None')){return(NULL)}
-    vec <- rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
+    vec <- SummarizedExperiment::rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
     if(is.numeric(vec)) 
       if(is.na(as.numeric(rv.filter$widgets$fieldFilter_value)))
         return(NULL)
@@ -471,12 +476,12 @@ callModule(mod_popover_for_help_server,
     
     field_filter <- NULL
     if (is.numeric(vec)){
-      field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
+      field_filter <- QFeatures::VariableFilter(field = rv.filter$widgets$fieldName, 
                                      value = as.numeric(rv.filter$widgets$fieldFilter_value), 
                                      condition = rv.filter$widgets$operator)
     } else { 
       if (is.character(vec))
-        field_filter <- VariableFilter(field = rv.filter$widgets$fieldName, 
+        field_filter <- QFeatures::VariableFilter(field = rv.filter$widgets$fieldName, 
                                        value = as.character(rv.filter$widgets$fieldFilter_value), 
                                        condition = rv.filter$widgets$operator)
     }
@@ -550,14 +555,17 @@ callModule(mod_popover_for_help_server,
   
   
   observeEvent(input$ValidateFilters,ignoreInit = TRUE,{ 
-     #browser()
+    
       #get indices of temporary SE
       ind <- grep('_filter_', names(rv.filter$dataIn))
-      ind <- ind[-length(ind)]
-      rv.filter$dataIn <- rv.filter$dataIn[ , ,-ind]
-      names(rv.filter$dataIn)[length(names(rv.filter$dataIn))] <- 'filtered'
+      if (length(ind)>1){
+        ind <- ind[-length(ind)]
+        rv.filter$dataIn <- rv.filter$dataIn[ , ,-ind]
+      }
+      ind <- grep('_filter_', names(rv.filter$dataIn))
+      names(rv.filter$dataIn)[ind] <- 'filtered'
       rv.filter$dataOut <- rv.filter$dataIn
-      
+
       r.nav$isDone[3] <- TRUE
   })
   

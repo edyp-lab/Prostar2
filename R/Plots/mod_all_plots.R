@@ -90,7 +90,7 @@ mod_all_plots_ui <- function(id){
 #' all_plots Server Function
 #'
 #' @noRd 
-mod_all_plots_server <- function(input, output, session, dataIn, settings){
+mod_all_plots_server <- function(input, output, session, dataIn, indice, settings){
   ns <- session$ns
   
   .width <- .height <- 40
@@ -171,6 +171,7 @@ mod_all_plots_server <- function(input, output, session, dataIn, settings){
     }
     selectInput(ns('chooseDataset'), 'Dataset',
                 choices = choices,
+                selected = names(dataIn())[indice()],
                 width=150)
   })
   

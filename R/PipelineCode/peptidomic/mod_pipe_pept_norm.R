@@ -24,6 +24,9 @@ mod_pipe_pept_norm_ui <- function(id){
 #' 
 #' @param samplesTab
 #' 
+#' @importFrom DAPAR2 normalizeD
+#' @importFrom SummarizedExperiment rowData
+#' 
 mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
   ns <- session$ns
   
@@ -341,7 +344,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
     print('in GetIndicesOfSelectedProteins')
     print(rv.norm$trackFromBoxplot())
     ind <- NULL
-    ll <- rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
+    ll <- SummarizedExperiment::rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
     tt <- rv.norm$trackFromBoxplot()$type
     switch(tt,
            ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
@@ -374,7 +377,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
            None = rv.norm$dataIn <- obj(),
            
            GlobalQuantileAlignment = {
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i,
                                           name = "peptides_norm",
                                           method='GlobalQuantileAlignment'
@@ -386,7 +389,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
              if (!is.null(rv.norm$widgets$quantile))
                quant <- as.numeric(rv.norm$widgets$quantile)
              
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn, 
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn, 
                                           i = rv.norm$i, 
                                           name = "peptides_norm",
                                           method = 'QuantileCentering', 
@@ -399,7 +402,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
            } ,
            
            MeanCentering = {
-             rv.norm$dataIn <- normalizeD(object =rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object =rv.norm$dataIn,
                                           i = rv.norm$i, 
                                           name ="peptides_norm",
                                           method = 'MeanCentering', 
@@ -411,7 +414,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
            }, 
            
            SumByColumns = {
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i,
                                           name = "peptides_norm",
                                           method = 'SumByColumns', 
@@ -422,7 +425,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
            },
            
            LOESS = { 
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i,
                                           name = "peptides_norm",
                                           method = 'LOESS', 
@@ -433,7 +436,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
            },
            
            vsn = {
-             rv.norm$dataIn <- normalizeD(object = rv.norm$dataIn,
+             rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
                                           i = rv.norm$i, 
                                           name = "peptides_norm",
                                           method = 'vsn', 

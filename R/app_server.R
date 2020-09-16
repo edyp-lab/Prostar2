@@ -11,13 +11,6 @@ lapply(list.files('R/DataManager/', pattern='.R'),
 lapply(list.files('R/Plots/', pattern='.R'), 
        function(x) {source(file.path('R/Plots', x), local=TRUE)$value })
 
-#source(file.path('R/Plots', 'mod_homepage.R'), local=TRUE)$value
-#files <- list.files('R/DataManager', pattern='.R')
-# files <- files[-which(files=='app_server.R')]
-# files <- files[-which(files=='app_ui.R')]
-# 
-# for (f in files)
-#   source(file.path('R',f), local=TRUE)$value
 
 #' @import shiny
 #' @importFrom shinyjs hide show
@@ -101,7 +94,8 @@ app_server <- function(input, output,session) {
   
   # Update several reactive variable once a dataset is loaded
   setCoreRV <- reactive({
-    rv.core$current.indice <- 1
+    # We begins with the last SE in the QFeatures dataset
+    rv.core$current.indice <- length(names(rv.core$current.obj))
     rv.core$current.pipeline <- metadata(rv.core$current.obj)$pipelineType
   })
   
@@ -110,12 +104,7 @@ app_server <- function(input, output,session) {
   rv.core$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
   
   
-  callModule(mod_all_plots_server, 'modAllPlots', 
-             dataIn = reactive({
-               req(rv.core$current.obj)
-               rv.core$current.obj
-             }),
-             settings = reactive({rv.core$settings()}))
+  
   
   
   callModule(mod_infos_dataset_server, 
@@ -134,7 +123,15 @@ app_server <- function(input, output,session) {
              })
   )
   
+  rv.core$tmp_indice <- callModule(mod_change_assay_server, 
+             'change_assay', 
+             ll.se = reactive({names(rv.core$current.obj)}),
+             indice = reactive({rv.core$current.indice})
+  )
   
+  observeEvent(rv.core$tmp_indice(),{
+    rv.core$current.indice <- rv.core$tmp_indice()
+  })
 
    
    callModule(mod_homepage_server, "homepage")
@@ -146,72 +143,139 @@ app_server <- function(input, output,session) {
    callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
    
   
-   
-   
-   
-   
-   
-   
    #Once the type of pipeline is known (ie a dataset has been loaded),
    #call the server parts of the processing modules that belongs
    # to this pipeline
    observeEvent(req(rv.core$current.pipeline), {
      
+     Build_DataMining_Menu()
+     Build_DataProcessing_Menu()
+   })
+   
+   
+
+   # Builds the menu for data mining tools. This menu is dependent of the type of dataset.
+   # This is why it is built dynamically
+   Build_DataMining_Menu <- reactive({
+    req(rv.core$current.obj)
+     
+     callModule(mod_all_plots_server, 'modAllPlots', 
+                dataIn = reactive({
+                  req(rv.core$current.obj)
+                  rv.core$current.obj
+                }),
+                indice = reactive({rv.core$current.indice}),
+                settings = reactive({rv.core$settings()}))
+     
+     # Default item is Descriptive statistics for every pipeline
+     tabs <- list(
+       tabPanel("Descriptive statistics", value='descriptiveStats', mod_all_plots_ui('modAllPlots'))
+     )
+     
+     
+      if (metadata(rv.core$current.obj)$pipelineType == 'peptide'){
+     # callModule(module = mod_graph_pept_prot_server, "CC_Multi_Any",
+     #            obj = reactive({rv.core$current.obj})
+     #             )
+     # 
+     # 
+     #   tabs <- append(tabs,
+     #                tabPanel("Graph pept-prot", value='graphCC', mod_graph_pept_prot_ui('CC_Multi_Any'))
+     #                )
+      }
+     
+     # Add the data mining tab to the header menu of Prostar
+     insertTab(inputId = "navPage",
+               do.call(navbarMenu, c('Data mining' ,tabs)),
+               target="Data manager",
+               position="after")
+   })
+   
+   
+   
+   ## Builds the menu for data processing tools
+   Build_DataProcessing_Menu <- reactive({
+     req(rv.core$current.pipeline)
+     
      ## Get list des process du pipeline
      proc <- pipeline.defs[[rv.core$current.pipeline]]
      dir <- paste0('R/PipelineCode/',rv.core$current.pipeline)
+   
+     process.files <- paste0('mod_pipe_',rv.core$current.pipeline, '_', proc, '.R')
      
-     process.files <- list.files(dir)[grep('mod_pipe', list.files(dir))]
      ## Use here a for loop instead of a lapply, otherwise the functions are not
-     ## correctly instanciated in environnment
+     ## correctly instantiated in environment
+     #Get all code for processing tools
      for (f in process.files)
-      source(file.path(dir, f), local=T)
-       
-     watchcode.files <- list.files(dir)[grep('watch_', list.files(dir))]
-     for (f in watchcode.files)
-       source(file.path(dir, f), local=T)
+       source(file.path(dir, f), local = T)
      
-     # BuildSidebarMenu()
-     # # Load UI code for modules
-     # rvNav$Done = rep(FALSE,length(def))
-     # rvNav$def = list(name = type.pipeline,
-     #                  stepsNames = def,
-     #                  isMandatory = rep(TRUE,length(def)),
-     #                  ll.UI = LoadModulesUI(def)
-     #                  )
-     # 
-     # pipeline$current.indice <- 1
-     # pipeline$current.obj <- obj.openDataset()
-     # 
-     # ## Lancement du module de navigation du pipeline pour suivre les différents process
-     # ## de traitement liés au pipeline
-     # pipeline$nav2 <- callModule(moduleNavigation2, "moduleGeneral",
-     #                             isDone = reactive({rvNav$Done}),
-     #                             pages = reactive({rvNav$def}),
-     #                             rstFunc = resetNavPipeline,
-     #                             type = reactive({'rectangle'})
-     #                             )
-     #BuildDataminingMenu("Data mining")
+     # Loads all server parts of the processing modules
+     watchcode.files <- paste0('watch_pipe_',rv.core$current.pipeline, '_', proc, '.R')
+     for (f in watchcode.files)
+       source(file.path(dir, f), local = T)
+     
+     ll.modules <- paste0('mod_pipe_', rv.core$current.pipeline, '_', proc)
+     
+     tabs <- lapply(proc, function(x){
+       do.call(tabPanel, list(title=x,
+                              value=x,
+                              do.call(paste0('mod_pipe_', rv.core$current.pipeline, '_', x, '_ui'), 
+                                      list(paste0('mod_pipe_', rv.core$current.pipeline, '_', x)))
+                              )
+               )
+     })
+     
+     # Add the data mining tab to the header menu of Prostar
+     insertTab(inputId = "navPage",
+               do.call(navbarMenu, c('Data processing' ,tabs)),
+               target="Data manager",
+               position="after")
    })
    
    
    
    
-   # 
-   # LoadModulesUI <- function(ll.modules){
-   #   ll <- lapply(ll.modules, function(i) {
-   #     UIfunc <- paste0(i, "UI")
-   #     do.call(UIfunc, list(i))
-   #   })
-   #   
-   #   return(ll)
+   
+   
+   
+   
+   
+   
+   
+   
+   # DeleteDatasetsAfter <- function(txt){
+   #   names <- names(rv.core$current.obj@datasets)
+   #   indice <- which(names == txt)
+   #   if (indice < length(names)) {
+   #     for (i in (indice+1):length(names)){
+   #       rv.core$current.obj@datasets[i] <- list(NULL)
+   #     }
+   #   }
    # }
    
+   # 
+   
+   #     
    
    
    
    
-  
+   
+   # GetScreenId <- reactive({
+   #   input$navPage
+   #   req(rv.core$current.obj)
+   #   
+   #   screen <- NULL
+   #   m <-  which(names(rv.core$current.obj@datasets)==input$navPage)
+   #   n <-  which(unlist(lapply(GetCurrentMSnSet(), function(x) length(which(x==rv.core$current.obj@datasets))))==1)
+   #   ## test if the navPage is one of a process one
+   #   if (length(m) ==0 || length(n) ==0) {return(NULL)}
+   #   
+   #   if (m >= n) { screen <- 'Initial screen'}
+   #   else {screen <- 'Final screen'}
+   #   print(paste0("in GetScreenId(), n = ", n, ", m = ", m, ". screen = ", screen))
+   #   screen
+   # })
    
    
    

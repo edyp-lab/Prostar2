@@ -66,12 +66,15 @@ tagList(
                                                        tags$strong('Test')),
                            tags$head(tags$style('.headerrow{height:10vh;}'))
                            ),
+                mod_change_assay_ui('change_assay'),
                   fluidPage(
                     navbarPage("Prostar",
                     position = "fixed-top",
                     id = "navPage",
                     inverse = FALSE,
 
+                    
+                    
                     #modulePlotsUI('showPlots')
                     navbarMenu("Prostar",
                                tabPanel(title="Home",
@@ -103,9 +106,9 @@ tagList(
                                          actionButton("ReloadProstar", "Reload Prostar",class = actionBtnClass)
                                           )
                     ),
-                    navbarMenu("Data processing",
-                               tabPanel("Descriptive statistics", value='descriptiveStats', mod_all_plots_ui('modAllPlots'))
-                    ),
+                    # navbarMenu("Data mining",
+                    #            tabPanel("Descriptive statistics", value='descriptiveStats', mod_all_plots_ui('modAllPlots'))
+                    # ),
                     navbarMenu("Help",
                                tabPanel("Links",value="usefulLinksTab",  mod_insert_md_ui('links_MD')),
                                tabPanel("FAQ", value="faqTab",  mod_insert_md_ui('FAQ_MD')),

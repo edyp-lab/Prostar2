@@ -8,6 +8,8 @@
 #'
 #' @importFrom shiny NS tagList
 #' @import shinyjs
+#' @import DAPAR2
+#' @import QFeatures filterFeatures addAssay VariableFilter
 #' 
 mod_pipe_pept_filter_ui <- function(id){
   ns <- NS(id)
@@ -211,22 +213,22 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
       
       # create a duplicate of the last assay
       i <- length(names(rv.filter$dataIn))
-      rv.filter$dataIn <-addAssay(rv.filter$dataIn, 
+      rv.filter$dataIn <- QFeatures::addAssay(rv.filter$dataIn, 
                                   rv.filter$dataIn[[i]],
                                   paste0('na_filtered_', i)
       )
       i <- i + 1
       #browser()
-      rv.filter$dataIn <- MVrowsTagToOne(object =rv.filter$dataIn, 
+      rv.filter$dataIn <- DAPAR2::MVrowsTagToOne(object =rv.filter$dataIn, 
                                          type = rv.filter$widgets$ChooseFilters, 
                                          th = as.integer(rv.filter$widgets$seuilNA), 
                                          percent = FALSE)
       
       ## keep rows where tagNA==0
-      na_filter <- VariableFilter(field = "tagNA", value = "0", condition = "==")
+      na_filter <- QFeatures::VariableFilter(field = "tagNA", value = "0", condition = "==")
       
-      rv.filter$dataIn <- filterFeatures(rv.filter$dataIn, na_filter)
-      rv.filter$dataIn <- removeAdditionalCol(rv.filter$dataIn, "tagNA")
+      rv.filter$dataIn <- QFeatures::filterFeatures(rv.filter$dataIn, na_filter)
+      rv.filter$dataIn <- DAPAR2::removeAdditionalCol(rv.filter$dataIn, "tagNA")
       key <- metadata(rv.filter$dataIn)$keyId
       from <- i -1
       to <- i
@@ -273,7 +275,7 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
     req(rv.filter$widgets$ChooseFilters)
     
     if ((rv.filter$widgets$ChooseFilters=="None") || (rv.filter$widgets$ChooseFilters==gFilterEmptyLines)) {return(NULL)   }
-    choice <- getListNbValuesInLines(obj = rv.filter$dataIn, 
+    choice <- DAPAR2::getListNbValuesInLines(obj = rv.filter$dataIn, 
                                      i = rv.filter$i, 
                                      type = rv.filter$widgets$ChooseFilters)
     tagList(
@@ -455,7 +457,7 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
     tagValue <- rv.filter$widgets$fieldFilter_value
     
     # create a duplicate of the last assay
-    rv.filter$tmp <-addAssay(rv.filter$tmp, 
+    rv.filter$tmp <- addAssay(rv.filter$tmp, 
                              rv.filter$tmp[[rv.filter$i]],
                              paste0('field_filtered_', rv.filter$i)
     )
@@ -502,7 +504,7 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
     #rv.filter$dataIn <- obj()
     
     
-    rv.filter$dataIn <- addAssay(rv.filter$dataIn,
+    rv.filter$dataIn <- QFeatures::addAssay(rv.filter$dataIn,
                                  rv.filter$tmp[[length(names(rv.filter$tmp))]],
                                  paste0('field_filtered_',length(names(rv.filter$tmp)))
     )
@@ -560,15 +562,15 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
   observeEvent(input$ValidateFilters,ignoreInit = TRUE,{ 
     
     isolate({
-      browser()
+      #browser()
       rv.filter$dataOut <- obj()
-      rv.filter$dataOut <- addAssay(obj(),
+      rv.filter$dataOut <- QFeatures::addAssay(obj(),
                                     rv.filter$dataIn[[length(names(rv.filter$dataIn))]],
                                     'filtered')
       
       if (!is.null(metadata(rv.filter$dataOut)$parentProtId)){
-        rv.filter$dataOut <- addListAdjacencyMatrices(rv.filter$dataOut, length(names(rv.filter$dataOut)))
-        rv.filter$dataOut <- addConnexComp(rv.filter$dataOut, length(names(rv.filter$dataOut)))
+        rv.filter$dataOut <- DAPAR2::addListAdjacencyMatrices(rv.filter$dataOut, length(names(rv.filter$dataOut)))
+        rv.filter$dataOut <- DAPAR2::addConnexComp(rv.filter$dataOut, length(names(rv.filter$dataOut)))
       } else {
         
       }
