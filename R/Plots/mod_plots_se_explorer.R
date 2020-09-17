@@ -45,7 +45,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- S4Vectors::metadata(obj())[['typeOfData']]
+    typeOfDataset <- metadata(obj())[['typeOfData']]
     
     .choices<- NULL
     

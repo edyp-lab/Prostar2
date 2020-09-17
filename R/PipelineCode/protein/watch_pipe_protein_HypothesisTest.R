@@ -8,7 +8,5 @@ Watch_mod_pipe_protein_HypothesisTest <- callModule(module=mod_pipe_protein_Hypo
 
 
 observeEvent(req(Watch_mod_pipe_protein_HypothesisTest()),{
-  
   rv.core$current.obj <- WatchmoduleProtHypothesisTest()
-  Update_QF_indice()
 })

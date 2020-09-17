@@ -7,7 +7,6 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList
-#' @importFrom SummarizedExperiment assay
 #' 
 mod_pipe_protein_Imputation_ui <- function(id){
   ns <- NS(id)

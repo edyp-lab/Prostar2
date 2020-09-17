@@ -9,7 +9,5 @@ Watch_mod_pipe_protein_Imputation <- callModule(module=mod_pipe_protein_Imputati
 
 
 observeEvent(req(Watch_mod_pipe_protein_Imputation()),{
-  
   rv.core$current.obj <- Watch_mod_pipe_protein_Imputation()
-  Update_QF_indice()
 })

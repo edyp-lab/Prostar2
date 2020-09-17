@@ -105,7 +105,7 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   output$linktoDemoPdf <- renderUI({
     req(input$demoDataset)
     
-    # file<- paste(system.file(package = "DAPARdata"),"/doc/",
+    # file<- paste(system.file(package = "DAPARdata2"),"/doc/",
     #              input$demoDataset,".pdf", sep="")
     # cmd <- paste("cp ",file," www", sep="")
     # system(cmd)

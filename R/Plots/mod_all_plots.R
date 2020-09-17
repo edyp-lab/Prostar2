@@ -107,14 +107,14 @@ mod_all_plots_server <- function(input, output, session, dataIn, indice, setting
   
   callModule(mod_plots_se_explorer_server, 'plot_quanti_large',
              obj = reactive({rv$current.obj}),
-             originOfValues = reactive({ S4Vectors::metadata(dataIn())[['OriginOfValues']] }),
+             originOfValues = reactive({ metadata(dataIn())[['OriginOfValues']] }),
              colData = reactive({ SummarizedExperiment::colData(dataIn()) })
   )
   
 
   callModule(module=mod_plots_intensity_server, 'plot_intensity_large',
              dataIn=reactive({rv$current.obj}),
-             meta = reactive({ S4Vectors::metadata(dataIn()) }),
+             meta = reactive({ metadata(dataIn()) }),
              conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] }),
              params = reactive({NULL}),
              reset = reactive({FALSE}),

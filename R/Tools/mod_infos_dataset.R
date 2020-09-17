@@ -52,7 +52,6 @@ mod_infos_dataset_ui <- function(id){
 #' @keywords internal
 #' 
 #' @importFrom MultiAssayExperiment experiments colData
-#' @import S4Vectors
 #' @importFrom tibble as_tibble
 #' 
 mod_infos_dataset_server <- function(input, output, session, obj){

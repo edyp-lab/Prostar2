@@ -15,6 +15,7 @@ library(shinyjs)
 library(DAPAR2)
 library(DT)
 library(tibble)
+library(shinyalert)
 
 
 options(shiny.fullstacktrace = FALSE)
@@ -22,7 +23,8 @@ options(shiny.fullstacktrace = FALSE)
 
 ui <- fluidPage(
   tagList(
-    mod_pipe_protein_Filtering_ui('pipe_filter'),
+    selectInput('n_assay', 'Assay', choices = 1:2),
+  mod_pipe_protein_Filtering_ui('pipe_filter'),
     mod_infos_dataset_ui('infos')
   )
 )
@@ -37,22 +39,14 @@ server <- function(input, output, session) {
     current.obj = Exp1_R25_prot
   )
   
-  
-  # output$test <- renderHighchart({
-  #   
-  #   utils::data(Exp1_R25_pept, package='DAPARdata2')
-  #   obj <- Exp1_R25_pept[1:1000,]
-  #   conds <- colData(obj)[["Condition"]]
-  #   obj <- normalizeD(obj, 2, name='norm', method='SumByColumns', conds=conds, type='overall')
-  #   compareNormalizationD_HC(assay(obj, 2), assay(obj, 3), conds=conds, palette=NULL)
-  # 
-  # })
-  # 
+
   
   rv$ret <- callModule(mod_pipe_protein_Filtering_server,
                        'pipe_filter',
                        obj = reactive({rv$current.obj}),
-                       indice = reactive({2}))
+                       indice = reactive({as.numeric(input$n_assay)
+                         })
+                       )
   
   callModule(mod_infos_dataset_server,'infos',
              obj = reactive({rv$current.obj}))
