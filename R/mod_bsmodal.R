@@ -12,7 +12,8 @@ mod_bsmodal_ui <- function(id){
 
 mod_bsmodal_server <- function(input, output, session,
                                title=NULL,
-                               mod_UI=NULL, width=NULL){ #height auto
+                               mod_UI=NULL, 
+                               width=NULL){ #height auto
   ns <- session$ns
   
   jqui_resizable(paste0("#",ns("fenetre")," .modal-content")
@@ -42,7 +43,6 @@ mod_bsmodal_server <- function(input, output, session,
     tagList(
       mod_UI  
     )
-    
   })
   
 }

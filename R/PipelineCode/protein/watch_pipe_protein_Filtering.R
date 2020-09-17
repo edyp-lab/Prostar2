@@ -1,24 +1,14 @@
-########
-#### Watch code#####
 
-### Pour le module Filtering, comme on doit également mettre a jour la matrice d'adjacence et les composantes
-### connexes, on les donne en parametre du module
-####################
 Watch_mod_pipe_protein_Filtering <- callModule(mod_pipe_protein_Filtering_server,
                                                'mod_pipe_protein_Filtering',  
-                                                obj = reactive({rv.core$current.obj})
+                                                obj = reactive({rv.core$current.obj}),
+                                                indice = reactive({rv.core$current.indice})
                                        )
 
 
 
 
 observeEvent(req(Watch_mod_pipe_protein_Filtering()),{
-  cat('In observeEvent(req(Watch_mod_pipe_protein_Filtering())')
-  
   rv.core$current.obj <- Watch_mod_pipe_protein_Filtering()
-  
-  ## doit avoir le meme nom que celui qui est indique dans la definition des modules pour le pipeline
-  ## (fichier pipelineDefinition.R)
-  rv.core$current.indice <- length(names(rv.core$current.obj))
-  #DeleteDatasetsAfter('moduleProteinFiltering')
+  Update_QF_indice()
 })

@@ -14,7 +14,7 @@ mod_change_assay_ui <- function(id){
      # id  = "#AbsolutePanel",
       #class = "panel panel-default",
       style= "text-align: center; z-index: 10000;",
-      top = 30, 
+      top = 0, 
       right = 50, 
       width = "250px",
       height = "50px",

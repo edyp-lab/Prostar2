@@ -20,7 +20,7 @@ mod_pipe_protein_Imputation_ui <- function(id){
 #' pipe_prot_impute Server Function
 #'
 #' @noRd 
-mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
+mod_pipe_protein_Imputation_server <- function(input, output, session, obj, indice){
   ns <- session$ns
  
   
@@ -82,7 +82,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
     ## do not modify this part
     rv.impute$dataIn <- obj()
     rv.impute$dataOut <- NULL
-    rv.impute$i <- length(names(obj()))
+    rv.impute$i <- indice()
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     ## end of no modifiable part
@@ -114,7 +114,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
   
   callModule(mod_plots_mv_for_imputation_server,"mvImputationPlots_MV", 
              obj = reactive({obj()}),
-             ind = reactive({length(names(obj()))}),
+             ind = reactive({rv.impute$i}),
              title = reactive({"POV distribution"}),
              palette = reactive({rv.impute$settings()$basePalette}))
   
@@ -132,15 +132,14 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
 
   callModule(mod_det_quant_impute_Values_server, "POV_DetQuantValues_DT", 
              qData = reactive({req(rv.impute$dataIn)
-  
-               SummarizedExperiment::assay(rv.impute$dataIn[[length(names(rv.impute$dataIn))]])
+                                SummarizedExperiment::assay(rv.impute$dataIn[[rv.impute$i]])
                                    }),
              quant = reactive({rv.impute$widgets$POV_detQuant_quantile}), 
              factor = reactive({rv.impute$widgets$POV_detQuant_factor}))
   
   callModule(mod_det_quant_impute_Values_server, "MEC_DetQuantValues_DT", 
              qData = reactive({req(rv.impute$dataIn)
-                              SummarizedExperiment::assay(rv.impute$dataIn[[length(names(rv.impute$dataIn))]])
+                              SummarizedExperiment::assay(rv.impute$dataIn[[rv.impute$i]])
                               }),
              quant = reactive({rv.impute$widgets$MEC_detQuant_quantile}), 
              factor = reactive({rv.impute$widgets$MEC_detQuant_factor}))
@@ -151,7 +150,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
   observeEvent(obj(),{
     cat('initialisation of rv.impute$dataIn')
     rv.impute$dataIn <- obj()
-   # rv.impute$i <- length(names(obj()))
+    rv.impute$i <- indice()
     rv.impute$imputePlotsSteps$step0 <- obj()
   })
   
@@ -213,7 +212,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
   
   observeEvent(input$perform.imputationClassical.button,{
 
-      nbMV_Before <- length(which(is.na(assay(rv.impute$dataIn, length(names(rv.impute$dataIn))))))
+      nbMV_Before <- length(which(is.na(assay(rv.impute$dataIn, rv.impute$i))))
       
       withProgress(message = '',detail = '', value = 0, {
         
@@ -223,14 +222,14 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
         switch(rv.impute$widgets$POV_algorithm,
                slsa = {
                  rv.impute$dataIn <- impute_dapar(object = rv.impute$dataIn,
-                                                  i = length(names(rv.impute$dataIn)),
+                                                  i = rv.impute$i,
                                                   name = 'POV_impute',
                                                   method = 'POV_slsa',
                                                   sampleTab = colData(rv.impute$dataIn))
                  },
                detQuantile = {
                  rv.impute$dataIn <- impute_dapar(object = rv.impute$dataIn,
-                                                  i = length(names(rv.impute$dataIn)),
+                                                  i = rv.impute$i,
                                                   name = 'POV_impute',
                                                   method = 'POV_det_quant',
                                                   conds = colData(rv.impute$dataIn)$Condition,
@@ -239,7 +238,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
                  },
                KNN = {
                  rv.impute$dataIn <- impute_dapar(object = rv.impute$dataIn,
-                                                  i =  length(names(rv.impute$dataIn)),
+                                                  i =  rv.impute$i,
                                                   name = 'POV_impute',
                                                   method = 'POV_knn_by_conds',
                                                   conds = colData(rv.impute$dataIn)$Condition,
@@ -248,8 +247,8 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
         )
         
         incProgress(1, detail = 'Finalize POV imputation')
-        #rv.impute$i <- length(names(rv.impute$dataIn))
-        nbMV_After <- length(which(is.na(assay(rv.impute$dataIn, length(names(rv.impute$dataIn))))))
+        rv.impute$i <- length(names(rv.impute$dataIn))
+        nbMV_After <- length(which(is.na(assay(rv.impute$dataIn, rv.impute$i))))
         rv.impute$nb_POV_imputed <-  nbMV_Before - nbMV_After
         
         rv.impute$imputePlotsSteps$step1 <- rv.impute$dataIn
@@ -407,12 +406,12 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
       withProgress(message = '',detail = '', value = 0, {
         #rv.impute$dataIn <- reIntroduceMEC(rv.impute$dataIn, rv.impute$MECIndex)
         
-        nbMV_Before <- length(which(is.na(assay(rv.impute$dataIn, length(names(rv.impute$dataIn))))))
+        nbMV_Before <- length(which(is.na(assay(rv.impute$dataIn, rv.impute$i))))
         incProgress(0.75, detail = 'MEC Imputation')
         switch(rv.impute$widgets$MEC_algorithm,
                detQuantile = {
                  rv.impute$dataIn <- impute_dapar(object = rv.impute$dataIn , 
-                                                  i = length(names(rv.impute$dataIn)),
+                                                  i = rv.impute$i,
                                                   name = 'MEC_impute',
                                                   method = 'det_quant',
                                                   qval = rv.impute$widgets$MEC_detQuant_quantile/100,
@@ -421,7 +420,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
                },
                fixedValue = {
                  rv.impute$dataIn <- impute_dapar(object = rv.impute$dataIn,
-                                                  i = length(names(rv.impute$dataIn)),
+                                                  i = rv.impute$i,
                                                   name = 'MEC_impute',
                                                   method = 'fixed_val',
                                                   value = rv.impute$widgets$MEC_fixedValue
@@ -429,8 +428,8 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
                }
         )
         
-        #rv.impute$i <- length(names(rv.impute$dataIn))
-        nbMV_After <- length(which(is.na(assay(rv.impute$dataIn , length(names(rv.impute$dataIn))))))
+        rv.impute$i <- length(names(rv.impute$dataIn))
+        nbMV_After <- length(which(is.na(assay(rv.impute$dataIn , rv.impute$i))))
         rv.impute$nb_MEC_imputed <-  nbMV_Before - nbMV_After
         
         incProgress(1, detail = 'Finalize MEC imputation')
@@ -534,9 +533,9 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj){
         txt <- lapply(ind, function(x){metadata(rv.impute$dataIn[[x]])$Params})
         ind <- ind[-length(ind)]
         rv.impute$dataIn <- rv.impute$dataIn[ , ,-ind]
-        metadata(rv.impute$dataIn[[length(names(rv.impute$dataIn))]])$Params <- txt
+        metadata(rv.impute$dataIn[[rv.impute$i]])$Params <- txt
       } else if (length(ind)==1){
-        names(rv.impute$dataIn)[length(names(rv.impute$dataIn))] <- 'impute'
+        names(rv.impute$dataIn)[rv.impute$i] <- 'impute'
       }
       
       rv.impute$dataOut <- rv.impute$dataIn

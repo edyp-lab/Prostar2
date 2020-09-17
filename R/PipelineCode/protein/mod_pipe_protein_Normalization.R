@@ -28,10 +28,10 @@ mod_pipe_protein_Normalization_ui <- function(id){
 #' 
 #' @param ind xxx
 #' 
-#' @importFrom DAPAR2 noramlizeD compareNormalizationD_HC
-#' @importFrom SummarizedExperiment rowData
+#' @importFrom DAPAR2 normalizeD compareNormalizationD_HC
+#' @importFrom SummarizedExperiment rowData assay
 #' 
-mod_pipe_protein_Normalization_server <- function(input, output, session, obj, ind){
+mod_pipe_protein_Normalization_server <- function(input, output, session, obj, indice){
   ns <- session$ns
   
   
@@ -89,7 +89,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     rv.norm$sync <- FALSE
     
     rv.norm$dataIn <- obj()
-    rv.norm$i <- ind()
+    rv.norm$i <- indice()
     
     ## do not modify this part
     r.nav$isDone <- rep(FALSE, 2)
@@ -165,7 +165,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     ## instanciation of the RV in the module with parameters
     req(obj())
     rv.norm$dataIn <- obj()
-    rv.norm$i <- ind()
+    rv.norm$i <- indice()
   })
   
   
@@ -381,7 +381,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     
     ## the dataset whihc will be normalized is always the original one
     rv.norm$dataIn <- obj()
-    rv.norm$i <- ind()
+    rv.norm$i <- indice()
     
     switch(rv.norm$widgets$method, 
            None = rv.norm$dataIn <- obj(),
@@ -456,7 +456,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     )
     # })
     
-    rv.norm$i <- ind() + 1
+    rv.norm$i <- indice() + 1
     r.nav$isDone[1] <- TRUE
     #shinyjs::hide("perform.normalization")
   })
@@ -475,8 +475,8 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     GetIndicesOfSelectedProteins()
     print(GetIndicesOfSelectedProteins())
     
-    hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = assay(obj()[[ind()]]),
-                                           qDataAfter = assay(rv.norm$dataIn[[rv.norm$i]]),
+    hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = SummarizedExperiment::assay(obj()[[indice()]]),
+                                           qDataAfter = SummarizedExperiment::assay(rv.norm$dataIn[[rv.norm$i]]),
                                            conds= colData(obj())$Condition,
                                            palette = rv.norm$settings()$basePalette,
                                            subset.view= GetIndicesOfSelectedProteins(),

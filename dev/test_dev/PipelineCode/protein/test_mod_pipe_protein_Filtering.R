@@ -51,8 +51,8 @@ server <- function(input, output, session) {
   
   rv$ret <- callModule(mod_pipe_protein_Filtering_server,
                        'pipe_filter',
-                       obj = reactive({rv$current.obj})
-                       )
+                       obj = reactive({rv$current.obj}),
+                       indice = reactive({2}))
   
   callModule(mod_infos_dataset_server,'infos',
              obj = reactive({rv$current.obj}))

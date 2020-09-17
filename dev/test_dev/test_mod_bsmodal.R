@@ -40,24 +40,12 @@ server <- function(input, output, session) {
   
   
   datasets <- utils::data(package="DAPARdata2")$results[,"Item"]
-  data('Exp1_R25_pept')
   data('Exp1_R25_prot')
   
   r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
   
-  
-  obj <- Exp1_R25_pept
-  samples <- Biobase::pData(obj)
-  mae <- PipelineProtein(analysis= 'test',
-                         pipelineType = 'peptide', 
-                         dataType = 'peptide',
-                         processes='original',
-                         experiments=list(original=Exp1_R25_prot,
-                                          test = Exp1_R25_pept),
-                         colData=samples)
-  
   callModule(mod_all_plots_server,'exemple_plot',
-             dataIn = reactive({mae}),
+             dataIn = reactive({Exp1_R25_prot}),
              settings = reactive({r$settings()}) ) 
   
   

@@ -24,7 +24,7 @@ mod_pipe_protein_HypothesisTest_ui <- function(id){
 #' 
 #' @param ind
 #' 
-mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, ind){
+mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, indice){
   ns <- session$ns
   
   
@@ -76,7 +76,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
     rv.hypotest$res_AllPairwiseComparisons = NULL
     
     rv.hypotest$dataIn <- obj()
-    rv.hypotest$i <- ind()
+    rv.hypotest$i <- indice()
     
     ## do not modify this part
     r.nav$isDone <- rep(FALSE, 2)
@@ -113,7 +113,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
   observe({
     req(obj())
     rv.hypotest$dataIn <- obj()
-    rv.hypotest$i <- ind()
+    rv.hypotest$i <- indice()
   })
   
   
@@ -144,18 +144,18 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
                                   choices = c("None"="None",
                                               "Limma"="Limma", 
                                               "t-tests"="ttests"),
-                                  selected=rv.hypotest$widgets$method,
-                                  width='150px')
+                                  selected = rv.hypotest$widgets$method,
+                                  width = '150px')
             ),
             tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
                       hidden( radioButtons(ns("ttest_options"), "t-tests options",choices=c("Student", "Welch"),
-                                           selected=rv.hypotest$widgets$ttest_options,
-                                           width='150px'))
+                                           selected = rv.hypotest$widgets$ttest_options,
+                                           width = '150px'))
             ),
             tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
                       textInput(ns("seuilLogFC"), "log(FC) threshold",  
-                                value=rv.hypotest$widgets$th_logFC,
-                                width='150px'),
+                                value = rv.hypotest$widgets$th_logFC,
+                                width = '150px'),
                       #module_Not_a_numericUI(ns("test_seuillogFC"))
             ),
             tags$div( style="display:inline-block; vertical-align: middle; padding-right: 20px;",
@@ -208,11 +208,11 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
       
       rv.hypotest$widgets$listNamesComparison <- names(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test)[ind]
       
-      df <- setNames(as.data.frame(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test[,ind]),
+      df <- setNames(as.data.frame(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test[ , ind]),
                      colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test)[ind])
       
       
-      hc_logFC_DensityPlot(df,as.numeric(input$seuilLogFC))
+      hc_logFC_DensityPlot(df, as.numeric(input$seuilLogFC))
       
     }
     
@@ -233,7 +233,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
     
     
     rv.hypotest$dataIn <- obj()
-    rv.hypotest$i <- ind()
+    rv.hypotest$i <- indice()
     
     
     #browser()
@@ -254,11 +254,8 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
                                                 contrast = input$anaDiff_Design,
                                                 type = input$ttest_options)
              })
-      
-      rv.hypotest$i <- ind() + 1
+      rv.hypotest$i <- rv.hypotest$i + 1
       r.nav$isDone[1] <- TRUE
-      
-      
     })
     
   })

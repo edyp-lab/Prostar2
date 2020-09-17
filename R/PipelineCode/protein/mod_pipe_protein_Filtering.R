@@ -25,7 +25,7 @@ mod_pipe_protein_Filtering_ui <- function(id){
 #' @importFrom QFeatures VariableFilter 
 #' @importFrom SummarizedExperiment rowData
 #' 
-mod_pipe_protein_Filtering_server <- function(input, output, session, obj){
+mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indice){
   ns <- session$ns
  
   ## Section navigation module
@@ -47,7 +47,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj){
     name = "processProtFilter",
     dataIn = NULL,
     dataOut = NULL,
-    #i = NULL,
+    i = NULL,
     settings = NULL,
     tmp = NULL,
     
@@ -102,7 +102,8 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj){
     
     ## do not modify this part
     rv.filter$dataIn <- obj()
-    length(experiments(rv.filter$dataIn)) <- ind()
+    rv.filter$i <- indice()
+    #length(experiments(rv.filter$dataIn)) <- ind()
     rv.filter$tmp <- NULL
     rv.filter.deleted.mvLines <- NULL
     rv.filter.deleted.field <- NULL
@@ -126,8 +127,8 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj){
   rv.filter$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.filter$dataIn}))
   callModule(mod_plots_group_mv_server,"MVPlots_filtering",
              obj = reactive({req(rv.filter$dataIn)
-               if(length(experiments(rv.filter$dataIn))>0)
-                      rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]]
+               if(rv.filter$i>0)
+                      rv.filter$dataIn[[rv.filter$i]]
                 else      NULL
                }),
              conds = reactive({colData(rv.filter$dataIn)}),
@@ -140,13 +141,15 @@ callModule(mod_popover_for_help_server,
                                   content= "The user-defined threshold allows to tune the minimum amount of non-NA values for each line to be kept in the dataset (the line is filtered out otherwise). The threshold either applies on the whole dataset, on each condition or on at least one condition."))
   
   observe({
-    req(obj())
+    req(obj(), indice())
 
-    if (metadata(obj()[[length(experiments(obj()))]])$typeOfData != 'protein'){
+    rv.filter$dataIn <- obj()
+    rv.filter$i <- indice()
+    if (metadata(obj()[[indice()]])$typeOfData != 'protein'){
       stop("The type of data contained in the dataset is not 'protein'")
       return(NULL)
     }
-    rv.filter$dataIn <- obj()
+    
   })
   
   
@@ -215,10 +218,8 @@ callModule(mod_popover_for_help_server,
     } else {
       
       # create a duplicate of the last assay
-      i <- length(names(rv.filter$dataIn))
-      
-     #browser()
-      rv.filter$dataIn <- DAPAR2::MVrowsTagToOne(object =rv.filter$dataIn, 
+      #browser()
+      rv.filter$dataIn <- DAPAR2::MVrowsTagToOne(object = rv.filter$dataIn, 
                                          type = rv.filter$widgets$ChooseFilters, 
                                          th = as.integer(rv.filter$widgets$seuilNA), 
                                          percent = FALSE)
@@ -227,21 +228,20 @@ callModule(mod_popover_for_help_server,
       na_filter <- QFeatures::VariableFilter(field = "tagNA", value = "0", condition = "==")
       
       rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
-                                                    i = i, 
-                                                    name = paste0('na_filter_',i), 
+                                                    i = rv.filter$i, 
+                                                    name = paste0('na_filter_',rv.filter$i), 
                                                     filter=na_filter)
-      i <- i +1
+      rv.filter$i <- rv.filter$i +1
       rv.filter$dataIn <- DAPAR2::removeAdditionalCol(rv.filter$dataIn, "tagNA")
       key <- metadata(rv.filter$dataIn)$keyId
       
       # rv.filter$dataIn <- addAssayLink(rv.filter$dataIn, from = from, to = to, varFrom = key, varTo = key)
        
       ## keep track of deleted rows
-      rv.filter$deleted.mvLines <- setdiff(SummarizedExperiment::rowData(rv.filter$dataIn[[i-1]])[,metadata(rv.filter$dataIn)$keyId], 
-                                           SummarizedExperiment::rowData(rv.filter$dataIn[[i]])[,metadata(rv.filter$dataIn)$keyId])
+      rv.filter$deleted.mvLines <- setdiff(SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i - 1]])[,metadata(rv.filter$dataIn)$keyId], 
+                                           SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])[,metadata(rv.filter$dataIn)$keyId])
 
       #browser()
-      # i <- length(names(rv.filter$dataIn))
       # ind <- grep('_filtered_', names(rv.filter$dataIn))
       # if (length(ind) >= 2)
       #   metadata(rv.filter$dataIn[[i]])$Params <- metadata(rv.filter$dataIn[[ind[length(ind)-1]]])$Params
@@ -254,9 +254,9 @@ callModule(mod_popover_for_help_server,
                       ' th=',rv.filter$widgets$seuilNA, 
                       ' percent=', rv.filter$widgets$percent)
       
-      metadata(rv.filter$dataIn[[i]])$Params[[paste0('na_filter_',i)]] <- txt
+      metadata(rv.filter$dataIn[[rv.filter$i]])$Params[[paste0('na_filter_',rv.filter$i)]] <- txt
       
-      .total <- ifelse(length(experiments(rv.filter$dataIn )) > 0, nrow(rv.filter$dataIn[[i]]), 0)
+      .total <- ifelse(rv.filter$i > 0, nrow(rv.filter$dataIn[[rv.filter$i]]), 0)
       df <- data.frame(Filter = rv.filter$widgets$ChooseFilters, 
                        seuilNA = as.integer(rv.filter$widgets$seuilNA), 
                        nbDeleted = length(rv.filter$deleted.mvLines), 
@@ -296,7 +296,7 @@ callModule(mod_popover_for_help_server,
     
     if ((rv.filter$widgets$ChooseFilters=="None") || (rv.filter$widgets$ChooseFilters==gFilterEmptyLines)) {return(NULL)   }
     choice <- getListNbValuesInLines(obj = rv.filter$dataIn, 
-                                     i = length(experiments(rv.filter$dataIn)), 
+                                     i = rv.filter$i, 
                                      type = rv.filter$widgets$ChooseFilters)
     tagList(
       mod_popover_for_help_ui(ns("modulePopover_keepVal")),
@@ -349,9 +349,9 @@ callModule(mod_popover_for_help_server,
   ###---------------------------------------------------------------------------------###
   output$Screen_Filtering_2 <- renderUI({
     req(rv.filter$dataIn)
-    if (length(experiments(rv.filter$dataIn)) == 0){ return(NULL)}
+    if (rv.filter$i == 0){ return(NULL)}
     
-    choice_field <- c("None",colnames(SummarizedExperiment::rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])))
+    choice_field <- c("None",colnames(SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])))
 
       tagList(
       h4("Build the filter for the data you want to keep"),
@@ -393,7 +393,7 @@ callModule(mod_popover_for_help_server,
   output$filterFieldOptions <- renderUI({
     req(rv.filter$widgets$fieldName)
     if (rv.filter$widgets$fieldName == "None"){ return(NULL)}
-    if (length(experiments(rv.filter$dataIn)) == 0){ return(NULL)}
+    if (rv.filter$i == 0){ return(NULL)}
     
     
       numeric_operators <- c('==' = '==',
@@ -406,7 +406,7 @@ callModule(mod_popover_for_help_server,
     character_operators <- c( '==' = '==',
                              '!=' = '!=')
      
-   vec <- SummarizedExperiment::rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
+   vec <- SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])[,rv.filter$widgets$fieldName]
    if (is.numeric(vec))
       operators <- numeric_operators
     else if (is.character(vec))
@@ -460,13 +460,13 @@ callModule(mod_popover_for_help_server,
   observeEvent(input$btn_perform_fieldFilter,ignoreInit=TRUE,{
     req(rv.filter$widgets$fieldName)
     if (rv.filter$widgets$fieldName == 'None'){return(NULL)}
-    req(SummarizedExperiment::rowData(rv.filter$dataIn[[length(names(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName])
+    req(SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])[ , rv.filter$widgets$fieldName])
     
    # browser()
     
-    i <- length(experiments(rv.filter$dataIn))
+    i <- rv.filter$i
     if (rv.filter$widgets$fieldFilter_value %in% c('', 'None')){return(NULL)}
-    vec <- SummarizedExperiment::rowData(rv.filter$dataIn[[length(experiments(rv.filter$dataIn))]])[,rv.filter$widgets$fieldName]
+    vec <- SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])[,rv.filter$widgets$fieldName]
     if(is.numeric(vec)) 
       if(is.na(as.numeric(rv.filter$widgets$fieldFilter_value)))
         return(NULL)
@@ -487,9 +487,9 @@ callModule(mod_popover_for_help_server,
     }
     tryCatch({
       rv.filter$dataIn <- DAPAR2::filterFeaturesSam(object = rv.filter$dataIn, 
-                                               i = length(names(rv.filter$dataIn)), 
+                                               i = rv.filter$i, 
                                                filter = field_filter, 
-                                               name=paste0('field_filter_', length(names(rv.filter$dataIn)))
+                                               name=paste0('field_filter_', rv.filter$i)
                                                 )
     }
     , warning = function(w) {
@@ -505,8 +505,8 @@ callModule(mod_popover_for_help_server,
     }, finally = {
       #cleanup-code
       
-      if (i < length(names(rv.filter$dataIn))) {
-        i <- length(names(rv.filter$dataIn))
+      if (i < rv.filter$i) {
+        i <- rv.filter$i
         metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
                                                                                       ' operator=',rv.filter$widgets$operator, 
                                                                                       ' value=', rv.filter$widgets$fieldFilter_value)
