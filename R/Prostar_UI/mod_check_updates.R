@@ -105,9 +105,17 @@ mod_check_updates_server <- function(input, output, session){
   GetLocalVersions <- reactive({
     local.version <- list()
     #loc.pkgs <-c("Prostar.loc", "DAPAR.loc", "DAPARdata.loc")
-    local.version <- list(Prostar = installed.packages(lib.loc=Prostar.loc)["Prostar2","Version"],
-                          DAPAR = installed.packages(lib.loc=DAPAR.loc)["DAPAR","Version"],
-                          DAPARdata = installed.packages(lib.loc=DAPARdata.loc)["DAPARdata","Version"])
+    ll.packages <- installed.packages()[,"Version"]
+    local.version <- list(Prostar = if (!is.null(match('Prostar2', names(ll.packages)))) 
+                                        ll.packages[match('Prostar2', names(ll.packages))] 
+                                    else '-',
+                          DAPAR = if (!is.null(match('DAPAR2', names(ll.packages)))) 
+                            ll.packages[match('DAPAR2', names(ll.packages))] 
+                          else '-',
+                          DAPARdata = if (!is.null(match('DAPARdata2', names(ll.packages)))) 
+                            ll.packages[match('DAPARdata2', names(ll.packages))] 
+                          else '-'
+    )
 
     local.version
   })
@@ -121,9 +129,9 @@ mod_check_updates_server <- function(input, output, session){
     
     bioconductor.version <- GetBioconductorVersions()
     local.version <- GetLocalVersions()
-    names <- c(as.character(tags$a(href="http://www.bioconductor.org/packages/release/bioc/html/Prostar.html", "Prostar")),
-               as.character(tags$a(href="http://www.bioconductor.org/packages/release/bioc/html/DAPAR.html", "DAPAR")),
-               as.character(tags$a(href="http://www.bioconductor.org/packages/release/data/experiment/html/DAPARdata.html", "DAPARdata")))
+    names <- c(as.character(tags$a(href="http://www.bioconductor.org/packages/release/bioc/html/Prostar.html", "Prostar2")),
+               as.character(tags$a(href="http://www.bioconductor.org/packages/release/bioc/html/DAPAR.html", "DAPAR2")),
+               as.character(tags$a(href="http://www.bioconductor.org/packages/release/data/experiment/html/DAPARdata.html", "DAPARdata2")))
     
     
     df <- data.frame("Name" = names,

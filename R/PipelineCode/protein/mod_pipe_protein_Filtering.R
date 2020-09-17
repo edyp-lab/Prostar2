@@ -8,13 +8,15 @@
 #'
 #' @importFrom shiny NS tagList
 #' @import shinyjs
+#' @importFrom shinyalert useShinyalert
 #' 
 mod_pipe_protein_Filtering_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    mod_navigation_ui(ns('nav_pipe_process'))
-  )
+    shinyalert::useShinyalert(),
+    div(id=ns('div_nav_pipe_process'), mod_navigation_ui(ns('nav_pipe_process')))
+    )
 }
     
 #' pipe_prot_filter Server Function
@@ -22,8 +24,8 @@ mod_pipe_protein_Filtering_ui <- function(id){
 #' @noRd 
 #' 
 #' @import DAPAR2
-#' @importFrom QFeatures VariableFilter 
-#' @importFrom SummarizedExperiment rowData
+#' @import QFeatures
+#' @importFrom shinyalert shinyalert
 #' 
 mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indice){
   ns <- session$ns
@@ -50,7 +52,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
     i = NULL,
     settings = NULL,
     tmp = NULL,
-    
+
     deleted.mvLines = NULL,
     widgets = list(ChooseFilters = "None",
                    seuilNA = 0,
@@ -69,7 +71,6 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   
   
-  
   #global variables for the module
   gFiltersList <- c("None" = "None",
                     "Empty lines" = "EmptyLines",
@@ -81,6 +82,30 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   gFilterWholeMat <- gFiltersList[["Whole matrix"]]
   gFilterAllCond <- gFiltersList[["For every condition"]]
   gFilterOneCond <- gFiltersList[["At least one condition"]]
+  
+  observeEvent(req(rv.filter$dataIn, rv.filter$i ), {
+#browser()
+    a <- (length(rv.filter$dataIn) != rv.filter$i) && !r.nav$isDone[length(r.nav$isDone)]
+    if (!a) return(NULL)
+
+    shinyalert::shinyalert(
+      title = 'title',
+      text = "This is a modal",
+      size = "xs", 
+      closeOnEsc = TRUE,
+      closeOnClickOutside = FALSE,
+      html = FALSE,
+      type = "info",
+      showConfirmButton = TRUE,
+      showCancelButton = TRUE,
+      confirmButtonText = "OK",
+      confirmButtonCol = "#15A4E6",
+      cancelButtonText = "Cancel",
+      timer = 0,
+      imageUrl = "",
+      animation = FALSE
+    )
+  })
   
   
   
@@ -108,10 +133,12 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
     rv.filter.deleted.mvLines <- NULL
     rv.filter.deleted.field <- NULL
     rv.filter$data <- data.frame()
-    
+
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
     ## end of no modifiable part
+    
+
   })
   
   callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
@@ -124,7 +151,10 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   ## Calls to other modules
   ##
   ##
+  
+
   rv.filter$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.filter$dataIn}))
+  
   callModule(mod_plots_group_mv_server,"MVPlots_filtering",
              obj = reactive({req(rv.filter$dataIn)
                if(rv.filter$i>0)
@@ -145,12 +175,37 @@ callModule(mod_popover_for_help_server,
 
     rv.filter$dataIn <- obj()
     rv.filter$i <- indice()
+    
+
     if (metadata(obj()[[indice()]])$typeOfData != 'protein'){
       stop("The type of data contained in the dataset is not 'protein'")
       return(NULL)
     }
     
   })
+  
+  
+  # If the user accepts the conditions on the shinyalert, then the process module is activated
+  observe({
+    input$shinyalert
+    rv.filter$i
+    if(is.null(input$shinyalert))return(NULL)
+    
+    c1 <- input$shinyalert
+    c2 <- rv.filter$i == length(rv.filter$dataIn)
+    c3 <- r.nav$isDone[length(r.nav$isDone)]
+    if (c1 && !c2 && !c3){
+      #Delete all assays after that one indicated by the indice given in parameter
+      rv.filter$dataIn <- rv.filter$dataIn[ , , -((rv.filter$i+1):length(rv.filter$dataIn))]
+      c1 <- input$shinyalert
+      c2 <- rv.filter$i == length(rv.filter$dataIn)
+      c3 <- r.nav$isDone[length(r.nav$isDone)]
+    } else {
+      # Do nothing, the module interface is still disabled
+    }
+    shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
+  })
+  
   
   
   disableActionButton <- function(id,session) {
@@ -564,6 +619,7 @@ callModule(mod_popover_for_help_server,
       }
       ind <- grep('_filter_', names(rv.filter$dataIn))
       names(rv.filter$dataIn)[ind] <- 'filtered'
+      rv.filter$i <- length(rv.filter$dataIn)
       rv.filter$dataOut <- rv.filter$dataIn
 
       r.nav$isDone[3] <- TRUE

@@ -1,6 +1,6 @@
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../../../R', 'mod_navigation.R'), local=TRUE)$value
-source(file.path('../../../../R/PipelineCOde/protein', 'mod_pipe_protein_HypothesisTest.R'), local=TRUE)$value
+source(file.path('../../../../R/PipelineCode/protein', 'mod_pipe_protein_HypothesisTest.R'), local=TRUE)$value
 source(file.path('../../../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path('../../../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 source(file.path('../../../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value

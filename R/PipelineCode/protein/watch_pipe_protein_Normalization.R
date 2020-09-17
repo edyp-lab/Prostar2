@@ -8,7 +8,5 @@ Watch_mod_pipe_protein_Normalization <- callModule(module=mod_pipe_protein_Norma
 
 
 observeEvent(req(Watch_mod_pipe_protein_Normalization()),{
-  
   rv.core$current.obj <- Watch_mod_pipe_protein_Normalization()
-  Update_QF_indice()
 })

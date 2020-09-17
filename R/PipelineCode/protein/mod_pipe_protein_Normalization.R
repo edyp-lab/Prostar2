@@ -29,7 +29,6 @@ mod_pipe_protein_Normalization_ui <- function(id){
 #' @param ind xxx
 #' 
 #' @importFrom DAPAR2 normalizeD compareNormalizationD_HC
-#' @importFrom SummarizedExperiment rowData assay
 #' 
 mod_pipe_protein_Normalization_server <- function(input, output, session, obj, indice){
   ns <- session$ns

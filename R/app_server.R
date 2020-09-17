@@ -235,24 +235,16 @@ app_server <- function(input, output,session) {
    
    
    
-   
-   
-   
-   
-   
-   
-   
-   
-   Update_QF_indice <- function(){
-     nb_SE_diff <- length(names(rv.core$current.obj)) - rv.core$current.indice
-     if ( nb_SE_diff > 1  ){
-       to_keep <- c(1:rv.core$current.indice, length(names(rv.core$current.obj)))
-       rv.core$current.obj[ , ,to_keep]
-     }
-     
-     rv.core$current.indice <- length(names(rv.core$current.obj))
-   }
-   
+   # Update_QF_indice <- function(){
+   #   nb_SE_diff <- length(names(rv.core$current.obj)) - rv.core$current.indice
+   #   if ( nb_SE_diff > 1  ){
+   #     to_keep <- c(1:rv.core$current.indice, length(names(rv.core$current.obj)))
+   #     rv.core$current.obj[ , ,to_keep]
+   #   }
+   #   
+   #   rv.core$current.indice <- length(names(rv.core$current.obj))
+   # }
+   # 
    
    
    

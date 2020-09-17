@@ -172,6 +172,71 @@ observeEvent(req(r.nav$reset),{
 
 
 
+# Managing the indice of assay
+
+By default (in a pipeline), when a dataset (QFeatures) have to be processed, the treatment operates on the last assay of the dataset. It then adds a new assay at the end of the assay list.
+
+However, the user may want to redo a previous treatment. Then, it specifies the assay he wants to work on. In order to guarantee
+that the succession of assays are consistent with the pipeline direction, all the assays placed after the one he indicated are to be deleted before proceeding. In this case, onpopup window will appear to inform the user. He has the choice to accept or to decline. In the latter case, the interface of the module is kept disabled.
+
+The management of the popup window is done with the package 'shinyalert'. For that purpose, some pieces of code are necessary.
+
+ui part
+```{r shinyalert_ui, eval=FALSE}
+useShinyalert(),
+```  
+
+
+server part
+```{r shinyalert_server, eval=FALSE}
+observeEvent(req(rv.filter$dataIn, rv.filter$i ), {
+    a <- (length(rv.filter$dataIn) != rv.filter$i) && !r.nav$isDone[length(r.nav$isDone)]
+    if (!a) return(NULL)
+
+    shinyalert(
+      title = 'title',
+      text = "This is a modal",
+      size = "xs", 
+      closeOnEsc = TRUE,
+      closeOnClickOutside = FALSE,
+      html = FALSE,
+      type = "info",
+      showConfirmButton = TRUE,
+      showCancelButton = TRUE,
+      confirmButtonText = "OK",
+      confirmButtonCol = "#15A4E6",
+      cancelButtonText = "Cancel",
+      timer = 0,
+      imageUrl = "",
+      animation = FALSE
+    )
+  })
+
+
+
+observe({
+    input$shinyalert
+    rv.filter$i
+    if(is.null(input$shinyalert))return(NULL)
+    
+    c1 <- input$shinyalert
+    c2 <- rv.filter$i == length(rv.filter$dataIn)
+    c3 <- r.nav$isDone[length(r.nav$isDone)]
+    if (c1 && !c2 && !c3){
+      #Delete all assays after that one indicated by the indice given in parameter
+      rv.filter$dataIn <- rv.filter$dataIn[ , , -((rv.filter$i+1):length(rv.filter$dataIn))]
+      c1 <- input$shinyalert
+      c2 <- rv.filter$i == length(rv.filter$dataIn)
+      c3 <- r.nav$isDone[length(r.nav$isDone)]
+    } else {
+      # Do nothing, the module interface is still disabled
+    }
+    shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
+  })
+```  
+
+
+
 # Observe for module parameters
 
 In this section, there is an observe function to set the local reactive variable with the values of parameters of the module.

@@ -67,8 +67,14 @@ mod_homepage_server <- function(input, output, session){
   
   output$versionsText <- renderUI({
     #t <- sessionInfo()
-    daparVersion <- installed.packages(lib.loc=DAPAR.loc)["DAPAR","Version"]
-    ProstarVersion <- installed.packages(lib.loc=Prostar.loc)["Prostar2","Version"]
+    ll.packages <- installed.packages()[,"Version"]
+    
+    daparVersion <- if (!is.null(match('DAPAR2', names(ll.packages)))) 
+      ll.packages[match('DAPAR2', names(ll.packages))] 
+    else '-'
+    ProstarVersion <- if (!is.null(match('Prostar2', names(ll.packages)))) 
+      ll.packages[match('Prostar2', names(ll.packages))] 
+    else '-'
 
     tagList(
       tags$p(class="body",
