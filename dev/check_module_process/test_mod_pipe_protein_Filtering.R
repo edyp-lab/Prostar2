@@ -2,15 +2,13 @@
 source(file.path('./', 'mod_pipe_protein_Filtering.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
+
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path("../../R", "mod_popover_for_help.R"), local = TRUE)$value
 source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 
 
 library(shiny)
-library(tibble)
-library(SummarizedExperiment)
 
 
 

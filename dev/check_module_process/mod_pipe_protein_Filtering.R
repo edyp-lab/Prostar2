@@ -46,7 +46,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   )
   
   ## reactive values for variables in the module
-  rv.filter <- reactiveValues(
+  rv <- reactiveValues(
     name = "processProtFilter",
     dataIn = NULL,
     dataOut = NULL,
@@ -54,7 +54,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
     settings = NULL,
     
     widgets = list(
-      
+      ## need to put each items to its default value
     )
   )
   
@@ -64,9 +64,9 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   
   #shinyalert modal asking if user wants to process a dataset with an index <i
-  observeEvent(req(rv.filter$dataIn, rv.filter$i ), {
+  observeEvent(req(rv$dataIn, rv$i ), {
     
-    a <- (length(rv.filter$dataIn) != rv.filter$i) && !r.nav$isDone[length(r.nav$isDone)]
+    a <- (length(rv$dataIn) != rv$i) && !r.nav$isDone[length(r.nav$isDone)]
     if (!a) return(NULL)
     
     shinyalert::shinyalert(
@@ -92,13 +92,13 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   observeEvent(req(r.nav$reset),{
     
-    rv.filter$widgets <- list(
+    rv$widgets <- list(
       ## need to put each items to its default value
     )
     
     ## do not modify this part
-    rv.filter$dataIn <- obj()
-    rv.filter$i <- indice()
+    rv$dataIn <- obj()
+    rv$i <- indice()
     
     r.nav$isDone <- rep(FALSE, 3)
     r.nav$reset <- FALSE
@@ -119,30 +119,30 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   ##
   
   
-  rv$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.filter$dataIn}))
+  rv$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv$dataIn}))
   
   
   # Initialisation of the module
   observe({
     req(obj(), indice())
-    rv.filter$dataIn <- obj()
-    rv.filter$i <- indice()
+    rv$dataIn <- obj()
+    rv$i <- indice()
   })
   
   
   # If the user accepts the conditions on the shinyalert, then the process module is activated
   observe({
     req(input$shinyalert)
-    rv.filter$i
+    rv$i
     
     c1 <- input$shinyalert
-    c2 <- rv.filter$i == length(rv.filter$dataIn)
+    c2 <- rv$i == length(rv$dataIn)
     c3 <- r.nav$isDone[length(r.nav$isDone)]
     if (c1 && !c2 && !c3){
       #Delete all assays after that one indicated by the indice given in parameter
-      rv.filter$dataIn <- rv.filter$dataIn[ , , -((rv.filter$i+1):length(rv.filter$dataIn))]
+      rv$dataIn <- rv$dataIn[ , , -((rv$i+1):length(rv$dataIn))]
       c1 <- input$shinyalert
-      c2 <- rv.filter$i == length(rv.filter$dataIn)
+      c2 <- rv$i == length(rv$dataIn)
       c3 <- r.nav$isDone[length(r.nav$isDone)]
     } else {
       # Do nothing, the module interface is still disabled
@@ -196,7 +196,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   
   
-  return({reactive(rv.filter$dataOut)})
+  return({reactive(rv$dataOut)})
   
 }
 
