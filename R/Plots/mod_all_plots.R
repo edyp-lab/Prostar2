@@ -107,14 +107,14 @@ mod_all_plots_server <- function(input, output, session, dataIn, indice, setting
   
   callModule(mod_plots_se_explorer_server, 'plot_quanti_large',
              obj = reactive({rv$current.obj}),
-             originOfValues = reactive({ metadata(dataIn())[['OriginOfValues']] }),
+             originOfValues = reactive({ MultiAssayExperiment::metadata(dataIn())[['OriginOfValues']] }),
              colData = reactive({ SummarizedExperiment::colData(dataIn()) })
   )
   
 
   callModule(module=mod_plots_intensity_server, 'plot_intensity_large',
              dataIn=reactive({rv$current.obj}),
-             meta = reactive({ metadata(dataIn()) }),
+             meta = reactive({ MultiAssayExperiment::metadata(dataIn()) }),
              conds = reactive({ SummarizedExperiment::colData(dataIn())[['Condition']] }),
              params = reactive({NULL}),
              reset = reactive({FALSE}),

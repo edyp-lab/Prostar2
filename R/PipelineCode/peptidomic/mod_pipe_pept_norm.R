@@ -123,7 +123,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
                                    "master_ProtSelection", 
                                    obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
                                    params = reactive({NULL}),
-                                   keyId = reactive({metadata(obj())[['keyId']]}),
+                                   keyId = reactive({MultiAssayExperiment::metadata(obj())[['keyId']]}),
                                    reset = reactive({rv.norm$resetTracking}),
                                    slave = reactive({FALSE})
   )
@@ -136,7 +136,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
   rv.norm$trackFromBoxplot <- callModule(mod_plots_intensity_server,
                                          "boxPlot_Norm",
                                          dataIn = reactive({rv.norm$dataIn[[rv.norm$i]]}),
-                                         meta = reactive({metadata(obj())}),
+                                         meta = reactive({MultiAssayExperiment::metadata(obj())}),
                                          conds = reactive({colData(obj())[['Condition']]}),
                                          base_palette = reactive({rv.norm$settings()$basePalette}),
                                          params = reactive({
@@ -330,7 +330,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
     shinyjs::toggle("normalization.type", 
                     condition=( rv.norm$widgets$method %in% c(DAPAR2::normalizeMethods.dapar()[-which(DAPAR2::normalizeMethods.dapar()=="GlobalQuantileAlignment")])))
     
-    cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'peptide'
+    cond <- MultiAssayExperiment::metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'peptide'
     trackAvailable <- rv.norm$widgets$method %in% normalizeMethodsWithTracking.dapar()
     shinyjs::toggle('DivMasterProtSelection', condition= cond && trackAvailable)
     shinyjs::toggle('SyncForNorm', condition= cond && trackAvailable)
@@ -344,7 +344,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
     print('in GetIndicesOfSelectedProteins')
     print(rv.norm$trackFromBoxplot())
     ind <- NULL
-    ll <- SummarizedExperiment::rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
+    ll <- SummarizedExperiment::rowData(rv.norm$dataIn[[rv.norm$i]])[,MultiAssayExperiment::metadata(rv.norm$dataIn)$keyId]
     tt <- rv.norm$trackFromBoxplot()$type
     switch(tt,
            ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
@@ -493,7 +493,7 @@ mod_pipe_pept_norm_server <- function(input, output, session, obj, ind){
   observeEvent(input$valid.normalization,{
     
     if (rv.norm$widgets$method != "None") {
-      metadata(rv.norm$dataIn[[rv.norm$i]])$Params <- list(
+      MultiAssayExperiment::metadata(rv.norm$dataIn[[rv.norm$i]])$Params <- list(
         method = rv.norm$widgets$method,
         type = rv.norm$widgets$type,
         varReduction = rv.norm$widgets$varReduction,

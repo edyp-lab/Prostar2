@@ -19,6 +19,7 @@
 #' @export 
 #' 
 #' @importFrom shiny NS tagList 
+#' @importFrom highcharter highchartOutput
 #' 
 mod_plots_group_mv_ui <- function(id){
   ns <- NS(id)
@@ -40,8 +41,8 @@ mod_plots_group_mv_ui <- function(id){
 #' @keywords internal
 #' 
 #' @importFrom DAPAR2 mvPerLinesHistoPerCondition_HC mvPerLinesHisto_HC
-#' 
 #' @importFrom SummarizedExperiment assay
+#' @import highcharter
 #' 
 mod_plots_group_mv_server <- function(input, output, session,
                                       obj,

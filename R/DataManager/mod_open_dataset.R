@@ -153,7 +153,7 @@ mod_open_dataset_server <- function(input, output, session, pipeline.def){
                return(NULL)
              }
       ) # end of switch statement
-      metadata(rv.openDataset$dataOut)$pipelineType <- rv.openDataset$pipe()
+      MultiAssayExperiment::metadata(rv.openDataset$dataOut)$pipelineType <- rv.openDataset$pipe()
     })
     
   })

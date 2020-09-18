@@ -19,9 +19,13 @@ mod_pipe_protein_Imputation_ui <- function(id){
 #' pipe_prot_impute Server Function
 #'
 #' @noRd 
+#' 
+#' @import QFeatures
+#' 
 mod_pipe_protein_Imputation_server <- function(input, output, session, obj, indice){
   ns <- session$ns
  
+  
   
   ## Section navigation module
   # Variable to manage the different screens of the module
@@ -130,14 +134,14 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj, indi
              palette = reactive({rv.impute$settings()$basePalette}))
 
   callModule(mod_det_quant_impute_Values_server, "POV_DetQuantValues_DT", 
-             qData = reactive({req(rv.impute$dataIn)
+             qData = reactive({req(rv.impute$dataIn, rv.impute$i)
                                 SummarizedExperiment::assay(rv.impute$dataIn[[rv.impute$i]])
                                    }),
              quant = reactive({rv.impute$widgets$POV_detQuant_quantile}), 
              factor = reactive({rv.impute$widgets$POV_detQuant_factor}))
   
   callModule(mod_det_quant_impute_Values_server, "MEC_DetQuantValues_DT", 
-             qData = reactive({req(rv.impute$dataIn)
+             qData = reactive({req(rv.impute$dataIn, rv.impute$i)
                               SummarizedExperiment::assay(rv.impute$dataIn[[rv.impute$i]])
                               }),
              quant = reactive({rv.impute$widgets$MEC_detQuant_quantile}), 
@@ -529,10 +533,10 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj, indi
       ind <- grep('_impute', names(rv.impute$dataIn))
       
       if (length(ind) > 1){
-        txt <- lapply(ind, function(x){metadata(rv.impute$dataIn[[x]])$Params})
+        txt <- lapply(ind, function(x){MultiAssayExperiment::metadata(rv.impute$dataIn[[x]])$Params})
         ind <- ind[-length(ind)]
         rv.impute$dataIn <- rv.impute$dataIn[ , ,-ind]
-        metadata(rv.impute$dataIn[[rv.impute$i]])$Params <- txt
+        MultiAssayExperiment::metadata(rv.impute$dataIn[[rv.impute$i]])$Params <- txt
       } else if (length(ind)==1){
         names(rv.impute$dataIn)[rv.impute$i] <- 'impute'
       }

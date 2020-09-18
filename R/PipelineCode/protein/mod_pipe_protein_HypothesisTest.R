@@ -24,6 +24,8 @@ mod_pipe_protein_HypothesisTest_ui <- function(id){
 #' 
 #' @param ind
 #' 
+#' @import QFeatures
+#' 
 mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, indice){
   ns <- session$ns
   
@@ -204,12 +206,12 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
     
     if(!is.null(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])){
       
-      ind <- grep('_logFC', colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test))
+      ind <- grep('_logFC', colnames(MultiAssayExperiment::metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test))
       
-      rv.hypotest$widgets$listNamesComparison <- names(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test)[ind]
+      rv.hypotest$widgets$listNamesComparison <- names(MultiAssayExperiment::metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test)[ind]
       
-      df <- setNames(as.data.frame(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test[ , ind]),
-                     colnames(metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test)[ind])
+      df <- setNames(as.data.frame(MultiAssayExperiment::metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test[ , ind]),
+                     colnames(MultiAssayExperiment::metadata(rv.hypotest$res_AllPairwiseComparisons[['proteins_hypotest']])$t_test)[ind])
       
       
       hc_logFC_DensityPlot(df, as.numeric(input$seuilLogFC))
@@ -297,7 +299,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
   observeEvent(input$ValidTest,{
     
     if (rv.hypotest$widgets$method != 'Limma') {
-      metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
+      MultiAssayExperiment::metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
         design = rv.hypotest$widgets$design,
         method = rv.hypotest$widgets$method,
         ttest_options = rv.hypotest$widgets$ttest_options,
@@ -305,7 +307,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
         listNamesComparison =rv.hypotest$widgets$listNamesComparison
       )
     } else {
-      metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
+      MultiAssayExperiment::metadata(rv.hypotest$dataIn[[rv.hypotest$i]])$Params <- list(
         design = rv.hypotest$widgets$design,
         method = rv.hypotest$widgets$method,
         th_logFC = rv.hypotest$widgets$th_logFC,

@@ -45,7 +45,7 @@ mod_plots_se_explorer_server <- function(input, output, session,
   
   output$DS_sidebarPanel_tab <- renderUI({
     
-    typeOfDataset <- metadata(obj())[['typeOfData']]
+    typeOfDataset <- MultiAssayExperiment::metadata(obj())[['typeOfData']]
     
     .choices<- NULL
     

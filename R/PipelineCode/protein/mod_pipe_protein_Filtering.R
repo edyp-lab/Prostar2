@@ -177,7 +177,7 @@ callModule(mod_popover_for_help_server,
     rv.filter$i <- indice()
     
 
-    if (metadata(obj()[[indice()]])$typeOfData != 'protein'){
+    if (MultiAssayExperiment::metadata(obj()[[indice()]])$typeOfData != 'protein'){
       stop("The type of data contained in the dataset is not 'protein'")
       return(NULL)
     }
@@ -288,13 +288,13 @@ callModule(mod_popover_for_help_server,
                                                     filter=na_filter)
       rv.filter$i <- rv.filter$i +1
       rv.filter$dataIn <- DAPAR2::removeAdditionalCol(rv.filter$dataIn, "tagNA")
-      key <- metadata(rv.filter$dataIn)$keyId
+      key <- MultiAssayExperiment::metadata(rv.filter$dataIn)$keyId
       
       # rv.filter$dataIn <- addAssayLink(rv.filter$dataIn, from = from, to = to, varFrom = key, varTo = key)
        
       ## keep track of deleted rows
-      rv.filter$deleted.mvLines <- setdiff(SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i - 1]])[,metadata(rv.filter$dataIn)$keyId], 
-                                           SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])[,metadata(rv.filter$dataIn)$keyId])
+      rv.filter$deleted.mvLines <- setdiff(SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i - 1]])[,MultiAssayExperiment::metadata(rv.filter$dataIn)$keyId], 
+                                           SummarizedExperiment::rowData(rv.filter$dataIn[[rv.filter$i]])[,MultiAssayExperiment::metadata(rv.filter$dataIn)$keyId])
 
       #browser()
       # ind <- grep('_filtered_', names(rv.filter$dataIn))
@@ -309,7 +309,7 @@ callModule(mod_popover_for_help_server,
                       ' th=',rv.filter$widgets$seuilNA, 
                       ' percent=', rv.filter$widgets$percent)
       
-      metadata(rv.filter$dataIn[[rv.filter$i]])$Params[[paste0('na_filter_',rv.filter$i)]] <- txt
+      MultiAssayExperiment::metadata(rv.filter$dataIn[[rv.filter$i]])$Params[[paste0('na_filter_',rv.filter$i)]] <- txt
       
       .total <- ifelse(rv.filter$i > 0, nrow(rv.filter$dataIn[[rv.filter$i]]), 0)
       df <- data.frame(Filter = rv.filter$widgets$ChooseFilters, 
@@ -562,7 +562,7 @@ callModule(mod_popover_for_help_server,
       
       if (i < rv.filter$i) {
         i <- rv.filter$i
-        metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
+        MultiAssayExperiment::metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
                                                                                       ' operator=',rv.filter$widgets$operator, 
                                                                                       ' value=', rv.filter$widgets$fieldFilter_value)
         df <- data.frame(Filter = rv.filter$widgets$fieldName, 

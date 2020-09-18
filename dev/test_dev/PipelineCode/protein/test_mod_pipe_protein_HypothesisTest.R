@@ -8,12 +8,12 @@ source(file.path('../../../../R', 'mod_infos_dataset.R'), local=TRUE)$value
 source(file.path('../../../../R', 'mod_format_DT.R'), local=TRUE)$value
 
 
-library(shiny)
-library(shinyjs)
-library(highcharter)
-library(DAPAR2)
-library(tibble)
-library(DT)
+# library(shiny)
+# library(shinyjs)
+# library(highcharter)
+# library(DAPAR2)
+# library(tibble)
+# library(DT)
 
 
 ui <- fluidPage(

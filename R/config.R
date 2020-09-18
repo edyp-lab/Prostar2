@@ -3,10 +3,11 @@ pipeline.defs <- list(
                   'Normalization',
                   'Imputation',
                   'HypothesisTest'),
-  protein = c('Filtering',
-              'Normalization',
+  protein = c('Filtering'
+            #  'Normalization',
             #  'Imputation',
-              'HypothesisTest'),
+            #  'HypothesisTest'
+            ),
   p2p = c('module_p2p_1',
           'module_p2p_2',
           'module_p2p_3',

@@ -49,6 +49,7 @@ mod_open_demo_dataset_ui <- function(id){
 #' @importFrom utils data
 #' @importFrom BiocManager install
 #' @importFrom shinyjs info
+#' @import QFeatures
 #' 
 mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
   ns <- session$ns
@@ -93,7 +94,7 @@ mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
         return(NULL)
       }
 
-      metadata(rv.openDemo$dataRead)$pipelineType <- rv.openDemo$pipe()
+      MultiAssayExperiment::metadata(rv.openDemo$dataRead)$pipelineType <- rv.openDemo$pipe()
       rv.openDemo$dataOut <- rv.openDemo$dataRead
      
     }) # End withProgress

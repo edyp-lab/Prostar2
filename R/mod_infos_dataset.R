@@ -99,7 +99,7 @@ mod_infos_dataset_server <- function(input, output, session, obj){
   
   output$title <- renderUI({
     req(obj())
-    title <- metadata(obj())$analysis
+    title <- MultiAssayExperiment::metadata(obj())$analysis
     tagList(
       h3("Dataset summary"),
       p(paste0("Name of analysis:",title))
@@ -122,13 +122,13 @@ mod_infos_dataset_server <- function(input, output, session, obj){
     req(obj())
     nb_assay <- length(obj())
     names_assay <- unlist(names(obj()))
-    pipeline <- metadata(obj())$pipelineType
+    pipeline <- MultiAssayExperiment::metadata(obj())$pipelineType
     
     columns <- c("Number of assay(s)",
                  "List of assay(s)",
                  "Pipeline Type")
     
-    vals <- c( if(is.null(metadata(obj())$pipelineType)) '-' else metadata(obj())$pipelineType,
+    vals <- c( if(is.null(MultiAssayExperiment::metadata(obj())$pipelineType)) '-' else MultiAssayExperiment::metadata(obj())$pipelineType,
                length(obj()),
                if (length(obj())==0) '-' else HTML(paste0('<ul>', paste0('<li>', names_assay, "</li>", collapse=""), '</ul>', collapse=""))
     )
@@ -161,7 +161,7 @@ mod_infos_dataset_server <- function(input, output, session, obj){
       
       
       
-      typeOfData <- metadata(data)$typeOfData
+      typeOfData <- MultiAssayExperiment::metadata(data)$typeOfData
       nLines <- nrow(obj()[[input$selectInputSE]])
       percentMV <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNA
       nEmptyLines <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNArows[as.character(ncol(obj()[[input$selectInputSE]]))]
@@ -180,13 +180,13 @@ mod_infos_dataset_server <- function(input, output, session, obj){
                      "Adjacency matrices",
                      "Connex components")
         
-        if(length(metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
+        if(length(MultiAssayExperiment::metadata(obj()[[input$selectInputSE]])$list.matAdj) > 0){
           adjMat.txt <- "<span style=\"color: lime\">OK</span>"
         } else{
           adjMat.txt <- "<span style=\"color: red\">Missing</span>"
         }
         
-        if(!is.null(metadata(obj()[[input$selectInputSE]])$list.cc)){
+        if(!is.null(MultiAssayExperiment::metadata(obj()[[input$selectInputSE]])$list.cc)){
           cc.txt <- "<span style=\"color: lime\">OK</span>"
         } else{
           cc.txt <- "<span style=\"color: red\">Missing</span>"
@@ -274,7 +274,7 @@ mod_infos_dataset_server <- function(input, output, session, obj){
       
       data <- MultiAssayExperiment::experiments(obj())[[input$selectInputSE]]
       
-      typeOfDataset <- metadata(obj()[[input$selectInputSE]])$typeOfData
+      typeOfDataset <- MultiAssayExperiment::metadata(obj()[[input$selectInputSE]])$typeOfData
       
       pourcentage <- QFeatures::nNA(obj()[[input$selectInputSE]])$nNA
       
@@ -309,7 +309,7 @@ mod_infos_dataset_server <- function(input, output, session, obj){
   
   NeedsUpdate <- reactive({
     req(obj())
-    PROSTAR.version <- metadata(MultiAssayExperiment::experiments(obj()))$versions$Prostar_Version
+    PROSTAR.version <- MultiAssayExperiment::metadata(MultiAssayExperiment::experiments(obj()))$versions$Prostar_Version
     
     if(compareVersion(PROSTAR.version,"1.12.9") != -1 && !is.na(PROSTAR.version) && PROSTAR.version != "NA") {
       return (FALSE)

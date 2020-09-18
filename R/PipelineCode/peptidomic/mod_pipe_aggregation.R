@@ -200,7 +200,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   output$specificPeptideBarplot <- renderUI({
     tagList(
       h4("Only specific peptides"),
-      GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlySpec"]]))
+      GraphPepProt_hc(as.matrix(MultiAssayExperiment::metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlySpec"]]))
     )
   })
   
@@ -208,7 +208,7 @@ mod_pipe_aggregation_server <- function(input, output, session, obj, ind){
   output$allPeptideBarplot <- renderUI({
     tagList(
       h4("All (specific & shared) peptides"),
-      GraphPepProt_hc(as.matrix(metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]]))
+      GraphPepProt_hc(as.matrix(MultiAssayExperiment::metadata(rv.aggregation$dataIn[[rv.aggregation$i]])[["list.matAdj"]][["onlyShared"]]))
     )
   })
   

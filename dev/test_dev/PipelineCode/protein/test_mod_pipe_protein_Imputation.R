@@ -12,12 +12,12 @@ source(file.path('../../../../R', 'mod_det_quant_impute_Values.R'), local=TRUE)$
 
 
 
-library(highcharter)
-library(shinyjs)
-library(DAPAR2)
-library(DT)
-library(tibble)
-library(QFeatures)
+# library(highcharter)
+# library(shinyjs)
+# library(DAPAR2)
+# library(DT)
+# library(tibble)
+# library(QFeatures)
 
 options(shiny.fullstacktrace = FALSE)
 
@@ -42,7 +42,8 @@ server <- function(input, output, session) {
   
   rv$ret <- callModule(mod_pipe_protein_Imputation_server,
                        'pipe_impute',
-                       obj = reactive({Exp1_R25_prot})
+                       obj = reactive({Exp1_R25_prot}),
+                       indice = reactive({2})
                        )
   
   # callModule(mod_infos_dataset_server,'infos',

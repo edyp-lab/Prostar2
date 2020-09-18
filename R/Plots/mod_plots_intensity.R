@@ -98,7 +98,7 @@ mod_plots_intensity_server <- function(input, output, session,
   output$slave_tracking_ui <- renderUI({
     slave()
     dataIn()
-    if ((slave()==FALSE) && metadata(dataIn())[["typeOfData"]]=='protein')
+    if ((slave()==FALSE) && MultiAssayExperiment::metadata(dataIn())[["typeOfData"]]=='protein')
       {
       mod_plots_tracking_ui(ns('slave_tracking'))
     }

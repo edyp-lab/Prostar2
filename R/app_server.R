@@ -4,12 +4,18 @@ options(shiny.fullstacktrace = T)
 require(compiler)
 enableJIT(3)
 
+lapply(list.files('R/Prostar_UI/', pattern='.R'), 
+       function(x) {source(file.path('R/Prostar_UI', x), local=TRUE)$value })
+
+lapply(list.files('R/Tools/', pattern='.R'), 
+       function(x) {source(file.path('R/Tools', x), local=TRUE)$value })
 
 lapply(list.files('R/DataManager/', pattern='.R'), 
        function(x) {source(file.path('R/DataManager',x), local=TRUE)$value })
 
 lapply(list.files('R/Plots/', pattern='.R'), 
        function(x) {source(file.path('R/Plots', x), local=TRUE)$value })
+
 
 
 #' @import shiny
@@ -95,8 +101,8 @@ app_server <- function(input, output,session) {
   # Update several reactive variable once a dataset is loaded
   setCoreRV <- reactive({
     # We begins with the last SE in the QFeatures dataset
-    rv.core$current.indice <- length(names(rv.core$current.obj))
-    rv.core$current.pipeline <- metadata(rv.core$current.obj)$pipelineType
+    rv.core$current.indice <- length(rv.core$current.obj)
+    rv.core$current.pipeline <- MultiAssayExperiment::metadata(rv.core$current.obj)$pipelineType
   })
   
   
@@ -173,7 +179,7 @@ app_server <- function(input, output,session) {
      )
      
      
-      if (metadata(rv.core$current.obj)$pipelineType == 'peptide'){
+      if (MultiAssayExperiment::metadata(rv.core$current.obj)$pipelineType == 'peptide'){
      # callModule(module = mod_graph_pept_prot_server, "CC_Multi_Any",
      #            obj = reactive({rv.core$current.obj})
      #             )
@@ -249,21 +255,21 @@ app_server <- function(input, output,session) {
    
    
    
-   # GetScreenId <- reactive({
-   #   input$navPage
-   #   req(rv.core$current.obj)
-   #   
-   #   screen <- NULL
-   #   m <-  which(names(rv.core$current.obj@datasets)==input$navPage)
-   #   n <-  which(unlist(lapply(GetCurrentMSnSet(), function(x) length(which(x==rv.core$current.obj@datasets))))==1)
-   #   ## test if the navPage is one of a process one
-   #   if (length(m) ==0 || length(n) ==0) {return(NULL)}
-   #   
-   #   if (m >= n) { screen <- 'Initial screen'}
-   #   else {screen <- 'Final screen'}
-   #   print(paste0("in GetScreenId(), n = ", n, ", m = ", m, ". screen = ", screen))
-   #   screen
-   # })
+   GetScreenId <- reactive({
+     input$navPage
+     req(rv.core$current.obj)
+
+     screen <- NULL
+     m <-  which(names(rv.core$current.obj)==input$navPage)
+     n <-  which(unlist(lapply(GetCurrentMSnSet(), function(x) length(which(x==rv.core$current.obj))))==1)
+     ## test if the navPage is one of a process one
+     if (length(m) ==0 || length(n) ==0) {return(NULL)}
+
+     if (m >= n) { screen <- 'Initial screen'}
+     else {screen <- 'Final screen'}
+     print(paste0("in GetScreenId(), n = ", n, ", m = ", m, ". screen = ", screen))
+     screen
+   })
    
    
    

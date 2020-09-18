@@ -29,6 +29,7 @@ mod_pipe_protein_Normalization_ui <- function(id){
 #' @param ind xxx
 #' 
 #' @importFrom DAPAR2 normalizeD compareNormalizationD_HC
+#' @import QFeatures
 #' 
 mod_pipe_protein_Normalization_server <- function(input, output, session, obj, indice){
   ns <- session$ns
@@ -127,7 +128,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
                                    "master_ProtSelection", 
                                    obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
                                    params = reactive({NULL}),
-                                   keyId = reactive({metadata(obj())[['keyId']]}),
+                                   keyId = reactive({MultiAssayExperiment::metadata(obj())[['keyId']]}),
                                    reset = reactive({rv.norm$resetTracking}),
                                    slave = reactive({FALSE})
   )
@@ -139,7 +140,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
   rv.norm$trackFromBoxplot <- callModule(mod_plots_intensity_server,
                                          "boxPlot_Norm",
                                          dataIn = reactive({rv.norm$dataIn[[rv.norm$i]]}),
-                                         meta = reactive({metadata(obj())}),
+                                         meta = reactive({MultiAssayExperiment::metadata(obj())}),
                                          conds = reactive({colData(obj())[['Condition']]}),
                                          base_palette = reactive({rv.norm$settings()$basePalette}),
                                          params = reactive({
@@ -342,7 +343,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     shinyjs::toggle("normalization.type", 
                     condition=( rv.norm$widgets$method %in% c(DAPAR2::normalizeMethods.dapar()[-which(DAPAR2::normalizeMethods.dapar()=="GlobalQuantileAlignment")])))
     
-    cond <- metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
+    cond <- MultiAssayExperiment::metadata(rv.norm$dataIn[[rv.norm$i]])$typeOfData == 'protein'
     trackAvailable <- rv.norm$widgets$method %in% DAPAR2::normalizeMethods.dapar()
     shinyjs::toggle('DivMasterProtSelection', condition= cond && trackAvailable)
     shinyjs::toggle('SyncForNorm', condition= cond && trackAvailable)
@@ -356,7 +357,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     print('in GetIndicesOfSelectedProteins')
     print(rv.norm$trackFromBoxplot())
     ind <- NULL
-    ll <- SummarizedExperiment::rowData(rv.norm$dataIn[[rv.norm$i]])[,metadata(rv.norm$dataIn)$keyId]
+    ll <- SummarizedExperiment::rowData(rv.norm$dataIn[[rv.norm$i]])[,MultiAssayExperiment::metadata(rv.norm$dataIn)$keyId]
     tt <- rv.norm$trackFromBoxplot()$type
     switch(tt,
            ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
@@ -557,7 +558,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
   observeEvent(input$valid.normalization,{ 
     
     if (rv.norm$widgets$method != "None") {
-      metadata(rv.norm$dataIn[[rv.norm$i]])$Params <- list(
+      MultiAssayExperiment::metadata(rv.norm$dataIn[[rv.norm$i]])$Params <- list(
         method = rv.norm$widgets$method,
         type = rv.norm$widgets$type,
         varReduction = rv.norm$widgets$varReduction,

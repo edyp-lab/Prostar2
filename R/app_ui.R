@@ -19,9 +19,12 @@ t = setTimeout(logout, %s);  // time is in milliseconds (1000 is 1 second)
 idleTimer();", timeoutSeconds*1000, timeoutSeconds, timeoutSeconds*1000)
 
 
+lapply(list.files('R/Prostar_UI/', pattern='.R'), 
+       function(x) {source(file.path('R/Prostar_UI', x), local=TRUE)$value })
 
+lapply(list.files('R/Tools/', pattern='.R'), 
+       function(x) {source(file.path('R/Tools', x), local=TRUE)$value })
 
-#browser()
 lapply(list.files('R/DataManager/', pattern='.R'), 
        function(x) {source(file.path('R/DataManager',x), local=FALSE)$value })
 

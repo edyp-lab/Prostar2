@@ -97,10 +97,10 @@ mod_format_DT_server <- function(input, output, session,
                                   ordering = FALSE
                       )
         )  %>%
-          formatStyle(
+          DT::formatStyle(
             columns = style()$cols,
             valueColumns = style()$vals,
-            backgroundColor = styleEqual(style()$unique, style()$pal)
+            backgroundColor = DT::styleEqual(style()$unique, style()$pal)
           )
       }
     })

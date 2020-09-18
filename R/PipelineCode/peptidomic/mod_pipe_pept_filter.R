@@ -139,7 +139,7 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
   observe({
     req(obj())
     
-    if (metadata(obj()[[length(experiments(obj()))]])$typeOfData != 'peptide'){
+    if (MultiAssayExperiment::metadata(obj()[[length(obj())]])$typeOfData != 'peptide'){
       stop("The type of data contained in the dataset is not 'peptide'")
       return(NULL)
     }
@@ -229,20 +229,20 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
       
       rv.filter$dataIn <- QFeatures::filterFeatures(rv.filter$dataIn, na_filter)
       rv.filter$dataIn <- DAPAR2::removeAdditionalCol(rv.filter$dataIn, "tagNA")
-      key <- metadata(rv.filter$dataIn)$keyId
+      key <- MultiAssayExperiment::metadata(rv.filter$dataIn)$keyId
       from <- i -1
       to <- i
       # rv.filter$dataIn <- addAssayLink(rv.filter$dataIn, from = from, to = to, varFrom = key, varTo = key)
       
       ## keep track of deleted rows
-      rv.filter$deleted.mvLines <- setdiff(rowData(rv.filter$dataIn[[from]])[,metadata(rv.filter$dataIn)$keyId], 
-                                           rowData(rv.filter$dataIn[[to]])[,metadata(rv.filter$dataIn)$keyId])
+      rv.filter$deleted.mvLines <- setdiff(rowData(rv.filter$dataIn[[from]])[,MultiAssayExperiment::metadata(rv.filter$dataIn)$keyId], 
+                                           rowData(rv.filter$dataIn[[to]])[,MultiAssayExperiment::metadata(rv.filter$dataIn)$keyId])
       
       #browser()
       i <- length(names(rv.filter$dataIn))
       ind <- grep('_filtered_', names(rv.filter$dataIn))
       if (length(ind) >= 2)
-        metadata(rv.filter$dataIn[[i]])$Params <- metadata(rv.filter$dataIn[[ind[length(ind)-1]]])$Params
+        MultiAssayExperiment::metadata(rv.filter$dataIn[[i]])$Params <- metadata(rv.filter$dataIn[[ind[length(ind)-1]]])$Params
       
       if (rv.filter$widgets$ChooseFilters == 'EmptyLines')
         txt <- paste0('type=',rv.filter$widgets$ChooseFilters,
@@ -252,7 +252,7 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
                       ' th=',rv.filter$widgets$seuilNA, 
                       ' percent=', rv.filter$widgets$percent)
       
-      metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- txt
+      MultiAssayExperiment::metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- txt
       
       .total <- ifelse(length(experiments(rv.filter$dataIn )) > 0, nrow(rv.filter$dataIn[[i]]), 0)
       df <- data.frame(Filter = rv.filter$widgets$ChooseFilters, 
@@ -479,8 +479,8 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
     
     if (length(experiments(.tmp)) > 0) {
       rv.filter$tmp[[i]] <- .tmp[[i]]
-      rv.filter$deleted.field <- setdiff(rowData(rv.filter$tmp[[i-1]])[,metadata(rv.filter$tmp)$keyId],
-                                         rowData(rv.filter$tmp[[i]])[,metadata(rv.filter$tmp)$keyId])
+      rv.filter$deleted.field <- setdiff(rowData(rv.filter$tmp[[i-1]])[,MultiAssayExperiment::metadata(rv.filter$tmp)$keyId],
+                                         rowData(rv.filter$tmp[[i]])[,MultiAssayExperiment::metadata(rv.filter$tmp)$keyId])
       #browser()
       shinyjs::enable('btn_perform_fieldFilter')
     } else {
@@ -512,8 +512,8 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
     i <- length(names(rv.filter$dataIn))
     ind <- grep('_filtered_', names(rv.filter$dataIn))
     if (length(ind) >= 2)
-      metadata(rv.filter$dataIn[[i]])$Params <- metadata(rv.filter$dataIn[[ind[length(ind)-1]]])$Params
-    metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
+      MultiAssayExperiment::metadata(rv.filter$dataIn[[i]])$Params <- MultiAssayExperiment::metadata(rv.filter$dataIn[[ind[length(ind)-1]]])$Params
+    MultiAssayExperiment::metadata(rv.filter$dataIn[[i]])$Params[[paste0('field_filter_',i)]] <- paste0('field=', rv.filter$widgets$fieldName,
                                                                                   ' operator=',rv.filter$widgets$operator, 
                                                                                   ' value=', rv.filter$widgets$fieldFilter_value)
     
@@ -568,9 +568,9 @@ mod_pipe_pept_filter_server <- function(input, output, session, obj, ind){
                                     rv.filter$dataIn[[length(names(rv.filter$dataIn))]],
                                     'filtered')
       
-      if (!is.null(metadata(rv.filter$dataOut)$parentProtId)){
-        rv.filter$dataOut <- DAPAR2::addListAdjacencyMatrices(rv.filter$dataOut, length(names(rv.filter$dataOut)))
-        rv.filter$dataOut <- DAPAR2::addConnexComp(rv.filter$dataOut, length(names(rv.filter$dataOut)))
+      if (!is.null(MultiAssayExperiment::metadata(rv.filter$dataOut)$parentProtId)){
+        rv.filter$dataOut <- DAPAR2::addListAdjacencyMatrices(rv.filter$dataOut, length(rv.filter$dataOut))
+        rv.filter$dataOut <- DAPAR2::addConnexComp(rv.filter$dataOut, length(rv.filter$dataOut))
       } else {
         
       }
