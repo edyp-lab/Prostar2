@@ -92,7 +92,9 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   observeEvent(req(r.nav$reset),{
     
-    rv.filter$widgets <- list()
+    rv.filter$widgets <- list(
+      ## need to put each items to its default value
+    )
     
     ## do not modify this part
     rv.filter$dataIn <- obj()
@@ -117,30 +119,21 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   ##
   
   
-  rv.filter$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.filter$dataIn}))
+  rv$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.filter$dataIn}))
   
   
-  
+  # Initialisation of the module
   observe({
     req(obj(), indice())
-    
     rv.filter$dataIn <- obj()
     rv.filter$i <- indice()
-    
-    
-    if (MultiAssayExperiment::metadata(obj()[[indice()]])$typeOfData != 'protein'){
-      stop("The type of data contained in the dataset is not 'protein'")
-      return(NULL)
-    }
-    
   })
   
   
   # If the user accepts the conditions on the shinyalert, then the process module is activated
   observe({
-    input$shinyalert
+    req(input$shinyalert)
     rv.filter$i
-    if(is.null(input$shinyalert))return(NULL)
     
     c1 <- input$shinyalert
     c2 <- rv.filter$i == length(rv.filter$dataIn)
@@ -179,24 +172,6 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   
   
-  ##
-  ## Perform process
-  observeEvent(input$perform.filtering.MV,ignoreInit=TRUE,{
-
-    
-    isolate({
-      
-        r.nav$isDone[1] <- TRUE
-        
-    })
-  })
-  
-  #for each widget
-  observeEvent(input$seuilNA, ignoreInit=TRUE,{
-    rv.filter$widgets$seuilNA <- input$seuilNA
-  })
-  
-  
   
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 2                                        ###
@@ -210,16 +185,6 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   
   
   
-  observeEvent(input$btn_perform_fieldFilter,ignoreInit=TRUE,{
- 
-      r.nav$isDone[2] <- TRUE
- 
-  })
-  
-  
-  
-  
-  
   ###---------------------------------------------------------------------------------###
   ###                                 Screen 3                                        ###
   ###---------------------------------------------------------------------------------###
@@ -229,10 +194,6 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   })
   
   
-  observeEvent(input$ValidateFilters,ignoreInit = TRUE,{
-
-    r.nav$isDone[3] <- TRUE
-  })
   
   
   return({reactive(rv.filter$dataOut)})
