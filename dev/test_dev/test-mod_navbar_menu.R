@@ -75,7 +75,7 @@ server <- function(input, output, session) {
     tmp = NULL,
     indice = NULL
   )
-  callModule(mod_navbar_menu_server,'menu')
+  #callModule(mod_navbar_menu_server,'menu')
   
   #callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', pipeline.def=reactive({pipeline.defs}))
   

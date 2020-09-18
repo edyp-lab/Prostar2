@@ -36,12 +36,19 @@ remove_shiny_inputs <- function(id, .input) {
 }
 
 
+remove_all_module_observers <- function(session){
+  browser()
+  cnames <- names(session$userData)
+  ind <- grep('_observer_', names(session$userData))
+  for (i in cnames)
+    session$userData[[i]]$destroy()
+} 
+
 remove_module_observers <- function(session, id){
   cnames <- names(session$userData)
   ind <- grep(id, names(session$userData))
   session$userData[[cnames[ind]]]$destroy()
 } 
-
 
 
 ###--------------------------------------------------------------
@@ -84,7 +91,8 @@ ui <- fluidPage(
   actionButton('addButton', '', icon = icon('plus')),
   selectInput('test', '', choices=1:15, width='70px'),
   uiOutput('mod2delete_ui'),
-  actionButton('delButton', 'Delete selected module', icon = icon('times'))
+  actionButton('delButton', 'Delete selected module', icon = icon('times')),
+  actionButton('delButtonAll', 'Delete ALL modules', icon = icon('times'))
 )
 
 
@@ -112,10 +120,15 @@ server <- function(input, output, session) {
     
     mod_test_server(id, val = reactive(input$test))
     rv$activeMods <- c(rv$activeMods, id)
-    
-    
   })
   
+  
+  observeEvent(input$delButtonAll, {
+    #removeUI(selector = sprintf('#%s', input$mod2delete))
+    #remove_shiny_inputs(input$mod2delete, input)
+    remove_all_module_observers(session)
+    
+  })
   
   observeEvent(input$delButton, {
     removeUI(selector = sprintf('#%s', input$mod2delete))
