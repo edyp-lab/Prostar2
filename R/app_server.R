@@ -51,7 +51,7 @@ app_server <- function(input, output,session) {
     
     
     # objects returned by demode, openmode and convertmode
-    tmp_dataManager = reactiveValues(convert = NULL,
+    tmp_dataManager = list(convert = NULL,
                               openFile = NULL,
                               openDemo = NULL),
     

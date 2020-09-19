@@ -1,4 +1,4 @@
-mod_B_ui <- function(id){
+mod_process_B_ui <- function(id){
   ns <- NS(id)
   tagList(
     tags$h4(paste0('Module ', id)),
@@ -8,7 +8,7 @@ mod_B_ui <- function(id){
 }
 
 
-mod_B_server <- function(id, dataIn=NULL){
+mod_process_B_server <- function(id, dataIn=NULL){
   moduleServer(
     id,
     function(input, output, session){
@@ -19,7 +19,7 @@ mod_B_server <- function(id, dataIn=NULL){
       )
       
       
-      session$userData$mod_B_observer_1 <-  observeEvent(dataIn(),{ 
+      session$userData$mod_B_obs_1 <-  observeEvent(dataIn(),{ 
         rv$dataIn <- dataIn()
         print(paste0('Module B, observer 1 -> ', rv$dataIn))
       })
@@ -30,7 +30,7 @@ mod_B_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(input$btn_valid,{
-        rv$dataOut <-  rv$dataIn
+        rv$dataOut <-  paste0('B_',rv$dataIn, ' ')
       })
       
       return(reactive({rv$dataOut}))
