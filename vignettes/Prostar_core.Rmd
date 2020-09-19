@@ -1,5 +1,6 @@
 ---
 title: "Prostar core"
+subtitle: "A developer's guidelines"
 author: "Samuel Wieczorek"
 date: "01/07/2020"
 output: 

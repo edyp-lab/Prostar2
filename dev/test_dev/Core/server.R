@@ -89,20 +89,12 @@ server <- function(input, output, session) {
       source(file.path('./Process', paste0('watch_', input$navPage, '.R')), local=TRUE)$value
 
     
-    # Launch the server parts of data sources module
-    if('mod_source_1' == input$navPage)
-      rv.core$current.obj <- mod_source_1_server('mod_source_1', dataIn = reactive('dataIn_1'))
-    
-    if('mod_source_2' == input$navPage)
-      rv.core$current.obj <- mod_source_2_server('mod_source_2', dataIn = reactive('dataIn_2'))
-    
-    if('mod_source_3' == input$navPage)
-      rv.core$current.obj <- mod_source_3_server('mod_source_3', dataIn = reactive('dataIn_3'))
-    
-  
-    observeEvent(rv.core$tmp$mod1(), {rv.core$current.obj <- rv.core$tmp$mod1()})
-    observeEvent(rv.core$tmp$mod2(), {rv.core$current.obj <- rv.core$tmp$mod2()})
-    observeEvent(rv.core$tmp$mod3(), {rv.core$current.obj <- rv.core$tmp$mod3()})
+    # Launch the server parts of data sources module via the module_All_source
+    # which manages all the modules that load a dataset in Prostar
+    if (input$navPage %in% c('mod_source_1', 'mod_source_2', 'mod_source_3')){
+      rv.core$tmp <- mod_All_source_server('mod_source_1', navPage = reactive({input$navPage}))
+      observeEvent(rv.core$tmp, {rv.core$current.obj <- rv.core$tmp()})
+      }
     
   })
   
