@@ -53,10 +53,8 @@ tagList(
 
         titlePanel("", windowTitle = "Prostar"),
         ###### DIV LOADING PAGE  #######
-         div(id = "loading_page",
-             mod_loading_page_ui('loadPage')
-         ),
-         #
+         div(id = "loading_page", mod_loading_page_ui('loadPage') ),
+
         ###### DIV MAIN CONTENT  #######
         shinyjs::hidden(
           div(id = "main_content",

@@ -8,21 +8,23 @@ mod_process_C_ui <- function(id){
 }
 
 
-mod_process_C_server <- function(id, dataIn=NULL){
+mod_process_C_server <- function(id, dataIn=NULL, indice){
   moduleServer(
     id,
     function(input, output, session){
       
       rv <-reactiveValues(
         dataIn = NULL,
+        indice = 0,
         dataOut = NULL
       )
       
       
-      session$userData$mod_C_obs_1 <-  observeEvent(dataIn(),{ 
+      session$userData$mod_C_obs_1 <-  observeEvent(c(dataIn(), indice()), { 
         rv$dataIn <- dataIn()
-        print(paste0('Module C, observer 1-dataIn() -> ', rv$dataIn))
-        })
+        rv$indice <- indice()
+        print(paste0('Module C, observer 1 - dataIn()= ', rv$dataIn, ', indice = ', rv$indice))
+      })
       
       output$show_n <- renderUI({rv$dataIn})
       

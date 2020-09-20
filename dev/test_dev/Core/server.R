@@ -1,11 +1,16 @@
 library(DAPAR2)
 library(shiny)
 
+options(shiny.fullstacktrace = F)
 
-source(file.path('../../../R', 'mod_navbar_menu.R'), local=TRUE)$value
+
+# Laucnh minimal necessary code to start the core server
 dir <- './DataManager'
 lapply(list.files(dir, pattern='.R'), 
        function(x) {source(file.path(dir,x), local=FALSE)$value })
+
+#source(file.path('.', 'mod_change_dataset.R'), local=FALSE)$value
+
 
 remove_shiny_inputs <- function(id, .input) {
   invisible(
@@ -32,24 +37,51 @@ server <- function(input, output, session) {
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv.core <- reactiveValues(
-    current.obj = 0,
-    tmp =NULL
+    current.obj = list(),
+    current.indice = 0,
+    tmp = NULL,
+    tmp_indice = NULL
   )
    
   
   
+  # Launch the module which manages the current dataset in the list of current.obj
+  rv.core$tmp_indice <- callModule(mod_change_dataset_server, 
+                                   'mod_change_dataset', 
+                                   ll.se = reactive({names(rv.core$current.obj)}),
+                                   indice = reactive({rv.core$current.indice})
+  )
+  
+  observeEvent(rv.core$tmp_indice(),{ rv.core$current.indice <- rv.core$tmp_indice()  })
+  
   output$activeTab <- renderUI({
-    p(paste0('input$navPage = ',input$navPage))
+    tags$p(tags$strong(paste0('input$navPage = ',input$navPage)))
   })
   
   output$currentObj <- renderUI({
     rv.core$current.obj
-    p(paste0('rv.core$current.obj = ', rv.core$current.obj))
+
+    tagList(
+      tags$p(tags$strong('rv.core$current.obj : ')),
+      tags$ul(
+        lapply(paste0(names(rv.core$current.obj), "=", unlist(rv.core$current.obj)), function(x) tags$li(x))
+    )
+    )
   })
   
+  output$names_Input <- renderUI({
+    tagList(
+      tags$p(tags$strong('List input = ')),
+      tags$ul(
+      lapply(names(reactiveValuesToList(input)), function(x) tags$li(x)))
+      )
+    
+  })
   
+ observeEvent(c(input$page, rv.core$current.obj), ignoreInit=TRUE, {
+   if(length(grep('mod_source_', input$navPage)) == 0)
+     return(NULL)
 
-  observeEvent(input$addButton, {
     # here, one source the code for modules that there are to be used.
     # This simulates the choice of pipeline in Prostar: we do not source
     # all the modules available in Prostar but only those needed
@@ -74,11 +106,8 @@ server <- function(input, output, session) {
     })
   
 
-  
-  
-  
-  observeEvent(input$navPage,{
-    
+  observeEvent(input$navPage, ignoreInit = FALSE,{
+
     # Delete the server part of all modules
     remove_all_module_observers(session, pattern='_obs_')
 
@@ -86,10 +115,13 @@ server <- function(input, output, session) {
     if(length(grep('mod_process_', input$navPage)) > 0)
       rv.core$tmp <- source(file.path('./Process', paste0('watch_', input$navPage, '.R')), local=TRUE)$value
     
-    # Launch the server parts of data sources module via the module_All_source
-    # which manages all the modules that load a dataset in Prostar
+    # Launch the server parts of the corresponding data sources module 
     if(length(grep('mod_source_', input$navPage)) > 0)
-      rv.core$tmp <- do.call(paste0(input$navPage, '_server'), list(id=input$navPage, params = reactive({input$navPage})))
+      rv.core$tmp <- do.call(paste0(input$navPage, '_server'), 
+                             list(id=input$navPage, 
+                                  params = reactive({input$navPage})
+                                  )
+                             )
 
     observeEvent(rv.core$tmp(), {rv.core$current.obj <- rv.core$tmp()})
     

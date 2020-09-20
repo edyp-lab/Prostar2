@@ -29,7 +29,7 @@ mod_source_1_server <- function(id, params=NULL){
 #session$userData$mod_source_1_obs_2 <- 
       observeEvent(input$btn_valid,{
         print(paste0('Module source 1, observer 2 -> ', input$n))
-        rv$dataOut <- input$n
+        rv$dataOut <- setNames(lapply(1:input$n, function(x) {x}), paste0('item_',1:input$n))
       })
       
       return(reactive(rv$dataOut))
