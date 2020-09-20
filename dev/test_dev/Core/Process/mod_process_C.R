@@ -21,14 +21,15 @@ mod_process_C_server <- function(id, dataIn=NULL){
       
       session$userData$mod_C_obs_1 <-  observeEvent(dataIn(),{ 
         rv$dataIn <- dataIn()
-        print(paste0('Module C, observer 1 -> ', rv$dataIn))
+        print(paste0('Module C, observer 1-dataIn() -> ', rv$dataIn))
         })
       
       output$show_n <- renderUI({rv$dataIn})
       
       
-      observeEvent(input$btn_valid,{
+      session$userData$mod_C_obs_2 <-  observeEvent(input$btn_valid,{
         rv$dataOut <-  paste0('C_',rv$dataIn, ' ')
+        print(paste0('Module C, observer btn_valid -> ', rv$dataOut))
       })
       
       return(reactive({rv$dataOut}))

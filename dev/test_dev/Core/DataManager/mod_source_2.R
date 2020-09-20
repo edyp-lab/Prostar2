@@ -11,7 +11,7 @@ mod_source_2_ui <- function(id){
 }
 
 
-mod_source_2_server <- function(id, dataIn=NULL){
+mod_source_2_server <- function(id, params=NULL){
   moduleServer(
     id,
     function(input, output, session){
@@ -21,16 +21,11 @@ mod_source_2_server <- function(id, dataIn=NULL){
         dataOut = NULL
       )
       
-      session$userData$mod_source_2_obs_1 <-  observeEvent(dataIn(),{ 
-        rv$dataIn <- dataIn()
-        print(paste0('Module source 2, observer 1 -> ', rv$dataIn))
+      session$userData$mod_source_2_obs_1 <-  observeEvent(params(),{ 
+        rv$params <- params()
+        print(paste0('Module source 2, observer 1 -> ', rv$params))
       })
-      
-      
-      output$show_n <- renderUI({
-        rv$dataIn
-      })
-      
+
       session$userData$mod_source_2_obs_2 <- observeEvent(input$btn_valid,{
         print(paste0('Module source 2, observer 2 -> ', input$n))
         rv$dataOut <- paste0('mod_source_2_',input$n)

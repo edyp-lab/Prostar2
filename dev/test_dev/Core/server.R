@@ -33,9 +33,7 @@ server <- function(input, output, session) {
   
   rv.core <- reactiveValues(
     current.obj = 0,
-    tmp = list(mod1=NULL,
-               mod2=NULL,
-               mod3=NULL)
+    tmp =NULL
   )
    
   
@@ -86,15 +84,14 @@ server <- function(input, output, session) {
 
     #if the activePage is a process one, then launch the corresponding server
     if(length(grep('mod_process_', input$navPage)) > 0)
-      source(file.path('./Process', paste0('watch_', input$navPage, '.R')), local=TRUE)$value
-
+      rv.core$tmp <- source(file.path('./Process', paste0('watch_', input$navPage, '.R')), local=TRUE)$value
     
     # Launch the server parts of data sources module via the module_All_source
     # which manages all the modules that load a dataset in Prostar
-    if (input$navPage %in% c('mod_source_1', 'mod_source_2', 'mod_source_3')){
-      rv.core$tmp <- mod_All_source_server('mod_source_1', navPage = reactive({input$navPage}))
-      observeEvent(rv.core$tmp, {rv.core$current.obj <- rv.core$tmp()})
-      }
+    if(length(grep('mod_source_', input$navPage)) > 0)
+      rv.core$tmp <- do.call(paste0(input$navPage, '_server'), list(id=input$navPage, params = reactive({input$navPage})))
+
+    observeEvent(rv.core$tmp(), {rv.core$current.obj <- rv.core$tmp()})
     
   })
   

@@ -21,7 +21,7 @@ mod_process_B_server <- function(id, dataIn=NULL){
       
       session$userData$mod_B_obs_1 <-  observeEvent(dataIn(),{ 
         rv$dataIn <- dataIn()
-        print(paste0('Module B, observer 1 -> ', rv$dataIn))
+        print(paste0('Module B, observer 1 - dataIn() -> ', rv$dataIn))
       })
       
       
@@ -29,8 +29,9 @@ mod_process_B_server <- function(id, dataIn=NULL){
         dataIn()
       })
       
-      observeEvent(input$btn_valid,{
+      session$userData$mod_B_obs_2 <-  observeEvent(input$btn_valid,{
         rv$dataOut <-  paste0('B_',rv$dataIn, ' ')
+        print(paste0('Module B, observer btn_valid -> ', rv$dataOut))
       })
       
       return(reactive({rv$dataOut}))
