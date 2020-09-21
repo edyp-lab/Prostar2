@@ -2,7 +2,7 @@
 
 
 ui <- "
-#' name UI Function
+#' pipe_name UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -14,7 +14,7 @@ ui <- "
 #' @import shinyjs
 #' @importFrom shinyalert useShinyalert
 #' 
-mod_name_ui <- function(id){
+mod_pipe_name_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
@@ -27,7 +27,7 @@ mod_name_ui <- function(id){
 
 
 start_server <- "
-#' name Server Function
+#' pipe_name Server Function
 #'
 #' @noRd 
 #' 
@@ -35,8 +35,10 @@ start_server <- "
 #' @import QFeatures
 #' @importFrom shinyalert shinyalert
 #' 
-mod_name_server <- function(input, output, session, obj, indice){
+mod_pipe_name_server <- function(input, output, session, obj, indice){
   ns <- session$ns
+  
+  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
 "
 
 
@@ -47,12 +49,9 @@ rNav <- "
   r.nav <- reactiveValues(
     name = 'process',
     stepsNames = steps,
-    ll.UI = list( screenStep1 = uiOutput(ns('Screen_process_1')),
-                  screenStep2 = uiOutput(ns('Screen_process_2')),
-                  screenStep3 = uiOutput(ns('Screen_process_3'))
-    ),
-    isDone =  rep(FALSE,3),
-    mandatory =  rep(FALSE,3),
+    ll.UI = list(ll.UI_list),
+    isDone =  rep(FALSE,nb_screen),
+    mandatory =  rep(FALSE,nb_screen),
     reset = FALSE
   )
 "

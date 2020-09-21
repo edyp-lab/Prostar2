@@ -1,5 +1,5 @@
 
-#' pipe_prot_filter UI Function
+#' pipe_protein_Filtering UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -20,7 +20,7 @@ mod_pipe_protein_Filtering_ui <- function(id){
   )
 }
 
-#' pipe_prot_filter Server Function
+#' pipe_protein_Filtering Server Function
 #'
 #' @noRd 
 #' 
@@ -30,35 +30,49 @@ mod_pipe_protein_Filtering_ui <- function(id){
 #' 
 mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indice){
   ns <- session$ns
-
-## Section navigation module
+  
+  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+  
+  ## Section navigation module
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
     name = 'Filtering',
     stepsNames = c('MV filtering', 'Field filtering', 'Validate'),
-    ll.UI = list( screenStep1 = uiOutput(ns('Screen_Filtering_1')),
-                  screenStep2 = uiOutput(ns('Screen_Filtering_2')),
-                  screenStep3 = uiOutput(ns('Screen_Filtering_3'))
-    ),
+    ll.UI = list(screenStep1 = uiOutput(ns('Screen_Filtering_1')),
+                 screenStep2 = uiOutput(ns('Screen_Filtering_2')),
+                 screenStep3 = uiOutput(ns('Screen_Filtering_3'))),
     isDone =  rep(FALSE,3),
     mandatory =  rep(FALSE,3),
     reset = FALSE
   )
-
-## reactive values for variables in the module
+  
+  ## reactive values for variables in the module
   rv <- reactiveValues(
-    name = 'processProtFilter',
+    name = 'process_Filtering',
     dataIn = NULL,
     dataOut = NULL,
     i = NULL,
     settings = NULL,
     
-    widgets = list(
-      
-    )
+    widgets = list(ChooseFilters = "None",seuilNA = 0)
   )
-
-#shinyalert modal asking if user wants to process a dataset with an index <i
+  
+  observeEvent(req(r.nav$reset),{
+    
+    rv$widgets <- list(ChooseFilters = "None",seuilNA = 0)
+    
+    ## do not modify this part
+    rv$dataIn <- obj()
+    rv$i <- indice()
+    
+    r.nav$isDone <- rep(FALSE, 3)
+    r.nav$reset <- FALSE
+    ## end of no modifiable part
+    
+    
+  })
+  
+  #shinyalert modal asking if user wants to process a dataset with an index <i
   observeEvent(req(rv$dataIn, rv$i ), {
     
     a <- (length(rv$dataIn) != rv$i) && !r.nav$isDone[length(r.nav$isDone)]
@@ -82,8 +96,8 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
       animation = FALSE
     )
   })
-
-observe({
+  
+  observe({
     req(input$shinyalert)
     rv$i
     
@@ -101,13 +115,13 @@ observe({
     }
     shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
   })
-
- return({reactive(rv$dataOut)})
-
+  
+  return({reactive(rv$dataOut)})
+  
 }
 
 ## To be copied in the UI
-# mod_pipe_protein_Filtering_ui('pipe_prot_filter_ui_1')
+# mod_pipe_protein_Filtering_ui('pipe_protein_Filtering_ui_1')
 
 ## To be copied in the server
-# callModule(mod_pipe_protein_Filtering_server, 'pipe_prot_filter_ui_1')
+# callModule(mod_pipe_protein_Filtering_server, 'pipe_protein_Filtering_ui_1')
