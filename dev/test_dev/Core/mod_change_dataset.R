@@ -68,7 +68,6 @@ mod_change_dataset_server <- function(input, output, session, ll.se, indice){
   
   ## manual change of current dataset
   observeEvent(input$currentDataset,{
-    print('!!!!! Manual change of current dataset')
     
     n <- which(ll.se() == input$currentDataset)
     if (length(n)==0){

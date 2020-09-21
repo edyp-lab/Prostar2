@@ -3,9 +3,12 @@ mod_wf_wf1_B_ui <- function(id){
   tagList(shinyjs::useShinyjs(),
           shinyalert::useShinyalert(),
           div(id=ns('div_nav_pipe_process'),
-              tags$h4(paste0('Module ', id)),
-              tags$p('y = 10 * x'),
-              actionButton(ns('btn_valid'), 'Validate')
+              wellPanel(
+                tags$h4(paste0('Module ', id)),
+                tags$p('y = 10 * x'),
+                actionButton(ns('btn_valid'), 'Validate')
+                ),
+              uiOutput(ns('currentObj'))
           )
   )
 }
@@ -21,11 +24,29 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, indice=NULL){
         dataOut = NULL
       )
       
+      # Just for the show absolutePanel
+      output$currentObj <- renderUI({
+        tagList(
+          tags$p(tags$strong(paste0('rv$indice = ',rv$indice))),
+          tags$p(tags$strong('rv$dataIn : ')),
+          tags$ul(
+            lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn )), 
+                   function(x) tags$li(x))
+          ),
+          br(),
+          tags$p(tags$strong('rv$dataOut : ')),
+          tags$ul(
+            lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut )), 
+                   function(x) tags$li(x))
+          )
+        )
+      })
+      
       
       session$userData$mod_B_obs_1 <-  observeEvent(c(dataIn(), indice()), { 
         rv$dataIn <- dataIn()
         rv$indice <- if (is.null(indice())) 1 else indice()
-        glue::glue('Module B, observer 1')
+        print('Module B, observer 1')
         
         # 
         # if (rv$indice == length(rv$dataIn))
@@ -55,8 +76,8 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, indice=NULL){
       #   shinyjs::toggleState('div_nav_pipe_process', condition = input$shinyalert)
       # })
       
-      session$userData$mod_B_obs_2 <-  observeEvent(input$btn_valid,{
-        isolate({
+      session$userData$mod_B_obs_2 <-  observeEvent(input$btn_valid, ignoreInit=T, ignoreNULL = T,{
+
         # We delete all items that are further the given indice
         # to ensure that the new item is always the last one
         print('btn_valid')
@@ -73,7 +94,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, indice=NULL){
         rv$dataOut <- rv$dataIn
         glue::glue('Module B, observer btn_valid')
       })
-      })
+
       
       return(reactive({rv$dataOut}))
     }

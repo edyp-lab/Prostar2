@@ -29,9 +29,9 @@ ui <- function() {
         wellPanel(
           style= "text-align: center; background-color: lightblue;",
           uiOutput('activeTab'),
+          uiOutput('currentIndice'),
           uiOutput('currentObj'),
           #uiOutput('names_Input'),
-          uiOutput('currentIndice'),
           width='300px'
           )
         ),

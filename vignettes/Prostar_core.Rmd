@@ -52,6 +52,16 @@ First, let write a simple A
 # Generalities
 
 
+## Contraints on the managment of modules
+
+* un process prend en entree un dataset de 'n' items et renvoie un dataset de (n+1) items
+* par defaut, l'indice courant est placé sur le dernier item du dataset. De la sorte, on modifie toujours le dernier item et on rajoute ainsi un nouvel item à la liste
+* pour un processus donné, si l'indice courant i n'est pas positionné  sur le dernier élément (i < N) alors, on supprime tous les items suivant (de i+1 à N) puis on procède à l'ajout du nouvel élément. 
+* on ne peut pas exécuter 2 fois de suite le même processus
+* a l'affichage de l'UI d'un processus déjà exécuté auparavant:
+  * si l'indice courant i est positionné sur le dernier élément du dataset, alors affichage du début du processus,
+  * si i est positionné sur un dataset précédent (i < N) (le dataset déjà traité par ce processus), alors on n'affiche que la dernière page du processus
+
 
 ## Nomenclature 
 

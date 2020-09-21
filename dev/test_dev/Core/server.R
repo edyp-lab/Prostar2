@@ -93,8 +93,9 @@ server <- function(input, output, session) {
 
   # On a new page, on launch the corresponding server module
   observeEvent(input$navPage, ignoreInit = FALSE,{
-
+    print('in observeEvent on input$navPage')
     # Delete the server part of all modules
+    #remove_shiny_inputs(input$navPage, input)
     remove_all_module_observers(session, pattern='_obs_')
     
     #if the activePage is a process one, then launch the corresponding server
@@ -124,18 +125,18 @@ server <- function(input, output, session) {
     dir <- paste0('./Workflows/', rv.core$current.workflow)
     rv.core$tmp <- source(file.path(dir,
                                     paste0('watch_', input$navPage, '.R')), local=TRUE)$value
-    
-    #Listen if a new dataset has been launched
-    # the variable rv.core$tmp() is linked to the datamanager server modules
-    session$userData$new_wf_obs_1 <- observeEvent(rv.core$tmp(), ignoreInit=TRUE, {
-      rv.core$current.obj <- rv.core$tmp()
-      
-      # By default, the last item in the dataset is the current one.
-      # So, needs to update the current indice to point the last item
-      rv.core$current.indice <- rv.core$current.indice + 1
-    })
   })
  
+  #Listen if a new dataset has been launched
+  # the variable rv.core$tmp() is linked to the datamanager server modules
+  observeEvent(rv.core$tmp(), ignoreInit=TRUE, ignoreNULL = T, {
+   
+    rv.core$current.obj <- rv.core$tmp()
+    
+    # By default, the last item in the dataset is the current one.
+    # So, needs to update the current indice to point the last item
+    rv.core$current.indice <- rv.core$current.indice + 1
+  })
     
     # A new dataset has been loaded in Prostar
     # Creation of the ui parts of process modules
@@ -187,7 +188,7 @@ server <- function(input, output, session) {
       })
       
 
-      rv.core$current_wf_menu <- paste0('Menu ', rv.core$current.workflow)
+      rv.core$current_wf_menu <- paste0('Menu for ', rv.core$current.workflow)
       insertTab(inputId = "navPage",
                 do.call(navbarMenu, c(rv.core$current_wf_menu ,tabs)),
                 target = 'data_manager',
