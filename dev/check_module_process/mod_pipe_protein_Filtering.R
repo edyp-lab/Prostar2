@@ -178,7 +178,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   ###---------------------------------------------------------------------------------###
   output$Screen_Filtering_2 <- renderUI({
 
-    
+    f
     
   })
   
