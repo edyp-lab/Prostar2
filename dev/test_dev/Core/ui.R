@@ -1,6 +1,9 @@
 
 # Laucnh minimal necessary code to start the ui server
 source(file.path('.', 'mod_change_dataset.R'), local=FALSE)$value
+dir <- './DataManager'
+lapply(list.files(dir, pattern='.R'), 
+       function(x) {source(file.path(dir,x), local=FALSE)$value })
 
 # List available values for workflows
 ll.wf <- paste0('wf', 1)

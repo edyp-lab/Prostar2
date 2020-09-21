@@ -231,11 +231,6 @@ $inactive: #AEB6BF;
   
   server = function(input, output) {
     
-    
-    
-   
-    
-    
     output$updateCssCode <- renderUI({
       input$nSteps
       code <- strsplit(code_sass,"\n")

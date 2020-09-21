@@ -1,5 +1,6 @@
 library(DAPAR2)
 library(shiny)
+library(DAPARdata2)
 
 # files <- list.files('../../R', pattern='.R')
 # files <- files[-which(files=='app_server.R')]
@@ -69,7 +70,7 @@ ui <- function() {
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
  
-  utils::data(Exp1_R25_pept, package='DAPARdata2')
+  utils::data('Exp1_R25_pept', package='DAPARdata2')
   
   rv <- reactiveValues(
     tmp = NULL,

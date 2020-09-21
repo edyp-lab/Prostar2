@@ -475,8 +475,8 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     GetIndicesOfSelectedProteins()
     print(GetIndicesOfSelectedProteins())
     
-    hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = SummarizedExperiment::assay(obj()[[indice()]]),
-                                           qDataAfter = SummarizedExperiment::assay(rv.norm$dataIn[[rv.norm$i]]),
+    hc <- DAPAR2::compareNormalizationD_HC(qDataBefore = assay(obj(), indice()),
+                                           qDataAfter = assay(rv.norm$dataIn, rv.norm$i),
                                            conds= colData(obj())$Condition,
                                            palette = rv.norm$settings()$basePalette,
                                            subset.view= GetIndicesOfSelectedProteins(),

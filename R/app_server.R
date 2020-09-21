@@ -4,6 +4,9 @@ options(shiny.fullstacktrace = T)
 require(compiler)
 enableJIT(3)
 
+
+library(QFeatures)
+
 lapply(list.files('R/Prostar_UI/', pattern='.R'), 
        function(x) {source(file.path('R/Prostar_UI', x), local=TRUE)$value })
 

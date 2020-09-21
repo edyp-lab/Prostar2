@@ -37,11 +37,11 @@ lapply(list.files('R/Plots/', pattern='.R'),
 #' @importFrom shiny includeCSS
 #' 
 app_ui <- function() {
-  
+ 
 tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-
+    #use_theme(dreamRs),
       launchGA(),
       tags$script(inactivity),
       shinyjs::useShinyjs(),
@@ -61,7 +61,8 @@ tagList(
               div(
                 id = "header",
                 # mod_navbar_menu_ui('mainMenu')
-                
+
+                  
                   fluidRow(class = 'headerrow', column(width = 12,
                                                        style = "font-size: 30pt; line-height: 10vh; text-align:left; color:#FFFFFF; width = 100",
                                                        tags$strong('Test')),
@@ -140,7 +141,15 @@ golem_add_external_resources <- function(){
   tags$head(
     golem::activate_js(),
     golem::favicon()
+    
     ,tags$link(rel="stylesheet", type="text/css", href="www/css/custom_sass.css")
+    
+    #,tags$head(tags$style(sass::sass(input = sass::sass_file("inst/app/www/css/_variables-Prostar.scss"),
+    #                           options = sass::sass_options(output_style = "expanded"))))
+    
+    # ,tags$head(tags$style(sass::sass(input = sass::sass_file("inst/app/www/css/_variables-cerulean.scss"),
+    #                                  options = sass::sass_options(output_style = "expanded"))))
+    
     ,tags$link(rel="stylesheet", type="text/css", href="www/css/prostar.css")
     #,tags$link(rel="stylesheet", type="text/css", href="www/css/loading_page.css")
     ,HTML("<script type='text/javascript' src='sbs/shinyBS.js'></script>")

@@ -17,6 +17,7 @@
 #' @export 
 #' 
 #' @importFrom shiny NS tagList 
+#' 
 mod_plots_density_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -31,6 +32,7 @@ mod_plots_density_ui <- function(id){
 #' @keywords internal
 #' 
 #' @importFrom DAPAR2 densityPlotD_HC
+#' @importFrom SummarizedExperiment assay
 #' 
 mod_plots_density_server <- function(input, output, session, 
                                      obj,
