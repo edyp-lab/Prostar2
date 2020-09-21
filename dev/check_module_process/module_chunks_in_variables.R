@@ -57,20 +57,17 @@ rNav <- "
   )
 "
 
-######################################################
 
 rvModule <- "
 ## reactive values for variables in the module
   rv <- reactiveValues(
-    name = 'processProtFilter',
+    name = 'process',
     dataIn = NULL,
     dataOut = NULL,
     i = NULL,
     settings = NULL,
     
-    widgets = list(
-      
-    )
+    widgets = widgets_list
   )
 "
 
@@ -79,7 +76,7 @@ rvModule <- "
 reset <- "
 observeEvent(req(r.nav$reset),{
     
-    rv$widgets <- list()
+    rv$widgets <- widgets_list
     
     ## do not modify this part
     rv$dataIn <- obj()
@@ -153,8 +150,8 @@ end_server <-  "
 }
 
 ## To be copied in the UI
-# mod_pipe_protein_Filtering_ui('pipe_prot_filter_ui_1')
+# mod_pipe_name_ui('pipe_name_ui_1')
 
 ## To be copied in the server
-# callModule(mod_pipe_protein_Filtering_server, 'pipe_prot_filter_ui_1')
+# callModule(mod_pipe_name_server, 'pipe_name_ui_1')
 "
