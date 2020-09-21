@@ -251,28 +251,7 @@ app_server <- function(input, output,session) {
    #   rv.core$current.indice <- length(names(rv.core$current.obj))
    # }
    # 
-   
-   
-   
-   
-   GetScreenId <- reactive({
-     input$navPage
-     req(rv.core$current.obj)
-
-     screen <- NULL
-     m <-  which(names(rv.core$current.obj)==input$navPage)
-     n <-  which(unlist(lapply(GetCurrentMSnSet(), function(x) length(which(x==rv.core$current.obj))))==1)
-     ## test if the navPage is one of a process one
-     if (length(m) ==0 || length(n) ==0) {return(NULL)}
-
-     if (m >= n) { screen <- 'Initial screen'}
-     else {screen <- 'Final screen'}
-     print(paste0("in GetScreenId(), n = ", n, ", m = ", m, ". screen = ", screen))
-     screen
-   })
-   
-   
-   
+ 
    
    
   

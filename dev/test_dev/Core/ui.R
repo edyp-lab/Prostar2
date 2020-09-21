@@ -2,6 +2,9 @@
 # Laucnh minimal necessary code to start the ui server
 source(file.path('.', 'mod_change_dataset.R'), local=FALSE)$value
 
+# List available values for workflows
+ll.wf <- paste0('wf', 1)
+
 ui <- function() {
   tagList(
     fluidPage(
@@ -24,20 +27,26 @@ ui <- function() {
           style= "text-align: center; background-color: lightblue;",
           uiOutput('activeTab'),
           uiOutput('currentObj'),
-          uiOutput('names_Input'),
+          #uiOutput('names_Input'),
+          uiOutput('currentIndice'),
           width='300px'
           )
         ),
       
       navbarPage("Navbar!",
                  id = "navPage",
-                 navbarMenu('Data manager', 
-                             tabPanel(title = 'Source 1', value='mod_source_1',
-                                     mod_source_1_ui('mod_source_1')),
-                            tabPanel(title = 'Source 2', value='mod_source_2',
-                                     mod_source_2_ui('mod_source_2')),
-                            tabPanel(title = 'Source 3', value='mod_source_3',
-                                     mod_source_3_ui('mod_source_3'))
+                 # This menu is hardcoded because it is static and there are only few
+                 # data manager modules. But it is certainly possible to
+                 # implement a generic module of data manager which
+                 # contains those 3 modules. The problem is the display of tabPanels
+                 # in the UI which does not work
+                 navbarMenu('data_manager', 
+                            tabPanel(title = 'Data manager 1', value='mod_datamanager_1',
+                                     mod_datamanager_1_ui('mod_datamanager_1', ll.wf)),
+                            tabPanel(title = 'Data manager 2', value='mod_datamanager_2',
+                                     mod_datamanager_2_ui('mod_datamanager_2', ll.wf)),
+                            tabPanel(title = 'Data manager 3', value='mod_datamanager_3',
+                                     mod_datamanager_3_ui('mod_datamanager_3', ll.wf))
                  )        
       )
     )

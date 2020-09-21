@@ -67,8 +67,20 @@ Each module in the directory 'R' has a test file, located in 'dev/test_dev'.
 
 
 
-## Files
+## Workflow files
 
+In each directory of a workflow, there are several type of files (module source code, watch modules code, miscellaneous code).
+As those files are dynamically loaded in Prostar (and not at the same time), it is necessary to identify in a unique
+manner each file with its function. Two ways are possible to do that:
+* build a complex hierarchy of directories in which directory correspond to a specific function,
+* name each source code file with a complex name
+
+Actually, Prostar's files structure uses the second point. In the directory of a workflow, the module's files are composed of four strings separated by a '_':
+* 'mod' which is the prefix used by the package [golem] to identify the modules,
+* the name of the workflow. It seems obvious because we are in the directory of the wf but it is more for the eyes of the developer and for make easiest the reading of the name of the files,
+* the name of the process itself.
+
+For the files containing the code to launch the server part of each module, we have prefixed the names by 'watch_'
 
 
 

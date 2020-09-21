@@ -1,17 +1,17 @@
 
 
 
-mod_source_1_ui <- function(id){
+mod_datamanager_1_ui <- function(id, ll.wf=""){
   ns <- NS(id)
   tagList(
     tags$h4(paste0('Module ', id)),
-    selectInput(ns('n'), 'N', choices=1:5, width='70px'),
+    selectInput(ns('workflow'), 'Choose a Workflow', choices=ll.wf, width='150px'),
     actionButton(ns('btn_valid'), 'Validate')
   )
 }
 
 
-mod_source_1_server <- function(id, params=NULL){
+mod_datamanager_1_server <- function(id, params=NULL){
   moduleServer(
     id,
     function(input, output, session){
@@ -27,9 +27,11 @@ mod_source_1_server <- function(id, params=NULL){
       })
       
 #session$userData$mod_source_1_obs_2 <- 
-      observeEvent(input$btn_valid,{
-        print(paste0('Module source 1, observer 2 -> ', input$n))
-        rv$dataOut <- setNames(lapply(1:input$n, function(x) {x}), paste0('item_',1:input$n))
+      observeEvent(input$btn_valid, ignoreInit = TRUE,{
+        print(paste0('Module source 1, observer 2 -> ', 1))
+        rv$dataOut <- list(workflow = input$workflow,
+                           obj = setNames(lapply(1, function(x) {x}), paste0('original',1))
+        )
       })
       
       return(reactive(rv$dataOut))
