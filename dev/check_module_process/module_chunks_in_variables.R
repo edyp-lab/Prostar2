@@ -155,3 +155,19 @@ end_server <-  "
 # callModule(mod_pipe_name_server, 'pipe_name_ui_1')
 "
 
+
+watch_file <- "
+Watch_mod_pipe_name <- callModule(mod_pipe_name_server,
+                                               'mod_pipe_name',  
+                                                obj = reactive({rv.core$current.obj}),
+                                                indice = reactive({rv.core$current.indice})
+                                       )
+
+
+
+
+observeEvent(req(Watch_mod_pipe_name()),{
+  rv.core$current.obj <- Watch_mod_pipe_name()
+})
+"
+

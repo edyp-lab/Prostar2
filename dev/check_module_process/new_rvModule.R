@@ -1,7 +1,7 @@
 
 ## reactive values for variables in the module
   rv <- reactiveValues(
-    name = 'process_protein_Filtering',
+    name = 'process_Filtering',
     dataIn = NULL,
     dataOut = NULL,
     i = NULL,
