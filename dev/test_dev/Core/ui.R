@@ -18,7 +18,7 @@ ui <- function() {
       # this panel is only to view running variables.
       # It does not take reallly part of core
       absolutePanel(
-        style= "text-align: center; background-color: #EEEEEE; z-index: 100;",
+        style= "z-index: 100;",
         top = 150, 
         right = 50, 
         width = "300px",
@@ -27,7 +27,8 @@ ui <- function() {
         fixed = FALSE,
         cursor = "default",
         wellPanel(
-          style= "text-align: center; background-color: lightblue;",
+          style= " background-color: lightblue; padding: 2px",
+          tags$h3('Prostar core'),
           uiOutput('activeTab'),
           uiOutput('currentIndice'),
           uiOutput('currentObj'),

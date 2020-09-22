@@ -62,17 +62,19 @@ server <- function(input, output, session) {
   
   # Just for the show absolutePanel
   output$activeTab <- renderUI({
-    tags$p(tags$strong(paste0('input$navPage = ',input$navPage)))
+    tags$p(paste0('input$navPage = ',input$navPage))
   })
   
   output$currentIndice <- renderUI({
-    tags$p(tags$strong(paste0('rv.core$current.indice = ',rv.core$current.indice)))
+    tags$p(paste0('rv.core$current.indice = ',rv.core$current.indice))
   })
   
   # Just for the show absolutePanel
   output$currentObj <- renderUI({
+    req(length(rv.core$current.obj) > 0)
+
     tagList(
-      tags$p(tags$strong('rv.core$current.obj : ')),
+      tags$p('rv.core$current.obj : '),
       tags$ul(
         lapply(paste0(names(rv.core$current.obj), "=", unlist(rv.core$current.obj)), 
                function(x) tags$li(x))
@@ -83,7 +85,7 @@ server <- function(input, output, session) {
   # Just for the show absolutePanel
   output$names_Input <- renderUI({
     tagList(
-      tags$p(tags$strong('List input = ')),
+      tags$p('List input = '),
       tags$ul(
       lapply(names(reactiveValuesToList(input)), function(x) tags$li(x)))
       )
