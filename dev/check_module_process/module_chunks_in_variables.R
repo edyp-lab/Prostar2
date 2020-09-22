@@ -81,7 +81,7 @@ observeEvent(req(r.nav$reset),{
     rv$dataIn <- obj()
     rv$i <- indice()
     
-    r.nav$isDone <- rep(FALSE, 3)
+    r.nav$isDone <- rep(FALSE, nb_screen)
     r.nav$reset <- FALSE
     ## end of no modifiable part
     
@@ -154,3 +154,4 @@ end_server <-  "
 ## To be copied in the server
 # callModule(mod_pipe_name_server, 'pipe_name_ui_1')
 "
+

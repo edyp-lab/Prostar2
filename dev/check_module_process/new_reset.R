@@ -7,7 +7,7 @@ observeEvent(req(r.nav$reset),{
     rv$dataIn <- obj()
     rv$i <- indice()
     
-    r.nav$isDone <- rep(FALSE, 3)
+    r.nav$isDone <- rep(FALSE, 5)
     r.nav$reset <- FALSE
     ## end of no modifiable part
     
