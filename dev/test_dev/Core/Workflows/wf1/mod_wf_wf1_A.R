@@ -3,14 +3,16 @@
 
 mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
-  tagList(shinyjs::useShinyjs(),
-          shinyalert::useShinyalert(),
-          div(id=ns('div_nav_pipe_process'), 
-              wellPanel(
+  tagList(
+    shinyjs::useShinyjs(),
+    shinyalert::useShinyalert(),
+    div(id=ns('process_ui'), 
                 tags$h4(paste0('Module ', id)),
                 tags$p('y = 2 * x'),
-                actionButton(ns('btn_valid'), 'Validate')
-                ),
+                selectInput(ns('si'), '', choices=LETTERS[1:4], selected='B', width='100px'),
+                numericInput(ns('num'), '', value=10, width='100px'),
+                actionButton(ns('reset'), 'Reset'),
+                actionButton(ns('btn_valid'), 'Validate'),
               uiOutput(ns('currentObj'))
           )
   )
@@ -21,30 +23,47 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, indice){
   moduleServer(
     id,
     function(input, output, session){
+      ns <- session$ns
       
         rv <-reactiveValues(
           dataIn = NULL,
-          indice = NULL,
+          indice = if (is.null(indice())) 1 else  indice(),
           dataOut = NULL
            )
-  
+   
+        session$userData$mod_A_obs_reset <- observeEvent(input$reset, {
+          shinyjs::reset('process_ui')
+          
+          rv$dataIn <- dataIn()
+          rv$indice <- if (is.null(indice())) 1 else  indice()
+          rv$dataOut <- NULL
+        })
         
+
         
+
         # Just for the show absolutePanel
         output$currentObj <- renderUI({
-          tagList(
+          div(
+              tagList(
             tags$p(tags$strong(paste0('rv$indice = ',rv$indice))),
-            tags$p(tags$strong('rv$dataIn : ')),
-            tags$ul(
-              lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn )), 
-                     function(x) tags$li(x))
-            ),
-            br(),
-            tags$p(tags$strong('rv$dataOut : ')),
-            tags$ul(
-              lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut )), 
-                     function(x) tags$li(x))
-            )
+            fluidRow(
+            column(3,
+                    tags$p(tags$strong('rv$dataIn : ')),
+                    tags$ul(
+                      lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn )), 
+                            function(x) tags$li(x))
+                    )
+                   ),
+            column(3,
+                   tags$p(tags$strong('rv$dataOut : ')),
+                    tags$ul(
+                      lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut )), 
+                            function(x) tags$li(x))
+                    )
+                  )
+          )
+          )
           )
         })
         
@@ -96,16 +115,15 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, indice){
           if (rv$indice < length(rv$dataIn)){
             rv$dataIn <- rv$dataIn[-c((rv$indice+1):length(rv$dataIn))]
           }
-          name <- paste0('proc A from i =', rv$indice)
+          name <- paste0('A-processed', rv$indice)
           # This ensures that each new item has d different name
           if (length(grep(name, names(rv$dataIn))) > 0)
             paste0(name, '_', (1 + length(grep(name, names(rv$dataIn)))))
           
           rv$dataIn <- append(rv$dataIn, setNames(2 * rv$dataIn[[rv$indice]], name))
-          rv$indice <- rv$indice+1
+          rv$indice <- length(rv$dataIn)
           rv$dataOut <- rv$dataIn
-         
-    
+
           
         })
         

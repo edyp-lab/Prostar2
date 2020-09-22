@@ -1,5 +1,5 @@
 
-source(file.path("../../R","mod_plots_legend_colored_exprs.R"), local=TRUE)$value
+source(file.path("../../../R/Plots","mod_plots_legend_colored_exprs.R"), local=TRUE)$value
 
 
 ui <- fluidPage(

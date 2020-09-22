@@ -3,9 +3,10 @@ library(highcharter)
 library(SummarizedExperiment)
 
 
-source(file.path("../../R","mod_plots_var_dist.R"), local=TRUE)$value
-source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
-source(file.path("../../R","mod_popover_for_help.R"), local=TRUE)$value
+source(file.path("../../../R/Plots","mod_plots_var_dist.R"), local=TRUE)$value
+source(file.path('../../../R', 'mod_settings.R'), local=TRUE)$value
+source(file.path("../../../R","mod_popover_for_help.R"), local=TRUE)$value
+source(file.path('../../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 
 
 ui <- fluidPage(

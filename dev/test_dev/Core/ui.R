@@ -12,9 +12,7 @@ ui <- function() {
   tagList(
     fluidPage(
       titlePanel("", windowTitle = "Foo"),
-      
-      mod_change_dataset_ui('mod_change_dataset'), 
-      
+       
       # this panel is only to view running variables.
       # It does not take reallly part of core
       absolutePanel(

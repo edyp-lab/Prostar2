@@ -2,7 +2,7 @@ library(visNetwork)
 
 
 
-source(file.path("../../../../R/Plots","mod_graph_pept_prot.R"), local=TRUE)$value
+source(file.path("../../../R/Plots","mod_graph_pept_prot.R"), local=TRUE)$value
 
 
 

@@ -1,3 +1,7 @@
+library(fresh)
+library(DAPAR2)
+library(QFeatures)
+
 options(shiny.maxRequestSize=300*1024^2) 
 options(encoding = "UTF-8")
 options(shiny.fullstacktrace = T)

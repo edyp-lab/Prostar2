@@ -14,7 +14,7 @@ mod_pipe_protein_Filtering_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    shinyalert::useShinyalert(),
+    #shinyalert::useShinyalert(),
     div(id=ns('div_nav_pipe_process'), mod_navigation_ui(ns('nav_pipe_process')))
     )
 }
@@ -83,29 +83,30 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   gFilterAllCond <- gFiltersList[["For every condition"]]
   gFilterOneCond <- gFiltersList[["At least one condition"]]
   
-  observeEvent(req(rv.filter$dataIn, rv.filter$i ), {
-#browser()
-    a <- (length(rv.filter$dataIn) != rv.filter$i) && !r.nav$isDone[length(r.nav$isDone)]
-    if (!a) return(NULL)
-
-    shinyalert::shinyalert(
-      title = 'title',
-      text = "This is a modal",
-      size = "xs", 
-      closeOnEsc = TRUE,
-      closeOnClickOutside = FALSE,
-      html = FALSE,
-      type = "info",
-      showConfirmButton = TRUE,
-      showCancelButton = TRUE,
-      confirmButtonText = "OK",
-      confirmButtonCol = "#15A4E6",
-      cancelButtonText = "Cancel",
-      timer = 0,
-      imageUrl = "",
-      animation = FALSE
-    )
-  })
+#   observeEvent(req(rv.filter$dataIn, rv.filter$i ), {
+# #browser()
+#     a <- (length(rv.filter$dataIn) != rv.filter$i) && !r.nav$isDone[length(r.nav$isDone)]
+#     if (!a) return(NULL)
+# 
+#     shinyalert::shinyalert(
+#       title = 'Info',
+#       text = "The assay you are about to process is not the last
+#       one of the dataset. Continuing will erase all further assays.",
+#       size = "xs", 
+#       closeOnEsc = TRUE,
+#       closeOnClickOutside = FALSE,
+#       html = FALSE,
+#       type = "info",
+#       showConfirmButton = TRUE,
+#       showCancelButton = TRUE,
+#       confirmButtonText = "OK",
+#       confirmButtonCol = "#15A4E6",
+#       cancelButtonText = "Cancel",
+#       timer = 0,
+#       imageUrl = "",
+#       animation = FALSE
+#     )
+#   })
   
   
   
@@ -177,7 +178,7 @@ callModule(mod_popover_for_help_server,
     rv.filter$i <- indice()
     
 
-    if (MultiAssayExperiment::metadata(obj()[[indice()]])$typeOfData != 'protein'){
+    if (metadata(obj()[[indice()]])$typeOfData != 'protein'){
       stop("The type of data contained in the dataset is not 'protein'")
       return(NULL)
     }
@@ -186,25 +187,25 @@ callModule(mod_popover_for_help_server,
   
   
   # If the user accepts the conditions on the shinyalert, then the process module is activated
-  observe({
-    input$shinyalert
-    rv.filter$i
-    if(is.null(input$shinyalert))return(NULL)
-    
-    c1 <- input$shinyalert
-    c2 <- rv.filter$i == length(rv.filter$dataIn)
-    c3 <- r.nav$isDone[length(r.nav$isDone)]
-    if (c1 && !c2 && !c3){
-      #Delete all assays after that one indicated by the indice given in parameter
-      rv.filter$dataIn <- rv.filter$dataIn[ , , -((rv.filter$i+1):length(rv.filter$dataIn))]
-      c1 <- input$shinyalert
-      c2 <- rv.filter$i == length(rv.filter$dataIn)
-      c3 <- r.nav$isDone[length(r.nav$isDone)]
-    } else {
-      # Do nothing, the module interface is still disabled
-    }
-    shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
-  })
+  # observe({
+  #   input$shinyalert
+  #   rv.filter$i
+  #   if(is.null(input$shinyalert))return(NULL)
+  #   
+  #   c1 <- input$shinyalert
+  #   c2 <- rv.filter$i == length(rv.filter$dataIn)
+  #   c3 <- r.nav$isDone[length(r.nav$isDone)]
+  #   if (c1 && !c2 && !c3){
+  #     #Delete all assays after that one indicated by the indice given in parameter
+  #     rv.filter$dataIn <- rv.filter$dataIn[ , , -((rv.filter$i+1):length(rv.filter$dataIn))]
+  #     c1 <- input$shinyalert
+  #     c2 <- rv.filter$i == length(rv.filter$dataIn)
+  #     c3 <- r.nav$isDone[length(r.nav$isDone)]
+  #   } else {
+  #     # Do nothing, the module interface is still disabled
+  #   }
+  #   shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
+  # })
   
   
   

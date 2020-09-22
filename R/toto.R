@@ -307,7 +307,7 @@ style3 = "")
 #' @importFrom shinyjs disabled inlineCSS
 mod_navigation_ui <- function(id){
   ns <- NS(id)
-
+  
 }
 
 # Module Server

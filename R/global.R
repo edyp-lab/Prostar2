@@ -2,7 +2,8 @@ DAPAR.loc <- DAPARdata.loc <- Prostar.loc <- NULL
 
 
 library(fresh)
-
+library(DAPAR2)
+library(QFeatures)
 
 
 

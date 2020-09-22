@@ -1,6 +1,7 @@
 library(shinyjs)
 library(rhandsontable)
-source(file.path('../../R', 'mod_build_design.R'), local=TRUE)$value
+source(file.path('../../../R/DataManager', 'mod_build_design.R'), local=TRUE)$value
+source(file.path('../../../R', 'mod_insert_md.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
@@ -20,7 +21,7 @@ server <- function(input, output, session) {
   )
   rv.test$res <- callModule(mod_build_design_server, 
              'buildDesign', 
-             sampleNames=reactive({colnames(Biobase::exprs(obj))}))
+             sampleNames=reactive({colnames(colData(obj))}))
   
   observeEvent(req(rv.test$res() ),{
     print(rv.test$res() )

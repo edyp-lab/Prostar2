@@ -1,3 +1,12 @@
+library(highcharter)
+library(shinyjs)
+library(DAPAR2)
+library(DT)
+library(tibble)
+library(shinyalert)
+library(QFeatures)
+library(SummarizedExperiment)
+
 source(file.path('../../../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../../../R/PipelineCode/protein', 'mod_pipe_protein_Filtering.R'), local=TRUE)$value
@@ -10,12 +19,7 @@ source(file.path("../../../../R/Plots", "mod_plots_group_mv.R"), local=TRUE)$val
 source(file.path('../../../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
 
 
-library(highcharter)
-library(shinyjs)
-library(DAPAR2)
-library(DT)
-library(tibble)
-library(shinyalert)
+
 
 
 options(shiny.fullstacktrace = FALSE)

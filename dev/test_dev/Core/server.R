@@ -41,23 +41,12 @@ server <- function(input, output, session) {
     current.obj = list(),
     current.indice = 0,
     tmp = reactive(NULL),
-    tmp_indice = NULL,
     load = NULL,
     load.tmp = reactive(NULL),
     current_wf_menu = NULL,
     current.workflow = NULL
   )
    
-  
-  
-  # Launch the module which manages the current dataset in the list of current.obj
-  rv.core$tmp_indice <- callModule(mod_change_dataset_server, 
-                                   'mod_change_dataset', 
-                                   ll.se = reactive({names(rv.core$current.obj)}),
-                                   indice = reactive({rv.core$current.indice})
-  )
-  
-  observeEvent(rv.core$tmp_indice(),{ rv.core$current.indice <- rv.core$tmp_indice()  })
   
   
   # Just for the show absolutePanel

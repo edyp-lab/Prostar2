@@ -39,45 +39,56 @@ This is why the nomenclature is extremely important when coding Prostar
 This is also another reason for that tutorial made step-by-step
 
 
-# Description of the package Prostar
 
-Prostar is built with the [golem] package.
-
-
-# Step 1. A simple Shiny App
-
-Prostar is buil with the shiny framework and use the 'navbar page menu' layout. Previous versions of Prostar used other layouts (such as xxx) but the free space on the screen was too small to put all the outputs.
-
-First, let write a simple A
 
 # Generalities
 
-## General behaviour of module processes
+## Workflows
+
+* A process cannot appear more than once in a workflow
+
+
+
+## Characteristics of module processes
 
 This is a list of how the modules of data processing work:
 
-  * Each process module has got a 'Reset' button which allows to set all inputs and plots to their default value. If the process has several steps, the screen returns to the first one.
-  * Each process module has a 'Validate' button which allows to record the new item at the end of the dataset and return the new dataset to Prostar core. After clicking, the screen is not updated: all the inputs keep their current value and the ui is kept to the last step.
-* A process module takes as parameter one dataset of 'n' items returns a dataset with N=(n+1) items,
+  * A process module takes as parameter one dataset of 'n' items returns a dataset of n + 1 items. The return value of the process p is the last item of the dataset.
+  * 'Reset': Each process module has a 'Reset' button which allows to set all inputs and plots to their default value if the validation button has not been clicked yet. If the process has several steps, the screen returns to the first one.
+  * 'Validate': Each process module has a 'Validate' button which allows to record the new item at the end of the dataset and return the new dataset to Prostar core. After clicking, the screen is not updated: all the inputs keep their current value and the ui is kept to the last step.
+  * A dataset cannot be run several times on its own result
 
 
-## General logics for processes and datasets
+
+## Logics for processes and datasets
 
 Here are the different rules that exists in Prostar core to deal with the different transactions between data processing modules and the dataset.
 The UI of Prostar allows the user to navigate between those two lists so as to rerun a process, fix a mistake in its parameters. But, to guarantee that the workflow stay consistent with the objective/philosophy of Prostar, some rules are implemented.
 
+Each data processing modules and dataset can be seen as a list of respectively P and N items. Let i, p be the indices of respectively the current item in the dataset list and the current item in the process list of the workflow.
+
+The different combination of values for i and p (their relative position) determines the behaviour of datasets and processes regarding the general philosophy of Prostar.
+
+Without any action of the user on the current item nor process, Prostar follows the standard workflow:
+
+* At the beginning of Prostar, i = 1 = N and p = 1
+* after the run of any process p, i = N = p -1 (the process has produced a new item in the dataset)
+
+The user may change either the current item in the dataset or the current process to be run. This leads to several situations. 
+
 ### Default (standard) behaviour
 
-* Each of data processing modules and dataset can be seen as a list of respectively P and N items. Let i,p be respectively the indices of respectively the current item in the dataset list and the current item in the process list of the workflow.
+
 * The default behaviour one have to see at the end of the execution of the workflow is that it seems to has gone straightforwards in the process list. It means that each process p runs on the item i=N and generates a dataset of N+1 items. If next process to be run is p', then p' > p.
 
 
-* By default, the behaviour of a module process is to work on the last item of the dataset; the resulting new item is appended to the list of items. Thus, by default, the current indice i is set to the last item of the dataset. For example, if the user starts the workflow with i = 1 (+ offset),  p = 1, then at the end of the workflow, one must have i = N, p = P with N = P + 1 (+ offset)
-* After each run of a process p, one have i = p + 1 (+ offset)
+* By default, the behaviour of a module process is to work on the last item of the dataset; the resulting new item is appended to the list of items. Thus, by default, the current indice i is set to the last item of the dataset. For example, if the user starts the workflow with i = 1 (+ offset), p = 1, then at the end of the workflow, one must have i = N, p = P with N = P + 1 (+ offset)
+
 
 * A process cannot be run more than one time on the same item. To avoid that a process be run on the previous result of itself.
 
 But, the user may navigate differently in the process and dataset lists. Thus, different situations may occur.
+Suppose we are after a standard run, then p = P, i = N, i = p + 1
 
 
 ### Reprocess a previous item of the dataset
@@ -111,6 +122,17 @@ The modules are prefixed with 'mod_'
 
 Each module in the directory 'R' has a test file, located in 'dev/test_dev'.
 
+
+# Description of the package Prostar
+
+Prostar is built with the [golem] package.
+
+
+# Step 1. A simple Shiny App
+
+Prostar is buil with the shiny framework and use the 'navbar page menu' layout. Previous versions of Prostar used other layouts (such as xxx) but the free space on the screen was too small to put all the outputs.
+
+First, let write a simple A
 
 
 ## Workflow files

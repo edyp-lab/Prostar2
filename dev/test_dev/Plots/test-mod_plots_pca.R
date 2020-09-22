@@ -4,8 +4,8 @@ library(SummarizedExperiment)
 library(shinycssloaders)
 library(DT)
 
-source(file.path("../../R/Plots","mod_plots_pca.R"), local=TRUE)$value
-source(file.path("../../R","mod_format_DT.R"), local=TRUE)$value
+source(file.path("../../../R/Plots","mod_plots_pca.R"), local=TRUE)$value
+source(file.path("../../../R","mod_format_DT.R"), local=TRUE)$value
 
 
 ui <- fluidPage(
