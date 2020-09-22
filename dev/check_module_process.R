@@ -86,7 +86,7 @@ pipeline <- 'protein'
 #           output$Screen_Process_3
 #      
 #           
-#     # pour chaque widget dans liste widgets :
+##   # pour chaque widget dans liste widgets :
 #     correspondance observeEvent(input$<widget_name> avec rv.process RV spe au module $widgets$<widget_name>)
 #     widgets = list(assay = 0,
 #                     operator = NULL,
@@ -95,7 +95,7 @@ pipeline <- 'protein'
 #       rv.process$widgets$operator <- input$operator
 #     })
 # 
-# bloc obligatoire when user recule d'un dataset' , voir prochain push de check_module_process
+# bloc obligatoire when user recule d'un dataset , voir prochain push de check_module_process
 # 
 # 
 

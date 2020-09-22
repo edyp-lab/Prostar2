@@ -4,19 +4,19 @@ source("./module_chunks_in_variables.R") #names(.GlobalEnv)
 
 create_ui <- function(name, file, append = FALSE) {
   new_ui <- gsub('name',name,ui)
-  cat(new_ui, file=file, append = append)#"new_ui.R"
+  cat(new_ui, file=file, append = append)
 }
 
 
 create_start_server <- function(name, file, append = FALSE) {
   new_start_server <- gsub('name',name,start_server)
-  cat(new_start_server, file=file, append = append)#"new_start_server.R"
+  cat(new_start_server, file=file, append = append)
 }
 
 
 create_rNav <- function(process, steps, file, append = FALSE) {
   
-  ### meme taille : stepsNames, ll.UI, isDone, mandatory
+  
   nb_screen <- length(unlist(strsplit(steps,',')))
   new_rNav <- gsub('nb_screen',nb_screen,rNav)
   
@@ -32,7 +32,7 @@ create_rNav <- function(process, steps, file, append = FALSE) {
   
   
   
-  cat(new_rNav, file=file, append = append)#"new_rNav.R"
+  cat(new_rNav, file=file, append = append)
   
 }
 
@@ -41,27 +41,27 @@ create_rvModule <- function(process, widgets_list, settings=TRUE, file, append =
   new_rvModule <- gsub('process',paste0('process_',process),rvModule)
   new_rvModule <- gsub('widgets_list',widgets_list,new_rvModule)
   if (!settings){ new_rvModule <- gsub('settings = NULL,','',new_rvModule) }
-  cat(new_rvModule, file=file, append = append)#"new_rvModule.R"
+  cat(new_rvModule, file=file, append = append)
 }
 
 
 create_reset <- function(widgets_list, nb_screen, file, append = FALSE) {
   new_reset <- gsub('widgets_list',widgets_list,reset)
   new_reset <- gsub('nb_screen',nb_screen,new_reset)
-  cat(new_reset, file=file, append = append)#"new_reset.R"
+  cat(new_reset, file=file, append = append)
 }
 
 create_modalAlert <- function(file, append = FALSE){
-  cat(modalAlert, file=file, append = append)#"modalAlert.R"
+  cat(modalAlert, file=file, append = append)
 }
 create_shinyAlert <- function(file, append = FALSE){
-  cat(shinyAlert, file=file, append = append)#"shinyAlert.R"
+  cat(shinyAlert, file=file, append = append)
 }
 
 
 create_end_server <- function(name, file, append = FALSE) {
   new_end_server <- gsub('name',name,end_server)
-  cat(new_end_server, file=file, append = append)#"new_end_server.R"
+  cat(new_end_server, file=file, append = append)
 }
 
 
@@ -77,7 +77,36 @@ create_screen <- function(nb_screen, process, file, append=FALSE){
   cat(new_screen, file=file, append = append)
 }
 
+
+create_widgets_from_input <- function(widgets_list, file, append=FALSE){
+  
+  widgets_list <- names(paste(widgets_list,collapse="\n"))
+  widgets_from_input <- c()
+  for (i in 1:length(widgets_list)){
+    widgets_from_input[i] <- paste0('observeEvent(input$',
+                                    widgets_list[i],
+                                    ', ignoreInit=TRUE,{\nrv.filter$widgets$',
+                                    widgets_list[i],' <- input$',
+                                    widgets_list[i],'\n})\n\n')
+  }
+  #if(!ignoreInit){widgets_from_input <- gsub('ignoreInit=TRUE,','',widgets_from_input)}
+  
+  cat(widgets_from_input, file=file, append = append)
+}
+
+
 #-----------------------------------------------------------#
+create_watch_file <- function(name, process){
+  new_watch_file <- gsub('name',name,watch_file)
+  new_watch_file <- gsub('process',process,new_watch_file)
+  file=paste0("watch_pipe_",name,".R")
+  cat(new_watch_file, file=file)
+}
+
+create_watch_file(name='protein_Filtering',
+                  process='Filtering')
+#-----------------------------------------------------------#
+
 
 create_ui(name='protein_Filtering',
           file="new_ui.R")
@@ -86,7 +115,7 @@ create_start_server(name='protein_Filtering',
                     file="new_start_server.R")
 
 create_rNav(process='Filtering',
-            steps = 'c(\'screen1\', \'table2\', \'ok\', \'toto\', \'titi\')',
+            steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
             file="new_rNav.R")
 
 create_rvModule(process='Filtering',
@@ -107,10 +136,17 @@ create_screen(nb_screen=4,
               process='plop',
               file="new_screen.R")
 
+create_widgets_from_input(widgets_list=c("ChooseFilters","plop1","seuilNA"),
+                          file="new_widgets_from_input.R")
+
+#-----------------------------------------------------------#
 #-----------------------------------------------------------#
 source("./copy_paste_test_wParam.R")
-#chunk_order <- c('ui', 'start_server', 'rNav', 'rvModule', 'reset','modalAlert', 'shinyAlert', 'end_server')
-createModule <- function(name, process, steps, widgets_list, file, append = TRUE){
+
+createModule <- function(name, process, steps, widgets_list, append = TRUE){
+  
+  file <- paste0("mod_pipe_",name,".R")
+  
   cat(NULL, file=file)
   
   create_ui(name=name,file=file, append = append)
@@ -127,23 +163,20 @@ createModule <- function(name, process, steps, widgets_list, file, append = TRUE
   
   create_shinyAlert(file=file, append = append)
   
+  create_screen(nb_screen=length(unlist(strsplit(steps,","))),process=process,file=file, append = append)
+  
+  create_widgets_from_input(widgets_list=widgets_list,file=file, append = append)
+  
   create_end_server(name=name,file=file, append = append)
   
-  # for (i in chunk_order) {
-  #   print(i)
-  #   method <- grep(paste0('^create_',i), names(.GlobalEnv), value = TRUE)
-  #   print(method)
-  #   method(name=name, file=file)
-  #   do.call(method, list())
-  # }
+  
 }
+
 createModule(name='protein_Filtering',
              process='Filtering',
-             steps = 'c(\'screen1\', \'table2\', \'ok\', \'toto\', \'titi\')',
-             widgets_list='list(ChooseFilters = "None",seuilNA = 0)',
-             file="new_module.R",
+             steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
+             widgets_list='list(ChooseFilters = "None",seuilNA = 0, seuil_plop=50)',
              append=TRUE)
 
 
 
-  

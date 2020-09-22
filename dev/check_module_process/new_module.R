@@ -38,11 +38,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   r.nav <- reactiveValues(
     name = 'Filtering',
     stepsNames = c('screen1', 'table2', 'ok', 'toto', 'titi'),
-    ll.UI = list(screenStep1 = uiOutput(ns('Screen_Filtering_1')),
-                 screenStep2 = uiOutput(ns('Screen_Filtering_2')),
-                 screenStep3 = uiOutput(ns('Screen_Filtering_3')),
-                 screenStep4 = uiOutput(ns('Screen_Filtering_4')),
-                 screenStep5 = uiOutput(ns('Screen_Filtering_5'))),
+    ll.UI = list(screenStep1 = uiOutput(ns('Screen_Filtering_1')),screenStep2 = uiOutput(ns('Screen_Filtering_2')),screenStep3 = uiOutput(ns('Screen_Filtering_3')),screenStep4 = uiOutput(ns('Screen_Filtering_4')),screenStep5 = uiOutput(ns('Screen_Filtering_5'))),
     isDone =  rep(FALSE,5),
     mandatory =  rep(FALSE,5),
     reset = FALSE
@@ -117,7 +113,33 @@ observe({
     }
     shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
   })
+## Definitions of the screens
 
+#Screen1
+output$Screen_Filtering_1 <- renderUI({
+
+
+})
+#Screen2
+output$Screen_Filtering_2 <- renderUI({
+
+
+})
+#Screen3
+output$Screen_Filtering_3 <- renderUI({
+
+
+})
+#Screen4
+output$Screen_Filtering_4 <- renderUI({
+
+
+})
+#Screen5
+output$Screen_Filtering_5 <- renderUI({
+
+
+})
  return({reactive(rv$dataOut)})
 
 }
