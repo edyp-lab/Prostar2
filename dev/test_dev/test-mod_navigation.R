@@ -5,7 +5,8 @@ source(file.path('../../R', 'global.R'), local=TRUE)$value
 ui <- fluidPage(
   tagList(
     br(),br(),
-    mod_navigation_ui('test_nav')
+    #mod_navigation_ui('test_nav')
+    uiOutput('show')
   )
 )
 
@@ -18,38 +19,41 @@ server <- function(input, output, session) {
     ll.UI = list( screenStep1 = uiOutput("screen1"),
                   screenStep2 = uiOutput("screen2"),
                   screenStep3 = uiOutput("screen3")),
-    isDone =  c(FALSE,FALSE, FALSE),
-    mandatory =  c(FALSE,TRUE, FALSE),
-    reset = FALSE
+    isDone =  c(FALSE, FALSE, FALSE),
+    mandatory =  c(FALSE, TRUE, FALSE),
+    reset = FALSE,
+    skip = NULL,
+                   undo = NULL
+    
   )
   
+  
+  
+  rv.nav <- mod_navigation_server("test_nav", style = 2, pages = r.nav)
+  
+  output$show <- renderUI({
+    tagList(
+      rv.nav$bars(),
+      rv.nav$screens()
+    )
+  })
+  
+  observeEvent(req(r.nav$actions$reset),{
+     r.nav$isDone <- rep(FALSE, 3)
+    r.nav$actions$reset <- FALSE
+    r.params$select1 <- NULL
+    r.params$select2 <- NULL
+    r.params$select3 <- NULL
+  })
+  
+  
+  ##------------------------------------------------------------
   #default values for the widgets
   r.params <- reactiveValues(
     select1 = 1,
     select2 = 1,
     select3 = 1
   )
-  
-  
-  
-  callModule(mod_navigation_server, "test_nav",style=2, pages = r.nav)
-  
-  
-  observeEvent(req(r.nav$reset),{
-     r.nav$isDone <- rep(FALSE, 3)
-    r.nav$reset <- FALSE
-    r.params$select1 <- NULL
-    r.params$select2 <- NULL
-    r.params$select3 <- NULL
-    #updateSelectInput(session,'select1', selected=r.params[['select1']])
-    #updateSelectInput(session,'select2', selected=r.params[['select2']])
-    #updateSelectInput(session,'select3', selected=r.params[['select3']])
-    
-  })
-  
-  
-  ##------------------------------------------------------------
-  
   
   observeEvent(input$done1,{r.nav$isDone[1] <- TRUE})
   observeEvent(input$done2,{r.nav$isDone[2] <- TRUE})
