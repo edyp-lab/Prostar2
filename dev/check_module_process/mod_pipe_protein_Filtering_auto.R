@@ -32,19 +32,24 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   ns <- session$ns
   
   callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
-
-## Section navigation module
+  
+  ## Section navigation module
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
     name = 'Filtering',
-    stepsNames = c('screen1', 'table2', 'ok', 'toto', 'titi'),
-    ll.UI = list(screenStep1 = uiOutput(ns('Screen_Filtering_1')),screenStep2 = uiOutput(ns('Screen_Filtering_2')),screenStep3 = uiOutput(ns('Screen_Filtering_3')),screenStep4 = uiOutput(ns('Screen_Filtering_4')),screenStep5 = uiOutput(ns('Screen_Filtering_5'))),
+    stepsNames = c('screen1', 'table2', 'plop', 'toto', 'titi'),
+    ll.UI = list(screenStep1 = uiOutput(ns('Screen_Filtering_1')),
+                 screenStep2 = uiOutput(ns('Screen_Filtering_2')),
+                 screenStep3 = uiOutput(ns('Screen_Filtering_3')),
+                 screenStep4 = uiOutput(ns('Screen_Filtering_4')),
+                 screenStep5 = uiOutput(ns('Screen_Filtering_5'))
+                 ),
     isDone =  rep(FALSE,5),
     mandatory =  rep(FALSE,5),
     reset = FALSE
   )
-
-## reactive values for variables in the module
+  
+  ## reactive values for variables in the module
   rv <- reactiveValues(
     name = 'process_Filtering',
     dataIn = NULL,
@@ -52,12 +57,12 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
     i = NULL,
     settings = NULL,
     
-    widgets = list(ChooseFilters = "None",seuilNA = 0)
+    widgets = list(ChooseFilters = "None",seuilNA = 0, seuil_plop=50)
   )
-
-observeEvent(req(r.nav$reset),{
+  
+  observeEvent(req(r.nav$reset),{
     
-    rv$widgets <- list(ChooseFilters = "None",seuilNA = 0)
+    rv$widgets <- list(ChooseFilters = "None",seuilNA = 0, seuil_plop=50)
     
     ## do not modify this part
     rv$dataIn <- obj()
@@ -69,8 +74,8 @@ observeEvent(req(r.nav$reset),{
     
     
   })
-
-#shinyalert modal asking if user wants to process a dataset with an index <i
+  
+  #shinyalert modal asking if user wants to process a dataset with an index <i
   observeEvent(req(rv$dataIn, rv$i ), {
     
     a <- (length(rv$dataIn) != rv$i) && !r.nav$isDone[length(r.nav$isDone)]
@@ -94,8 +99,8 @@ observeEvent(req(r.nav$reset),{
       animation = FALSE
     )
   })
-
-observe({
+  
+  observe({
     req(input$shinyalert)
     rv$i
     
@@ -113,35 +118,47 @@ observe({
     }
     shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
   })
-## Definitions of the screens
-
-#Screen1
-output$Screen_Filtering_1 <- renderUI({
-
-
-})
-#Screen2
-output$Screen_Filtering_2 <- renderUI({
-
-
-})
-#Screen3
-output$Screen_Filtering_3 <- renderUI({
-
-
-})
-#Screen4
-output$Screen_Filtering_4 <- renderUI({
-
-
-})
-#Screen5
-output$Screen_Filtering_5 <- renderUI({
-
-
-})
- return({reactive(rv$dataOut)})
-
+  ## Definitions of the screens
+  
+  #Screen1
+  output$Screen_Filtering_1 <- renderUI({
+    
+    
+  })
+  #Screen2
+  output$Screen_Filtering_2 <- renderUI({
+    
+    
+  })
+  #Screen3
+  output$Screen_Filtering_3 <- renderUI({
+    
+    
+  })
+  #Screen4
+  output$Screen_Filtering_4 <- renderUI({
+    
+    
+  })
+  #Screen5
+  output$Screen_Filtering_5 <- renderUI({
+    
+    
+  })observeEvent(input$ChooseFilters, ignoreInit=TRUE,{
+    rv.filter$widgets$ChooseFilters <- input$ChooseFilters
+  })
+  
+  observeEvent(input$seuilNA, ignoreInit=TRUE,{
+    rv.filter$widgets$seuilNA <- input$seuilNA
+  })
+  
+  observeEvent(input$seuil_plop, ignoreInit=TRUE,{
+    rv.filter$widgets$seuil_plop <- input$seuil_plop
+  })
+  
+  
+  return({reactive(rv$dataOut)})
+  
 }
 
 ## To be copied in the UI

@@ -1,5 +1,5 @@
 
-#' pipe_protein_Filtering UI Function
+#' pipe_protein_Filtering_shinyTest UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -11,7 +11,7 @@
 #' @import shinyjs
 #' @importFrom shinyalert useShinyalert
 #' 
-mod_pipe_protein_Filtering_ui <- function(id){
+mod_pipe_protein_Filtering_shinyTest_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
@@ -20,7 +20,7 @@ mod_pipe_protein_Filtering_ui <- function(id){
   )
 }
 
-#' pipe_protein_Filtering Server Function
+#' pipe_protein_Filtering_shinyTest Server Function
 #'
 #' @noRd 
 #' 
@@ -28,7 +28,7 @@ mod_pipe_protein_Filtering_ui <- function(id){
 #' @import QFeatures
 #' @importFrom shinyalert shinyalert
 #' 
-mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indice){
+mod_pipe_protein_Filtering_shinyTest_server <- function(input, output, session, obj, indice){
   ns <- session$ns
   
   callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
@@ -37,7 +37,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   # Variable to manage the different screens of the module
   r.nav <- reactiveValues(
     name = 'Filtering',
-    stepsNames = c(screen1),
+    stepsNames = screen1,table2,plop,
     ll.UI = list(screenStep1 = uiOutput(ns('Screen_Filtering_1')),screenStep2 = uiOutput(ns('Screen_Filtering_2')),screenStep3 = uiOutput(ns('Screen_Filtering_3'))),
     isDone =  rep(FALSE,3),
     mandatory =  rep(FALSE,3),
@@ -97,7 +97,7 @@ rv.filter$widgets$ChooseFilters <- input$ChooseFilters
 }
 
 ## To be copied in the UI
-# mod_pipe_protein_Filtering_ui('pipe_protein_Filtering_ui_1')
+# mod_pipe_protein_Filtering_shinyTest_ui('pipe_protein_Filtering_shinyTest_ui_1')
 
 ## To be copied in the server
-# callModule(mod_pipe_protein_Filtering_server, 'pipe_protein_Filtering_ui_1')
+# callModule(mod_pipe_protein_Filtering_shinyTest_server, 'pipe_protein_Filtering_shinyTest_ui_1')

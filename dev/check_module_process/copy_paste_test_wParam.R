@@ -1,6 +1,6 @@
 
 source("./module_chunks_in_variables.R") #names(.GlobalEnv)
-# modalAlert and shinyAlert raw code
+
 
 create_ui <- function(name, file, append = FALSE) {
   new_ui <- gsub('name',name,ui)
