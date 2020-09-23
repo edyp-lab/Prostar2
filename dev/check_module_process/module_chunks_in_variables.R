@@ -142,13 +142,13 @@ observeEvent(req(r.nav$reset),{
 # "
 
 
-"
-disableActionButton <- function(id,session) {
-  session$sendCustomMessage(type='jsCode',
-                            list(code= paste('$('#',id,'').prop('disabled',true)'
-                                             ,sep="")))
-}
-"
+# "
+# disableActionButton <- function(id,session) {
+#   session$sendCustomMessage(type='jsCode',
+#                             list(code= paste('$('#',id,'').prop('disabled',true)'
+#                                              ,sep="")))
+# }
+# "
 
 
 end_server <-  "

@@ -95,8 +95,6 @@ pipeline <- 'protein'
 #       rv.process$widgets$operator <- input$operator
 #     })
 # 
-# bloc obligatoire when user recule d'un dataset , voir prochain push de check_module_process
-# 
 # 
 
 # # check <param(s)> quelque soit endroit where module called -> nom param, nb de param, (class ?)
