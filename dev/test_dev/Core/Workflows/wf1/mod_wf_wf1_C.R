@@ -23,8 +23,8 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
-        name = "test",
-        stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
+        name = "Process C",
+        stepsNames = c("C - Description", "C - Step 1", "C - Step 2", "C - Step 3"),
         ll.UI = list( screenStep1 = uiOutput(ns("screen1")),
                       screenStep2 = uiOutput(ns("screen2")),
                       screenStep3 = uiOutput(ns("screen3")),
@@ -171,12 +171,13 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
               actionButton(ns('validate_btn'), 'Validate')
           )
         )
+      })
         
         observeEvent(input$validate_btn, {
           rv$dataOut <- rv$dataIn
           r.nav$isDone[3] <- TRUE
         })
-      })
+
       
       
       ##########################################################

@@ -21,10 +21,15 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       
+      rv <-reactiveValues(
+        dataIn = NULL,
+        dataOut = NULL
+      )
+      
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
-        name = "test",
-        stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
+        name = "Process A",
+        stepsNames = c("A - Description", "A - Step 1", "A - Step 2", "A - Step 3"),
         ll.UI = list( screenStep1 = uiOutput(ns("screen1")),
                       screenStep2 = uiOutput(ns("screen2")),
                       screenStep3 = uiOutput(ns("screen3")),
@@ -48,10 +53,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
         )
       })
       
-        rv <-reactiveValues(
-          dataIn = NULL,
-          dataOut = NULL
-           )
+        
 
         reset <- reactive({
           r.nav$isDone <- c(TRUE,rep(FALSE, 3))
@@ -167,21 +169,22 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
          
          tagList(
            div(id=ns('screen4'),
-               tags$h1('Step 4'),
+               tags$h3('Step 4'),
                actionButton(ns('validate_btn'), 'Validate')
            )
          )
+       })
          
-         observeEvent(input$validate_btn, {
-           rv$dataOut <- rv$dataIn
-           r.nav$isDone[3] <- TRUE
-         })
+          observeEvent(input$validate_btn, ignoreInit = T,{
+
+            rv$dataOut <- rv$dataIn
+            r.nav$isDone[4] <- TRUE
        })
        
        
        ##########################################################
         
-  reactive({rv$dataOut})
+  return(reactive({rv$dataOut}))
     }
   )
 }
