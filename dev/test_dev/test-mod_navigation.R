@@ -4,8 +4,6 @@ source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
-    br(),br(),
-    #mod_navigation_ui('test_nav')
     uiOutput('show')
   )
 )
@@ -21,9 +19,9 @@ server <- function(input, output, session) {
                   screenStep3 = uiOutput("screen3")),
     isDone =  c(FALSE, FALSE, FALSE),
     mandatory =  c(FALSE, TRUE, FALSE),
-    reset = FALSE,
+    reset = TRUE,
     skip = NULL,
-                   undo = NULL
+    undo = TRUE
     
   )
   
@@ -39,8 +37,8 @@ server <- function(input, output, session) {
   })
   
   observeEvent(req(r.nav$actions$reset),{
-     r.nav$isDone <- rep(FALSE, 3)
-    r.nav$actions$reset <- FALSE
+    r.nav$isDone <- rep(FALSE, 3)
+    r.nav$reset <- FALSE
     r.params$select1 <- NULL
     r.params$select2 <- NULL
     r.params$select3 <- NULL

@@ -1,4 +1,271 @@
 
+
+# Module UI
+
+#' @title   mod_navigation_ui and mod_navigation_server
+#' @description  A shiny Module. The sass source code for timeline was inspired by 
+#'  : https://codepen.io/cjl750/pen/mXbMyo
+#'
+#' @param id shiny id
+#' @param input internal
+#' @param output internal
+#' @param session internal
+#' @param isDone xxxxx
+#' @param screens xxxxx
+#' @param rstFunc xxxxx
+#' @param iconType xxxxxx
+#'
+#' @rdname mod_navigation
+#'
+#' @keywords internal
+#' @export 
+#' @importFrom shiny NS tagList
+#' @importFrom shinyjs disabled inlineCSS
+mod_navigation_ui <- function(id){
+  ns <- NS(id)
+
+}
+
+# Module Server
+
+#' @rdname mod_navigation
+#' @export
+#' @keywords internal
+#' @import shiny shinyjs
+#' @importFrom sass sass
+mod_navigation_server <- function(id, style=1, pages){
+  stopifnot(!is.reactive(style))
+  stopifnot(!is.reactive(pages))
+  
+  btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
+  
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+    current <- reactiveValues(
+      # This variable is the indice of the current screen
+      val = NULL,
+      nbSteps = NULL
+    )
+    
+    
+    
+    
+    bars <- reactive({
+      ns <- NS(id)
+      tagList(
+        uiOutput(ns("load_css_style")),
+        shinyjs::useShinyjs(),
+        fluidRow(
+          align= 'center',
+          column(width=2,
+                div(
+                  style = btn_style,
+                  uiOutput(ns('show_rstBtn'))
+                ),
+                div(style=btn_style,
+                    uiOutput(ns('show_undoBtn'))),
+                div( id='test',
+                      style = btn_style,
+                      shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                   class = PrevNextBtnClass,
+                                   style='padding:4px; font-size:80%')))
+          ),
+          column(width=8,div( style = btn_style,
+                              uiOutput(ns("timelineStyle")))
+          ),
+          column(width=2,div(style=btn_style,
+                             shinyjs::disabled(actionButton(ns("nextBtn"), ">>",
+                                                            class = PrevNextBtnClass,
+                                                            style='padding:4px; font-size:80%'))),
+                 div(style=btn_style,uiOutput(ns('show_skipBtn')))
+          )
+        )
+      )
+    })
+    
+   
+    
+     observeEvent(c(pages$reset, pages$undo, pages$skip),{
+     #  shinyjs::toggleState(id="rstBtn", condition = !is.null(pages$reset))
+    #   shinyjs::toggle('undoBtn', condition = !is.null(pages$undo))
+    #   shinyjs::toggle('skipBtn', condition = !is.null(pages$skip))
+     })
+    
+    
+    output$show_rstBtn <- renderUI({
+      req(!is.null(pages$reset))
+      actionButton(ns("rstBtn"), "reset",
+                   class = PrevNextBtnClass,
+                   style='padding:4px; font-size:80%')
+      shinyjs::toggleState(id="rstBtn", condition = FALSE)
+    })
+    
+    output$show_skipBtn <- renderUI({
+      req(!is.null(pages$skip))
+      actionButton(ns("skipBtn"), "skip",
+                   class = PrevNextBtnClass,
+                   style='padding:4px; font-size:80%')
+    })
+    
+    output$show_undoBtn <- renderUI({
+      req(!is.null(pages$undo))
+      actionButton(ns("undoBtn"), "undo",
+                   class = PrevNextBtnClass,
+                   style='padding:4px; font-size:80%')
+    })
+    
+    output$load_css_style <- renderUI({
+      req(current$nbSteps)
+      style
+      if (style==3) return(NULL)
+      code <- strsplit(code_sass_timeline[[paste0('style',style)]],"\n")
+      firstLine <- code[[1]][1]
+      prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
+      suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
+      
+      code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
+      
+      shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
+      
+    })
+    
+    
+    observeEvent(req(pages),{
+      current$nbSteps <- length(pages$stepsNames)
+      current$val <- 1
+      
+      pages$ll.UI[[1]] <- div(id = ns(paste0("screen",1)),  pages$ll.UI[[1]])
+      for (i in 2:current$nbSteps){
+        pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)),  pages$ll.UI[[i]]))
+      }
+      current$val <- 1
+    })
+    
+    
+    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
+    
+    #### -----
+    ### Three timelines
+    output$timeline1 <- renderUI({
+      current$val
+      status <- rep('',current$nbSteps)
+      status[current$val] <- ' active'
+      steps <- pages$stepsNames
+      txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
+      for (i in 1:current$nbSteps){
+        txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
+      }
+      txt <- paste0(txt,"</div></div>")
+      HTML(txt)
+    })
+    
+    
+    output$timeline2 <- renderUI({
+      current$val
+      pages
+      status <- rep('',current$nbSteps)
+      if( !is.null(pages$mandatory))
+        status[which(pages$mandatory)] <- 'mandatory'
+      
+      #status <- rep('',current$nbSteps)
+      status[which(pages$isDone)] <- 'complete'
+      
+      active  <- rep('',current$nbSteps)
+      active[current$val] <- 'active'
+      
+      steps <- pages$stepsNames
+      txt <- "<ul class='timeline' id='timeline'>"
+      for (i in 1:current$nbSteps){
+        txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
+      }
+      txt <- paste0(txt,"</ul>")
+      
+      HTML(txt)
+    })
+    
+    
+    output$timeline3 <- renderUI({
+      current$val
+      color <- rep("lightgrey",current$nbSteps)
+      colorForCursor <- rep("white",current$nbSteps)
+      
+      
+      for (i in 1:current$nbSteps){
+        status <- pages$isDone[i]
+        col <- ifelse(!is.null(pages$mandatory) && pages$mandatory[i], "red", orangeProstar)
+        ifelse(status, color[i] <- "green", color[i] <- col)
+      }
+      
+      colorForCursor[current$val] <- "black"
+      
+      steps <- pages$stepsNames
+      colorCurrentPos <- colorForCursor
+      paste0("     ", steps, "     ")
+      rows.color <- rows.text <-  rows.cursor <- list()
+      rows.text <- list()
+      for( i in 1:length( color ) ) {
+        rows.color[[i]] <-lapply( color[i], function( x ) tags$th(  style=paste0("background-color:", x,"; height: 20px;" ) ))
+        rows.cursor[[i]] <-lapply( colorCurrentPos[i], function( x ) tags$th(  style=paste0("background-color:", x,"; height: 5px;" ) ))
+        rows.text[[i]] <- lapply( steps[i], function( x ) tags$td( x ) ) 
+      }
+      
+      html.table <-  tags$table(style = "width: 100%; text-align: center;border: 1;border-collapse: separate;border-spacing: 10px;padding-top: 0px;",
+                                tags$tr( rows.color ),
+                                tags$tr( rows.cursor ),
+                                tags$tr( rows.text )
+      )
+      
+      html.table
+    })
+    
+    
+    
+    observeEvent(req(input$rstBtn),{
+      current$val <- 1
+      pages$isDone <- rep(FALSE, current$nbSteps)
+      pages$reset <- TRUE
+    })
+    
+    
+    navPage <- function(direction) {
+      newval <- current$val + direction 
+      newval <- max(1, newval)
+      newval <- min(newval, current$nbSteps)
+      current$val <- newval
+    }
+    
+    
+    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
+    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
+    
+    observeEvent( pages$isDone[current$val],{
+      shinyjs::toggleState(id = "nextBtn", 
+                           condition = isTRUE(pages$isDone[current$val]) ||
+                             !isTRUE(pages$mandatory[current$val]))
+      shinyjs::toggleState(id = "nextBtn", condition = current$val< current$nbSteps)
+      shinyjs::toggleState(id = "prevBtn", condition = current$val > 1)
+    })
+    
+    observeEvent(current$val, {
+      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
+    })
+    
+    
+    screens <- reactive({
+      tagList(pages$ll.UI)
+    })
+    
+    
+    list(bars=reactive(bars()),
+         screens=reactive(screens())
+    )
+  })
+}
+
+
+
+
 code_sass_timeline <- list(
   style1 ="$numDots:3;
 $parentWidthBase: 0.4;
@@ -283,244 +550,3 @@ $lineWidth: 5px;
   }
 }", 
 style3 = "")
-
-# Module UI
-
-#' @title   mod_navigation_ui and mod_navigation_server
-#' @description  A shiny Module. The sass source code for timeline was inspired by 
-#'  : https://codepen.io/cjl750/pen/mXbMyo
-#'
-#' @param id shiny id
-#' @param input internal
-#' @param output internal
-#' @param session internal
-#' @param isDone xxxxx
-#' @param screens xxxxx
-#' @param rstFunc xxxxx
-#' @param iconType xxxxxx
-#'
-#' @rdname mod_navigation
-#'
-#' @keywords internal
-#' @export 
-#' @importFrom shiny NS tagList
-#' @importFrom shinyjs disabled inlineCSS
-mod_navigation_ui <- function(id){
-  ns <- NS(id)
-  shinyjs::useShinyjs()
-}
-
-# Module Server
-
-#' @rdname mod_navigation
-#' @export
-#' @keywords internal
-#' @import shiny shinyjs
-#' @importFrom sass sass
-mod_navigation_server <- function(id, style=1, pages){
-  stopifnot(!is.reactive(style))
-  stopifnot(!is.reactive(pages))
-  
-  
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-    
-    current <- reactiveValues(
-      # This variable is the indice of the current screen
-      val = NULL,
-      nbSteps = NULL
-    )
-    
-    
-    
-    
-    bars <- reactive({
-      tagList(
-        shinyjs::useShinyjs(),
-        uiOutput(ns("load_css_style")),
-        fluidRow(
-          align= 'center',
-          column(width=2,
-                 div(
-                     style="display:inline-block; vertical-align: middle; padding: 7px",
-                           shinyjs::hidden(actionButton(ns("rstBtn"), "reset",
-                                   class = PrevNextBtnClass,
-                                   style='padding:4px; font-size:80%')
-                                 )
-                            ),
-                 div( id='test',
-                      style="display:inline-block; vertical-align: middle; padding: 7px",
-                      shinyjs::hidden(actionButton(ns("prevBtn"), "<<",
-                                   class = PrevNextBtnClass,
-                                   style='padding:4px; font-size:80%')))
-          ),
-          column(width=8,div( style="display:inline-block; vertical-align: middle; padding: 7px",
-                              uiOutput(ns("timelineStyle")))
-          ),
-          column(width=2,div(style="display:inline-block; vertical-align: middle; padding: 7px",
-                             shinyjs::disabled(actionButton(ns("nextBtn"), ">>",
-                                                            class = PrevNextBtnClass,
-                                                            style='padding:4px; font-size:80%')))
-          )
-        )
-      )
-    })
-    
-    
-    observe({
-      pages$reset
-      shinyjs::toggle("rstBtn", condition = TRUE)
-      #shinyjs::toggle('xxx', condition= req(pages$actions$skip))
-      #shinyjs::toggle('xxx', condition= req(pages$actions$undo))
-    })
-    
-    
-    output$load_css_style <- renderUI({
-      req(current$nbSteps)
-      style
-      if (style==3) return(NULL)
-      code <- strsplit(code_sass_timeline[[paste0('style',style)]],"\n")
-      firstLine <- code[[1]][1]
-      prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
-      suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
-      
-      code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
-      
-      shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-      
-    })
-    
-    
-    observeEvent(req(pages),{
-      current$nbSteps <- length(pages$stepsNames)
-      current$val <- 1
-      
-      pages$ll.UI[[1]] <- div(id = ns(paste0("screen",1)),  pages$ll.UI[[1]])
-      for (i in 2:current$nbSteps){
-        pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen",i)),  pages$ll.UI[[i]]))
-      }
-      current$val <- 1
-    })
-    
-    
-    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
-    
-    #### -----
-    ### Three timelines
-    output$timeline1 <- renderUI({
-      current$val
-      status <- rep('',current$nbSteps)
-      status[current$val] <- ' active'
-      steps <- pages$stepsNames
-      txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
-      for (i in 1:current$nbSteps){
-        txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
-      }
-      txt <- paste0(txt,"</div></div>")
-      HTML(txt)
-    })
-    
-    
-    output$timeline2 <- renderUI({
-      current$val
-      pages
-      status <- rep('',current$nbSteps)
-      if( !is.null(pages$mandatory))
-        status[which(pages$mandatory)] <- 'mandatory'
-      
-      #status <- rep('',current$nbSteps)
-      status[which(pages$isDone)] <- 'complete'
-      
-      active  <- rep('',current$nbSteps)
-      active[current$val] <- 'active'
-      
-      steps <- pages$stepsNames
-      txt <- "<ul class='timeline' id='timeline'>"
-      for (i in 1:current$nbSteps){
-        txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
-      }
-      txt <- paste0(txt,"</ul>")
-      
-      HTML(txt)
-    })
-    
-    
-    output$timeline3 <- renderUI({
-      current$val
-      color <- rep("lightgrey",current$nbSteps)
-      colorForCursor <- rep("white",current$nbSteps)
-      
-      
-      for (i in 1:current$nbSteps){
-        status <- pages$isDone[i]
-        col <- ifelse(!is.null(pages$mandatory) && pages$mandatory[i], "red", orangeProstar)
-        ifelse(status, color[i] <- "green", color[i] <- col)
-      }
-      
-      colorForCursor[current$val] <- "black"
-      
-      steps <- pages$stepsNames
-      colorCurrentPos <- colorForCursor
-      paste0("     ", steps, "     ")
-      rows.color <- rows.text <-  rows.cursor <- list()
-      rows.text <- list()
-      for( i in 1:length( color ) ) {
-        rows.color[[i]] <-lapply( color[i], function( x ) tags$th(  style=paste0("background-color:", x,"; height: 20px;" ) ))
-        rows.cursor[[i]] <-lapply( colorCurrentPos[i], function( x ) tags$th(  style=paste0("background-color:", x,"; height: 5px;" ) ))
-        rows.text[[i]] <- lapply( steps[i], function( x ) tags$td( x ) ) 
-      }
-      
-      html.table <-  tags$table(style = "width: 100%; text-align: center;border: 1;border-collapse: separate;border-spacing: 10px;padding-top: 0px;",
-                                tags$tr( rows.color ),
-                                tags$tr( rows.cursor ),
-                                tags$tr( rows.text )
-      )
-      
-      html.table
-    })
-    
-    
-    
-    observeEvent(req(input$rstBtn),{
-      current$val <- 1
-      pages$isDone <- rep(FALSE, current$nbSteps)
-      pages$reset <- TRUE
-    })
-    
-    
-    navPage <- function(direction) {
-      newval <- current$val + direction 
-      newval <- max(1, newval)
-      newval <- min(newval, current$nbSteps)
-      current$val <- newval
-    }
-    
-    
-    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
-    
-    observeEvent( pages$isDone[current$val],{
-      shinyjs::toggleState(id = "nextBtn", 
-                           condition = isTRUE(pages$isDone[current$val]) ||
-                             !isTRUE(pages$mandatory[current$val]))
-      shinyjs::toggle(id = "nextBtn", condition = current$val< current$nbSteps)
-      shinyjs::toggle(id = "prevBtn", condition = current$val > 1)
-    })
-    
-    observeEvent(current$val, {
-      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
-    })
-    
-    
-    screens <- reactive({
-      tagList(pages$ll.UI)
-    })
-    
-    
-    list(bars=reactive(bars()),
-         screens=reactive(screens())
-    )
-  })
-}
-
-

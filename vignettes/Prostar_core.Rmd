@@ -59,6 +59,45 @@ This is a list of how the modules of data processing work:
   * A dataset cannot be run several times on its own result
 
 
+The code for the UI is composed of a list a several elements used in the navigation module (mod_navigation.R).
+
+
+
+```{r ui_reactive_param, eval=FALSE}
+r.nav <- reactiveValues(
+    name = "test",
+    stepsNames = c("Screen 1", "Screen 2","Screen 3"),
+    ll.UI = list( screenStep1 = uiOutput("screen1"),
+                  screenStep2 = uiOutput("screen2"),
+                  screenStep3 = uiOutput("screen3")),
+    isDone =  c(FALSE, FALSE, FALSE),
+    mandatory =  c(FALSE, TRUE, FALSE),
+    reset = FALSE,
+    skip = NULL,
+    undo = NULL
+    
+  )
+```  
+  
+  
+* name: the name of the process that is to be managed by the timeline logics,
+* steps: A vector of names for the different steps of the process,
+* ll.UI: a list in which each item is the UI for one of the screens of the process. The length of this list is
+equal to the length of the variables 'steps',
+* isDone: A vector of boolean to indicate whether each step has been run by the user. SO, the length of this vector is also equal to the length of the variables 'steps'. By default, all the elements are set to FALSE. They are set to TRUE by some a function in the process source code. The communication between the process and the navigation module is possible because of reactivity. So, if at any moment, an element is set to TRUE by the process, then the corresponding tag is colored in green in the timeline; otherwise, the default color is red if the step is mandatory and orange otherwise,
+* isMandatory:
+* actions: 
+
+
+
+
+UI
+Each process UI is composed of one or more screens which correspond to the different steps of the process. The navigation between each screen is realized by means of buttons placed on the right and the left of the navigation UI (the 'timeline').
+
+The timeline may take different aspects w.r.t the style applied. The principle is to have
+
+Several buttons are available:
+* the buttons 'Prev' (on the left) and 'Next' 'on the right' are always part of the timeline. AT the initialization of the process, only the 'Next' button is visible and disabled 
 
 ## Logics for processes and datasets
 
