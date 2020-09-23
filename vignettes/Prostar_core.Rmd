@@ -47,16 +47,48 @@ This is also another reason for that tutorial made step-by-step
 
 * A process cannot appear more than once in a workflow
 
+# Data processing modules
 
 
-## Characteristics of module processes
+## Generalities
+
+  * A process module takes as parameter one dataset of 'n' items returns a dataset of n + 1 items. The return value of the process p is the last item of the dataset.
+    * A dataset cannot be run several times on its own result
+
+## Navigation module
 
 This is a list of how the modules of data processing work:
 
-  * A process module takes as parameter one dataset of 'n' items returns a dataset of n + 1 items. The return value of the process p is the last item of the dataset.
+The special buttons which must be present are always shown in the timeline. They are enabled/disabled w.r.t to state of the navigation:
+
+* the 'skip' button is always enabled to allow the user to skip the process even in the middle of the navigation. If clicked, one goes to the next step without changing the current assay
+* the 'undo' button is only enabled once the user has clicked on the 'validate' button of the process. One of its action is to relaod the previous assay to be ready to rerun the process.
+* the 'reset' button is only enabled while the user fill the UI and has not yet clicked on the 'validate' button. Its effects is to set all inputs of the process to their default value.
+
+Navigation buttons ('previous' and 'next'):
+
+* the 'next button is enabled if two conditions are valid at the same time:
+  * if there is at least one more step forward,
+  * if the user is on a mandatory step, this step must has been validated (Done)
+* the 'prev' button needs two conditions being TRUE to be enabled:
+  * if there is at least one more step backward,
+  * if the process is not yet validated (otherwise, the user must use the 'undo' button)
+  
+  
+If the user goes backward on a previous step and validate this step, then  the following steps are automatically set to 'undone' and have to be rerun. This guarantees that the steps are always done in the same way. This feature must be implemented in each module source code. It cannot be coded in the navigation module (recursive loop on the listener of isDone vector)
+
+
+The undo button is enabled only if the user is on the last step and has validated it.The action is the same as reset but, in addition, we get back the previous dataset
+
+## Initialization of a navigation module instance
+
+At start, 
+
+
+
   * 'Reset': Each process module has a 'Reset' button which allows to set all inputs and plots to their default value if the validation button has not been clicked yet. If the process has several steps, the screen returns to the first one.
   * 'Validate': Each process module has a 'Validate' button which allows to record the new item at the end of the dataset and return the new dataset to Prostar core. After clicking, the screen is not updated: all the inputs keep their current value and the ui is kept to the last step.
-  * A dataset cannot be run several times on its own result
+
 
 
 The code for the UI is composed of a list a several elements used in the navigation module (mod_navigation.R).

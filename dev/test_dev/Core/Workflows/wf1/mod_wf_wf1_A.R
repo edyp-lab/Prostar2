@@ -1,52 +1,78 @@
 
+# source(file.path('../../../../R', 'mod_navigation.R'), local=TRUE)$value
+# source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 
 
 mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
   tagList(
-    shinyjs::useShinyjs(),
-    shinyalert::useShinyalert(),
-    div(id=ns('process_ui'), 
-                tags$h4(paste0('Module ', id)),
-                tags$p('y = 2 * x'),
-                selectInput(ns('si'), '', choices=LETTERS[1:4], selected='B', width='100px'),
-                numericInput(ns('num'), '', value=10, width='100px'),
-                actionButton(ns('reset'), 'Reset'),
-                actionButton(ns('btn_valid'), 'Validate'),
-              uiOutput(ns('currentObj'))
-          )
+    uiOutput(ns('currentObj')),
+    uiOutput(ns('show'))
   )
 }
 
-
-mod_wf_wf1_A_server <- function(id, dataIn=NULL, indice){
+#' @param dataIn xxx
+#'
+#' 
+#' 
+mod_wf_wf1_A_server <- function(id, dataIn=NULL){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       
+      # variables to communicate with the navigation module
+      r.nav <- reactiveValues(
+        name = "test",
+        stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
+        ll.UI = list( screenStep1 = uiOutput(ns("screen1")),
+                      screenStep2 = uiOutput(ns("screen2")),
+                      screenStep3 = uiOutput(ns("screen3")),
+                      screenStep4 = uiOutput(ns("screen4"))
+                      ),
+        isDone =  c(TRUE, FALSE, FALSE, FALSE),
+        mandatory =  c(FALSE, FALSE, TRUE, TRUE),
+        reset = FALSE
+      )
+      
+      screens <- mod_navigation_server("test_nav", 
+                                      style = 2, 
+                                      pages = r.nav,
+                                      start = NULL)
+      
+      
+      output$show <- renderUI({
+        tagList(
+          mod_navigation_ui(ns("test_nav")),
+          screens()
+        )
+      })
+      
         rv <-reactiveValues(
           dataIn = NULL,
-          indice = if (is.null(indice())) 1 else  indice(),
           dataOut = NULL
            )
-   
-        session$userData$mod_A_obs_reset <- observeEvent(input$reset, {
-          shinyjs::reset('process_ui')
-          
+
+        reset <- reactive({
+          r.nav$isDone <- c(TRUE,rep(FALSE, 3))
+          for (i in 1:length(r.nav$stepsNames))
+            shinyjs::reset(paste0('screen', i))
           rv$dataIn <- dataIn()
-          rv$indice <- if (is.null(indice())) 1 else  indice()
           rv$dataOut <- NULL
         })
         
+        
+        observeEvent(req(r.nav$reset),{
+          r.nav$reset  <- FALSE
+          print('reset activated from navigation module')
+          reset()
+        })
 
         
-
         # Just for the show absolutePanel
         output$currentObj <- renderUI({
           div(
               tagList(
-            tags$p(tags$strong(paste0('rv$indice = ',rv$indice))),
             fluidRow(
             column(3,
                     tags$p(tags$strong('rv$dataIn : ')),
@@ -69,65 +95,93 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, indice){
         
         
         
-      session$userData$mod_A_obs_1 <-  observeEvent(c(dataIn(),indice()), { 
+      # Initialization fo the process
+        session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
           rv$dataIn <- dataIn()
-          rv$indice <- if (is.null(indice())) 1 else  indice()
-          print('Module A, observer 1')
-          
-          # if (rv$indice == length(rv$dataIn))
-          #   return(NULL)
-          # 
-          # shinyalert::shinyalert(
-          #   title = 'title',
-          #   text = "This is a modal",
-          #   size = "xs", 
-          #   closeOnEsc = TRUE,
-          #   closeOnClickOutside = FALSE,
-          #   html = FALSE,
-          #   type = "info",
-          #   showConfirmButton = TRUE,
-          #   showCancelButton = TRUE,
-          #   confirmButtonText = "OK",
-          #   confirmButtonCol = "#15A4E6",
-          #   cancelButtonText = "Cancel",
-          #   timer = 0,
-          #   imageUrl = "",
-          #   animation = FALSE
-          # )
       })
 
-        
-        
-      # 
-      # observeEvent(input$shinyalert, ignoreNULL=T, {
-      #   shinyjs::toggleState('div_nav_pipe_process', condition = input$shinyalert)
-      # })
       
-      
-       session$userData$mod_A_obs_2 <-  
-          observeEvent(input$btn_valid, ignoreInit=T, ignoreNULL = T,{
-
-          # We delete all items that are further the given indice
-          # to ensure that the new item is always the last one
-          print('btn_valid')
-
-          print('Module A, observer btn_valid')
-          if (rv$indice < length(rv$dataIn)){
-            rv$dataIn <- rv$dataIn[-c((rv$indice+1):length(rv$dataIn))]
-          }
-          name <- paste0('A-processed', rv$indice)
-          # This ensures that each new item has d different name
-          if (length(grep(name, names(rv$dataIn))) > 0)
-            paste0(name, '_', (1 + length(grep(name, names(rv$dataIn)))))
-          
-          rv$dataIn <- append(rv$dataIn, setNames(2 * rv$dataIn[[rv$indice]], name))
-          rv$indice <- length(rv$dataIn)
-          rv$dataOut <- rv$dataIn
-
-          
-        })
+       
+       
+       
+       
+       
+       #####################################################################
+       ## screens of the module
+       
+       ############### SCREEN 1 ######################################
+       output$screen1 <- renderUI({
+         tagList(
+           tags$h1('Description of the module'),
+           checkboxInput(ns('check'), 'Check test', value=F)
+         )
+         
+       })
+       
+       
+       ############### SCREEN 2 ######################################
+       
+       output$screen2 <- renderUI({
+         
+         tagList(
+           div(id=ns('screen2'),
+               tags$h2('Step 1'),
+               actionButton(ns('perform_screen2_btn'), 'Perform'),
+               selectInput(ns('select1'), 'Select step 1', 
+                           choices = 1:5, 
+                           selected = 1,
+                           width = '150px')
+           )
+         )
+       })
+       
+       observeEvent(input$perform_screen2_btn, {
+         rv$dataIn <- append(rv$dataIn, input$select1)
+         r.nav$isDone[2] <- TRUE
+       })
+       
+       
+       ############### SCREEN 3 ######################################
+       output$screen3 <- renderUI({
+         
+         tagList(
+           div(id=ns('screen3'),
+               tags$h3('Step 2'),
+               actionButton(ns('perform_screen3_btn'), 'Perform'),
+               selectInput(ns('select2'), 'Select step 2',
+                           choices = 1:5,
+                           selected = 1,
+                           width = '150px')
+           )
+         )
+       })
+       
+       observeEvent(input$perform_screen3_btn, {
+         rv$dataIn <- append(rv$dataIn, input$select2)
+         r.nav$isDone[3] <- TRUE
+       })
+       
+       
+       ############### SCREEN 4 ######################################
+       output$screen4 <- renderUI({
+         
+         tagList(
+           div(id=ns('screen4'),
+               tags$h1('Step 4'),
+               actionButton(ns('validate_btn'), 'Validate')
+           )
+         )
+         
+         observeEvent(input$validate_btn, {
+           rv$dataOut <- rv$dataIn
+           r.nav$isDone[3] <- TRUE
+         })
+       })
+       
+       
+       ##########################################################
         
-  return(reactive({rv$dataOut}))
+  reactive({rv$dataOut})
     }
   )
 }
