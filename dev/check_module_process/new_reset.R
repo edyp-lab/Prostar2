@@ -1,7 +1,7 @@
 
 observeEvent(req(r.nav$reset),{
     
-    rv$widgets <- list(ChooseFilters = "None",seuilNA = 0)
+    rv$widgets <- list(ChooseFilters = "None",seuilNA = 0, seuil_plop=50)
     
     ## do not modify this part
     rv$dataIn <- obj()

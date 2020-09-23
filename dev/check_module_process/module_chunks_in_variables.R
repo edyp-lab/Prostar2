@@ -66,7 +66,7 @@ rvModule <- "
     i = NULL,
     settings = NULL,
     
-    widgets = widgets_list
+    widgets = list(widgets_list)
   )
 "
 
@@ -75,7 +75,7 @@ rvModule <- "
 reset <- "
 observeEvent(req(r.nav$reset),{
     
-    rv$widgets <- widgets_list
+    rv$widgets <- list(widgets_list)
     
     ## do not modify this part
     rv$dataIn <- obj()
@@ -91,56 +91,64 @@ observeEvent(req(r.nav$reset),{
 
 
 
-modalAlert <- "
-#shinyalert modal asking if user wants to process a dataset with an index <i
-  observeEvent(req(rv$dataIn, rv$i ), {
-    
-    a <- (length(rv$dataIn) != rv$i) && !r.nav$isDone[length(r.nav$isDone)]
-    if (!a) return(NULL)
-    
-    shinyalert::shinyalert(
-      title = 'title',
-      text = 'This is a modal',
-      size = 'xs', 
-      closeOnEsc = TRUE,
-      closeOnClickOutside = FALSE,
-      html = FALSE,
-      type = 'info',
-      showConfirmButton = TRUE,
-      showCancelButton = TRUE,
-      confirmButtonText = 'OK',
-      confirmButtonCol = '#15A4E6',
-      cancelButtonText = 'Cancel',
-      timer = 0,
-      imageUrl = '',
-      animation = FALSE
-    )
-  })
+# modalAlert <- "
+# #shinyalert modal asking if user wants to process a dataset with an index <i
+#   observeEvent(req(rv$dataIn, rv$i ), {
+#     
+#     a <- (length(rv$dataIn) != rv$i) && !r.nav$isDone[length(r.nav$isDone)]
+#     if (!a) return(NULL)
+#     
+#     shinyalert::shinyalert(
+#       title = 'title',
+#       text = 'This is a modal',
+#       size = 'xs', 
+#       closeOnEsc = TRUE,
+#       closeOnClickOutside = FALSE,
+#       html = FALSE,
+#       type = 'info',
+#       showConfirmButton = TRUE,
+#       showCancelButton = TRUE,
+#       confirmButtonText = 'OK',
+#       confirmButtonCol = '#15A4E6',
+#       cancelButtonText = 'Cancel',
+#       timer = 0,
+#       imageUrl = '',
+#       animation = FALSE
+#     )
+#   })
+# "
+
+
+
+# shinyAlert <- "
+# observe({
+#     req(input$shinyalert)
+#     rv$i
+#     
+#     c1 <- input$shinyalert
+#     c2 <- rv$i == length(rv$dataIn)
+#     c3 <- r.nav$isDone[length(r.nav$isDone)]
+#     if (c1 && !c2 && !c3){
+#       #Delete all assays after that one indicated by the indice given in parameter
+#       rv$dataIn <- rv$dataIn[ , , -((rv$i+1):length(rv$dataIn))]
+#       c1 <- input$shinyalert
+#       c2 <- rv$i == length(rv$dataIn)
+#       c3 <- r.nav$isDone[length(r.nav$isDone)]
+#     } else {
+#       # Do nothing, the module interface is still disabled
+#     }
+#     shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
+#   })
+# "
+
+
 "
-
-
-
-shinyAlert <- "
-observe({
-    req(input$shinyalert)
-    rv$i
-    
-    c1 <- input$shinyalert
-    c2 <- rv$i == length(rv$dataIn)
-    c3 <- r.nav$isDone[length(r.nav$isDone)]
-    if (c1 && !c2 && !c3){
-      #Delete all assays after that one indicated by the indice given in parameter
-      rv$dataIn <- rv$dataIn[ , , -((rv$i+1):length(rv$dataIn))]
-      c1 <- input$shinyalert
-      c2 <- rv$i == length(rv$dataIn)
-      c3 <- r.nav$isDone[length(r.nav$isDone)]
-    } else {
-      # Do nothing, the module interface is still disabled
-    }
-    shinyjs::toggleState('div_nav_pipe_process', condition = !c3 && (c1||c2))
-  })
+disableActionButton <- function(id,session) {
+  session$sendCustomMessage(type='jsCode',
+                            list(code= paste('$('#',id,'').prop('disabled',true)'
+                                             ,sep="")))
+}
 "
-
 
 
 end_server <-  "

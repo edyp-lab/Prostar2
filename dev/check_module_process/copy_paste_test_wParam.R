@@ -18,7 +18,7 @@ create_rNav <- function(process, steps, file, append = FALSE) {
   
   
   nb_screen <- length(unlist(strsplit(steps,',')))
-  new_rNav <- gsub('nb_screen',nb_screen,rNav)
+  new_rNav <- gsub('nb_screen',nb_screen,rNav) # warning special case like isDone =  c(FALSE,TRUE,FALSE)
   
   ll.UI <- c()
   for (i in 1:nb_screen){
@@ -36,7 +36,6 @@ create_rNav <- function(process, steps, file, append = FALSE) {
   
 }
 
-
 create_rvModule <- function(process, widgets_list, settings=TRUE, file, append = FALSE) {
   new_rvModule <- gsub('process',paste0('process_',process),rvModule)
   new_rvModule <- gsub('widgets_list',widgets_list,new_rvModule)
@@ -51,12 +50,12 @@ create_reset <- function(widgets_list, nb_screen, file, append = FALSE) {
   cat(new_reset, file=file, append = append)
 }
 
-create_modalAlert <- function(file, append = FALSE){
-  cat(modalAlert, file=file, append = append)
-}
-create_shinyAlert <- function(file, append = FALSE){
-  cat(shinyAlert, file=file, append = append)
-}
+# create_modalAlert <- function(file, append = FALSE){
+#   cat(modalAlert, file=file, append = append)
+# }
+# create_shinyAlert <- function(file, append = FALSE){
+#   cat(shinyAlert, file=file, append = append)
+# }
 
 
 create_end_server <- function(name, file, append = FALSE) {
@@ -72,7 +71,7 @@ create_screen <- function(nb_screen, process, file, append=FALSE){
     screen_list[i] <- paste0('#Screen',i,'\noutput$Screen_process_',i,' <- renderUI({\n\n\n})')
   }
   screen_list <- paste0(screen_list,collapse = "\n")
-  new_screen <- paste0('## Definitions of the screens\n\n', screen_list)
+  new_screen <- paste0('\n\n## Definitions of the screens\n\n', screen_list)
   new_screen <- gsub('process',process,new_screen)
   cat(new_screen, file=file, append = append)
 }
@@ -80,7 +79,10 @@ create_screen <- function(nb_screen, process, file, append=FALSE){
 
 create_widgets_from_input <- function(widgets_list, file, append=FALSE){
   
-  widgets_list <- names(paste(widgets_list,collapse="\n"))
+  widgets_list <- unlist(strsplit(widgets_list,","))
+  widgets_list <- sub("[[:space:]]*=.*", "", widgets_list)  
+  widgets_list <- gsub(' ','',widgets_list)
+  
   widgets_from_input <- c()
   for (i in 1:length(widgets_list)){
     widgets_from_input[i] <- paste0('observeEvent(input$',
@@ -89,7 +91,7 @@ create_widgets_from_input <- function(widgets_list, file, append=FALSE){
                                     widgets_list[i],' <- input$',
                                     widgets_list[i],'\n})\n\n')
   }
-  #if(!ignoreInit){widgets_from_input <- gsub('ignoreInit=TRUE,','',widgets_from_input)}
+  
   
   cat(widgets_from_input, file=file, append = append)
 }
@@ -103,45 +105,46 @@ create_watch_file <- function(name, process){
   cat(new_watch_file, file=file)
 }
 
-create_watch_file(name='protein_Filtering',
-                  process='Filtering')
-#-----------------------------------------------------------#
-
-
-create_ui(name='protein_Filtering',
-          file="new_ui.R")
-
-create_start_server(name='protein_Filtering',
-                    file="new_start_server.R")
-
-create_rNav(process='Filtering',
-            steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
-            file="new_rNav.R")
-
-create_rvModule(process='Filtering',
-                widgets_list='list(ChooseFilters = "None",seuilNA = 0)',
-                file="new_rvModule.R")
-
-create_reset(widgets_list='list(ChooseFilters = "None",seuilNA = 0)',
-             nb_screen=5,
-             file="new_reset.R")
-
-create_modalAlert(file="modalAlert.R")
-create_shinyAlert(file="shinyAlert.R")
-
-create_end_server(name='protein_Filtering',
-                  file="new_end_server.R")
-
-create_screen(nb_screen=4,
-              process='plop',
-              file="new_screen.R")
-
-create_widgets_from_input(widgets_list=c("ChooseFilters","plop1","seuilNA"),
+# create_watch_file(name='protein_Filtering',
+#                   process='Filtering')
+# #-----------------------------------------------------------#
+# 
+# 
+# create_ui(name='protein_Filtering',
+#           file="new_ui.R")
+# 
+# create_start_server(name='protein_Filtering',
+#                     file="new_start_server.R")
+# 
+# create_rNav(process='Filtering',
+#             steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
+#             file="new_rNav.R")
+# 
+# create_rvModule(process='Filtering',
+#                 widgets_list='ChooseFilters = "None",seuilNA = 0, seuil_plop=50',
+#                 file="new_rvModule.R")
+# 
+# create_reset(widgets_list='ChooseFilters = "None",seuilNA = 0, seuil_plop=50',
+#              nb_screen=5,
+#              file="new_reset.R")
+# 
+# # create_modalAlert(file="modalAlert.R")
+# # create_shinyAlert(file="shinyAlert.R")
+# 
+# create_end_server(name='protein_Filtering',
+#                   file="new_end_server.R")
+# 
+# create_screen(nb_screen=4,
+#               process='plop',
+#               file="new_screen.R")
+# 
+create_widgets_from_input(widgets_list=' ChooseFilters= "None",  seuilNA   =   10',
                           file="new_widgets_from_input.R")
 
+
 #-----------------------------------------------------------#
 #-----------------------------------------------------------#
-source("./copy_paste_test_wParam.R")
+#source("./copy_paste_test_wParam.R")
 
 createModule <- function(name, process, steps, widgets_list, append = TRUE){
   
@@ -159,9 +162,9 @@ createModule <- function(name, process, steps, widgets_list, append = TRUE){
   
   create_reset(widgets_list=widgets_list,nb_screen=length(unlist(strsplit(steps,","))),file=file, append = append)
   
-  create_modalAlert(file=file, append = append)
+  # create_modalAlert(file=file, append = append)
   
-  create_shinyAlert(file=file, append = append)
+  # create_shinyAlert(file=file, append = append)
   
   create_screen(nb_screen=length(unlist(strsplit(steps,","))),process=process,file=file, append = append)
   
@@ -175,7 +178,7 @@ createModule <- function(name, process, steps, widgets_list, append = TRUE){
 createModule(name='protein_Filtering',
              process='Filtering',
              steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
-             widgets_list='list(ChooseFilters = "None",seuilNA = 0, seuil_plop=50)',
+             widgets_list='ChooseFilters = "None",seuilNA = 0, seuil_plop=50',
              append=TRUE)
 
 

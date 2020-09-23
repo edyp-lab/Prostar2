@@ -7,5 +7,5 @@
     i = NULL,
     settings = NULL,
     
-    widgets = list(ChooseFilters = "None",seuilNA = 0)
+    widgets = list(ChooseFilters = "None",seuilNA = 0, seuil_plop=50)
   )
