@@ -28,16 +28,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
       #  currentData = 0
       #)
       
-      init.rv <- reactive({
-        #rv$dataIn <- NULL
-        #rv$dataOut <- NULL
-        #rv$currentData <- 0
-        rv <- reactiveValues(
-          dataIn = NULL,
-          dataOut = NULL,
-          currentData = 0
-        )
-      })
+      
       
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
@@ -56,8 +47,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
       
       screens <- mod_navigation_server("test_nav", 
                                       style = 2, 
-                                      pages = r.nav,
-                                      start = NULL)
+                                      pages = r.nav)
       
       
       output$show <- renderUI({
@@ -68,19 +58,47 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
       })
       
         
-        observeEvent(req(r.nav$reset),{
-          r.nav$reset  <- FALSE
-          print('reset activated from navigation module')
-          r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
-          for (i in 1:length(r.nav$stepsNames))
+        ## The goal is t restart the timeline as if it is the first time
+      # The main action is to reload the dataset
+      # if the final validation button has not be clicked, then restore the last not null dataset
+      # among the set of datasets before current position i
+      # else reload the dataset among the set o 1 : (i-1)
+      observeEvent(req(r.nav$reset),{
+          print('reset action')
+        for (i in 1:length(r.nav$stepsNames))
             shinyjs::reset(paste0('screen', i))
-          browser()
-          init.rv()
-          rv$dataIn <- dataIn()
-          rv$dataOut <- NULL
-          rv$currentData <- 0
+
+
+        if (r.nav$isDone[length(r.nav$stepsNames)])
+            rv$dataOut <- dataIn()[1:(length(dataIn()) - 1)]
+          else
+            rv$dataOut <- dataIn()[1:(length(rv$dataIn) - length(dataIn()))]
+          
+          #rv$dataOut <- NULL
+          r.nav$current.indice <- 1
+          r.nav$reset  <- FALSE
+          
+          # Set all steps to undone except the first one which is the description screen
+          r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
+          
         })
 
+      # observeEvent(req(r.nav$act.next),{
+      #   r.nav$act.next <- FALSE
+      #   print('btn next was acticated')
+      # 
+      #   if (!(r.nav$isDone[r.nav$current.indice - 1]) || r.nav$current.indice == 2)
+      #   rv$dataIn <- append(rv$dataIn, setNames(0, paste0('screen', (r.nav$current.indice-1))))
+      # })
+      # 
+      # 
+      
+      
+      # Initialization fo the process
+      session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
+        print('Initialisation du module')
+        rv$dataIn <- dataIn()
+      })
         
         # Just for the show absolutePanel
         output$currentObj <- renderUI({
@@ -88,19 +106,19 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
           wellPanel(
               tagList(
                 p('Live view of data from inside the module'),
-                p(paste0('rv$currentData = ', rv$currentData)),
+                p(paste0('r.nav$current.indice = ', r.nav$current.indice)),
             fluidRow(
             column(3,
                     tags$p(tags$strong('rv$dataIn : ')),
                     tags$ul(
-                      lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn )), 
+                      lapply(paste0(names(rv$dataIn ), "=", rv$dataIn ), 
                             function(x) tags$li(x))
                     )
                    ),
             column(3,
                    tags$p(tags$strong('rv$dataOut : ')),
                     tags$ul(
-                      lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut )), 
+                      lapply(paste0(names(rv$dataOut ), "=", rv$dataOut ), 
                             function(x) tags$li(x))
                     )
                   )
@@ -110,19 +128,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
         })
         
         
-        
-      # Initialization fo the process
-        session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
-          init.rv()
-          rv$dataIn <- dataIn()
-          rv$currentData <- rv$dataIn[[length(rv$dataIn)]]
-      })
+      
 
       
-       
-       
-       
-       
        
        #####################################################################
        ## screens of the module
@@ -152,8 +160,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        })
        
        observeEvent(input$perform_screen2_btn, {
-         rv$currentData <- rv$currentData + 1
-         r.nav$isDone[2] <- TRUE
+         newVal <- rv$dataIn[[length(rv$dataIn)]] + 1
+         rv$dataIn <- append(rv$dataIn, setNames(newVal, paste0('screen', r.nav$current.indice)))
+         r.nav$isDone[r.nav$current.indice] <- TRUE
        })
        
        
@@ -172,9 +181,13 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
          )
        })
        
+       ## Logics to implement: here, we must take the last data not null
+       # in previous datas. The objective is to take account
+       # of skipped steps
        observeEvent(input$perform_screen3_btn, {
-         rv$currentData <- rv$currentData +1
-         r.nav$isDone[3] <- TRUE
+         newVal <- rv$dataIn[[length(rv$dataIn)]] + 1
+         rv$dataIn <- append(rv$dataIn, setNames(newVal, paste0('screen', r.nav$current.indice)))
+         r.nav$isDone[r.nav$current.indice] <- TRUE
        })
        
        
@@ -189,10 +202,13 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
          )
        })
          
-          observeEvent(input$validate_btn, ignoreInit = T,{
-            rv$dataIn <- append(rv$dataIn, setNames(rv$currentData+rv$dataIn[[length(rv$dataIn)]], c(r.nav$name)))
-            rv$dataOut <- rv$dataIn
-            r.nav$isDone[4] <- TRUE
+          observeEvent(input$validate_btn, {
+            isolate({
+              rv$dataOut <- dataIn()
+            rv$dataOut <- append(rv$dataOut, setNames(rv$dataIn[[length(rv$dataIn)]], r.nav$name))
+            rv$dataIn <- NULL
+            r.nav$isDone[r.nav$current.indice] <- TRUE
+            })
        })
        
        

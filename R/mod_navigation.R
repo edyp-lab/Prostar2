@@ -73,7 +73,7 @@ mod_navigation_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_navigation_server <- function(id, style=1, pages, start = NULL){
+mod_navigation_server <- function(id, style=1, pages){
   #stopifnot(!is.reactive(style))
   #stopifnot(!is.reactive(pages))
   
@@ -82,7 +82,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     ns <- session$ns
     
     current <- reactiveValues(
-      # This variable is the indice of the current screen
+      # This variable is the pages$current.indice of the current screen
       val = NULL,
       nbSteps = NULL
     )
@@ -116,13 +116,13 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     ## Initialization of the timeline - pages loaded for the first time
     observeEvent(req(pages),{
       current$nbSteps <- length(pages$stepsNames)
-      current$val <- if(is.null(start) || (start<1) || (start > current$nbSteps)) 1 else start
+      pages$current.indice <- if(is.null(pages$current.pages$current.indice) || (pages$current.indice<1) || (pages$current.indice > current$nbSteps)) 1 else pages$current.indice
       
       pages$ll.UI[[1]] <- div(id = ns(paste0("screen", 1)),  pages$ll.UI[[1]])
       for (i in 2:current$nbSteps){
         pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
       }
-      current$val <-  if(is.null(start) || (start<1) || (start > current$nbSteps)) 1 else start
+      pages$current.indice <-  if(is.null(pages$current.indice) || (pages$current.indice<1) || (pages$current.indice > current$nbSteps)) 1 else pages$current.indice
  })
     
     
@@ -130,9 +130,9 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     output$timeline <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
     output$timeline1 <- renderUI({
-      current$val
+      pages$current.indice
       status <- rep('',current$nbSteps)
-      status[current$val] <- ' active'
+      status[pages$current.indice] <- ' active'
       steps <- pages$stepsNames
       txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
       for (i in 1:current$nbSteps){
@@ -144,7 +144,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     
     
     output$timeline2 <- renderUI({
-      current$val
+      pages$current.indice
       pages
       status <- rep('', current$nbSteps)
       if( !is.null(pages$mandatory))
@@ -154,7 +154,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       status[which(pages$isDone)] <- 'complete'
       
       active  <- rep('', current$nbSteps)
-      active[current$val] <- 'active'
+      active[pages$current.indice] <- 'active'
       
       steps <- pages$stepsNames
       txt <- "<ul class='timeline' id='timeline'>"
@@ -168,7 +168,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     
     
     output$timeline3 <- renderUI({
-      current$val
+      pages$current.indice
       color <- rep("lightgrey", current$nbSteps)
       colorForCursor <- rep("white", current$nbSteps)
       
@@ -179,7 +179,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
         ifelse(status, color[i] <- "green", color[i] <- col)
       }
       
-      colorForCursor[current$val] <- "black"
+      colorForCursor[pages$current.indice] <- "black"
       
       steps <- pages$stepsNames
       colorCurrentPos <- colorForCursor
@@ -207,10 +207,8 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     observeEvent(req(input$rstBtn),{
       
       # Get back to first screen
-      current$val <- 1
+      pages$current.indice <- 1
       
-      # Set all steps to undone except the first one which is the description screen
-      pages$isDone <- c(TRUE, rep(FALSE, current$nbSteps-1))
       
       # Send to the caller 
       pages$reset <- TRUE
@@ -220,41 +218,43 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     })
     
     navPage <- function(direction) {
-      newval <- current$val + direction 
+      newval <- pages$current.indice + direction 
       newval <- max(1, newval)
       newval <- min(newval, current$nbSteps)
-      current$val <- newval
+      pages$current.indice <- newval
     }
     
     
     observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
+    observeEvent(input$nextBtn, ignoreInit = TRUE, {
+      navPage(1)
+      pages$act.next <- TRUE})
     
     
     # Listen if the current step has been validated
-    observeEvent( pages$isDone[current$val],{
+    observeEvent( pages$isDone[pages$current.indice],{
       #enable/disable the 'next' btn is necessary
-      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
+      cond.next.btn <- isTRUE(pages$isDone[pages$current.indice]) && (pages$current.indice< current$nbSteps) || !isTRUE(pages$mandatory[pages$current.indice])
       shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
       
       # enable the button if xxxx
       # disable the button if there is no step backward of if we are
       # on the last step which is Done. thus, the user must click
       # on the undo button
-      cond.prev.btn <- (current$val > 1 && current$val < current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
+      cond.prev.btn <- (pages$current.indice > 1 && pages$current.indice < current$nbSteps) || (pages$current.indice == current$nbSteps && !pages$isDone[pages$current.indice])
       shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
       
-      if (pages$isDone[current$val])
-      lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
+      if (pages$isDone[pages$current.indice])
+      lapply(1:pages$current.indice, function(x){ shinyjs::disable(paste0('screen', x))})
     })
     
     
     
     # Change the displayed screen UI w.r.t the current position in the timeline
     # and disable all previous screens
-    observeEvent(current$val, {
+    observeEvent(pages$current.indice, {
         lapply(1:current$nbSteps, function(x){
-          shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
+          shinyjs::toggle(paste0('screen', x), condition = x==pages$current.indice)})
     })
     
     
