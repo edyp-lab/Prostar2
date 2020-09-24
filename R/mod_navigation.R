@@ -267,6 +267,9 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       
       # Send to the caller 
       pages$reset <- TRUE
+      
+      # Re-enable all screens
+      lapply(1:current$nbSteps, function(x){shinyjs::enable(paste0('screen', x))})
     })
     
     
@@ -283,27 +286,18 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     
     observeEvent( pages$isDone[current$val],{
       
-      
-    
-      #enable/disable the 'next' btn is necessary
-      shinyjs::toggleState(id = "nextBtn", 
-                           condition = isTRUE(pages$isDone[current$val]) 
-                           && (current$val< current$nbSteps)
-                           || !isTRUE(pages$mandatory[current$val])
-      )
-      
+      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
+      shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
       
       # enable the button if xxxx
       # disable the button if there is no step backward of if we are
       # on the last step which is Done. thus, the user must click
       # on the undo button
-      shinyjs::toggleState(id = "prevBtn", 
-                           condition = (current$val > 1 && current$val < current$nbSteps)
-                           || (current$val == current$nbSteps && !pages$isDone[current$val]))
+      cond.prev.btn <- (current$val > 1 && current$val < current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
+      shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
       
-      
-      shinyjs::toggleState(id = "undoBtn", 
-                           condition = (current$val == current$nbSteps && pages$isDone[current$val]))
+      if (pages$isDone[current$val])
+        lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
     })
     
     

@@ -159,7 +159,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
         
       observeEvent(input$validate_btn, {
         isolate({
-          rv$dataIn <- addAssay(rv$dataIn, assay(rv$dataIn[[length(rv$dataIn)]]), name='Process_C')
+          rv$dataIn <- addAssay(rv$dataIn, rv$dataIn[[length(rv$dataIn)]], name='Process_A')
           rv$dataOut <- rv$dataIn
           rv$dataIn <- NULL
           r.nav$isDone[4] <- TRUE
