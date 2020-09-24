@@ -4,7 +4,13 @@ mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
   tagList(
     uiOutput(ns('show')),
-    uiOutput(ns('currentObj'))
+    wellPanel(
+      h3('Module A'),
+      p('rv$dataIn :'),
+      verbatimTextOutput(ns('show_dataIn')),
+      p('rv$dataOut'),
+      verbatimTextOutput(ns('show_dataOut'))
+    )
   )
 }
 
@@ -18,14 +24,6 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues()
-      
-      #rv <- reactiveValues(
-      # dataIn = NULL,
-      #  dataOut = NULL,
-      #  currentData = 0
-      #)
-      
-      
       
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
@@ -53,6 +51,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
         )
       })
       
+      output$show_dataIn <- renderPrint({rv$dataIn})
+      output$show_dataOut <- renderPrint({rv$dataOut})
+      
         
         ## The goal is t restart the timeline as if it is the first time
       # The main action is to reload the dataset
@@ -69,48 +70,19 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
           else
             rv$dataIn <- dataIn()
           
-
           r.nav$reset  <- FALSE
           
           # Set all steps to undone except the first one which is the description screen
           r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
-          
         })
 
 
       # Initialization fo the process
       session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
-        # print('Initialisation du module A')
+         print('Initialisation du module A')
         rv$dataIn <- dataIn()
-        
       })
         
-        # Just for the show absolutePanel
-        output$currentObj <- renderUI({
-
-          wellPanel(
-              tagList(
-                p('Live view of data from inside the module'),
-                p(paste0('r.nav$current.indice = ', r.nav$current.indice)),
-            fluidRow(
-            column(3,
-                    tags$p(tags$strong('rv$dataIn : ')),
-                    tags$ul(
-                      lapply(paste0(names(rv$dataIn ), "=", rv$dataIn ), 
-                            function(x) tags$li(x))
-                    )
-                   ),
-            column(3,
-                   tags$p(tags$strong('rv$dataOut : ')),
-                    tags$ul(
-                      lapply(paste0(names(rv$dataOut ), "=", rv$dataOut ), 
-                            function(x) tags$li(x))
-                    )
-                  )
-          )
-          )
-          )
-        })
         
         
       
@@ -145,7 +117,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        })
        
        observeEvent(input$perform_screen2_btn, {
-         rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
+         # Put here the code for modifying the QF after this step
+         
          r.nav$isDone[2] <- TRUE
        })
        
@@ -170,7 +143,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        # of skipped steps
        observeEvent(input$perform_screen3_btn, {
 
-         rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
+         #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
          r.nav$isDone[3] <- TRUE
        })
        
@@ -188,9 +161,10 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
          
           observeEvent(input$validate_btn, {
             isolate({
-            rv$dataOut <- append(dataIn(), setNames(rv$dataIn, r.nav$name))
-            rv$dataIn <- NULL
-            r.nav$isDone[4] <- TRUE
+              rv$dataIn <- addAssay(rv$dataIn, rv$dataIn[[length(rv$dataIn)]], name='Process_A')
+              rv$dataOut <- rv$dataIn
+              rv$dataIn <- NULL
+              r.nav$isDone[4] <- TRUE
             })
        })
        

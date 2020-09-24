@@ -3,7 +3,23 @@ mod_super_timeline_ui <- function(id){
   ns <- NS(id)
   tagList(
     uiOutput(ns('show')),
-    wellPanel(uiOutput(ns('currentObj')))
+    wellPanel(
+      # Just for the show absolutePanel
+      
+          tagList(
+            p('Live view of data from inside the super timeline module'),
+            fluidRow(
+              column(3,
+                     tags$p(tags$strong('rv$dataIn : ')),
+                     verbatimTextOutput('show_dataIn')
+              ),
+              column(3,
+                     tags$p(tags$strong('rv$dataOut : ')),
+                     verbatimTextOutput('show_dataOut')
+              )
+            )
+          )
+    )
   )
 }
 
@@ -17,10 +33,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       
-      rv <-reactiveValues(
-        dataOut = NULL,
-        datatIn = NULL
-      )
+      rv <-reactiveValues()
       
       observeEvent(dataIn(), {
         print('Initialisation du pipeline X')
@@ -55,6 +68,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       
+      output$show_dataIn <- renderPrint({rv$dataIn})
+      output$show_dataOut <- renderPrint({rv$dataOut})
+      
       observeEvent(req(r.nav$reset),{
         
         for (i in 1:length(r.nav$stepsNames))
@@ -72,30 +88,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       
-      # Just for the show absolutePanel
-      output$currentObj <- renderUI({
-        div(
-          tagList(
-            p('Live view of data from inside the super timeline module'),
-            fluidRow(
-              column(3,
-                     tags$p(tags$strong('rv$dataIn : ')),
-                     tags$ul(
-                       lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn)), 
-                              function(x) tags$li(x))
-                     )
-              ),
-              column(3,
-                     tags$p(tags$strong('rv$dataOut : ')),
-                     tags$ul(
-                       lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut)), 
-                              function(x) tags$li(x))
-                     )
-              )
-            )
-          )
-        )
-      })
+      
 
       
       #####################################################################
@@ -122,7 +115,10 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$dataIn}) )
-      observeEvent(rv$tmpA(),  { rv$dataIn <- rv$tmpA() })
+      observeEvent(rv$tmpA(),  { 
+        rv$dataIn <- rv$tmpA()
+        r.nav$isDone[2] <- TRUE
+      })
       
       
       
@@ -138,7 +134,10 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$dataIn}) )
-      observeEvent(rv$tmpB(),  { rv$dataIn <- rv$tmpB() })
+      observeEvent(rv$tmpB(),  {
+        rv$dataIn <- rv$tmpB()
+        r.nav$isDone[3] <- TRUE
+        })
       
       
       
@@ -154,7 +153,10 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$dataIn}) )
-      observeEvent(rv$tmpC(),  { rv$dataIn <- rv$tmpC() })
+      observeEvent(rv$tmpC(),  { 
+        rv$dataIn <- rv$tmpC()
+        r.nav$isDone[4] <- TRUE
+        })
       
       
       ############### SCREEN 5 ######################################

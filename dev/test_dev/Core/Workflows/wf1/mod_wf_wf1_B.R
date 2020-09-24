@@ -7,7 +7,12 @@ mod_wf_wf1_B_ui <- function(id){
   ns <- NS(id)
   tagList(
     uiOutput(ns('show')),
-    uiOutput(ns('currentObj'))
+    wellPanel(
+      p('rv$dataIn :'),
+      verbatimTextOutput(ns('show_dataIn')),
+      p('rv$dataOut'),
+      verbatimTextOutput(ns('show_dataOut'))
+    )
   )
 }
 
@@ -48,6 +53,9 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
         )
       })
       
+      output$show_dataIn <- renderPrint({rv$dataIn})
+      output$show_dataOut <- renderPrint({rv$dataOut})
+      
       
       
       observeEvent(req(r.nav$reset),{
@@ -68,33 +76,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
         
       })
       
-      
-      # Just for the show absolutePanel
-      output$currentObj <- renderUI({
-        div(
-          tagList(
-            p('Live view of data from inside the module'),
-            fluidRow(
-              column(3,
-                     tags$p(tags$strong('rv$dataIn : ')),
-                     tags$ul(
-                       lapply(paste0(names(rv$dataIn ), "=", rv$dataIn ), 
-                              function(x) tags$li(x))
-                     )
-              ),
-              column(3,
-                     tags$p(tags$strong('rv$dataOut : ')),
-                     tags$ul(
-                       lapply(paste0(names(rv$dataOut ), "=", rv$dataOut ), 
-                              function(x) tags$li(x))
-                     )
-              )
-            )
-          )
-        )
-      })
-      
-      
+    
       
       # Initialization fo the process
       session$userData$mod_B_obs_1 <-  observeEvent(dataIn(), { 
@@ -135,8 +117,8 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(input$perform_screen2_btn, {
-        rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
-        r.nav$isDone[r.nav$current.indice] <- TRUE
+        #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
+        r.nav$isDone[2] <- TRUE
       })
       
       
@@ -156,7 +138,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(input$perform_screen3_btn, {
-        rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
+        #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
         r.nav$isDone[3] <- TRUE
       })
       
@@ -174,7 +156,8 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
 
       observeEvent(input$validate_btn, {
         isolate({
-          rv$dataOut <- append(dataIn(), setNames(rv$dataIn, r.nav$name))
+          rv$dataIn <- addAssay(rv$dataIn, assay(rv$dataIn[[length(rv$dataIn)]]), name='Process_B')
+          rv$dataOut <- rv$dataIn 
           rv$dataIn <- NULL
           r.nav$isDone[4] <- TRUE
         })

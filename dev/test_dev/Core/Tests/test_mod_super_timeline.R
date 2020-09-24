@@ -10,19 +10,28 @@ options(shiny.fullstacktrace = T)
 ui <- fluidPage(
   tagList(
     mod_super_timeline_ui("super_nav"),
-    uiOutput('obj')
+    wellPanel(
+      p('rv$current.obj :'),
+      verbatimTextOutput('obj'),
+      p('rv$tmp()'),
+      verbatimTextOutput('tmp')
+    )
   )
 )
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
   rv <- reactiveValues(
-    current.obj = list(original = 0),
+    current.obj = Exp1_R25_prot[1:10,,],
     tmp = NULL
   )
   
-
+  
+  output$obj <- renderPrint({rv$current.obj})
+  output$tmp <- renderPrint({rv$tmp()})
+  
   rv$tmp <- mod_super_timeline_server("super_nav", 
                                    dataIn = reactive({rv$current.obj}))
 
