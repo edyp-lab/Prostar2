@@ -20,11 +20,24 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
     id,
     function(input, output, session){
       ns <- session$ns
+      rv <- reactiveValues()
       
-      rv <-reactiveValues(
-        dataIn = NULL,
-        dataOut = NULL
-      )
+      #rv <- reactiveValues(
+      # dataIn = NULL,
+      #  dataOut = NULL,
+      #  currentData = 0
+      #)
+      
+      init.rv <- reactive({
+        #rv$dataIn <- NULL
+        #rv$dataOut <- NULL
+        #rv$currentData <- 0
+        rv <- reactiveValues(
+          dataIn = NULL,
+          dataOut = NULL,
+          currentData = 0
+        )
+      })
       
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
@@ -61,17 +74,21 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
           r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
           for (i in 1:length(r.nav$stepsNames))
             shinyjs::reset(paste0('screen', i))
+          browser()
+          init.rv()
           rv$dataIn <- dataIn()
           rv$dataOut <- NULL
+          rv$currentData <- 0
         })
 
         
         # Just for the show absolutePanel
         output$currentObj <- renderUI({
-          
+
           wellPanel(
               tagList(
                 p('Live view of data from inside the module'),
+                p(paste0('rv$currentData = ', rv$currentData)),
             fluidRow(
             column(3,
                     tags$p(tags$strong('rv$dataIn : ')),
@@ -96,7 +113,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
         
       # Initialization fo the process
         session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
+          init.rv()
           rv$dataIn <- dataIn()
+          rv$currentData <- rv$dataIn[[length(rv$dataIn)]]
       })
 
       
@@ -133,7 +152,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        })
        
        observeEvent(input$perform_screen2_btn, {
-         rv$dataIn <- append(rv$dataIn, setNames(1+rv$dataIn[[length(rv$dataIn)]], c(r.nav$stepsNames[2])))
+         rv$currentData <- rv$currentData + 1
          r.nav$isDone[2] <- TRUE
        })
        
@@ -154,7 +173,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        })
        
        observeEvent(input$perform_screen3_btn, {
-         rv$dataIn <- append(rv$dataIn, setNames(1+rv$dataIn[[length(rv$dataIn)]], c(r.nav$stepsNames[3])))
+         rv$currentData <- rv$currentData +1
          r.nav$isDone[3] <- TRUE
        })
        
@@ -171,6 +190,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        })
          
           observeEvent(input$validate_btn, ignoreInit = T,{
+            rv$dataIn <- append(rv$dataIn, setNames(rv$currentData+rv$dataIn[[length(rv$dataIn)]], c(r.nav$name)))
             rv$dataOut <- rv$dataIn
             r.nav$isDone[4] <- TRUE
        })
