@@ -1,13 +1,9 @@
 
-# source(file.path('../../../../R', 'mod_navigation.R'), local=TRUE)$value
-# source(file.path('../../../../R', 'global.R'), local=TRUE)$value
-
-
-mod_wf_wf1_B_ui <- function(id){
+mod_super_timeline_ui <- function(id){
   ns <- NS(id)
   tagList(
     uiOutput(ns('show')),
-    uiOutput(ns('currentObj'))
+    wellPanel(uiOutput(ns('currentObj')))
   )
 }
 
@@ -15,39 +11,48 @@ mod_wf_wf1_B_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_B_server <- function(id, dataIn=NULL){
+mod_super_timeline_server <- function(id, dataIn=NULL){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       
-      rv <-reactiveValues()
+      rv <-reactiveValues(
+        dataOut = NULL,
+        datatIn = NULL
+      )
+      
+      observeEvent(dataIn(), {
+        print('Initialisation du pipeline X')
+        rv$dataIn <- dataIn()
+        })
+      
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
-        name = "Process B",
-        stepsNames = c("B - Description", "B - Step 1", "B - Step 2", "B - Step 3"),
+        name = "Pipeline X",
+        stepsNames = c("Description", "Proc 1", "Proc 2", "Proc 3", "Summary"),
         ll.UI = list( screenStep1 = uiOutput(ns("screen1")),
                       screenStep2 = uiOutput(ns("screen2")),
                       screenStep3 = uiOutput(ns("screen3")),
-                      screenStep4 = uiOutput(ns("screen4"))
-        ),
-        isDone =  c(TRUE, FALSE, FALSE, FALSE),
-        mandatory =  c(FALSE, FALSE, TRUE, TRUE),
+                      screenStep4 = uiOutput(ns("screen4")),
+                      screenStep5 = uiOutput(ns("screen5"))),
+        isDone =  c(TRUE, FALSE, FALSE, FALSE, FALSE),
+        mandatory =  c(FALSE, FALSE, TRUE, TRUE, TRUE),
         reset = FALSE
       )
       
-      screens <- mod_navigation_server("test_nav", 
+      screens <- mod_navigation_server("super_nav", 
                                        style = 2, 
                                        pages = r.nav)
       
       
       output$show <- renderUI({
         tagList(
-          mod_navigation_ui(ns("test_nav")),
+          mod_navigation_ui(ns("super_nav")),
+          hr(),
           screens()
         )
       })
-      
       
       
       observeEvent(req(r.nav$reset),{
@@ -60,12 +65,10 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
         else
           rv$dataIn <- dataIn()
         
-        
         r.nav$reset  <- FALSE
         
         # Set all steps to undone except the first one which is the description screen
         r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
-        
       })
       
       
@@ -73,19 +76,19 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
       output$currentObj <- renderUI({
         div(
           tagList(
-            p('Live view of data from inside the module'),
+            p('Live view of data from inside the super timeline module'),
             fluidRow(
               column(3,
                      tags$p(tags$strong('rv$dataIn : ')),
                      tags$ul(
-                       lapply(paste0(names(rv$dataIn ), "=", rv$dataIn ), 
+                       lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn)), 
                               function(x) tags$li(x))
                      )
               ),
               column(3,
                      tags$p(tags$strong('rv$dataOut : ')),
                      tags$ul(
-                       lapply(paste0(names(rv$dataOut ), "=", rv$dataOut ), 
+                       lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut)), 
                               function(x) tags$li(x))
                      )
               )
@@ -93,19 +96,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
           )
         )
       })
-      
-      
-      
-      # Initialization fo the process
-      session$userData$mod_B_obs_1 <-  observeEvent(dataIn(), { 
-        rv$dataIn <- dataIn()
-      })
-      
-      
-      
-      
-      
-      
+
       
       #####################################################################
       ## screens of the module
@@ -113,7 +104,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
       ############### SCREEN 1 ######################################
       output$screen1 <- renderUI({
         tagList(
-          tags$h3(r.nav$name)
+          tags$h1('Description of the pipeline')
         )
       })
       
@@ -124,20 +115,15 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
         
         tagList(
           div(id=ns('screen2'),
-              tags$h2('Step 1'),
-              actionButton(ns('perform_screen2_btn'), 'Perform'),
-              selectInput(ns('select1'), 'Select step 1', 
-                          choices = 1:5, 
-                          selected = 1,
-                          width = '150px')
+              tags$h3('Processus 1'),
+              mod_wf_wf1_A_ui(ns('mod_A_nav'))
           )
         )
       })
       
-      observeEvent(input$perform_screen2_btn, {
-        rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
-        r.nav$isDone[r.nav$current.indice] <- TRUE
-      })
+      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$dataIn}) )
+      observeEvent(rv$tmpA(),  { rv$dataIn <- rv$tmpA() })
+      
       
       
       ############### SCREEN 3 ######################################
@@ -145,20 +131,15 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
         
         tagList(
           div(id=ns('screen3'),
-              tags$h3('Step 2'),
-              actionButton(ns('perform_screen3_btn'), 'Perform'),
-              selectInput(ns('select2'), 'Select step 2',
-                          choices = 1:5,
-                          selected = 1,
-                          width = '150px')
+              tags$h3('Processus 2'),
+              mod_wf_wf1_B_ui(ns('mod_B_nav'))
           )
         )
       })
       
-      observeEvent(input$perform_screen3_btn, {
-        rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
-        r.nav$isDone[3] <- TRUE
-      })
+      rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$dataIn}) )
+      observeEvent(rv$tmpB(),  { rv$dataIn <- rv$tmpB() })
+      
       
       
       ############### SCREEN 4 ######################################
@@ -166,24 +147,30 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
         
         tagList(
           div(id=ns('screen4'),
-              tags$h3('Step 4'),
-              actionButton(ns('validate_btn'), 'Validate')
+              tags$h3('Processus 3'),
+              mod_wf_wf1_C_ui(ns('mod_C_nav'))
           )
         )
       })
-
-      observeEvent(input$validate_btn, {
-        isolate({
-          rv$dataOut <- append(dataIn(), setNames(rv$dataIn, r.nav$name))
-          rv$dataIn <- NULL
-          r.nav$isDone[4] <- TRUE
-        })
+      
+      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$dataIn}) )
+      observeEvent(rv$tmpC(),  { rv$dataIn <- rv$tmpC() })
+      
+      
+      ############### SCREEN 5 ######################################
+      output$screen5 <- renderUI({
+        
+        tagList(
+          div(id='screen5',
+              tags$h3('Summary')
+          )
+        )
       })
       
       ##########################################################
       
       reactive({rv$dataOut})
-}
+    }
   )
 }
 

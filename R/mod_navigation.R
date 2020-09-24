@@ -1,4 +1,3 @@
-
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
 # Module UI
@@ -24,26 +23,29 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 #' @importFrom shinyjs disabled inlineCSS
 mod_navigation_ui <- function(id){
   ns <- NS(id)
-
+  
   tagList(
     uiOutput(ns("load_css_style")),
     shinyjs::useShinyjs(),
     fluidRow(
       align= 'center',
       column(width=2,
-               div(style = btn_style,
+             if ('reset' %in% 'reset') 
+               div(
+                 style = btn_style,
                  actionButton(ns("rstBtn"), "reset",
-                              class = redBtnClass,
+                              class = PrevNextBtnClass,
                               style='padding:4px; font-size:80%')
                ),
-             uiOutput(ns('show_rerun_btn')),
-             div(style = btn_style,
+             div( id='test',
+                  style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
                                                  class = PrevNextBtnClass,
                                                  style='padding:4px; font-size:80%')))
       ),
       column(width=8,div( style = btn_style,
-                          uiOutput(ns("timeline")))),
+                          uiOutput(ns("timelineStyle")))
+      ),
       column(width=2,div(style=btn_style,
                          actionButton(ns("nextBtn"), ">>",
                                       class = PrevNextBtnClass,
@@ -52,7 +54,7 @@ mod_navigation_ui <- function(id){
       )
     )
   )
-
+  
 }
 
 # Module Server
@@ -87,19 +89,65 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       nbSteps = NULL
     )
     
-   
-    output$show_rerun_btn <- renderUI({
-      req(!is.null(pages$rerun))
-      div(style = btn_style,
-          actionButton(ns("rerunBtn"), "rerun",
-                       class = redBtnClass,
-                       style='padding:4px; font-size:80%')
-      )
-    })
+    
+    
+    
+    # bars <- reactive({
+    #   ns <- NS(id)
+    #   tagList(
+    #     uiOutput(ns("load_css_style")),
+    #     shinyjs::useShinyjs(),
+    #     fluidRow(
+    #       align= 'center',
+    #       column(width=2,
+    #              if ('reset' %in% btns) 
+    #                div(
+    #                  style = btn_style,
+    #                  actionButton(ns("rstBtn"), "reset",
+    #                               class = PrevNextBtnClass,
+    #                               style='padding:4px; font-size:80%')
+    #                  ),
+    #                 if ('undo' %in% btns) 
+    #                   div(
+    #                     style = btn_style,
+    #                     shinyjs::disabled(actionButton(ns("undoBtn"), "undo",
+    #                                  class = PrevNextBtnClass,
+    #                                  style='padding:4px; font-size:80%'))
+    #                   ),
+    #             div( id='test',
+    #                   style = btn_style,
+    #                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+    #                                class = PrevNextBtnClass,
+    #                                style='padding:4px; font-size:80%')))
+    #       ),
+    #       column(width=8,div( style = btn_style,
+    #                           uiOutput(ns("timelineStyle")))
+    #       ),
+    #       column(width=2,div(style=btn_style,
+    #                           actionButton(ns("nextBtn"), ">>",
+    #                                            class = PrevNextBtnClass,
+    #                                            style='padding:4px; font-size:80%')
+    #              ),
+    #              if ('skip' %in% btns) 
+    #                div(
+    #                  style = btn_style,
+    #                  actionButton(ns("skipBtn"), "skip entire process",
+    #                               class = PrevNextBtnClass,
+    #                               style='padding:4px; font-size:80%')
+    #                )
+    #       )
+    #     )
+    #   )
+    # })
+    
+    
+    observeEvent(input$rstBtn,{ pages$reset <- input$rstBtn})
+    
     
     output$load_css_style <- renderUI({
       req(current$nbSteps)
-
+      style
+      if (style==3) return(NULL)
       code <- strsplit(code_sass_timeline[[paste0('style',style)]],"\n")
       firstLine <- code[[1]][1]
       prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
@@ -108,27 +156,33 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
+      
     })
     
     
     
     
-    ## Initialization of the timeline - pages loaded for the first time
+    ## Initialization of the timeline
     observeEvent(req(pages),{
       current$nbSteps <- length(pages$stepsNames)
-      current$val <- if(is.null(start) || (start<1) || (start > current$nbSteps)) 1 else start
+      if(is.null(start)) current$val <- 1
+      else current$val <- start
       
       pages$ll.UI[[1]] <- div(id = ns(paste0("screen", 1)),  pages$ll.UI[[1]])
       for (i in 2:current$nbSteps){
         pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
       }
-      current$val <-  if(is.null(start) || (start<1) || (start > current$nbSteps)) 1 else start
- })
+      if(is.null(start)) current$val <- 1
+      else current$val <- start
+      
+      
+    })
     
     
-    #### ----------------------------------------------------------------
-    output$timeline <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
+    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
+    #### -----
+    ### Three timelines
     output$timeline1 <- renderUI({
       current$val
       status <- rep('',current$nbSteps)
@@ -200,7 +254,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       
       html.table
     })
-    #  ----------------------------------------------------------------
+    
     
     # Reset UI by setting the variable reset to TRUE. The caller program has the function
     # to reset its UI inputs
@@ -208,16 +262,13 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       
       # Get back to first screen
       current$val <- 1
-      
-      # Set all steps to undone except the first one which is the description screen
+      # Set all steps to undone
       pages$isDone <- c(TRUE, rep(FALSE, current$nbSteps-1))
       
       # Send to the caller 
       pages$reset <- TRUE
-      
-      # Re-enable all screens
-      lapply(1:current$nbSteps, function(x){shinyjs::enable(paste0('screen', x))})
     })
+    
     
     navPage <- function(direction) {
       newval <- current$val + direction 
@@ -230,34 +281,45 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
     observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
     observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
     
-    
-    # Listen if the current step has been validated
     observeEvent( pages$isDone[current$val],{
+      
+      
+    
       #enable/disable the 'next' btn is necessary
-      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
-      shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
+      shinyjs::toggleState(id = "nextBtn", 
+                           condition = isTRUE(pages$isDone[current$val]) 
+                           && (current$val< current$nbSteps)
+                           || !isTRUE(pages$mandatory[current$val])
+      )
+      
       
       # enable the button if xxxx
       # disable the button if there is no step backward of if we are
       # on the last step which is Done. thus, the user must click
       # on the undo button
-      cond.prev.btn <- (current$val > 1 && current$val < current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
-      shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
+      shinyjs::toggleState(id = "prevBtn", 
+                           condition = (current$val > 1 && current$val < current$nbSteps)
+                           || (current$val == current$nbSteps && !pages$isDone[current$val]))
       
-      if (pages$isDone[current$val])
-      lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
+      
+      shinyjs::toggleState(id = "undoBtn", 
+                           condition = (current$val == current$nbSteps && pages$isDone[current$val]))
     })
     
     
     
-    # Change the displayed screen UI w.r.t the current position in the timeline
-    # and disable all previous screens
     observeEvent(current$val, {
-        lapply(1:current$nbSteps, function(x){
-          shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
+      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), 
+                                                            condition = x==current$val)})
     })
     
     
+    # screens <- reactive({
+    # 
+    #   tagList(pages$ll.UI)
+    # })
+    # 
+    # 
     # list(bars=reactive(bars()),
     #      screens=reactive(screens())
     # )
@@ -278,9 +340,6 @@ $dotWidth: 25px;
 $dotWidthSm: 17px;
 $active: #2C3E50;
 $inactive: #AEB6BF;
-
-
-
 .flex-parent{
 	display: flex;
 	flex-direction: column;
@@ -300,15 +359,12 @@ $inactive: #AEB6BF;
 	position: relative;
 	z-index: 0;
 }
-
-
 .input{
 	width: $dotWidth;
 	height: $dotWidth;
 	background-color: $active;
 	position: relative;
 	border-radius: 50%;
-
 	&::before, &::after{
 		content: '';
 		display: block;
@@ -391,27 +447,22 @@ $inactive: #AEB6BF;
       text-indent: -10px;
 		}
     
-
 		}
 	}
-
 .description-flex-container {
   width: 80vw;
   font-weight: 400;
   font-size: 22px;
   margin-top: 100px;
   max-width: 1000px;
-
   p {
     margin-top: 0;
     display: none;
-
     &.active {
       display: block;
     }
   }
 }
-
 	
 @media (min-width: $parentMaxWidth / $parentWidthBase){
 	.input{
@@ -424,7 +475,6 @@ $inactive: #AEB6BF;
 	}
 	}
 }
-
 @media (max-width: 850px){
 	.input{
 		width: $dotWidthSm;
@@ -451,18 +501,15 @@ $colMandatory: #D30505;
 $colDefault: #B3AFAB;
 $radius: 20px;
 $lineWidth: 5px;
-
 .timeline{
   list-style-type: none;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .li{
   transition: all 200ms ease-in;
 }
-
 .timestamp{
   margin-bottom: 20px;
   padding: 0px 40px;
@@ -496,7 +543,6 @@ $lineWidth: 5px;
     transition: all 200ms ease-in;
   }
 }
-
 .li.complete{
   .status{
     border-top: $lineWidth solid $colDefault;
@@ -511,7 +557,6 @@ $lineWidth: 5px;
       }
     }
 }
-
 .li.mandatory{
   .status{
     border-top: $lineWidth solid $colDefault;
@@ -526,8 +571,6 @@ $lineWidth: 5px;
     }
   }
 }
-
-
            
 .li.active{
   .status{
@@ -536,7 +579,6 @@ $lineWidth: 5px;
     }
   }
 }
-
 .li.complete.active{
   .status{
     h4{
