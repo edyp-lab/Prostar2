@@ -9,6 +9,9 @@ library(shiny)
 
 
 ui <- fluidPage(
+  
+  #useShinyFeedback(),
+  
   textInput('module_name','name'),
   textInput('module_process','process'),
   textInput('module_steps','steps (sep by \',\')'),
@@ -31,25 +34,38 @@ server <- function(input, output, session){
   
   observeEvent(input$validate, {
     
-    name=paste0(input$module_name,'_shinyTest')
-    process=input$module_process
-    test=paste0('c(',unlist(strsplit(steps,',')),')')
-    # "screen1,table2,plop" to 'c(\'screen1\', \'table2\', \'plop\')
-    widgets=paste0(input$module_widgets,'=',input$module_widgets_value)
-    print(name)
-    print(process)
-    print(test)
-    print(widgets)
     
-    createModule('protein_Filtering',
-                'Filtering',
-                test,
-                widgets)
-    # createModule(name='protein_Filtering',
-    #              process='Filtering',
-    #              steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
-    #              widgets_list='ChooseFilters = "None",seuilNA = 0, seuil_plop=50',
-    #              append=TRUE)
+    name=paste0(input$module_name,'_shinyTest')
+    
+    #----------------------------------------------------------------#
+    
+    process=input$module_process
+    
+    #----------------------------------------------------------------#
+    
+    steps=unlist(strsplit(input$module_steps,',')) #separe chaque etape
+    
+    steps<-paste0('\'',steps,'\'') #chaque mot encadre
+    steps<-paste0(steps,collapse = ",") #chaine char sep par ,
+    steps<-paste0('c(',steps,')') #chaine char like vector
+    
+    #----------------------------------------------------------------#
+    
+    if(is.na(as.numeric(input$module_widgets_value))){
+      widget_value <- paste0('\"',input$module_widgets_value,'\"')
+    } else{
+      widget_value <- input$module_widgets_value
+    }
+    widgets=paste0(input$module_widgets,'=',widget_value)
+    
+    
+    #----------------------------------------------------------------#
+    
+    
+    createModule(name,
+                 process,
+                 steps,
+                 widgets)
   })
   
   
