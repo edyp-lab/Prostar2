@@ -15,35 +15,33 @@ ui <- fluidPage(
   textInput('module_name','name'),
   textInput('module_process','process'),
   textInput('module_steps','steps (sep by \',\')'),
-  uiOutput('widgets'),
+  fluidRow(column(4, textInput('module_widgets','widgets (sep by \',\')')),
+           column(1, "="),
+           column(4, textInput('module_widgets_value','default values (sep by \',\')'))),
   actionButton('validate', 'Generate module')
 )
 
 
 server <- function(input, output, session){
   
-  output$widgets <- renderUI({
-    fluidRow(column(2,
-                    textInput('module_widgets','widgets')),
-             column(1,
-                    "="),
-             column(2,
-                    textInput('module_widgets_value','default values')))
-  })
-  
   
   observeEvent(input$validate, {
     
+    call_createModule()
+
+  })
+  
+  call_createModule <- function(){
     
-    name=paste0(input$module_name,'_shinyTest')
+    name <- paste0(input$module_name,'_shinyTest')
     
     #----------------------------------------------------------------#
     
-    process=input$module_process
+    process <- input$module_process
     
     #----------------------------------------------------------------#
     
-    steps=unlist(strsplit(input$module_steps,',')) #separe chaque etape
+    steps <- unlist(strsplit(input$module_steps,',')) #separe chaque etape
     
     steps<-paste0('\'',steps,'\'') #chaque mot encadre
     steps<-paste0(steps,collapse = ",") #chaine char sep par ,
@@ -51,13 +49,23 @@ server <- function(input, output, session){
     
     #----------------------------------------------------------------#
     
-    if(is.na(as.numeric(input$module_widgets_value))){
-      widget_value <- paste0('\"',input$module_widgets_value,'\"')
-    } else{
-      widget_value <- input$module_widgets_value
+    widgets <- c()
+    for(i in 1:length(unlist(strsplit(input$module_widgets,',')))){
+      
+      widget <- unlist(strsplit(input$module_widgets,','))
+      widget_value <- unlist(strsplit(input$module_widgets_value,','))
+      
+      if(is.na(as.numeric(widget_value[i]))){
+        widget_value[i] <- paste0('\"',widget_value[i],'\"')
+      } else{
+        widget_value[i] <- widget_value[i]
+      }
+      
+      widget <- paste0(widget[i],'=',widget_value[i])
+      
+      widgets <- c(widgets,widget)
+      widgets <- paste0(widgets,collapse = ',')
     }
-    widgets=paste0(input$module_widgets,'=',widget_value)
-    
     
     #----------------------------------------------------------------#
     
@@ -66,9 +74,7 @@ server <- function(input, output, session){
                  process,
                  steps,
                  widgets)
-  })
-  
-  
+  }
   
 }
 

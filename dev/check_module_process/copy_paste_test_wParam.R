@@ -138,8 +138,8 @@ create_watch_file <- function(name, process){
 #               process='plop',
 #               file="new_screen.R")
 # 
-create_widgets_from_input(widgets_list=' ChooseFilters= "None",  seuilNA   =   10',
-                          file="new_widgets_from_input.R")
+# create_widgets_from_input(widgets_list=' ChooseFilters= "None",  seuilNA   =   10',
+#                           file="new_widgets_from_input.R")
 
 
 #-----------------------------------------------------------#
@@ -175,11 +175,11 @@ createModule <- function(name, process, steps, widgets_list, append = TRUE){
   
 }
 
-createModule(name='protein_Filtering',
-             process='Filtering',
-             steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
-             widgets_list='ChooseFilters = "None",seuilNA = 0, seuil_plop=50',
-             append=TRUE)
+# createModule(name='protein_Filtering',
+#              process='Filtering',
+#              steps = 'c(\'screen1\', \'table2\', \'plop\', \'toto\', \'titi\')',
+#              widgets_list='ChooseFilters = "None",seuilNA = 0, seuil_plop=50',
+#              append=TRUE)
 
 
 
