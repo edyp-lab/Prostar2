@@ -18,7 +18,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
 rv <- reactiveValues(
-  current.obj = 'original',
+  current.obj = list(original = 0),
   tmp = NULL
 )
   
@@ -26,10 +26,7 @@ rv <- reactiveValues(
   #mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$current.obj}) )
   #mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$current.obj}) )
   
-  observeEvent(rv$tmp(),{
-    print('toto')
-    rv$current.obj <- rv$tmp()
-  })
+  observeEvent(rv$tmp(),{rv$current.obj <- rv$tmp()  })
 }
 
 

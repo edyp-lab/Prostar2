@@ -9,9 +9,8 @@ options(shiny.fullstacktrace = T)
 
 ui <- fluidPage(
   tagList(
-
-    uiOutput('obj'),
-    uiOutput('show')
+    uiOutput('show'),
+    uiOutput('obj')
   )
 )
 
@@ -20,20 +19,21 @@ server <- function(input, output, session) {
   
   r.nav <- reactiveValues(
     name = "Pipeline",
-    stepsNames = c("Description", "Proc 1", "Proc 2", "Proc 3"),
+    stepsNames = c("Description", "Proc 1", "Proc 2", "Proc 3", 'Summary'),
     ll.UI = list( screenStep1 = uiOutput("screen1"),
                   screenStep2 = uiOutput("screen2"),
                   screenStep3 = uiOutput("screen3"),
-                  screenStep4 = uiOutput("screen4")),
-    isDone =  c(TRUE, FALSE, FALSE, FALSE),
-    mandatory =  c(FALSE, FALSE, TRUE, TRUE),
+                  screenStep4 = uiOutput("screen4"),
+                  screenStep4 = uiOutput("screen5")),
+    isDone =  c(TRUE, FALSE, FALSE, FALSE, FALSE),
+    mandatory =  c(FALSE, FALSE, TRUE, TRUE, TRUE),
     reset = FALSE
     
   )
   
   
   rv <- reactiveValues(
-    current.obj = list(original = 'original'),
+    current.obj = list(original = 0),
     tmpA = NULL,
     tmpB = NULL,
     tmpC = NULL
@@ -42,7 +42,7 @@ server <- function(input, output, session) {
   
   screens <- mod_navigation_server("pipeline_nav",
                                    style = 2,
-                                   pages = r.nav  )
+                                   pages = r.nav)
   
   output$show <- renderUI({
     tagList(
@@ -58,17 +58,14 @@ server <- function(input, output, session) {
   })
   
   
-  reset <- reactive({
-    r.nav$isDone <- c(TRUE,rep(FALSE, 3))
-    for (i in 1:length(r.nav$stepsNames))
-      shinyjs::reset(paste0('screen', i))
-  })
-  
-  
   observeEvent(req(r.nav$reset),{
     r.nav$reset  <- FALSE
     print('reset activated from navigation module')
-    reset()
+    r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
+    for (i in 1:length(r.nav$stepsNames))
+      shinyjs::reset(paste0('screen', i))
+    rv$dataIn <- dataIn()
+    rv$dataOut <- NULL
   })
   
  
@@ -98,11 +95,7 @@ server <- function(input, output, session) {
   rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$current.obj}) )
   observeEvent(rv$tmpA(),  { rv$current.obj <- rv$tmpA() })
   
-  # observeEvent(input$done2,{
-  #   r.nav$isDone[2] <- TRUE
-  #   rv.data$data <- append(rv.data$data, input$select1)})
-  # 
-  
+
   ############### SCREEN 3 ######################################
   output$screen3 <- renderUI({
     
@@ -131,6 +124,17 @@ server <- function(input, output, session) {
   rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$current.obj}) )
   observeEvent(rv$tmpC(),  { rv$current.obj <- rv$tmpC() })
   
+  
+  ############### SCREEN 5 ######################################
+  output$screen4 <- renderUI({
+    
+    tagList(
+      div(id='screen4',
+          tags$h3('Summary')
+      )
+    )
+  })
+ 
 }
 
 
