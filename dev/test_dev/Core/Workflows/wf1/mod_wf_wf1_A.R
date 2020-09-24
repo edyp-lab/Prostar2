@@ -1,7 +1,4 @@
 
-# source(file.path('../../../../R', 'mod_navigation.R'), local=TRUE)$value
-# source(file.path('../../../../R', 'global.R'), local=TRUE)$value
-
 
 mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
@@ -41,8 +38,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
                       ),
         isDone =  c(TRUE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, FALSE, TRUE, TRUE),
-        reset = FALSE,
-        rerun = FALSE
+        reset = FALSE
       )
       
       screens <- mod_navigation_server("test_nav", 
@@ -64,18 +60,16 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
       # among the set of datasets before current position i
       # else reload the dataset among the set o 1 : (i-1)
       observeEvent(req(r.nav$reset),{
-          print('reset action')
+
         for (i in 1:length(r.nav$stepsNames))
             shinyjs::reset(paste0('screen', i))
 
-
         if (r.nav$isDone[length(r.nav$stepsNames)])
-            rv$dataOut <- dataIn()[1:(length(dataIn()) - 1)]
+            rv$dataOut <- dataIn()[-length(dataIn())]
           else
-            rv$dataOut <- dataIn()[1:(length(rv$dataIn) - length(dataIn()))]
+            rv$dataIn <- dataIn()
           
-          #rv$dataOut <- NULL
-          r.nav$current.indice <- 1
+
           r.nav$reset  <- FALSE
           
           # Set all steps to undone except the first one which is the description screen
@@ -83,21 +77,12 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
           
         })
 
-      # observeEvent(req(r.nav$act.next),{
-      #   r.nav$act.next <- FALSE
-      #   print('btn next was acticated')
-      # 
-      #   if (!(r.nav$isDone[r.nav$current.indice - 1]) || r.nav$current.indice == 2)
-      #   rv$dataIn <- append(rv$dataIn, setNames(0, paste0('screen', (r.nav$current.indice-1))))
-      # })
-      # 
-      # 
-      
-      
+
       # Initialization fo the process
       session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
-        print('Initialisation du module')
+        # print('Initialisation du module A')
         rv$dataIn <- dataIn()
+        
       })
         
         # Just for the show absolutePanel
@@ -160,9 +145,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        })
        
        observeEvent(input$perform_screen2_btn, {
-         newVal <- rv$dataIn[[length(rv$dataIn)]] + 1
-         rv$dataIn <- append(rv$dataIn, setNames(newVal, paste0('screen', r.nav$current.indice)))
-         r.nav$isDone[r.nav$current.indice] <- TRUE
+         rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
+         r.nav$isDone[2] <- TRUE
        })
        
        
@@ -185,9 +169,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
        # in previous datas. The objective is to take account
        # of skipped steps
        observeEvent(input$perform_screen3_btn, {
-         newVal <- rv$dataIn[[length(rv$dataIn)]] + 1
-         rv$dataIn <- append(rv$dataIn, setNames(newVal, paste0('screen', r.nav$current.indice)))
-         r.nav$isDone[r.nav$current.indice] <- TRUE
+
+         rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
+         r.nav$isDone[3] <- TRUE
        })
        
        
@@ -204,10 +188,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
          
           observeEvent(input$validate_btn, {
             isolate({
-              rv$dataOut <- dataIn()
-            rv$dataOut <- append(rv$dataOut, setNames(rv$dataIn[[length(rv$dataIn)]], r.nav$name))
+            rv$dataOut <- append(dataIn(), setNames(rv$dataIn, r.nav$name))
             rv$dataIn <- NULL
-            r.nav$isDone[r.nav$current.indice] <- TRUE
+            r.nav$isDone[4] <- TRUE
             })
        })
        

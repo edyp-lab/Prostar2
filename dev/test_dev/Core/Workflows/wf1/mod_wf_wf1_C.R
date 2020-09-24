@@ -21,10 +21,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       
-      rv <-reactiveValues(
-        dataIn = NULL,
-        dataOut = NULL
-      )
+      rv <-reactiveValues()
       
       # variables to communicate with the navigation module
       r.nav <- reactiveValues(
@@ -42,8 +39,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       
       screens <- mod_navigation_server("test_nav", 
                                        style = 2, 
-                                       pages = r.nav,
-                                       start = NULL)
+                                       pages = r.nav)
       
       
       output$show <- renderUI({
@@ -55,13 +51,21 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       
 
       observeEvent(req(r.nav$reset),{
-        r.nav$reset  <- FALSE
-        print('reset activated from navigation module')
-        r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
+        
         for (i in 1:length(r.nav$stepsNames))
           shinyjs::reset(paste0('screen', i))
-        rv$dataIn <- dataIn()
-        rv$dataOut <- NULL
+        
+        if (r.nav$isDone[length(r.nav$stepsNames)])
+          rv$dataOut <- dataIn()[-length(dataIn())]
+        else
+          rv$dataIn <- dataIn()
+        
+        
+        r.nav$reset  <- FALSE
+        
+        # Set all steps to undone except the first one which is the description screen
+        r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
+        
       })
       
       
@@ -74,14 +78,14 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
               column(3,
                      tags$p(tags$strong('rv$dataIn : ')),
                      tags$ul(
-                       lapply(paste0(names(rv$dataIn ), "=", unlist(rv$dataIn )), 
+                       lapply(paste0(names(rv$dataIn ), "=", rv$dataIn ), 
                               function(x) tags$li(x))
                      )
               ),
               column(3,
                      tags$p(tags$strong('rv$dataOut : ')),
                      tags$ul(
-                       lapply(paste0(names(rv$dataOut ), "=", unlist(rv$dataOut )), 
+                       lapply(paste0(names(rv$dataOut ), "=", rv$dataOut ), 
                               function(x) tags$li(x))
                      )
               )
@@ -93,7 +97,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       
       
       # Initialization fo the process
-      session$userData$mod_A_obs_1 <-  observeEvent(dataIn(), { 
+      session$userData$mod_C_obs_1 <-  observeEvent(dataIn(), { 
         rv$dataIn <- dataIn()
       })
       
@@ -109,8 +113,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       ############### SCREEN 1 ######################################
       output$screen1 <- renderUI({
         tagList(
-          tags$h1('Description of the module'),
-          checkboxInput(ns('check'), 'Check test', value=F)
+          tags$h1('Description of the module')
         )
         
       })
@@ -133,7 +136,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(input$perform_screen2_btn, {
-        rv$dataIn <- append(rv$dataIn, setNames(1+rv$dataIn[[length(rv$dataIn)]], c(r.nav$stepsNames[2])))
+        rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
         r.nav$isDone[2] <- TRUE
       })
       
@@ -154,7 +157,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(input$perform_screen3_btn, {
-        rv$dataIn <- append(rv$dataIn, setNames(1+rv$dataIn[[length(rv$dataIn)]], c(r.nav$stepsNames[3])))
+        rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
         r.nav$isDone[3] <- TRUE
       })
       
@@ -170,12 +173,14 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
         )
       })
         
-        observeEvent(input$validate_btn, {
-          rv$dataOut <- rv$dataIn
+      observeEvent(input$validate_btn, {
+        isolate({
+          rv$dataOut <- append(dataIn(), setNames(rv$dataIn, r.nav$name))
+          rv$dataIn <- NULL
           r.nav$isDone[4] <- TRUE
         })
 
-      
+      })
       
       ##########################################################
       
