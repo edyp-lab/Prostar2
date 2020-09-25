@@ -33,7 +33,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
     function(input, output, session){
       ns <- session$ns
       
-      rv <-reactiveValues()
+      rv <-reactiveValues(remoteReset = 0)
       
       observeEvent(dataIn(), {
         print('Initialisation du pipeline X')
@@ -51,19 +51,18 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
                       screenStep5 = uiOutput(ns("screen5"))),
         isDone =  c(TRUE, FALSE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, FALSE, TRUE, TRUE, TRUE),
-        reset = FALSE,
-        remoteReset = 0
+        start = 1
       )
       
 
-      screens <- mod_navigation_server("super_nav", style = 2, pages = r.nav)
+      timeline <- mod_navigation_server("super_nav", style = 2, pages = r.nav)
       
       
       output$show <- renderUI({
         tagList(
           mod_navigation_ui(ns("super_nav")),
           hr(),
-          screens()
+          timeline()
         )
       })
       
@@ -71,29 +70,26 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
-    #   
-    #   observe({
-    #     r.nav$remoteReset
-    #     print(paste0('Module Super timeline - new value for remoteReset() :', r.nav$remoteReset))
-    # })
+       
+       observeEvent(r.nav$isDone,{
+         browser()
+     })
 
       
-      observeEvent(req(c(r.nav$reset, r.nav$remoteReset)), ignoreInit = T,{
-        
-        print('Module Super timeline : Activation of the reset variable')
-        print(paste0('Module Super timeline - new value for super timeline remoteReset :', remoteReset))
-        r.nav$remoteReset <- r.nav$remoteReset + 1
-        # Set all steps to undone
-        r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
-        
-        # Send to the caller 
-        r.nav$reset <- TRUE
+      observeEvent(req(c(r.nav$reset, r.nav$remoteReset)), {
         
         # Re-enable all screens
         lapply(1:length(r.nav$stepsNames), function(x){shinyjs::enable(paste0('screen', x))})
-        #remoteReset <- FALSE
         
         
+        r.nav$start <- 1
+        
+        # Reload previous dataset
+        rv$dataIn <- dataIn()
+        
+        
+        # Set all steps to undone
+        r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
         
         for (i in 1:length(r.nav$stepsNames))
           shinyjs::reset(paste0('screen', i))
@@ -104,12 +100,13 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         #   rv$dataIn <- dataIn()
         rv$dataIn <- dataIn()
         
-        rv$dataOut <- NULL
-        r.nav$reset  <- FALSE
-        
         # Set all steps to undone except the first one which is the description screen
         r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
-      })
+        
+        rv$dataOut <- NULL
+        
+     
+         })
       
       
       
@@ -133,12 +130,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         tagList(
           div(id=ns('screen2'),
               tags$h3('Processus 1'),
-              mod_wf_wf1_A_ui(ns('mod_A_nav'))
+              rv$toto <- mod_wf_wf1_A_ui(ns('mod_A_nav'))
           )
         )
       })
       
-      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$dataIn}), remoteReset = reactive(remoteReset) )
+      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", 
+                                     dataIn = reactive({rv$dataIn}), 
+                                     remoteReset = reactive({r.nav$reset}) )
       observeEvent(rv$tmpA(),  { 
         rv$dataIn <- rv$dataOut <- rv$tmpA()
         r.nav$isDone[2] <- TRUE
@@ -157,7 +156,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         )
       })
       
-      rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$dataIn}) )
+      rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav", 
+                                     dataIn = reactive({rv$dataIn}), 
+                                     remoteReset = reactive({r.nav$reset}) )
       observeEvent(rv$tmpB(),  {
         rv$dataIn <- rv$dataOut <- rv$tmpB()
         r.nav$isDone[3] <- TRUE
@@ -176,7 +177,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         )
       })
       
-      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$dataIn}) )
+      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", 
+                                     dataIn = reactive({rv$dataIn}), 
+                                     remoteReset = reactive({r.nav$reset}) )
       observeEvent(rv$tmpC(),  { 
         rv$dataIn <- rv$dataOut <- rv$tmpC()
         r.nav$isDone[4] <- TRUE

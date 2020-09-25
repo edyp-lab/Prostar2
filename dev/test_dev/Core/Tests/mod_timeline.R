@@ -21,7 +21,7 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 #' @export 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs disabled inlineCSS
-mod_navigation_ui <- function(id){
+mod_timeline_ui <- function(id){
   ns <- NS(id)
   
   tagList(
@@ -30,12 +30,12 @@ mod_navigation_ui <- function(id){
     fluidRow(
       align= 'center',
       column(width=2,
-               div(
-                 style = btn_style,
-                 actionButton(ns("rstBtn"), "reset",
-                              class = PrevNextBtnClass,
-                              style='padding:4px; font-size:80%')
-               ),
+             div(
+               style = btn_style,
+               actionButton(ns("rstBtn"), "reset",
+                            class = PrevNextBtnClass,
+                            style='padding:4px; font-size:80%')
+             ),
              div( id='test',
                   style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
@@ -74,7 +74,7 @@ mod_navigation_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_navigation_server <- function(id, style=1, pages){
+mod_timeline_server <- function(id, style=1, pages){
   #stopifnot(!is.reactive(style))
   #stopifnot(!is.reactive(pages))
   
@@ -88,32 +88,13 @@ mod_navigation_server <- function(id, style=1, pages){
       nbSteps = NULL
     )
     
-    
-    # Reset UI by setting the variable reset to TRUE. The caller program has the function
-    # to reset its UI inputs
-    observeEvent(req(input$rstBtn),{ pages$reset <- input$rstBtn})
-    
-    # Listen to a change of current screen sent by the caller via the start slot
-    observeEvent(pages$start, { current$val <- pages$start})
-    
-    
+     
     
     ## Initialization of the timeline
     observeEvent(req(pages),{
       current$nbSteps <- length(pages$stepsNames)
-      current$val <- pages$start
-      
-      pages$ll.UI[[1]] <- div(id = ns(paste0("screen", 1)),  pages$ll.UI[[1]])
-      for (i in 2:current$nbSteps){
-        pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
-      }
-
-    })
-    
-    
-   
-    
-    
+      current$val <- pages$current.pos
+        })
     
     
     
@@ -122,7 +103,6 @@ mod_navigation_server <- function(id, style=1, pages){
       newval <- max(1, newval)
       newval <- min(newval, current$nbSteps)
       current$val <- newval
-      pages$start <- current$val
     }
     
     
@@ -130,31 +110,7 @@ mod_navigation_server <- function(id, style=1, pages){
     observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
     
     
-    observeEvent( req(c(current$val, pages$isDone[current$val])),{
-      
-      # Conditional enabling of the next button
-      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
-      shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
-      
-      # enable the button if xxxx
-      # disable the button if there is no step backward of if we are
-      # on the last step which is Done. thus, the user must click
-      # on the undo button
-      cond.prev.btn <- (current$val > 1 && current$val <= current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
-      shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
-      
-      
-      # Disable all previous screensbut
-      if (pages$isDone[current$val])
-        lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
-    })
-    
-    
-    # Show the screen corresponding to the current indice
-    observeEvent(current$val, {
-      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), 
-                                                            condition = x==current$val)})
-    })
+   
     
     
     
@@ -255,8 +211,11 @@ mod_navigation_server <- function(id, style=1, pages){
     
     # return value of the module
     
-    reactive( tagList(pages$ll.UI))
-
+    reactive( list(rstBtn = input$rstBtn,
+                   nextBtn = input$nextBtn,
+                   prevBtn = input$prevBtn,
+                   current.pos = current$val))
+    
   })
 }
 

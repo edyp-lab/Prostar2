@@ -21,7 +21,7 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 #' @export 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs disabled inlineCSS
-mod_navigation_ui <- function(id){
+mod_navigation2_ui <- function(id){
   ns <- NS(id)
   
   tagList(
@@ -30,6 +30,7 @@ mod_navigation_ui <- function(id){
     fluidRow(
       align= 'center',
       column(width=2,
+             if ('reset' %in% 'reset') 
                div(
                  style = btn_style,
                  actionButton(ns("rstBtn"), "reset",
@@ -74,7 +75,7 @@ mod_navigation_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_navigation_server <- function(id, style=1, pages){
+mod_navigation2_server <- function(id, style=1, pages, start=1){
   #stopifnot(!is.reactive(style))
   #stopifnot(!is.reactive(pages))
   
@@ -89,77 +90,8 @@ mod_navigation_server <- function(id, style=1, pages){
     )
     
     
-    # Reset UI by setting the variable reset to TRUE. The caller program has the function
-    # to reset its UI inputs
-    observeEvent(req(input$rstBtn),{ pages$reset <- input$rstBtn})
+    observeEvent(input$rstBtn,{ pages$reset <- input$rstBtn})
     
-    # Listen to a change of current screen sent by the caller via the start slot
-    observeEvent(pages$start, { current$val <- pages$start})
-    
-    
-    
-    ## Initialization of the timeline
-    observeEvent(req(pages),{
-      current$nbSteps <- length(pages$stepsNames)
-      current$val <- pages$start
-      
-      pages$ll.UI[[1]] <- div(id = ns(paste0("screen", 1)),  pages$ll.UI[[1]])
-      for (i in 2:current$nbSteps){
-        pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
-      }
-
-    })
-    
-    
-   
-    
-    
-    
-    
-    
-    navPage <- function(direction) {
-      newval <- current$val + direction 
-      newval <- max(1, newval)
-      newval <- min(newval, current$nbSteps)
-      current$val <- newval
-      pages$start <- current$val
-    }
-    
-    
-    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
-    
-    
-    observeEvent( req(c(current$val, pages$isDone[current$val])),{
-      
-      # Conditional enabling of the next button
-      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
-      shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
-      
-      # enable the button if xxxx
-      # disable the button if there is no step backward of if we are
-      # on the last step which is Done. thus, the user must click
-      # on the undo button
-      cond.prev.btn <- (current$val > 1 && current$val <= current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
-      shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
-      
-      
-      # Disable all previous screensbut
-      if (pages$isDone[current$val])
-        lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
-    })
-    
-    
-    # Show the screen corresponding to the current indice
-    observeEvent(current$val, {
-      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), 
-                                                            condition = x==current$val)})
-    })
-    
-    
-    
-    
-    ## Functions for timeline and styles
     
     output$load_css_style <- renderUI({
       req(current$nbSteps)
@@ -175,6 +107,26 @@ mod_navigation_server <- function(id, style=1, pages){
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
       
     })
+    
+    
+    
+    
+    ## Initialization of the timeline
+    observeEvent(req(pages),{
+      current$nbSteps <- length(pages$stepsNames)
+      if(is.null(start)) current$val <- 1
+      else current$val <- start
+      
+      pages$ll.UI[[1]] <- div(id = ns(paste0("screen", 1)),  pages$ll.UI[[1]])
+      for (i in 2:current$nbSteps){
+        pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
+      }
+      if(is.null(start)) current$val <- 1
+      else current$val <- start
+      
+      
+    })
+    
     
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
@@ -253,10 +205,62 @@ mod_navigation_server <- function(id, style=1, pages){
     })
     
     
-    # return value of the module
+    # Reset UI by setting the variable reset to TRUE. The caller program has the function
+    # to reset its UI inputs
+    observeEvent(req(input$rstBtn),{
+      
+      # Get back to first screen
+      current$val <- 1
+      
+    })
+    
+    
+    navPage <- function(direction) {
+      newval <- current$val + direction 
+      newval <- max(1, newval)
+      newval <- min(newval, current$nbSteps)
+      current$val <- newval
+    }
+    
+    
+    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
+    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
+    
+    observeEvent( pages$isDone[current$val],{
+      
+      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
+      shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
+      
+      # enable the button if xxxx
+      # disable the button if there is no step backward of if we are
+      # on the last step which is Done. thus, the user must click
+      # on the undo button
+      cond.prev.btn <- (current$val > 1 && current$val < current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
+      shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
+      
+      if (pages$isDone[current$val])
+        lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
+    })
+    
+    
+    
+    observeEvent(current$val, {
+      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), 
+                                                            condition = x==current$val)})
+    })
+    
+    
+    # screens <- reactive({
+    # 
+    #   tagList(pages$ll.UI)
+    # })
+    # 
+    # 
+    # list(bars=reactive(bars()),
+    #      screens=reactive(screens())
+    # )
     
     reactive( tagList(pages$ll.UI))
-
   })
 }
 

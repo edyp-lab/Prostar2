@@ -6,7 +6,7 @@
 mod_wf_wf1_C_ui <- function(id){
   ns <- NS(id)
   tagList(
-    uiOutput(ns('show')),
+    uiOutput(ns('show_UI')),
     wellPanel(
       p('rv$dataIn :'),
       verbatimTextOutput(ns('show_dataIn')),
@@ -20,7 +20,7 @@ mod_wf_wf1_C_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_C_server <- function(id, dataIn=NULL){
+mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
   moduleServer(
     id,
     function(input, output, session){
@@ -39,28 +39,45 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
         ),
         isDone =  c(TRUE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, FALSE, TRUE, TRUE),
-        reset = FALSE
+        start = 1
       )
       
-      screens <- mod_navigation_server("test_nav", 
-                                       style = 2, 
-                                       pages = r.nav)
+      timeline <- mod_navigation_server("test_nav", style = 2, pages = r.nav)
       
       
-      output$show <- renderUI({
+      output$show_UI <- renderUI({
         tagList(
           mod_navigation_ui(ns("test_nav")),
-          screens()
+          timeline()
         )
       })
       
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
-
-      observeEvent(req(r.nav$reset),{
-        print('Module C : Activation of the reset variable')
+      observeEvent(r.nav$isDone, {
+        print("new event on isDone")
+        inames <- names(input)
+        print(inames)
+        # Disable all input from test_nav but the action buttons
         
+        #browser()
+        # Disable all previous screens but the action buttons of the timeline
+        # if (pages$isDone[current$val])
+        #   lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
+      })
+
+      observeEvent(req(c(r.nav$reset, remoteReset())),{
+        #print('Module A : Activation of the reset variable')
+        #print(paste0('r.nav$reset = ', r.nav$reset))
+        #print(paste0('remoteReset() = ', remoteReset()))
+        
+        # Re-enable all screens
+        lapply(1:length(r.nav$stepsNames), function(x){shinyjs::enable(paste0('screen', x))})
+        
+        r.nav$start <- 1
+        
+        # Reload previous dataset
         for (i in 1:length(r.nav$stepsNames))
           shinyjs::reset(paste0('screen', i))
         
@@ -69,12 +86,10 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
         else
           rv$dataIn <- dataIn()
         
-        
-        r.nav$reset  <- FALSE
-        
         # Set all steps to undone except the first one which is the description screen
         r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
         
+        rv$dataOut <- NULL
       })
       
      
