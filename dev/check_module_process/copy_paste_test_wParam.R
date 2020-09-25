@@ -64,11 +64,15 @@ create_end_server <- function(name, file, append = FALSE) {
 }
 
 
-create_screen <- function(nb_screen, process, file, append=FALSE){
+create_screen <- function(process, file, append=FALSE){
   
   screen_list <- c()
+  nb_screen <- length(unlist(strsplit(screen_content_ui,',')))
+  print(nb_screen)
   for (i in 1:nb_screen){
-    screen_list[i] <- paste0('#Screen',i,'\noutput$Screen_process_',i,' <- renderUI({\n\n\n})')
+    screen_list[i] <- paste0('\n#Screen',i,
+                             '\noutput$Screen_process_',i,' <- renderUI({\n\n',screen_content_ui[[i]],'\n\n})\n\n',
+                             screen_content_server[[i]])
   }
   screen_list <- paste0(screen_list,collapse = "\n")
   new_screen <- paste0('\n\n## Definitions of the screens\n\n', screen_list)
@@ -85,13 +89,12 @@ create_widgets_from_input <- function(widgets_list, file, append=FALSE){
   
   widgets_from_input <- c()
   for (i in 1:length(widgets_list)){
-    widgets_from_input[i] <- paste0('observeEvent(input$',
+    widgets_from_input[i] <- paste0('\n\nobserveEvent(input$',
                                     widgets_list[i],
                                     ', ignoreInit=TRUE,{\nrv.filter$widgets$',
                                     widgets_list[i],' <- input$',
-                                    widgets_list[i],'\n})\n\n')
+                                    widgets_list[i],'\n})\n')
   }
-  
   
   cat(widgets_from_input, file=file, append = append)
 }
@@ -134,8 +137,7 @@ create_watch_file <- function(name, process){
 # create_end_server(name='protein_Filtering',
 #                   file="new_end_server.R")
 # 
-# create_screen(nb_screen=4,
-#               process='plop',
+# create_screen(process='plop',
 #               file="new_screen.R")
 # 
 # create_widgets_from_input(widgets_list=' ChooseFilters= "None",  seuilNA   =   10',

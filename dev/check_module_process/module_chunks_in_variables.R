@@ -164,6 +164,28 @@ end_server <-  "
 "
 
 
+screen_content_ui <- c(
+  "mod_infos_dataset_ui('infos')",
+  
+  "mod_plots_corr_matrix_ui('plots_corr_matrix')"
+)
+
+
+screen_content_server <- c(
+  "callModule(mod_infos_dataset_server,'infos',
+                 obj = reactive({rv$dataIn}))",
+  
+  "rv$settings <- callModule(mod_settings_server, 'settings', obj=reactive({rv$dataIn}))
+  
+    callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
+                 obj = reactive({rv$dataIn}),
+                 names = reactive({NULL}),
+                 gradientRate = reactive({r$settings()$defaultGradientRate})
+                 )"
+  )
+
+
+
 watch_file <- "
 Watch_mod_pipe_name <- callModule(mod_pipe_name_server,
                                                'mod_pipe_name',  
@@ -178,4 +200,3 @@ observeEvent(req(Watch_mod_pipe_name()),{
   rv.core$current.obj <- Watch_mod_pipe_name()
 })
 "
-

@@ -1,5 +1,5 @@
 
-source(file.path('./', 'mod_pipe_protein_Filtering.R'), local=TRUE)$value
+source(file.path('./', 'test/temp_mod_pipe_protein_newModule_shinyTest.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 
@@ -14,8 +14,7 @@ library(shiny)
 
 ui <- fluidPage(
   tagList(
-    selectInput('n_assay', 'Assay', choices = 1:2),
-    mod_pipe_protein_Filtering_ui('pipe_filter')
+    mod_pipe_protein_newModule_shinyTest_ui('pipe_filter')
   )
 )
 
@@ -25,24 +24,17 @@ server <- function(input, output, session) {
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv <-reactiveValues(
-    ret = NULL,
     current.obj = Exp1_R25_prot
   )
   
   
-  
-  rv$ret <- callModule(mod_pipe_protein_Filtering_server,
-                       'pipe_filter',
-                       obj = reactive({rv$current.obj}),
-                       indice = reactive({as.numeric(input$n_assay)
-                       })
+  callModule(mod_pipe_protein_newModule_shinyTest_server,
+             'pipe_filter',
+             obj = reactive({rv$current.obj}),
+             indice = reactive({2})
   )
   
   
-  observe({
-    req(rv$ret())
-    rv$current.obj <- rv$ret()
-  })
 }
 
 
