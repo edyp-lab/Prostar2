@@ -2,15 +2,11 @@ source("./copy_paste_test_wParam.R")
 
 library(shiny)
 
-# nom des step > nb de screens
-# quelle etapes mandatory ?
-# test attention pas match nb screen avec mandatory/isDone...
+
 # download button
 
 
 ui <- fluidPage(
-  
-  #useShinyFeedback(),
   
   textInput('module_name','name'),
   textInput('module_process','process'),
@@ -20,6 +16,7 @@ ui <- fluidPage(
            column(4, textInput('module_widgets_value','default values (sep by \',\')'))),
   actionButton('validate', 'Generate module')
 )
+
 
 
 server <- function(input, output, session){
@@ -49,7 +46,7 @@ server <- function(input, output, session){
     
     #----------------------------------------------------------------#
     
-    widgets <- c()
+    widgets_list <- c()
     for(i in 1:length(unlist(strsplit(input$module_widgets,',')))){
       
       widget <- unlist(strsplit(input$module_widgets,','))
@@ -63,17 +60,34 @@ server <- function(input, output, session){
       
       widget <- paste0(widget[i],'=',widget_value[i])
       
-      widgets <- c(widgets,widget)
-      widgets <- paste0(widgets,collapse = ',')
+      widgets_list <- c(widgets_list,widget)
+      widgets_list <- paste0(widgets_list,collapse = ',')
     }
     
     #----------------------------------------------------------------#
     
+    file <- paste0("./test/temp_mod_pipe_",name,".R")
     
-    createModule(name,
-                 process,
-                 steps,
-                 widgets)
+    cat(NULL, file=file)
+    append=TRUE
+    
+    create_ui(name=name,file=file, append = append)
+    
+    create_start_server(name=name,file=file, append = append)
+    
+    create_rNav(process=process,steps = steps,file=file, append = append)
+    
+    create_rvModule(process=process,widgets_list=widgets_list,file=file, append = append)
+    
+    create_reset(widgets_list=widgets_list,nb_screen=length(unlist(strsplit(steps,","))),file=file, append = append)
+    
+    create_screen(process=process,file=file, append = append)
+    
+    create_widgets_from_input(widgets_list=widgets_list,file=file, append = append)
+    
+    create_end_server(name=name,file=file, append = append)
+    
+    create_watch_file(name=name,process=process)
   }
   
 }
