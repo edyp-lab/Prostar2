@@ -54,8 +54,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
-        observe({
-          remoteReset()
+        observeEvent(remoteReset,{
           print(paste0('Module A - new value for remoteReset() :', remoteReset()))
         })
 
@@ -64,9 +63,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       # if the final validation button has not be clicked, then restore the last not null dataset
       # among the set of datasets before current position i
       # else reload the dataset among the set o 1 : (i-1)
-      observeEvent(req(c(r.nav$reset, remoteReset)),{
+      observeEvent(req(c(r.nav$reset, remoteReset())),{
         print('Module A : Activation of the reset variable')
-        print(paste0('Module A - new value for remoteReset:', remoteReset()))
         
         # Re-enable all screens
         lapply(1:length(r.nav$stepsNames), function(x){shinyjs::enable(paste0('screen', x))})

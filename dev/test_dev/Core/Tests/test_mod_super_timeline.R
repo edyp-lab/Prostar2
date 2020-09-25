@@ -32,7 +32,9 @@ server <- function(input, output, session) {
   output$obj <- renderPrint({rv$current.obj})
   output$tmp <- renderPrint({rv$tmp()})
   
-  rv$tmp <- mod_super_timeline_server("super_nav", dataIn = reactive({rv$current.obj}))
+  rv$tmp <- mod_super_timeline_server("super_nav", 
+                                   dataIn = reactive({rv$current.obj}),
+                                   remoteReset = FALSE)
 
 }
 
