@@ -18,7 +18,7 @@ mod_wf_wf1_A_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_A_server <- function(id, dataIn=NULL){
+mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
   moduleServer(
     id,
     function(input, output, session){
@@ -54,14 +54,24 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
-        
+        observe({
+          remoteReset()
+          print(paste0('Module A - new value for remoteReset() :', remoteReset()))
+        })
+
         ## The goal is t restart the timeline as if it is the first time
       # The main action is to reload the dataset
       # if the final validation button has not be clicked, then restore the last not null dataset
       # among the set of datasets before current position i
       # else reload the dataset among the set o 1 : (i-1)
-      observeEvent(req(r.nav$reset),{
-
+      observeEvent(req(c(r.nav$reset, remoteReset)),{
+        print('Module A : Activation of the reset variable')
+        print(paste0('Module A - new value for remoteReset:', remoteReset()))
+        
+        # Re-enable all screens
+        lapply(1:length(r.nav$stepsNames), function(x){shinyjs::enable(paste0('screen', x))})
+        
+        
         for (i in 1:length(r.nav$stepsNames))
             shinyjs::reset(paste0('screen', i))
 
@@ -74,6 +84,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL){
           
           # Set all steps to undone except the first one which is the description screen
           r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
+          
+          rv$dataOut <- NULL
         })
 
 

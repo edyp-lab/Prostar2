@@ -59,6 +59,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       
 
       observeEvent(req(r.nav$reset),{
+        print('Module C : Activation of the reset variable')
         
         for (i in 1:length(r.nav$stepsNames))
           shinyjs::reset(paste0('screen', i))
@@ -82,6 +83,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       
       # Initialization fo the process
       session$userData$mod_C_obs_1 <-  observeEvent(dataIn(), { 
+        print('Initialisation du module C')
         rv$dataIn <- dataIn()
       })
       
@@ -159,7 +161,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
         
       observeEvent(input$validate_btn, {
         isolate({
-          rv$dataIn <- addAssay(rv$dataIn, rv$dataIn[[length(rv$dataIn)]], name='Process_A')
+          rv$dataIn <- addAssay(rv$dataIn, rv$dataIn[[length(rv$dataIn)]], name='Process_C')
           rv$dataOut <- rv$dataIn
           rv$dataIn <- NULL
           r.nav$isDone[4] <- TRUE

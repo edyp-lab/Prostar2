@@ -75,7 +75,7 @@ mod_navigation_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_navigation_server <- function(id, style=1, pages, start = NULL){
+mod_navigation_server <- function(id, style=1, pages, start=1){
   #stopifnot(!is.reactive(style))
   #stopifnot(!is.reactive(pages))
   
@@ -88,57 +88,6 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       val = NULL,
       nbSteps = NULL
     )
-    
-    
-    
-    
-    # bars <- reactive({
-    #   ns <- NS(id)
-    #   tagList(
-    #     uiOutput(ns("load_css_style")),
-    #     shinyjs::useShinyjs(),
-    #     fluidRow(
-    #       align= 'center',
-    #       column(width=2,
-    #              if ('reset' %in% btns) 
-    #                div(
-    #                  style = btn_style,
-    #                  actionButton(ns("rstBtn"), "reset",
-    #                               class = PrevNextBtnClass,
-    #                               style='padding:4px; font-size:80%')
-    #                  ),
-    #                 if ('undo' %in% btns) 
-    #                   div(
-    #                     style = btn_style,
-    #                     shinyjs::disabled(actionButton(ns("undoBtn"), "undo",
-    #                                  class = PrevNextBtnClass,
-    #                                  style='padding:4px; font-size:80%'))
-    #                   ),
-    #             div( id='test',
-    #                   style = btn_style,
-    #                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-    #                                class = PrevNextBtnClass,
-    #                                style='padding:4px; font-size:80%')))
-    #       ),
-    #       column(width=8,div( style = btn_style,
-    #                           uiOutput(ns("timelineStyle")))
-    #       ),
-    #       column(width=2,div(style=btn_style,
-    #                           actionButton(ns("nextBtn"), ">>",
-    #                                            class = PrevNextBtnClass,
-    #                                            style='padding:4px; font-size:80%')
-    #              ),
-    #              if ('skip' %in% btns) 
-    #                div(
-    #                  style = btn_style,
-    #                  actionButton(ns("skipBtn"), "skip entire process",
-    #                               class = PrevNextBtnClass,
-    #                               style='padding:4px; font-size:80%')
-    #                )
-    #       )
-    #     )
-    #   )
-    # })
     
     
     observeEvent(input$rstBtn,{ pages$reset <- input$rstBtn})
@@ -262,14 +211,7 @@ mod_navigation_server <- function(id, style=1, pages, start = NULL){
       
       # Get back to first screen
       current$val <- 1
-      # Set all steps to undone
-      pages$isDone <- c(TRUE, rep(FALSE, current$nbSteps-1))
-      
-      # Send to the caller 
-      pages$reset <- TRUE
-      
-      # Re-enable all screens
-      lapply(1:current$nbSteps, function(x){shinyjs::enable(paste0('screen', x))})
+
     })
     
     

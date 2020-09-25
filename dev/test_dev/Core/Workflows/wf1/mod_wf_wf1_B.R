@@ -59,6 +59,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
       
       
       observeEvent(req(r.nav$reset),{
+        print('Module B : Activation of the reset variable')
         
         for (i in 1:length(r.nav$stepsNames))
           shinyjs::reset(paste0('screen', i))
@@ -80,6 +81,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL){
       
       # Initialization fo the process
       session$userData$mod_B_obs_1 <-  observeEvent(dataIn(), { 
+        print('Initialisation du module B')
         rv$dataIn <- dataIn()
       })
       

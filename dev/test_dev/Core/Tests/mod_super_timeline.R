@@ -27,7 +27,7 @@ mod_super_timeline_ui <- function(id){
 #'
 #' 
 #' 
-mod_super_timeline_server <- function(id, dataIn=NULL){
+mod_super_timeline_server <- function(id, dataIn=NULL, remoteReset=FALSE){
   moduleServer(
     id,
     function(input, output, session){
@@ -51,12 +51,12 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                       screenStep5 = uiOutput(ns("screen5"))),
         isDone =  c(TRUE, FALSE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, FALSE, TRUE, TRUE, TRUE),
-        reset = FALSE
+        reset = FALSE,
+        remoteReset = 0
       )
       
-      screens <- mod_navigation_server("super_nav", 
-                                       style = 2, 
-                                       pages = r.nav)
+
+      screens <- mod_navigation_server("super_nav", style = 2, pages = r.nav)
       
       
       output$show <- renderUI({
@@ -71,16 +71,40 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
-      observeEvent(req(r.nav$reset),{
+    #   
+    #   observe({
+    #     r.nav$remoteReset
+    #     print(paste0('Module Super timeline - new value for remoteReset() :', r.nav$remoteReset))
+    # })
+
+      
+      observeEvent(req(c(r.nav$reset, r.nav$remoteReset)), ignoreInit = T,{
+        
+        print('Module Super timeline : Activation of the reset variable')
+        print(paste0('Module Super timeline - new value for super timeline remoteReset :', remoteReset))
+        r.nav$remoteReset <- r.nav$remoteReset + 1
+        # Set all steps to undone
+        r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
+        
+        # Send to the caller 
+        r.nav$reset <- TRUE
+        
+        # Re-enable all screens
+        lapply(1:length(r.nav$stepsNames), function(x){shinyjs::enable(paste0('screen', x))})
+        #remoteReset <- FALSE
+        
+        
         
         for (i in 1:length(r.nav$stepsNames))
           shinyjs::reset(paste0('screen', i))
         
-        if (r.nav$isDone[length(r.nav$stepsNames)])
-          rv$dataOut <- dataIn()[-length(dataIn())]
-        else
-          rv$dataIn <- dataIn()
+        # if (r.nav$isDone[length(r.nav$stepsNames)])
+        #   rv$dataOut <- dataIn()[-length(dataIn())]
+        # else
+        #   rv$dataIn <- dataIn()
+        rv$dataIn <- dataIn()
         
+        rv$dataOut <- NULL
         r.nav$reset  <- FALSE
         
         # Set all steps to undone except the first one which is the description screen
@@ -114,9 +138,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         )
       })
       
-      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$dataIn}) )
+      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$dataIn}), remoteReset = reactive(remoteReset) )
       observeEvent(rv$tmpA(),  { 
-        rv$dataIn <- rv$tmpA()
+        rv$dataIn <- rv$dataOut <- rv$tmpA()
         r.nav$isDone[2] <- TRUE
       })
       
@@ -135,7 +159,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$dataIn}) )
       observeEvent(rv$tmpB(),  {
-        rv$dataIn <- rv$tmpB()
+        rv$dataIn <- rv$dataOut <- rv$tmpB()
         r.nav$isDone[3] <- TRUE
         })
       
@@ -154,7 +178,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$dataIn}) )
       observeEvent(rv$tmpC(),  { 
-        rv$dataIn <- rv$tmpC()
+        rv$dataIn <- rv$dataOut <- rv$tmpC()
         r.nav$isDone[4] <- TRUE
         })
       

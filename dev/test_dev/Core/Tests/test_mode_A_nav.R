@@ -22,7 +22,7 @@ rv <- reactiveValues(
   tmp = NULL
 )
   
-  rv$tmp <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$current.obj}) )
+  rv$tmp <- mod_wf_wf1_A_server("mod_A_nav", dataIn = reactive({rv$current.obj}), remoteReset = reactive(FALSE))
   #mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$current.obj}) )
   #mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$current.obj}) )
   
