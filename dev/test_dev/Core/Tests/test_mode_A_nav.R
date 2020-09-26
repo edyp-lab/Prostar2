@@ -1,5 +1,5 @@
 
-source(file.path('../../../../R', 'mod_navigation.R'), local=TRUE)$value
+source(file.path('.', 'mod_tl_engine.R'), local=TRUE)$value
 source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('../Workflows/wf1', 'mod_wf_wf1_A.R'), local=TRUE)$value
@@ -9,7 +9,7 @@ source(file.path('../Workflows/wf1', 'mod_wf_wf1_C.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
-    actionButton('testclic', 'test clic'),
+    actionButton('testclic', 'Remote reset'),
     mod_wf_wf1_A_ui('mod_A_nav')
     #mod_wf_wf1_B_ui('mod_B_nav'),
     #mod_wf_wf1_C_ui('mod_C_nav')
@@ -19,6 +19,7 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
 rv <- reactiveValues(
   current.obj = Exp1_R25_prot[1:10,,],
   tmp = NULL,
@@ -38,3 +39,4 @@ rv <- reactiveValues(
 
 
 shinyApp(ui, server)
+

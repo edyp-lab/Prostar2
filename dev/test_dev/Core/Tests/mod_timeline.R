@@ -30,14 +30,12 @@ mod_timeline_ui <- function(id){
     fluidRow(
       align= 'center',
       column(width=2,
-             div(
-               style = btn_style,
+             div(style = btn_style,
                actionButton(ns("rstBtn"), "reset",
-                            class = PrevNextBtnClass,
+                            class = redBtnClass,
                             style='padding:4px; font-size:80%')
              ),
-             div( id='test',
-                  style = btn_style,
+             div( style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
                                                  class = PrevNextBtnClass,
                                                  style='padding:4px; font-size:80%')))
@@ -62,7 +60,7 @@ mod_timeline_ui <- function(id){
 #' 
 #' @param style xxx
 #' 
-#' @param pages xxxx
+#' @param config xxxx
 #' 
 #' @param  btns xxx
 #' 
@@ -74,51 +72,27 @@ mod_timeline_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_timeline_server <- function(id, style=1, pages){
-  #stopifnot(!is.reactive(style))
-  #stopifnot(!is.reactive(pages))
+mod_timeline_server <- function(id, style=1, config, actions){
+  stopifnot(!is.reactive(style))
+  stopifnot(!is.reactive(config))
   
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    current <- reactiveValues(
-      # This variable is the indice of the current screen
-      val = NULL,
-      nbSteps = NULL
-    )
+    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
-     
-    
-    ## Initialization of the timeline
-    observeEvent(req(pages),{
-      current$nbSteps <- length(pages$stepsNames)
-      current$val <- pages$current.pos
-        })
-    
-    
-    
-    navPage <- function(direction) {
-      newval <- current$val + direction 
-      newval <- max(1, newval)
-      newval <- min(newval, current$nbSteps)
-      current$val <- newval
-    }
-    
-    
-    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
-    
-    
-   
-    
-    
-    
+    observeEvent(actions,{ 
+      print(paste0('action :', unlist(actions)))
+      shinyjs::toggleState('nextBtn', condition=actions$nxt)
+      shinyjs::toggleState('rstBtn', condition=actions$rst)
+      shinyjs::toggleState('prevBtn', condition=actions$prv) 
+   })
     
     ## Functions for timeline and styles
     
     output$load_css_style <- renderUI({
-      req(current$nbSteps)
+      req(length(config$stepsNames))
       style
       if (style==3) return(NULL)
       code <- strsplit(code_sass_timeline[[paste0('style',style)]],"\n")
@@ -126,23 +100,22 @@ mod_timeline_server <- function(id, style=1, pages){
       prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
       suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
       
-      code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
+      code[[1]][1] <- paste0(prefix, length(config$stepsNames), suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
       
     })
     
-    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
     #### -----
     ### Three timelines
     output$timeline1 <- renderUI({
-      current$val
-      status <- rep('',current$nbSteps)
-      status[current$val] <- ' active'
-      steps <- pages$stepsNames
+      config$current.pos
+      status <- rep('',length(config$stepsNames))
+      status[config$current.pos] <- ' active'
+      steps <- config$stepsNames
       txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
-      for (i in 1:current$nbSteps){
+      for (i in 1:length(config$stepsNames)){
         txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
       }
       txt <- paste0(txt,"</div></div>")
@@ -151,21 +124,21 @@ mod_timeline_server <- function(id, style=1, pages){
     
     
     output$timeline2 <- renderUI({
-      current$val
-      pages
-      status <- rep('', current$nbSteps)
-      if( !is.null(pages$mandatory))
-        status[which(pages$mandatory)] <- 'mandatory'
+      config$current.pos
+      config
+      status <- rep('', length(config$stepsNames))
+      if( !is.null(config$mandatory))
+        status[which(config$mandatory)] <- 'mandatory'
       
-      #status <- rep('',current$nbSteps)
-      status[which(pages$isDone)] <- 'complete'
+      #status <- rep('',length(config$stepsNames))
+      status[which(config$isDone)] <- 'complete'
       
-      active  <- rep('', current$nbSteps)
-      active[current$val] <- 'active'
+      active  <- rep('', length(config$stepsNames))
+      active[config$current.pos] <- 'active'
       
-      steps <- pages$stepsNames
+      steps <- config$stepsNames
       txt <- "<ul class='timeline' id='timeline'>"
-      for (i in 1:current$nbSteps){
+      for (i in 1:length(config$stepsNames)){
         txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
       }
       txt <- paste0(txt,"</ul>")
@@ -175,20 +148,20 @@ mod_timeline_server <- function(id, style=1, pages){
     
     
     output$timeline3 <- renderUI({
-      current$val
-      color <- rep("lightgrey", current$nbSteps)
-      colorForCursor <- rep("white", current$nbSteps)
+      config$current.pos
+      color <- rep("lightgrey", length(config$stepsNames))
+      colorForCursor <- rep("white", length(config$stepsNames))
       
       
-      for (i in 1:current$nbSteps){
-        status <- pages$isDone[i]
-        col <- ifelse(!is.null(pages$mandatory) && pages$mandatory[i], "red", orangeProstar)
+      for (i in 1:length(config$stepsNames)){
+        status <- config$isDone[i]
+        col <- ifelse(!is.null(config$mandatory) && config$mandatory[i], "red", orangeProstar)
         ifelse(status, color[i] <- "green", color[i] <- col)
       }
       
-      colorForCursor[current$val] <- "black"
+      colorForCursor[config$current.pos] <- "black"
       
-      steps <- pages$stepsNames
+      steps <- config$stepsNames
       colorCurrentPos <- colorForCursor
       paste0("     ", steps, "     ")
       rows.color <- rows.text <-  rows.cursor <- list()
@@ -209,12 +182,11 @@ mod_timeline_server <- function(id, style=1, pages){
     })
     
     
-    # return value of the module
-    
-    reactive( list(rstBtn = input$rstBtn,
-                   nextBtn = input$nextBtn,
-                   prevBtn = input$prevBtn,
-                   current.pos = current$val))
+    # return value of the actions
+    list(rstBtn = reactive(input$rstBtn),
+                   nextBtn = reactive(input$nextBtn),
+                   prevBtn = reactive(input$prevBtn)
+         )
     
   })
 }
