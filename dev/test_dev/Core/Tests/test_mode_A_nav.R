@@ -1,3 +1,4 @@
+library(shinyjs)
 
 source(file.path('.', 'mod_tl_engine.R'), local=TRUE)$value
 source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
@@ -11,8 +12,6 @@ ui <- fluidPage(
   tagList(
     actionButton('testclic', 'Remote reset'),
     mod_wf_wf1_A_ui('mod_A_nav')
-    #mod_wf_wf1_B_ui('mod_B_nav'),
-    #mod_wf_wf1_C_ui('mod_C_nav')
   )
 )
 
@@ -31,8 +30,6 @@ rv <- reactiveValues(
   rv$tmp <- mod_wf_wf1_A_server("mod_A_nav", 
                                 dataIn = reactive({rv$current.obj}), 
                                 remoteReset = reactive({input$testclic}))
-  #mod_wf_wf1_B_server("mod_B_nav", dataIn = reactive({rv$current.obj}) )
-  #mod_wf_wf1_C_server("mod_C_nav", dataIn = reactive({rv$current.obj}) )
   
   observeEvent(rv$tmp(),{rv$current.obj <- rv$tmp()  })
 }

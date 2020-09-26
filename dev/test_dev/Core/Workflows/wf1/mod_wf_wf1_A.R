@@ -25,25 +25,31 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues()
+
       
       # variables to communicate with the navigation module
-      rv.config <- reactiveValues(
+      rv.process_config <- reactiveValues(
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
         isDone =  c(TRUE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, FALSE, TRUE, TRUE)
       )
       
-      
-      rv$tmp <- mod_tl_engine_server('tl_engine',
-                                     dataIn = rv$dataIn,
-                                     config = rv.config,
-                                     remoteReset = reactive(FALSE)
-                                     )
-      
+      rv.screens <- reactiveValues( )
+
       # Initialization fo the process
-      observeEvent(dataIn(), { 
+      observeEvent(req(dataIn()), { 
         print('Initialisation du module A')
         rv$dataIn <- dataIn()
+        
+        rv.screens$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
+          do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
+        
+        rv$tmp <- mod_tl_engine_server('tl_engine',
+                                       dataIn = rv$dataIn,
+                                       process_config = rv.process_config,
+                                       screens = rv.screens$screens,
+                                       remoteReset = reactive(FALSE)
+        )
        })
       
        
@@ -57,7 +63,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
        ############### SCREEN 1 ######################################
        output$screen1 <- renderUI({
          tagList(
-           tags$h3(rv.config$name)
+           tags$h3(rv.process_config$name)
          )
        })
        
@@ -81,7 +87,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
        observeEvent(input$perform_screen2_btn, {
          # Put here the code for modifying the QF after this step
          
-         rv.config$isDone[2] <- TRUE
+         rv.process_config$isDone[2] <- TRUE
        })
        
        
@@ -106,7 +112,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
        observeEvent(input$perform_screen3_btn, {
 
          #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
-         rv.config$isDone[3] <- TRUE
+         rv.process_config$isDone[3] <- TRUE
        })
        
        
@@ -126,7 +132,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
               rv$dataIn <- addAssay(rv$dataIn, rv$dataIn[[length(rv$dataIn)]], name='Process_A')
               rv$dataOut <- rv$dataIn
               rv$dataIn <- NULL
-              rv.config$isDone[4] <- TRUE
+              rv.process_config$isDone[4] <- TRUE
             })
        })
        

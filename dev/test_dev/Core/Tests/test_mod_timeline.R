@@ -4,7 +4,7 @@ source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
-    mod_timeline_ui('time')
+    mod_timeline_ui("timeline")
   )
 )
 
@@ -12,22 +12,21 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   
-  pages <- reactiveValues(
+  config <- reactiveValues(
     stepsNames = c("A - Description", "A - Step 1", "A - Step 2", "A - Step 3"),
     mandatory = c(FALSE, FALSE, TRUE, TRUE),
-    current = 2,
-    isDone = c(TRUE, FALSE, FALSE, FALSE),
-    nextBtn = TRUE,
-    prevBtn = TRUE
+    current.pos = 1,
+    isDone = c(TRUE, FALSE, FALSE, FALSE)
   )
   
+  rv.engine <- reactiveValues(
+    current.pos = 1,
+    actions = list(rst = TRUE,
+                   nxt = TRUE,
+                   prv = TRUE)
+  )
   
-  pos <- mod_timeline_server("time", style = 2,pages = pages)
-
-  observeEvent(req(pos()$rstBtn), {
-    print(pos()$rstBtn)
-  })
-
+  mod_timeline_server("timeline", style = 2, config = config, actions = rv.engine)
 }
 
 
