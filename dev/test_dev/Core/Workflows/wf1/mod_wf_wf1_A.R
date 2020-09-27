@@ -24,7 +24,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
     id,
     function(input, output, session){
       ns <- session$ns
-      rv <- reactiveValues()
+      rv <- reactiveValues(
+        reset2 = F
+      )
 
       
       # variables to communicate with the navigation module
@@ -40,19 +42,24 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       observeEvent(req(dataIn()), { 
         print('Initialisation du module A')
         rv$dataIn <- dataIn()
-        
+        rv$hasReset <- FALSE
         rv.screens$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
        })
       
-      rv$tmp <- mod_tl_engine_server('tl_engine',
+      mod_tl_engine_server('tl_engine',
                                      dataIn = reactive({rv$dataIn}),
                                      process_config = rv.process_config,
                                      screens = rv.screens$screens,
+                                     hasReset = reactive({rv$reset2}),
                                      remoteReset = reactive(FALSE)
       )
        
-      observeEvent(rv$tmp(), { rv$dataOut <- rv$tmp()})
+      #observeEvent(rv$hasReset, { 
+      #  print(paste0('in module A, new value for rv$hasReset = ', rv$hasReset))
+       # rv$reset2 <- rv$hasReset
+      #  })
+      
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       

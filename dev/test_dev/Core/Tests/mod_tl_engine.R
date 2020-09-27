@@ -21,14 +21,17 @@ mod_tl_engine_ui <- function(id){
 #'
 #' 
 #' 
-mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens = NULL, remoteReset=FALSE){
+mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens = NULL, hasReset = F, remoteReset=FALSE){
   #stopifnot(!(is.null(dataIn()) && is.reactive(config) && is.reactive(screens)))
   
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
-      rv <- reactiveValues()
+      rv <- reactiveValues(
+        hasReset = F
+      )
+      #hasReset <- reactiveVal(FALSE)
       
       tl.update <- reactiveValues(
           current.pos = 1,
@@ -53,7 +56,10 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
       
       
-      
+    #  observeEvent(hasReset(), { 
+     #   print(paste0('in module tk_engine, new value for hasReset : ',hasReset()))
+        #rv$hasReset <- hasReset()
+     #   })
       
       ###
       ###
@@ -77,18 +83,24 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
            lapply(1:length(process_config$stepsNames), 
                   function(x){ shinyjs::reset(paste0('screen', x))})
 
-         if (process_config$isDone[length(process_config$stepsNames)])
-             rv$dataIn <- dataIn()[ , , -length(dataIn())]
-           else
-             rv$dataIn <- dataIn()
+         #if (process_config$isDone[length(process_config$stepsNames)])
+         #    rv$dataIn <- dataIn()[ , , -length(dataIn())]
+         #  else
+          #   rv$dataIn <- dataIn()
 
           # Set all steps to undone except the first one which is the description screen
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
-        rv$dataOut <- rv$dataIn
+        rv$dataOut <- NULL
         tl.update$current.pos <- 1
         tl.update$actions$rst <- 0
+       # rv$hasReset <- TRUE
+
         })
 
+      #observeEvent(req(rv$hasReset), ignoreInit = T,{
+      #  print("set hasReset to F")
+       # rv$hasReset <- F
+      #})
       
       # # Action on validation of the current step
        #observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
@@ -160,6 +172,7 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
         print(rv$dataOut)
         
         rv$screens <- screens
+        rv$hasReset <- F
         
         # update the current.pos if the final step is validated
         if (process_config$isDone[length(process_config$stepsNames)])
@@ -179,12 +192,6 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       
       output$show_screens <- renderUI({tagList(rv$screens)})
       
-      
-      
-      
-      
-      
-      
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
@@ -203,15 +210,7 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       # })
       
       
-      
-      
-      
-      
-      
-
-      ##########################################################
-      
-      reactive({rv$dataOut})
+      return(reactive({rv$hasReset}))
     }
   )
 }
