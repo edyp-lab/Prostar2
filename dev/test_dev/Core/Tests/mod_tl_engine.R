@@ -22,7 +22,7 @@ mod_tl_engine_ui <- function(id){
 #' 
 #' 
 mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens = NULL, remoteReset=FALSE){
-  #stopifnot(!(is.null(dataIn) && is.reactive(config) && is.reactive(screens)))
+  #stopifnot(!(is.null(dataIn()) && is.reactive(config) && is.reactive(screens)))
   
   moduleServer(
     id,
@@ -42,48 +42,6 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
                                  process_config = process_config, 
                                  tl.update = tl.update)
       
-      ###
-      ###
-      ### RESET FUNCTION
-      ### The goal is to restart the timeline as if it is the first time
-      ### The main action is to reload the dataset
-      ### if the final validation button has not be clicked, then restore the last not null dataset
-      ### among the set of datasets before current position i
-      ### else reload the dataset among the set o 1 : (i-1)
-      ###
-      ###
-      observeEvent(req(c(pos$rstBtn(), remoteReset())), ignoreInit=T, {
-        print("clic on reset button")
-        #browser()
-        # Re-enable all screens
-        lapply(1:length(process_config$stepsNames), 
-               function(x){shinyjs::enable(paste0('screen', x))})
-
-        tl.update$current.pos <- 1
-
-        # Reload previous dataset
-        # for (i in 1:length(config$stepsNames))
-        #     shinyjs::reset(paste0('screen', i))
-        # 
-        # if (config$isDone[length(config$stepsNames)])
-        #     rv$dataOut <- dataIn[-length(dataIn)]
-        #   else
-        #     rv$dataIn <- dataIn
-
-          # Set all steps to undone except the first one which is the description screen
-        process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
-
-          rv$dataOut <- NULL
-        })
-
-      
-      # # Action on validation of the current step
-       observeEvent(req(process_config$isDone[tl.update$current.pos]), {
-         print("# Disable all previous screens but")
-         lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
-       })
-      # 
-      
       
       navPage <- function(direction) {
         newval <- tl.update$current.pos + direction 
@@ -94,56 +52,129 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
       observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
       
-      observeEvent(req(process_config$isDone[length(process_config$stepsNames)]), {
-        print('the last step has just been validated')
-        print(tl.update$current.pos)
-        })
-  
-      observeEvent(tl.update$current.pos, {
-        process_config$isDone
-        process_config$mandatory
-        
-        print("# Disable all previous screens but")
-        #Case 1: the current step is validated -> disable all previous steps
-        if (process_config$isDone[tl.update$current.pos])
-          lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
-        
-        # Display the screen corresponding to the new position
-        lapply(1:length(process_config$stepsNames), function(x){shinyjs::toggle(paste0('screen', x),
-              condition = x==tl.update$current.pos)}) 
-                                                                                
-        # # Conditional enabling of the next button
-         end_of_tl <- tl.update$current.pos == length(process_config$stepsNames)
-         mandatory_step <- isTRUE(process_config$mandatory[tl.update$current.pos])
-         validated <- isTRUE(process_config$isDone[tl.update$current.pos])
-         cond.next.btn <-  !mandatory_step || validated
-         tl.update$actions$nxt <- cond.next.btn
-        
-        # # Conditional enabling of the prev button
-         start_of_tl <- tl.update$current.pos == 1
-         cond.prev.btn <- !start_of_tl
-         tl.update$actions$prv <-  cond.prev.btn
+      
+      
+      
+      ###
+      ###
+      ### RESET FUNCTION
+      ### The goal is to restart the timeline as if it is the first time
+      ### The main action is to reload the dataset
+      ### if the final validation button has not be clicked, then restore the last not null dataset
+      ### among the set of datasets before current position i
+      ### else reload the dataset among the set o 1 : (i-1)
+      ###
+      ###
+      observeEvent(req(c(pos$rstBtn()!=0, remoteReset())), {
+        print(paste0("---> clic on reset button", pos$rstBtn()))
+        #browser()
+        # Re-enable all screens
+        lapply(1:length(process_config$stepsNames), 
+               function(x){shinyjs::enable(paste0('screen', x))})
 
         
+        # Reload previous dataset
+           lapply(1:length(process_config$stepsNames), 
+                  function(x){ shinyjs::reset(paste0('screen', x))})
+
+         if (process_config$isDone[length(process_config$stepsNames)])
+             rv$dataIn <- dataIn()[ , , -length(dataIn())]
+           else
+             rv$dataIn <- dataIn()
+
+          # Set all steps to undone except the first one which is the description screen
+        process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
+        rv$dataOut <- rv$dataIn
+        tl.update$current.pos <- 1
+        tl.update$actions$rst <- 0
+        })
+
+      
+      # # Action on validation of the current step
+       #observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
+         
+        # print("---> observeEvent(req(process_config$isDone[tl.update$current.pos])")
+        # print("# Disable all previous screens but the current one")
+
+         #lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
+         #toggleNextBtn()
+
+      # })
+      
+  
+      observeEvent(c(tl.update$current.pos,process_config$isDone),  ignoreInit = T, {
+        process_config$mandatory
         
+        print(paste0("---> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
+      
+        #Case 1: the current step is validated -> disable all previous steps
+        if (process_config$isDone[tl.update$current.pos])
+          DisableAllPrevSteps()
+        
+        # Display the screen corresponding to the new position
+        DisplayCurrentStep()
+                                                                                
+        toggleNextBtn()
+        togglePrevBtn()
       })
       
       
+      
+      DisplayCurrentStep <- reactive({
+        lapply(1:length(process_config$stepsNames), 
+               function(x){shinyjs::toggle(paste0('screen', x),
+                                           condition = x==tl.update$current.pos)}) 
+      })
+      
+      
+      DisableAllPrevSteps <- reactive({
+        lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
+      })
+      
+      toggleNextBtn <- reactive({
+        tl.update$current.pos
+        #browser()
+        # # Conditional enabling of the next button
+        end_of_tl <- tl.update$current.pos == length(process_config$stepsNames)
+        mandatory_step <- isTRUE(process_config$mandatory[tl.update$current.pos])
+        validated <- isTRUE(process_config$isDone[tl.update$current.pos])
+        cond.next.btn <-  !mandatory_step || validated
+        tl.update$actions$nxt <- cond.next.btn
+      })
+      
+      togglePrevBtn <- reactive({
+        start_of_tl <- tl.update$current.pos == 1
+        cond.prev.btn <- !start_of_tl
+        tl.update$actions$prv <-  cond.prev.btn
+      })
+      
       # Initialization fo the process
-      observeEvent(dataIn, { 
+      observeEvent(dataIn(), { 
         print('Initialisation du module engine')
-
-        rv$dataIn <- dataIn
+        print(paste0('Init pos = ', tl.update$current.pos))
+        
+        rv$dataIn <- dataIn()
+        rv$dataOut <- NULL
+        print(dataIn())
+        print(rv$dataIn)
+        print(rv$dataOut)
+        
         rv$screens <- screens
-
-        # initialisation of the screens
-        for (i in 1:length(process_config$stepsNames))
-            rv$screens[[i]] <- if (i == 1) div(id = ns(paste0("screen", i)),  rv$screens[[i]])
-                                else  shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
-
-        # update the current.pos if the final step has been validated
+        
+        # update the current.pos if the final step is validated
         if (process_config$isDone[length(process_config$stepsNames)])
           tl.update$current.pos <- length(process_config$stepsNames)
+        
+        # initialisation of the screens
+        for (i in 1:length(process_config$stepsNames))
+            rv$screens[[i]] <- if (i == tl.update$current.pos) 
+                                  div(id = ns(paste0("screen", i)),  rv$screens[[i]])
+                                else  
+                                  shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
+
+        
+        togglePrevBtn()
+        toggleNextBtn()
       })
       
       output$show_screens <- renderUI({tagList(rv$screens)})

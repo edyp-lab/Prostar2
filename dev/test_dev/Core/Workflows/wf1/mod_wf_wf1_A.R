@@ -34,7 +34,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         mandatory =  c(FALSE, FALSE, TRUE, TRUE)
       )
       
-      rv.screens <- reactiveValues( )
+      rv.screens <- reactiveValues( screens=NULL)
 
       # Initialization fo the process
       observeEvent(req(dataIn()), { 
@@ -43,16 +43,16 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         
         rv.screens$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
-        
-        rv$tmp <- mod_tl_engine_server('tl_engine',
-                                       dataIn = rv$dataIn,
-                                       process_config = rv.process_config,
-                                       screens = rv.screens$screens,
-                                       remoteReset = reactive(FALSE)
-        )
        })
       
+      rv$tmp <- mod_tl_engine_server('tl_engine',
+                                     dataIn = reactive({rv$dataIn}),
+                                     process_config = rv.process_config,
+                                     screens = rv.screens$screens,
+                                     remoteReset = reactive(FALSE)
+      )
        
+      observeEvent(rv$tmp(), { rv$dataOut <- rv$tmp()})
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
@@ -71,7 +71,6 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
        ############### SCREEN 2 ######################################
        
        output$screen2 <- renderUI({
-         
          tagList(
            div(id=ns('screen2'),
                tags$h2('Step 1'),
