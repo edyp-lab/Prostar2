@@ -13,7 +13,7 @@ mod_tl_engine_ui <- function(id){
 #'
 #' 
 #' 
-mod_tl_engine_server <- function(id, process_config = NULL, hasReset=F, screens = NULL,remoteReset=FALSE){
+mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remoteReset=FALSE){
   #stopifnot(!(is.null(dataIn()) && is.reactive(config) && is.reactive(screens)))
   
   moduleServer(
@@ -73,13 +73,13 @@ mod_tl_engine_server <- function(id, process_config = NULL, hasReset=F, screens 
           # Set all steps to undone except the first one which is the description screen
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
         tl.update$current.pos <- 1
-        rv$hasReset <- TRUE
+        rv$hasReset <- pos$rstBtn()
         })
 
-      observeEvent(hasReset(), {
-         print("MODULE TL_ENGINE : Received hasReset() = T => set rv$hasReset back to F")
-         rv$hasReset <- F
-       })
+      # observeEvent(hasReset(), {
+      #    print("MODULE TL_ENGINE : Received hasReset() = T => set rv$hasReset back to F")
+      #    rv$hasReset <- F
+      #  })
       
       # # Action on validation of the current step
        observeEvent(req(process_config$isDone[tl.update$current.pos]),  {

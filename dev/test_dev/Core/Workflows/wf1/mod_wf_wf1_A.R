@@ -58,15 +58,18 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       rv$tmp <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
                                      screens = rv.screens$screens,
-                                     hasReset = reactive({rv.screens$reset2}),
+                                     #hasReset = reactive({rv.screens$reset2}),
                                      remoteReset = reactive(FALSE)
       )
-       
-      observeEvent(req(rv$tmp()), { 
+       # observeEvent(remoteReset(),{
+       #   print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
+       # })
+       # 
+      observeEvent(req(c(rv$tmp())), { 
         print(paste0('MODULE A : new value for rv$hasReset = ', rv$tmp()))
-        rv.screens$reset2 <- rv$tmp()
+        #rv.screens$reset2 <- rv$tmp()
         UpdateDataIn()
-        rv$dataOut <- NULL
+        rv$dataOut <- rv$dataIn
         print("MODULE A : after updating datasets")
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
@@ -80,7 +83,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       # else on change have to reload the current dataset to reinit the module
       # The condition is on the presence of the name in the dataset rather then
       # on the value of the last element of isDone vector because if the value is set 
-      # to TRUE and, for aby reason, the dataset is not updated, it may have a bug
+      # to TRUE and, for any reason, the dataset is not updated, it may have a bug
       
       # If there are further elements in the dataset after the current one, 
       # then they are deleted
