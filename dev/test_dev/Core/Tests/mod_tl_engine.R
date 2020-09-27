@@ -70,11 +70,6 @@ mod_tl_engine_server <- function(id, process_config = NULL, hasReset=F, screens 
            lapply(1:length(process_config$stepsNames), 
                   function(x){ shinyjs::reset(paste0('screen', x))})
 
-         #if (process_config$isDone[length(process_config$stepsNames)])
-         #    rv$dataIn <- dataIn()[ , , -length(dataIn())]
-         #  else
-          #   rv$dataIn <- dataIn()
-
           # Set all steps to undone except the first one which is the description screen
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
         tl.update$current.pos <- 1
@@ -89,19 +84,18 @@ mod_tl_engine_server <- function(id, process_config = NULL, hasReset=F, screens 
       # # Action on validation of the current step
        observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
          
-        # print("---> observeEvent(req(process_config$isDone[tl.update$current.pos])")
+         print("MODULE TL_ENGINE : ---> observeEvent(req(process_config$isDone[tl.update$current.pos])")
         # print("# Disable all previous screens but the current one")
 
          lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
          toggleNextBtn()
-
        })
       
   
       observeEvent(c(tl.update$current.pos,process_config$isDone),  ignoreInit = T, {
         process_config$mandatory
         
-        print(paste0("-MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
+        print(paste0("MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
       
         #Case 1: the current step is validated -> disable all previous steps
         if (process_config$isDone[tl.update$current.pos])
