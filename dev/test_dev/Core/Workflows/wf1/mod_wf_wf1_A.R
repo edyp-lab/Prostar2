@@ -3,15 +3,7 @@
 mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_tl_engine_ui(ns('tl_engine')),
-    hr(),
-    wellPanel(
-      h3('Module A'),
-      p('rv$dataIn :'),
-      verbatimTextOutput(ns('show_dataIn')),
-      p('rv$dataOut'),
-      verbatimTextOutput(ns('show_dataOut'))
-    )
+    mod_tl_engine_ui(ns('tl_engine'))
   )
 }
 
@@ -38,7 +30,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         mandatory =  c(FALSE, FALSE, TRUE, TRUE)
       )
       
-      # Initialization fo the process
+      # Initialization of the process
       observeEvent(req(dataIn()), { 
         print("--------------------------------------------------")
         print('MODULE TL_ENGINE : Initialisation du module A')
@@ -47,22 +39,27 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
         
+        # Instantiation of the screens
         rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
        })
       
+      
+      # The remoteReset argument is used to communicate between the caller
+      # and this module
       rv$tmp <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
                                      screens = rv$screens,
                                      remoteReset = reactive(remoteReset())
-      )
+                                      )
 
+      # Catch the reset events (local or remote)
       observeEvent(req(c(rv$tmp(), remoteReset())), { 
         print(paste0('MODULE A : new value for rv$hasReset = ', rv$tmp()))
         print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
         
-        # this setting allows to trigger the initialisation of the module
+        # this setting allows to trigger the initialization of the module
         rv$dataOut <- rv$dataIn
         
         print("MODULE A : after updating datasets")
@@ -86,14 +83,13 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       # In order to trigger the initialization of the module, one change 
       # the value of rv$dataOut in the case where it is necessary
       UpdateDataIn <- reactive({
-        print('MODULE A : UpdateDataIn w.r.t logics')
+        print('MODULE A : UpdateDataIn()')
         #browser()
         ind <- grep(rv.process_config$process.name, names(rv$dataIn))
         if (length(ind) == 0)
           rv$dataIn <- dataIn()
           else
             rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
-
       })
       
       output$show_dataIn <- renderPrint({rv$dataIn})
@@ -102,11 +98,11 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         
        #####################################################################
        ## screens of the module
-       
+       ##
        ############### SCREEN 1 ######################################
        output$screen1 <- renderUI({
          tagList(
-           tags$h3(rv.process_config$name)
+           tags$h3(paste0('Process ', rv.process_config$name))
          )
        })
        

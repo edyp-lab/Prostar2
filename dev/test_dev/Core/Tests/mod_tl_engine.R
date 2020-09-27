@@ -13,7 +13,7 @@ mod_tl_engine_ui <- function(id){
 #'
 #' 
 #' 
-mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remoteReset=FALSE){
+mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remoteReset=FALSE){
   #stopifnot(!(is.null(dataIn()) && is.reactive(config) && is.reactive(screens)))
   
   moduleServer(
