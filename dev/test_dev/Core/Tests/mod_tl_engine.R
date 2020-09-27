@@ -21,9 +21,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remot
     function(input, output, session){
       ns <- session$ns
 
-      rv <- reactiveValues(
-        hasReset = NULL
-      )
+      rv <- reactiveValues()
       
       tl.update <- reactiveValues(
           current.pos = 1,
@@ -60,11 +58,11 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remot
       ###
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
         print(paste0("MODULE TL_ENGINE : ---> clic on reset button", pos$rstBtn()))
+        print(paste0("MODULE TL_ENGINE : ---> new value for remoteReset()", remoteReset()))
         #browser()
         # Re-enable all screens
         lapply(1:length(process_config$stepsNames), 
                function(x){shinyjs::enable(paste0('screen', x))})
-
         
         # Reload previous dataset
            lapply(1:length(process_config$stepsNames), 
@@ -73,13 +71,8 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remot
           # Set all steps to undone except the first one which is the description screen
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
         tl.update$current.pos <- 1
-        rv$hasReset <- pos$rstBtn()
         })
 
-      # observeEvent(hasReset(), {
-      #    print("MODULE TL_ENGINE : Received hasReset() = T => set rv$hasReset back to F")
-      #    rv$hasReset <- F
-      #  })
       
       # # Action on validation of the current step
        observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
@@ -123,7 +116,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remot
       
       toggleNextBtn <- reactive({
         tl.update$current.pos
-        #browser()
+
         # # Conditional enabling of the next button
         end_of_tl <- tl.update$current.pos == length(process_config$stepsNames)
         mandatory_step <- isTRUE(process_config$mandatory[tl.update$current.pos])
@@ -144,7 +137,6 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remot
         print(paste0('MODULE TL_ENGINE : Init pos = ', tl.update$current.pos))
         
         rv$screens <- screens
-        rv$hasReset <- F
         
         # update the current.pos if the final step is validated
         if (process_config$isDone[length(process_config$stepsNames)])
@@ -179,7 +171,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL,remot
       # })
       
       
-      return(reactive({rv$hasReset}))
+      return(reactive({pos$rstBtn()}))
     }
   )
 }

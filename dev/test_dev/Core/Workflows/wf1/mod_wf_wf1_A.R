@@ -26,7 +26,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       ns <- session$ns
       rv <- reactiveValues(
         tmp = F,
-        reset2 = F
+        screens=NULL
       )
 
       
@@ -38,9 +38,6 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         mandatory =  c(FALSE, FALSE, TRUE, TRUE)
       )
       
-      rv.screens <- reactiveValues( screens=NULL,
-                                    reset2 = F)
-
       # Initialization fo the process
       observeEvent(req(dataIn()), { 
         print("--------------------------------------------------")
@@ -50,26 +47,24 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
         
-        rv$hasReset <- F
-        rv.screens$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
+        rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
        })
       
       rv$tmp <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
-                                     screens = rv.screens$screens,
-                                     #hasReset = reactive({rv.screens$reset2}),
-                                     remoteReset = reactive(FALSE)
+                                     screens = rv$screens,
+                                     remoteReset = reactive(remoteReset())
       )
-       # observeEvent(remoteReset(),{
-       #   print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
-       # })
-       # 
-      observeEvent(req(c(rv$tmp())), { 
+
+      observeEvent(req(c(rv$tmp(), remoteReset())), { 
         print(paste0('MODULE A : new value for rv$hasReset = ', rv$tmp()))
-        #rv.screens$reset2 <- rv$tmp()
+        print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
+        
+        # this setting allows to trigger the initialisation of the module
         rv$dataOut <- rv$dataIn
+        
         print("MODULE A : after updating datasets")
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
