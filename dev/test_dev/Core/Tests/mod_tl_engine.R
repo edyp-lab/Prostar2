@@ -5,15 +5,7 @@ mod_tl_engine_ui <- function(id){
   tagList(
     useShinyjs(),
     mod_timeline_ui(ns("timeline")),
-    uiOutput(ns('show_screens')),
-    hr(),
-    wellPanel(
-      h3('Module A'),
-      p('rv$dataIn :'),
-      verbatimTextOutput(ns('show_dataIn')),
-      p('rv$dataOut'),
-      verbatimTextOutput(ns('show_dataOut'))
-    )
+    uiOutput(ns('show_screens'))
   )
 }
 
@@ -21,17 +13,17 @@ mod_tl_engine_ui <- function(id){
 #'
 #' 
 #' 
-mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens = NULL, hasReset = F, remoteReset=FALSE){
+mod_tl_engine_server <- function(id, process_config = NULL, hasReset=F, screens = NULL,remoteReset=FALSE){
   #stopifnot(!(is.null(dataIn()) && is.reactive(config) && is.reactive(screens)))
   
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
+
       rv <- reactiveValues(
-        hasReset = F
+        hasReset = NULL
       )
-      #hasReset <- reactiveVal(FALSE)
       
       tl.update <- reactiveValues(
           current.pos = 1,
@@ -55,12 +47,7 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
       observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
       
-      
-    #  observeEvent(hasReset(), { 
-     #   print(paste0('in module tk_engine, new value for hasReset : ',hasReset()))
-        #rv$hasReset <- hasReset()
-     #   })
-      
+
       ###
       ###
       ### RESET FUNCTION
@@ -71,8 +58,8 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       ### else reload the dataset among the set o 1 : (i-1)
       ###
       ###
-      observeEvent(req(c(pos$rstBtn()!=0, remoteReset())), {
-        print(paste0("---> clic on reset button", pos$rstBtn()))
+      observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
+        print(paste0("MODULE TL_ENGINE : ---> clic on reset button", pos$rstBtn()))
         #browser()
         # Re-enable all screens
         lapply(1:length(process_config$stepsNames), 
@@ -90,34 +77,31 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
 
           # Set all steps to undone except the first one which is the description screen
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
-        rv$dataOut <- NULL
         tl.update$current.pos <- 1
-        tl.update$actions$rst <- 0
-       # rv$hasReset <- TRUE
-
+        rv$hasReset <- TRUE
         })
 
-      #observeEvent(req(rv$hasReset), ignoreInit = T,{
-      #  print("set hasReset to F")
-       # rv$hasReset <- F
-      #})
+      observeEvent(hasReset(), {
+         print("MODULE TL_ENGINE : Received hasReset() = T => set rv$hasReset back to F")
+         rv$hasReset <- F
+       })
       
       # # Action on validation of the current step
-       #observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
+       observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
          
         # print("---> observeEvent(req(process_config$isDone[tl.update$current.pos])")
         # print("# Disable all previous screens but the current one")
 
-         #lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
-         #toggleNextBtn()
+         lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
+         toggleNextBtn()
 
-      # })
+       })
       
   
       observeEvent(c(tl.update$current.pos,process_config$isDone),  ignoreInit = T, {
         process_config$mandatory
         
-        print(paste0("---> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
+        print(paste0("-MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
       
         #Case 1: the current step is validated -> disable all previous steps
         if (process_config$isDone[tl.update$current.pos])
@@ -161,15 +145,9 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       })
       
       # Initialization fo the process
-      observeEvent(dataIn(), { 
-        print('Initialisation du module engine')
-        print(paste0('Init pos = ', tl.update$current.pos))
-        
-        rv$dataIn <- dataIn()
-        rv$dataOut <- NULL
-        print(dataIn())
-        print(rv$dataIn)
-        print(rv$dataOut)
+      observeEvent(process_config, { 
+        print('MODULE TL_ENGINE : Initialisation du module engine')
+        print(paste0('MODULE TL_ENGINE : Init pos = ', tl.update$current.pos))
         
         rv$screens <- screens
         rv$hasReset <- F
@@ -191,9 +169,6 @@ mod_tl_engine_server <- function(id, dataIn=NULL, process_config = NULL, screens
       })
       
       output$show_screens <- renderUI({tagList(rv$screens)})
-      
-      output$show_dataIn <- renderPrint({rv$dataIn})
-      output$show_dataOut <- renderPrint({rv$dataOut})
       
       #observeEvent(config$isDone, {
       #  print("new event on isDone")

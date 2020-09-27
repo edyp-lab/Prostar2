@@ -25,6 +25,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
+        tmp = F,
         reset2 = F
       )
 
@@ -36,30 +37,34 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         mandatory =  c(FALSE, FALSE, TRUE, TRUE)
       )
       
-      rv.screens <- reactiveValues( screens=NULL)
+      rv.screens <- reactiveValues( screens=NULL,
+                                    reset2 = F)
 
       # Initialization fo the process
       observeEvent(req(dataIn()), { 
-        print('Initialisation du module A')
+        print('MODULE TL_ENGINE : Initialisation du module A')
         rv$dataIn <- dataIn()
-        rv$hasReset <- FALSE
+        rv$hasReset <- F
         rv.screens$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
        })
       
-      mod_tl_engine_server('tl_engine',
-                                     dataIn = reactive({rv$dataIn}),
+      rv$tmp <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
                                      screens = rv.screens$screens,
-                                     hasReset = reactive({rv$reset2}),
+                                     hasReset = reactive({rv.screens$reset2}),
                                      remoteReset = reactive(FALSE)
       )
        
-      #observeEvent(rv$hasReset, { 
-      #  print(paste0('in module A, new value for rv$hasReset = ', rv$hasReset))
-       # rv$reset2 <- rv$hasReset
-      #  })
+      observeEvent(rv$tmp(), ignoreInit = T, { 
+        print(paste0('MODULE A : new value for rv$hasReset = ', rv$tmp()))
+        rv.screens$reset2 <- rv$tmp()
+        })
       
+      observeEvent(req(rv.screens$reset2), {
+        print('MODULE A : process dataIn update if necessary')
+        rv$dataIn <- rv$dataIn[ , , -length(rv$dataIn)]
+      })
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
