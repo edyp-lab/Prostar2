@@ -1,86 +1,58 @@
 library(rhandsontable)
-#source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
+library(shiny)
+source(file.path('../nav_style/', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('Core/Tests', 'mod_timeline.R'), local=TRUE)$value
 
 ui <- fluidPage(
   tagList(
-    mod_timeline_ui("test_nav"),
-    uiOutput('show')
+    uiOutput('show'),
+    uiOutput('obj')
   )
 )
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  rv.timeline <- reactiveValues(
+  r.nav <- reactiveValues(
+    name = "test",
     stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
+    ll.UI = list( screenStep1 = uiOutput("screen1"),
+                  screenStep2 = uiOutput("screen2"),
+                  screenStep3 = uiOutput("screen3"),
+                  screenStep4 = uiOutput("screen4")),
     isDone =  c(TRUE, FALSE, FALSE, FALSE),
     mandatory =  c(FALSE, FALSE, TRUE, TRUE),
-    current.pos = 1
-  )
-  
-  
-  ll.UI <- reactiveValues(
-    screens = NULL
-  )
-  
-  
-  
-  pos <- mod_timeline_server("test_nav",style = 2, pages = rv.timeline  )
-  
-  
-  
-  #observeEvent(pos()$current.pos, {
-  #  lapply(1:length(rv.timeline$stepsNames), function(x){shinyjs::toggle(paste0('screen', x) )})
-  #  })
-  
-  #observeEvent(pos()$rstBtn, { xx})
-  
-  #observeEvent(pos()$nextBtn, { })
-  
-  #observeEvent(pos()$prevBtn, { })
-  
-  #-------------------------------------------
-  
-  
-  observeEvent(pos()$current.pos, {
+    reset = FALSE
     
-   # browser()
-    ll.UI$screens <- lapply(1:length(rv.timeline$stepsNames), function(x){
-      do.call(uiOutput, list(outputId=paste0("screen", x)))})
-      
-      
-    # initialisation fo the screens
-    ll.UI$screens[[1]] <- div(id = paste0("screen", 1),  ll.UI$screens[[1]])
-    for (i in 2:length(rv.timeline$stepsNames)){
-      ll.UI$screens[[i]] <- shinyjs::hidden(div(id = paste0("screen", i),  ll.UI$screens[[i]]))
-    }
-  })
+  )
   
-  observeEvent(req(rv.timeline$isDone[pos()$current.pos]), {
-    # Disable all previous screensbut
-      lapply(1:length(rv.timeline$stepsNames), function(x){ shinyjs::disable(paste0('screen', x))})
-  })
   
-  #------------------------------------------------
+  
+  screens <- mod_navigation_server("test_nav",
+                                  style = 1,
+                                  pages = r.nav  )
   
   output$show <- renderUI({
     tagList(
-      ll.UI$screens
+      mod_navigation_ui("test_nav"),
+      screens()
     )
   })
-
+  
+  output$obj <- renderUI({
+    paste0(unlist(rv.data$data), collapse=' ')
+  })
+  
   
   reset <- reactive({
-    rv.timeline$isDone <- c(TRUE,rep(FALSE, 3))
-    for (i in 1:length(rv.timeline$stepsNames))
+    r.nav$isDone <- c(TRUE,rep(FALSE, 3))
+    for (i in 1:length(r.nav$stepsNames))
       shinyjs::reset(paste0('screen', i))
   })
   
   
-  observeEvent(req(rv.timeline$reset),{
-    rv.timeline$reset  <- FALSE
+  observeEvent(req(r.nav$reset),{
+    r.nav$reset  <- FALSE
     print('reset activated from navigation module')
     reset()
   })
@@ -98,15 +70,15 @@ server <- function(input, output, session) {
     data = list(original = 'original')
   )
   
-  #*observeEvent(input$done1,{rv.timeline$isDone[1] <- TRUE})
+  #*observeEvent(input$done1,{r.nav$isDone[1] <- TRUE})
   observeEvent(input$done2,{
-    rv.timeline$isDone[2] <- TRUE
+    r.nav$isDone[2] <- TRUE
     rv.data$data <- append(rv.data$data, input$select1)})
   
-  observeEvent(input$done3,{rv.timeline$isDone[3] <- TRUE
+  observeEvent(input$done3,{r.nav$isDone[3] <- TRUE
   rv.data$data <- append(rv.data$data, input$select2)})
   
-  observeEvent(input$done4,{rv.timeline$isDone[4] <- TRUE
+  observeEvent(input$done4,{r.nav$isDone[4] <- TRUE
   rv.data$data <- append(rv.data$data, input$select3)})
   
   
