@@ -1,18 +1,19 @@
 
-# source(file.path('../../../../R', 'mod_navigation.R'), local=TRUE)$value
-# source(file.path('../../../../R', 'global.R'), local=TRUE)$value
-
 
 mod_wf_wf1_C_ui <- function(id){
   ns <- NS(id)
   tagList(
-    uiOutput(ns('show')),
-    wellPanel(
-      p('rv$dataIn :'),
-      verbatimTextOutput(ns('show_dataIn')),
-      p('rv$dataOut'),
-      verbatimTextOutput(ns('show_dataOut'))
-    )
+    mod_tl_engine_ui(ns('tl_engine'))
+    # hr(),
+    # wellPanel(
+    #   h3('Module C'),
+    #   p('dataIn() :'),
+    #   verbatimTextOutput(ns('show_dataIn')),
+    #   p('rv$dataIn :'),
+    #   verbatimTextOutput(ns('show_rv_dataIn')),
+    #   p('rv$dataOut'),
+    #   verbatimTextOutput(ns('show_rv_dataOut'))
+    # )
   )
 }
 
@@ -20,95 +21,125 @@ mod_wf_wf1_C_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_C_server <- function(id, dataIn=NULL){
+mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
-      
-      rv <-reactiveValues()
-      
-      # variables to communicate with the navigation module
-      r.nav <- reactiveValues(
-        name = "Process C",
-        stepsNames = c("C - Description", "C - Step 1", "C - Step 2", "C - Step 3"),
-        ll.UI = list( screenStep1 = uiOutput(ns("screen1")),
-                      screenStep2 = uiOutput(ns("screen2")),
-                      screenStep3 = uiOutput(ns("screen3")),
-                      screenStep4 = uiOutput(ns("screen4"))
-        ),
-        isDone =  c(TRUE, FALSE, FALSE, FALSE),
-        mandatory =  c(FALSE, FALSE, TRUE, TRUE),
-        reset = FALSE
+      rv <- reactiveValues(
+        tmp_engine = F,
+        screens=NULL
       )
       
-      screens <- mod_navigation_server("test_nav", 
-                                       style = 2, 
-                                       pages = r.nav)
       
       
-      output$show <- renderUI({
-        tagList(
-          mod_navigation_ui(ns("test_nav")),
-          screens()
-        )
+      
+      # variables to communicate with the navigation module
+      rv.process_config <- reactiveValues(
+        process.name = 'Process C',
+        stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
+        isDone =  c(TRUE, FALSE, FALSE, FALSE),
+        mandatory =  c(FALSE, FALSE, TRUE, TRUE)
+      )
+      
+      # Initialization of the process
+      observeEvent(req(dataIn()), { 
+        print("--------------------------------------------------")
+        print('MODULE TL_ENGINE : Initialisation du module C')
+        rv$dataIn <- dataIn()
+        rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
+        print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
+        print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
+        print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
+        
+        # Instantiation of the screens
+        rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
+          do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
+      })
+      
+      # output$show_dataIn <- renderPrint({dataIn()})
+      # output$show_rv_dataIn <- renderPrint({rv$dataIn})
+      # output$show_rv_dataOut <- renderPrint({rv$dataOut})
+      
+      # The remoteReset argument is used to communicate between the caller
+      # and this module
+      rv$tmp_engine <- mod_tl_engine_server('tl_engine',
+                                            process_config = rv.process_config,
+                                            screens = rv$screens,
+                                            remoteReset = reactive(remoteReset())
+      )
+      
+      
+      observeEvent(rv.process_config$isDone, {
+        print(paste0('MODULE C : new value for rv.process_config$isDone = ', rv.process_config$isDone))
+        print("     Disable all previous screens")
+        pos <- max(grep(TRUE, rv.process_config$isDone))
+        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+      })
+      
+      
+      # Catch the reset events (local or remote)
+      observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
+        print(paste0('MODULE C : new value for rv$tmp_engine = ', rv$tmp_engine()))
+        print(paste0('MODULE C : new value for remoteReset() = ', remoteReset()))
+        UpdateDataIn()
+        # this setting allows to trigger the initialization of the module
+        #rv$dataOut <- rv$dataIn
+        rv$process.validated <- F
+        print("MODULE C : after updating datasets")
+        print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
+        print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
+        print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
+        print(paste0("      rv.process_config =" , paste0(rv.process_config$isDone, collapse=' - ')))
+        
+      })
+      
+      
+      # If this step has been validated, then one need to delete the last
+      # record in the dataset,
+      # else on change have to reload the current dataset to reinit the module
+      # The condition is on the presence of the name in the dataset rather then
+      # on the value of the last element of isDone vector because if the value is set 
+      # to TRUE and, for any reason, the dataset is not updated, it may have a bug
+      
+      # If there are further elements in the dataset after the current one, 
+      # then they are deleted
+      
+      # In order to trigger the initialization of the module, one change 
+      # the value of rv$dataOut in the case where it is necessary
+      UpdateDataIn <- reactive({
+        print('MODULE C : UpdateDataIn()')
+        #browser()
+        ind <- grep(rv.process_config$process.name, names(rv$dataIn))
+        if (length(ind) == 0)
+          rv$dataIn <- dataIn()
+        else
+          rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
       })
       
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
-
-      observeEvent(req(r.nav$reset),{
-        print('Module C : Activation of the reset variable')
-        
-        for (i in 1:length(r.nav$stepsNames))
-          shinyjs::reset(paste0('screen', i))
-        
-        if (r.nav$isDone[length(r.nav$stepsNames)])
-          rv$dataOut <- dataIn()[-length(dataIn())]
-        else
-          rv$dataIn <- dataIn()
-        
-        
-        r.nav$reset  <- FALSE
-        
-        # Set all steps to undone except the first one which is the description screen
-        r.nav$isDone <- c(TRUE, rep(FALSE, length(r.nav$stepsNames)-1))
-        
-      })
-      
-     
       
       
-      
-      # Initialization fo the process
-      session$userData$mod_C_obs_1 <-  observeEvent(dataIn(), { 
-        print('Initialisation du module C')
-        rv$dataIn <- dataIn()
-      })
-      
-      
-      
-      
-      
-      
+      # observeEvent( rv.process_config$isDone[length(rv.process_config$isDone)], {
+      #   rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
+      # } )            
       
       #####################################################################
       ## screens of the module
-      
+      ##
       ############### SCREEN 1 ######################################
       output$screen1 <- renderUI({
         tagList(
-          tags$h1('Description of the module')
+          tags$h3(paste0('Process ', rv.process_config$name))
         )
-        
       })
       
       
       ############### SCREEN 2 ######################################
       
       output$screen2 <- renderUI({
-        
         tagList(
           div(id=ns('screen2'),
               tags$h2('Step 1'),
@@ -122,8 +153,9 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(input$perform_screen2_btn, {
-        #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select1)
-        r.nav$isDone[2] <- TRUE
+        # Put here the code for modifying the QF after this step
+        shinyjs::disable('screen2')
+        rv.process_config$isDone[2] <- TRUE
       })
       
       
@@ -142,9 +174,13 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
         )
       })
       
+      ## Logics to implement: here, we must take the last data not null
+      # in previous datas. The objective is to take account
+      # of skipped steps
       observeEvent(input$perform_screen3_btn, {
+        shinyjs::disable('screen3')
         #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
-        r.nav$isDone[3] <- TRUE
+        rv.process_config$isDone[3] <- TRUE
       })
       
       
@@ -158,20 +194,29 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL){
           )
         )
       })
-        
+      
       observeEvent(input$validate_btn, {
         isolate({
-          rv$dataIn <- addAssay(rv$dataIn, rv$dataIn[[length(rv$dataIn)]], name='Process_C')
+          shinyjs::disable('screen4')
+          rv$dataIn <- addAssay(rv$dataIn, 
+                                rv$dataIn[[length(rv$dataIn)]], 
+                                name=rv.process_config$process.name)
           rv$dataOut <- rv$dataIn
           rv$dataIn <- NULL
-          r.nav$isDone[4] <- TRUE
+          rv$process.validated <- TRUE
+          rv.process_config$isDone[4] <- TRUE
         })
-
       })
+      
+      
+      
       
       ##########################################################
       
-      reactive({rv$dataOut})
+      list(dataOut = reactive({rv$dataOut}),
+           validated = reactive({rv$process.validated}),
+           screens = reactive({rv.screens})
+      )
     }
   )
 }

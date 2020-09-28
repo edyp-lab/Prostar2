@@ -21,29 +21,26 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 #' @export 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs disabled inlineCSS
-mod_navigation_ui <- function(id){
+mod_timeline_ui <- function(id){
   ns <- NS(id)
   
   tagList(
-    uiOutput(ns("load_css_style")),
     shinyjs::useShinyjs(),
+    uiOutput(ns("load_css_style")),
     fluidRow(
       align= 'center',
       column(width=2,
-               div(
-                 style = btn_style,
-                 actionButton(ns("rstBtn"), "reset",
-                              class = PrevNextBtnClass,
-                              style='padding:4px; font-size:80%')
-               ),
-             div( id='test',
-                  style = btn_style,
+             div(style = btn_style,
+               actionButton(ns("rstBtn"), "reset",
+                            class = redBtnClass,
+                            style='padding:4px; font-size:80%')
+             ),
+             div( style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
                                                  class = PrevNextBtnClass,
                                                  style='padding:4px; font-size:80%')))
       ),
-      column(width=8,div( style = btn_style,
-                          uiOutput(ns("timelineStyle")))
+      column(width=8,div( style = btn_style, uiOutput(ns("timelineStyle")))
       ),
       column(width=2,div(style=btn_style,
                          actionButton(ns("nextBtn"), ">>",
@@ -62,7 +59,7 @@ mod_navigation_ui <- function(id){
 #' 
 #' @param style xxx
 #' 
-#' @param pages xxxx
+#' @param process_config xxxx
 #' 
 #' @param  btns xxx
 #' 
@@ -74,119 +71,51 @@ mod_navigation_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_navigation_server <- function(id, style=1, pages){
-  #stopifnot(!is.reactive(style))
-  #stopifnot(!is.reactive(pages))
-  
+mod_timeline_server <- function(id, style=1, process_config, tl.update){
+  stopifnot(!is.reactive(style))
+  stopifnot(!is.reactive(process_config) && !is.null(process_config))
+  stopifnot(!is.reactive(tl.update) && !is.null(tl.update))
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    current <- reactiveValues(
-      # This variable is the indice of the current screen
-      val = NULL,
-      nbSteps = NULL
-    )
+    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
-    
-    # Reset UI by setting the variable reset to TRUE. The caller program has the function
-    # to reset its UI inputs
-    observeEvent(req(input$rstBtn),{ pages$reset <- input$rstBtn})
-    
-    # Listen to a change of current screen sent by the caller via the start slot
-    observeEvent(pages$start, { current$val <- pages$start})
-    
-    
-    
-    ## Initialization of the timeline
-    observeEvent(req(pages),{
-      current$nbSteps <- length(pages$stepsNames)
-      current$val <- pages$start
-      
-      pages$ll.UI[[1]] <- div(id = ns(paste0("screen", 1)),  pages$ll.UI[[1]])
-      for (i in 2:current$nbSteps){
-        pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
-      }
-
-    })
-    
-    
-   
-    
-    
-    
-    
-    
-    navPage <- function(direction) {
-      newval <- current$val + direction 
-      newval <- max(1, newval)
-      newval <- min(newval, current$nbSteps)
-      current$val <- newval
-      pages$start <- current$val
-    }
-    
-    
-    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
-    
-    
-    observeEvent( req(c(current$val, pages$isDone[current$val])),{
-      
-      # Conditional enabling of the next button
-      cond.next.btn <- isTRUE(pages$isDone[current$val]) && (current$val< current$nbSteps) || !isTRUE(pages$mandatory[current$val])
-      shinyjs::toggleState(id = "nextBtn", condition = cond.next.btn) 
-      
-      # enable the button if xxxx
-      # disable the button if there is no step backward of if we are
-      # on the last step which is Done. thus, the user must click
-      # on the undo button
-      cond.prev.btn <- (current$val > 1 && current$val <= current$nbSteps) || (current$val == current$nbSteps && !pages$isDone[current$val])
-      shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
-      
-      
-      # Disable all previous screensbut
-      if (pages$isDone[current$val])
-        lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
-    })
-    
-    
-    # Show the screen corresponding to the current indice
-    observeEvent(current$val, {
-      lapply(1:current$nbSteps, function(x){shinyjs::toggle(paste0('screen', x), 
-                                                            condition = x==current$val)})
-    })
-    
-    
-    
+    observeEvent(tl.update$actions,{
+      #print('action :')
+      #print(reactiveValuesToList(tl.update))
+      shinyjs::toggleState('nextBtn', condition=tl.update$actions$nxt)
+      shinyjs::toggleState('rstBtn', condition=tl.update$actions$rst)
+      shinyjs::toggleState('prevBtn', condition=tl.update$actions$prv)
+   })
     
     ## Functions for timeline and styles
     
     output$load_css_style <- renderUI({
-      req(current$nbSteps)
-      style
-      if (style==3) return(NULL)
+      req(length(process_config$stepsNames))
+      req(style != 3)
+      
       code <- strsplit(code_sass_timeline[[paste0('style',style)]],"\n")
       firstLine <- code[[1]][1]
       prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
       suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
       
-      code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
+      code[[1]][1] <- paste0(prefix, length(process_config$stepsNames), suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
       
     })
     
-    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
     #### -----
-    ### Three timelines
+    ### Definition of timelines style
     output$timeline1 <- renderUI({
-      current$val
-      status <- rep('',current$nbSteps)
-      status[current$val] <- ' active'
-      steps <- pages$stepsNames
+      process_config
+      status <- rep('',length(process_config$stepsNames))
+      status[tl.update$current.pos] <- ' active'
+      steps <- process_config$stepsNames
       txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
-      for (i in 1:current$nbSteps){
+      for (i in 1:length(process_config$stepsNames)){
         txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
       }
       txt <- paste0(txt,"</div></div>")
@@ -195,21 +124,20 @@ mod_navigation_server <- function(id, style=1, pages){
     
     
     output$timeline2 <- renderUI({
-      current$val
-      pages
-      status <- rep('', current$nbSteps)
-      if( !is.null(pages$mandatory))
-        status[which(pages$mandatory)] <- 'mandatory'
+      process_config
+      status <- rep('', length(process_config$stepsNames))
+      if( !is.null(process_config$mandatory))
+        status[which(process_config$mandatory)] <- 'mandatory'
       
-      #status <- rep('',current$nbSteps)
-      status[which(pages$isDone)] <- 'complete'
+      #status <- rep('',length(process_config$stepsNames))
+      status[which(process_config$isDone)] <- 'complete'
       
-      active  <- rep('', current$nbSteps)
-      active[current$val] <- 'active'
+      active  <- rep('', length(process_config$stepsNames))
+      active[tl.update$current.pos] <- 'active'
       
-      steps <- pages$stepsNames
+      steps <- process_config$stepsNames
       txt <- "<ul class='timeline' id='timeline'>"
-      for (i in 1:current$nbSteps){
+      for (i in 1:length(process_config$stepsNames)){
         txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
       }
       txt <- paste0(txt,"</ul>")
@@ -219,20 +147,20 @@ mod_navigation_server <- function(id, style=1, pages){
     
     
     output$timeline3 <- renderUI({
-      current$val
-      color <- rep("lightgrey", current$nbSteps)
-      colorForCursor <- rep("white", current$nbSteps)
+      process_config
       
+      color <- rep("lightgrey", length(process_config$stepsNames))
+      colorForCursor <- rep("white", length(process_config$stepsNames))
       
-      for (i in 1:current$nbSteps){
-        status <- pages$isDone[i]
-        col <- ifelse(!is.null(pages$mandatory) && pages$mandatory[i], "red", orangeProstar)
+      for (i in 1:length(process_config$stepsNames)){
+        status <- process_config$isDone[i]
+        col <- ifelse(!is.null(process_config$mandatory) && process_config$mandatory[i], "red", orangeProstar)
         ifelse(status, color[i] <- "green", color[i] <- col)
       }
       
-      colorForCursor[current$val] <- "black"
+      colorForCursor[tl.update$current.pos] <- "black"
       
-      steps <- pages$stepsNames
+      steps <- process_config$stepsNames
       colorCurrentPos <- colorForCursor
       paste0("     ", steps, "     ")
       rows.color <- rows.text <-  rows.cursor <- list()
@@ -253,10 +181,12 @@ mod_navigation_server <- function(id, style=1, pages){
     })
     
     
-    # return value of the module
+    # return value of the tl.update
+    list(rstBtn = reactive(input$rstBtn),
+         nextBtn = reactive(input$nextBtn),
+         prevBtn = reactive(input$prevBtn)
+         )
     
-    reactive( tagList(pages$ll.UI))
-
   })
 }
 
