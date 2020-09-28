@@ -47,15 +47,15 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       # The remoteReset argument is used to communicate between the caller
       # and this module
-      rv$tmp <- mod_tl_engine_server('tl_engine',
+      rv$tmp_engine <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
                                      screens = rv$screens,
                                      remoteReset = reactive(remoteReset())
                                       )
 
       # Catch the reset events (local or remote)
-      observeEvent(req(c(rv$tmp(), remoteReset())), { 
-        print(paste0('MODULE A : new value for rv$hasReset = ', rv$tmp()))
+      observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
+        print(paste0('MODULE A : new value for rv$tmp_engine = ', rv$tmp_engine()))
         print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
         

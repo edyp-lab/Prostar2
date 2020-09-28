@@ -8,6 +8,7 @@ source(file.path('../Workflows/wf1', 'mod_wf_wf1_B.R'), local=TRUE)$value
 source(file.path('../Workflows/wf1', 'mod_wf_wf1_C.R'), local=TRUE)$value
 
 options(shiny.fullstacktrace = F)
+options(shiny.reactlog=TRUE) 
 
 ui <- fluidPage(
   tagList(
@@ -22,8 +23,7 @@ server <- function(input, output, session) {
   
   rv <- reactiveValues(
     current.obj = Exp1_R25_prot[1:10,,],
-    tmp = NULL,
-    remoteReset = 0
+    tmp = NULL
   )
   
   rv$tmp <- mod_super_timeline_server("super_nav", 

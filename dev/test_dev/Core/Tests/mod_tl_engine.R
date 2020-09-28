@@ -88,14 +88,16 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       observeEvent(c(tl.update$current.pos,process_config$isDone),  ignoreInit = T, {
         process_config$mandatory
         
-        print(paste0("MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
+        print(paste0("####### MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
       
         #Case 1: the current step is validated -> disable all previous steps
         if (process_config$isDone[tl.update$current.pos])
+          {
           DisableAllPrevSteps()
+        }
         
         # Display the screen corresponding to the new position
-        DisplayCurrentStep()
+              DisplayCurrentStep()
                                                                                 
         toggleNextBtn()
         togglePrevBtn()
@@ -104,6 +106,8 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       
       
       DisplayCurrentStep <- reactive({
+        # Display the screen corresponding to the new position
+        print("####### MODULE TL_ENGINE : --> Display the screen corresponding to the new position")
         lapply(1:length(process_config$stepsNames), 
                function(x){shinyjs::toggle(paste0('screen', x),
                                            condition = x==tl.update$current.pos)}) 
@@ -111,6 +115,8 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       
       
       DisableAllPrevSteps <- reactive({
+        print("####### MODULE TL_ENGINE : --> the current step is validated -> disable all previous steps")
+        
         lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
       })
       

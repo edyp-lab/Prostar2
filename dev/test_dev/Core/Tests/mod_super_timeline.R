@@ -45,7 +45,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       
       # Here, there is no remoteReset because there is no upper level
-      rv$tmp <- mod_tl_engine_server('tl_engine',
+      rv$tmp_super <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
                                      screens = rv$screens,
                                      remoteReset = reactive(FALSE)
@@ -53,8 +53,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
 
       
       # Catch the reset events (local or remote)
-      observeEvent(req(rv$tmp()), { 
-        print(paste0('MODULE SUPER_TL : new value for rv$tmp = ', rv$tmp()))
+      observeEvent(req(rv$tmp_super()), { 
+        print(paste0('MODULE SUPER_TL : new value for rv$tmp_super = ', rv$tmp_super()))
         UpdateDataIn()
         
         # this setting allows to trigger the initialization of the module
@@ -82,13 +82,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       # In order to trigger the initialization of the module, one change 
       # the value of rv$dataOut in the case where it is necessary
       UpdateDataIn <- reactive({
-        print('MODULE SUPER_TL : UpdateDataIn()')
-        #browser()
-        ind <- grep(rv.process_config$process.name, names(rv$dataIn))
-        # if (length(ind) == 0)
-        #   rv$dataIn <- dataIn()
-        # else
-        #   rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
+        print('MODULE SUPER_TL : UpdateDataIn(). RESET ALL')
+        rv$dataIn <- dataIn()
       })
       
 
@@ -119,6 +114,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      dataIn = reactive({rv$dataIn}), 
                                      remoteReset = reactive({FALSE}) )
       observeEvent(rv$tmpA(),  { 
+        print('MODULE SUPER_TL : New value for rv$tmpA() :')
+        print(paste0("      names(dataIn()) = ", paste0(names(rv$tmpA()), collapse=' - ')))
         rv$dataIn <- rv$tmpA()
         rv.process_config$isDone[2] <- TRUE
       })
