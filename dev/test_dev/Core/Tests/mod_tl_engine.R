@@ -66,7 +66,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         lapply(1:length(process_config$stepsNames), 
                function(x){shinyjs::enable(paste0('screen', x))})
         
-        # Reset all screens inputs
+        # Reset for all screens inputs of the caller
         print("MODULE TL_ENGINE : Reset all screens inputs")
         lapply(1:length(process_config$stepsNames), 
                   function(x){ shinyjs::reset(paste0('screen', x))})
@@ -158,11 +158,11 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         toggleNextBtn()
       })
       
+      output$show_screens <- renderUI({tagList(rv$screens)})
       
       
       
-      #list(reset = reactive({pos$rstBtn()}))
-      reactive({pos$rstBtn()})
+      return(reactive({pos$rstBtn()}))
     }
   )
 }

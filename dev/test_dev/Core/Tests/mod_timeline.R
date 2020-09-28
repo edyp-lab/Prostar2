@@ -31,7 +31,9 @@ mod_timeline_ui <- function(id){
       align= 'center',
       column(width=2,
              div(style = btn_style,
-               uiOutput(ns('show_rstBtn'))
+               actionButton(ns("rstBtn"), "reset",
+                            class = redBtnClass,
+                            style='padding:4px; font-size:80%')
              ),
              div( style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
@@ -88,13 +90,6 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
    })
     
     ## Functions for timeline and styles
-    
-    
-    output$show_rstBtn <- renderUI({
-      actionButton(ns("rstBtn"), paste0("reset ", process_config$type),
-                   class = redBtnClass,
-                   style='padding:4px; font-size:80%')
-    })
     
     output$load_css_style <- renderUI({
       req(length(process_config$stepsNames))

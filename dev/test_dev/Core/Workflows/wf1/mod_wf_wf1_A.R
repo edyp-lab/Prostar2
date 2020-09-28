@@ -4,6 +4,16 @@ mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
   tagList(
     mod_tl_engine_ui(ns('tl_engine'))
+    # hr(),
+    # wellPanel(
+    #   h3('Module A'),
+    #   p('dataIn() :'),
+    #   verbatimTextOutput(ns('show_dataIn')),
+    #   p('rv$dataIn :'),
+    #   verbatimTextOutput(ns('show_rv_dataIn')),
+    #   p('rv$dataOut'),
+    #   verbatimTextOutput(ns('show_rv_dataOut'))
+    # )
   )
 }
 
@@ -26,7 +36,6 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
-        type = 'process',
         process.name = 'Process A',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
         isDone =  c(TRUE, FALSE, FALSE, FALSE),
@@ -61,7 +70,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
                                       )
 
       
-      observeEvent(rv.process_config$isDone, ignoreInit=T, {
+      observeEvent(rv.process_config$isDone, {
         print(paste0('MODULE A : new value for rv.process_config$isDone = ', rv.process_config$isDone))
         print("     Disable all previous screens")
         pos <- max(grep(TRUE, rv.process_config$isDone))
@@ -70,10 +79,15 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       
       # Catch the reset events (local or remote)
-      observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
+      observeEvent(req(c(rv$tmp_engine()!=0, remoteReset()!=0)), { 
         print(paste0('MODULE A : new value for rv$tmp_engine = ', rv$tmp_engine()))
         print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
+        print("MODULE A : Reset all screens inputs")
+
+        lapply(1:length(rv.process_config$stepsNames), 
+               function(x){ shinyjs::reset(paste0('screen', x))})
+        
         rv$process.validated <- F
         print("MODULE A : after updating datasets")
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
@@ -203,7 +217,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
        ##########################################################
         
   list(dataOut = reactive({rv$dataOut}),
-       validated = reactive({rv$process.validated})
+       validated = reactive({rv$process.validated}),
+       screens = reactive({rv.screens})
   )
     }
   )

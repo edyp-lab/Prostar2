@@ -23,7 +23,6 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
-        type = 'pipeline',
         process.name = 'Pipeline protein',
         stepsNames = c("Description", "Filtering", "Normalization", "Imputation", "Summary"),
         isDone =  c(TRUE, rep(FALSE,4)),
@@ -53,12 +52,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       # Catch the reset events (local or remote)
       observeEvent(req(rv$tmp_super()), { 
-        print(paste0('MODULE SUPER_TL : new value for rv$tmp_super() = ', rv$tmp_super()))
+        print(paste0('MODULE SUPER_TL : new value for rv$tmp_super = ', rv$tmp_super()))
         UpdateDataIn()
-        
-        
-        #rv$dataOut <- NULL
-        
+
         print("MODULE SUPER_TL : after updating datasets")
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
@@ -120,7 +116,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv$dataOut <- rv$dataIn
       })
       
-      observeEvent(rv$tmpA$validated(), ignoreInit = T, { 
+      observeEvent(rv$tmpA$validated(),  { 
         print('MODULE SUPER_TL : New value for rv$validated() :')
         print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
         rv.process_config$isDone[2] <- rv$tmpA$validated()
@@ -177,7 +173,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv$dataOut <- rv$dataIn
       })
       
-      observeEvent(rv$tmpC$validated(),  ignoreInit=T, { 
+      observeEvent(rv$tmpC$validated(),  { 
         print('MODULE SUPER_TL : New value for rv$tmpC$validated() :')
         print(paste0("      rv$tmpC$validated() = ", rv$tmpC$validated()))
         rv.process_config$isDone[2] <- rv$tmpC$validated()
