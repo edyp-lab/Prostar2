@@ -66,21 +66,22 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       rv$tmp_engine <- mod_tl_engine_server('tl_engine',
                                             process_config = rv.process_config,
                                             screens = rv$screens,
-                                            remoteReset = reactive(remoteReset())
-      )
+                                            remoteReset = reactive(remoteReset()),
+                                            forcePosition = reactive(NULL)
+                                              )
       
       
       observeEvent(rv.process_config$isDone, {
-        print(paste0('MODULE B : new value for rv.process_config$isDone = ', rv.process_config$isDone))
-        print("     Disable all previous screens")
+        #print(paste0('MODULE B : new value for rv.process_config$isDone = ', rv.process_config$isDone))
+        #print("     Disable all previous screens")
         pos <- max(grep(TRUE, rv.process_config$isDone))
         lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
       })
       
       
       # Catch the reset events (local or remote)
-      observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
-        print(paste0('MODULE B : new value for rv$tmp_engine = ', rv$tmp_engine()))
+      observeEvent(req(c(rv$tmp_engine$reset())), ignoreInit=T, { 
+        print(paste0('MODULE B : new value for rv$tmp_engine$reset() = ', rv$tmp_engine$reset()))
         print(paste0('MODULE B : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
         # this setting allows to trigger the initialization of the module
@@ -90,7 +91,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
-        print(paste0("      rv.process_config =" , paste0(rv.process_config$isDone, collapse=' - ')))
+        #print(paste0("      rv.process_config =" , paste0(rv.process_config$isDone, collapse=' - ')))
         
       })
       
@@ -108,7 +109,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       # In order to trigger the initialization of the module, one change 
       # the value of rv$dataOut in the case where it is necessary
       UpdateDataIn <- reactive({
-        print('MODULE B : UpdateDataIn()')
+        #print('MODULE B : UpdateDataIn()')
         #browser()
         ind <- grep(rv.process_config$process.name, names(rv$dataIn))
         if (length(ind) == 0)

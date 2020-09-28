@@ -13,7 +13,7 @@ mod_tl_engine_ui <- function(id){
 #'
 #' 
 #' 
-mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remoteReset=FALSE){
+mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remoteReset=FALSE, forcePosition = NULL){
   #stopifnot(!(is.reactive(screens) && !is.null(screens)))
   #stopifnot(!is.reactive(process_config) && !is.null(process_config))
   
@@ -46,7 +46,10 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
       observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
       
-
+      observeEvent(req(forcePosition()), {
+        tl.update$current.pos <- forcePosition()
+      })
+      
       ###
       ###
       ### RESET FUNCTION
@@ -58,21 +61,21 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       ###
       ###
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-        print(paste0("MODULE TL_ENGINE : ---> clic on reset button = ", pos$rstBtn()))
-        print(paste0("MODULE TL_ENGINE : ---> new value for remoteReset() = ", remoteReset()))
+        #print(paste0("MODULE TL_ENGINE : ---> clic on reset button = ", pos$rstBtn()))
+        #print(paste0("MODULE TL_ENGINE : ---> new value for remoteReset() = ", remoteReset()))
         #browser()
         # Re-enable all screens
-        print("MODULE TL_ENGINE : Re-enable all screens")
+        #print("MODULE TL_ENGINE : Re-enable all screens")
         lapply(1:length(process_config$stepsNames), 
                function(x){shinyjs::enable(paste0('screen', x))})
         
         # Reset for all screens inputs of the caller
-        print("MODULE TL_ENGINE : Reset all screens inputs")
+        #print("MODULE TL_ENGINE : Reset all screens inputs")
         lapply(1:length(process_config$stepsNames), 
                   function(x){ shinyjs::reset(paste0('screen', x))})
 
           # Set all steps to undone except the first one which is the description screen
-        print("MODULE TL_ENGINE : Set all steps to undone")
+        #print("MODULE TL_ENGINE : Set all steps to undone")
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
         tl.update$current.pos <- 1
         })
@@ -81,11 +84,11 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       
       
   
-      observeEvent(c(tl.update$current.pos,process_config$isDone),  ignoreInit = T, {
+      observeEvent(c(tl.update$current.pos, process_config$isDone),  ignoreInit = T, {
         process_config$mandatory
         
-        print(paste0("####### MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
-        print(paste0("####### MODULE TL_ENGINE : --> isDone = ", paste0(process_config$isDone, collapse=' ')))
+        #print(paste0("####### MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
+        #rint(paste0("####### MODULE TL_ENGINE : --> isDone = ", paste0(process_config$isDone, collapse=' ')))
         
         #Case 1: the current step is validated -> disable all previous steps
         if (process_config$isDone[tl.update$current.pos])
@@ -105,14 +108,15 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       DisplayCurrentStep <- reactive({
         # Display the screen corresponding to the new position
         print("####### MODULE TL_ENGINE : --> Display the screen corresponding to the new position")
+        cond <- 
         lapply(1:length(process_config$stepsNames), 
                function(x){shinyjs::toggle(paste0('screen', x),
-                                           condition = x==tl.update$current.pos)}) 
+                                           condition = x==tl.update$current.pos )}) 
       })
       
       
       DisableAllPrevSteps <- reactive({
-        print("####### MODULE TL_ENGINE : --> the current step is validated -> disable all previous steps")
+        #print("####### MODULE TL_ENGINE : --> the current step is validated -> disable all previous steps")
         #browser()
         #lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
         tl.update$actions$rst <- T
@@ -162,7 +166,8 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       
       
       
-      return(reactive({pos$rstBtn()}))
+      list(reset = reactive({pos$rstBtn()}),
+           position = reactive({tl.update$current.pos}))
     }
   )
 }
