@@ -2,7 +2,11 @@
 
 mod_tl_engine_ui <- function(id){
   ns <- NS(id)
-  
+  tagList(
+    useShinyjs(),
+    mod_timeline_ui(ns("timeline")),
+    uiOutput(ns('show_screens'))
+  )
 }
 
 #' @param dataIn xxx
@@ -110,8 +114,8 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       DisableAllPrevSteps <- reactive({
         print("####### MODULE TL_ENGINE : --> the current step is validated -> disable all previous steps")
         #browser()
-        lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
-
+        #lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
+        tl.update$actions$rst <- T
       })
       
       toggleNextBtn <- reactive({
@@ -154,16 +158,11 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         toggleNextBtn()
       })
       
-      #output$show_screens <- renderUI({tagList(rv$screens)})
+      output$show_screens <- renderUI({tagList(rv$screens)})
       
       
       
-      list(rstBtn = reactive({pos$rstBtn()}),
-           ui = reactive({tagList(
-                          useShinyjs(),
-                          mod_timeline_ui(ns("timeline"))
-                          )}),
-           screens = reactive({tagList(rv$screens)}))
+      return(reactive({pos$rstBtn()}))
     }
   )
 }

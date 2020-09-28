@@ -69,6 +69,15 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
                                             remoteReset = reactive(remoteReset())
       )
       
+      
+      observeEvent(rv.process_config$isDone, {
+        print(paste0('MODULE C : new value for rv.process_config$isDone = ', rv.process_config$isDone))
+        print("     Disable all previous screens")
+        pos <- max(grep(TRUE, rv.process_config$isDone))
+        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+      })
+      
+      
       # Catch the reset events (local or remote)
       observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
         print(paste0('MODULE C : new value for rv$tmp_engine = ', rv$tmp_engine()))
@@ -145,7 +154,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       observeEvent(input$perform_screen2_btn, {
         # Put here the code for modifying the QF after this step
-        
+        shinyjs::disable('screen2')
         rv.process_config$isDone[2] <- TRUE
       })
       
@@ -169,7 +178,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_screen3_btn, {
-        
+        shinyjs::disable('screen3')
         #rv$dataIn <- rv$dataIn[[length(rv$dataIn)]] + as.numeric(input$select2)
         rv.process_config$isDone[3] <- TRUE
       })
@@ -188,6 +197,7 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       observeEvent(input$validate_btn, {
         isolate({
+          shinyjs::disable('screen4')
           rv$dataIn <- addAssay(rv$dataIn, 
                                 rv$dataIn[[length(rv$dataIn)]], 
                                 name=rv.process_config$process.name)
@@ -199,10 +209,13 @@ mod_wf_wf1_C_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       })
       
       
+      
+      
       ##########################################################
       
       list(dataOut = reactive({rv$dataOut}),
-           validated = reactive({rv$process.validated})
+           validated = reactive({rv$process.validated}),
+           screens = reactive({rv.screens})
       )
     }
   )

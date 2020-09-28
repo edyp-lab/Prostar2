@@ -100,7 +100,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         tagList(
           div(id=ns('screen2'),
               tags$h3('Processus 1'),
-              rv$tmpA$screens()
+              mod_wf_wf1_A_ui(ns('mod_A_nav'))
           )
         )
       })
@@ -110,14 +110,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      remoteReset = reactive({rv$tmp_super()}) )
       
       observeEvent(req(rv$tmpA$dataOut()),  { 
-        print('MODULE SUPER_TL : New value for rv$tmpA$dataOut() :')
+        print('MODULE SUPER_TL : New value for rv$tmpA() :')
         print(paste0("      names(rv$tmpA$dataOut()) = ", paste0(names(rv$tmpA$dataOut()), collapse=' - ')))
         rv$dataIn <- rv$tmpA$dataOut()
         rv$dataOut <- rv$dataIn
       })
       
       observeEvent(rv$tmpA$validated(),  { 
-        print('MODULE SUPER_TL : New value for rv$tmpA$validated() :')
+        print('MODULE SUPER_TL : New value for rv$validated() :')
         print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
         rv.process_config$isDone[2] <- rv$tmpA$validated()
       })
@@ -146,7 +146,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       observeEvent(rv$tmpB$validated(),  { 
         print('MODULE SUPER_TL : New value for rv$tmpB$validated() :')
         print(paste0("      rv$tmpB$validated() = ", rv$tmpB$validated()))
-        rv.process_config$isDone[3] <- rv$tmpB$validated()
+        rv.process_config$isDone[2] <- rv$tmpB$validated()
       })
       
       
@@ -163,7 +163,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         )
       })
       
-      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav",
+      rv$tmpC <- mod_wf_wf1_A_server("mod_C_nav",
                                      dataIn = reactive({rv$dataIn}),
                                      remoteReset = reactive({rv$tmp_super()}) )
       observeEvent(req(rv$tmpC$dataOut()),  { 
@@ -176,7 +176,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       observeEvent(rv$tmpC$validated(),  { 
         print('MODULE SUPER_TL : New value for rv$tmpC$validated() :')
         print(paste0("      rv$tmpC$validated() = ", rv$tmpC$validated()))
-        rv.process_config$isDone[4] <- rv$tmpC$validated()
+        rv.process_config$isDone[2] <- rv$tmpC$validated()
       })
       
       
