@@ -4,6 +4,16 @@ mod_wf_wf1_B_ui <- function(id){
   ns <- NS(id)
   tagList(
     mod_tl_engine_ui(ns('tl_engine'))
+    # hr(),
+    # wellPanel(
+    #   h3('Module B'),
+    #   p('dataIn() :'),
+    #   verbatimTextOutput(ns('show_dataIn')),
+    #   p('rv$dataIn :'),
+    #   verbatimTextOutput(ns('show_rv_dataIn')),
+    #   p('rv$dataOut'),
+    #   verbatimTextOutput(ns('show_rv_dataOut'))
+    # )
   )
 }
 
@@ -17,9 +27,11 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
-        tmp = F,
+        tmp_engine = F,
         screens=NULL
       )
+      
+      
       
       
       # variables to communicate with the navigation module
@@ -35,6 +47,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         print("--------------------------------------------------")
         print('MODULE TL_ENGINE : Initialisation du module B')
         rv$dataIn <- dataIn()
+        rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
@@ -44,28 +57,31 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
       })
       
+      # output$show_dataIn <- renderPrint({dataIn()})
+      # output$show_rv_dataIn <- renderPrint({rv$dataIn})
+      # output$show_rv_dataOut <- renderPrint({rv$dataOut})
       
       # The remoteReset argument is used to communicate between the caller
       # and this module
-      rv$tmp <- mod_tl_engine_server('tl_engine',
-                                     process_config = rv.process_config,
-                                     screens = rv$screens,
-                                     remoteReset = reactive(remoteReset())
+      rv$tmp_engine <- mod_tl_engine_server('tl_engine',
+                                            process_config = rv.process_config,
+                                            screens = rv$screens,
+                                            remoteReset = reactive(remoteReset())
       )
       
       # Catch the reset events (local or remote)
-      observeEvent(req(c(rv$tmp(), remoteReset())),  ignoreInit=T, { 
-        print(paste0('MODULE B : new value for rv$hasReset = ', rv$tmp()))
+      observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
+        print(paste0('MODULE B : new value for rv$tmp_engine = ', rv$tmp_engine()))
         print(paste0('MODULE B : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
-        
         # this setting allows to trigger the initialization of the module
-        rv$dataOut <- rv$dataIn
-        
+        #rv$dataOut <- rv$dataIn
+        rv$process.validated <- F
         print("MODULE B : after updating datasets")
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
+        print(paste0("      rv.process_config =" , paste0(rv.process_config$isDone, collapse=' - ')))
         
       })
       
@@ -95,6 +111,11 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       output$show_dataIn <- renderPrint({rv$dataIn})
       output$show_dataOut <- renderPrint({rv$dataOut})
       
+      
+      
+      # observeEvent( rv.process_config$isDone[length(rv.process_config$isDone)], {
+      #   rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
+      # } )            
       
       #####################################################################
       ## screens of the module
@@ -172,6 +193,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
                                 name=rv.process_config$process.name)
           rv$dataOut <- rv$dataIn
           rv$dataIn <- NULL
+          rv$process.validated <- TRUE
           rv.process_config$isDone[4] <- TRUE
         })
       })
@@ -179,7 +201,9 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       ##########################################################
       
-      reactive({rv$dataOut})
+      list(dataOut = reactive({rv$dataOut}),
+           validated = reactive({rv$process.validated})
+      )
     }
   )
 }
