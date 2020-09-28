@@ -2,11 +2,7 @@
 
 mod_tl_engine_ui <- function(id){
   ns <- NS(id)
-  tagList(
-    useShinyjs(),
-    mod_timeline_ui(ns("timeline")),
-    uiOutput(ns('show_screens'))
-  )
+  
 }
 
 #' @param dataIn xxx
@@ -78,15 +74,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         })
 
       
-      # # Action on validation of the current step
-       observeEvent(req(process_config$isDone[tl.update$current.pos]),  {
-         
-         print("MODULE TL_ENGINE : ---> observeEvent(req(process_config$isDone[tl.update$current.pos])")
-        # print("# Disable all previous screens but the current one")
-
-         lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
-         toggleNextBtn()
-       })
+      
       
   
       observeEvent(c(tl.update$current.pos,process_config$isDone),  ignoreInit = T, {
@@ -121,8 +109,9 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       
       DisableAllPrevSteps <- reactive({
         print("####### MODULE TL_ENGINE : --> the current step is validated -> disable all previous steps")
-        
+        #browser()
         lapply(1:tl.update$current.pos, function(x){ shinyjs::disable(paste0('screen', x))})
+
       })
       
       toggleNextBtn <- reactive({
@@ -165,24 +154,16 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         toggleNextBtn()
       })
       
-      output$show_screens <- renderUI({tagList(rv$screens)})
-      
-      #observeEvent(config$isDone, {
-      #  print("new event on isDone")
-      #  inames <- c("test_nav-prevBtn", "test_nav-nextBtn", "test_nav-rstBtn")
-      #  toDisable <- names(input)[-which(names(input) %in% inames)]
-      #browser()
-      # Disable all input from test_nav but the action buttons
-      
-      #browser()
-      # Disable all previous screens but the action buttons of the timeline
-      #  if (config$isDone[current$val])
-      #    lapply(toDisable, function(x){ shinyjs::disable( x)})
-      #lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
-      # })
+      #output$show_screens <- renderUI({tagList(rv$screens)})
       
       
-      return(reactive({pos$rstBtn()}))
+      
+      list(rstBtn = reactive({pos$rstBtn()}),
+           ui = reactive({tagList(
+                          useShinyjs(),
+                          mod_timeline_ui(ns("timeline"))
+                          )}),
+           screens = reactive({tagList(rv$screens)}))
     }
   )
 }

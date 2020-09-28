@@ -3,16 +3,9 @@
 mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_tl_engine_ui(ns('tl_engine'))
-    # hr(),
-    # wellPanel(
-    #   h3('Module A'),
-    #   p('dataIn() :'),
-    #   verbatimTextOutput(ns('show_dataIn')),
-    #   p('rv$dataIn :'),
-    #   verbatimTextOutput(ns('show_rv_dataIn')),
-    #   p('rv$dataOut'),
-    #   verbatimTextOutput(ns('show_rv_dataOut'))
+
+    uiOutput(ns('show_tl_engine_ui'))
+
     # )
   )
 }
@@ -32,7 +25,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       )
 
       
-      
+      output$show_tl_engine_ui <- renderUI({rv$tmp_engine$ui()})
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
@@ -202,7 +195,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
        ##########################################################
         
   list(dataOut = reactive({rv$dataOut}),
-       validated = reactive({rv$process.validated})
+       validated = reactive({rv$process.validated}),
+       screens = reactive({rv$tmp_engine$screens()})
   )
     }
   )

@@ -100,7 +100,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         tagList(
           div(id=ns('screen2'),
               tags$h3('Processus 1'),
-              mod_wf_wf1_A_ui(ns('mod_A_nav'))
+              rv$tmpA$screens()
           )
         )
       })
