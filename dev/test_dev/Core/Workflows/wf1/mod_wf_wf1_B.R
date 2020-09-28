@@ -54,7 +54,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       )
       
       # Catch the reset events (local or remote)
-      observeEvent(req(c(rv$tmp(), remoteReset())), { 
+      observeEvent(req(c(rv$tmp(), remoteReset())),  ignoreInit=T, { 
         print(paste0('MODULE B : new value for rv$hasReset = ', rv$tmp()))
         print(paste0('MODULE B : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()

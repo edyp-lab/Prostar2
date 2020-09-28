@@ -14,7 +14,8 @@ mod_tl_engine_ui <- function(id){
 #' 
 #' 
 mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remoteReset=FALSE){
-  #stopifnot(!(is.null(dataIn()) && is.reactive(config) && is.reactive(screens)))
+  #stopifnot(!(is.reactive(screens) && !is.null(screens)))
+  #stopifnot(!is.reactive(process_config) && !is.null(process_config))
   
   moduleServer(
     id,
@@ -57,18 +58,21 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       ###
       ###
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-        print(paste0("MODULE TL_ENGINE : ---> clic on reset button", pos$rstBtn()))
-        print(paste0("MODULE TL_ENGINE : ---> new value for remoteReset()", remoteReset()))
+        print(paste0("MODULE TL_ENGINE : ---> clic on reset button = ", pos$rstBtn()))
+        print(paste0("MODULE TL_ENGINE : ---> new value for remoteReset() = ", remoteReset()))
         #browser()
         # Re-enable all screens
+        print("MODULE TL_ENGINE : Re-enable all screens")
         lapply(1:length(process_config$stepsNames), 
                function(x){shinyjs::enable(paste0('screen', x))})
         
-        # Reload previous dataset
-           lapply(1:length(process_config$stepsNames), 
+        # Reset all screens inputs
+        print("MODULE TL_ENGINE : Reset all screens inputs")
+        lapply(1:length(process_config$stepsNames), 
                   function(x){ shinyjs::reset(paste0('screen', x))})
 
           # Set all steps to undone except the first one which is the description screen
+        print("MODULE TL_ENGINE : Set all steps to undone")
         process_config$isDone <- c(TRUE, rep(FALSE, length(process_config$stepsNames)-1))
         tl.update$current.pos <- 1
         })
@@ -89,7 +93,8 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         process_config$mandatory
         
         print(paste0("####### MODULE TL_ENGINE : --> observeEvent(tl.update$current.pos). New pos = ", tl.update$current.pos))
-      
+        print(paste0("####### MODULE TL_ENGINE : --> isDone = ", paste0(process_config$isDone, collapse=' ')))
+        
         #Case 1: the current step is validated -> disable all previous steps
         if (process_config$isDone[tl.update$current.pos])
           {

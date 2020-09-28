@@ -16,7 +16,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
-        tmp = F,
+        tmp_super = F,
         screens=NULL
       )
       
@@ -43,22 +43,17 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
         })
       
-      
       # Here, there is no remoteReset because there is no upper level
       rv$tmp_super <- mod_tl_engine_server('tl_engine',
                                      process_config = rv.process_config,
                                      screens = rv$screens,
-                                     remoteReset = reactive(FALSE)
-                                     )
+                                     remoteReset = reactive(FALSE))
 
       
       # Catch the reset events (local or remote)
       observeEvent(req(rv$tmp_super()), { 
         print(paste0('MODULE SUPER_TL : new value for rv$tmp_super = ', rv$tmp_super()))
         UpdateDataIn()
-        
-        # this setting allows to trigger the initialization of the module
-        rv$dataOut <- rv$dataIn
         
         print("MODULE SUPER_TL : after updating datasets")
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
@@ -67,7 +62,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         
       })
       
-      
+    
       
       # If this step has been validated, then one need to delete the last
       # record in the dataset,
@@ -109,18 +104,22 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
           )
         )
       })
+
+      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav",
+                                     dataIn = reactive({rv$dataIn}),
+                                     remoteReset = reactive({rv$tmp_super()}) )
       
-      rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", 
-                                     dataIn = reactive({rv$dataIn}), 
-                                     remoteReset = reactive({FALSE}) )
-      observeEvent(rv$tmpA(),  { 
+      observeEvent(req(rv$tmpA$dataOut()),  { 
         print('MODULE SUPER_TL : New value for rv$tmpA() :')
-        print(paste0("      names(dataIn()) = ", paste0(names(rv$tmpA()), collapse=' - ')))
-        rv$dataIn <- rv$tmpA()
-        rv.process_config$isDone[2] <- TRUE
+        print(paste0("      names(rv$tmpA$dataOut()) = ", paste0(names(rv$tmpA$dataOut()), collapse=' - ')))
+        rv$dataIn <- rv$tmpA$dataOut()
       })
       
-      
+      observeEvent(rv$tmpA$validated(),  { 
+        print('MODULE SUPER_TL : New value for rv$validated() :')
+        print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
+        rv.process_config$isDone[2] <- rv$tmpA$validated()
+      })
       
       ############### SCREEN 3 ######################################
       output$screen3 <- renderUI({
@@ -128,17 +127,20 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         tagList(
           div(id=ns('screen3'),
               tags$h3('Processus 2'),
-              mod_wf_wf1_B_ui(ns('mod_B_nav'))
+              mod_wf_wf1_A_ui(ns('mod_B_nav'))
           )
         )
       })
       
-      rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav", 
-                                     dataIn = reactive({rv$dataIn}), 
-                                     remoteReset = reactive({FALSE}) )
-      observeEvent(rv$tmpB(),  {
-        rv$dataIn <- rv$tmpB()
-        rv.process_config$isDone[3] <- TRUE
+      rv$tmpB <- mod_wf_wf1_A_server("mod_B_nav",
+                                     dataIn = reactive({rv$dataIn}),
+                                     remoteReset = reactive({rv$tmp_super()}) )
+      observeEvent(req(rv$tmpB$dataOut()),  {
+        print('MODULE SUPER_TL : New value for rv$tmpB() :')
+        print(paste0("      names(rv$tmpB$dataOut()) = ", paste0(names(rv$tmpB$dataOut()), collapse=' - ')))
+        print(paste0("      rv$tmpB$validated() = ", rv$tmpB$validated()))
+        rv$dataIn <- rv$tmpB$dataOut()
+        rv.process_config$isDone[3] <- rv$tmpB$validated()
         })
       
       
@@ -149,17 +151,21 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         tagList(
           div(id=ns('screen4'),
               tags$h3('Processus 3'),
-              mod_wf_wf1_C_ui(ns('mod_C_nav'))
+              mod_wf_wf1_A_ui(ns('mod_C_nav'))
           )
         )
       })
       
-      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav", 
-                                     dataIn = reactive({rv$dataIn}), 
-                                     remoteReset = reactive({FALSE}) )
-      observeEvent(rv$tmpC(),  { 
-        rv$dataIn <- rv$tmpC()
-        rv.process_config$isDone[4] <- TRUE
+      rv$tmpC <- mod_wf_wf1_A_server("mod_C_nav",
+                                     dataIn = reactive({rv$dataIn}),
+                                     remoteReset = reactive({rv$tmp_super()}) )
+      observeEvent(req(rv$tmpC$dataOut()),  { 
+        print('MODULE SUPER_TL : New value for rv$tmpA() :')
+        print(paste0("      names(rv$tmpC$dataOut()) = ", paste0(names(rv$tmpC$dataOut()), collapse=' - ')))
+        print(paste0("      rv$tmpA$validated() = ", rv$tmpC$validated()))
+
+        rv$dataIn <- rv$tmpC$dataOut()
+        rv.process_config$isDone[4] <- rv$tmpC$validated()
         })
       
       

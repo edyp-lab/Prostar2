@@ -29,7 +29,11 @@ server <- function(input, output, session) {
   rv$tmp <- mod_super_timeline_server("super_nav", 
                                 dataIn = reactive({rv$current.obj}) )
   
-  observeEvent(rv$tmp(),{rv$current.obj <- rv$tmp()  })
+  observeEvent(rv$tmp(),{
+    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server')
+    rv$current.obj <- rv$tmp()
+    print(paste0("      names(dataIn()) = ", paste0(names(rv$current.obj), collapse=' - ')))
+    })
 
 }
 

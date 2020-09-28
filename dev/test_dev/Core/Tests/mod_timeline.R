@@ -72,9 +72,9 @@ mod_timeline_ui <- function(id){
 #' @importFrom sass sass
 #' 
 mod_timeline_server <- function(id, style=1, process_config, tl.update){
-  #stopifnot(!is.reactive(style))
-  #stopifnot(!is.reactive(process_config))
-  
+  stopifnot(!is.reactive(style))
+  stopifnot(!is.reactive(process_config) && !is.null(process_config))
+  stopifnot(!is.reactive(tl.update) && !is.null(tl.update))
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
