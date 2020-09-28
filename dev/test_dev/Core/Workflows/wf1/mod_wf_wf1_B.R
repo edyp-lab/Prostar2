@@ -4,16 +4,6 @@ mod_wf_wf1_B_ui <- function(id){
   ns <- NS(id)
   tagList(
     mod_tl_engine_ui(ns('tl_engine'))
-    # hr(),
-    # wellPanel(
-    #   h3('Module B'),
-    #   p('dataIn() :'),
-    #   verbatimTextOutput(ns('show_dataIn')),
-    #   p('rv$dataIn :'),
-    #   verbatimTextOutput(ns('show_rv_dataIn')),
-    #   p('rv$dataOut'),
-    #   verbatimTextOutput(ns('show_rv_dataOut'))
-    # )
   )
 }
 
@@ -70,7 +60,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       )
       
       
-      observeEvent(rv.process_config$isDone, {
+      observeEvent(rv.process_config$isDone, ignoreInit=T, {
         print(paste0('MODULE B : new value for rv.process_config$isDone = ', rv.process_config$isDone))
         print("     Disable all previous screens")
         pos <- max(grep(TRUE, rv.process_config$isDone))
@@ -80,7 +70,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       
       # Catch the reset events (local or remote)
       observeEvent(req(c(rv$tmp_engine())), ignoreInit=T, { 
-        print(paste0('MODULE B : new value for rv$tmp_engine = ', rv$tmp_engine()))
+        print(paste0('MODULE B : new value for rv$tmp_engine() = ', rv$tmp_engine()))
         print(paste0('MODULE B : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
         # this setting allows to trigger the initialization of the module
@@ -214,8 +204,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
       ##########################################################
       
       list(dataOut = reactive({rv$dataOut}),
-           validated = reactive({rv$process.validated}),
-           screens = reactive({rv.screens})
+           validated = reactive({rv$process.validated})
       )
     }
   )

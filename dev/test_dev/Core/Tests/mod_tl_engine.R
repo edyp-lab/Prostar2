@@ -158,11 +158,11 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         toggleNextBtn()
       })
       
-      output$show_screens <- renderUI({tagList(rv$screens)})
       
       
       
-      return(reactive({pos$rstBtn()}))
+      #list(reset = reactive({pos$rstBtn()}))
+      reactive({pos$rstBtn()})
     }
   )
 }

@@ -2,12 +2,13 @@ library(shinyjs)
 
 source(file.path('.', 'mod_tl_engine.R'), local=TRUE)$value
 source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
+source(file.path('.', 'mod_super_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('../Workflows/wf1', 'mod_wf_wf1_A.R'), local=TRUE)$value
 source(file.path('../Workflows/wf1', 'mod_wf_wf1_B.R'), local=TRUE)$value
 source(file.path('../Workflows/wf1', 'mod_wf_wf1_C.R'), local=TRUE)$value
 
-options(shiny.fullstacktrace = F)
+options(shiny.fullstacktrace = T)
 options(shiny.reactlog=TRUE) 
 
 ui <- fluidPage(
