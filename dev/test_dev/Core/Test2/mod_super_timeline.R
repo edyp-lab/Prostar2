@@ -203,17 +203,17 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      )
       
       observeEvent(rv$tmpA$dataOut(),  { 
-     
+      isolate({
         rv$dataOut <- rv$tmpA$dataOut()
-  
+      })
       })
       
       observeEvent(rv$tmpA$validated(),  { 
         #print('MODULE SUPER_TL : New value for rv$validated() :')
         #print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
-     
+        isolate({
           rv.process_config$isDone[2] <- rv$tmpA$validated()
-       
+        })
       })
       
      # observeEvent(req(rv$tmpA$reseted()!=0), {
