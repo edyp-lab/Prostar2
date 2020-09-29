@@ -98,7 +98,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
         }
         
         # Display the screen corresponding to the new position
-              DisplayCurrentStep()
+        DisplayCurrentStep()
                                                                                 
         toggleNextBtn()
         togglePrevBtn()

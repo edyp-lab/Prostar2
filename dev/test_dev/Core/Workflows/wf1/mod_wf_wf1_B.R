@@ -21,7 +21,11 @@ mod_wf_wf1_B_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePosition = NULL){
+mod_wf_wf1_B_server <- function(id,
+                                dataIn=NULL,
+                                remoteReset=FALSE,
+                                forcePosition = NULL,
+                                forceDisablePrevScreens = NULL){
   moduleServer(
     id,
     function(input, output, session){
@@ -71,7 +75,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
       )
       
       
-      observeEvent(rv.process_config$isDone, {
+      observeEvent(c(rv.process_config$isDone,forceDisablePrevScreens) , {
         #print(paste0('MODULE B : new value for rv.process_config$isDone = ', rv.process_config$isDone))
         #print("     Disable all previous screens")
         pos <- max(grep(TRUE, rv.process_config$isDone))

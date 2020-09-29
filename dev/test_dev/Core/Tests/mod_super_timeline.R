@@ -124,7 +124,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav",
                                      dataIn = reactive({rv$dataIn}),
                                      remoteReset = reactive({rv$tmp_super$reset()}),
-                                     forcePosition = reactive({rv$tmp_super$position()})
+                                     forcePosition = reactive({rv$tmp_super$position()}),
+                                     forceDisablePrevScreens = reactive({ TRUE})
                                      )
       
       observeEvent(req(rv$tmpA$dataOut()),  { 
@@ -142,7 +143,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       observeEvent(req(rv$tmpA$reseted()!=0), {
         print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
-        browser()
+        #browser()
         ind <- grep(rv.process_config$stepsNames[2], names(rv$dataIn))
         if (length(ind) == 0){
           rv$dataIn <- dataIn()
@@ -170,7 +171,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav",
                                      dataIn = reactive({rv$dataIn}),
                                      remoteReset = reactive({rv$tmp_super$reset()}),
-                                     forcePosition = reactive({rv$tmp_super$position()})
+                                     forcePosition = reactive({rv$tmp_super$position()}),
+                                     forceDisablePrevScreens = reactive({rv.process_config$isDone})
                                      )
       
       observeEvent(req(rv$tmpB$dataOut()),  { 
@@ -217,7 +219,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav",
                                      dataIn = reactive({rv$dataIn}),
                                      remoteReset = reactive({rv$tmp_super$reset()}) ,
-                                     forcePosition = reactive({rv$tmp_super$position()})
+                                     forcePosition = reactive({rv$tmp_super$position()}),
+                                     forceDisablePrevScreens = reactive({rv.process_config$isDone})
                                      )
       
       

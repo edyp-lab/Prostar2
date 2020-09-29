@@ -13,7 +13,7 @@ server <- function(input, output, session) {
 
   
   config <- reactiveValues(
-    stepsNames = c("A - Description", "A - Step 1", "A - Step 2", "A - Step 3"),
+    stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
     mandatory = c(FALSE, FALSE, TRUE, TRUE),
     current.pos = 1,
     isDone = c(TRUE, FALSE, FALSE, FALSE)
@@ -26,7 +26,7 @@ server <- function(input, output, session) {
                    prv = TRUE)
   )
   
-  mod_timeline_server("timeline", style = 4, process_config = config, tl.update = rv.engine)
+  mod_timeline_server("timeline", style = 2, process_config = config, tl.update = rv.engine)
 }
 
 

@@ -21,14 +21,19 @@ mod_wf_wf1_A_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePosition = NULL){
+mod_wf_wf1_A_server <- function(id, 
+                                dataIn=NULL,
+                                remoteReset=FALSE, 
+                                forcePosition = NULL,
+                                forceDisablePrevScreens = NULL){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
         tmp_engine = NULL,
-        screens=NULL
+        screens=NULL,
+        process.validated = FALSE
       )
 
       
@@ -45,7 +50,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
       # Initialization of the process
       observeEvent(req(dataIn()), { 
         print("--------------------------------------------------")
-        print('MODULE TL_ENGINE : Initialisation du module A')
+        print('MODULE A : Initialisation du module A')
         rv$dataIn <- dataIn()
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
@@ -54,7 +59,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
         
         # Instantiation of the screens
         rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
-          do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
+          do.call(uiOutput, list(outputId=ns(paste0("screen", x))))})
        })
       
        output$show_dataIn <- renderPrint({dataIn()})
@@ -71,14 +76,27 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
                                       )
 
       
-      observeEvent(rv.process_config$isDone, {
-        #print(paste0('MODULE A : new value for rv.process_config$isDone = ', rv.process_config$isDone))
+      observeEvent(c(rv.process_config$isDone), {
+        print(paste0('MODULE A : new value for rv.process_config$isDone = ', rv.process_config$isDone))
         #print("     Disable all previous screens")
-        pos <- max(grep(TRUE, rv.process_config$isDone))
-        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-        
+        DisableAllPrevScreens()
       })
       
+      observeEvent(forceDisablePrevScreens(), {
+        print(paste0('MODULE A : new value for forceDisablePrevScreens() = ', 
+                     paste0(forceDisablePrevScreens(), collapse=' ')))
+        print("     MODULE A : Disable all screens")
+        
+        lapply(1:length(rv.process_config$isDone), function(x){ 
+          shinyjs::disable(paste0('screen', x))})
+      })
+      
+      
+      DisableAllPrevScreens <- reactive({
+        print(paste0('MODULE A : DisableAllPrevScreens() ', rv.process_config$isDone))
+        pos <- max(grep(TRUE, rv.process_config$isDone))
+        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+      })
       
        observeEvent(req(forcePosition()), {
          print(paste0("MODULE A : New value for forcePosition (envoi à MODULE TL_ENGINE : ", forcePosition()))

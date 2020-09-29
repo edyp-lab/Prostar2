@@ -93,7 +93,7 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
       req(length(process_config$stepsNames))
       req(style != 3)
       
-      if (style != 4) {
+      if (style %in%  c(1:2,6)) {
         file <- paste0('timeline',style, '.sass')
       #code <- code_sass_timeline[[paste0('style',style)]],"\n")
       code <- strsplit(readLines(file),"\n")
@@ -104,12 +104,17 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
       code[[1]][1] <- paste0(prefix, length(process_config$stepsNames), suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-      } else {
-      jsCode <- readLines('timeline4.js')
-      shinyjs::runjs(jsCode)
+      } else if (style == 4) {
+      includeScript("timeline4.js")
       cssCode <- readLines('timeline4.css')
       shinyjs::inlineCSS(cssCode)
+      
+      }else if (style == 5) {
+        includeScript("timeline5.js")
+        cssCode <- readLines('timeline5.css')
+        shinyjs::inlineCSS(cssCode)
       }
+      
     })
     
     
@@ -189,8 +194,6 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
     
     output$timeline4 <- renderUI({
       # Source: https://codepen.io/chrisgannon/pen/djjZBq
-      jsCode <- readLines('timeline4.js')
-      shinyjs::runjs(jsCode)
       
     tl <- "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'>
 <defs>
@@ -292,6 +295,101 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
       HTML(tl)
       })
     
+    output$timeline5 <- renderUI({
+      # Source: https://codepen.io/chrisgannon/pen/djjZBq
+      
+      tl <-"<section class='cd-horizontal-timeline'>
+		<div class='timeline'>
+			<div class='events-wrapper'>
+				<div class='events'>
+					<ol>
+						<li><a href='#0' data-date='16/01/1997' class='selected'>1997 - 2001</a></li>
+      <li><a href='#0' data-date='28/02/2001'>2001 - 2002</a></li>
+        <li><a href='#0' data-date='20/04/2002'>2002 - 2005</a></li>
+          <li><a href='#0' data-date='20/05/2006'>2006</a></li>
+            <li><a href='#0' data-date='09/07/2007'>2007</a></li>
+              <li><a href='#0' data-date='30/08/2008'>2008</a></li>	
+                </ol>
+                
+                <span class='filling-line' aria-hidden='true'></span>
+                  </div> <!-- .events -->
+                  </div> <!-- .events-wrapper -->
+                  
+                  <ul class='cd-timeline-navigation'>
+                    <li><a href='#0' class='prev inactive'><p>&#x21E9</p></a></li>
+                      <li><a href='#0' class='next'><p>&#x21E9</p></a></li>
+                        </ul> <!-- .cd-timeline-navigation -->
+                        </div> <!-- .timeline -->
+                        
+                        <div class='events-content'>
+                          <ol>
+                          <li class='selected' data-date='16/01/1997'>
+                            <h2>toto.</h2>
+                            <p>toto</p>
+                            </li>
+                            
+                            <li data-date='28/02/2001'>
+                              <h2>toto.</h2>
+                              <p>toto</p>
+                              </li>
+                              
+                              <li data-date='20/04/2002'>
+                                <h2>toto.</h2>
+                                <p>toto.</p>
+                                </li>
+                                
+                                <li data-date='20/05/2006'>
+                                  <h2>toto.</h2>
+                                  <p>toto.</p>
+                                  </li>
+                                  
+                                  <li data-date='09/07/2007'>
+                                    <h2>toto</h2>
+                                    <p> toto</p>
+                                    </li>
+                                    
+                                    <li data-date='30/08/2008'>
+                                      <h2>Lorem </h2>
+                                      <p>Lorem </p>
+                                      </li>
+                                      </ol>
+                                      </div> <!-- .events-content -->
+                                      </section>"
+    HTML(tl)
+    })
+    
+    
+    output$timeline6 <- renderUI({
+      # Source: https://codepen.io/chrisgannon/pen/djjZBq
+      
+      tl <-"<div id='content'>
+  <h1>Timeline Concept</h1>
+
+  <ul class='timeline'>
+    <li class='event' data-date='12:30 - 1:00pm'>
+      <h3>Registration</h3>
+      <p>Get here on time, it's first come first serve. Be late, get turned away.</p>
+      <p>Get here on time, it's first come first serve. Be late, get turned away.</p>
+      <p>Get here on time, it's first come first serve. Be late, get turned away.</p>
+    </li>
+    <li class='event' data-date='2:30 - 4:00pm'>
+      <h3>Opening Ceremony</h3>
+      <p>Get ready for an exciting event, this will kick off in amazing fashion with MOP & Busta Rhymes as an opening show.</p>    
+    </li>
+    <li class='event' data-date='5:00 - 8:00pm'>
+      <h3>Main Event</h3>
+      <p>This is where it all goes down. You will compete head to head with your friends and rivals. Get ready!</p>    
+    </li>
+    <li class='event' data-date='8:30 - 9:30pm'>
+      <h3>Closing Ceremony</h3>
+      <p>See how is the victor and who are the losers. The big stage is where the winners bask in their own glory.</p>    
+    </li>
+  </ul>
+</div>"
+      
+      HTML(tl)
+    })
+    
     # return value of the tl.update
     list(rstBtn = reactive(input$rstBtn),
          nextBtn = reactive(input$nextBtn),
@@ -303,268 +401,3 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
 
 
 
-
-code_sass_timeline <- list(
-  style1 ="$numDots:3;
-$parentWidthBase: 0.4;
-$parentWidth: $parentWidthBase * 100vw;
-$parentMaxWidth: 800px;
-$dotWidth: 25px;
-$dotWidthSm: 17px;
-$active: #2C3E50;
-$inactive: #AEB6BF;
-.flex-parent{
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
-	}
-	
-.input-flex-container{
-	display: flex;
-	justify-content: space-around;
-	align-items: center;
-	width: $parentWidth;
-	height: 20px;
-	max-width: $parentMaxWidth;
-	position: relative;
-	z-index: 0;
-}
-.input{
-	width: $dotWidth;
-	height: $dotWidth;
-	background-color: $active;
-	position: relative;
-	border-radius: 50%;
-	&::before, &::after{
-		content: '';
-		display: block;
-		position: absolute;
-		z-index: -1;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: $active;
-		width: $parentWidth / $numDots;
-		height: 5px;
-		max-width: $parentMaxWidth / $numDots;
-	}
-	
-	&::before{
-		left: calc(#{-$parentWidth / $numDots} + #{$dotWidth / 2});
-	}
-	
-	&::after{
-		right: calc(#{-$parentWidth / $numDots} + #{$dotWidth / 2});
-		}
-		
-	&.active{
-		background-color: $active;
-	
-		&::before{
-			background-color: $active;
-		}
-		
-		&::after{
-			background-color: $active;
-		}
-	
-		span{
-			font-weight: 700;
-			
-			&::before{
-				font-size: 13px;
-			}
-			
-			&::after {
-				font-size: 15px;
-			}
-		}
-	
-		&.active ~ .input{
-		&, &::before, &::after{
-			background-color: $inactive;
-		}
-		}
-	}
-	
-	span{
-		width: 1px;
-		height: 1px;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		visibility: hidden;
-		
-		&::before, &::after {
-			visibility: visible;
-			position: absolute;
-			left: 50%;
-		}
-		
-		&::after {
-			content: attr(name);
-			top: 25px;
-			transform: translateX(-50%);
-			font-size: 14px;
-		}
-		
-		&::before {
-      content: attr(data-info);
-      top: -65px;
-      width: 70px;
-      transform: translateX(-5px) rotateZ(-45deg);
-      font-size: 12px;
-      text-indent: -10px;
-		}
-    
-		}
-	}
-.description-flex-container {
-  width: 80vw;
-  font-weight: 400;
-  font-size: 22px;
-  margin-top: 100px;
-  max-width: 1000px;
-  p {
-    margin-top: 0;
-    display: none;
-    &.active {
-      display: block;
-    }
-  }
-}
-	
-@media (min-width: $parentMaxWidth / $parentWidthBase){
-	.input{
-	&::before{
-		left: #{-($parentMaxWidth / $numDots) + ($dotWidth / 2)};
-	}
-	
-	&::after{
-		right: #{-($parentMaxWidth / $numDots) + ($dotWidth / 2)};
-	}
-	}
-}
-@media (max-width: 850px){
-	.input{
-		width: $dotWidthSm;
-		height: $dotWidthSm;
-	
-	
-		&::before, &::after{
-			height: 3px;
-		}
-		
-		&::before{
-			left: calc(#{-$parentWidth / $numDots} + #{$dotWidthSm / 2});
-		}
-		
-		&::after{
-			right: calc(#{-$parentWidth / $numDots} + #{$dotWidthSm / 2});
-}
-}
-}
-",
-style2 = "$test: test;
-$colCompleted: #07910A;
-$colMandatory: #D30505;
-$colDefault: #B3AFAB;
-$radius: 20px;
-$lineWidth: 5px;
-.timeline{
-  list-style-type: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.li{
-  transition: all 200ms ease-in;
-}
-.timestamp{
-  margin-bottom: 20px;
-  padding: 0px 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-weight: 100;
-}
-.status {
-  padding: 0px 40px;
-  display: flex;
-  justify-content: center;
-  border-top: $lineWidth solid $colDefault;
-  position: relative;
-  transition: all 200ms ease-in;
-  h4{
-    font-weight: 600;
-    border-bottom: 3px solid white;
-  }
-  
-  &:before{
-    content: '';
-    width: $radius;
-    height: $radius;
-    background-color: white;
-    border-radius: 55px;
-    border: $lineWidth solid $colDefault;
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transition: all 200ms ease-in;
-  }
-}
-.li.complete{
-  .status{
-    border-top: $lineWidth solid $colDefault;
-    &:before{
-      background-color: $colCompleted;
-      border: $lineWidth solid $colCompleted;
-      transition: all 200ms ease-in;
-      }
-    h4{
-      color: $colCompleted;
-      border-bottom: 3px solid white;
-      }
-    }
-}
-.li.mandatory{
-  .status{
-    border-top: $lineWidth solid $colDefault;
-    &:before{
-      background-color: white;
-      border: $lineWidth solid $colMandatory;
-      transition: all 200ms ease-in;
-      }
-    h4{
-      color: $colMandatory;
-      border-bottom: 3px solid white;
-    }
-  }
-}
-           
-.li.active{
-  .status{
-    h4{
-      border-bottom: 3px solid currentColor;
-    }
-  }
-}
-.li.complete.active{
-  .status{
-    h4{
-      border-bottom: 3px solid currentColor ;
-    }
-  }
-}
-      
-.li.mandatory.active{
-  .status{
-    h4{
-      border-bottom: 3px solid currentColor;
-    }
-  }
-}", 
-style3 = "")
