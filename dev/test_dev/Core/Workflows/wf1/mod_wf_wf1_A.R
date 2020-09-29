@@ -3,17 +3,17 @@
 mod_wf_wf1_A_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_tl_engine_ui(ns('tl_engine'))
-    # hr(),
-    # wellPanel(
-    #   h3('Module A'),
-    #   p('dataIn() :'),
-    #   verbatimTextOutput(ns('show_dataIn')),
-    #   p('rv$dataIn :'),
-    #   verbatimTextOutput(ns('show_rv_dataIn')),
-    #   p('rv$dataOut'),
-    #   verbatimTextOutput(ns('show_rv_dataOut'))
-    # )
+    mod_tl_engine_ui(ns('tl_engine')),
+    hr(),
+    wellPanel(
+      h3('Module A'),
+      p('dataIn() :'),
+      verbatimTextOutput(ns('show_dataIn')),
+      p('rv$dataIn :'),
+      verbatimTextOutput(ns('show_rv_dataIn')),
+      p('rv$dataOut'),
+      verbatimTextOutput(ns('show_rv_dataOut'))
+    )
   )
 }
 
@@ -36,7 +36,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
-        process.name = 'Process A',
+        process.name = 'Filtering',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
         isDone =  c(TRUE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, FALSE, TRUE, TRUE)
@@ -57,9 +57,9 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
        })
       
-      # output$show_dataIn <- renderPrint({dataIn()})
-      # output$show_rv_dataIn <- renderPrint({rv$dataIn})
-      # output$show_rv_dataOut <- renderPrint({rv$dataOut})
+       output$show_dataIn <- renderPrint({dataIn()})
+       output$show_rv_dataIn <- renderPrint({rv$dataIn})
+       output$show_rv_dataOut <- renderPrint({rv$dataOut})
       
       # The remoteReset argument is used to communicate between the caller
       # and this module
@@ -89,16 +89,16 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
         print(paste0('MODULE A : new value for rv$tmp_engine$reset() = ', rv$tmp_engine$reset()))
         print(paste0('MODULE A : new value for remoteReset() = ', remoteReset()))
         UpdateDataIn()
+        
         #print("MODULE A : Reset all screens inputs")
-
         lapply(1:length(rv.process_config$stepsNames), 
                function(x){ shinyjs::reset(paste0('screen', x))})
         
         rv$process.validated <- F
-        print("MODULE A : after updating datasets")
-        print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
-        print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
-        print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
+        #print("MODULE A : after updating datasets")
+        #print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
+        #print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
+        #print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
         #print(paste0("      rv.process_config =" , paste0(rv.process_config$isDone, collapse=' - ')))
         
         })
@@ -124,6 +124,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
           rv$dataIn <- dataIn()
           else
             rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
+      rv$dataOut <- NULL
       })
       
       output$show_dataIn <- renderPrint({rv$dataIn})
@@ -224,7 +225,8 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePositio
         
   list(dataOut = reactive({rv$dataOut}),
        validated = reactive({rv$process.validated}),
-       screens = reactive({rv.screens})
+       screens = reactive({rv.screens}),
+       reseted = reactive({rv$tmp_engine$reset()})
   )
     }
   )

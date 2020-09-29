@@ -2,7 +2,17 @@
 mod_super_timeline_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_tl_engine_ui(ns('tl_engine'))
+    mod_tl_engine_ui(ns('tl_engine')),
+    hr(),
+    wellPanel(
+      h3('Pipeline'),
+      p('dataIn() :'),
+      verbatimTextOutput(ns('show_dataIn')),
+      p('rv$dataIn :'),
+      verbatimTextOutput(ns('show_rv_dataIn')),
+      p('rv$dataOut'),
+      verbatimTextOutput(ns('show_rv_dataOut'))
+    )
   )
 }
 
@@ -62,11 +72,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
       })
       
-    # observeEvent(rv$tmp_super$position(), {
-    #   print(paste0("MODULE SUPER_TL : new position detected : ", rv$tmp_super$position()))
-    #   if (rv.process_config$isDone[length(rv.process_config$isDone)])
-    #     rv$current.pos <- length(rv.process_config$isDone)
-    # })
+
       
       # If this step has been validated, then one need to delete the last
       # record in the dataset,
@@ -86,6 +92,12 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
 
+      
+      output$show_dataIn <- renderPrint({dataIn()})
+      output$show_rv_dataIn <- renderPrint({rv$dataIn})
+      output$show_rv_dataOut <- renderPrint({rv$dataOut})
+        
+        
       #####################################################################
       ## screens of the module
       ##
@@ -103,7 +115,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         
         tagList(
           div(id=ns('screen2'),
-              tags$h3('Processus 1'),
+              tags$h3(rv.process_config$stepsName[2]),
               mod_wf_wf1_A_ui(ns('mod_A_nav'))
           )
         )
@@ -128,18 +140,34 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv.process_config$isDone[2] <- rv$tmpA$validated()
       })
       
+      observeEvent(req(rv$tmpA$reseted()!=0), {
+        print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
+        browser()
+        ind <- grep(rv.process_config$stepsNames[2], names(rv$dataIn))
+        if (length(ind) == 0){
+          rv$dataIn <- dataIn()
+          rv$dataOut <- rv$dataIn
+          rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+        } else {
+          rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
+          rv$dataOut <- rv$dataIn
+          rv.process_config$isDone[2:length(dataIn())] <- FALSE
+        }
+        
+      })
+      
       ############### SCREEN 3 ######################################
       output$screen3 <- renderUI({
         
         tagList(
           div(id=ns('screen3'),
-              tags$h3('Processus 2'),
-              mod_wf_wf1_A_ui(ns('mod_B_nav'))
+              tags$h3(rv.process_config$stepsName[3]),
+              mod_wf_wf1_B_ui(ns('mod_B_nav'))
           )
         )
       })
       
-      rv$tmpB <- mod_wf_wf1_A_server("mod_B_nav",
+      rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav",
                                      dataIn = reactive({rv$dataIn}),
                                      remoteReset = reactive({rv$tmp_super$reset()}),
                                      forcePosition = reactive({rv$tmp_super$position()})
@@ -158,7 +186,21 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv.process_config$isDone[3] <- rv$tmpB$validated()
       })
       
-      
+      observeEvent(req(rv$tmpB$reseted()!=0), {
+        print(paste0('MODULE SUPER_TL : New value for rv$tmpB$reseted() : ', rv$tmpB$reseted()))
+        browser()
+        ind <- grep(rv.process_config$stepsNames[3], names(rv$dataIn))
+        if (length(ind) == 0){
+          rv$dataIn <- dataIn()
+          rv$dataOut <- rv$dataIn
+          rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+        } else {
+          rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
+          rv$dataOut <- rv$dataIn
+          rv.process_config$isDone[2:length(dataIn())] <- FALSE
+        }
+        
+      })
       
       
       ############### SCREEN 4 ######################################
@@ -166,13 +208,13 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         
         tagList(
           div(id=ns('screen4'),
-              tags$h3('Processus 3'),
-              mod_wf_wf1_A_ui(ns('mod_C_nav'))
+              tags$h3(rv.process_config$stepsName[4]),
+              mod_wf_wf1_C_ui(ns('mod_C_nav'))
           )
         )
       })
       
-      rv$tmpC <- mod_wf_wf1_A_server("mod_C_nav",
+      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav",
                                      dataIn = reactive({rv$dataIn}),
                                      remoteReset = reactive({rv$tmp_super$reset()}) ,
                                      forcePosition = reactive({rv$tmp_super$position()})
@@ -192,14 +234,28 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv.process_config$isDone[4] <- rv$tmpC$validated()
       })
       
-      
+      observeEvent(req(rv$tmpC$reseted()!=0), {
+        print(paste0('MODULE SUPER_TL : New value for rv$tmpC$reseted() : ', rv$tmpC$reseted()))
+        browser()
+        ind <- grep(rv.process_config$stepsNames[4], names(rv$dataIn))
+        if (length(ind) == 0){
+          rv$dataIn <- dataIn()
+          rv$dataOut <- rv$dataIn
+          rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+        } else {
+          rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
+          rv$dataOut <- rv$dataIn
+          rv.process_config$isDone[2:length(dataIn())] <- FALSE
+        }
+        
+      })
       
       ############### SCREEN 5 ######################################
       output$screen5 <- renderUI({
         
         tagList(
           div(id='screen5',
-              tags$h3('Summary')
+              tags$h3(rv.process_config$stepsName[5])
           )
         )
       })
