@@ -46,9 +46,10 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
       observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
       
-      observeEvent(req(forcePosition()), {
-        tl.update$current.pos <- forcePosition()
-      })
+      # observeEvent(req(forcePosition()), {
+      #   print(paste0("MODULE TL_ENGINE : New value for forcePosition : ", forcePosition()))
+      #   tl.update$current.pos <- forcePosition()
+      # })
       
       ###
       ###
@@ -142,13 +143,14 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
       # Initialization fo the process
       observeEvent(process_config, { 
         print('MODULE TL_ENGINE : Initialisation du module engine')
+        
         print(paste0('MODULE TL_ENGINE : Init pos = ', tl.update$current.pos))
         
         rv$screens <- screens
         
         # update the current.pos if the final step is validated
-        if (process_config$isDone[length(process_config$stepsNames)])
-          tl.update$current.pos <- length(process_config$stepsNames)
+        #if (process_config$isDone[length(process_config$stepsNames)])
+        #  tl.update$current.pos <- length(process_config$stepsNames)
         
         # initialisation of the screens
         for (i in 1:length(process_config$stepsNames))
@@ -157,14 +159,11 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
                                 else  
                                   shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
 
-        
         togglePrevBtn()
         toggleNextBtn()
       })
       
       output$show_screens <- renderUI({tagList(rv$screens)})
-      
-      
       
       list(reset = reactive({pos$rstBtn()}),
            position = reactive({tl.update$current.pos}))

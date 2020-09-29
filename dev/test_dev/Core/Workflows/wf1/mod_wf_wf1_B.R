@@ -21,13 +21,13 @@ mod_wf_wf1_B_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
+mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePosition = NULL){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
-        tmp_engine = F,
+         tmp_engine =NULL,
         screens=NULL
       )
       
@@ -67,7 +67,7 @@ mod_wf_wf1_B_server <- function(id, dataIn=NULL, remoteReset=FALSE){
                                             process_config = rv.process_config,
                                             screens = rv$screens,
                                             remoteReset = reactive(remoteReset()),
-                                            forcePosition = reactive(NULL)
+                                            forcePosition = reactive(forcePosition)
                                               )
       
       

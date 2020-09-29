@@ -16,8 +16,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
-        tmp_super = F,
-        screens=NULL
+        tmp_super = NULL,
+        screens=NULL,
+        current.pos = NULL
       )
       
       
@@ -48,8 +49,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      process_config = rv.process_config,
                                      screens = rv$screens,
                                      remoteReset = reactive(FALSE),
-                                     forcePosition = reactive(NULL))
-
+                                     forcePosition = NULL)
       
       # Catch the reset events (local or remote)
       observeEvent(req(rv$tmp_super$reset()), { 
@@ -60,10 +60,13 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         print(paste0("      names(dataIn()) = ", paste0(names(dataIn()), collapse=' - ')))
         print(paste0("      names(rv$dataIn) = ", paste0(names(rv$dataIn), collapse=' - ')))
         print(paste0("      names(rv$dataOut) =" , paste0(names(rv$dataOut), collapse=' - ')))
-        
       })
       
-    
+    # observeEvent(rv$tmp_super$position(), {
+    #   print(paste0("MODULE SUPER_TL : new position detected : ", rv$tmp_super$position()))
+    #   if (rv.process_config$isDone[length(rv.process_config$isDone)])
+    #     rv$current.pos <- length(rv.process_config$isDone)
+    # })
       
       # If this step has been validated, then one need to delete the last
       # record in the dataset,
@@ -108,7 +111,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
 
       rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav",
                                      dataIn = reactive({rv$dataIn}),
-                                     remoteReset = reactive({rv$tmp_super$reset()}) )
+                                     remoteReset = reactive({rv$tmp_super$reset()}),
+                                     forcePosition = reactive({rv$tmp_super$position()})
+                                     )
       
       observeEvent(req(rv$tmpA$dataOut()),  { 
         #print('MODULE SUPER_TL : New value for rv$tmpA() :')
@@ -134,9 +139,12 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         )
       })
       
-      rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav",
+      rv$tmpB <- mod_wf_wf1_A_server("mod_B_nav",
                                      dataIn = reactive({rv$dataIn}),
-                                     remoteReset = reactive({rv$tmp_super$reset()}) )
+                                     remoteReset = reactive({rv$tmp_super$reset()}),
+                                     forcePosition = reactive({rv$tmp_super$position()})
+                                     )
+      
       observeEvent(req(rv$tmpB$dataOut()),  { 
         #print('MODULE SUPER_TL : New value for rv$tmpB$dataOut() :')
         #print(paste0("      names(rv$tmpB$dataOut()) = ", paste0(names(rv$tmpB$dataOut()), collapse=' - ')))
@@ -164,9 +172,11 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         )
       })
       
-      rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav",
+      rv$tmpC <- mod_wf_wf1_A_server("mod_C_nav",
                                      dataIn = reactive({rv$dataIn}),
-                                     remoteReset = reactive({rv$tmp_super$reset()}) )
+                                     remoteReset = reactive({rv$tmp_super$reset()}) ,
+                                     forcePosition = reactive({rv$tmp_super$position()})
+                                     )
       
       
       observeEvent(req(rv$tmpC$dataOut()),  { 

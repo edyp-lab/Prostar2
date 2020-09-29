@@ -21,13 +21,13 @@ mod_wf_wf1_A_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
+mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE, forcePosition = NULL){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       rv <- reactiveValues(
-        tmp_engine = F,
+        tmp_engine = NULL,
         screens=NULL
       )
 
@@ -67,7 +67,7 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
                                      process_config = rv.process_config,
                                      screens = rv$screens,
                                      remoteReset = reactive(remoteReset()),
-                                     forcePosition = reactive(NULL)
+                                     forcePosition = forcePosition()
                                       )
 
       
@@ -79,6 +79,10 @@ mod_wf_wf1_A_server <- function(id, dataIn=NULL, remoteReset=FALSE){
         
       })
       
+      
+       observeEvent(req(forcePosition()), {
+         print(paste0("MODULE A : New value for forcePosition (envoi à MODULE TL_ENGINE : ", forcePosition()))
+       })
       
       # Catch the reset events (local or remote)
       observeEvent(req(c(rv$tmp_engine$reset()!=0, remoteReset()!=0)), { 
