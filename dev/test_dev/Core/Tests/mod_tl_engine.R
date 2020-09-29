@@ -1,17 +1,4 @@
 
-
-mod_tl_engine_ui <- function(id){
-  ns <- NS(id)
-  tagList(
-    useShinyjs(),
-    mod_timeline_ui(ns("timeline")),
-    uiOutput(ns('show_screens'))
-  )
-}
-
-#' @param dataIn xxx
-#'
-#' 
 #' 
 mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remoteReset=FALSE, forcePosition = NULL){
   #stopifnot(!(is.reactive(screens) && !is.null(screens)))
@@ -22,29 +9,7 @@ mod_tl_engine_server <- function(id, process_config = NULL, screens = NULL, remo
     function(input, output, session){
       ns <- session$ns
 
-      rv <- reactiveValues()
       
-      tl.update <- reactiveValues(
-          current.pos = 1,
-          actions = list(rst = TRUE,
-                          nxt = TRUE,
-                          prv = TRUE)
-      )
-      
-      pos <- mod_timeline_server("timeline", 
-                                 style = 2, 
-                                 process_config = process_config, 
-                                 tl.update = tl.update)
-      
-      
-      navPage <- function(direction) {
-        newval <- tl.update$current.pos + direction 
-        newval <- max(1, newval)
-        newval <- min(newval, length(process_config$stepsNames))
-        tl.update$current.pos <- newval
-      }
-      observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
-      observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
       
       # observeEvent(req(forcePosition()), {
       #   print(paste0("MODULE TL_ENGINE : New value for forcePosition : ", forcePosition()))
