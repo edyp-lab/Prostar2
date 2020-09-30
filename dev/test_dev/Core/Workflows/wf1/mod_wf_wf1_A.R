@@ -51,8 +51,7 @@ mod_wf_wf1_A_server <- function(id,
         current.pos = 1,
         actions = list(rst = TRUE,
                        nxt = TRUE,
-                       prv = TRUE, 
-                       skip = TRUE)
+                       prv = TRUE, skip = TRUE)
       )
       
       pos <- mod_timeline_server("timeline", 
@@ -172,12 +171,6 @@ mod_wf_wf1_A_server <- function(id,
       })
       
       
-      DisableAllSteps <- reactive({
-        lapply(1:length(rv.process_config$isDone),
-               function(x){ shinyjs::disable(paste0('screen', x))})
-        
-      })
-      
       DisableAllPrevSteps <- reactive({
         pos <- max(grep(TRUE, rv.process_config$isDone))
         lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
@@ -235,10 +228,6 @@ mod_wf_wf1_A_server <- function(id,
       })
       
      
-      
-      
-      
-      
       
        #####################################################################
        ## screens of the module
@@ -330,23 +319,22 @@ mod_wf_wf1_A_server <- function(id,
        })
        
           
-        #  observeEvent(pos$skipBtn(),{
-            
-        #    print('MODULE A : Skip button activated')
-            #isolate({
-        #     DisableAllSteps()
-        #    rv$dataIn <- addAssay(rv$dataIn, 
-         #                         rv$dataIn[[length(rv$dataIn)]], 
-        #                          name=paste0('skipped.',rv.process_config$process.name))
-            
-            #rv$forcePosition <- TRUE
-            # browser()
-            
-            #tl.update$actions$skip <- FALSE
-       #     rv$dataOut <- dataIn()
-       #     rv.process_config$isDone[4] <- TRUE
-            #})
-      #    })
+          observeEvent(pos$skipBtn(),{
+      #     print('MODULE A : Skip button activated')
+           # isolate({
+       #        rv$dataIn <- addAssay(rv$dataIn, 
+        #                            rv$dataIn[[length(rv$dataIn)]], 
+       #                             name=paste0('skipped.',rv.process_config$process.name))
+        #      rv$dataOut <- rv$dataIn
+        #      rv.process_config$isDone[4] <- TRUE
+       #       rv$forcePosition <- TRUE
+        #      browser()
+       #       lapply(1:length(rv.process_config$stepsNames), 
+        #             function(x){ shinyjs::disable(paste0('screen', x))})
+              
+        #      tl.update$actions$skip <- FALSE
+           # })
+          })
        
           
           

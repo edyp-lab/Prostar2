@@ -47,16 +47,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         current.pos = 1,
         actions = list(rst = TRUE,
                        nxt = TRUE,
-                       prv = TRUE,
-                       skip = TRUE)
+                       prv = TRUE)
       )
       
       
       pos <- mod_timeline_server("timeline", 
                                  style = 2, 
                                  process_config = rv.process_config, 
-                                 tl.update = tl.update,
-                                 showSkip = FALSE)
+                                 tl.update = tl.update)
       
       
       # Initialization of the process
@@ -108,11 +106,10 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
        lapply(1:length(rv.process_config$stepsNames), 
                function(x){
                  shinyjs::enable(paste0('screen', x))
-                 shinyjs::reset(paste0('screen', x))
-                 })
+                 shinyjs::reset(paste0('screen', x))})
         
-      #  lapply(1:length(rv.process_config$stepsNames), 
-      #         function(x){ shinyjs::reset(paste0('screen', x))})
+        #lapply(1:length(rv.process_config$stepsNames), 
+        #       function(x){ shinyjs::reset(paste0('screen', x))})
         
         # Set all steps to undone except the first one which is the description screen
         #print("MODULE TL_ENGINE : Set all steps to undone")
@@ -166,9 +163,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       
       DisableAllPrevSteps <- reactive({
-        pos <- max(grep(TRUE, rv.process_config$isDone))
-        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-        
+       # pos <- max(grep(TRUE, rv.process_config$isDone))
+       # lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+      #  tl.update$actions$rst <- T
       })
       
       toggleNextBtn <- reactive({
