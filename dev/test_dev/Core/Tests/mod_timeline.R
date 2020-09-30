@@ -91,7 +91,7 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update, showSkip
                          class = PrevNextBtnClass,
                          style='padding:4px; font-size:80%')),
             if(showSkip)
-              actionButton(ns("skipBtn"), "Skip",
+              actionButton(ns("skipBtn"), "Skip process",
                  class = redBtnClass,
                  style='padding:4px; font-size:80%')
       )

@@ -68,6 +68,7 @@ mod_wf_wf1_A_server <- function(id,
         #print(paste0("rv.process_config$isDone = ", paste0(rv.process_config$isDone, collapse=' ')))
         rv$dataIn <- dataIn()
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
+        rv$skip = 0
         #browser()
         
         #print(paste0("     tl.update$current.pos = ", tl.update$current.pos))

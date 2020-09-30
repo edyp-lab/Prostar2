@@ -116,7 +116,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv.process_config$isDone <- c(TRUE, rep(FALSE, length(rv.process_config$stepsNames)-1))
         tl.update$current.pos <- 1
         
-        rv$dataOut <- dataIn()
+       # rv$dataOut <- dataIn()
+        rv$dataOut <- NULL
         
       })
       
