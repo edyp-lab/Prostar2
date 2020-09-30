@@ -41,7 +41,7 @@ mod_wf_wf1_A_server <- function(id,
       rv.process_config <- reactiveValues(
         process.name = 'Filtering',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
-        isDone =  c(TRUE, rep(FALSE, 3)),
+        isDone =  c(TRUE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, rep(TRUE, 3))
       )
       
