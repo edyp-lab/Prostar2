@@ -76,8 +76,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         else  
           shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
         
-        togglePrevBtn()
-        toggleNextBtn()
+        tl.update$actions$nxt <- condNextBtn()
+        tl.update$actions$nxt <- condPrevBtn()
         
        # print(paste0('MODULE SUPER_TL : New value for tl.update$current.pos : ', tl.update$current.pos))
       })

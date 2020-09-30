@@ -88,10 +88,8 @@ mod_wf_wf1_A_server <- function(id,
 
         }
         
-        
-        togglePrevBtn()
-        toggleNextBtn()
-        
+        tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
+        tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
       })
       
       # output$show_dataIn <- renderPrint({dataIn()})
