@@ -29,7 +29,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       ns <- session$ns
       
       rv <- reactiveValues(
-        force.position = c(NULL, NULL, NULL, NULL)
+        force.position = c(FALSE, FALSE, FALSE, FALSE, FALSE)
       )
       
       # variables to communicate with the navigation module
@@ -47,14 +47,16 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         current.pos = 1,
         actions = list(rst = TRUE,
                        nxt = TRUE,
-                       prv = TRUE)
+                       prv = TRUE,
+                       skip = TRUE)
       )
       
       
       pos <- mod_timeline_server("timeline", 
                                  style = 2, 
                                  process_config = rv.process_config, 
-                                 tl.update = tl.update)
+                                 tl.update = tl.update,
+                                 showSkip = FALSE)
       
       
       # Initialization of the process
@@ -104,10 +106,13 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       #Catch a reset command from timeline
       observeEvent(req(pos$rstBtn()!=0), {
        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){shinyjs::enable(paste0('screen', x))})
+               function(x){
+                 shinyjs::enable(paste0('screen', x))
+                 shinyjs::reset(paste0('screen', x))
+                 })
         
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){ shinyjs::reset(paste0('screen', x))})
+      #  lapply(1:length(rv.process_config$stepsNames), 
+      #         function(x){ shinyjs::reset(paste0('screen', x))})
         
         # Set all steps to undone except the first one which is the description screen
         #print("MODULE TL_ENGINE : Set all steps to undone")
@@ -120,20 +125,32 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       
       
-      observeEvent(c(tl.update$current.pos, rv.process_config$isDone),  ignoreInit = T, {
+      observeEvent(tl.update$current.pos,  ignoreInit = T, {
         rv.process_config$mandatory
-     # browser()
-        if (tl.update$current.pos == 2 && rv.process_config$isDone[2]){
-          print('MODULE SUPER_TL : Position on the module 2')
-        }
-         # rv$force.position[2] <- length(rv.process_config$isDone)
-        
-        if (rv.process_config$isDone[tl.update$current.pos])
-          DisableAllPrevSteps()
+         #print(paste0('MODULE SUPER_TL : new Position : ',tl.update$current.pos))
+          lapply(tl.update$current.pos, function(x){
+            if (rv.process_config$isDone[tl.update$current.pos])
+            rv$force.position[x] <- rv$force.position[x] + 1
+          })
+
+         # print(paste0("MODULE SUPER_TL : After updating rv$force.position :", paste0(rv$force.position, collapse=' ')))
 
         # Display the screen corresponding to the new position
         DisplayCurrentStep()
        
+        toggleNextBtn()
+        togglePrevBtn()
+      })
+      
+      
+      
+      observeEvent(rv.process_config$isDone,  ignoreInit = T, {
+        rv.process_config$mandatory
+        #print('MODULE SUPER_TL : isDone has changed')
+        
+        if (rv.process_config$isDone[tl.update$current.pos])
+          DisableAllPrevSteps()
+        
         toggleNextBtn()
         togglePrevBtn()
       })
@@ -149,9 +166,9 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       
       DisableAllPrevSteps <- reactive({
-       # pos <- max(grep(TRUE, rv.process_config$isDone))
-       # lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-      #  tl.update$actions$rst <- T
+        pos <- max(grep(TRUE, rv.process_config$isDone))
+        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+        
       })
       
       toggleNextBtn <- reactive({
@@ -211,21 +228,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      )
       
       observeEvent(req(rv$tmpA$dataOut()),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpA() :')
-        #print(paste0("      names(rv$tmpA$dataOut()) = ", paste0(names(rv$tmpA$dataOut()), collapse=' - ')))
         rv$dataOut <- rv$tmpA$dataOut()
-
       })
       
       observeEvent(rv$tmpA$validated(),  { 
-        #print('MODULE SUPER_TL : New value for rv$validated() :')
-        #print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
-        rv.process_config$isDone[2] <- rv$tmpA$validated()
+       rv.process_config$isDone[2] <- rv$tmpA$validated()
       })
       
       observeEvent(req(rv$tmpA$reseted()!=0), {
-        #print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
-        #browser()
         ind <- grep(rv.process_config$stepsNames[2], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
           rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]

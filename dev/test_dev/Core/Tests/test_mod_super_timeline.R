@@ -17,9 +17,9 @@ ui <- fluidPage(
     hr(),
     wellPanel(
       h3('Prostar (caller)'),
-      p('dataIn() :'),
+      p('dataIn :'),
       verbatimTextOutput('show_dataIn'),
-      p('rv$dataIn :'),
+      p('rv$dataout :'),
       verbatimTextOutput('show_rv_tmp_dataOut')
     )
   )

@@ -51,13 +51,15 @@ mod_wf_wf1_A_server <- function(id,
         current.pos = 1,
         actions = list(rst = TRUE,
                        nxt = TRUE,
-                       prv = TRUE)
+                       prv = TRUE, 
+                       skip = TRUE)
       )
       
       pos <- mod_timeline_server("timeline", 
                                  style = 2, 
                                  process_config = rv.process_config, 
-                                 tl.update = tl.update)
+                                 tl.update = tl.update,
+                                 showSkip = TRUE)
       
       
       # Initialization of the process
@@ -125,12 +127,15 @@ mod_wf_wf1_A_server <- function(id,
       ###
       ###
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-        #print('MODULE A : RESET du module A')
+        print('MODULE A : RESET du module A')
         lapply(1:length(rv.process_config$stepsNames), 
-               function(x){shinyjs::enable(paste0('screen', x))})
+               function(x){
+                 shinyjs::enable(paste0('screen', x))
+                 shinyjs::reset(paste0('screen', x))
+                 })
         
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){ shinyjs::reset(paste0('screen', x))})
+        #lapply(1:length(rv.process_config$stepsNames), 
+        #       function(x){ shinyjs::reset(paste0('screen', x))})
         
         rv.process_config$isDone <- c(TRUE, rep(FALSE, length(rv.process_config$stepsNames)-1))
         tl.update$current.pos <- 1
@@ -153,34 +158,63 @@ mod_wf_wf1_A_server <- function(id,
       #  rv$dataOut <- rv$dataIn
       #})
       
-      
-      
-      observeEvent(c(rv.process_config$isDone,tl.update$current.pos),  ignoreInit = T, {
+      observeEvent(rv.process_config$isDone,  ignoreInit = T, {
         rv.process_config$mandatory
-        #print('MODULE A : observeEvent(rv.process_config$isDone)')
-        #print(paste0('     New value for rv.process_config$isDone : ', paste0(rv.process_config$isDone, collapse=' ')))
-       
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){shinyjs::toggle(paste0('screen', x),
-                                           condition = x==tl.update$current.pos )}) 
+        print('MODULE A : observeEvent(rv.process_config$isDone)')
+        print(paste0('     New value for rv.process_config$isDone : ', paste0(rv.process_config$isDone, collapse=' ')))
         
-        if (rv.process_config$isDone[tl.update$current.pos]){
-          pos <- max(grep(TRUE, rv.process_config$isDone))
-        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-        }
+        #browser()
+        if (rv.process_config$isDone[tl.update$current.pos])
+          DisableAllPrevSteps()
         
         toggleNextBtn()
         togglePrevBtn()
       })
+      
+      
+      DisableAllSteps <- reactive({
+        lapply(1:length(rv.process_config$isDone),
+               function(x){ shinyjs::disable(paste0('screen', x))})
+        
+      })
+      
+      DisableAllPrevSteps <- reactive({
+        pos <- max(grep(TRUE, rv.process_config$isDone))
+        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+        
+      })
+      
+      observeEvent(tl.update$current.pos,  ignoreInit = T, {
+        rv.process_config$mandatory
+        print('MODULE A : observeEvent(rv.process_config$isDone)')
+        print(paste0('     New value for rv.process_config$isDone : ', paste0(rv.process_config$isDone, collapse=' ')))
+       
+        DisplayCurrentStep()
+        
+        toggleNextBtn()
+        togglePrevBtn()
+      })
+      
+      
+      DisplayCurrentStep <- reactive({
+      lapply(1:length(rv.process_config$stepsNames), 
+             function(x){shinyjs::toggle(paste0('screen', x),
+                                         condition = x==tl.update$current.pos )}) 
+    })
+      
       
       observeEvent(rv.process_config$isDone[length(rv.process_config$isDone)], {
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
 })
      
       
-      observeEvent(req(forcePosition()), {
-        print(paste0('     New value for forcePosition : ', forcePosition()))
-       # tl.update$current.pos <- forcePosition()
+      observeEvent(req(forcePosition() != 0), ignoreNULL=T, {
+        #print(paste0('MODULE A : New value for forcePosition() : ', forcePosition()))
+        rv$forcePosition <- forcePosition()})
+      
+      observeEvent(req(rv$forcePosition),   {
+        #print(paste0('MODULE A : New value for rv$forcePosition : ', rv$forcePosition))
+        tl.update$current.pos <- length(rv.process_config$isDone)
       })
       
       
@@ -201,6 +235,10 @@ mod_wf_wf1_A_server <- function(id,
       })
       
      
+      
+      
+      
+      
       
        #####################################################################
        ## screens of the module
@@ -287,14 +325,28 @@ mod_wf_wf1_A_server <- function(id,
                                     rv$dataIn[[length(rv$dataIn)]], 
                                     name=rv.process_config$process.name)
               rv$dataOut <- rv$dataIn
-              #rv$dataIn <- NULL
               rv.process_config$isDone[4] <- TRUE
-              # This feature is to disable the reset button in the process module
-              # once it has been validated
-              #tl.update$actions$rst <- FALSE
             })
        })
        
+          
+        #  observeEvent(pos$skipBtn(),{
+            
+        #    print('MODULE A : Skip button activated')
+            #isolate({
+        #     DisableAllSteps()
+        #    rv$dataIn <- addAssay(rv$dataIn, 
+         #                         rv$dataIn[[length(rv$dataIn)]], 
+        #                          name=paste0('skipped.',rv.process_config$process.name))
+            
+            #rv$forcePosition <- TRUE
+            # browser()
+            
+            #tl.update$actions$skip <- FALSE
+       #     rv$dataOut <- dataIn()
+       #     rv.process_config$isDone[4] <- TRUE
+            #})
+      #    })
        
           
           

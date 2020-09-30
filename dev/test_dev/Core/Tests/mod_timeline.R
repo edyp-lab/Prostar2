@@ -30,26 +30,11 @@ mod_timeline_ui <- function(id){
 
     fluidRow(
       align= 'center',
-      column(width=2,
-             div(style = btn_style,
-               uiOutput(ns('show_reset'))
-             ),
-             div( style = btn_style,
-                  shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-                                                 class = PrevNextBtnClass,
-                                                 style='padding:4px; font-size:80%')))
-      ),
-      column(width=8,div( style = btn_style, uiOutput(ns("timelineStyle")))
-      ),
-      column(width=2,div(style=btn_style,
-                         actionButton(ns("nextBtn"), ">>",
-                                      class = PrevNextBtnClass,
-                                      style='padding:4px; font-size:80%')
-      )
+      column(width=2,uiOutput(ns('show_leftBtns'))),
+      column(width=8,div( style = btn_style, uiOutput(ns("timelineStyle"))) ),
+      column(width=2,uiOutput(ns('show_rightBtns')))
       )
     )
-  )
-  
 }
 
 # Module Server
@@ -70,7 +55,7 @@ mod_timeline_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_timeline_server <- function(id, style=1, process_config, tl.update){
+mod_timeline_server <- function(id, style=1, process_config, tl.update, showSkip = FALSE){
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -78,20 +63,40 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
     observeEvent(tl.update$actions,{
-      #print('action :')
-      #print(reactiveValuesToList(tl.update))
       shinyjs::toggleState('nextBtn', condition=tl.update$actions$nxt)
       shinyjs::toggleState('rstBtn', condition=tl.update$actions$rst)
       shinyjs::toggleState('prevBtn', condition=tl.update$actions$prv)
+      shinyjs::toggleState('skipBtn', condition=tl.update$actions$skip)
    })
     
     
     
-    output$show_reset <- renderUI({
-      actionButton(ns("rstBtn"), paste0("Reset ", process_config$type),
+    output$show_leftBtns <- renderUI({
+      tagList(
+        div(style=btn_style,
+            actionButton(ns("rstBtn"), paste0("Reset ", process_config$type),
                    class = redBtnClass,
-                   style='padding:4px; font-size:80%')
+                   style='padding:4px; font-size:80%'),
+            shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                           class = PrevNextBtnClass,
+                                           style='padding:4px; font-size:80%'))
+        )
+      )
     })
+    
+    output$show_rightBtns <- renderUI({
+      tagList(
+        div(style=btn_style,
+            actionButton(ns("nextBtn"), ">>",
+                         class = PrevNextBtnClass,
+                         style='padding:4px; font-size:80%')),
+            if(showSkip)
+              actionButton(ns("skipBtn"), "Skip",
+                 class = redBtnClass,
+                 style='padding:4px; font-size:80%')
+      )
+    })
+    
     ## Functions for timeline and styles
     
     output$load_css_style <- renderUI({
@@ -398,7 +403,8 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
     # return value of the tl.update
     list(rstBtn = reactive(input$rstBtn),
          nextBtn = reactive(input$nextBtn),
-         prevBtn = reactive(input$prevBtn)
+         prevBtn = reactive(input$prevBtn),
+         skipBtn = reactive(input$skipBtn)
          )
     
   })
