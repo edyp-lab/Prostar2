@@ -9,7 +9,7 @@ mod_wf_wf1_B_ui <- function(id){
     hr(),
     wellPanel(
       h3('Module B'),
-      p('dataIn :'),
+      p('dataIn() :'),
       verbatimTextOutput(ns('show_dataIn')),
       p('rv$dataIn :'),
       verbatimTextOutput(ns('show_rv_dataIn')),
@@ -39,7 +39,7 @@ mod_wf_wf1_B_server <- function(id,
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
-        process.name = 'Filtering',
+        process.name = 'Normalization',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
         isDone =  c(TRUE, rep(FALSE, 3)),
         mandatory =  c(FALSE, rep(TRUE, 3))
@@ -60,11 +60,11 @@ mod_wf_wf1_B_server <- function(id,
       
       
       # Initialization of the process
-      observeEvent(req(dataIn), { 
+      observeEvent(req(dataIn()), { 
         print("--------------------------------------------------")
         print('MODULE B : Initialisation du module B')
         print(paste0("rv.process_config$isDone = ", paste0(rv.process_config$isDone, collapse=' ')))
-        rv$dataIn <- dataIn
+        rv$dataIn <- dataIn()
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
         #browser()
         
@@ -96,7 +96,7 @@ mod_wf_wf1_B_server <- function(id,
         
       })
       
-      output$show_dataIn <- renderPrint({dataIn})
+      output$show_dataIn <- renderPrint({dataIn()})
       output$show_rv_dataIn <- renderPrint({rv$dataIn})
       output$show_rv_dataOut <- renderPrint({rv$dataOut})
       output$show_screens <- renderUI({tagList(rv$screens)})
@@ -145,9 +145,9 @@ mod_wf_wf1_B_server <- function(id,
       # UpdateDataIn <- reactive({
       #   ind <- grep(rv.process_config$process.name, names(rv$dataIn))
       #   if (length(ind) == 0)
-      #     rv$dataIn <- dataIn
+      #     rv$dataIn <- dataIn()
       #   else
-      #    rv$dataIn <- dataIn[ , , -c(ind:length(dataIn)]
+      #    rv$dataIn <- dataIn()[ , , -c(ind:length(dataIn()))]
       #  rv$dataOut <- rv$dataIn
       #})
       
@@ -269,6 +269,7 @@ mod_wf_wf1_B_server <- function(id,
           rv$dataOut <- rv$dataIn
           #rv$dataIn <- NULL
           rv.process_config$isDone[4] <- TRUE
+          rv$process.validated <- TRUE
         })
       })
       

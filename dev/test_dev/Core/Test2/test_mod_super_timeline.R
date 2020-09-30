@@ -13,15 +13,7 @@ options(shiny.reactlog=TRUE)
 
 ui <- fluidPage(
   tagList(
-    mod_super_timeline_ui("super_nav"),
-    hr(),
-    wellPanel(
-      h3('Prostar (caller)'),
-      p('dataIn() :'),
-      verbatimTextOutput('show_dataIn'),
-      p('rv$dataIn :'),
-      verbatimTextOutput('show_rv_tmp_dataOut')
-    )
+    mod_super_timeline_ui("super_nav")
   )
 )
 
@@ -38,21 +30,12 @@ server <- function(input, output, session) {
   rv$tmp <- mod_super_timeline_server("super_nav", 
                                 dataIn = reactive({rv$current.obj}) )
   
-  observeEvent(rv$tmp$dataOut(), {
-    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')
-    print(rv$tmp$dataOut())
-    #rv$current.obj <- rv$tmp()
+  observeEvent(rv$tmp(), {
+    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server')
+    rv$current.obj <- rv$tmp()
+    print(paste0("      names(dataIn()) = ", paste0(names(rv$current.obj), collapse=' - ')))
     })
-  
-  observeEvent(rv$tmp$reseted(),{
-    print('TEST SUPER_TIMELINE : activation of the reset all')
-    
-  })
 
-  
-  output$show_dataIn <- renderPrint({rv$current.obj})
-  output$show_rv_tmp_dataOut <- renderPrint({rv$tmp$dataOut()})
-  
 }
 
 

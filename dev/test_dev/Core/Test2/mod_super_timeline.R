@@ -28,13 +28,10 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
     function(input, output, session){
       ns <- session$ns
       
-      rv <- reactiveValues(
-        force.position = c(NULL, NULL, NULL, NULL)
-      )
+      rv <- reactiveValues()
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
-        type = 'pipeline',
         process.name = 'Pipeline protein',
         stepsNames = c("Description", "Filtering", "Normalization", "Imputation", "Summary"),
         isDone =  c(TRUE, rep(FALSE,4)),
@@ -59,7 +56,8 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       # Initialization of the process
       observeEvent(req(dataIn()), {
-        print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
+        print("--------------------------------------------------")
+        print('MODULE SUPER_TIMELINE : Initialisation du module')
         rv$dataIn <- dataIn()
         
         rv$remoteReset <- rep(length(rv.process_config$stepsNames), FALSE)
@@ -79,7 +77,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         togglePrevBtn()
         toggleNextBtn()
         
-       # print(paste0('MODULE SUPER_TL : New value for tl.update$current.pos : ', tl.update$current.pos))
+        print(paste0('MODULE SUPER_TL : New value for tl.update$current.pos : ', tl.update$current.pos))
       })
       
       
@@ -101,7 +99,6 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       
       #------------------------------------------------------------------------
-      #Catch a reset command from timeline
       observeEvent(req(pos$rstBtn()!=0), {
        lapply(1:length(rv.process_config$stepsNames), 
                function(x){shinyjs::enable(paste0('screen', x))})
@@ -114,26 +111,26 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv.process_config$isDone <- c(TRUE, rep(FALSE, length(rv.process_config$stepsNames)-1))
         tl.update$current.pos <- 1
         
-        rv$dataOut <- dataIn()
+        UpdateDataIn()
         
+      })
+      
+      
+      UpdateDataIn <- reactive({
+        rv$dataOut <- dataIn()
       })
       
       
       
       observeEvent(c(tl.update$current.pos, rv.process_config$isDone),  ignoreInit = T, {
         rv.process_config$mandatory
-     # browser()
-        if (tl.update$current.pos == 2 && rv.process_config$isDone[2]){
-          print('MODULE SUPER_TL : Position on the module 2')
-        }
-         # rv$force.position[2] <- length(rv.process_config$isDone)
         
         if (rv.process_config$isDone[tl.update$current.pos])
           DisableAllPrevSteps()
 
         # Display the screen corresponding to the new position
         DisplayCurrentStep()
-       
+        
         toggleNextBtn()
         togglePrevBtn()
       })
@@ -176,12 +173,6 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       #   rv$remoteReset <- rep(length( rv.process_config$stepsNames), TRUE)
       # })
         
-      
-      
-      
-      
-      
-      
       #####################################################################
       ## screens of the module
       ##
@@ -196,6 +187,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       ############### SCREEN 2 ######################################
       
       output$screen2 <- renderUI({
+        
         tagList(
           div(id=ns('screen2'),
               tags$h3(rv.process_config$stepsName[2]),
@@ -205,35 +197,35 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
 
       rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav",
-                                     dataIn = reactive({rv$dataIn}),
-                                     remoteReset = reactive({pos$rstBtn()}),
-                                     forcePosition = reactive({rv$force.position[2]})
+                                     dataIn = rv$dataIn,
+                                     remoteReset = rv$remoteReset[2],
+                                     forcePosition = NULL
                                      )
       
-      observeEvent(req(rv$tmpA$dataOut()),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpA() :')
-        #print(paste0("      names(rv$tmpA$dataOut()) = ", paste0(names(rv$tmpA$dataOut()), collapse=' - ')))
+      observeEvent(rv$tmpA$dataOut(),  { 
+      isolate({
         rv$dataOut <- rv$tmpA$dataOut()
-
+      })
       })
       
       observeEvent(rv$tmpA$validated(),  { 
         #print('MODULE SUPER_TL : New value for rv$validated() :')
         #print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
-        rv.process_config$isDone[2] <- rv$tmpA$validated()
+        isolate({
+          rv.process_config$isDone[2] <- rv$tmpA$validated()
+        })
       })
       
-      observeEvent(req(rv$tmpA$reseted()!=0), {
-        #print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
-        #browser()
-        ind <- grep(rv.process_config$stepsNames[2], names(rv$tmpA$dataOut()))
-        if (length(ind)>0){
-          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
-          rv$dataOut <- rv$dataIn 
-          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
-        }
+     # observeEvent(req(rv$tmpA$reseted()!=0), {
+     #   print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
+       # ind <- grep(rv.process_config$stepsNames[4], names(rv$dataIn))
+       # if (length(ind)>0){
+       #   rv$dataIn <- dataIn()
+       #   rv$dataOut <- rv$dataIn
+       #   rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+       # }
         
-      })
+     # })
       
       ############### SCREEN 3 ######################################
       output$screen3 <- renderUI({
@@ -247,31 +239,30 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav",
-                                     dataIn = reactive({rv$tmpA$dataOut()}),
-                                     remoteReset = reactive({pos$rstBtn()}),
-                                     forcePosition = reactive({rv$force.position[3]})
+                                     dataIn = rv$tmpA$dataOut(),
+                                     remoteReset = rv$remoteReset[3],
+                                     forcePosition = rv.process_config$isDone[length(rv.process_config$isDone)]
                                      )
       
       observeEvent(req(rv$tmpB$dataOut()),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpB$dataOut() :')
-        #print(paste0("      names(rv$tmpB$dataOut()) = ", paste0(names(rv$tmpB$dataOut()), collapse=' - ')))
-        rv$dataOut <- rv$tmpB$dataOut()
+        isolate({ rv$dataOut <- rv$tmpB$dataOut()})
       })
       
       observeEvent(rv$tmpB$validated(),  { 
         #print('MODULE SUPER_TL : New value for rv$tmpB$validated() :')
         #print(paste0("      rv$tmpB$validated() = ", rv$tmpB$validated()))
-        rv.process_config$isDone[3] <- rv$tmpB$validated()
+        isolate({ rv.process_config$isDone[3] <- rv$tmpB$validated()})
       })
       
       observeEvent(req(rv$tmpB$reseted()!=0), {
-        #print(paste0('MODULE SUPER_TL : New value for rv$tmpB$reseted() : ', rv$tmpB$reseted()))
-        ind <- grep(rv.process_config$stepsNames[3], names(rv$tmpA$dataOut()))
-        if (length(ind)>0){
-          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
-          rv$dataOut <- rv$dataIn 
-          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
-        }
+        print(paste0('MODULE SUPER_TL : New value for rv$tmpB$reseted() : ', rv$tmpB$reseted()))
+        #ind <- grep(rv.process_config$stepsNames[4], names(rv$dataIn))
+        #if (length(ind)>0){
+       #   rv$dataIn <- dataIn()
+        #  rv$dataOut <- rv$dataIn
+        #  rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+       # } 
+        
       })
       
       
@@ -287,32 +278,31 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav",
-                                     dataIn = reactive({rv$tmpB$dataOut()}),
-                                     remoteReset = reactive({pos$rstBtn()}) ,
-                                     forcePosition = reactive({rv$force.position[4]})
+                                     dataIn = rv$tmpB$dataOut(),
+                                     remoteReset = rv$remoteReset[4] ,
+                                     forcePosition = rv.process_config$isDone[length(rv.process_config$isDone)]
                                      )
       
       
       observeEvent(req(rv$tmpC$dataOut()),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpC$dataOut() :')
-        #print(paste0("      names(rv$tmpC$dataOut()) = ", paste0(names(rv$tmpC$dataOut()), collapse=' - ')))
-         rv$dataOut <- rv$tmpC$dataOut()
+        isolate({  rv$dataOut <- rv$tmpC$dataOut()})
       })
       
       observeEvent(rv$tmpC$validated(),  { 
         #print('MODULE SUPER_TL : New value for rv$tmpC$validated() :')
         #print(paste0("      rv$tmpC$validated() = ", rv$tmpC$validated()))
-        rv.process_config$isDone[4] <- rv$tmpC$validated()
+        isolate({ rv.process_config$isDone[4] <- rv$tmpC$validated()})
       })
       
       observeEvent(req(rv$tmpC$reseted()!=0), {
-        #print(paste0('MODULE SUPER_TL : New value for rv$tmpC$reseted() : ', rv$tmpC$reseted()))
-        ind <- grep(rv.process_config$stepsNames[4], names(rv$tmpA$dataOut()))
-        if (length(ind)>0){
-          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
-          rv$dataOut <- rv$dataIn 
-          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
-        }
+        print(paste0('MODULE SUPER_TL : New value for rv$tmpC$reseted() : ', rv$tmpC$reseted()))
+ 
+       # ind <- grep(rv.process_config$stepsNames[4], names(rv$dataIn))
+       # if (length(ind)>0){
+       #   rv$dataIn <- dataIn()
+       #   rv$dataOut <- rv$dataIn
+       #   rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+       # } 
         
       })
       
@@ -328,10 +318,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       ##########################################################
       
-      list(dataOut = reactive({rv$dataOut}),
-           validated = reactive({rv.process_config$isDone[length(rv.process_config$isDone)]}),
-           reseted = reactive({pos$rstBtn()})
-      )
+      reactive({rv$dataOut})
     }
   )
 }
