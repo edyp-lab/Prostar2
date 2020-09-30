@@ -26,7 +26,7 @@ server <- function(input, output, session) {
                    prv = TRUE)
   )
   
-  mod_timeline_server("timeline", style = 2, process_config = config, tl.update = rv.engine)
+  mod_timeline_server("timeline", style = 7, process_config = config, tl.update = rv.engine)
 }
 
 

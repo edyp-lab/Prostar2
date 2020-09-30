@@ -65,15 +65,12 @@ mod_wf_wf1_A_server <- function(id,
       # Initialization of the process
       observeEvent(req(dataIn()), { 
         print(' ------- MODULE A : Initialisation du module A ------- ')
-        #print(paste0("rv.process_config$isDone = ", paste0(rv.process_config$isDone, collapse=' ')))
+        
         rv$dataIn <- dataIn()
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
         rv$skip = 0
-        #browser()
         
-        #print(paste0("     tl.update$current.pos = ", tl.update$current.pos))
-        #print(paste0("     rv$process.validated = ", rv$process.validated))
-       # Instantiation of the screens
+        # Instantiation of the screens
         rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
         
@@ -97,23 +94,23 @@ mod_wf_wf1_A_server <- function(id,
         
       })
       
-      output$show_dataIn <- renderPrint({dataIn()})
-      output$show_rv_dataIn <- renderPrint({rv$dataIn})
-      output$show_rv_dataOut <- renderPrint({rv$dataOut})
-      output$show_screens <- renderUI({tagList(rv$screens)})
+      # output$show_dataIn <- renderPrint({dataIn()})
+      # output$show_rv_dataIn <- renderPrint({rv$dataIn})
+      # output$show_rv_dataOut <- renderPrint({rv$dataOut})
+      # output$show_screens <- renderUI({tagList(rv$screens)})
+      # 
+      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
-     
       
-      
-      navPage <- function(direction) {
-        newval <- tl.update$current.pos + direction 
-        newval <- max(1, newval)
-        newval <- min(newval, length(rv.process_config$stepsNames))
-        tl.update$current.pos <- newval
-      }
-      observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
-      observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
-      
+      # navPage <- function(direction) {
+      #   newval <- tl.update$current.pos + direction 
+      #   newval <- max(1, newval)
+      #   newval <- min(newval, length(rv.process_config$stepsNames))
+      #   tl.update$current.pos <- newval
+      # }
+      # observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
+      # observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
+      # 
       
       ###
       ###
@@ -159,21 +156,21 @@ mod_wf_wf1_A_server <- function(id,
         if (rv.process_config$isDone[tl.update$current.pos])
           DisableAllPrevSteps()
         
-        toggleNextBtn()
-        togglePrevBtn()
+        tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
+        tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
       })
       
-      
-      DisableAllPrevSteps <- reactive({
-        pos <- max(grep(TRUE, rv.process_config$isDone))
-        lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-        
-      })
-      
-      DisableAllSteps <- reactive({
-        lapply(1:length(rv.process_config$isDone), function(x){ shinyjs::disable(paste0('screen', x))})
-        
-      })
+      # 
+      # DisableAllPrevSteps <- reactive({
+      #   pos <- max(grep(TRUE, rv.process_config$isDone))
+      #   lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
+      #   
+      # })
+      # 
+      # DisableAllSteps <- reactive({
+      #   lapply(1:length(rv.process_config$isDone), function(x){ shinyjs::disable(paste0('screen', x))})
+      #   
+      # })
       
       observeEvent(tl.update$current.pos,  ignoreInit = T, {
         rv.process_config$mandatory
@@ -182,17 +179,17 @@ mod_wf_wf1_A_server <- function(id,
        
         DisplayCurrentStep()
 
-        toggleNextBtn()
-        togglePrevBtn()
+        tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
+        tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
       })
       
       
-      DisplayCurrentStep <- reactive({
-      lapply(1:length(rv.process_config$stepsNames), 
-             function(x){shinyjs::toggle(paste0('screen', x),
-                                         condition = x==tl.update$current.pos )}) 
-    })
-      
+    #   DisplayCurrentStep <- reactive({
+    #   lapply(1:length(rv.process_config$stepsNames), 
+    #          function(x){shinyjs::toggle(paste0('screen', x),
+    #                                      condition = x==tl.update$current.pos )}) 
+    # })
+    #   
       
       observeEvent(rv.process_config$isDone[length(rv.process_config$isDone)], {
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
@@ -216,22 +213,22 @@ mod_wf_wf1_A_server <- function(id,
       
       
       
-      toggleNextBtn <- reactive({
-
-        # # Conditional enabling of the next button
-        end_of_tl <- tl.update$current.pos == length(rv.process_config$stepsNames)
-        mandatory_step <- isTRUE(rv.process_config$mandatory[tl.update$current.pos])
-        validated <- isTRUE(rv.process_config$isDone[tl.update$current.pos])
-        cond.next.btn <-  !mandatory_step || validated
-        tl.update$actions$nxt <- cond.next.btn && rv$skip == 0
-      })
-      
-      togglePrevBtn <- reactive({
-        pos$skipBtn()
-        start_of_tl <- tl.update$current.pos == 1
-        cond.prev.btn <- !start_of_tl
-        tl.update$actions$prv <-  cond.prev.btn && rv$skip == 0
-      })
+      # toggleNextBtn <- reactive({
+      # 
+      #   # # Conditional enabling of the next button
+      #   end_of_tl <- tl.update$current.pos == length(rv.process_config$stepsNames)
+      #   mandatory_step <- isTRUE(rv.process_config$mandatory[tl.update$current.pos])
+      #   validated <- isTRUE(rv.process_config$isDone[tl.update$current.pos])
+      #   cond.next.btn <-  !mandatory_step || validated
+      #   tl.update$actions$nxt <- cond.next.btn && rv$skip == 0
+      # })
+      # 
+      # togglePrevBtn <- reactive({
+      #   pos$skipBtn()
+      #   start_of_tl <- tl.update$current.pos == 1
+      #   cond.prev.btn <- !start_of_tl
+      #   tl.update$actions$prv <-  cond.prev.btn && rv$skip == 0
+      # })
       
      
       

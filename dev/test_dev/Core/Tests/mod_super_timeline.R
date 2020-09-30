@@ -83,22 +83,22 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       
-      output$show_dataIn <- renderPrint({dataIn()})
-      output$show_rv_dataIn <- renderPrint({rv$dataIn})
-      output$show_rv_dataOut <- renderPrint({rv$dataOut})
-      output$show_screens <- renderUI({tagList(rv$screens)})
+      # output$show_dataIn <- renderPrint({dataIn()})
+      # output$show_rv_dataIn <- renderPrint({rv$dataIn})
+      # output$show_rv_dataOut <- renderPrint({rv$dataOut})
+      # output$show_screens <- renderUI({tagList(rv$screens)})
+       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
       
-      
-      navPage <- function(direction) {
-        newval <- tl.update$current.pos + direction 
-        newval <- max(1, newval)
-        newval <- min(newval, length(rv.process_config$stepsNames))
-        tl.update$current.pos <- newval
-      }
-      observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
-      observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
-      
+      # navPage <- function(direction) {
+      #   newval <- tl.update$current.pos + direction 
+      #   newval <- max(1, newval)
+      #   newval <- min(newval, length(rv.process_config$stepsNames))
+      #   tl.update$current.pos <- newval
+      # }
+      # observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
+      # observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
+      # 
       
       #------------------------------------------------------------------------
       #Catch a reset command from timeline
@@ -131,13 +131,10 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
             rv$force.position[x] <- rv$force.position[x] + 1
           })
 
-         # print(paste0("MODULE SUPER_TL : After updating rv$force.position :", paste0(rv$force.position, collapse=' ')))
-
         # Display the screen corresponding to the new position
         DisplayCurrentStep()
-       
-        toggleNextBtn()
-        togglePrevBtn()
+        tl.update$actions$nxt <- condNextBtn()
+        tl.update$actions$nxt <- condPrevBtn()
       })
       
       
@@ -146,55 +143,41 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv.process_config$mandatory
         #print('MODULE SUPER_TL : isDone has changed')
         
-        if (rv.process_config$isDone[tl.update$current.pos])
-          DisableAllPrevSteps()
+       # if (rv.process_config$isDone[tl.update$current.pos])
+        #  DisableAllPrevSteps()
         
-        toggleNextBtn()
-        togglePrevBtn()
+        tl.update$actions$nxt <- condNextBtn()
+        tl.update$actions$nxt <- condPrevBtn()
       })
       
       
       
-      DisplayCurrentStep <- reactive({
-        # Display the screen corresponding to the new position
-        lapply(1:length(rv.process_config$stepsNames), 
-                 function(x){shinyjs::toggle(paste0('screen', x),
-                                             condition = x==tl.update$current.pos )}) 
-      })
-      
-      
-      DisableAllPrevSteps <- reactive({
-       # pos <- max(grep(TRUE, rv.process_config$isDone))
-       # lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-      #  tl.update$actions$rst <- T
-      })
-      
-      toggleNextBtn <- reactive({
-        tl.update$current.pos
-        
-        # # Conditional enabling of the next button
-        end_of_tl <- tl.update$current.pos == length(rv.process_config$stepsNames)
-        mandatory_step <- isTRUE(rv.process_config$mandatory[tl.update$current.pos])
-        validated <- isTRUE(rv.process_config$isDone[tl.update$current.pos])
-        cond.next.btn <-  !mandatory_step || validated
-        tl.update$actions$nxt <- cond.next.btn
-      })
-      
-      togglePrevBtn <- reactive({
-        start_of_tl <- tl.update$current.pos == 1
-        cond.prev.btn <- !start_of_tl
-        tl.update$actions$prv <-  cond.prev.btn
-      })
-    
-
-      # observeEvent(rv$tmp_super$reset(), {
-      #   rv$remoteReset <- rep(length( rv.process_config$stepsNames), TRUE)
+      # DisplayCurrentStep <- reactive({
+      #   # Display the screen corresponding to the new position
+      #   lapply(1:length(rv.process_config$stepsNames), 
+      #            function(x){shinyjs::toggle(paste0('screen', x),
+      #                                        condition = x==tl.update$current.pos )}) 
       # })
-        
+
       
-      
-      
-      
+      # toggleNextBtn <- reactive({
+      #   tl.update$current.pos
+      #   
+      #   # # Conditional enabling of the next button
+      #   end_of_tl <- tl.update$current.pos == length(rv.process_config$stepsNames)
+      #   mandatory_step <- isTRUE(rv.process_config$mandatory[tl.update$current.pos])
+      #   validated <- isTRUE(rv.process_config$isDone[tl.update$current.pos])
+      #   cond.next.btn <-  !mandatory_step || validated
+      #   tl.update$actions$nxt <- cond.next.btn
+      # })
+      # 
+      # togglePrevBtn <- reactive({
+      #   start_of_tl <- tl.update$current.pos == 1
+      #   cond.prev.btn <- !start_of_tl
+      #   tl.update$actions$prv <-  cond.prev.btn
+      # })
+      # 
+
       
       
       #####################################################################

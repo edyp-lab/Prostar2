@@ -123,7 +123,11 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update, showSkip
         includeScript("timeline5.js")
         cssCode <- readLines('timeline5.css')
         shinyjs::inlineCSS(cssCode)
+      }else if (style == 7) {
+        cssCode <- readLines('timeline7.css')
+        shinyjs::inlineCSS(cssCode)
       }
+      
       
     })
     
@@ -399,6 +403,76 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update, showSkip
       
       HTML(tl)
     })
+    
+    
+    
+    
+    
+    output$timeline7 <- renderUI({
+      
+      txt <- "<!-- Based on: https://dribbble.com/shots/5260798-Process -->
+
+<div class='main-container'>
+    <div class='steps-container'>
+        <div class='step completed'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                <path d='M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z' />
+            </svg>
+            <div class='label completed'>
+                Prospect
+            </div>
+            <div class='icon completed'>
+                <i class='far fa-handshake'></i>
+            </div>
+        </div>
+        <div class='line completed'></div>
+        <div class='step completed'>
+            <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                <path d='M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z' />
+            </svg>
+            <div class='label completed'>
+                Tour
+            </div>
+            <div class='icon completed'>
+                <i class='far fa-map'></i>
+            </div>
+        </div>
+        <div class='line next-step-in-progress'>
+        </div>
+        <div class='step in-progress'>
+            <div class='preloader'></div>
+            <div class='label loading'>
+                Offer
+            </div>
+            <div class='icon in-progress'>
+                <i class='far fa-money-bill-alt'></i>
+            </div>
+        </div>
+        <div class='line prev-step-in-progress'></div>
+        <div class='step'>
+            <div class='label'>
+                Contract
+            </div>
+            <div class='icon'>
+                <i class='far fa-newspaper'></i>
+            </div>
+        </div>
+        <div class='line'></div>
+        <div class='step'>
+            <div class='label'>
+                Settled
+            </div>
+            <div class='icon'>
+                <i class='fas fa-home'></i>
+            </div>
+        </div>
+    </div>
+</div>"
+      
+      HTML(txt)
+    })
+    
+    
     
     # return value of the tl.update
     list(rstBtn = reactive(input$rstBtn),
