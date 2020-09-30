@@ -31,10 +31,9 @@ mod_wf_wf1_A_server <- function(id,
     id,
     function(input, output, session){
       ns <- session$ns
+      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
-      rv <- reactiveValues(
-        screens=NULL
-      )
+      rv <- reactiveValues()
 
       
       # variables to communicate with the navigation module
@@ -70,63 +69,23 @@ mod_wf_wf1_A_server <- function(id,
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
         rv$skip = 0
         
-        # Instantiation of the screens
-        rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
-          do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
-        
-        # initialisation of the screens
-        for (i in 1:length(rv.process_config$stepsNames))
-          rv$screens[[i]] <- if (i == tl.update$current.pos) 
-            div(id = ns(paste0("screen", i)),  rv$screens[[i]])
-        else  
-          shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
+        CreateScreens()
+        InitScreens()
         
         if (isTRUE(rv$process.validated)){
           tl.update$current.pos <-  length(rv.process_config$isDone)}
         else {
           tl.update$current.pos <- 1
-
-        }
+          }
         
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
         tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
       })
       
-      # output$show_dataIn <- renderPrint({dataIn()})
-      # output$show_rv_dataIn <- renderPrint({rv$dataIn})
-      # output$show_rv_dataOut <- renderPrint({rv$dataOut})
-      # output$show_screens <- renderUI({tagList(rv$screens)})
-      # 
-      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
-      
-      # navPage <- function(direction) {
-      #   newval <- tl.update$current.pos + direction 
-      #   newval <- max(1, newval)
-      #   newval <- min(newval, length(rv.process_config$stepsNames))
-      #   tl.update$current.pos <- newval
-      # }
-      # observeEvent(pos$prevBtn(), ignoreInit = TRUE, {navPage(-1)})
-      # observeEvent(pos$nextBtn(), ignoreInit = TRUE, {navPage(1)})
-      # 
-      
-      ###
-      ###
-      ### RESET FUNCTION
-      ### The goal is to restart the timeline as if it is the first time
-      ### The main action is to reload the dataset
-      ### if the final validation button has not be clicked, then restore the last not null dataset
-      ### among the set of datasets before current position i
-      ### else reload the dataset among the set o 1 : (i-1)
-      ###
-      ###
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
         print('MODULE A : RESET du module A')
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){
-                 shinyjs::enable(paste0('screen', x))
-                 shinyjs::reset(paste0('screen', x))
-                 })
+        ReinitScreens()
 
         rv.process_config$isDone <- c(TRUE, rep(FALSE, length(rv.process_config$stepsNames)-1))
         tl.update$current.pos <- 1
@@ -146,11 +105,6 @@ mod_wf_wf1_A_server <- function(id,
       
       observeEvent(req(rv.process_config$isDone[tl.update$current.pos]),  ignoreInit = T, {
         rv.process_config$mandatory
-        print('MODULE A : observeEvent(rv.process_config$isDone)')
-        print(paste0('     New value for rv.process_config$isDone : ', 
-                     paste0(rv.process_config$isDone, collapse=' ')))
-        
-       # browser()
         if (rv.process_config$isDone[tl.update$current.pos])
           DisableAllPrevSteps()
         
@@ -158,77 +112,32 @@ mod_wf_wf1_A_server <- function(id,
         tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
       })
       
-      # 
-      # DisableAllPrevSteps <- reactive({
-      #   pos <- max(grep(TRUE, rv.process_config$isDone))
-      #   lapply(1:pos, function(x){ shinyjs::disable(paste0('screen', x))})
-      #   
-      # })
-      # 
-      # DisableAllSteps <- reactive({
-      #   lapply(1:length(rv.process_config$isDone), function(x){ shinyjs::disable(paste0('screen', x))})
-      #   
-      # })
-      
+     
       observeEvent(tl.update$current.pos,  ignoreInit = T, {
-        rv.process_config$mandatory
-        print('MODULE A : observeEvent(tl.update$current.pos)')
-        print(paste0('     New value for tl.update$current.pos : ', tl.update$current.pos))
-       
         DisplayCurrentStep()
-
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
         tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
       })
       
-      
-    #   DisplayCurrentStep <- reactive({
-    #   lapply(1:length(rv.process_config$stepsNames), 
-    #          function(x){shinyjs::toggle(paste0('screen', x),
-    #                                      condition = x==tl.update$current.pos )}) 
-    # })
-    #   
-      
+
       observeEvent(rv.process_config$isDone[length(rv.process_config$isDone)], {
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
 })
      
       
       observeEvent(req(forcePosition() != 0), ignoreNULL=T, {
-        #print(paste0('MODULE A : New value for forcePosition() : ', forcePosition()))
         rv$forcePosition <- forcePosition()})
       
       observeEvent(req(rv$forcePosition),   {
-        #print(paste0('MODULE A : New value for rv$forcePosition : ', rv$forcePosition))
         tl.update$current.pos <- length(rv.process_config$isDone)
       })
       
       
       observeEvent(req(pos$skipBtn() != 0), ignoreNULL=T, {
-        #print(paste0('MODULE A : New value for forcePosition() : ', forcePosition()))
         rv$skip <- pos$skipBtn()
         })
       
-      
-      
-      # toggleNextBtn <- reactive({
-      # 
-      #   # # Conditional enabling of the next button
-      #   end_of_tl <- tl.update$current.pos == length(rv.process_config$stepsNames)
-      #   mandatory_step <- isTRUE(rv.process_config$mandatory[tl.update$current.pos])
-      #   validated <- isTRUE(rv.process_config$isDone[tl.update$current.pos])
-      #   cond.next.btn <-  !mandatory_step || validated
-      #   tl.update$actions$nxt <- cond.next.btn && rv$skip == 0
-      # })
-      # 
-      # togglePrevBtn <- reactive({
-      #   pos$skipBtn()
-      #   start_of_tl <- tl.update$current.pos == 1
-      #   cond.prev.btn <- !start_of_tl
-      #   tl.update$actions$prv <-  cond.prev.btn && rv$skip == 0
-      # })
-      
-     
+
       
        #####################################################################
        ## screens of the module
@@ -321,10 +230,6 @@ mod_wf_wf1_A_server <- function(id,
             tl.update$current.pos <- length(rv.process_config$isDone)
             rv.process_config$isDone[length(rv.process_config$isDone)] <- TRUE
             tl.update$actions$skip <- FALSE
-            #rv$dataIn <- addAssay(rv$dataIn, 
-            #                    rv$dataIn[[length(rv$dataIn)]], 
-            #                      name=paste0(rv.process_config$process.name, '.skipped')
-            #)
             rv$dataOut <- dataIn()
           })
        

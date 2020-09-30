@@ -1,3 +1,29 @@
+
+InitScreens <- reactive({
+  # initialisation of the screens
+  for (i in 1:length(rv.process_config$stepsNames))
+    rv$screens[[i]] <- if (i == tl.update$current.pos) 
+      div(id = ns(paste0("screen", i)),  rv$screens[[i]])
+  else  
+    shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
+  rv$screens
+  })
+
+CreateScreens <- reactive({
+  rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
+    do.call(uiOutput, list(outputId=ns(paste0("screen", x))))})
+  rv$screens
+})
+
+ReinitScreens <- reactive({
+  lapply(1:length(rv.process_config$stepsNames), 
+         function(x){
+           shinyjs::enable(paste0('screen', x))
+           shinyjs::reset(paste0('screen', x))
+         })
+})
+
+
 output$show_dataIn <- renderPrint({dataIn()})
 output$show_rv_dataIn <- renderPrint({rv$dataIn})
 output$show_rv_dataOut <- renderPrint({rv$dataOut})
