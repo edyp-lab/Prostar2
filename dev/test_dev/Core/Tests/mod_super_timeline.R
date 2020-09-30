@@ -59,8 +59,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       # Initialization of the process
       observeEvent(req(dataIn()), {
-        print("--------------------------------------------------")
-        print('MODULE SUPER_TIMELINE : Initialisation du module')
+        print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
         rv$dataIn <- dataIn()
         
         rv$remoteReset <- rep(length(rv.process_config$stepsNames), FALSE)
@@ -80,7 +79,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         togglePrevBtn()
         toggleNextBtn()
         
-        print(paste0('MODULE SUPER_TL : New value for tl.update$current.pos : ', tl.update$current.pos))
+       # print(paste0('MODULE SUPER_TL : New value for tl.update$current.pos : ', tl.update$current.pos))
       })
       
       
@@ -219,17 +218,19 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(rv$tmpA$validated(),  { 
-        print('MODULE SUPER_TL : New value for rv$validated() :')
-        print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
+        #print('MODULE SUPER_TL : New value for rv$validated() :')
+        #print(paste0("      rv$tmpA$validated() = ", rv$tmpA$validated()))
         rv.process_config$isDone[2] <- rv$tmpA$validated()
       })
       
       observeEvent(req(rv$tmpA$reseted()!=0), {
-        print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
-        ind <- grep(rv.process_config$stepsNames[2], names(rv$dataIn))
+        #print(paste0('MODULE SUPER_TL : New value for rv$tmpA$reseted() : ', rv$tmpA$reseted()))
+        #browser()
+        ind <- grep(rv.process_config$stepsNames[2], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
-          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(dataIn())) ]
-          rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
+          rv$dataOut <- rv$dataIn 
+          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
         }
         
       })
@@ -264,13 +265,13 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(req(rv$tmpB$reseted()!=0), {
-        print(paste0('MODULE SUPER_TL : New value for rv$tmpB$reseted() : ', rv$tmpB$reseted()))
-        ind <- grep(rv.process_config$stepsNames[3], names(rv$dataIn))
+        #print(paste0('MODULE SUPER_TL : New value for rv$tmpB$reseted() : ', rv$tmpB$reseted()))
+        ind <- grep(rv.process_config$stepsNames[3], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
-          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(dataIn())) ]
-          rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
+          rv$dataOut <- rv$dataIn 
+          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
         }
-        
       })
       
       
@@ -305,11 +306,12 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       })
       
       observeEvent(req(rv$tmpC$reseted()!=0), {
-        print(paste0('MODULE SUPER_TL : New value for rv$tmpC$reseted() : ', rv$tmpC$reseted()))
-        ind <- grep(rv.process_config$stepsNames[4], names(rv$dataIn))
+        #print(paste0('MODULE SUPER_TL : New value for rv$tmpC$reseted() : ', rv$tmpC$reseted()))
+        ind <- grep(rv.process_config$stepsNames[4], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
-          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(dataIn())) ]
-          rv.process_config$isDone[ind:length(dataIn())] <- FALSE
+          rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
+          rv$dataOut <- rv$dataIn 
+          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
         }
         
       })

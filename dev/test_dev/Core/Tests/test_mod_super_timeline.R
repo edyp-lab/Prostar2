@@ -39,9 +39,9 @@ server <- function(input, output, session) {
                                 dataIn = reactive({rv$current.obj}) )
   
   observeEvent(rv$tmp$dataOut(), {
-    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server')
+    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')
+    print(rv$tmp$dataOut())
     #rv$current.obj <- rv$tmp()
-    print(paste0("      names(dataIn()) = ", paste0(names(rv$tmp$dataOut()), collapse=' - ')))
     })
   
   observeEvent(rv$tmp$reseted(),{

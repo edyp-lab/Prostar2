@@ -62,15 +62,14 @@ mod_wf_wf1_A_server <- function(id,
       
       # Initialization of the process
       observeEvent(req(dataIn()), { 
-        print("--------------------------------------------------")
-        print('MODULE A : Initialisation du module A')
-        print(paste0("rv.process_config$isDone = ", paste0(rv.process_config$isDone, collapse=' ')))
+        print(' ------- MODULE A : Initialisation du module A ------- ')
+        #print(paste0("rv.process_config$isDone = ", paste0(rv.process_config$isDone, collapse=' ')))
         rv$dataIn <- dataIn()
         rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
         #browser()
         
-        print(paste0("     tl.update$current.pos = ", tl.update$current.pos))
-        print(paste0("     rv$process.validated = ", rv$process.validated))
+        #print(paste0("     tl.update$current.pos = ", tl.update$current.pos))
+        #print(paste0("     rv$process.validated = ", rv$process.validated))
        # Instantiation of the screens
         rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
           do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}) 
@@ -126,7 +125,7 @@ mod_wf_wf1_A_server <- function(id,
       ###
       ###
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-        print('MODULE A : RESET du module A')
+        #print('MODULE A : RESET du module A')
         lapply(1:length(rv.process_config$stepsNames), 
                function(x){shinyjs::enable(paste0('screen', x))})
         
@@ -138,6 +137,7 @@ mod_wf_wf1_A_server <- function(id,
         
         if (!rv.process_config$isDone[length(rv.process_config$isDone)]){
           rv$dataIn <- dataIn()
+          rv$dataOut <- NULL
         }
 
       })
@@ -157,8 +157,8 @@ mod_wf_wf1_A_server <- function(id,
       
       observeEvent(c(rv.process_config$isDone,tl.update$current.pos),  ignoreInit = T, {
         rv.process_config$mandatory
-        print('MODULE A : observeEvent(rv.process_config$isDone)')
-        print(paste0('     New value for rv.process_config$isDone : ', paste0(rv.process_config$isDone, collapse=' ')))
+        #print('MODULE A : observeEvent(rv.process_config$isDone)')
+        #print(paste0('     New value for rv.process_config$isDone : ', paste0(rv.process_config$isDone, collapse=' ')))
        
         lapply(1:length(rv.process_config$stepsNames), 
                function(x){shinyjs::toggle(paste0('screen', x),
@@ -218,12 +218,17 @@ mod_wf_wf1_A_server <- function(id,
        output$screen2 <- renderUI({
          tagList(
            div(id=ns('screen2'),
-               tags$h2('Step 1'),
-               actionButton(ns('perform_screen2_btn'), 'Perform'),
-               selectInput(ns('select1'), 'Select step 1', 
+               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+               tags$h2('Step 1')),
+               div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
+                   selectInput(ns('select1'), 'Select step 1', 
                            choices = 1:5, 
                            selected = 1,
                            width = '150px')
+               ),
+               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                   actionButton(ns('perform_screen2_btn'), 'Perform'))
+               
            )
          )
        })
@@ -240,12 +245,15 @@ mod_wf_wf1_A_server <- function(id,
          
          tagList(
            div(id=ns('screen3'),
-               tags$h3('Step 2'),
-               actionButton(ns('perform_screen3_btn'), 'Perform'),
-               selectInput(ns('select2'), 'Select step 2',
+               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                   tags$h3('Step 2')),
+               div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
+                   selectInput(ns('select2'), 'Select step 2',
                            choices = 1:5,
                            selected = 1,
-                           width = '150px')
+                           width = '150px')),
+               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                   actionButton(ns('perform_screen3_btn'), 'Perform'))
            )
          )
        })
@@ -264,8 +272,10 @@ mod_wf_wf1_A_server <- function(id,
          
          tagList(
            div(id=ns('screen4'),
-               tags$h3('Step 4'),
-               actionButton(ns('validate_btn'), 'Validate')
+               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                   tags$h3('Step 4')),
+               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                   actionButton(ns('validate_btn'), 'Validate'))
            )
          )
        })
@@ -279,7 +289,9 @@ mod_wf_wf1_A_server <- function(id,
               rv$dataOut <- rv$dataIn
               #rv$dataIn <- NULL
               rv.process_config$isDone[4] <- TRUE
-
+              # This feature is to disable the reset button in the process module
+              # once it has been validated
+              #tl.update$actions$rst <- FALSE
             })
        })
        
