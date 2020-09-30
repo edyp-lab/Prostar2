@@ -24,24 +24,17 @@ server <- function(input, output, session) {
 rv <- reactiveValues(
   current.obj = Exp1_R25_prot[1:10,,],
   tmp = NULL,
-  remoteReset = 0,
-  dataOut = NULL
+  remoteReset = 0
 )
 
   observeEvent(input$testclic, {rv$remoteReset <- input$tesclic})
   
   rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", 
-                                dataIn = rv$current.obj, 
-                                remoteReset = NULL,
-                                forcePosition = FALSE
-                                )
+                                dataIn = reactive({rv$current.obj}), 
+                                remoteReset = reactive({input$testclic}),
+                                forcePosition = reactive({input$testclic}))
   
-  observeEvent(rv$tmpA$dataOut(),{print('toto')
-    isolate({
-      rv$dataOut <- rv$tmpA$dataOut()
-    })
-    
-    })
+  #observeEvent(rv$tmp$dataOut(),{rv$current.obj <- rv$tmp$dataOu()  })
 }
 
 

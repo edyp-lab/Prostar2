@@ -32,9 +32,7 @@ mod_timeline_ui <- function(id){
       align= 'center',
       column(width=2,
              div(style = btn_style,
-               actionButton(ns("rstBtn"), "reset",
-                            class = redBtnClass,
-                            style='padding:4px; font-size:80%')
+               uiOutput(ns('show_reset'))
              ),
              div( style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
@@ -87,6 +85,13 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update){
       shinyjs::toggleState('prevBtn', condition=tl.update$actions$prv)
    })
     
+    
+    
+    output$show_reset <- renderUI({
+      actionButton(ns("rstBtn"), paste0("Reset ", process_config$type),
+                   class = redBtnClass,
+                   style='padding:4px; font-size:80%')
+    })
     ## Functions for timeline and styles
     
     output$load_css_style <- renderUI({
