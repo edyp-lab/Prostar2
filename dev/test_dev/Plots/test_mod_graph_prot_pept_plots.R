@@ -1,5 +1,5 @@
 library(visNetwork)
-
+library(highcharter)
 
 
 source(file.path("../../../R/Plots","mod_graph_pept_prot.R"), local=TRUE)$value
@@ -7,7 +7,7 @@ source(file.path("../../../R/Plots","mod_graph_pept_prot.R"), local=TRUE)$value
 
 
 ui <- fluidPage(
-  mod_plots_corr_matrix_ui('plots_cc')
+  mod_graph_pept_prot_ui('plots_cc')
 )
 
 
@@ -19,11 +19,11 @@ server <- function(input, output, session) {
     settings = NULL
   )
   obj <- Exp1_R25_prot[[length(names(Exp1_R25_prot))]]
-   
-  callModule(mod_plots_corr_matrix_server,'plots_cc', 
-             obj = reactive({obj}),
-             cc = reactive({xxxx}),
-             matAdj = reactive({xxx})
+  
+  mod_graph_pept_prot_server('plots_cc', 
+                               obj = reactive({obj}),
+                               cc = reactive({xxxx}),
+                               matAdj = reactive({xxx})
   )
 }
 

@@ -44,63 +44,66 @@ mod_plots_group_mv_ui <- function(id){
 #' @importFrom SummarizedExperiment assay
 #' @import highcharter
 #' 
-mod_plots_group_mv_server <- function(input, output, session,
-                                      obj,
-                                      conds,
-                                      base_palette){
-  ns <- session$ns
+mod_plots_group_mv_server <- function(id, obj, conds, base_palette){
   
-  
-  observe({
-    req(obj())
-    if (class(obj()) != "SummarizedExperiment") { return(NULL) }
-  })
-  
-  
-  
-  output$histo_MV <- renderHighchart({
-    req(obj())
-    conds()
-    base_palette()
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    withProgress(message = 'Making plot', value = 100, {
-      tmp <- DAPAR2::mvHisto_HC(SummarizedExperiment::assay(obj()),
-                                conds=conds(),
-                                palette=base_palette())
+    
+    observe({
+      req(obj())
+      if (class(obj()) != "SummarizedExperiment") { return(NULL) }
     })
-    tmp
-  })
-  
-  
-  
-  output$histo_MV_per_lines <- renderHighchart({
-    req(obj())
-    conds()
     
-    isolate({
+    
+    
+    output$histo_MV <- renderHighchart({
+      req(obj())
+      conds()
+      base_palette()
+      
       withProgress(message = 'Making plot', value = 100, {
-        tmp <- DAPAR2::mvPerLinesHisto_HC(SummarizedExperiment::assay(obj()),
-                                          conds())
+        tmp <- DAPAR2::mvHisto_HC(SummarizedExperiment::assay(obj()),
+                                  conds=conds(),
+                                  palette=base_palette())
       })
+      tmp
     })
-    tmp
-  })
-  
-  
-  
-  
-  output$histo_MV_per_lines_per_conditions <- renderHighchart({
-    req(obj())
-    conds()
-    base_palette()
     
-    withProgress(message = 'Making plot', value = 100, {
-      tmp <- DAPAR2::mvPerLinesHistoPerCondition_HC(SummarizedExperiment::assay(obj()),
-                                                    samplesData=conds(),
-                                                    palette=base_palette())
+    
+    
+    output$histo_MV_per_lines <- renderHighchart({
+      req(obj())
+      conds()
+      
+      isolate({
+        withProgress(message = 'Making plot', value = 100, {
+          tmp <- DAPAR2::mvPerLinesHisto_HC(SummarizedExperiment::assay(obj()),
+                                            conds())
+        })
+      })
+      tmp
     })
-    tmp
+    
+    
+    
+    
+    output$histo_MV_per_lines_per_conditions <- renderHighchart({
+      req(obj())
+      conds()
+      base_palette()
+      
+      withProgress(message = 'Making plot', value = 100, {
+        tmp <- DAPAR2::mvPerLinesHistoPerCondition_HC(SummarizedExperiment::assay(obj()),
+                                                      samplesData=conds(),
+                                                      palette=base_palette())
+      })
+      tmp
+    })
+    
+    
   })
+  
   
 }
 

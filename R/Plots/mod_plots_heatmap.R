@@ -66,56 +66,59 @@ mod_plots_heatmap_ui <- function(id){
 #' 
 #' @importFrom SummarizedExperiment assay
 #' 
-mod_plots_heatmap_server <- function(input, output, session, 
-                                     obj,
-                                     conds,
-                                     width = 900){
-  ns <- session$ns
+mod_plots_heatmap_server <- function(id, obj, conds, width = 900){
   
-  observe({
-    req(obj())
-    if (class(obj()) != "SummarizedExperiment") { return(NULL) }
-  })
-  
-  limitHeatmap <- 20000
-  height <- paste0(2*width/3,"px")
-  width <- paste0(width,"px")
-  
-  output$DS_PlotHeatmap <- renderUI({
-    req(obj())
-    if (nrow(SummarizedExperiment::assay(obj())) > limitHeatmap){
-      tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
-    }else {
-      tagList(
-        plotOutput(ns("heatmap_ui"), width = width, height = height)
-      )
-    }
-  })
-  
-  
-  
-  output$heatmap_ui <- renderPlot({
-    heatmap()
-  })
-  
-  
-  
-  heatmap <- reactive({
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    req(obj())
-    req(input$linkage)
-    req(input$distance)
+    observe({
+      req(obj())
+      if (class(obj()) != "SummarizedExperiment") { return(NULL) }
+    })
     
-    isolate({ 
-      withProgress(message = 'Making plot', value = 100, {
-        DAPAR2::heatmapD(qData=SummarizedExperiment::assay(obj()),
-                         conds=conds(),
-                         distance=input$distance, 
-                         cluster=input$linkage,
-                         dendro=TRUE)
+    limitHeatmap <- 20000
+    height <- paste0(2*width/3,"px")
+    width <- paste0(width,"px")
+    
+    output$DS_PlotHeatmap <- renderUI({
+      req(obj())
+      if (nrow(SummarizedExperiment::assay(obj())) > limitHeatmap){
+        tags$p("The dataset is too big to compute the heatmap in a reasonable time.")
+      }else {
+        tagList(
+          plotOutput(ns("heatmap_ui"), width = width, height = height)
+        )
+      }
+    })
+    
+    
+    
+    output$heatmap_ui <- renderPlot({
+      heatmap()
+    })
+    
+    
+    
+    heatmap <- reactive({
+      
+      req(obj())
+      req(input$linkage)
+      req(input$distance)
+      
+      isolate({ 
+        withProgress(message = 'Making plot', value = 100, {
+          DAPAR2::heatmapD(qData=SummarizedExperiment::assay(obj()),
+                           conds=conds(),
+                           distance=input$distance, 
+                           cluster=input$linkage,
+                           dendro=TRUE)
+        })
       })
     })
+    
+    
   })
+  
 }
 
 ## To be copied in the UI

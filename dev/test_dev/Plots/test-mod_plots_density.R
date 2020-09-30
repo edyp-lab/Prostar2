@@ -26,13 +26,13 @@ server <- function(input, output, session) {
   r <- reactiveValues(
     settings = NULL
   )
-  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
+  r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
   
-  callModule(mod_plots_density_server,'plots_density', 
-             obj = reactive({obj}),
-             conds = reactive({conds}),
-             legend = reactive({legend}),
-             base_palette = reactive({r$settings()$examplePalette})
+  mod_plots_density_server('plots_density', 
+                           obj = reactive({obj}),
+                           conds = reactive({conds}),
+                           legend = reactive({legend}),
+                           base_palette = reactive({r$settings()$examplePalette})
   )
 }
 

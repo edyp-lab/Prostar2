@@ -103,7 +103,7 @@ mod_navigation_server <- function(id, style=1, pages, start=1){
       suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
       
       code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
-      #code[[1]][1] <- paste0(prefix, 2, suffix, collapse='')
+      #code[[1]][1] <- paste0(prefix, 1, suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
       
@@ -208,44 +208,21 @@ mod_navigation_server <- function(id, style=1, pages, start=1){
     })
     
     
-    
+    ###########################################################################
     output$timeline4 <- renderUI({
       current$val
       pages
 
       steps <- pages$stepsNames
       
-      txt <- "<div id='container'> <div id='thumbs'> <div class='step-block'>"
+      txt <- "<div id='lineCount'> <div id='line'>"
       for (i in 1:current$nbSteps){
-        txt <- paste0(txt, "<div class='title'",steps[i],"></div>")
+        txt <- paste0(txt, "<div id='span'>",steps[i],"</div>")
       }
       txt <- paste0(txt,"</div>")
       
     })
-    
-    output$timeline5 <- renderUI({
-      current$val
-      pages
-      status <- rep('', current$nbSteps)
-      status[current$val] <- ' active'
-      
-      if( !is.null(pages$mandatory))
-        status[which(pages$mandatory)] <- 'mandatory'
-      
-      status[which(pages$isDone)] <- 'complete'
-      
-      active  <- rep('', current$nbSteps)
-      active[current$val] <- 'active'
-      
-      steps <- pages$stepsNames
-      
-      txt <- "<div id='container'> <div id='thumbs'> <div class='step-block'>"
-      for (i in 1:current$nbSteps){
-        txt <- paste0(txt, "<div class='title'",steps[i],"></div>")
-      }
-      txt <- paste0(txt,"</div>")
-      
-    })
+    ###########################################################################
     
     
     # Reset UI by setting the variable reset to TRUE. The caller program has the function
@@ -575,343 +552,112 @@ $lineWidth: 5px;
 }", 
 style3 = "",
 style4 = "$test: test;
-$colCompleted: #07910A;
-.container {
-height: 600px;
-width: 100%;
-background-color: #ddd;
-overflow: hidden;
-#position: relative;
-#overflow-x: scroll;
-  margin-top: 30px;
-  display: inline-block;
+.body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #e97162;
+  font-family: Arial;
+  overflow: hidden;
 }
-.thumbs {
-background-color: #ddd;
-position: absolute;
-top: 0px;
-left: 0px;
-height: 100%;
-width: auto;
-overflow: hidden;
-white-space: nowrap;
-padding: 30px 100px;
-}
-.step-block {
-  height: 100%;
-  width: 300px;
-  background-color: #cdcdcd;
-  margin: 0 -2px;
-  border-right: 1px solid #fff;
-  display: inline-block;
-  font-family: 'roboto condensed', sans-serif;
-  font-size:60px;
-  font-weight: 100;
-  color: #FFF;
-  cursor: pointer;
-  box-shadow: 2px 5px 20px rgba(0,0,0,0.8);
-  transition: width 0.2s;
-}
-.step-block:last-of-type {
-  border-right: none;
-}
-.cover {
+
+.lineCont {
   width: 100%;
-  height: 100%;
-  transition: background 0.5s;
-  background: rgba(0,0,0,0.8);
+  height: 20%;
 }
-.cover:hover {
-  width: 100%;
-  height: 100%;
-  transition: background .5s;
-  background: rgba(0,0,0,0.8);
+
+.line {
+  height: 6px;
+  width: 70%;
+  background: white;
+  border-radius: 5px;
+  margin: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  position: relative;
 }
-.title {
+
+.span {
+  display: none;
+  width: 70%;
+  margin: auto;
+  margin-top: 25%;
+  text-align: center;
+  color: white;
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  background: #e97162;
+  border-radius: 15px;
   position: absolute;
-  display: block;
-  width: 260px;
-    top: 60px;
-    font-size: 15px;
-    margin: 30px;
-  white-space: normal;
-  transition: width 1s;
+  top: -7px;
+  border: 3px solid white;
+  cursor: pointer;
+  &:before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: white;
+    position: absolute;
+    border-radius: 100%;
+    top: 2px;
+    left: 2px;
+    display: none;
+  }
+  .popupSpan {
+    width: auto;
+    height: auto;
+    padding: 10px;
+    white-space: nowrap;
+    display: inline-block;
+    color: white;
+    position: absolute;
+    top: 20px;
+    left: -75px;
+    display: none;
+    transition: all 0.1s ease-out;
+  }
+  // &:nth-child(odd) .popupSpan {
+  //   top: 20px;
+  // }
+  &.hover:before, &.active:before {
+    display: block;
+  }
+  &.hover .popupSpan, &.active .popupSpan {
+    display: block;
+  }
+  &.active .popupSpan {
+    top: -40px;
+  }
 }
-",
-style5 = "$test: test
-$primary: #fc5a7d
-$secondary: #7d6dfb
-$dark: #18294f
-$timeline-1: #fec541
-$timeline-2: #36d484
-$timeline-3: #32ccf4
-$timeline-4: #fd9252
-$bg-mild: #f5f7f6
-$bg-reg: #dfe3e6
-$bg-dark: #7f9298
-$text-black: #4A4A4A
 
-body
-  // background-color: $bg-mild
-  margin: 0
-
-.body-wrap
-  background-color: #fff
-  width: 600px
-  min-height: 500px
-  margin: 0 auto
-  font-size: 12px
-  
-.pres-timeline
-  font-family: roboto, helvetica, sans-serif
-  font-size: 12px
-  color: $text-black
-  width: 100%
-  margin: 30px 0
-  > div > div 
-    // this is  fixing the padding bug
-    padding: 1em 0
-    box-sizing: border-box
-  
-  .periods-container, .cards-container
-    overflow: hidden
-    box-sizing: border-box
-    position: relative
-    min-height: 100px
-    transition: height .5s ease-in-out
-    background-color: #FFF
-  .timeline-container
-    
-.periods-container
-  &:before
-    background-image: linear-gradient(left, #FFF, rgba(248, 248, 248, 0))
-    left: 0
-    content: ''
-    position: absolute
-    z-index: 2
-    top: 0
-    height: 100%
-    width: 100px
-  &:after
-    background-image: linear-gradient(right, #FFF, rgba(248, 248, 248, 0))
-    right: 0
-    content: ''
-    position: absolute
-    z-index: 2
-    top: 0
-    height: 100%
-    width: 100px
-  .btn-back, .btn-next
-    // background-color: 
-    // border: 2px solid $bg-reg
-    display: inline-block
-    width: 15%
-    height: 100%
-    position: absolute
-    cursor: pointer
-    z-index: 10
-    transition: 0.3s ease-in-out
-    &:hover
-      background-color: rgba(0,0,0,.05)
-    &.hide
-      display: none
-  .btn-back
-    left: 0
-  .btn-next
-    right: 0
-  section
-    width: 70%
-    height: 0
-    position: absolute
-    margin-left: 15%
-    // border: 1px solid $bg-mild
-    border-bottom: 5px solid $bg-reg
-    padding: 1.5em
-    box-sizing: border-box
-    transition: transform .3s ease-in-out, opacity .2s ease, height .3s ease
-    bottom: 0
-    opacity: 0
-    background-color: #fff
-    &.active
-      height: auto
-      opacity: 1
-      transform: translateX(0)
-      z-index: 5
-      .title, p
-        display: block
-    &.prev
-      height: auto
-      opacity: 0.4
-      transform: translateX(-100%)
-      z-index: 0
-      .year
-        text-align: right
-    &.next
-      height: auto
-      opacity: 0.4
-      transform: translateX(100%)
-      z-index: 0
-    .year
-      font-size: 20px
-      font-weight: 400
-    .title
-      color: $text-black
-      font-size: 28px
-      font-weight: 400
-      display: none
-    p
-      display: none
-// Timeline styles
-.timeline-container
-  position: relative
-  width: 100%
-  height: 50px
-  overflow: hidden
-  &:before
-    background-image: linear-gradient(left, #FFF, rgba(248, 248, 248, 0))
-    left: 0
-    content: ''
-    position: absolute
-    z-index: 2
-    top: 0
-    height: 100%
-    width: 100px
-  &:after
-    background-image: linear-gradient(right, #FFF, rgba(248, 248, 248, 0))
-    right: 0
-    content: ''
-    position: absolute
-    z-index: 2
-    top: 0
-    height: 100%
-    width: 100px
-  .timeline
-    position: absolute
-    display: block
-    height: 50px
-    transition: left .3s ease-in-out
-    ol
-      display: block
-      width: 100%
-      height: 2px
-      background-color: $bg-reg
-      list-style: none
-      padding-left: 210px
-      padding-right: 300px
-      li
-        display: inline-block
-        padding: 5px
-        margin-top: -11px
-        margin-left: 80px
-        border-radius: 50%
-        border: 3px solid $bg-dark
-        background-color: #FFF
-        position: relative
-        cursor: pointer
-        box-shadow: 0 2px 5px rgba(0,0,0,.2)
-        &.active
-          box-shadow: none
-        &.active:before
-          content: ''
-          display: block
-          height: 25px
-          width: 1px
-          position: absolute
-          top: -25px
-          transition: opacity .3s ease-in-out
-          // opacity: 0
-        &.active:after
-          content: ''
-          display: block
-          height: 25px
-          width: 1px
-          position: absolute
-          bottom: -25px
-          transition: opacity .3s ease-in-out
-          // opacity: 0
-  .btn-back, .btn-next
-    display: inline-block
-    position: absolute
-    cursor: pointer
-    margin-top: -2px
-    z-index: 11
-    transition: all .3s ease
-    &.hide
-      display: none
-      
-    &:hover
-      border-color: $bg-dark
-  .btn-back
-    left: 1em
-    // background: url('data:image/svg+xml;utf8,<svg width='14' height='22' viewBox='6 4 14 22' xmlns='http://www.w3.org/2000/svg'><path fill='#D8D8D8' fill-rule='evenodd' d='M11.828 15l7.89-7.89-2.83-2.828L6.283 14.89l.11.11-.11.11L16.89 25.72l2.828-2.83'/></svg>') no-repeat
-.btn-next
-right: 1em
-// background: url('data:image/svg+xml;utf8,<svg width='14' height='23' viewBox='10 3 14 23' xmlns='http://www.w3.org/2000/svg'><path fill='#D8D8D8' fill-rule='evenodd' d='M18.172 14.718l-7.89-7.89L13.112 4l10.606 10.607-.11.11.11.11-10.608 10.61-2.828-2.83 7.89-7.89'/></svg>') no-repeat
-  
-  // Cards
-.cards-container
-// &:after
-//   content: ''
-//   display: block
-//   width: 100%
-//   height: 2em
-//   background-image: linear-gradient(bottom, #FFF, rgba(248, 248, 248, 0))
-                                       //   position: absolute
-                                       //   bottom: 0
-                                       &:before
-                                       background-image: linear-gradient(left, #FFF, rgba(248, 248, 248, 0))
-                                                                         left: 0
-                                                                         content: ''
-                                                                         position: absolute
-                                                                         z-index: 2
-                                                                         top: 0
-                                                                         height: 100%
-                                                                         width: 100px
-                                                                         &:after
-                                                                         background-image: linear-gradient(right, #FFF, rgba(248, 248, 248, 0))
-                                                                                                           right: 0
-                                                                                                           content: ''
-                                                                                                           position: absolute
-                                                                                                           z-index: 2
-                                                                                                           top: 0
-                                                                                                           height: 100%
-                                                                                                           width: 100px
-                                                                                                           section
-                                                                                                           width: 70%
-                                                                                                           position: absolute
-                                                                                                           margin-left: 15%
-                                                                                                           margin-bottom: 2em
-                                                                                                           border: 1px solid $bg-mild
-                                                                                                           padding: 1.5em
-                                                                                                           box-sizing: border-box
-                                                                                                           transition: transform .3s ease-in-out
-                                                                                                           top: 0
-                                                                                                           opacity: 0
-                                                                                                           border-radius: 8px
-                                                                                                           background-color: #fff
-                                                                                                             box-shadow: 0 10px 15px rgba(0,0,0,.15)
-                                                                                                           &.active
-                                                                                                           height: auto
-                                                                                                           opacity: 1
-                                                                                                           transform: translateX(0)
-                                                                                                           z-index: 5
-                                                                                                           &.prev
-                                                                                                           height: auto
-                                                                                                           opacity: 0.4
-                                                                                                           transform: translateX(-105%)
-                                                                                                           z-index: 0
-                                                                                                           &.next
-                                                                                                           height: auto
-                                                                                                           opacity: 0.4
-                                                                                                           transform: translateX(105%)
-                                                                                                           z-index: 0
-                                                                                                           .year
-                                                                                                           text-align: center
-                                                                                                           font-size: 16px
-                                                                                                           margin: 0
-                                                                                                           .title
-                                                                                                           font-weight: 400
-                                                                                                           img
-                                                                                                           width: 100%
-"
+.mainCont {
+  height: 80%;
+  width: 100%;
+  position: relative;
+  color: white;
+  font-size: 62px;
+  text-align: center;
+  transition: all 0.2s ease-out;
+  span {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 30%;
+    transition: all 0.2s ease-out;
+    &.right {
+      left: 200%;
+    }
+    &.center {
+      left: 0% !important;
+    }
+    &.left {
+      left: -100%;
+    }
+  }
+}"
 )

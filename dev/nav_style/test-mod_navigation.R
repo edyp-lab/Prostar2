@@ -29,7 +29,7 @@ server <- function(input, output, session) {
   
   
   screens <- mod_navigation_server("test_nav",
-                                  style = 1,
+                                  style = 4,
                                   pages = r.nav  )
   
   output$show <- renderUI({

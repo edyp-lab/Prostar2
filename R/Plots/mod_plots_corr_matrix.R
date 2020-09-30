@@ -52,6 +52,9 @@ mod_plots_corr_matrix_ui <- function(id){
     highchartOutput(ns("corrMatrix"),width = '600px',height = '500px')
   )
 }
+# mod_navigation_server <- function(id, style=1, pages, start=1){
+#   
+#   moduleServer(id, function(input, output, session) {
 
 # Module Server
 
@@ -71,71 +74,71 @@ mod_plots_corr_matrix_ui <- function(id){
 #' 
 #' @importFrom DAPAR2 corrMatrixD_HC
 #' 
-mod_plots_corr_matrix_server <- function(input, output, session,
-                                         obj,
-                                         names=NULL,
-                                         gradientRate=NULL){
+mod_plots_corr_matrix_server <- function(id, obj, names=NULL, gradientRate=NULL){
   
-  ns <- session$ns
-  
-  
-  rv.corr <- reactiveValues(
-    gradient = NULL,
-    showValues = FALSE
-  )
-  
-  
-  output$gradient_ui <- renderUI({
-    req(rv.corr$gradient)
-    sliderInput(ns("expGradientRate"),
-                "Tune to modify the color gradient",
-                min = 0,
-                max = 1,
-                value = rv.corr$gradient,
-                step=0.01)
-  })
-  
-  
-  output$showValues_ui <- renderUI({
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     
-    checkboxInput(ns('showDataLabels'), 'Show labels', value=rv.corr$showValues)
     
-  })
-  
-  observeEvent(req(input$showDataLabels),{
-    rv.corr$showValues <- input$showDataLabels
-  })
-  
-  observeEvent(req(gradientRate()),{
-    rv.corr$gradient <- gradientRate()
-  })
-  
-  observeEvent(req(input$expGradientRate),{
-    rv.corr$gradient <- input$expGradientRate
-  })
-  
-  
-  corrMatrix <- reactive({
-    req(obj())
-    rv.corr$gradient 
-    rv.corr$showValues
+    rv.corr <- reactiveValues(
+      gradient = NULL,
+      showValues = FALSE
+    )
     
- 
+    
+    output$gradient_ui <- renderUI({
+      req(rv.corr$gradient)
+      sliderInput(ns("expGradientRate"),
+                  "Tune to modify the color gradient",
+                  min = 0,
+                  max = 1,
+                  value = rv.corr$gradient,
+                  step=0.01)
+    })
+    
+    
+    output$showValues_ui <- renderUI({
+      
+      checkboxInput(ns('showDataLabels'), 'Show labels', value=rv.corr$showValues)
+      
+    })
+    
+
+    observeEvent(req(!is.null(input$showDataLabels)),{
+      rv.corr$showValues <- input$showDataLabels
+    })
+    
+    observeEvent(req(gradientRate()),{
+      rv.corr$gradient <- gradientRate()
+    })
+    
+    observeEvent(req(input$expGradientRate),{
+      rv.corr$gradient <- input$expGradientRate
+    })
+
+    corrMatrix <- reactive({
+      req(obj())
+      rv.corr$gradient 
+      rv.corr$showValues
+      
+      
       withProgress(message = 'Making plot', value = 100, {
         tmp <- DAPAR2::corrMatrixD_HC(obj = obj(), 
                                       names = names(), 
                                       rate = rv.corr$gradient,
                                       showValues = rv.corr$showValues)
       })
-
-    tmp
+      
+      tmp
+    })
+    
+    
+    output$corrMatrix <- renderHighchart({
+      corrMatrix()
+    }) 
+    
+    
   })
-  
-  
-  output$corrMatrix <- renderHighchart({
-    corrMatrix()
-  }) 
-  
   
 }
 
@@ -144,4 +147,3 @@ mod_plots_corr_matrix_server <- function(input, output, session,
 
 ## To be copied in the server
 # callModule(mod_plots_corr_matrix_server, "plots_corr_matrix_ui_1")
-

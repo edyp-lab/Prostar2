@@ -16,10 +16,10 @@ server <- function(input, output, session) {
   obj <- Exp1_R25_prot[[2]]
   conds <- colData(Exp1_R25_prot)[['Condition']]
   
-  callModule(mod_plots_heatmap_server,'plots_heatmap',
-             obj = reactive({obj}),
-             conds = reactive({conds})
-             )
+  mod_plots_heatmap_server('plots_heatmap',
+                           obj = reactive({obj}),
+                           conds = reactive({conds})
+  )
   
 }
 

@@ -34,35 +34,37 @@ mod_plots_density_ui <- function(id){
 #' @importFrom DAPAR2 densityPlotD_HC
 #' @importFrom SummarizedExperiment assay
 #' 
-mod_plots_density_server <- function(input, output, session, 
-                                     obj,
-                                     conds,
-                                     legend=NULL,
-                                     base_palette=NULL){
-  ns <- session$ns
+mod_plots_density_server <- function(id, obj, conds, legend=NULL, base_palette=NULL){
   
-  observe({
-    req(obj())
-    if (class(obj()) != "SummarizedExperiment") { return(NULL) }
-  })
-  
-  
-  output$Densityplot <- renderHighchart({
-    req(obj())
-    req(conds())
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    tmp <- NULL
-    isolate({
-      
-      withProgress(message = 'Making plot', value = 100, {
-        tmp <- DAPAR2::densityPlotD_HC(qData = assay(obj()),
-                                       conds = conds(),
-                                       legend = legend(),
-                                       palette = base_palette())
-      })
+    observe({
+      req(obj())
+      if (class(obj()) != "SummarizedExperiment") { return(NULL) }
     })
-    tmp
+    
+    
+    output$Densityplot <- renderHighchart({
+      req(obj())
+      req(conds())
+      
+      tmp <- NULL
+      isolate({
+        
+        withProgress(message = 'Making plot', value = 100, {
+          tmp <- DAPAR2::densityPlotD_HC(qData = assay(obj()),
+                                         conds = conds(),
+                                         legend = legend(),
+                                         palette = base_palette())
+        })
+      })
+      tmp
+    })
+    
+    
   })
+  
   
 }
 
