@@ -103,33 +103,66 @@ mod_timeline_server <- function(id, style=1, process_config, tl.update, showSkip
       req(length(process_config$stepsNames))
       req(style != 3)
       
-      if (style %in%  c(1:2,6)) {
-        file <- paste0('timeline',style, '.sass')
+
+        file <- paste0('./Timelines/timeline',style, '.sass')
       #code <- code_sass_timeline[[paste0('style',style)]],"\n")
       code <- strsplit(readLines(file),"\n")
       firstLine <- code[[1]][1]
-      prefix <- substr(firstLine,1,unlist(gregexpr(pattern =':',firstLine)))
-      suffix <- substr(firstLine,unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
+      prefix <- substr(firstLine, 1, unlist(gregexpr(pattern =':',firstLine)))
+      suffix <- substr(firstLine, unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
       
       code[[1]][1] <- paste0(prefix, length(process_config$stepsNames), suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-      } else if (style == 4) {
-      includeScript("timeline4.js")
-      cssCode <- readLines('timeline4.css')
-      shinyjs::inlineCSS(cssCode)
-      
-      }else if (style == 5) {
-        includeScript("timeline5.js")
-        cssCode <- readLines('timeline5.css')
-        shinyjs::inlineCSS(cssCode)
-      }else if (style == 7) {
-        cssCode <- readLines('timeline7.css')
-        shinyjs::inlineCSS(cssCode)
-      }
+
       
       
     })
+    
+    
+    
+    
+    output$timeline9 <- renderUI({
+      txt <- "<div class='inliner'></div>
+        <div class='inlined'>
+          
+          <!-- Start component -->
+          <div class='progress-meter'>
+            <div class='track'>
+              <span class='progress'></span>
+                </div>
+                <ol class='progress-points' data-current='4'>
+                  <li class='progress-point'>
+                    <span class='label'>Lorem ipsum</span>
+                      </li>
+                      <li class='progress-point'>
+                        <span class='label'>Aliquam tincidunt</span>
+                          </li>
+                          <li class='progress-point'>
+                            <span class='label'>Vestibulum auctor</span>
+                              </li>
+                              <li class='progress-point'>
+                                <span class='label'>Lorem ipsum</span>
+                                  </li>
+                                  <li class='progress-point'>
+                                    <span class='label'>Aliquam tincidunt</span>
+                                      </li>
+                                      </ol>
+                                      </div>
+                                      <!-- End component -->
+                                      
+                                      <!-- Demo only -->
+                                      <div class='controls'>
+                                        <button class='trigger'>Toggle progress</button>
+                                          <p>Click any point to navigate to it directly</p>
+                                          </div>
+                                          </div>
+                                          "
+                                          
+                                          HTML(txt)
+    })
+
+    
     
     
     #### -----

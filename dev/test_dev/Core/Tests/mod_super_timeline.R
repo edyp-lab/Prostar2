@@ -63,7 +63,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
         rv$dataIn <- dataIn()
         
-        rv$remoteReset <- rep(length(rv.process_config$stepsNames), FALSE)
+        rv$remoteReset <- rep(size(), FALSE)
         
         # Instantiation of the screens
         CreateScreens()
@@ -77,7 +77,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       #Catch a reset command from timeline
       observeEvent(req(pos$rstBtn()!=0), {
         ReinitScreens()
-        rv.process_config$isDone <- c(TRUE, rep(FALSE, length(rv.process_config$stepsNames)-1))
+        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
         tl.update$current.pos <- 1
         
        # rv$dataOut <- dataIn()
@@ -151,7 +151,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         if (length(ind)>0){
           rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
           rv$dataOut <- rv$dataIn 
-          rv.process_config$isDone[ind:length(rv.process_config$isDone)] <- FALSE
+          rv.process_config$isDone[ind:size()] <- FALSE
         }
         
       })
@@ -174,19 +174,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      )
       
       observeEvent(req(rv$tmpB$dataOut()),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpB$dataOut() :')
-        #print(paste0("      names(rv$tmpB$dataOut()) = ", paste0(names(rv$tmpB$dataOut()), collapse=' - ')))
         rv$dataOut <- rv$tmpB$dataOut()
       })
       
       observeEvent(rv$tmpB$validated(),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpB$validated() :')
-        #print(paste0("      rv$tmpB$validated() = ", rv$tmpB$validated()))
         rv.process_config$isDone[3] <- rv$tmpB$validated()
       })
       
       observeEvent(req(rv$tmpB$reseted()!=0), {
-        #print(paste0('MODULE SUPER_TL : New value for rv$tmpB$reseted() : ', rv$tmpB$reseted()))
         ind <- grep(rv.process_config$stepsNames[3], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
           rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
@@ -198,7 +193,6 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       ############### SCREEN 4 ######################################
       output$screen4 <- renderUI({
-        
         tagList(
           div(id=ns('screen4'),
               tags$h3(rv.process_config$stepsName[4]),
@@ -215,20 +209,15 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       
       
       observeEvent(req(rv$tmpC$dataOut()),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpC$dataOut() :')
-        #print(paste0("      names(rv$tmpC$dataOut()) = ", paste0(names(rv$tmpC$dataOut()), collapse=' - ')))
          rv$dataOut <- rv$tmpC$dataOut()
       })
       
       observeEvent(rv$tmpC$validated(),  { 
-        #print('MODULE SUPER_TL : New value for rv$tmpC$validated() :')
-        #print(paste0("      rv$tmpC$validated() = ", rv$tmpC$validated()))
-        rv.process_config$isDone[4] <- rv$tmpC$validated()
+         rv.process_config$isDone[4] <- rv$tmpC$validated()
       })
       
       observeEvent(req(rv$tmpC$reseted()!=0), {
-        #print(paste0('MODULE SUPER_TL : New value for rv$tmpC$reseted() : ', rv$tmpC$reseted()))
-        ind <- grep(rv.process_config$stepsNames[4], names(rv$tmpA$dataOut()))
+         ind <- grep(rv.process_config$stepsNames[4], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
           rv$dataIn <- rv$tmpA$dataOut()[ , ,-c(ind:length(rv$tmpA$dataOut())) ]
           rv$dataOut <- rv$dataIn 
@@ -250,7 +239,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       ##########################################################
       
       list(dataOut = reactive({rv$dataOut}),
-           validated = reactive({rv.process_config$isDone[length(rv.process_config$isDone)]}),
+           validated = reactive({rv.process_config$isDone[size()]}),
            reseted = reactive({pos$rstBtn()})
       )
     }

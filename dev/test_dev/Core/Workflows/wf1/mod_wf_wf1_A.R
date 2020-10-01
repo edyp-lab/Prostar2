@@ -61,22 +61,23 @@ mod_wf_wf1_A_server <- function(id,
                                  showSkip = TRUE)
       
       
+      
+      
       # Initialization of the process
       observeEvent(req(dataIn()), { 
         print(' ------- MODULE A : Initialisation du module A ------- ')
         
         rv$dataIn <- dataIn()
-        rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
+        rv$process.validated <- rv.process_config$isDone[size()]
         rv$skip = 0
         
         CreateScreens()
         InitScreens()
         
-        if (isTRUE(rv$process.validated)){
-          tl.update$current.pos <-  length(rv.process_config$isDone)}
-        else {
+        if (isTRUE(rv$process.validated))
+          tl.update$current.pos <-  size()
+        else 
           tl.update$current.pos <- 1
-          }
         
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
         tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
@@ -87,14 +88,14 @@ mod_wf_wf1_A_server <- function(id,
         print('MODULE A : RESET du module A')
         ReinitScreens()
 
-        rv.process_config$isDone <- c(TRUE, rep(FALSE, length(rv.process_config$stepsNames)-1))
+        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
         tl.update$current.pos <- 1
         rv$skip <- 0
         tl.update$actions$skip <- TRUE
         tl.update$actions$nxt <- TRUE
         tl.update$actions$prv <- TRUE
         
-        if (!rv.process_config$isDone[length(rv.process_config$isDone)]){
+        if (!rv.process_config$isDone[size()]){
           rv$dataIn <- dataIn()
           rv$dataOut <- NULL
         }
@@ -120,22 +121,14 @@ mod_wf_wf1_A_server <- function(id,
       })
       
 
-      observeEvent(rv.process_config$isDone[length(rv.process_config$isDone)], {
-        rv$process.validated <- rv.process_config$isDone[length(rv.process_config$isDone)]
+      observeEvent(rv.process_config$isDone[size()], {
+        rv$process.validated <- rv.process_config$isDone[size()]
 })
      
       
-      observeEvent(req(forcePosition() != 0), ignoreNULL=T, {
-        rv$forcePosition <- forcePosition()})
-      
-      observeEvent(req(rv$forcePosition),   {
-        tl.update$current.pos <- length(rv.process_config$isDone)
-      })
-      
-      
-      observeEvent(req(pos$skipBtn() != 0), ignoreNULL=T, {
-        rv$skip <- pos$skipBtn()
-        })
+      observeEvent(req(forcePosition() != 0), ignoreNULL=T, { rv$forcePosition <- forcePosition()})
+      observeEvent(req(rv$forcePosition), { tl.update$current.pos <- size() })
+      observeEvent(req(pos$skipBtn() != 0), ignoreNULL=T, { rv$skip <- pos$skipBtn() })
       
 
       
@@ -153,6 +146,11 @@ mod_wf_wf1_A_server <- function(id,
        ############### SCREEN 2 ######################################
        
        output$screen2 <- renderUI({
+         
+         observeEvent(input$perform_screen2_btn, {
+           rv.process_config$isDone[2] <- TRUE
+         })
+         
          tagList(
            div(id=ns('screen2'),
                div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
@@ -170,9 +168,7 @@ mod_wf_wf1_A_server <- function(id,
          )
        })
        
-       observeEvent(input$perform_screen2_btn, {
-         rv.process_config$isDone[2] <- TRUE
-       })
+       
        
        
        ############### SCREEN 3 ######################################
@@ -215,20 +211,19 @@ mod_wf_wf1_A_server <- function(id,
        })
          
           observeEvent(input$validate_btn, {
-            isolate({
+            #isolate({
               rv$dataIn <- addAssay(rv$dataIn, 
                                     rv$dataIn[[length(rv$dataIn)]], 
                                     name=rv.process_config$process.name)
               rv$dataOut <- rv$dataIn
               rv.process_config$isDone[4] <- TRUE
-            })
+           # })
        })
        
           
           observeEvent(req(pos$skipBtn() !=0),{
-           print(paste0('MODULE A : Skip button activated : ', pos$skipBtn()))
-            tl.update$current.pos <- length(rv.process_config$isDone)
-            rv.process_config$isDone[length(rv.process_config$isDone)] <- TRUE
+            tl.update$current.pos <- size()
+            rv.process_config$isDone[size()] <- TRUE
             tl.update$actions$skip <- FALSE
             rv$dataOut <- dataIn()
           })
@@ -238,7 +233,7 @@ mod_wf_wf1_A_server <- function(id,
        ##########################################################
         
   list(dataOut = reactive({rv$dataOut}),
-       validated = reactive({rv.process_config$isDone[length(rv.process_config$isDone)]}),
+       validated = reactive({rv.process_config$isDone[size()]}),
        reseted = reactive({pos$rstBtn()})
   )
     }

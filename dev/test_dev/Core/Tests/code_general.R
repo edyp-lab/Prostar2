@@ -79,3 +79,8 @@ condPrevBtn <- reactive({
   cond.prev.btn <- !start_of_tl
   cond.prev.btn
 })
+
+size <- reactive({
+  req(rv.process_config$stepsNames)
+  length(rv.process_config$stepsNames)
+})

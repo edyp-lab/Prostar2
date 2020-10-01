@@ -1,7 +1,7 @@
 library(shinyjs)
 
 
-source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
+source(file.path('./Timelines', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('.', 'mod_super_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('../Workflows/wf1', 'mod_wf_wf1_A.R'), local=TRUE)$value
