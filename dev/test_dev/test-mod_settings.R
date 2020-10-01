@@ -25,9 +25,8 @@ server <- function(input, output, session) {
     settings = NULL
   )
   
-  r$settings <- callModule(mod_settings_server, 
-                           "settings", 
-                           obj = reactive({Exp1_R25_prot}))
+  r$settings <- mod_settings_server("settings", 
+                                    obj = reactive({Exp1_R25_prot}))
   
   # observeEvent(r$settings(),{
   #   print(r$settings())

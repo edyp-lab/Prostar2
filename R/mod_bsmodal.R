@@ -10,39 +10,45 @@ mod_bsmodal_ui <- function(id){
 }
 
 
-mod_bsmodal_server <- function(input, output, session,
+mod_bsmodal_server <- function(id,
                                title=NULL,
                                mod_UI=NULL, 
                                width=NULL){ #height auto
-  ns <- session$ns
   
-  jqui_resizable(paste0("#",ns("fenetre")," .modal-content")
-                 ,options = list(minHeight = 500, minWidth=500  ))
-  
-  jqui_draggable(paste0("#",ns("fenetre")," .modal-content")
-                 , options = list(revert=TRUE) 
-  )
-  
-  
-  output$bsmodal_ui <- renderUI({
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    tagList(
-      tags$head(tags$style(paste0(".modal-dialog { width:",width," }"))),
-      actionButton(ns("button"), "Open Modal"),
+    jqui_resizable(paste0("#",ns("fenetre")," .modal-content")
+                   ,options = list(minHeight = 500, minWidth=500  ))
+    
+    jqui_draggable(paste0("#",ns("fenetre")," .modal-content")
+                   , options = list(revert=TRUE) 
+    )
+    
+    
+    output$bsmodal_ui <- renderUI({
       
-      shinyBS::bsModal(ns("fenetre"),
-                       title,
-                       trigger = ns("button"),
-                       uiOutput(ns("mod_content")) )
-    )
+      tagList(
+        tags$head(tags$style(paste0(".modal-dialog { width:",width," }"))),
+        actionButton(ns("button"), "Open Modal"),
+        
+        shinyBS::bsModal(ns("fenetre"),
+                         title,
+                         trigger = ns("button"),
+                         uiOutput(ns("mod_content")) )
+      )
+      
+    })
+    
+    
+    output$mod_content <- renderUI({
+      tagList(
+        mod_UI  
+      )
+    })
+    
     
   })
   
-  
-  output$mod_content <- renderUI({
-    tagList(
-      mod_UI  
-    )
-  })
   
 }

@@ -7,15 +7,15 @@ source(file.path('../../../R/Plots', 'mod_plots_tracking.R'), local=TRUE)$value
 
 ui <- fluidPage(
   checkboxInput('sync', 'sync Slave with Master', value=FALSE),
-   fluidRow(
-     column(6,tagList(h3('Master'),
-                      mod_plots_tracking_ui('master_tracking')
-                      )
-            ),
-            column(6,tagList(h3('Slave'),
-                             mod_plots_tracking_ui('slave_tracking')
-            )
-            )
+  fluidRow(
+    column(6,tagList(h3('Master'),
+                     mod_plots_tracking_ui('master_tracking')
+    )
+    ),
+    column(6,tagList(h3('Slave'),
+                     mod_plots_tracking_ui('slave_tracking')
+    )
+    )
   ),
   
   fluidRow(
@@ -44,20 +44,20 @@ server <- function(input, output, session) {
   
   rowData(obj) <- cbind(rowData(obj), ProtOfInterest=sample(c(0,1), nrow(obj), TRUE))
   
-  r$master <- callModule(mod_plots_tracking_server,'master_tracking', 
-                      obj = reactive({obj}), 
-                      params=reactive({NULL}),
-                      keyId=reactive({keyId}),
-                      reset=reactive({FALSE}),
-                      slave = reactive({FALSE}))
+  r$master <- mod_plots_tracking_server('master_tracking', 
+                         obj = reactive({obj}), 
+                         params=reactive({NULL}),
+                         keyId=reactive({keyId}),
+                         reset=reactive({FALSE}),
+                         slave = reactive({FALSE}))
   
-  r$slave <- callModule(mod_plots_tracking_server,'slave_tracking', 
-                      obj = reactive({obj}), 
-                      params=reactive({if (input$sync) r$master() 
-                        else NULL}),
-                      keyId=reactive({keyId}),
-                      reset=reactive({FALSE}),
-                      slave=reactive({NULL}))
+  r$slave <- mod_plots_tracking_server('slave_tracking', 
+                        obj = reactive({obj}), 
+                        params=reactive({if (input$sync) r$master() 
+                          else NULL}),
+                        keyId=reactive({keyId}),
+                        reset=reactive({FALSE}),
+                        slave=reactive({NULL}))
   
   
   # observe({
@@ -69,7 +69,7 @@ server <- function(input, output, session) {
   output$master_out <- renderUI({
     r$master()
     
-     tagList(
+    tagList(
       p(paste0('type = ', r$master()$type)),
       p(paste0('list = ', paste0(r$master()$listSelect, collapse=', '))),
       p(paste0('rand = ', r$master()$randSelect)),
@@ -79,7 +79,7 @@ server <- function(input, output, session) {
       p(paste0('col.indices = ', paste0(r$master()$col.indices, collapse=', ')))
     )
   })
-
+  
   
   output$slave_out <- renderUI({
     r$slave()

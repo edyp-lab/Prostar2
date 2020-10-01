@@ -38,14 +38,14 @@ server <- function(input, output, session) {
     settings = NULL
   )
   
-  r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
+  #r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
   
   obj <- QFeatures::addAssay(Exp1_R25_prot, (QFeatures::filterNA(Exp1_R25_prot,i=2))[[2]], "original_log_NAfiltered")
   
   mod_all_plots_server('plots',
                        dataIn = reactive({obj}),
                        indice = reactive({2}),
-                       settings = reactive({r$settings()})
+                       #settings = reactive({r$settings()})
   ) 
   
 }

@@ -11,7 +11,7 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   
-  callModule(mod_release_notes_server, "rl")
+  mod_release_notes_server("rl")
 }
 
 

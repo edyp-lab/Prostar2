@@ -22,9 +22,9 @@ server <- function(input, output, session) {
   coldata <- colData(Exp1_R25_prot)
   SummarizedExperiment::assay(obj)[which(is.na(SummarizedExperiment::assay(obj)))] <- 0
   
-  callModule(mod_plots_pca_server,'pca',
-             obj=reactive({obj}),
-             coldata=reactive({coldata})
+  mod_plots_pca_server('pca',
+                       obj=reactive({obj}),
+                       coldata=reactive({coldata})
   )
 }
 

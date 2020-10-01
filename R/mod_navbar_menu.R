@@ -67,8 +67,13 @@ mod_navbar_menu_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_navbar_menu_server <- function(input, output, session){
-  ns <- session$ns
+mod_navbar_menu_server <- function(id){
+  
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+  })
+  
   
 }
     

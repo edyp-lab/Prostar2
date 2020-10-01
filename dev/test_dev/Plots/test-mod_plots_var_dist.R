@@ -24,13 +24,13 @@ server <- function(input, output, session) {
   r <- reactiveValues(
     settings = NULL
   )
-  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
+  r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
   
   
-  callModule(mod_plots_var_dist_server,'varDistPlot', 
-             obj = reactive({obj}),
-             conds = reactive({conds}),
-             base_palette = reactive({r$settings()$examplePalette}))
+  mod_plots_var_dist_server('varDistPlot', 
+                            obj = reactive({obj}),
+                            conds = reactive({conds}),
+                            base_palette = reactive({r$settings()$examplePalette}))
 }
 
 

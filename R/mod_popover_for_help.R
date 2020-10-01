@@ -46,23 +46,28 @@ mod_popover_for_help_ui <- function(id){
 #' 
 #' @importFrom shinyBS bsPopover addPopover bsTooltip
 #' 
-mod_popover_for_help_server <- function(input, output, session, data){
-  ns <- session$ns
+mod_popover_for_help_server <- function(id, data){
   
-  output$write_title_ui <- renderUI({
-    req(data)
-    data$title
-  })
   
-  output$dot <- renderUI({
-    tags$button(tags$sup("[?]"), class="Prostar_tooltip")
-  })
-  
-  output$show_Pop <- renderUI({
-    shinyBS::bsTooltip(ns("dot"), data$content, trigger = "hover")
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    
+    output$write_title_ui <- renderUI({
+      req(data)
+      data$title
+    })
+    
+    output$dot <- renderUI({
+      tags$button(tags$sup("[?]"), class="Prostar_tooltip")
+    })
+    
+    output$show_Pop <- renderUI({
+      shinyBS::bsTooltip(ns("dot"), data$content, trigger = "hover")
+      
+    })
+    
     
   })
-  
   
 }
 

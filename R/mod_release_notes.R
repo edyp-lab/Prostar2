@@ -35,10 +35,15 @@ mod_release_notes_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_release_notes_server <- function(input, output, session){
-  ns <- session$ns
-  callModule(mod_insert_md_server, "versionNotes_MD",URL_versionNotes)
-  callModule(mod_insert_md_server, "formerReleases_MD",URL_formerReleases)
+mod_release_notes_server <- function(id){
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    mod_insert_md_server("versionNotes_MD",URL_versionNotes)
+    mod_insert_md_server("formerReleases_MD",URL_formerReleases)
+    
+  })
+  
   
 }
     

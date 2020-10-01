@@ -28,48 +28,48 @@ source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
 ui <- function() {
   tagList(
     fluidPage(
-    titlePanel("", windowTitle = "toto"),
-    
-  # div(id = "main_content",
-  #     div(
-  #       id = "header",
-  #       # mod_navbar_menu_ui('mainMenu')
-  #       
-  #       fluidRow(class = 'headerrow', column(width = 12,
-  #                                            style = "font-size: 30pt; line-height: 10vh; text-align:left; color:#FFFFFF; width = 100",
-  #                                            tags$strong('Test')),
-  #                tags$head(tags$style('.headerrow{height:10vh;}'))
-  #       ),
-
+      titlePanel("", windowTitle = "toto"),
+      
+      # div(id = "main_content",
+      #     div(
+      #       id = "header",
+      #       # mod_navbar_menu_ui('mainMenu')
+      #       
+      #       fluidRow(class = 'headerrow', column(width = 12,
+      #                                            style = "font-size: 30pt; line-height: 10vh; text-align:left; color:#FFFFFF; width = 100",
+      #                                            tags$strong('Test')),
+      #                tags$head(tags$style('.headerrow{height:10vh;}'))
+      #       ),
+      
       navbarPage("Navbar!",
-        #position = "fixed-top",
-        id = "navPage",
-        inverse = FALSE,
-        
-        navbarMenu("Prostar",
-                              tabPanel(title="Home",
-                                       value="HomeTab",mod_homepage_ui("homepage")),
-                              tabPanel(title="Global settings",
-                                       value="GlobalSettingsTab", mod_settings_ui("modSettings")),
-                              tabPanel("Release notes",
-                                       value="ReleaseNotesTab",mod_release_notes_ui("modReleaseNotes")),
-                              tabPanel("Check for updates",
-                                       value="CheckUpdatesTab",mod_check_updates_ui("modCheckUpdates"))
-                   ),
-        tabPanel('Test change assay',
-                 selectInput('manualChange', 'Manual change of dataset', 
-                             choices = names(Exp1_R25_pept))),
-        mod_change_assay_ui('change_dataset')
-        
-        )
+                 #position = "fixed-top",
+                 id = "navPage",
+                 inverse = FALSE,
+                 
+                 navbarMenu("Prostar",
+                            tabPanel(title="Home",
+                                     value="HomeTab",mod_homepage_ui("homepage")),
+                            tabPanel(title="Global settings",
+                                     value="GlobalSettingsTab", mod_settings_ui("modSettings")),
+                            tabPanel("Release notes",
+                                     value="ReleaseNotesTab",mod_release_notes_ui("modReleaseNotes")),
+                            tabPanel("Check for updates",
+                                     value="CheckUpdatesTab",mod_check_updates_ui("modCheckUpdates"))
+                 ),
+                 tabPanel('Test change assay',
+                          selectInput('manualChange', 'Manual change of dataset', 
+                                      choices = names(Exp1_R25_pept))),
+                 mod_change_assay_ui('change_dataset')
+                 
       )
-     # )
+    )
+    # )
   )
 }
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
- 
+  
   utils::data('Exp1_R25_pept', package='DAPARdata2')
   
   rv <- reactiveValues(
@@ -84,9 +84,9 @@ server <- function(input, output, session) {
   #callModule(mod_insert_md_server, "links_MD",URL_links)
   #callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
   
-  rv$tmp <- callModule(mod_change_assay_server,'change_dataset',
-             ll.se = reactive({names(Exp1_R25_pept)}),
-             indice = reactive({NULL}))
+  rv$tmp <- mod_change_assay_server('change_dataset',
+                                    ll.se = reactive({names(Exp1_R25_pept)}),
+                                    indice = reactive({NULL}))
   
   
   observeEvent(rv$tmp, {

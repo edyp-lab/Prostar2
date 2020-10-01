@@ -8,7 +8,7 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-  callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
+  mod_insert_md_server("FAQ_MD", URL_FAQ)
 }
 
 
