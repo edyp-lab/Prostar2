@@ -1,19 +1,32 @@
 library(shinyjs)
 
 
-source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
+source(file.path('./Timelines', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('.', 'mod_super_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
-source(file.path('../Workflows/wf1', 'mod_wf_wf1_A.R'), local=TRUE)$value
-source(file.path('../Workflows/wf1', 'mod_wf_wf1_B.R'), local=TRUE)$value
-source(file.path('../Workflows/wf1', 'mod_wf_wf1_C.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_A.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_B.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_C.R'), local=TRUE)$value
 
 options(shiny.fullstacktrace = F)
 options(shiny.reactlog=TRUE) 
 
 ui <- fluidPage(
   tagList(
-    mod_super_timeline_ui("super_nav")
+    mod_super_timeline_ui("super_nav"),
+    hr(),
+    wellPanel(
+      h3('Prostar (caller)'),
+      fluidRow(
+        column(width=6,
+               p('Data input :'),
+               verbatimTextOutput('show_dataIn')
+        ),
+        column(width=6,
+               p('Data output :'),
+               verbatimTextOutput('show_rv_tmp_dataOut'))
+      )
+    )
   )
 )
 
@@ -30,12 +43,20 @@ server <- function(input, output, session) {
   rv$tmp <- mod_super_timeline_server("super_nav", 
                                 dataIn = reactive({rv$current.obj}) )
   
-  observeEvent(rv$tmp(), {
-    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server')
-    rv$current.obj <- rv$tmp()
-    print(paste0("      names(dataIn()) = ", paste0(names(rv$current.obj), collapse=' - ')))
+  observeEvent(rv$tmp$dataOut(), {
+    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')
+    print(rv$tmp$dataOut())
     })
+  
+  observeEvent(rv$tmp$reseted(),{
+    print('TEST SUPER_TIMELINE : activation of the reset all')
+    
+  })
 
+  
+  output$show_dataIn <- renderPrint({rv$current.obj})
+  output$show_rv_tmp_dataOut <- renderPrint({rv$tmp$dataOut()})
+  
 }
 
 

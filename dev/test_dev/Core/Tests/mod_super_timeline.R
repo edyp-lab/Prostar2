@@ -37,7 +37,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         process.name = 'Pipeline protein',
         stepsNames = c("Description", "Filtering", "Normalization", "Imputation", "Summary"),
         isDone =  c(TRUE, rep(FALSE,4)),
-        mandatory =  c(FALSE, rep(TRUE,4))
+        mandatory =  c(FALSE, TRUE, FALSE, TRUE, TRUE)
       )
       
       

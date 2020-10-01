@@ -85,23 +85,48 @@ mod_wf_wf1_A_server <- function(id,
       
       
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-         ReinitScreens()
-
+        #ReinitScreens()
+        lapply(1:length(rv.process_config$stepsNames), 
+               function(x){
+                 shinyjs::enable(paste0('screen', x))
+                 shinyjs::reset(paste0('screen', x))
+               })
+        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
+        tl.update$current.pos <- 1
+        
+        
         rv$skip <- 0
         lapply(tl.update$actions, function(x){x <- T})
         
-        if (!rv.process_config$isDone[size()]){
+        if (!rv.process_config$isDone[size()])
           rv$dataIn <- dataIn()
-          rv$dataOut <- NULL
-        }
 
+        rv$dataOut <- NULL
       })
       
 
       
-      observeEvent(req(rv.process_config$isDone[tl.update$current.pos]),  ignoreInit = T, {
-        if (rv.process_config$isDone[tl.update$current.pos])
-          DisableAllPrevSteps()
+      
+      observeEvent(req(pos$skipBtn() !=0),{
+        print(' ------- MODULE A : Skipping module ------- ')
+        
+        tl.update$current.pos <- size()
+        rv.process_config$isDone[size()] <- TRUE
+        tl.update$actions$skip <- FALSE
+        lapply(1:length(rv.process_config$stepsNames), 
+               function(x){shinyjs::toggle(paste0('screen', x),
+                                           condition = F)}) 
+        rv$dataOut <- dataIn()
+      })
+      
+      
+      
+      
+      observeEvent(rv.process_config$isDone,  ignoreInit = T, {
+        print(' ------- MODULE A : New step is validated ------- ')
+        #if (rv.process_config$isDone[tl.update$current.pos])
+        DisableAllPrevSteps()
+        
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
         tl.update$actions$prv <- condPrevBtn() && rv$skip == 0
       })
@@ -214,12 +239,7 @@ mod_wf_wf1_A_server <- function(id,
        })
        
           
-          observeEvent(req(pos$skipBtn() !=0),{
-            tl.update$current.pos <- size()
-            rv.process_config$isDone[size()] <- TRUE
-            tl.update$actions$skip <- FALSE
-            rv$dataOut <- dataIn()
-          })
+         
        
           
           
