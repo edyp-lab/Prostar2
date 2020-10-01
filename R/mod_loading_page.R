@@ -45,8 +45,12 @@ mod_loading_page_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_loading_page_server <- function(input, output, session){
-  ns <- session$ns
+mod_loading_page_server <- function(id){
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+  })
+  
 }
     
 ## To be copied in the UI

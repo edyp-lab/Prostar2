@@ -1,3 +1,5 @@
+library(shinyjs)
+
 
 source(file.path('../../R', 'mod_loading_page.R'), local=TRUE)$value
 
@@ -10,7 +12,7 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-  callModule(mod_loading_page_server, "loadPage")
+  mod_loading_page_server("loadPage")
 }
 
 
