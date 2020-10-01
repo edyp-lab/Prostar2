@@ -81,6 +81,7 @@ mod_settings_server <- function(id, obj){
     
     observe({
       req(obj())
+      
       if(class(obj()) != 'QFeatures'){
         warning("mod_settings: 'obj()' is not of class 'QFeatures'.")
         return(NULL)
@@ -139,10 +140,9 @@ mod_settings_server <- function(id, obj){
     
     
     
-    callModule(mod_popover_for_help_server,
-               "modulePopover_numPrecision", 
-               data = list(title=HTML(paste0("<strong><font size=\"4\">Numerical precisions</font></strong>")),
-                           content= "Set the number of decimals to display for numerical values."))
+    mod_popover_for_help_server("modulePopover_numPrecision", 
+                                data = list(title=HTML(paste0("<strong><font size=\"4\">Numerical precisions</font></strong>")),
+                                            content= "Set the number of decimals to display for numerical values."))
     
     output$settings_nDigits_UI <- renderUI({
       numericInput(ns("settings_nDigits"), "", value=rv.settings$nDigits, min=0, width="100px")
@@ -280,10 +280,9 @@ mod_settings_server <- function(id, obj){
     })
     
     
-    rv.settings$dynColors <- callModule(mod_observe_dynamic_colourPicker_input_server,
-                                        'colourPickerInputs',
-                                        n=reactive({length(unique(rv.settings$conditions))}),
-                                        label = reactive({ unique(rv.settings$conditions)}))
+    rv.settings$dynColors <- mod_observe_dynamic_colourPicker_input_server('colourPickerInputs',
+                                                                           n=reactive({length(unique(rv.settings$conditions))}),
+                                                                           label = reactive({ unique(rv.settings$conditions)}))
     
     
     SetExamplePalette <- reactive({

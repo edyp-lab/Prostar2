@@ -32,46 +32,54 @@ mod_bug_report_ui <- function(id){
 #' @export
 #' @keywords internal
 
-mod_bug_report_server <- function(input, output, session){
-  ns <- session$ns
+mod_bug_report_server <- function(id){
   
-  logfile <- tempfile(fileext=".log")
   
-  if (isTRUE(getOption('golem.app.prod'))==FALSE){
-    con <- file(logfile, open="wt")
-    sink(con, append=TRUE)
-    sink(con, append=TRUE, type="message")
-  } else {
-    sink()
-  }
-  
-  # ============================================================
-  # This part of the code monitors the file for changes once per
-  # 0.5 second (500 milliseconds).
-  fileReaderData <- reactiveFileReader(500, session, logfile, readLines)
-  
-  output$fileReaderText <- renderText({
-    # Read the text, and make it a consistent number of lines so
-    # that the output box doesn't grow in height.
-    text <- fileReaderData()
-    paste(text, collapse = '\n')
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    
+    logfile <- tempfile(fileext=".log")
+    
+    if (isTRUE(getOption('golem.app.prod'))==FALSE){
+      con <- file(logfile, open="wt")
+      sink(con, append=TRUE)
+      sink(con, append=TRUE, type="message")
+    } else {
+      sink()
+    }
+    
+    # ============================================================
+    # This part of the code monitors the file for changes once per
+    # 0.5 second (500 milliseconds).
+    fileReaderData <- reactiveFileReader(500, session, logfile, readLines)
+    
+    output$fileReaderText <- renderText({
+      # Read the text, and make it a consistent number of lines so
+      # that the output box doesn't grow in height.
+      text <- fileReaderData()
+      paste(text, collapse = '\n')
+    })
+    
+    
+    
+    output$BugReport_output <- renderUI({
+      
+      mail <- unlist(strsplit(maintainer("Prostar2"), "<"))[2]
+      mail <- unlist(strsplit(mail, ">"))[1]
+      
+      tagList(
+        a(actionButton(inputId = ns("email1"), label = "Contact maintainer", 
+                       icon = icon("envelope", lib = "font-awesome"), class = actionBtnClass),
+          href=paste0("mailto:", mail,"?subject=[Prostar2 bug report]&body=")
+        )
+      ) 
+      
+    })
+    
+    
   })
   
   
-  
-  output$BugReport_output <- renderUI({
-    
-    mail <- unlist(strsplit(maintainer("Prostar2"), "<"))[2]
-    mail <- unlist(strsplit(mail, ">"))[1]
-    
-    tagList(
-      a(actionButton(inputId = ns("email1"), label = "Contact maintainer", 
-                     icon = icon("envelope", lib = "font-awesome"), class = actionBtnClass),
-        href=paste0("mailto:", mail,"?subject=[Prostar2 bug report]&body=")
-      )
-    ) 
-    
-  })
   
 }
 

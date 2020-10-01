@@ -29,59 +29,66 @@ mod_change_assay_ui <- function(id){
 #' change_assay Server Function
 #'
 #' @noRd 
-mod_change_assay_server <- function(input, output, session, ll.se, indice){
-  ns <- session$ns
- 
-  rv.change <- reactiveValues(
-    out = NULL
-  )
+mod_change_assay_server <- function(id, ll.se, indice){
   
   
-  observe({
-    req(indice())
-    rv.change$out <- indice()
-  })
-  
-  
-  output$datasetAbsPanel <- renderUI({
-    req(ll.se())
-    req(indice())
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    tagList(
-      div(
-        div(
-          style="display:inline-block; vertical-align: middle; margin:0px",
-          p('Current assay', style='color: white')
-        ),
-        div(
-          style="display:inline-block; vertical-align: middle; margin:0px",
-          selectInput(ns('currentDataset'), '',
-                      choices = ll.se(),
-                      selected = ll.se()[indice()],
-                      width='150px')
-        )
-      )
+    rv.change <- reactiveValues(
+      out = NULL
     )
     
-  })
-  
-  
-  
-  ## manual change of current dataset
-  observeEvent(input$currentDataset,{
-    print('!!!!! Manual change of current dataset')
-
+    
+    observe({
+      req(indice())
+      rv.change$out <- indice()
+    })
+    
+    
+    output$datasetAbsPanel <- renderUI({
+      req(ll.se())
+      req(indice())
+      
+      tagList(
+        div(
+          div(
+            style="display:inline-block; vertical-align: middle; margin:0px",
+            p('Current assay', style='color: white')
+          ),
+          div(
+            style="display:inline-block; vertical-align: middle; margin:0px",
+            selectInput(ns('currentDataset'), '',
+                        choices = ll.se(),
+                        selected = ll.se()[indice()],
+                        width='150px')
+          )
+        )
+      )
+      
+    })
+    
+    
+    
+    ## manual change of current dataset
+    observeEvent(input$currentDataset,{
+      print('!!!!! Manual change of current dataset')
+      
       n <- which(ll.se() == input$currentDataset)
       if (length(n)==0){
         rv.change$out <- 1
       } else {
         rv.change$out <- n
       }
-
+      
+    })
+    
+    
+    return(reactive({rv.change$out}))
+    
   })
   
   
-  return(reactive({rv.change$out}))
 }
     
 ## To be copied in the UI

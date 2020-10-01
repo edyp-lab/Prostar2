@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_insert_md_ui and mod_insert_md_server
 #' @description  A shiny Module.
 #'
@@ -19,36 +19,43 @@ mod_insert_md_ui <- function(id){
     uiOutput(ns("insertMD"))
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_insert_md
 #' @export
 #' @keywords internal
+
+mod_insert_md_server <- function(id, url){
+  
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-mod_insert_md_server <- function(input, output, session, url){
-  ns <- session$ns
-  
-  
-  output$insertMD <- renderUI({
-    tryCatch(
-      {
-        includeMarkdown(url)
-      }
-      , warning = function(w) {
-        tags$p("URL not found<br>",conditionMessage(w))
-      }, error = function(e) {
-        shinyjs::info(paste("URL not found :", conditionMessage(e), sep=" "))
-      }, finally = {
-        #cleanup-code 
-      })
+    
+    output$insertMD <- renderUI({
+      tryCatch(
+        {
+          includeMarkdown(url)
+        }
+        , warning = function(w) {
+          tags$p("URL not found<br>",conditionMessage(w))
+        }, error = function(e) {
+          shinyjs::info(paste("URL not found :", conditionMessage(e), sep=" "))
+        }, finally = {
+          #cleanup-code 
+        })
+      
+    })
+    
     
   })
+  
 }
-    
+
 ## To be copied in the UI
 # mod_insert_md_ui("insert_md_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_insert_md_server, "insert_md_ui_1")
- 
+

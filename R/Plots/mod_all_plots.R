@@ -104,7 +104,10 @@ mod_all_plots_server <- function(id, dataIn, indice, settings){
       current.obj = NULL,
       settings = NULL
     )
-    rv$settings <- mod_settings_server("settings", obj=reactive({rv$current.obj}))
+    
+    
+    rv$settings <- mod_settings_server("settings", obj=reactive({dataIn()}))
+    
     
     
     mod_plots_se_explorer_server('plot_quanti_large',
@@ -166,7 +169,7 @@ mod_all_plots_server <- function(id, dataIn, indice, settings){
     
     
     output$chooseDataset_UI <- renderUI({
-      if (length(SummarizedExperiment::assays(dataIn())) == 0){
+      if (length(names(dataIn())) == 0){
         choices <- list(' '=character(0))
       } else {
         choices <- names(dataIn())
@@ -284,8 +287,7 @@ mod_all_plots_server <- function(id, dataIn, indice, settings){
     
     return(NULL)
     
-  }
-  )
+  })
   
 }
 

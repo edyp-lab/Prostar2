@@ -23,55 +23,62 @@ mod_observe_dynamic_colourPicker_input_ui <- function(id){
     uiOutput(ns("dyn_inputs"))
   )
 }
-    
+
 #' observe_dynamic_colourPicker_input Server Function
 #'
 #' @noRd 
-mod_observe_dynamic_colourPicker_input_server <- function(input, output, session, n=NULL, label=NULL){
-  ns <- session$ns
+mod_observe_dynamic_colourPicker_input_server <- function(id, n=NULL, label=NULL){
   
-  dynColors <- reactiveVal()
-  defaultColor <- '#CAC8C6'
-  
-  observe({
-    if(is.null(n()))
-      stop("'n' is null.")
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    if (!is.null(n()) && !is.null(label()))
-      if (length(label()) != n())
-        stop("The length of 'label' must be equal to the value of 'n'.")
-  })
-  
-  #Dynamic inputs  
-  output$dyn_inputs <- renderUI({
-    buttons <- as.list(1:n())
-    # use a div with class = "dynamicSI" to distinguish from other selectInput's
-    div( class = "dynamicSI",
-         lapply(buttons, function(i)
-           column(n(),
-                  colourpicker::colourInput(inputId = ns(paste0("input_",i)), 
-                                            label = if (is.null(label())) paste0('color ', i) else label()[i],
-                                            value = defaultColor,
-                                            showColour = "background")
+    dynColors <- reactiveVal()
+    defaultColor <- '#CAC8C6'
+    
+    observe({
+      if(is.null(n()))
+        stop("'n' is null.")
+      
+      if (!is.null(n()) && !is.null(label()))
+        if (length(label()) != n())
+          stop("The length of 'label' must be equal to the value of 'n'.")
+    })
+    
+    #Dynamic inputs  
+    output$dyn_inputs <- renderUI({
+      buttons <- as.list(1:n())
+      # use a div with class = "dynamicSI" to distinguish from other selectInput's
+      div( class = "dynamicSI",
+           lapply(buttons, function(i)
+             column(n(),
+                    colourpicker::colourInput(inputId = ns(paste0("input_",i)), 
+                                              label = if (is.null(label())) paste0('color ', i) else label()[i],
+                                              value = defaultColor,
+                                              showColour = "background")
+             )
            )
-         )
-    )
-  })
-  
-  
-  # react to changes in dynamically generated selectInput's
-  observe({
-    input$lastSelect
-    input$lastSelectId
+      )
+    })
     
-    tmp <- NULL
-    for(i in 1:n()){
-      tmp <- c(tmp, input[[paste0("input_",i)]])
-    }
-    dynColors(tmp)
+    
+    # react to changes in dynamically generated selectInput's
+    observe({
+      input$lastSelect
+      input$lastSelectId
+      
+      tmp <- NULL
+      for(i in 1:n()){
+        tmp <- c(tmp, input[[paste0("input_",i)]])
+      }
+      dynColors(tmp)
+    })
+    
+    return(reactive({dynColors()}))
+    
+    
   })
   
-  return(reactive({dynColors()}))
+  
 }
     
 ## To be copied in the UI
