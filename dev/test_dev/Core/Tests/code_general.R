@@ -21,6 +21,8 @@ ReinitScreens <- reactive({
            shinyjs::enable(paste0('screen', x))
            shinyjs::reset(paste0('screen', x))
          })
+  rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
+  tl.update$current.pos <- 1
 })
 
 

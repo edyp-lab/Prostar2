@@ -29,9 +29,7 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
       ns <- session$ns
       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
-      rv <- reactiveValues(
-        force.position = c(FALSE, FALSE, FALSE, FALSE, FALSE)
-      )
+      rv <- reactiveValues( )
       
       # variables to communicate with the navigation module
       rv.process_config <- reactiveValues(
@@ -64,22 +62,19 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         rv$dataIn <- dataIn()
         
         rv$remoteReset <- rep(size(), FALSE)
-        
+        force.position <- rep(size(), FALSE)
         # Instantiation of the screens
         CreateScreens()
         InitScreens()
         
         tl.update$actions$nxt <- condNextBtn()
-        tl.update$actions$nxt <- condPrevBtn()
+        tl.update$actions$prv <- condPrevBtn()
         })
       
 
       #Catch a reset command from timeline
       observeEvent(req(pos$rstBtn()!=0), {
         ReinitScreens()
-        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
-        tl.update$current.pos <- 1
-        
        # rv$dataOut <- dataIn()
         rv$dataOut <- NULL
       })
@@ -95,16 +90,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
         # Display the screen corresponding to the new position
         DisplayCurrentStep()
         tl.update$actions$nxt <- condNextBtn()
-        tl.update$actions$nxt <- condPrevBtn()
+        tl.update$actions$prv <- condPrevBtn()
       })
       
       
       
       observeEvent(rv.process_config$isDone,  ignoreInit = T, {
-        rv.process_config$mandatory
-          
         tl.update$actions$nxt <- condNextBtn()
-        tl.update$actions$nxt <- condPrevBtn()
+        tl.update$actions$prv <- condPrevBtn()
       })
       
       
@@ -138,13 +131,15 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      forcePosition = reactive({rv$force.position[2]})
                                      )
       
-      observeEvent(req(rv$tmpA$dataOut()),  { 
+      observeEvent(rv$tmpA$dataOut(), ignoreNULL = F, { 
+
         rv$dataOut <- rv$tmpA$dataOut()
+        rv.process_config$isDone[2] <- !is.null(rv$tmpA$dataOut())
       })
       
-      observeEvent(rv$tmpA$validated(),  { 
-       rv.process_config$isDone[2] <- rv$tmpA$validated()
-      })
+      # observeEvent(rv$tmpA$validated(),  { 
+      #  rv.process_config$isDone[2] <- rv$tmpA$validated()
+      # })
       
       observeEvent(req(rv$tmpA$reseted()!=0), {
         ind <- grep(rv.process_config$stepsNames[2], names(rv$tmpA$dataOut()))
@@ -173,14 +168,15 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      forcePosition = reactive({rv$force.position[3]})
                                      )
       
-      observeEvent(req(rv$tmpB$dataOut()),  { 
+      observeEvent(req(rv$tmpB$dataOut()), ignoreNULL = F, { 
         rv$dataOut <- rv$tmpB$dataOut()
+        rv.process_config$isDone[3] <- !is.null(rv$tmpB$dataOut())
       })
       
-      observeEvent(rv$tmpB$validated(),  { 
-        rv.process_config$isDone[3] <- rv$tmpB$validated()
-      })
-      
+      # observeEvent(rv$tmpB$validated(),  { 
+      #   rv.process_config$isDone[3] <- rv$tmpB$validated()
+      # })
+      # 
       observeEvent(req(rv$tmpB$reseted()!=0), {
         ind <- grep(rv.process_config$stepsNames[3], names(rv$tmpA$dataOut()))
         if (length(ind)>0){
@@ -208,13 +204,14 @@ mod_super_timeline_server <- function(id, dataIn=NULL){
                                      )
       
       
-      observeEvent(req(rv$tmpC$dataOut()),  { 
+      observeEvent(req(rv$tmpC$dataOut()), ignoreNULL = F, { 
          rv$dataOut <- rv$tmpC$dataOut()
+         rv.process_config$isDone[4] <- !is.null(rv$tmpC$dataOut())
       })
       
-      observeEvent(rv$tmpC$validated(),  { 
-         rv.process_config$isDone[4] <- rv$tmpC$validated()
-      })
+      # observeEvent(rv$tmpC$validated(),  { 
+      #    rv.process_config$isDone[4] <- rv$tmpC$validated()
+      # })
       
       observeEvent(req(rv$tmpC$reseted()!=0), {
          ind <- grep(rv.process_config$stepsNames[4], names(rv$tmpA$dataOut()))

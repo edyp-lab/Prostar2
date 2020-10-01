@@ -80,20 +80,15 @@ mod_wf_wf1_A_server <- function(id,
           tl.update$current.pos <- 1
         
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
-        tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
+        tl.update$actions$prv <- condPrevBtn() && rv$skip == 0
       })
       
       
       observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-        print('MODULE A : RESET du module A')
-        ReinitScreens()
+         ReinitScreens()
 
-        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
-        tl.update$current.pos <- 1
         rv$skip <- 0
-        tl.update$actions$skip <- TRUE
-        tl.update$actions$nxt <- TRUE
-        tl.update$actions$prv <- TRUE
+        lapply(tl.update$actions, function(x){x <- T})
         
         if (!rv.process_config$isDone[size()]){
           rv$dataIn <- dataIn()
@@ -105,25 +100,23 @@ mod_wf_wf1_A_server <- function(id,
 
       
       observeEvent(req(rv.process_config$isDone[tl.update$current.pos]),  ignoreInit = T, {
-        rv.process_config$mandatory
         if (rv.process_config$isDone[tl.update$current.pos])
           DisableAllPrevSteps()
-        
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
-        tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
+        tl.update$actions$prv <- condPrevBtn() && rv$skip == 0
       })
       
      
       observeEvent(tl.update$current.pos,  ignoreInit = T, {
         DisplayCurrentStep()
         tl.update$actions$nxt <- condNextBtn() && rv$skip == 0
-        tl.update$actions$nxt <- condPrevBtn() && rv$skip == 0
+        tl.update$actions$prv <- condPrevBtn() && rv$skip == 0
       })
       
 
       observeEvent(rv.process_config$isDone[size()], {
         rv$process.validated <- rv.process_config$isDone[size()]
-})
+      })
      
       
       observeEvent(req(forcePosition() != 0), ignoreNULL=T, { rv$forcePosition <- forcePosition()})
