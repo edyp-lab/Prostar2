@@ -72,7 +72,7 @@ mod_pipe_protein_newModule_shinyTest_server <- function(input, output, session, 
     
   })
   
-  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_process', style=2, pages=r.nav)
   
   ## Definitions of the screens
   

@@ -38,7 +38,7 @@ start_server <- "
 mod_pipe_name_server <- function(input, output, session, obj, indice){
   ns <- session$ns
   
-  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_process', style=2, pages=r.nav)
 "
 
 
@@ -160,7 +160,7 @@ end_server <-  "
 # mod_pipe_name_ui('pipe_name_ui_1')
 
 ## To be copied in the server
-# callModule(mod_pipe_name_server, 'pipe_name_ui_1')
+# mod_pipe_name_server('pipe_name_ui_1')
 "
 
 
@@ -172,12 +172,12 @@ screen_content_ui <- c(
 
 
 screen_content_server <- c(
-  "callModule(mod_infos_dataset_server,'infos',
+  "mod_infos_dataset_server('infos',
                  obj = reactive({rv$dataIn}))",
   
-  "rv$settings <- callModule(mod_settings_server, 'settings', obj=reactive({rv$dataIn}))
+  "rv$settings <- mod_settings_server('settings', obj=reactive({rv$dataIn}))
   
-    callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
+    mod_plots_corr_matrix_server('plots_corr_matrix', 
                  obj = reactive({rv$dataIn}),
                  names = reactive({NULL}),
                  gradientRate = reactive({r$settings()$defaultGradientRate})
@@ -187,8 +187,7 @@ screen_content_server <- c(
 
 
 watch_file <- "
-Watch_mod_pipe_name <- callModule(mod_pipe_name_server,
-                                               'mod_pipe_name',  
+Watch_mod_pipe_name <- mod_pipe_name_server('mod_pipe_name',  
                                                 obj = reactive({rv.core$current.obj}),
                                                 indice = reactive({rv.core$current.indice})
                                        )

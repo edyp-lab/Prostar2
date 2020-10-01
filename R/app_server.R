@@ -79,11 +79,11 @@ app_server <- function(input, output,session) {
   
   
   ## Get the return values of modules in charge of loading datasets
-  rv.core$tmp_dataManager <- list(openFile = callModule(mod_open_dataset_server, 'moduleOpenDataset', 
+  rv.core$tmp_dataManager <- list(openFile = mod_open_dataset_server('moduleOpenDataset', 
                                                         pipeline.def=reactive({pipeline.defs})),
-                                  convert = callModule(mod_convert_ms_file_server, 'moduleProcess_Convert', 
+                                  convert = mod_convert_ms_file_server('moduleProcess_Convert', 
                                                        pipeline.def=reactive({pipeline.defs})),
-                                  openDemo = callModule(mod_open_demo_dataset_server, 'mod_OpenDemoDataset', 
+                                  openDemo = mod_open_demo_dataset_server('mod_OpenDemoDataset', 
                                                         pipeline.def=reactive({pipeline.defs}))
                                   )
   
@@ -114,30 +114,27 @@ app_server <- function(input, output,session) {
   
   
   # Store the return value of the module settings
-  rv.core$settings <- callModule(mod_settings_server, "modSettings", obj=reactive({rv.core$current.obj}))
+  rv.core$settings <- mod_settings_server("modSettings", obj=reactive({rv.core$current.obj}))
   
   
   
   
   
-  callModule(mod_infos_dataset_server, 
-             'infos_demoDataset', 
+  mod_infos_dataset_server('infos_demoDataset', 
              obj = reactive({
                req(rv.core$current.obj)
                rv.core$current.obj
              })
   )
   
-  callModule(mod_infos_dataset_server, 
-             'infos_openFile', 
+  mod_infos_dataset_server('infos_openFile', 
              obj = reactive({
                req(rv.core$current.obj)
                rv.core$current.obj
              })
   )
   
-  rv.core$tmp_indice <- callModule(mod_change_assay_server, 
-             'change_assay', 
+  rv.core$tmp_indice <- mod_change_assay_server('change_assay', 
              ll.se = reactive({names(rv.core$current.obj)}),
              indice = reactive({rv.core$current.indice})
   )
@@ -147,13 +144,13 @@ app_server <- function(input, output,session) {
   })
 
    
-   callModule(mod_homepage_server, "homepage")
-   callModule(mod_release_notes_server, "modReleaseNotes")
-   callModule(mod_check_updates_server, "modCheckUpdates")
+  mod_homepage_server("homepage")
+  mod_release_notes_server("modReleaseNotes")
+  mod_check_updates_server("modCheckUpdates")
 
-   #callModule(mod_bug_report_server, "bugreport")
-   callModule(mod_insert_md_server, "links_MD",URL_links)
-   callModule(mod_insert_md_server, "FAQ_MD", URL_FAQ)
+  #callModule(mod_bug_report_server, "bugreport")
+  mod_insert_md_server("links_MD",URL_links)
+  mod_insert_md_server("FAQ_MD", URL_FAQ)
    
   
    #Once the type of pipeline is known (ie a dataset has been loaded),
@@ -172,7 +169,7 @@ app_server <- function(input, output,session) {
    Build_DataMining_Menu <- reactive({
     req(rv.core$current.obj)
      
-     callModule(mod_all_plots_server, 'modAllPlots', 
+     mod_all_plots_server('modAllPlots', 
                 dataIn = reactive({
                   req(rv.core$current.obj)
                   rv.core$current.obj

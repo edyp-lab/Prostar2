@@ -107,7 +107,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
     
   })
   
-  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_process', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -119,7 +119,7 @@ mod_pipe_protein_Filtering_server <- function(input, output, session, obj, indic
   ##
   
   
-  rv$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv$dataIn}))
+  rv$settings <- mod_settings_server("settings", obj=reactive({rv$dataIn}))
   
   
   # Initialisation of the module

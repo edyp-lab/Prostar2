@@ -60,7 +60,7 @@ mod_pipe_process_server <- function(input, output, session, obj){
   })
   
   
-  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_process', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -75,9 +75,8 @@ mod_pipe_process_server <- function(input, output, session, obj){
   # Add new modules via 'callModule'
   # for example, the module for settings: mod_settings
   
-  rv.process$settings <- callModule(mod_settings_server,
-                                    "settings", 
-                                    obj = reactive({obj()}))
+  rv.process$settings <- mod_settings_server("settings", 
+                                             obj = reactive({obj()}))
   
   
   
@@ -216,7 +215,7 @@ server <- function(input, output, session) {
   )
   
   
-  rv$test <- callModule(mod_pipe_process_server,'foo', obj=reactive({obj}) )
+  rv$test <- mod_pipe_process_server('foo', obj=reactive({obj}) )
   
   
   observeEvent(rv$test(),{

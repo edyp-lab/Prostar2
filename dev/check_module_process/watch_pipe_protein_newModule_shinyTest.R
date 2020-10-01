@@ -1,8 +1,7 @@
 
-Watch_mod_pipe_protein_newModule_shinyTest <- callModule(mod_pipe_protein_newModule_shinyTest_server,
-                                                         'mod_pipe_protein_newModule_shinyTest',  
-                                                         obj = reactive({rv.core$current.obj}),
-                                                         indice = reactive({rv.core$current.indice})
+Watch_mod_pipe_protein_newModule_shinyTest <- mod_pipe_protein_newModule_shinyTest_server('mod_pipe_protein_newModule_shinyTest',  
+                                                                                          obj = reactive({rv.core$current.obj}),
+                                                                                          indice = reactive({rv.core$current.indice})
 )
 
 

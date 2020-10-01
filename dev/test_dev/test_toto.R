@@ -36,7 +36,7 @@ server <- function(input, output, session) {
   )
   
   
-  rv$test <- callModule(mod_navigation_server, "test_nav",style=2, pages = r.nav)
+  rv$test <- mod_navigation_server("test_nav",style=2, pages = r.nav)
   
   output$show <- renderUI({
     tagList(

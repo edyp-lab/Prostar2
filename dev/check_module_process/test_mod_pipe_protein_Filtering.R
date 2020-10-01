@@ -28,10 +28,9 @@ server <- function(input, output, session) {
   )
   
   
-  callModule(mod_pipe_protein_newModule_shinyTest_server,
-             'pipe_filter',
-             obj = reactive({rv$current.obj}),
-             indice = reactive({2})
+  mod_pipe_protein_newModule_shinyTest_server('pipe_filter',
+                                              obj = reactive({rv$current.obj}),
+                                              indice = reactive({2})
   )
   
   
