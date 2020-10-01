@@ -9,7 +9,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  callModule(mod_plots_legend_colored_exprs_server,'legend_colored_exprs')
+  mod_plots_legend_colored_exprs_server('legend_colored_exprs')
   
 }
 

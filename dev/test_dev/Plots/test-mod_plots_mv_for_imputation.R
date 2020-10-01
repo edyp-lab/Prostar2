@@ -15,12 +15,12 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   utils::data(Exp1_R25_pept, package='DAPARdata2')
- 
-  callModule(mod_plots_mv_for_imputation_server,'plots_mv_impute',
-             obj = reactive({Exp1_R25_pept}),
-             ind = reactive({2}),
-             title = reactive({NULL}),
-             palette = reactive({NULL})
+  
+  mod_plots_mv_for_imputation_server('plots_mv_impute',
+                                     obj = reactive({Exp1_R25_pept}),
+                                     ind = reactive({2}),
+                                     title = reactive({NULL}),
+                                     palette = reactive({NULL})
   )
 }
 

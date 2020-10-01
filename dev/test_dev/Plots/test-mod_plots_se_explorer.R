@@ -20,10 +20,10 @@ server <- function(input, output, session) {
   originOfValues <- metadata(Exp1_R25_prot)[['OriginOfValues']]
   colData <- colData(Exp1_R25_prot)
   
-  callModule(mod_plots_se_explorer_server,'se_explorer',
-             obj = reactive({obj}),
-             originOfValues = reactive({originOfValues}),
-             colData = reactive({colData}))
+  mod_plots_se_explorer_server('se_explorer',
+                               obj = reactive({obj}),
+                               originOfValues = reactive({originOfValues}),
+                               colData = reactive({colData}))
 }
 
 

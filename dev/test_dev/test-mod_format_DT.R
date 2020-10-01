@@ -17,14 +17,14 @@ server <- function(input, output, session) {
   obj <- Exp1_R25_prot
   #obj <- NULL
   
-  callModule(mod_format_DT_server,'test_format_DT', 
-             table2show = reactive({as.data.frame(assay(obj[[2]]))}),
-             style = reactive(NULL)
-             # style = reactive({ list(cols = colnames(colData(obj)),
-             #                         vals = colnames(colData(obj))[2],
-             #                         unique = unique(colData(obj)$Condition),
-             #                         pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})
-             ) 
+  mod_format_DT_server('test_format_DT', 
+                       table2show = reactive({as.data.frame(assay(obj[[2]]))}),
+                       style = reactive(NULL)
+                       # style = reactive({ list(cols = colnames(colData(obj)),
+                       #                         vals = colnames(colData(obj))[2],
+                       #                         unique = unique(colData(obj)$Condition),
+                       #                         pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])})
+  ) 
   
   #callModule(mod_format_DT_server,'test_format_DT', table2show = reactive({NULL}))
   

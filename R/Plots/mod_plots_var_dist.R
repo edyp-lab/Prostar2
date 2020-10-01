@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_var_dist_plot_ui and mod_var_dist_plot_server
 #' 
 #' @description  A shiny Module.
@@ -29,9 +29,9 @@ mod_plots_var_dist_ui <- function(id){
 }
 
 
-    
+
 # Module Server
-    
+
 #' @rdname mod_var_dist_plot
 #' 
 #' @export
@@ -42,44 +42,50 @@ mod_plots_var_dist_ui <- function(id){
 #' 
 #' @importFrom SummarizedExperiment assay
 #' 
-mod_plots_var_dist_server <- function(input, output, session,
+mod_plots_var_dist_server <- function(id,
                                       obj,
                                       conds,
                                       base_palette=NULL){
-  ns <- session$ns
   
-  observe({
-    req(obj())
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-    if (class(obj()) != "Summarizedexperiment") { return(NULL) }
-  })
-  
-  
-  
-  viewDistCV <- reactive({
-    req(obj())
+    observe({
+      req(obj())
+      
+      if (class(obj()) != "Summarizedexperiment") { return(NULL) }
+    })
     
-    isolate({
-      varDist <- DAPAR2::CVDistD_HC(SummarizedExperiment::assay(obj()),conds(),palette = base_palette())
+    
+    
+    viewDistCV <- reactive({
+      req(obj())
+      
+      isolate({
+        varDist <- DAPAR2::CVDistD_HC(SummarizedExperiment::assay(obj()),
+                                      conds(),
+                                      palette = base_palette())
+      })
+      varDist
     })
-    varDist
-  })
-  
-  
-  output$viewDistCV <- renderHighchart({
-    withProgress(message = 'Making plot', value = 100, {
-      viewDistCV()
+    
+    
+    output$viewDistCV <- renderHighchart({
+      withProgress(message = 'Making plot', value = 100, {
+        viewDistCV()
+      })
     })
+    
   })
-  
   
   
 }
 
-    
+
 ## To be copied in the UI
 # mod_plots_var_dist_ui("var_dist_plot_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_plots_var_dist_server, "var_dist_plot_ui_1")
- 
+

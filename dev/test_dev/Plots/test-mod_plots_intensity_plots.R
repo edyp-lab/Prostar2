@@ -28,9 +28,9 @@ server <- function(input, output, session) {
     master = NULL
   )
   
-  r$settings <- callModule(mod_settings_server, "settings", obj=reactive({Exp1_R25_prot}))
+  r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
   
-                      
+  
   
   metadata <- metadata(Exp1_R25_prot)
   conds <- colData(Exp1_R25_prot)[['Condition']]
@@ -39,25 +39,25 @@ server <- function(input, output, session) {
                                               ProtOfInterest=rep(0,nrow(obj)))
   SummarizedExperiment::rowData(obj)$ProtOfInterest[10:20] <- 1
   
-  r$master <- callModule(mod_plots_tracking_server,'master_tracking', 
-                         obj = reactive({obj}),
-                         keyId=reactive({keyId}),
-                         params=reactive({NULL}),
-                         reset=reactive({FALSE}),
-                         slave = reactive({FALSE})
-                        )
+  r$master <- mod_plots_tracking_server('master_tracking', 
+                                        obj = reactive({obj}),
+                                        keyId=reactive({keyId}),
+                                        params=reactive({NULL}),
+                                        reset=reactive({FALSE}),
+                                        slave = reactive({FALSE})
+  )
   
-  callModule(mod_plots_intensity_server,'plots_boxplots', 
-             dataIn = reactive({obj}),
-             meta = reactive({metadata}),
-             conds = reactive({conds}),
-             base_palette = reactive({r$settings()$examplePalette}),
-             params = reactive({if(input$sync) 
-               r$master() else NULL
-               }),
-             reset = reactive({FALSE}),
-             slave = reactive({input$sync})
-             
+  mod_plots_intensity_server('plots_boxplots', 
+                             dataIn = reactive({obj}),
+                             meta = reactive({metadata}),
+                             conds = reactive({conds}),
+                             base_palette = reactive({r$settings()$examplePalette}),
+                             params = reactive({if(input$sync) 
+                               r$master() else NULL
+                             }),
+                             reset = reactive({FALSE}),
+                             slave = reactive({input$sync})
+                             
   )
   
 }
