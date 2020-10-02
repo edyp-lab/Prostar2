@@ -2,7 +2,9 @@
 #   source(file.path('../../R', f), local=TRUE)$value
 # }
 
-source(file.path('../../R', 'mod_select_keyID.R'), local=TRUE)$value
+library(shiny)
+
+source(file.path('../../R/DataManager', 'mod_select_keyID.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 
 ui <- fluidPage(
@@ -22,9 +24,9 @@ server <- function(input, output, session) {
   
   utils::data(Exp1_R25_pept, package='DAPARdata2')
   
-  rv$IDs <- callModule(mod_select_keyID_server, 'selectID', 
-                       dataIn = reactive({rowData(Exp1_R25_pept[['original']])}),
-                       typeOfData = reactive({'peptide'}))
+  rv$IDs <- mod_select_keyID_server('selectID', 
+                                    dataIn = reactive({SummarizedExperiment::rowData(Exp1_R25_pept[['original']])}),
+                                    typeOfData = reactive({'peptide'}))
   
   #rv$IDs <- callModule(mod_select_keyID_server, 'selectID', dataIn=reactive({NULL}))
   

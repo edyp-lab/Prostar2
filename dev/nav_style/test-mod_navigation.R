@@ -1,6 +1,6 @@
 library(rhandsontable)
 library(shiny)
-source(file.path('../nav_style/', 'mod_navigation.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 ui <- fluidPage(
@@ -29,7 +29,7 @@ server <- function(input, output, session) {
   
   
   screens <- mod_navigation_server("test_nav",
-                                  style = 4,
+                                  style = 2,
                                   pages = r.nav  )
   
   output$show <- renderUI({

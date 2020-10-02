@@ -1,8 +1,11 @@
-# set max upload file size to 30 Mo
+library(shiny)
+
+
+#set max upload file size to 30 Mo
 options(shiny.maxRequestSize=300*1024^2)
 
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_import_file_from.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_import_file_from.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
@@ -17,7 +20,7 @@ server <- function(input, output, session) {
   rv.import <- reactiveValues(
     data = NULL
   )
-  rv.import$data <- callModule(mod_import_file_from_server, 'import')
+  rv.import$data <- mod_import_file_from_server('import')
   
   output$showHead <- renderText({
     req(rv.import$data())

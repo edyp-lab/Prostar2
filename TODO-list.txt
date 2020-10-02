@@ -1,4 +1,4 @@
-
+﻿
 Sam
 * regarder pourquoi Prostar ne trouve pas tous les datasets de DAPARdata
 * rajouter les settings comme paramètre des modules graphiques
@@ -14,8 +14,13 @@ Enora
 * DAPAR2 filtration ajouter les checks/warnings adéquats pour que la fonction soit indépendante
 * mod_plot_heatmap : + bouton export ; + param taille label et palette ?
 * ANOVA Hélène
+* Liens vers sass/scss/css-js pour la barre de navigation : https://codepen.io/ritz078/pen/LGRWjE/
+https://codepen.io/jen-huang/pen/LENZGX/
+https://codepen.io/AdamKimmerer/pen/RraRbb/
+https://codepen.io/carrrter/pen/ELLmyX
+https://codepen.io/vram1980/pen/jrzgXk/
+https://codepen.io/abhishekraj/pen/WZZKKw
 
 
 ### modules qui ne fonctionnent pas (encore) ###
-mod_all_plots
 mod_convert_from_ms

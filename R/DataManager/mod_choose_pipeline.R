@@ -27,29 +27,36 @@ mod_choose_pipeline_ui <- function(id){
 #' @export
 #' @keywords internal
     
-mod_choose_pipeline_server <- function(input, output, session, pipeline.def=NULL, dataType=NULL){
-  ns <- session$ns
-  
-  rv.choosePipeline <- reactiveValues(
-    choice = NULL )
+mod_choose_pipeline_server <- function(id, pipeline.def=NULL, dataType=NULL){
   
   
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
     
-  observeEvent( req(input$pipelineChoice), {
-    rv.choosePipeline$choice <- input$pipelineChoice
+    rv.choosePipeline <- reactiveValues(
+      choice = NULL )
+    
+    
+    
+    observeEvent( req(input$pipelineChoice), {
+      rv.choosePipeline$choice <- input$pipelineChoice
+    })
+    
+    output$selectWidgetPipeline <- renderUI({
+      req(pipeline.def())
+      
+      selectizeInput(ns("pipelineChoice"),
+                     "Choose the pipeline",
+                     multiple = T,
+                     options = list(maxItems = 1),
+                     choices = names(pipeline.def()))
+    })
+    
+    return( reactive({rv.choosePipeline$choice }))
+    
+    
   })
   
-  output$selectWidgetPipeline <- renderUI({
-    req(pipeline.def())
-    
-    selectizeInput(ns("pipelineChoice"),
-                   "Choose the pipeline",
-                   multiple = T,
-                   options = list(maxItems = 1),
-                   choices = names(pipeline.def()))
-  })
-  
-  return( reactive({rv.choosePipeline$choice }))
 }
     
 ## To be copied in the UI

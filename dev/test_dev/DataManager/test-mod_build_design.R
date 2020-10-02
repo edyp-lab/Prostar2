@@ -22,8 +22,10 @@ server <- function(input, output, session) {
   rv.test <- reactiveValues(
     res = NULL
   )
+  # rv.test$res <- mod_build_design_server('buildDesign', 
+  #                                        sampleNames=reactive({colnames(colData(obj))}))
   rv.test$res <- mod_build_design_server('buildDesign', 
-                                         sampleNames=reactive({colnames(colData(obj))}))
+                                         sampleNames=reactive({colData(obj)$Sample.name}))
   
   observeEvent(req(rv.test$res() ),{
     print(rv.test$res() )

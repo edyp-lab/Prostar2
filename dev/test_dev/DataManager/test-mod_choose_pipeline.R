@@ -1,5 +1,5 @@
 source(file.path('../../R', 'config.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_choose_pipeline.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_choose_pipeline.R'), local=TRUE)$value
 
 
 ui <- fluidPage(
@@ -19,7 +19,7 @@ server <- function(input, output, session) {
     res = NULL
    )
   
-  rv$res <- callModule(mod_choose_pipeline_server,'pipe', pipeline.def=reactive({pipeline.defs}))
+  rv$res <- mod_choose_pipeline_server('pipe', pipeline.def=reactive({pipeline.defs}))
   
   output$showPipeline <- renderText({
     req(rv$res())
