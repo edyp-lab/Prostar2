@@ -38,76 +38,24 @@ mod_wf_wf1_A_server <- function(id,
       
       ##########################################################################
       
-      # InitScreens <- reactive({
-      #   # initialisation of the screens
-      #   for (i in 1:length(rv.process_config$stepsNames))
-      #     rv$screens[[i]] <- if (i == rv$current.pos) 
-      #       div(id = ns(paste0("screen", i)),  rv$screens[[i]])
-      #   else  
-      #     shinyjs::hidden(div(id = ns(paste0("screen", i)),  rv$screens[[i]]))
-      #   rv$screens
-      # })
       
-      # CreateScreens <- reactive({
-      #   rv$screens <- lapply(1:length(rv.process_config$stepsNames), function(x){
-      #     do.call(uiOutput, list(outputId=ns(paste0("screen", x))))})
-      #   rv$screens
-      # })
-      
-      ReinitScreens <- reactive({
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){
-                 shinyjs::enable(paste0('screen', x))
-                 shinyjs::reset(paste0('screen', x))
-               })
-        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
-        rv$current.pos <- 1
-      })
-      
-      
-      output$show_dataIn <- renderPrint({names(dataIn())})
-      output$show_rv_dataIn <- renderPrint({names(rv$dataIn)})
-      output$show_rv_dataOut <- renderPrint({names(rv$dataOut)})
-      #output$show_screens <- renderUI({tagList(rv$screens)})
       
       
       
       
       
       
-      DisableAllPrevSteps <- reactive({
-        pos <- max(grep(TRUE, rv.process_config$isDone))
-        lapply(1:pos, 
-               function(x){ shinyjs::disable(paste0('screen', x))})
-        
-      })
+      output$show_dataIn <- renderPrint({names(dataIn())})
+      output$show_rv_dataIn <- renderPrint({names(rv$dataIn)})
+      output$show_rv_dataOut <- renderPrint({names(rv$dataOut)})
       
-      DisableAllSteps <- reactive({
-        lapply(1:length(rv.process_config$isDone), 
-               function(x){ shinyjs::disable(paste0('screen', x))})
-        
-      })
-      
-      
-      DisplayCurrentStep <- reactive({
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){shinyjs::toggle(paste0('screen', x),
-                                           condition = x==rv$current.pos )}) 
-      })
-      
-      
-      HideAllSteps <- reactive({
-        lapply(1:length(rv.process_config$stepsNames), 
-               function(x){shinyjs::toggle(paste0('screen', x),
-                                           condition = F)}) 
-      })
       
       condNextBtn <- reactive({
         
         # # Conditional enabling of the next button
-        end_of_tl <- rv$current.pos == length(rv.process_config$stepsNames)
-        mandatory_step <- isTRUE(rv.process_config$mandatory[rv$current.pos])
-        validated <- isTRUE(rv.process_config$isDone[rv$current.pos])
+        end_of_tl <- rv$current.pos == length(config$stepsNames)
+        mandatory_step <- isTRUE(config$mandatory[rv$current.pos])
+        validated <- isTRUE(config$isDone[rv$current.pos])
         cond.next.btn <-  !mandatory_step || validated
         cond.next.btn
       })
@@ -118,104 +66,155 @@ mod_wf_wf1_A_server <- function(id,
         cond.prev.btn
       })
       
-      size <- reactive({
-        req(rv.process_config$stepsNames)
-        length(rv.process_config$stepsNames)
-      })
       #################################################################################
       
       
       
       rv <- reactiveValues(
         current.pos = 1,
-        screens = NULL)
-      
-      
-      actions <- reactiveValues(
-          rst = TRUE,
-          nxt = TRUE,
-          prv = TRUE)
+        timeline = NULL)
 
       
-      # variables to communicate with the navigation module
-      rv.process_config <- reactiveValues(
+      actions <- reactiveValues(
+          btns = list(
+            rst = TRUE,
+            nxt = TRUE,
+            prv = TRUE),
+          screens = NULL,
+          position = 1
+          )
+
+      
+      
+      config <- reactiveValues(
         type = 'process',
         name = 'Filtering',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
         isDone =  c(TRUE, FALSE, FALSE, FALSE),
-        mandatory =  c(FALSE, FALSE, TRUE,TRUE),
-        screens = list(screenStep1 = uiOutput(ns('screen1')),
-                       screenStep2 = uiOutput(ns('screen2')),
-                       screenStep3 = uiOutput(ns('screen3')),
-                       screenStep1 = uiOutput(ns('screen4')))
-      )
-   
-      pos <- mod_timeline_server("timeline", 
-                                 style = 2, 
-                                 pages = rv.process_config, 
-                                 actions = actions)
-      
+        mandatory =  c(FALSE, FALSE, TRUE,TRUE)
+        )
 
+      observeEvent(req(rv$timeline$position()),{ 
+        print(paste0('--- MODULE A : new position = ', rv$timeline$position()))
+        rv$current.pos <- rv$timeline$position()
+        })
+      
       #--------------------------------------------------------------
       observeEvent(req(dataIn()), { 
         print(' ------- MODULE A : Initialisation du module A ------- ')
         rv$dataIn <- dataIn()
+        
+        InitActions(nbSteps())
+        config$screens <- CreateScreens(nbSteps())
+        rv$timeline <- mod_timeline_server("timeline", 
+                                   style = 2, 
+                                   config = config, 
+                                   actions = actions,
+                                   position = rv$current.pos
+                                   )
       })
       
       
+      InitActions <- function(n){
+        actions$screens <- setNames(lapply(1:n,
+                                  function(x){T}),
+                                  paste0('screen', 1:n)
+                                  )
+      }
+      
+      CreateScreens <- function(n){
+        setNames(
+          lapply(1:n, 
+                 function(x){
+                   do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
+          paste0('screenStep', 1:n))
+      }
+      
+      nbSteps <- reactive({
+        req(config$stepsNames)
+        length(config$stepsNames)
+      })
+      
+      
+      DisableAllPrevSteps <- reactive({
+        pos <- max(grep(TRUE, config$isDone))
+        lapply(1:pos, function(x) actions$screens[[x]] <- FALSE)
+      })
+      
+      DisableAllSteps <- reactive({
+        lapply(actions$screens, function(x) x <- FALSE)
+      })
+      
+      EnableAllSteps <- function(){
+        lapply(actions$screens, function(x) x <- TRUE)
+      }
+      
+      
+      ResetScreens <- function(){
+        EnableAllSteps()
+        
+        lapply(1:nbSteps(), function(x){
+          shinyjs::reset(paste0('screen', x))
+        })
+      }
+      
+      
+      ResetActionBtns <- function(){
+        lapply(actions$btns, function(x){x <- T})
+        }
+      
       #--------------------------------------------------------------
-      observeEvent(req(rv.process_config), { 
+      observeEvent(req(config), { 
         print(' ------- MODULE A : Initialisation de la configuration A ------- ')
         
-        rv$isValidated <- rv.process_config$isDone[size()]
+        rv$isValidated <- config$isDone[nbSteps()]
         
         #CreateScreens()
         #InitScreens()
         print(rv$screens)
         if (isTRUE(rv$isValidated))
-          rv$current.pos <-  size()
+          rv$current.pos <-  nbSteps()
         else 
           rv$current.pos <- 1
 
-        actions$nxt <- condNextBtn()
-        actions$prv <- condPrevBtn() 
+        # actions$nxt <- condNextBtn()
+        # actions$prv <- condPrevBtn() 
       })
       
       
       #--------------------------------------------------------------
-      observeEvent(req(c(pos$rstBtn()!=0, remoteReset()!=0)), {
-        ReinitScreens()
-
-        rv.process_config$isDone <- c(TRUE, rep(FALSE, size()-1))
+      observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
+        print("---- MODULE A : reset activated")
+        ResetScreens()
+        config$isDone <- c(TRUE, rep(FALSE, nbSteps()-1))
+        ResetActionBtns()
         rv$current.pos <- 1
-        lapply(actions, function(x){x <- T})
-
-        rv$dataIn <- RemoveItemFromDataset(dataIn(), rv.process_config$name)
+        rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
         rv$dataOut <- NULL
       })
       
 
       
-      observeEvent(rv.process_config$isDone,  ignoreInit = T, {
+      observeEvent(config$isDone,  ignoreInit = T, {
         print(' ------- MODULE A : A new step is validated ------- ')
         
         DisableAllPrevSteps()
-        rv$isValidated <- rv.process_config$isDone[size()]
-        actions$nxt <- condNextBtn()
-        actions$prv <- condPrevBtn()
+        rv$isValidated <- config$isDone[nbSteps()]
+        # actions$nxt <- condNextBtn()
+        # actions$prv <- condPrevBtn()
       })
       
      
       observeEvent(rv$current.pos,  ignoreInit = T, {
         DisplayCurrentStep()
-        actions$nxt <- condNextBtn() 
-        actions$prv <- condPrevBtn() 
+        # actions$nxt <- condNextBtn() 
+        # actions$prv <- condPrevBtn() 
       })
       
 
       
       observeEvent(req(forcePosition() != 0), ignoreNULL=T, { rv$forcePosition <- forcePosition()})
-      observeEvent(req(rv$forcePosition), { rv$current.pos <- size() })
+      observeEvent(req(rv$forcePosition), { rv$current.pos <- nbSteps() })
       
 
       
@@ -225,17 +224,22 @@ mod_wf_wf1_A_server <- function(id,
        ############### SCREEN 1 ######################################
        output$screen1 <- renderUI({
          tagList(
-           tags$h3(paste0('Process ', rv.process_config$name))
+           tags$h3(paste0('Process ', config$name)),
+           actionButton(ns('rst'), 'reset'),
+           actionButton(ns('screen'), 'screen'),
+           actionButton(ns('prev'), 'prev'),
+           actionButton(ns('next'), 'next')
          )
        })
        
+      observeEvent(input$screen, { actions$screens[[3]] <- !actions$screens[[3]]})
        
        ############### SCREEN 2 ######################################
        
        output$screen2 <- renderUI({
          
          observeEvent(input$perform_screen2_btn, {
-           rv.process_config$isDone[2] <- TRUE
+           config$isDone[2] <- TRUE
          })
          
          tagList(
@@ -280,7 +284,7 @@ mod_wf_wf1_A_server <- function(id,
        # in previous datas. The objective is to take account
        # of skipped steps
        observeEvent(input$perform_screen3_btn, {
-         rv.process_config$isDone[3] <- TRUE
+         config$isDone[3] <- TRUE
        })
        
        
@@ -299,9 +303,9 @@ mod_wf_wf1_A_server <- function(id,
          
           observeEvent(input$validate_btn, {
             #isolate({
-              rv$dataIn <- AddItemToDataset(rv$dataIn, rv.process_config$name)
+              rv$dataIn <- AddItemToDataset(rv$dataIn, config$name)
               rv$dataOut <- rv$dataIn
-              rv.process_config$isDone[4] <- TRUE
+              config$isDone[4] <- TRUE
            # })
        })
        
@@ -313,8 +317,8 @@ mod_wf_wf1_A_server <- function(id,
        ##########################################################
         
   list(dataOut = reactive({rv$dataOut}),
-       validated = reactive({rv.process_config$isDone[size()]}),
-       reseted = reactive({pos$rstBtn()})
+       validated = reactive({config$isDone[nbSteps()]}),
+       reseted = reactive({rv$timeline$rstBtn()})
   )
     }
   )

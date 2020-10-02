@@ -6,11 +6,13 @@ source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_A.R'), local=TRUE)$value
 source(file.path('.', 'formal_funcs.R'), local=TRUE)$value
 
-options(shiny.fullstacktrace = F)
+options(shiny.fullstacktrace = T)
 
 ui <- fluidPage(
   tagList(
     actionButton('testclic', 'Remote reset'),
+
+    
     mod_wf_wf1_A_ui('mod_A_nav')
   )
 )
@@ -24,6 +26,7 @@ rv <- reactiveValues(
   tmp = NULL,
   remoteReset = 0
 )
+
 
   observeEvent(input$testclic, {rv$remoteReset <- input$tesclic})
   
