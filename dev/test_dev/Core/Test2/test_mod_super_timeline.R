@@ -7,8 +7,10 @@ source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_A.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_B.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_C.R'), local=TRUE)$value
+source(file.path('.', 'formal_funcs.R'), local=TRUE)$value
 
-options(shiny.fullstacktrace = F)
+
+options(shiny.fullstacktrace = T)
 options(shiny.reactlog=TRUE) 
 
 ui <- fluidPage(
@@ -18,13 +20,13 @@ ui <- fluidPage(
     wellPanel(
       h3('Prostar (caller)'),
       fluidRow(
-        column(width=6,
+        column(width=2,
                p('Data input :'),
-               verbatimTextOutput('show_dataIn')
+               uiOutput('show_dataIn')
         ),
-        column(width=6,
+        column(width=2,
                p('Data output :'),
-               verbatimTextOutput('show_rv_tmp_dataOut'))
+               uiOutput('show_rv_tmp_dataOut'))
       )
     )
   )
@@ -43,20 +45,23 @@ server <- function(input, output, session) {
   rv$tmp <- mod_super_timeline_server("super_nav", 
                                 dataIn = reactive({rv$current.obj}) )
   
-  observeEvent(rv$tmp$dataOut(), {
-    print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')
-    print(rv$tmp$dataOut())
-    })
-  
-  observeEvent(rv$tmp$reseted(),{
-    print('TEST SUPER_TIMELINE : activation of the reset all')
-    
-  })
+   observeEvent(rv$tmp(), {
+     print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')
+     print(rv$tmp())
+     })
+
 
   
-  output$show_dataIn <- renderPrint({rv$current.obj})
-  output$show_rv_tmp_dataOut <- renderPrint({rv$tmp$dataOut()})
-  
+   output$show_dataIn <- renderUI({
+     tagList(lapply(names(rv$current.obj), function(x){tags$p(x)}))
+   })
+   output$show_rv_dataOut <- renderUI({
+     req(rv$dataOut)
+     tagList(
+       lapply(names(rv$dataOut), function(x){tags$p(x)})
+     )
+   })
+
 }
 
 

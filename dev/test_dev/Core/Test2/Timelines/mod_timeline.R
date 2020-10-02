@@ -75,16 +75,13 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
     # Disable screens marks as F in the vector actions$screens
-    observeEvent(actions$screens, ignoreInit = T,{
-      lapply(1:current$nbSteps, 
-             function(x){ shinyjs::toggleState(paste0('screen', x), cond = actions$screens[[x]])})
-      print(paste0(unlist(actions$screens), collapse=' '))
-      })
+    observeEvent(actions()$screens, ignoreInit=T, {
+     print('MODULE TL : event on actions()$screens')
+      lapply(1:length(actions()$screens), 
+             function(x){ shinyjs::toggleState(paste0('div_screen', x), cond = actions()$screens[[x]])})
+       })
     
-    # observeEvent(position,{ 
-    #   print(paste0('in TL, new position : ', position))
-    #   current$val <- position
-    # })
+   observeEvent(position(),{current$val <- position()})
     
     
     current <- reactiveValues(
@@ -94,19 +91,28 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
     
     observeEvent(req(config),{
       current$nbSteps <- length(config$stepsNames)
-      current$val <- 1
       InitScreens()
     })
     
-    
+    #observeEvent(req(config$isDone),{
+    #  print("TL : change in config$isDone")
+    #  print(paste0(unlist(config$isDone), collapse = ' '))
+    #  if (config$isDone[[current$nbSteps]])
+    #    current$val <- current$nbSteps
+    #  else
+    #    1
+    #})
     
     InitScreens <- reactive({
       # initialisation of the screens
-      for (i in 1:current$nbSteps)
-        config$screens[[i]] <- if (i == current$val)
-          div(id = ns(paste0("screen", i)),  config$screens[[i]])
-      else
-        shinyjs::hidden(div(id = ns(paste0("screen", i)),  config$screens[[i]]))
+      config$screens <- lapply(1:current$nbSteps,
+                               function(x){
+                                 config$screens[[x]] <- if (x == current$val) 
+                                   div(id = ns(paste0("div_screen", x)),  config$screens[[x]])
+                                 else 
+                                   shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  config$screens[[x]]))
+                               })
+
     })
     
 
@@ -125,15 +131,28 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
   
     output$show_screens <- renderUI({tagList(config$screens)})
     
-   
+    condNextBtn <- reactive({
+      end_of_tl <- current$val == current$nbSteps
+      mandatory_step <- isTRUE(config$mandatory[current$val])
+      validated <- isTRUE(config$isDone[[current$val]])
+      cond.next.btn <-  !mandatory_step || validated
+      cond.next.btn
+    })
     
-    observeEvent(current$val, {
-      shinyjs::toggleState('prevBtn', cond = (current$val > 1) && actions$btns$prv)
-      shinyjs::toggleState('nextBtn', cond = (current$val < current$nbSteps) &&  actions$btns$nxt)
+    condPrevBtn <- reactive({
+      start_of_tl <- current$val == 1
+      cond.prev.btn <- !start_of_tl
+      cond.prev.btn
+    })
+    
+    # Catch a new position or a change in the isDone list
+    observeEvent(c(current$val, config$isDone), {
+      shinyjs::toggleState('prevBtn', cond = condPrevBtn() && actions()$btns$prv)
+      shinyjs::toggleState('nextBtn', cond = condNextBtn() &&  actions()$btns$nxt)
       
       # Display current page
       lapply(1:current$nbSteps, function(x){
-        shinyjs::toggle(paste0('screen', x), condition = x==current$val)})
+        shinyjs::toggle(paste0('div_screen', x), condition = x==current$val)})
     })
     
     
@@ -185,7 +204,7 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
         status[which(config$mandatory)] <- 'mandatory'
       
       #status <- rep('',length(config$stepsNames))
-      status[which(config$isDone)] <- 'complete'
+      status[which(unlist(config$isDone))] <- 'complete'
       
       active  <- rep('', length(config$stepsNames))
       active[current$val] <- 'active'
@@ -208,7 +227,7 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
       colorForCursor <- rep("white", length(config$stepsNames))
       
       for (i in 1:length(config$stepsNames)){
-        status <- config$isDone[i]
+        status <- config$isDone[[i]]
         col <- ifelse(!is.null(config$mandatory) && config$mandatory[i], "red", orangeProstar)
         ifelse(status, color[i] <- "green", color[i] <- col)
       }
@@ -237,9 +256,8 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
     
     
     
-    # return value of the tl.update
     list(rstBtn = reactive(input$rstBtn),
-         position = reactive(current$val)
+         pos = reactive(current$val)
          )
     
   })

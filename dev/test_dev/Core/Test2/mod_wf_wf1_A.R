@@ -10,13 +10,20 @@ mod_wf_wf1_A_ui <- function(id){
     wellPanel(
       h3('Module A'),
       fluidRow(
-        column(width=6,
-               p('Data input :'),
-               verbatimTextOutput(ns('show_dataIn'))
+        column(width=2,
+               tags$b(h4(style = 'color: blue;', "Data input")),
+               uiOutput(ns('show_dataIn'))
         ),
-        column(width=6,
-               p('Data output :'),
-               verbatimTextOutput(ns('show_rv_dataOut')))
+        column(width=2,
+               tags$b(h4(style = 'color: blue;', "Data output")),
+               
+               uiOutput(ns('show_rv_dataOut'))),
+        column(width=2,
+               tags$b(h4(style = 'color: blue;', "Current pos")),
+               uiOutput(ns('show_currentPos'))),
+        column(width=2,
+               tags$b(h4(style = 'color: blue;', "List 'isDone'")),
+               uiOutput(ns('show_isDone')))
       )
     )
   )
@@ -28,98 +35,85 @@ mod_wf_wf1_A_ui <- function(id){
 #' 
 mod_wf_wf1_A_server <- function(id, 
                                 dataIn=NULL,
-                                remoteReset=FALSE, 
-                                forcePosition = NULL){
+                                remoteReset=FALSE,
+                                forcePosition = 1){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       
       
-      ##########################################################################
-      
-      
-      
-      
-      
-      
-      
-      
-      output$show_dataIn <- renderPrint({names(dataIn())})
+      output$show_currentPos <- renderUI({
+        req(rv$current.pos)
+         p(as.character(rv$current.pos))
+      })
+      output$show_dataIn <- renderUI({
+        tagList(lapply(names(dataIn()), function(x){tags$p(x)}))
+          })
       output$show_rv_dataIn <- renderPrint({names(rv$dataIn)})
-      output$show_rv_dataOut <- renderPrint({names(rv$dataOut)})
-      
-      
-      condNextBtn <- reactive({
-        
-        # # Conditional enabling of the next button
-        end_of_tl <- rv$current.pos == length(config$stepsNames)
-        mandatory_step <- isTRUE(config$mandatory[rv$current.pos])
-        validated <- isTRUE(config$isDone[rv$current.pos])
-        cond.next.btn <-  !mandatory_step || validated
-        cond.next.btn
+      output$show_rv_dataOut <- renderUI({
+        tagList(
+          lapply(names(rv$dataOut), function(x){tags$p(x)})
+        )
       })
-      
-      condPrevBtn <- reactive({
-        start_of_tl <- rv$current.pos == 1
-        cond.prev.btn <- !start_of_tl
-        cond.prev.btn
-      })
-      
+      output$show_isDone <- renderUI({
+        config$isDone <- setNames(config$isDone, config$stepsNames)
+          tagList(lapply(names(config$isDone), 
+                function(x){tags$p(paste0(x, ' - ', config$isDone[[x]]))}))
+          })
+
+  
       #################################################################################
-      
-      
       
       rv <- reactiveValues(
         current.pos = 1,
-        timeline = NULL)
+        timeline = NULL,
+        dataIn = NULL,
+        dataOut = NULL)
 
-      
+      # Commands to send to timeline_server
       actions <- reactiveValues(
           btns = list(
             rst = TRUE,
             nxt = TRUE,
             prv = TRUE),
-          screens = NULL,
-          position = 1
-          )
+          screens = NULL)
 
-      
-      
       config <- reactiveValues(
         type = 'process',
         name = 'Filtering',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
-        isDone =  c(TRUE, FALSE, FALSE, FALSE),
-        mandatory =  c(FALSE, FALSE, TRUE,TRUE)
+        isDone =  list(TRUE, FALSE, FALSE, FALSE),
+        mandatory =  c(FALSE, TRUE, FALSE, TRUE)
         )
 
-      observeEvent(req(rv$timeline$position()),{ 
-        print(paste0('--- MODULE A : new position = ', rv$timeline$position()))
-        rv$current.pos <- rv$timeline$position()
-        })
+      #################################################################################
       
+      observeEvent(forcePosition(),{rv$current.pos <- forcePosition() })
       #--------------------------------------------------------------
       observeEvent(req(dataIn()), { 
         print(' ------- MODULE A : Initialisation du module A ------- ')
         rv$dataIn <- dataIn()
+        rv$dataOut <- NULL
         
-        InitActions(nbSteps())
+        actions$screens <- InitActions(nbSteps())
         config$screens <- CreateScreens(nbSteps())
+        config$isDone <- setNames(config$isDone, config$stepsNames)
+        
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
                                    config = config, 
-                                   actions = actions,
-                                   position = rv$current.pos
+                                   actions = reactive({actions}),
+                                   position = reactive({rv$current.pos})
                                    )
-      })
+        })
       
-      
+      # ------------ START OF COMMON FUNCTIONS --------------------
       InitActions <- function(n){
-        actions$screens <- setNames(lapply(1:n,
-                                  function(x){T}),
-                                  paste0('screen', 1:n)
-                                  )
+        setNames(lapply(1:n,
+                         function(x){T}),
+                 paste0('screen', 1:n)
+                 )
       }
       
       CreateScreens <- function(n){
@@ -136,110 +130,95 @@ mod_wf_wf1_A_server <- function(id,
       })
       
       
-      DisableAllPrevSteps <- reactive({
-        pos <- max(grep(TRUE, config$isDone))
-        lapply(1:pos, function(x) actions$screens[[x]] <- FALSE)
-      })
+      DisableAllPrevSteps <- function(screens){
+        pos <- max(grep(TRUE, unlist(config$isDone)))
+        lapply(1:pos, function(x) screens[[x]] <- FALSE)
+      }
       
-      DisableAllSteps <- reactive({
-        lapply(actions$screens, function(x) x <- FALSE)
-      })
+      DisableAllSteps <- function(screens){
+        lapply(screens, function(x) x <- FALSE)
+      }
       
-      EnableAllSteps <- function(){
-        lapply(actions$screens, function(x) x <- TRUE)
+      EnableAllSteps <- function(screens){
+        lapply(screens, function(x) x <- TRUE)
       }
       
       
-      ResetScreens <- function(){
-        EnableAllSteps()
-        
+      ResetScreens <- function(screens){
         lapply(1:nbSteps(), function(x){
           shinyjs::reset(paste0('screen', x))
         })
       }
       
       
-      ResetActionBtns <- function(){
-        lapply(actions$btns, function(x){x <- T})
-        }
+      ResetActionBtns <- function(btns){lapply(btns, function(x){x <- T})}
       
-      #--------------------------------------------------------------
-      observeEvent(req(config), { 
-        print(' ------- MODULE A : Initialisation de la configuration A ------- ')
-        
-        rv$isValidated <- config$isDone[nbSteps()]
-        
-        #CreateScreens()
-        #InitScreens()
-        print(rv$screens)
-        if (isTRUE(rv$isValidated))
-          rv$current.pos <-  nbSteps()
-        else 
-          rv$current.pos <- 1
-
-        # actions$nxt <- condNextBtn()
-        # actions$prv <- condPrevBtn() 
+      # ------------ END OF COMMON FUNCTIONS --------------------
+      
+      
+      
+      #Catch a new position from timeline
+      observeEvent(req(rv$timeline$pos()),{ 
+        rv$current.pos <- rv$timeline$pos()
       })
       
+      observeEvent(forcePosition(),{
+        print(paste0('---- MODULE A : new value for forcePosition() : ', forcePosition()))
+        # If is.validated
+        if (length(which(unlist(config$isDone)==T))>0){
+          rv$maxTRUE <- max(which(unlist(config$isDone)==T))
+        } else {
+          rv$maxTRUE <- 1
+        }
+        
+        rv$current.pos <- rv$maxTRUE
+        print(paste0('MAXTRUE = ', rv$maxTRUE))
+      })
       
-      #--------------------------------------------------------------
+      #--- Catch a reset from timeline of caller
       observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
         print("---- MODULE A : reset activated")
+        
+        actions$screens <- EnableAllSteps(actions$screens)
         ResetScreens()
-        config$isDone <- c(TRUE, rep(FALSE, nbSteps()-1))
-        ResetActionBtns()
+
+        config$isDone <- setNames(lapply(1:nbSteps(), function(x) x<-FALSE),
+                                  config$stepsNames)
+        config$isDone[[1]] <- T
+        
+        actions$btns <- ResetActionBtns(actions$btns)
         rv$current.pos <- 1
+        
+        # Update datasets logics
         rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
-        rv$dataOut <- NULL
+        rv$dataOut <- rv$dataIn
       })
       
 
       
+      # Catch a change in isDone (validation of a step)
+      # Specific to the modules of process and do not appear in pipeline module
       observeEvent(config$isDone,  ignoreInit = T, {
         print(' ------- MODULE A : A new step is validated ------- ')
-        
-        DisableAllPrevSteps()
-        rv$isValidated <- config$isDone[nbSteps()]
-        # actions$nxt <- condNextBtn()
-        # actions$prv <- condPrevBtn()
+        actions$screens <- DisableAllPrevSteps(actions$screens)
       })
-      
-     
-      observeEvent(rv$current.pos,  ignoreInit = T, {
-        DisplayCurrentStep()
-        # actions$nxt <- condNextBtn() 
-        # actions$prv <- condPrevBtn() 
-      })
-      
 
-      
-      observeEvent(req(forcePosition() != 0), ignoreNULL=T, { rv$forcePosition <- forcePosition()})
-      observeEvent(req(rv$forcePosition), { rv$current.pos <- nbSteps() })
-      
-
-      
        #####################################################################
        ## screens of the module
        ##
        ############### SCREEN 1 ######################################
        output$screen1 <- renderUI({
          tagList(
-           tags$h3(paste0('Process ', config$name)),
-           actionButton(ns('rst'), 'reset'),
-           actionButton(ns('screen'), 'screen'),
-           actionButton(ns('prev'), 'prev'),
-           actionButton(ns('next'), 'next')
+           tags$h3(paste0('Process ', config$name))
          )
        })
-       
-      observeEvent(input$screen, { actions$screens[[3]] <- !actions$screens[[3]]})
-       
+
        ############### SCREEN 2 ######################################
        
        output$screen2 <- renderUI({
          
          observeEvent(input$perform_screen2_btn, {
-           config$isDone[2] <- TRUE
+           config$isDone[[2]] <- TRUE
          })
          
          tagList(
@@ -284,7 +263,7 @@ mod_wf_wf1_A_server <- function(id,
        # in previous datas. The objective is to take account
        # of skipped steps
        observeEvent(input$perform_screen3_btn, {
-         config$isDone[3] <- TRUE
+         config$isDone[[3]] <- TRUE
        })
        
        
@@ -305,7 +284,7 @@ mod_wf_wf1_A_server <- function(id,
             #isolate({
               rv$dataIn <- AddItemToDataset(rv$dataIn, config$name)
               rv$dataOut <- rv$dataIn
-              config$isDone[4] <- TRUE
+              config$isDone[[4]] <- TRUE
            # })
        })
        
@@ -316,11 +295,8 @@ mod_wf_wf1_A_server <- function(id,
           
        ##########################################################
         
-  list(dataOut = reactive({rv$dataOut}),
-       validated = reactive({config$isDone[nbSteps()]}),
-       reseted = reactive({rv$timeline$rstBtn()})
-  )
-    }
-  )
+  reactive({rv$dataOut})
+    })
+  
 }
 
