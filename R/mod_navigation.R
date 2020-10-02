@@ -30,12 +30,12 @@ mod_navigation_ui <- function(id){
     fluidRow(
       align= 'center',
       column(width=2,
-               div(
-                 style = btn_style,
-                 actionButton(ns("rstBtn"), "reset",
-                              class = PrevNextBtnClass,
-                              style='padding:4px; font-size:80%')
-               ),
+             div(
+               style = btn_style,
+               actionButton(ns("rstBtn"), "reset",
+                            class = PrevNextBtnClass,
+                            style='padding:4px; font-size:80%')
+             ),
              div( id='test',
                   style = btn_style,
                   shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
@@ -107,11 +107,11 @@ mod_navigation_server <- function(id, style=1, pages){
       for (i in 2:current$nbSteps){
         pages$ll.UI[[i]] <- shinyjs::hidden(div(id = ns(paste0("screen", i)),  pages$ll.UI[[i]]))
       }
-
+      
     })
     
     
-   
+    
     
     
     
@@ -256,7 +256,7 @@ mod_navigation_server <- function(id, style=1, pages){
     # return value of the module
     
     reactive( tagList(pages$ll.UI))
-
+    
   })
 }
 
