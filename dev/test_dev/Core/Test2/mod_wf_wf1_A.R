@@ -57,7 +57,8 @@ mod_wf_wf1_A_server <- function(id,
         )
       })
       output$show_isDone <- renderUI({
-        config$isDone <- setNames(config$isDone, config$stepsNames)
+        req(config$isDone)
+        #config$isDone <- setNames(config$isDone, config$stepsNames)
           tagList(lapply(names(config$isDone), 
                 function(x){tags$p(paste0(x, ' - ', config$isDone[[x]]))}))
           })
@@ -70,22 +71,13 @@ mod_wf_wf1_A_server <- function(id,
         timeline = NULL,
         dataIn = NULL,
         dataOut = NULL,
-        event_counter = 0)
-
-      # Commands to send to timeline_server
-      actions <- reactiveValues(
-          # btns = list(
-          #   rst = TRUE,
-          #   nxt = TRUE,
-          #   prv = TRUE),
-          screens = NULL,
-          cmd = NULL)
+        event_counter = 0,
+        cmd = NULL)
 
       config <- reactiveValues(
         type = 'process',
         name = 'Filtering',
         stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
-        isDone =  list(TRUE, FALSE, FALSE, FALSE),
         mandatory =  c(FALSE, TRUE, FALSE, TRUE)
         )
 
@@ -99,14 +91,16 @@ mod_wf_wf1_A_server <- function(id,
         rv$dataOut <- NULL
         
         rv$event_counter <- 0
-        actions$screens <- InitActions(nbSteps())
+        rv$screens <- InitActions(nbSteps())
         config$screens <- CreateScreens(nbSteps())
-        config$isDone <- setNames(config$isDone, config$stepsNames)
+        config$isDone <- setNames(lapply(1:nbSteps(), 
+                                         function(x){ x == 1}), 
+                                  config$stepsNames)
         
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
                                    config = config, 
-                                   actions = reactive({actions}),
+                                   cmd = reactive({rv$cmd}),
                                    position = reactive({rv$current.pos})
                                    )
         })
@@ -133,17 +127,15 @@ mod_wf_wf1_A_server <- function(id,
       })
       
       
+      # This function cannot be implemented in the module pipeline because 
+      # the id of the screens to reset are not known elsewhere.
+      # Trying to reset the global 'div_screens' in the timeline module
+      # does not work
       ResetScreens <- function(screens){
         lapply(1:nbSteps(), function(x){
           shinyjs::reset(paste0('screen', x))
         })
       }
-      
-      
-      #ResetActionBtns <- function(btns){lapply(btns, function(x){x <- T})}
-      
-      # ------------ END OF COMMON FUNCTIONS --------------------
-      
       
       
       #Catch a new position from timeline
@@ -163,20 +155,36 @@ mod_wf_wf1_A_server <- function(id,
         rv$current.pos <- rv$maxTRUE
       })
       
+      
+      SetCmd <- function(names){
+        append(as.list(names), list(rv$event_counter))
+        #paste0(name, '_', rv$event_counter)
+      }
+      
+      
+      observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0)),{
+        # Add external events to counter
+        rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
+      })
+      
+      
       #--- Catch a reset from timeline of caller
       observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
-        print("---- MODULE A : reset activated")
-        
-        #actions$screens <- EnableAllSteps(actions$screens)
-        actions$cmd <- paste0('EnableAllSteps_', rv$event_counter)
-        ResetScreens()
+        print("---- MODULE A : reset activated ----------------")
 
+        # Add external events to counter
+        rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
+        
+        rv$cmd <- SetCmd(c('EnableAllSteps', 'ResetActionBtns'))
+        
         config$isDone <- setNames(lapply(1:nbSteps(), function(x) x<-FALSE),
                                   config$stepsNames)
         config$isDone[[1]] <- T
         
-        actions$cmd <- paste0('ResetActionBtns_', rv$event_counter)
         rv$current.pos <- 1
+        rv$event_counter <- 0
+        ResetScreens()
+        
         
         # Update datasets logics
         rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
@@ -189,13 +197,15 @@ mod_wf_wf1_A_server <- function(id,
       # Specific to the modules of process and do not appear in pipeline module
       observeEvent(config$isDone,  ignoreInit = T, {
         print(' ------- MODULE A : A new step is validated ------- ')
-        #actions$screens <- DisableAllPrevSteps(actions$screens)
-        actions$cmd <- paste0('DisableAllPrevSteps_',rv$event_counter)
+        #rv$screens <- DisableAllPrevSteps(rv$screens)
+        rv$cmd <- SetCmd('DisableAllPrevSteps')
       })
 
       observe({
+        #browser()
         reactiveValuesToList(input)
-        rv$event_counter <- sum(as.numeric(unlist(reactiveValuesToList(input))))
+        rv$event_counter <- sum(as.numeric(unlist(reactiveValuesToList(input))), na.rm=T)
+        
         print(paste0('----MODULE A : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
         })
       
