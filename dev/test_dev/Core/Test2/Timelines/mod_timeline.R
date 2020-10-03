@@ -86,7 +86,11 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
     
     current <- reactiveValues(
       val = 1,
-      nbSteps = NULL
+      nbSteps = NULL,
+      userToggleBtns = list(
+        rst = TRUE,
+        nxt = TRUE,
+        prv = TRUE)
     )
     
     observeEvent(req(config),{
@@ -147,14 +151,60 @@ mod_timeline_server <- function(id, style=1, config, actions, position){
     
     # Catch a new position or a change in the isDone list
     observeEvent(c(current$val, config$isDone), {
-      shinyjs::toggleState('prevBtn', cond = condPrevBtn() && actions()$btns$prv)
-      shinyjs::toggleState('nextBtn', cond = condNextBtn() &&  actions()$btns$nxt)
+      shinyjs::toggleState('prevBtn', cond = condPrevBtn() && current$userToggleBtns$prv)
+      shinyjs::toggleState('nextBtn', cond = condNextBtn() &&  current$userToggleBtns$nxt)
       
       # Display current page
       lapply(1:current$nbSteps, function(x){
         shinyjs::toggle(paste0('div_screen', x), condition = x==current$val)})
+      
+
     })
     
+    
+   
+    
+    # Catch a command name to toggle the state enable/disable of screens
+    # Each command is received with an integer as suffix which correspond to
+    # an event_count in the caller module. This is used to virtually create a
+    # new event which will be triggered by observeEvent event if the value
+    # is the same.
+    observeEvent(actions()$cmd, {
+      print(paste0('MODULE TL : New event on actions()$toggleSteps : ', actions()$cmd))
+      cmd <- strsplit(actions()$cmd, '_')[[1]][1]
+      print(paste0('extracted cmd = ', cmd))
+      if (cmd == 'DisableAllSteps')
+        toggleState_Steps(cond = F, i = current$nbSteps)
+      else if (cmd == 'EnableAllSteps')
+        EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps)
+      else if (cmd == 'DisableAllPrevSteps'){
+        print('module TL : DisableAllPrevSteps')
+        #pos <- max(grep(TRUE, unlist(config$isDone)))
+        pos <- current$val
+        toggleState_Steps(cond = F, i = pos)
+      } else if (cmd == 'ResetActionBtns'){
+        lapply(current$userToggleBtns, function(x) x <- TRUE)
+        
+      }
+      
+      #actions()$toggleStateSteps <- NULL
+      
+      # switch(actions()$toggleStateSteps,
+      #        DisableAllSteps = toggleState_Steps(cond = F, i = current$nbSteps),
+      #        EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps),
+      #        DisableAllPrevSteps = {
+      #          pos <- max(grep(TRUE, unlist(config$isDone)))
+      #          pos <- current$val
+      #          toggleState_Steps(cond = F, i=pos)
+      #        }
+      #        )
+    })
+    
+    toggleState_Steps <- function(cond, i){
+      lapply(1:i, function(x){
+        shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
+    }
+
     
     
     ## Functions for timeline and styles

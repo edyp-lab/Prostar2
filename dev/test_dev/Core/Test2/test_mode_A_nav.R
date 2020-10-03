@@ -32,7 +32,8 @@ rv <- reactiveValues(
   
   rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", 
                                 dataIn = reactive({rv$current.obj}), 
-                                remoteReset = reactive({input$testclic})
+                                remoteReset = reactive({input$testclic}),
+                                forcePosition = reactive({1})
                                 )
   
   #observeEvent(rv$tmp$dataOut(),{rv$current.obj <- rv$tmp$dataOu()  })
