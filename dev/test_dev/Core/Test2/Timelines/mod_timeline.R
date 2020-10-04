@@ -91,18 +91,11 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       current$nbSteps <- length(config$stepsNames)
       InitScreens()
     })
-    
-    #observeEvent(req(config$isDone),{
-    #  print("TL : change in config$isDone")
-    #  print(paste0(unlist(config$isDone), collapse = ' '))
-    #  if (config$isDone[[current$nbSteps]])
-    #    current$val <- current$nbSteps
-    #  else
-    #    1
-    #})
-    
+
+    # Initialization of the screens with integrating them into a div specific
+    # to this module (name prefixed with the ns() function
+    # Those div englobs the div of the caller where screens are defined
     InitScreens <- reactive({
-      # initialisation of the screens
       config$screens <- lapply(1:current$nbSteps,
                                function(x){
                                  config$screens[[x]] <- if (x == current$val) 
@@ -110,7 +103,6 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
                                  else 
                                    shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  config$screens[[x]]))
                                })
-
     })
     
 
@@ -121,32 +113,28 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       newval <- min(newval, current$nbSteps)
       current$val <- newval
     }
-    
-    
     observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
     observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
     
   
     output$show_screens <- renderUI({tagList(config$screens)})
     
-    condNextBtn <- reactive({
+    NextBtn_default_logics <- reactive({
       end_of_tl <- current$val == current$nbSteps
       mandatory_step <- isTRUE(config$mandatory[current$val])
       validated <- isTRUE(config$isDone[[current$val]])
-      cond.next.btn <-  !mandatory_step || validated
-      cond.next.btn
+      !mandatory_step || validated
     })
     
-    condPrevBtn <- reactive({
+    PrevBtn_default_logics <- reactive({
       start_of_tl <- current$val == 1
-      cond.prev.btn <- !start_of_tl
-      cond.prev.btn
+      !start_of_tl
     })
     
     # Catch a new position or a change in the isDone list
     observeEvent(c(current$val, config$isDone), {
-      shinyjs::toggleState('prevBtn', cond = condPrevBtn() && current$userToggleBtns$prv)
-      shinyjs::toggleState('nextBtn', cond = condNextBtn() &&  current$userToggleBtns$nxt)
+      shinyjs::toggleState('prevBtn', cond = PrevBtn_default_logics() && current$userToggleBtns$prv)
+      shinyjs::toggleState('nextBtn', cond = NextBtn_default_logics() &&  current$userToggleBtns$nxt)
       
       # Display current page
       lapply(1:current$nbSteps, function(x){
@@ -162,36 +150,23 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
     # new event which will be triggered by observeEvent event if the value
     # is the same.
     observeEvent(cmd(), {
-      print(paste0('------ MODULE TL : New event on actions()$toggleSteps : ', cmd()))
+      #print(paste0('------ MODULE TL : New event on actions()$toggleSteps : ', cmd()))
       #browser()
       AnalyseCmd <- function(c) {
         print(paste0('extracted cmd = ', c))
-      if (c == 'DisableAllSteps')
-        toggleState_Steps(cond = F, i = current$nbSteps)
-      else if (c == 'EnableAllSteps')
-        toggleState_Steps(cond = T, i = current$nbSteps)
-      else if (c == 'DisableAllPrevSteps'){
-        print('module TL : DisableAllPrevSteps')
-        #pos <- max(grep(TRUE, unlist(config$isDone)))
-        pos <- current$val
-        toggleState_Steps(cond = F, i = pos)
-      } else if (c == 'ResetActionBtns')
-        ResetActionsBtns()
-      }
-      
+        switch(c,
+             DisableAllSteps = toggleState_Steps(cond = F, i = current$nbSteps),
+             EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps),
+             DisableAllPrevSteps = {
+               pos <- max(grep(TRUE, unlist(config$isDone)))
+               #pos <- current$val
+               toggleState_Steps(cond = F, i = pos)
+             },
+             ResetActionBtns = ResetActionsBtns()
+             )
+           }
+
       lapply(cmd()[-length(cmd())], function(x) AnalyseCmd(x))
-      
-      #actions()$toggleStateSteps <- NULL
-      
-      # switch(actions()$toggleStateSteps,
-      #        DisableAllSteps = toggleState_Steps(cond = F, i = current$nbSteps),
-      #        EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps),
-      #        DisableAllPrevSteps = {
-      #          pos <- max(grep(TRUE, unlist(config$isDone)))
-      #          pos <- current$val
-      #          toggleState_Steps(cond = F, i=pos)
-      #        }
-      #        )
     })
     
     toggleState_Steps <- function(cond, i){
@@ -203,13 +178,13 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       lapply(current$userToggleBtns, function(x) x <- TRUE)
     }
     
-    ## Functions for timeline and styles
-    
+    ##
+    ## Functions defining timeline and styles
+    ##
     output$load_css_style <- renderUI({
       req(length(config$stepsNames))
       req(style != 3)
       
-
         file <- paste0('./Timelines/timeline',style, '.sass')
       #code <- code_sass_timeline[[paste0('style',style)]],"\n")
       code <- strsplit(readLines(file),"\n")

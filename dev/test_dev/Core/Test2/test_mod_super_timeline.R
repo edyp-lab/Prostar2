@@ -38,7 +38,7 @@ server <- function(input, output, session) {
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv <- reactiveValues(
-    current.obj = Exp1_R25_prot[1:10,,],
+    current.obj = Exp1_R25_prot[1:10,,-1],
     tmp = NULL
   )
   

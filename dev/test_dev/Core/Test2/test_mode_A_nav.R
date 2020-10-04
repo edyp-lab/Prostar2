@@ -28,7 +28,7 @@ rv <- reactiveValues(
 )
 
 
-  observeEvent(input$testclic, {rv$remoteReset <- input$tesclic})
+  observeEvent(input$testclic, {rv$current.obj <- NULL})
   
   rv$tmpA <- mod_wf_wf1_A_server("mod_A_nav", 
                                 dataIn = reactive({rv$current.obj}), 
