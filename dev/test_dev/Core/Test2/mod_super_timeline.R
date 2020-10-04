@@ -210,12 +210,14 @@ mod_super_timeline_server <- function(id,
       # pointed by the current position
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
         print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
-        browser()
-        rv$dataIn <- rv$tmp()
+        #browser()
+        module_which_returned <- names(which(lapply(reactiveValuesToList(rv$tmp), 
+                                                    function(x){!is.null(x())}) == T))
+        rv$dataIn <- rv$tmp[[module_which_returned]]()
         rv$dataOut <- rv$dataIn
         # The last TRUE value of the list is on the current pos
-        current.name <- names(config$stepsNames)[rv$current.pos]
-        config$isDone[[current.name]] <- TRUE
+        #current.name <- names(config$stepsNames)[rv$current.pos]
+        config$isDone[[module_which_returned]] <- TRUE
       })
 
 

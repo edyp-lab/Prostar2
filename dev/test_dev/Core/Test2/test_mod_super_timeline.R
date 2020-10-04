@@ -58,7 +58,7 @@ server <- function(input, output, session) {
    output$show_rv_dataOut <- renderUI({
      req(rv$dataOut)
      tagList(
-       lapply(names(rv$dataOut), function(x){tags$p(x)})
+       lapply(names(rv$tmp), function(x){tags$p(x)})
      )
    })
 
