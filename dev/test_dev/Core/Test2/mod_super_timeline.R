@@ -48,7 +48,7 @@ mod_super_timeline_server <- function(id,
         type = 'pipeline',
         process.name = 'Pipeline',
         stepsNames = c("Original", "Filtering", "Normalization", "Imputation"),
-         mandatory =  c(FALSE, FALSE, TRUE, FALSE)
+         mandatory =  c(TRUE, TRUE, FALSE, FALSE)
       )
       
       rv <- reactiveValues(
@@ -59,7 +59,8 @@ mod_super_timeline_server <- function(id,
         dataOut = NULL,
         sendPosition = 1,
         event_counter = 0,
-        cmd = NULL
+        cmd = NULL,
+        tmp = reactiveValues()
       )
       
       #--------------------------------------------------------------
@@ -89,6 +90,8 @@ mod_super_timeline_server <- function(id,
                                    cmd = reactive({rv$cmd}),
                                    position = reactive({rv$current.pos})
                                   )
+        
+        Launch_Module_Server()
         })
       
 
@@ -164,17 +167,22 @@ mod_super_timeline_server <- function(id,
       
       GetMaxTrue <- reactive({ max(which(unlist(config$isDone)==T)) })
       
-      #To avoid intempestive initialisations of modules due to dataIn changes
+      #To avoid intempestive initializations of modules due to dataIn changes
       # one define the following logics :
       #  A dataset is loaded in a module only if this module is not yet
       # validated and if it has not been skipped (this is why we use the
       # max True function
       # To rerun a validated module, the user has to reset it
-      SendCurrentDataset <- function(pos){
-        if (pos > GetMaxTrue())
-            rv$dataIn
-        else
-          NULL
+      # This function returns a non-NULL value to the module which name
+      # corresponds to the current position
+      SendCurrentDataset <- function(name){
+        #browser()
+        data <- NULL
+        if (names(config$isDone)[rv$current.pos] == name && rv$current.pos > GetMaxTrue())
+            data <- rv$dataIn
+        print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data)))
+        
+        return(data)
       }
       
       #Catch a new position from timeline
@@ -200,9 +208,9 @@ mod_super_timeline_server <- function(id,
       # anymore)
       # If a value (not NULL) is received, then it corresponds to the module
       # pointed by the current position
-      observeEvent(req(rv$tmp()), ignoreNULL = T, { 
+      observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
         print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
-        #browser()
+        browser()
         rv$dataIn <- rv$tmp()
         rv$dataOut <- rv$dataIn
         # The last TRUE value of the list is on the current pos
@@ -213,24 +221,26 @@ mod_super_timeline_server <- function(id,
 
       
       
-      rv$tmp <- mod_wf_wf1_A_server("mod_A_nav",
-                                     dataIn = reactive({SendCurrentDataset(rv$current.pos)}),
-                                     remoteReset = reactive({rv$timeline$rstBtn()}),
-                                     forcePosition = reactive({NULL})
-                                      )
-      
-     # rv$tmpB <- mod_wf_wf1_B_server("mod_B_nav",
-     #                                dataIn = reactive({rv$dataIn}),
-     #                                remoteReset = reactive({rv$timeline$rstBtn()}),
-     #                                forcePosition = reactive({rv$current.pos})
-     #                                 )
-      
-     # rv$tmpC <- mod_wf_wf1_C_server("mod_C_nav",
-     #                                dataIn = reactive({rv$dataIn}),
-     #                                remoteReset = reactive({rv$timeline$rstBtn()}),
-     #                                forcePosition = reactive({rv$current.pos})
-     #                                 )
-      
+     
+      Launch_Module_Server <- function(){
+        rv$tmp[['Filtering']] <- mod_wf_wf1_A_server("mod_A_nav",
+                                                     dataIn = reactive({SendCurrentDataset('Filtering')}),
+                                                     remoteReset = reactive({rv$timeline$rstBtn()}),
+                                                     forcePosition = reactive({NULL})
+        )
+        
+        rv$tmp[['Normalization']] <- mod_wf_wf1_B_server("mod_B_nav",
+                                                         dataIn = reactive({SendCurrentDataset('Normalization')}),
+                                                         remoteReset = reactive({rv$timeline$rstBtn()}),
+                                                         forcePosition = reactive({rv$current.pos})
+        )
+        
+        rv$tmp[['Imputation']] <- mod_wf_wf1_C_server("mod_C_nav",
+                                                      dataIn = reactive({SendCurrentDataset('Imputation')}),
+                                                      remoteReset = reactive({rv$timeline$rstBtn()}),
+                                                      forcePosition = reactive({rv$current.pos})
+        )
+      }
       
       
       
