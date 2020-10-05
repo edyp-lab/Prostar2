@@ -4,7 +4,8 @@ library(shiny)
 library(DAPARdata2)
 
 
-source(file.path("../../R","mod_plots_corr_matrix.R"), local=TRUE)$value
+source(file.path("../../R/Plots","mod_plots_corr_matrix.R"), local=TRUE)$value
+source(file.path("../../R","global.R"), local=TRUE)$value
 
 
 ui <- fluidPage(
@@ -23,7 +24,7 @@ server <- function(input, output, session) {
   
   output$choose_data_ui <- renderUI({
     selectInput('choose_data', "Dataset", choices = utils::data(package="DAPARdata2")$results[,"Item"]
-                )
+    )
   })
   
   
@@ -32,10 +33,10 @@ server <- function(input, output, session) {
     print(rv$current.obj)
   })
   
-  callModule(mod_plots_corr_matrix_server,'plots_corr_matrix', 
-             obj = reactive({rv$current.obj}),
-             names = reactive({NULL}),
-             gradientRate = reactive({0.8}))
+  mod_plots_corr_matrix_server('plots_corr_matrix', 
+                               obj = reactive({rv$current.obj[[length(names(rv$current.obj))]]}),
+                               names = reactive({NULL}),
+                               gradientRate = reactive({0.8}))
 }
 
 

@@ -1,8 +1,7 @@
-Watch_mod_pipe_protein_Normalization <- callModule(module=mod_pipe_protein_Normalization_server,
-                                           'mod_pipe_protein_Normalization',  
-                                           obj = reactive({rv.core$current.obj}),
-                                           indice = reactive({rv.core$current.indice})
-                                           )
+Watch_mod_pipe_protein_Normalization <- mod_pipe_protein_Normalization_server('mod_pipe_protein_Normalization',  
+                                                                              obj = reactive({rv.core$current.obj}),
+                                                                              indice = reactive({rv.core$current.indice})
+)
 
 
 

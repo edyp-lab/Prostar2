@@ -21,10 +21,10 @@ server <- function(input, output, session) {
   obj <- Exp1_R25_pept[[2]]
   
   
-  callModule(mod_plots_cc_server,'plots_cc', 
-             cc = reactive({metadata(obj)$list.cc}),
-             matAdj = reactive({metadata(obj)$list.matAdj}),
-             obj = reactive({obj})
+  mod_plots_cc_server('plots_cc', 
+                      cc = reactive({metadata(obj)$list.cc}),
+                      matAdj = reactive({metadata(obj)$list.matAdj}),
+                      obj = reactive({obj})
   )
 }
 

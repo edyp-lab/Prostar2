@@ -18,10 +18,10 @@
 mod_navigate_in_WF_ui <- function(id){
   ns <- NS(id)
   tagList(
- 
+    
   )
 }
-    
+
 #' navigate_in_WF Server Function
 #'
 #' @noRd 
@@ -161,12 +161,11 @@ mod_navigate_in_WF_server <- function(input, output, session){
   
   return(reactive(list(bars=bars(),
                        screens=screens())))
- 
+  
 }
-    
+
 ## To be copied in the UI
 # mod_navigate_in_WF_ui("navigate_in_WF_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_navigate_in_WF_server, "navigate_in_WF_ui_1")
- 

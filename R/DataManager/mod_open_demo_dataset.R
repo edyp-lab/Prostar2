@@ -1,5 +1,5 @@
 # Module UI
-  
+
 #' @title   mod_open_demo_dataset_ui and mod_open_demo_dataset_server
 #' 
 #' @description  A shiny Module.
@@ -35,9 +35,9 @@ mod_open_demo_dataset_ui <- function(id){
     shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass))
   )
 }
-    
+
 # Module Server
-    
+
 #' @rdname mod_open_demo_dataset
 #' 
 #' @export
@@ -51,77 +51,83 @@ mod_open_demo_dataset_ui <- function(id){
 #' @importFrom shinyjs info
 #' @import QFeatures
 #' 
-mod_open_demo_dataset_server <- function(input, output, session, pipeline.def){
-  ns <- session$ns
+mod_open_demo_dataset_server <- function(id, pipeline.def){
   
-
-  rv.openDemo <- reactiveValues(
-    dataRead = NULL,
-    pipe = NULL,
-    dataOut = NULL
-  )
-
-  rv.openDemo$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", 
-                                 pipeline.def = reactive({pipeline.defs}))
-  
-  
-  observe({
-    shinyjs::toggle('loadDemoDataset', condition= (!is.null(rv.openDemo$pipe())) && rv.openDemo$pipe() != '' && length(input$demoDataset) >0)
-  })
-  
-  
-  ### function for demo mode
-  output$chooseDemoDataset <- renderUI({
-     print("DAPARdata is loaded correctly")
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    
+    
+    rv.openDemo <- reactiveValues(
+      dataRead = NULL,
+      pipe = NULL,
+      dataOut = NULL
+    )
+    
+    rv.openDemo$pipe <- mod_choose_pipeline_server("choosePipe", 
+                                                   pipeline.def = reactive({pipeline.defs}))
+    
+    
+    observe({
+      shinyjs::toggle('loadDemoDataset', condition= (!is.null(rv.openDemo$pipe())) && rv.openDemo$pipe() != '' && length(input$demoDataset) >0)
+    })
+    
+    
+    ### function for demo mode
+    output$chooseDemoDataset <- renderUI({
+      print("DAPARdata is loaded correctly")
       selectInput(ns("demoDataset"),
                   "Demo dataset",
                   choices = utils::data(package="DAPARdata2")$results[,"Item"],
                   selected = character(0),
                   width='200px')
-  })
-  
-
-  
-  observeEvent(input$loadDemoDataset, {
-    nSteps <- 1
-    withProgress(message = '',detail = '', value = 0, {
-      incProgress(1/nSteps, detail = 'Loading dataset')
-      utils::data(list=input$demoDataset, package='DAPARdata2')
-      rv.openDemo$dataRead <- BiocGenerics::get(input$demoDataset)
-      if (class(rv.openDemo$dataRead)!="QFeatures") {
-        shinyjs::info("Warning : this file is not a QFeatures file ! 
+    })
+    
+    
+    
+    observeEvent(input$loadDemoDataset, {
+      nSteps <- 1
+      withProgress(message = '',detail = '', value = 0, {
+        incProgress(1/nSteps, detail = 'Loading dataset')
+        utils::data(list=input$demoDataset, package='DAPARdata2')
+        rv.openDemo$dataRead <- BiocGenerics::get(input$demoDataset)
+        if (class(rv.openDemo$dataRead)!="QFeatures") {
+          shinyjs::info("Warning : this file is not a QFeatures file ! 
                       Please choose another one.")
-        return(NULL)
-      }
-
-      MultiAssayExperiment::metadata(rv.openDemo$dataRead)$pipelineType <- rv.openDemo$pipe()
-      rv.openDemo$dataOut <- rv.openDemo$dataRead
-     
-    }) # End withProgress
+          return(NULL)
+        }
+        
+        MultiAssayExperiment::metadata(rv.openDemo$dataRead)$pipelineType <- rv.openDemo$pipe()
+        rv.openDemo$dataOut <- rv.openDemo$dataRead
+        
+      }) # End withProgress
+      
+      return(reactive({rv.openDemo$dataOut }))
+    }) # End observeEvent
     
-    return(reactive({rv.openDemo$dataOut }))
-  }) # End observeEvent
-  
-  
-  output$linktoDemoPdf <- renderUI({
-    req(input$demoDataset)
     
-    # file<- paste(system.file(package = "DAPARdata2"),"/doc/",
-    #              input$demoDataset,".pdf", sep="")
-    # cmd <- paste("cp ",file," www", sep="")
-    # system(cmd)
-    # filename <-paste0(input$demoDataset,".pdf", sep="")
-    # p("Dataset documentation ",a(href=filename, target='_blank', "(pdf)"))
-    # 
+    output$linktoDemoPdf <- renderUI({
+      req(input$demoDataset)
+      
+      # file<- paste(system.file(package = "DAPARdata2"),"/doc/",
+      #              input$demoDataset,".pdf", sep="")
+      # cmd <- paste("cp ",file," www", sep="")
+      # system(cmd)
+      # filename <-paste0(input$demoDataset,".pdf", sep="")
+      # p("Dataset documentation ",a(href=filename, target='_blank', "(pdf)"))
+      # 
+    })
+    
+    
+    return(reactive({rv.openDemo$dataOut}))
+    
+    
   })
   
- 
-  return(reactive({rv.openDemo$dataOut}))
 }
-    
+
 ## To be copied in the UI
 # mod_open_demo_dataset_ui("open_demo_dataset_ui_1")
-    
+
 ## To be copied in the server
 # callModule(mod_open_demo_dataset_server, "open_demo_dataset_ui_1")
- 
+

@@ -4,8 +4,8 @@ source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=T
 
 ui <- fluidPage(
   mod_observe_dynamic_colourPicker_input_ui('test'),
-    uiOutput('printColors')
-  )
+  uiOutput('printColors')
+)
 
 
 
@@ -15,9 +15,9 @@ server <- function(input, output,session) {
     colors = NULL)
   
   conds <- LETTERS[1:4]
-  rv.dyn$colors <- callModule(mod_observe_dynamic_colourPicker_input_server,'test', 
-                              n=reactive({4}),
-                              label=reactive({conds}))
+  rv.dyn$colors <- mod_observe_dynamic_colourPicker_input_server('test', 
+                                                                 n=reactive({4}),
+                                                                 label=reactive({conds}))
   
   
   output$printColors <- renderUI({

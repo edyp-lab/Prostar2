@@ -1,8 +1,7 @@
-Watch_mod_pipe_protein_HypothesisTest <- callModule(module=mod_pipe_protein_HypothesisTest_server,
-                                            'mod_pipe_protein_HypothesisTest',  
-                                            obj=reactive({rv.core$current.obj}),
-                                            indice = reactive({rv.core$current.indice})
-                                            )
+Watch_mod_pipe_protein_HypothesisTest <- mod_pipe_protein_HypothesisTest_server('mod_pipe_protein_HypothesisTest',  
+                                                                                obj=reactive({rv.core$current.obj}),
+                                                                                indice = reactive({rv.core$current.indice})
+)
 
 
 

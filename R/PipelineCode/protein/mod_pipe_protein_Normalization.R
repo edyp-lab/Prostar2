@@ -98,7 +98,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
   })
   
   
-  callModule(mod_navigation_server, 'nav_pipe_prot_norm', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_prot_norm', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -109,48 +109,43 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
   ## Calls to other modules
   ##
   ##
-  callModule(mod_plots_density_server,
-             "densityPlot_Norm",
-             obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
-             conds = reactive({colData(rv.norm$dataIn)[["Condition"]]}),
-             legend = reactive({colData(rv.norm$dataIn)[["Sample.name"]]}),
-             base_palette = reactive({rv.norm$settings()$basePalette}))
+  mod_plots_density_server("densityPlot_Norm",
+                           obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
+                           conds = reactive({colData(rv.norm$dataIn)[["Condition"]]}),
+                           legend = reactive({colData(rv.norm$dataIn)[["Sample.name"]]}),
+                           base_palette = reactive({rv.norm$settings()$basePalette}))
   
   
   
-  callModule(mod_popover_for_help_server,
-             "modulePopover_normQuanti", 
-             data = list(title = HTML(paste0("<strong>Normalization quantile</strong>")), 
-                         content="lower limit/noise (quantile = 0.15), median (quantile = 0.5). Min value=0, max value=1")
+  mod_popover_for_help_server("modulePopover_normQuanti", 
+                              data = list(title = HTML(paste0("<strong>Normalization quantile</strong>")), 
+                                          content="lower limit/noise (quantile = 0.15), median (quantile = 0.5). Min value=0, max value=1")
   )
   
-  rv.norm$selectProt <- callModule(mod_plots_tracking_server, 
-                                   "master_ProtSelection", 
-                                   obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
-                                   params = reactive({NULL}),
-                                   keyId = reactive({MultiAssayExperiment::metadata(obj())[['keyId']]}),
-                                   reset = reactive({rv.norm$resetTracking}),
-                                   slave = reactive({FALSE})
+  rv.norm$selectProt <- mod_plots_tracking_server("master_ProtSelection", 
+                                                  obj = reactive({rv.norm$dataIn[[rv.norm$i]]}),
+                                                  params = reactive({NULL}),
+                                                  keyId = reactive({MultiAssayExperiment::metadata(obj())[['keyId']]}),
+                                                  reset = reactive({rv.norm$resetTracking}),
+                                                  slave = reactive({FALSE})
   )
   
-  rv.norm$settings <- callModule(mod_settings_server,
-                                 "settings", 
-                                 obj = reactive({obj()}))
+  rv.norm$settings <- mod_settings_server("settings", 
+                                          obj = reactive({obj()}))
   
-  rv.norm$trackFromBoxplot <- callModule(mod_plots_intensity_server,
-                                         "boxPlot_Norm",
-                                         dataIn = reactive({rv.norm$dataIn[[rv.norm$i]]}),
-                                         meta = reactive({MultiAssayExperiment::metadata(obj())}),
-                                         conds = reactive({colData(obj())[['Condition']]}),
-                                         base_palette = reactive({rv.norm$settings()$basePalette}),
-                                         params = reactive({
-                                           if(rv.norm$sync)
-                                             rv.norm$selectProt() 
-                                           else 
-                                             NULL
-                                         }),
-                                         reset = reactive({rv.norm$resetTracking}),
-                                         slave = reactive({rv.norm$sync})
+  rv.norm$trackFromBoxplot <- mod_plots_intensity_server("boxPlot_Norm",
+                                                         dataIn = reactive({rv.norm$dataIn[[rv.norm$i]]}),
+                                                         meta = reactive({MultiAssayExperiment::metadata(obj())}),
+                                                         conds = reactive({colData(obj())[['Condition']]}),
+                                                         base_palette = reactive({rv.norm$settings()$basePalette}),
+                                                         params = reactive({
+                                                           if(rv.norm$sync)
+                                                             rv.norm$selectProt() 
+                                                           else 
+                                                             NULL
+                                                         }),
+                                                         reset = reactive({rv.norm$resetTracking}),
+                                                         slave = reactive({rv.norm$sync})
   )
   
   
@@ -366,7 +361,7 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
     )
     if (length(ind)==0)
       ind <- NULL
-
+    
     ind
   })
   
@@ -388,9 +383,9 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
            
            GlobalQuantileAlignment = {
              rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
-                                          i = rv.norm$i,
-                                          name = "proteins_norm",
-                                          method='GlobalQuantileAlignment'
+                                                  i = rv.norm$i,
+                                                  name = "proteins_norm",
+                                                  method='GlobalQuantileAlignment'
              )
            },
            
@@ -400,58 +395,58 @@ mod_pipe_protein_Normalization_server <- function(input, output, session, obj, i
                quant <- as.numeric(rv.norm$widgets$quantile)
              
              rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn, 
-                                          i = rv.norm$i, 
-                                          name = "proteins_norm",
-                                          method = 'QuantileCentering', 
-                                          conds = conds, 
-                                          type = rv.norm$widgets$type,
-                                          subset.norm = GetIndicesOfSelectedProteins(), 
-                                          quantile = quant
+                                                  i = rv.norm$i, 
+                                                  name = "proteins_norm",
+                                                  method = 'QuantileCentering', 
+                                                  conds = conds, 
+                                                  type = rv.norm$widgets$type,
+                                                  subset.norm = GetIndicesOfSelectedProteins(), 
+                                                  quantile = quant
              )
              
            } ,
            
            MeanCentering = {
              rv.norm$dataIn <- DAPAR2::normalizeD(object =rv.norm$dataIn,
-                                          i = rv.norm$i, 
-                                          name ="proteins_norm",
-                                          method = 'MeanCentering', 
-                                          conds = conds, 
-                                          type = rv.norm$widgets$type,
-                                          subset.norm = GetIndicesOfSelectedProteins(), 
-                                          scaling = rv.norm$widgets$varReduction
+                                                  i = rv.norm$i, 
+                                                  name ="proteins_norm",
+                                                  method = 'MeanCentering', 
+                                                  conds = conds, 
+                                                  type = rv.norm$widgets$type,
+                                                  subset.norm = GetIndicesOfSelectedProteins(), 
+                                                  scaling = rv.norm$widgets$varReduction
              )
            }, 
            
            SumByColumns = {
              rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
-                                          i =rv.norm$i,
-                                          name = "proteins_norm",
-                                          method = 'SumByColumns', 
-                                          conds = conds, 
-                                          type = rv.norm$widgets$type,
-                                          subset.norm = GetIndicesOfSelectedProteins()
+                                                  i =rv.norm$i,
+                                                  name = "proteins_norm",
+                                                  method = 'SumByColumns', 
+                                                  conds = conds, 
+                                                  type = rv.norm$widgets$type,
+                                                  subset.norm = GetIndicesOfSelectedProteins()
              )
            },
            
            LOESS = { 
              rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
-                                          i = rv.norm$i,
-                                          name = "proteins_norm",
-                                          method = 'LOESS', 
-                                          conds = conds, 
-                                          type = rv.norm$widgets$type,
-                                          span = as.numeric(rv.norm$widgets$spanLOESS)
+                                                  i = rv.norm$i,
+                                                  name = "proteins_norm",
+                                                  method = 'LOESS', 
+                                                  conds = conds, 
+                                                  type = rv.norm$widgets$type,
+                                                  span = as.numeric(rv.norm$widgets$spanLOESS)
              )
            },
            
            vsn = {
              rv.norm$dataIn <- DAPAR2::normalizeD(object = rv.norm$dataIn,
-                                          i = rv.norm$i, 
-                                          name = "proteins_norm",
-                                          method = 'vsn', 
-                                          conds = conds, 
-                                          type = rv.norm$widgets$type)
+                                                  i = rv.norm$i, 
+                                                  name = "proteins_norm",
+                                                  method = 'vsn', 
+                                                  conds = conds, 
+                                                  type = rv.norm$widgets$type)
            }
     )
     # })

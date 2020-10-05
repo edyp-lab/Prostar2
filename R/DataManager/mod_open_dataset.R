@@ -50,116 +50,122 @@ mod_open_dataset_ui <- function(id){
 #' 
 #' @importFrom shinyjs info alert
 #'     
-mod_open_dataset_server <- function(input, output, session, pipeline.def){
-  ns <- session$ns
+mod_open_dataset_server <- function(id, pipeline.def){
   
   
-  rv.openDataset <- reactiveValues(
-    dataOut = NULL,
-    pipe = NULL,
-    dataRead = NULL,
-    ret = NULL,
-    keyID = NULL,
-    parentProtId = NULL
-  )
-  
-  
-  rv.openDataset$pipe <- callModule(mod_choose_pipeline_server, "choosePipe", pipeline.def=reactive({pipeline.def()}))
-  
-  
-  DeleteExtension <- function(name){
-    return(strsplit(name,'.', fixed=T)[[1]][1])
-  }
-  
-  
-  observe({
-    cond <- !is.null(rv.openDataset$pipe())
-    if (class(rv.openDataset$dataRead)=='MSnSet'){
-      cond <- cond && 
-        !is.null(rv.openDataset$keyID) && 
-        !is.null(rv.openDataset$parentProtId) && 
-        !is.null(rv.openDataset$data)
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    
+    
+    rv.openDataset <- reactiveValues(
+      dataOut = NULL,
+      pipe = NULL,
+      dataRead = NULL,
+      ret = NULL,
+      keyID = NULL,
+      parentProtId = NULL
+    )
+    
+    
+    rv.openDataset$pipe <- mod_choose_pipeline_server("choosePipe", pipeline.def=reactive({pipeline.def()}))
+    
+    
+    DeleteExtension <- function(name){
+      return(strsplit(name,'.', fixed=T)[[1]][1])
     }
-    shinyjs::toggle('loadDataset', condition=cond)
-  })
-  
-  
-  
-  observeEvent(req(input$file),{
-    tryCatch({
-      rv.openDataset$dataRead <- readRDS(input$file$datapath)
+    
+    
+    observe({
+      cond <- !is.null(rv.openDataset$pipe())
+      if (class(rv.openDataset$dataRead)=='MSnSet'){
+        cond <- cond && 
+          !is.null(rv.openDataset$keyID) && 
+          !is.null(rv.openDataset$parentProtId) && 
+          !is.null(rv.openDataset$data)
+      }
+      shinyjs::toggle('loadDataset', condition=cond)
+    })
+    
+    
+    
+    observeEvent(req(input$file),{
+      tryCatch({
+        rv.openDataset$dataRead <- readRDS(input$file$datapath)
+        
+      }, warning = function(w) {
+        shinyjs::alert('Input format not recognized.')
+        warning(w)
+        return(NULL)
+      }, error = function(e) {
+        shinyjs::info('Input format not recognized.')
+        return(NULL)
+      }, finally = {
+        #cleanup-code 
+      })
       
-    }, warning = function(w) {
-      shinyjs::alert('Input format not recognized.')
-      warning(w)
-      return(NULL)
-    }, error = function(e) {
-      shinyjs::info('Input format not recognized.')
-      return(NULL)
-    }, finally = {
-      #cleanup-code 
+      
     })
     
     
-  })
-  
-  
-  
-  
-  output$ui_select_KID <- renderUI({
-    req(rv.openDataset$dataRead )
     
-    if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
     
-    mod_select_keyID_from_MSnset_ui(ns('select_KID'))
-  })
-  
-  rv.openDataset$ret <- callModule(mod_select_keyID_from_MSnset_server, 
-                                   'select_KID', 
-                                   dataIn = reactive({if (class(rv.openDataset$dataRead ) == "MSnSet") 
-                                     rv.openDataset$dataRead else NULL}))
-  
-  
-  
-  observe({
-    rv.openDataset$keyID <- rv.openDataset$ret()$keyId
-    rv.openDataset$parentProtId <- rv.openDataset$ret()$parentProtId
-    rv.openDataset$data <- rv.openDataset$ret()$data
-  })
-  
-  
-  
-  observeEvent(input$loadDataset,ignoreInit =TRUE,{ 
-    req(rv.openDataset$dataRead )
-    
-    withProgress(message = '',detail = '', value = 0, {
-      incProgress(1, detail = 'Loading dataset')
-      switch(class(rv.openDataset$dataRead ),
-             QFeatures= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
-             MSnSet= {
-               typeOfData <- rv.openDataset$dataRead@experimentData@other$typeOfData
-               ll.pipeline <- rv.openDataset$pipe()
-               
-               rv.openDataset$dataOut <- convertMSnset2QFeatures(obj = rv.openDataset$dataRead,
-                                                                 analysis = DeleteExtension(input$file$name),
-                                                                 parentProtId = rv.openDataset$parentProtId,
-                                                                 keyId = rv.openDataset$keyID,
-                                                                 pipelineType = names(ll.pipeline), 
-                                                                 processes = unlist(ll.pipeline)
-               )
-             },
-             default= {
-               shinyjs::info("Warning : This type of data is not implemented in Prostar.")
-               return(NULL)
-             }
-      ) # end of switch statement
-      MultiAssayExperiment::metadata(rv.openDataset$dataOut)$pipelineType <- rv.openDataset$pipe()
+    output$ui_select_KID <- renderUI({
+      req(rv.openDataset$dataRead )
+      
+      if (class(rv.openDataset$dataRead ) != "MSnSet"){ return(NULL)}
+      
+      mod_select_keyID_from_MSnset_ui(ns('select_KID'))
     })
     
+    rv.openDataset$ret <- mod_select_keyID_from_MSnset_server('select_KID', 
+                                                              dataIn = reactive({if (class(rv.openDataset$dataRead ) == "MSnSet") 
+                                                                rv.openDataset$dataRead else NULL}))
+    
+    
+    
+    observe({
+      rv.openDataset$keyID <- rv.openDataset$ret()$keyId
+      rv.openDataset$parentProtId <- rv.openDataset$ret()$parentProtId
+      rv.openDataset$data <- rv.openDataset$ret()$data
+    })
+    
+    
+    
+    observeEvent(input$loadDataset,ignoreInit = TRUE,{ 
+      req(rv.openDataset$dataRead )
+      
+      withProgress(message = '',detail = '', value = 0, {
+        incProgress(1, detail = 'Loading dataset')
+        switch(class(rv.openDataset$dataRead ),
+               QFeatures= {rv.openDataset$dataOut <- rv.openDataset$dataRead },
+               MSnSet= {
+                 typeOfData <- rv.openDataset$dataRead@experimentData@other$typeOfData
+                 ll.pipeline <- rv.openDataset$pipe()
+                 
+                 rv.openDataset$dataOut <- convertMSnset2QFeatures(obj = rv.openDataset$dataRead,
+                                                                   analysis = DeleteExtension(input$file$name),
+                                                                   parentProtId = rv.openDataset$parentProtId,
+                                                                   keyId = rv.openDataset$keyID,
+                                                                   pipelineType = names(ll.pipeline), 
+                                                                   processes = unlist(ll.pipeline)
+                 )
+               },
+               default= {
+                 shinyjs::info("Warning : This type of data is not implemented in Prostar.")
+                 return(NULL)
+               }
+        ) # end of switch statement
+        MultiAssayExperiment::metadata(rv.openDataset$dataOut)$pipelineType <- rv.openDataset$pipe()
+      })
+      
+    })
+    
+    
+    return(reactive({rv.openDataset$dataOut }))
+    
+    
   })
   
-  
-  return(reactive({rv.openDataset$dataOut }))
 }
 
 ## To be copied in the UI

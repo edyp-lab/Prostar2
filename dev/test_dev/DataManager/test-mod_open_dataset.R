@@ -1,4 +1,5 @@
 library(DAPAR2)
+library(shiny)
 source(file.path('../../../R/DataManager', 'mod_select_keyID.R'), local=TRUE)$value
 source(file.path('../../../R/DataManager', 'mod_select_keyID_from_MSnset.R'), local=TRUE)$value
 source(file.path('../../../R', 'mod_popover_for_help.R'), local=TRUE)$value
@@ -25,13 +26,12 @@ server <- function(input, output, session) {
     openData = NULL
   )
   
-  rv$openData <- callModule(mod_open_dataset_server, "rl", pipeline.def=reactive({pipeline.defs}))
+  rv$openData <- mod_open_dataset_server("rl", pipeline.def=reactive({pipeline.defs}))
   
-    
-  callModule(mod_infos_dataset_server, 
-             'infos', 
-             obj = reactive({rv$openData() })
-            )
+  
+  mod_infos_dataset_server('infos', 
+                           obj = reactive({rv$openData() })
+  )
   
   
 }

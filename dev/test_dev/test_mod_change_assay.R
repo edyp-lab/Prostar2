@@ -2,6 +2,7 @@ library(shiny)
 
 source(file.path('../../R', 'mod_change_assay.R'), local=TRUE)$value
 
+utils::data(Exp1_R25_pept, package='DAPARdata2')
 
 ui <- function() {
   tagList(
