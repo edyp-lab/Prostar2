@@ -18,7 +18,7 @@ mod_wf_wf1_Filtering_ui <- function(id){
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Current pos")),
                uiOutput(ns('show_currentPos'))),
-        column(width=2,
+        column(width=4,
                tags$b(h4(style = 'color: blue;', "List 'isDone'")),
                uiOutput(ns('show_isDone')))
       )
@@ -69,10 +69,11 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       # Main listener of the module which initialize it
       observeEvent(req(dataIn() ), ignoreNULL=T,{ 
-        print(' ------- MODULE _A_ : Initialisation de rv$dataIn ------- ')
+        #print(' ------- MODULE _A_ : Initialisation de rv$dataIn ------- ')
         
         if (is.null(rv$dataIn))
-          {print(' ------- MODULE _A_ : Entering for the first time ------')
+          {
+          #print(' ------- MODULE _A_ : Entering for the first time ------')
           InitializeModule()
           }
         if (config$isDone[[nbSteps()]])
@@ -109,7 +110,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       }
       
       InitializeModule <- function(){
-        print(' ------- MODULE _A_ : InitializeModule() ------- ')
+        #print(' ------- MODULE _A_ : InitializeModule() ------- ')
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
@@ -138,14 +139,14 @@ mod_wf_wf1_Filtering_server <- function(id,
         
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()),{ 
-          print(' ------- MODULE _A_ : observeEvent(req(rv$timeline$pos()) ------- ')
+          #print(' ------- MODULE _A_ : observeEvent(req(rv$timeline$pos()) ------- ')
           rv$current.pos <- rv$timeline$pos() })
         
         
         # Catches an clic on the next or previous button in the timeline
         # and updates the event_counter
         observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0)),{
-          print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
+          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
           
           # Add external events to counter
           rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
@@ -154,8 +155,8 @@ mod_wf_wf1_Filtering_server <- function(id,
         
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
-          print("---- MODULE _A_ : reset activated ----------------")
-          print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+          #print("---- MODULE _A_ : reset activated ----------------")
+          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
           # Add external events to counter
           rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
@@ -176,8 +177,8 @@ mod_wf_wf1_Filtering_server <- function(id,
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
         observeEvent(config$isDone,  ignoreInit = T, {
-          print(' ------- MODULE _A_ : A new step is validated ------- ')
-          print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+          #print(' ------- MODULE _A_ : A new step is validated ------- ')
+          #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
           
           rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
         })

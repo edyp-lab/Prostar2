@@ -1,5 +1,6 @@
 $test: test;
 $colCompleted: #07910A;
+$colSkipped: #ECF4F8;
   $colMandatory: #D30505;
   $colDefault: #B3AFAB;
   $radius: 20px;
@@ -57,6 +58,20 @@ $lineWidth: 5px;
     h4{
       color: $colCompleted;
       border-bottom: 3px solid white;
+    }
+  }
+}
+.li.skipped{
+  .status{
+    border-top: $lineWidth dashed solid $colDefault;
+    &:before{
+      background-color: $colSkipped;
+      border: $lineWidth dashed solid $colSkipped;
+      transition: all 200ms ease-in;
+    }
+    h4{
+      color: $colSkipped;
+      border-bottom: 3px dashed solid white;
     }
   }
 }

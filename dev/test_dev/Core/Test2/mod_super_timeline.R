@@ -18,12 +18,9 @@ mod_super_timeline_ui <- function(id){
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Current pos")),
                uiOutput(ns('show_currentPos'))),
-        column(width=2,
+        column(width=4,
                tags$b(h4(style = 'color: blue;', "List 'isDone'")),
-               uiOutput(ns('show_isDone'))),
-        column(width=2,
-               tags$b(h4(style = 'color: blue;', "rv$tmp")),
-               uiOutput(ns('show_rvtmp')))
+               uiOutput(ns('show_isDone')))
       )
     )
   )
@@ -51,18 +48,28 @@ mod_super_timeline_server <- function(id,
         type = 'pipeline',
         process.name = 'Pipeline',
         stepsNames = c("Original", "Filtering", "Normalization", "Imputation"),
-         mandatory =  c(TRUE, FALSE, FALSE, FALSE)
+        mandatory =  c(TRUE, FALSE, FALSE, FALSE)
       )
       
       rv <- reactiveValues(
+        # Current position of the cursor in the timeline
         current.pos = 1,
-        timeline = NULL,
+        
+        # Use to pass the reset info to the process modules
         remoteReset = NULL,
+        
         dataIn = NULL,
         dataOut = NULL,
         sendPosition = 1,
+        
+        # Used to create a different value for some variables in order to 
+        # trigger observeEvent functions
         event_counter = 0,
+        
+        # A vector of strings which are commands keywords to manipulate the timeline
         cmd = NULL,
+        
+        # Variable to store the results of process modules
         tmp = reactiveValues()
       )
       
@@ -71,21 +78,22 @@ mod_super_timeline_server <- function(id,
       Init_isDone <- function(){
         setNames(lapply(1:nbSteps(), 
                         function(x){ x == 1}), 
-                 config$stepsNames)
+                 names(config$stepsNames))
       }
       
       
       # Initialization of the process
       observeEvent(req(dataIn()), {
-        print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
+       # print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
         rv$dataIn <- dataIn()
         rv$dataOut <- dataIn()
          
         rv$event_counter <- 0
         rv$screens <- InitActions(nbSteps())
         config$screens <- CreateScreens(nbSteps())
-        config$isDone <- Init_isDone()
         config$stepsNames <- setNames(config$stepsNames,config$stepsNames)
+        config$stepsNames[1] <- 'Description'
+        config$isDone <- Init_isDone()
         
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
@@ -147,7 +155,7 @@ mod_super_timeline_server <- function(id,
       
       #Catch a reset command from timeline
       observeEvent(req(rv$timeline$rstBtn()!=0), {
-        print("---- MODULE SUPER_TIMELINE : reset activated")
+        #print("---- MODULE SUPER_TIMELINE : reset activated")
         
         # Add external events to counter
         rv$event_counter <- rv$event_counter + rv$timeline$rstBtn()
@@ -187,7 +195,7 @@ mod_super_timeline_server <- function(id,
         #browser()
         data2send <- NULL
         if (names(config$isDone)[rv$current.pos] != name) return(NULL)
-        print(paste0('--- MODULE SUPER TL, current.pos = ', rv$current.pos))
+        #print(paste0('--- MODULE SUPER TL, current.pos = ', rv$current.pos))
         if (config$isDone[[rv$current.pos]]){
           # The processus is already validated and the reception of a value
           # means that the user has reseted it and want to revalidate this module
@@ -210,25 +218,20 @@ mod_super_timeline_server <- function(id,
         }
         
       
-        print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data2send)))
+        #print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data2send)))
         
         return(data2send)
       }
       
       #Catch a new position from timeline
       observeEvent(req(rv$timeline$pos()),{ 
-        print('---- MODULE TL = new position detected')
+        #print('---- MODULE TL = new position detected')
         rv$current.pos <- rv$timeline$pos()
         })
       
 ### End of part for managing the timeline
       
-      
-     # observeEvent(rv$tmpA(), { rv$tmp <- rv$tmpA()})
-     # observeEvent(rv$tmpB(), { rv$tmp <- rv$tmpB()})
-     # observeEvent(rv$tmpC(), { rv$tmp <- rv$tmpC()})
-      
-     
+
       # Catch the return value of a module and update the list of isDone modules
       # This list is updated with the names of datasets present in the rv$tmp
       # variable. One set to TRUE all the elements in isDone which have a corresponding
@@ -239,7 +242,7 @@ mod_super_timeline_server <- function(id,
       # If a value (not NULL) is received, then it corresponds to the module
       # pointed by the current position
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
-        print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
+        #print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
         #browser()
         if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
           && (length(which(config$isDone==T))) ){
@@ -291,22 +294,36 @@ mod_super_timeline_server <- function(id,
       
      
       Launch_Module_Server <- function(){
-        rv$tmp[['Original']] <- reactive({dataIn()})
+        BuildServer <- function(name){
+          if (name == 'Original'){
+            rv$tmp[[name]] <- reactive({dataIn()})
+          } else {
+            rv$tmp[[name]] <- do.call('mod_wf_wf1_Filtering_server', 
+                                      list(paste0("mod_",name, "_nav"),
+                                           dataIn = reactive({SendCurrentDataset(name)}),
+                                           remoteReset = reactive({rv$timeline$rstBtn()})))
+          }
+        }
         
-        rv$tmp[['Filtering']] <- mod_wf_wf1_Filtering_server("mod_Filtering_nav",
-                                                     dataIn = reactive({SendCurrentDataset('Filtering')}),
-                                                     remoteReset = reactive({rv$timeline$rstBtn()})
-        )
+        lapply(1:nbSteps(), function(x){BuildServer(names(config$stepsNames)[x])})
         
-        rv$tmp[['Normalization']] <- mod_wf_wf1_Normalization_server("mod_Normalization_nav",
-                                                         dataIn = reactive({SendCurrentDataset('Normalization')}),
-                                                         remoteReset = reactive({rv$timeline$rstBtn()})
-        )
         
-        rv$tmp[['Imputation']] <- mod_wf_wf1_Imputation_server("mod_Imputation_nav",
-                                                      dataIn = reactive({SendCurrentDataset('Imputation')}),
-                                                      remoteReset = reactive({rv$timeline$rstBtn()})
-        )
+        # rv$tmp[['Original']] <- reactive({dataIn()})
+        # 
+        # rv$tmp[['Filtering']] <- mod_wf_wf1_Filtering_server("mod_Filtering_nav",
+        #                                              dataIn = reactive({SendCurrentDataset('Filtering')}),
+        #                                              remoteReset = reactive({rv$timeline$rstBtn()})
+        # )
+        # 
+        # rv$tmp[['Normalization']] <- mod_wf_wf1_Normalization_server("mod_Normalization_nav",
+        #                                                  dataIn = reactive({SendCurrentDataset('Normalization')}),
+        #                                                  remoteReset = reactive({rv$timeline$rstBtn()})
+        # )
+        # 
+        # rv$tmp[['Imputation']] <- mod_wf_wf1_Imputation_server("mod_Imputation_nav",
+        #                                               dataIn = reactive({SendCurrentDataset('Imputation')}),
+        #                                               remoteReset = reactive({rv$timeline$rstBtn()})
+        # )
       }
       
       

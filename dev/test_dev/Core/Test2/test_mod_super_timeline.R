@@ -21,12 +21,12 @@ ui <- fluidPage(
       h3('Prostar (caller)'),
       fluidRow(
         column(width=2,
-               p('Data input :'),
+               tags$b(h4(style = 'color: blue;', "Data input")),
                uiOutput('show_dataIn')
         ),
         column(width=2,
-               p('Data output :'),
-               uiOutput('show_rv_tmp_dataOut'))
+               tags$b(h4(style = 'color: blue;', "Data output")),
+               uiOutput('show_rv_dataOut'))
       )
     )
   )
@@ -58,9 +58,9 @@ server <- function(input, output, session) {
      tagList(lapply(names(rv$current.obj), function(x){tags$p(x)}))
    })
    output$show_rv_dataOut <- renderUI({
-     req(rv$dataOut)
-     tagList(
-       lapply(names(rv$tmp), function(x){tags$p(x)})
+     req(rv$tmp())
+    tagList(
+       lapply(names(rv$tmp()), function(x){tags$p(x)})
      )
    })
 

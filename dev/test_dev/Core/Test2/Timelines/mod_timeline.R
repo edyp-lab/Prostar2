@@ -153,7 +153,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       #print(paste0('------ MODULE TL : New event on actions()$toggleSteps : ', cmd()))
       #browser()
       AnalyseCmd <- function(c) {
-        print(paste0('extracted cmd = ', c))
+        #print(paste0('extracted cmd = ', c))
         switch(c,
                DisableAllSteps = toggleState_Steps(cond = F, i = current$nbSteps),
                EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps),
@@ -217,15 +217,25 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       HTML(txt)
     })
     
+    GetMaxTrue <- function(bound = length(config$isDone)){
+      max(which(unlist(config$isDone)[1:bound]==T))
+    }
+    
     
     output$timeline2 <- renderUI({
       config
       status <- rep('', length(config$stepsNames))
+     # browser()
       if( !is.null(config$mandatory))
         status[which(config$mandatory)] <- 'mandatory'
       
       #status <- rep('',length(config$stepsNames))
       status[which(unlist(config$isDone))] <- 'complete'
+      
+      #Compute the skipped steps
+      maxT <- GetMaxTrue()
+      status[which(toto==F)[which(which(toto == FALSE ) < maxT)]] <- 'skipped'
+      
       
       active  <- rep('', length(config$stepsNames))
       active[current$val] <- 'active'
