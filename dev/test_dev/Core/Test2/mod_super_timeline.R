@@ -20,7 +20,10 @@ mod_super_timeline_ui <- function(id){
                uiOutput(ns('show_currentPos'))),
         column(width=2,
                tags$b(h4(style = 'color: blue;', "List 'isDone'")),
-               uiOutput(ns('show_isDone')))
+               uiOutput(ns('show_isDone'))),
+        column(width=2,
+               tags$b(h4(style = 'color: blue;', "rv$tmp")),
+               uiOutput(ns('show_rvtmp')))
       )
     )
   )
@@ -48,7 +51,7 @@ mod_super_timeline_server <- function(id,
         type = 'pipeline',
         process.name = 'Pipeline',
         stepsNames = c("Original", "Filtering", "Normalization", "Imputation"),
-         mandatory =  c(TRUE, TRUE, FALSE, FALSE)
+         mandatory =  c(TRUE, FALSE, FALSE, FALSE)
       )
       
       rv <- reactiveValues(
@@ -76,7 +79,7 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(dataIn()), {
         print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
         rv$dataIn <- dataIn()
-        rv$dataOut <- NULL
+        rv$dataOut <- dataIn()
          
         rv$event_counter <- 0
         rv$screens <- InitActions(nbSteps())
@@ -165,7 +168,9 @@ mod_super_timeline_server <- function(id,
         rv$dataOut <- NULL
       }
       
-      GetMaxTrue <- reactive({ max(which(unlist(config$isDone)==T)) })
+      GetMaxTrue <- function(bound = nbSteps()){
+         max(which(unlist(config$isDone)[1:bound]==T))
+        }
       
       #To avoid intempestive initializations of modules due to dataIn changes
       # one define the following logics :
@@ -174,15 +179,38 @@ mod_super_timeline_server <- function(id,
       # max True function
       # To rerun a validated module, the user has to reset it
       # This function returns a non-NULL value to the module which name
-      # corresponds to the current position
+      # corresponds to the current position and one send always the last
+      # non-NULL dataset before current position
       SendCurrentDataset <- function(name){
         #browser()
-        data <- NULL
-        if (names(config$isDone)[rv$current.pos] == name && rv$current.pos > GetMaxTrue())
-            data <- rv$dataIn
-        print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data)))
+        data2send <- NULL
+        if (names(config$isDone)[rv$current.pos] != name) return(NULL)
+        print(paste0('--- MODULE SUPER TL, current.pos = ', rv$current.pos))
+        if (config$isDone[[rv$current.pos]]){
+          # The processus is already validated and the reception of a value
+          # means that the user has reseted it and want to revalidate this module
+          data2send <- rv$dataOut
+          #browser()
+        } else {
+          # The processus has not yet been validated and one want to run it and 
+          # validate it
+          if (GetMaxTrue() < rv$current.pos) {
+            data2send <- rv$dataOut
+          } else {
+            # it is a skipped module
+            name <- names(config$isDone)[GetMaxTrue(bound = rv$current.pos-1)]
+            ind.name <- grep(name, names(rv$dataOut))
+            data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
+          }
+          # Test if the process has been skipped or if it is a new process
+          # Name of the last validated dataset before the current one
+          
+        }
         
-        return(data)
+      
+        print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data2send)))
+        
+        return(data2send)
       }
       
       #Catch a new position from timeline
@@ -198,7 +226,10 @@ mod_super_timeline_server <- function(id,
      # observeEvent(rv$tmpB(), { rv$tmp <- rv$tmpB()})
      # observeEvent(rv$tmpC(), { rv$tmp <- rv$tmpC()})
       
-      
+      observe({
+        config$isDone
+        print(config$isDone)
+      })
       # Catch the return value of a module and update the list of isDone modules
       # This list is updated with the names of datasets present in the rv$tmp
       # variable. One set to TRUE all the elements in isDone which have a corresponding
@@ -211,13 +242,41 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
         print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
         #browser()
-        module_which_returned <- names(which(lapply(reactiveValuesToList(rv$tmp), 
-                                                    function(x){!is.null(x())}) == T))
-        rv$dataIn <- rv$tmp[[module_which_returned]]()
-        rv$dataOut <- rv$dataIn
-        # The last TRUE value of the list is on the current pos
-        #current.name <- names(config$stepsNames)[rv$current.pos]
-        config$isDone[[module_which_returned]] <- TRUE
+        # Compare the current config$isDone with rv$tmp to see which dataset
+        # has changed. One compares the item which has changed between the two lists
+        # if a dataset passed from NULL to a non-NULL value then is has been validated
+        # else if the dataset passed from a non-NULL value to NULL, it has been reseted
+        module_which_returned <- unlist(lapply(names(config$isDone), 
+                                               function(x){
+                                                 if (!is.null(reactiveValuesToList(rv$tmp)[[x]]()) != config$isDone[[x]]) {x}
+                                                 }
+                                               )
+                                        )
+       
+        #module_which_returned <- names(which(lapply(reactiveValuesToList(rv$tmp), 
+        #                                            function(x){!is.null(x())}) == T))
+        
+        if (is.null(rv$tmp[[module_which_returned]]())){
+          # This means that the corresponding module has been reseted
+          config$isDone[[module_which_returned]] <- FALSE
+          
+          # renvoyer le dernier dataset non NULL avant la position courante
+          #rv$dataOut <- rv$dataIn[,,-c(rv$current.pos:length(rv$dataIn))]
+          #rv$dataIn <- rv$dataIn[,,-c(rv$current.pos:length(rv$dataIn))]
+        } else {
+          # This means that the corresponding module has return a value
+          # It has been validated
+          config$isDone[[module_which_returned]] <- TRUE
+          # Set to FALSE all further steps (in case of rerun a process
+          #browser()
+          ind <- which(names(config$isDone)==module_which_returned)
+          if (ind < nbSteps())
+            config$isDone[(1+ind):nbSteps()] <- FALSE
+          #rv$dataIn <- rv$tmp[[module_which_returned]]()
+          
+         
+        }
+        rv$dataOut <- rv$tmp[[module_which_returned]]()
       })
 
 
@@ -225,6 +284,8 @@ mod_super_timeline_server <- function(id,
       
      
       Launch_Module_Server <- function(){
+        rv$tmp[['Original']] <- reactive({dataIn()})
+        
         rv$tmp[['Filtering']] <- mod_wf_wf1_A_server("mod_A_nav",
                                                      dataIn = reactive({SendCurrentDataset('Filtering')}),
                                                      remoteReset = reactive({rv$timeline$rstBtn()}),
@@ -234,13 +295,13 @@ mod_super_timeline_server <- function(id,
         rv$tmp[['Normalization']] <- mod_wf_wf1_B_server("mod_B_nav",
                                                          dataIn = reactive({SendCurrentDataset('Normalization')}),
                                                          remoteReset = reactive({rv$timeline$rstBtn()}),
-                                                         forcePosition = reactive({rv$current.pos})
+                                                         forcePosition = reactive({NULL})
         )
         
         rv$tmp[['Imputation']] <- mod_wf_wf1_C_server("mod_C_nav",
                                                       dataIn = reactive({SendCurrentDataset('Imputation')}),
                                                       remoteReset = reactive({rv$timeline$rstBtn()}),
-                                                      forcePosition = reactive({rv$current.pos})
+                                                      forcePosition = reactive({NULL})
         )
       }
       

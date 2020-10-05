@@ -19,3 +19,10 @@ output$show_isDone <- renderUI({
                    else tags$p(paste0(names(config$isDone)[x], ' - ', config$isDone[[x]]))
                  }))
 })
+
+output$show_rvtmp <- renderUI({
+  req(config$isDone)
+  #config$isDone <- setNames(config$isDone, config$stepsNames)
+  #browser()
+  #tagList(lapply(reactiveValuesToList(rv$tmp), function(x){tags$p(paste0(names(x()), collapse=' '))}) )
+})

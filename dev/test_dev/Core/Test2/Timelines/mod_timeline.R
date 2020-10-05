@@ -27,7 +27,7 @@ mod_timeline_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     uiOutput(ns("load_css_style")),
-
+    
     fluidRow(
       align= 'center',
       column(width=2,div(style=btn_style,
@@ -43,10 +43,10 @@ mod_timeline_ui <- function(id){
                          actionButton(ns("nextBtn"), ">>",
                                       class = PrevNextBtnClass,
                                       style='padding:4px; font-size:80%'))
-             )
-      ),
+      )
+    ),
     uiOutput(ns('show_screens'))
-    )
+  )
 }
 
 # Module Server
@@ -68,14 +68,14 @@ mod_timeline_ui <- function(id){
 #' @importFrom sass sass
 #' 
 mod_timeline_server <- function(id, style=1, config, cmd, position){
-
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
     
-   observeEvent(position(),{current$val <- position()})
+    observeEvent(position(),{current$val <- position()})
     
     
     current <- reactiveValues(
@@ -91,7 +91,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       current$nbSteps <- length(config$stepsNames)
       InitScreens()
     })
-
+    
     # Initialization of the screens with integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
@@ -105,7 +105,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
                                })
     })
     
-
+    
     
     navPage <- function(direction) {
       newval <- current$val + direction 
@@ -116,7 +116,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
     observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
     observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
     
-  
+    
     output$show_screens <- renderUI({tagList(config$screens)})
     
     NextBtn_default_logics <- reactive({
@@ -142,7 +142,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
     })
     
     
-   
+    
     
     # Catch a command name to toggle the state enable/disable of screens
     # Each command is received with an integer as suffix which correspond to
@@ -155,17 +155,17 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       AnalyseCmd <- function(c) {
         print(paste0('extracted cmd = ', c))
         switch(c,
-             DisableAllSteps = toggleState_Steps(cond = F, i = current$nbSteps),
-             EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps),
-             DisableAllPrevSteps = {
-               pos <- max(grep(TRUE, unlist(config$isDone)))
-               #pos <- current$val
-               toggleState_Steps(cond = F, i = pos)
-             },
-             ResetActionBtns = ResetActionsBtns()
-             )
-           }
-
+               DisableAllSteps = toggleState_Steps(cond = F, i = current$nbSteps),
+               EnableAllSteps = toggleState_Steps(cond = T, i = current$nbSteps),
+               DisableAllPrevSteps = {
+                 pos <- max(grep(TRUE, unlist(config$isDone)))
+                 #pos <- current$val
+                 toggleState_Steps(cond = F, i = pos)
+               },
+               ResetActionBtns = ResetActionsBtns()
+        )
+      }
+      
       lapply(cmd()[-length(cmd())], function(x) AnalyseCmd(x))
     })
     
@@ -185,7 +185,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       req(length(config$stepsNames))
       req(style != 3)
       
-        file <- paste0('./Timelines/timeline',style, '.sass')
+      file <- paste0('./Timelines/timeline',style, '.sass')
       #code <- code_sass_timeline[[paste0('style',style)]],"\n")
       code <- strsplit(readLines(file),"\n")
       firstLine <- code[[1]][1]
@@ -195,12 +195,12 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
       code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-
+      
       
       
     })
     
-
+    
     
     #### -----
     ### Definition of timelines style
@@ -281,10 +281,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
          prvBtn = reactive(input$prevBtn),
          nxtBtn = reactive(input$nextBtn),
          pos = reactive(current$val)
-         )
+    )
     
   })
 }
-
-
-

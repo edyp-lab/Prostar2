@@ -7,7 +7,7 @@ mod_wf_wf1_A_ui <- function(id){
     mod_timeline_ui(ns("timeline")),
     hr(),
     wellPanel(
-      h3('Module A'),
+      h3('Module _A_'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -64,27 +64,52 @@ mod_wf_wf1_A_server <- function(id,
       
 
       
+     
+      #################################################################################
+      
+      # Main listener of the module which initialize it
+      observeEvent(req(dataIn() ), ignoreNULL=T,{ 
+        print(' ------- MODULE _A_ : Initialisation de rv$dataIn ------- ')
+        
+        if (is.null(rv$dataIn))
+          {print(' ------- MODULE _A_ : Entering for the first time ------')
+          InitializeModule()
+          }
+        if (config$isDone[[nbSteps()]])
+          rv$current.pos <- nbSteps()
+        
+      })
+      
+      
+      # ------------ START OF COMMON FUNCTIONS --------------------
+      InitActions <- function(n){
+        setNames(lapply(1:n,
+                        function(x){T}),
+                 paste0('screen', 1:n)
+        )
+      }
+      
+      CreateScreens <- function(n){
+        setNames(
+          lapply(1:n, 
+                 function(x){
+                   do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
+          paste0('screenStep', 1:n))
+      }
+      
+      nbSteps <- reactive({
+        req(config$stepsNames)
+        length(config$stepsNames)
+      })
+      
       Init_isDone <- function(){
         setNames(lapply(1:nbSteps(), 
                         function(x){ x == 1}), 
                  config$stepsNames)
       }
-      #################################################################################
-      
-      # Main listener of the module which initialize it
-      observeEvent(req(dataIn() ), ignoreNULL=T,{ 
-        print(' ------- MODULE A : Initialisation de rv$dataIn ------- ')
-        browser()
-        if (is.null(rv$dataIn))
-          InitializeModule()
-      })
-      
-      
-      
-      
       
       InitializeModule <- function(){
-        print(' ------- MODULE A : InitializeModule() ------- ')
+        print(' ------- MODULE _A_ : InitializeModule() ------- ')
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
@@ -104,22 +129,23 @@ mod_wf_wf1_A_server <- function(id,
         
         # This listener appears only in modules that are called by another one.
         # It allows the caller to force a new position
-        observeEvent(forcePosition(),{
-          print(' ------- MODULE A : observeEvent(forcePosition()) ------- ')
-          rv$current.pos <- forcePosition() })
+        # observeEvent(forcePosition(),{
+        #   print(' ------- MODULE _A_ : observeEvent(forcePosition()) ------- ')
+        #   print(paste0('force position to : ', forcePosition()))
+        #   rv$current.pos <- forcePosition() })
         
         
         
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()),{ 
-          print(' ------- MODULE A : observeEvent(req(rv$timeline$pos()) ------- ')
+          print(' ------- MODULE _A_ : observeEvent(req(rv$timeline$pos()) ------- ')
           rv$current.pos <- rv$timeline$pos() })
         
         
         # Catches an clic on the next or previous button in the timeline
         # and updates the event_counter
         observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0)),{
-          print(' ------- MODULE A : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
+          print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
           
           # Add external events to counter
           rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
@@ -128,20 +154,21 @@ mod_wf_wf1_A_server <- function(id,
         
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
-          print("---- MODULE A : reset activated ----------------")
-          print(' ------- MODULE A : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+          print("---- MODULE _A_ : reset activated ----------------")
+          print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
           # Add external events to counter
           rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
           
           rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
-          config$isDone <- Init_isDone()
           
           rv$current.pos <- 1
           rv$event_counter <- 0
           ResetScreens()
           
           Reset_Module_Data_logics()
+          
+          
           # Update datasets logics
         })
         
@@ -149,8 +176,8 @@ mod_wf_wf1_A_server <- function(id,
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
         observeEvent(config$isDone,  ignoreInit = T, {
-          print(' ------- MODULE A : A new step is validated ------- ')
-          print(' ------- MODULE A : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+          print(' ------- MODULE _A_ : A new step is validated ------- ')
+          print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
           
           rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
         })
@@ -162,75 +189,44 @@ mod_wf_wf1_A_server <- function(id,
         observe({
           reactiveValuesToList(input)
           rv$event_counter <- sum(as.numeric(unlist(reactiveValuesToList(input))), na.rm=T)
-          #print(paste0('----MODULE A : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
+          #print(paste0('----MODULE _A_ : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
         })
         
+        
+        # This function cannot be implemented in the timeline module because 
+        # the id of the screens to reset are not known elsewhere.
+        # Trying to reset the global 'div_screens' in the timeline module
+        # does not work
+        ResetScreens <- function(screens){
+          lapply(1:nbSteps(), function(x){
+            shinyjs::reset(paste0('screen', x))
+          })
+        }
+        
+        
+        SendCmdToTimeline <- function(names){
+          append(as.list(names), list(rv$event_counter))
+          #paste0(name, '_', rv$event_counter)
+        }
+        
+        
+        Reset_Module_Data_logics <- function(){
+          # Update datasets logics
+          #browser()
+          
+          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
+          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$name)
+          rv$dataOut <- NULL
+          config$isDone <- Init_isDone()
+        }
+        
+        
+        
       }
-      
-      # ------------ START OF COMMON FUNCTIONS --------------------
-      InitActions <- function(n){
-        setNames(lapply(1:n,
-                         function(x){T}),
-                 paste0('screen', 1:n)
-                 )
-      }
-      
-      CreateScreens <- function(n){
-        setNames(
-          lapply(1:n, 
-                 function(x){
-                   do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
-          paste0('screenStep', 1:n))
-      }
-      
-      nbSteps <- reactive({
-        req(config$stepsNames)
-        length(config$stepsNames)
-      })
+      ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
       
       
-      # This function cannot be implemented in the timeline module because 
-      # the id of the screens to reset are not known elsewhere.
-      # Trying to reset the global 'div_screens' in the timeline module
-      # does not work
-      ResetScreens <- function(screens){
-        lapply(1:nbSteps(), function(x){
-          shinyjs::reset(paste0('screen', x))
-        })
-      }
       
-      
-     
-      
-      #Catch 
-      # observeEvent(forcePosition(),{
-      #   print(paste0('---- MODULE A : new value for forcePosition() : ', forcePosition()))
-      # 
-      #   if (length(which(unlist(config$isDone)==T))>0){
-      #     rv$maxTRUE <- max(which(unlist(config$isDone)==T))
-      #   } else {
-      #     rv$maxTRUE <- 1
-      #   }
-      #   
-      #   rv$current.pos <- rv$maxTRUE
-      # })
-      
-      
-      SendCmdToTimeline <- function(names){
-        append(as.list(names), list(rv$event_counter))
-        #paste0(name, '_', rv$event_counter)
-      }
-      
-      
-     
-      
-      Reset_Module_Data_logics <- function(){
-        # Update datasets logics
-        rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
-        rv$dataOut <- rv$dataIn
-      }
-      
-     
       
        #####################################################################
        ## screens of the module
@@ -308,6 +304,11 @@ mod_wf_wf1_A_server <- function(id,
          )
        })
          
+       
+       Validate_Module_Data_logics <- function(){
+         #rv$dataIn <- AddItemToDataset(rv$dataIn, config$name)
+         rv$dataOut <- AddItemToDataset(rv$dataIn, config$name)
+       }
           observeEvent(input$validate_btn, {
             #isolate({
             #browser()
@@ -316,10 +317,7 @@ mod_wf_wf1_A_server <- function(id,
            # })
        })
        
-          Validate_Module_Data_logics <- function(){
-            rv$dataIn <- AddItemToDataset(rv$dataIn, config$name)
-            rv$dataOut <- rv$dataIn
-          }
+
          
        
           
