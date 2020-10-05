@@ -1,6 +1,6 @@
 
 
-mod_wf_wf1_A_ui <- function(id){
+mod_wf_wf1_Filtering_ui <- function(id){
   ns <- NS(id)
   tagList(
     useShinyjs(),
@@ -30,7 +30,7 @@ mod_wf_wf1_A_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_A_server <- function(id, 
+mod_wf_wf1_Filtering_server <- function(id, 
                                 dataIn=NULL,
                                 remoteReset=FALSE,
                                 forcePosition = 1){

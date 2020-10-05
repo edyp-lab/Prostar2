@@ -1,6 +1,6 @@
 
 
-mod_wf_wf1_B_ui <- function(id){
+mod_wf_wf1_Normalization_ui <- function(id){
   ns <- NS(id)
   tagList(
     useShinyjs(),
@@ -30,7 +30,7 @@ mod_wf_wf1_B_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_B_server <- function(id, 
+mod_wf_wf1_Normalization_server <- function(id, 
                                 dataIn=NULL,
                                 remoteReset=FALSE,
                                 forcePosition = 1){
@@ -70,11 +70,13 @@ mod_wf_wf1_B_server <- function(id,
       # Main listener of the module which initialize it
       observeEvent(req(dataIn() ), ignoreNULL=T,{ 
         print(' ------- MODULE _B_ : Initialisation de rv$dataIn ------- ')
-        # browser()
+        
         if (is.null(rv$dataIn))
         {print(' ------- MODULE _B_ : Entering for the first time ------')
           InitializeModule()
         }
+        if (config$isDone[[nbSteps()]])
+          rv$current.pos <- nbSteps()
         
       })
       
@@ -127,9 +129,10 @@ mod_wf_wf1_B_server <- function(id,
         
         # This listener appears only in modules that are called by another one.
         # It allows the caller to force a new position
-        observeEvent(forcePosition(),{
-          print(' ------- MODULE _B_ : observeEvent(forcePosition()) ------- ')
-          rv$current.pos <- forcePosition() })
+        # observeEvent(forcePosition(),{
+        #   print(' ------- MODULE _B_ : observeEvent(forcePosition()) ------- ')
+        #   print(paste0('force position to : ', forcePosition()))
+        #   rv$current.pos <- forcePosition() })
         
         
         

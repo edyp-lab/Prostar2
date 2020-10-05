@@ -163,9 +163,11 @@ mod_super_timeline_server <- function(id,
         Reset_Pipeline_Data_logics()
       })
       
+      
+      
+      
       Reset_Pipeline_Data_logics <- function(){
-        rv$dataIn <- dataIn()
-        rv$dataOut <- NULL
+        rv$dataOut <- dataIn()
       }
       
       GetMaxTrue <- function(bound = nbSteps()){
@@ -226,10 +228,7 @@ mod_super_timeline_server <- function(id,
      # observeEvent(rv$tmpB(), { rv$tmp <- rv$tmpB()})
      # observeEvent(rv$tmpC(), { rv$tmp <- rv$tmpC()})
       
-      observe({
-        config$isDone
-        print(config$isDone)
-      })
+     
       # Catch the return value of a module and update the list of isDone modules
       # This list is updated with the names of datasets present in the rv$tmp
       # variable. One set to TRUE all the elements in isDone which have a corresponding
@@ -242,6 +241,11 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
         print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
         #browser()
+        if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
+          && (length(which(config$isDone==T))) ){
+          print("It is a global reset")
+          return(NULL)
+        }
         # Compare the current config$isDone with rv$tmp to see which dataset
         # has changed. One compares the item which has changed between the two lists
         # if a dataset passed from NULL to a non-NULL value then is has been validated
@@ -259,9 +263,12 @@ mod_super_timeline_server <- function(id,
         if (is.null(rv$tmp[[module_which_returned]]())){
           # This means that the corresponding module has been reseted
           config$isDone[[module_which_returned]] <- FALSE
-          
+         browser() 
           # renvoyer le dernier dataset non NULL avant la position courante
-          #rv$dataOut <- rv$dataIn[,,-c(rv$current.pos:length(rv$dataIn))]
+          name <- names(config$isDone)[ GetMaxTrue(rv$current.pos - 1)]
+          ind.name <- grep(name, names(rv$dataOut))
+          rv$dataOut <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
+          #rv$dataOut <- rv$dataOut[,,-c(rv$current.pos:length(rv$dataIn))]
           #rv$dataIn <- rv$dataIn[,,-c(rv$current.pos:length(rv$dataIn))]
         } else {
           # This means that the corresponding module has return a value
@@ -274,9 +281,9 @@ mod_super_timeline_server <- function(id,
             config$isDone[(1+ind):nbSteps()] <- FALSE
           #rv$dataIn <- rv$tmp[[module_which_returned]]()
           
-         
+          rv$dataOut <- rv$tmp[[module_which_returned]]()
         }
-        rv$dataOut <- rv$tmp[[module_which_returned]]()
+        
       })
 
 
@@ -286,22 +293,19 @@ mod_super_timeline_server <- function(id,
       Launch_Module_Server <- function(){
         rv$tmp[['Original']] <- reactive({dataIn()})
         
-        rv$tmp[['Filtering']] <- mod_wf_wf1_A_server("mod_A_nav",
+        rv$tmp[['Filtering']] <- mod_wf_wf1_Filtering_server("mod_Filtering_nav",
                                                      dataIn = reactive({SendCurrentDataset('Filtering')}),
-                                                     remoteReset = reactive({rv$timeline$rstBtn()}),
-                                                     forcePosition = reactive({NULL})
+                                                     remoteReset = reactive({rv$timeline$rstBtn()})
         )
         
-        rv$tmp[['Normalization']] <- mod_wf_wf1_B_server("mod_B_nav",
+        rv$tmp[['Normalization']] <- mod_wf_wf1_Normalization_server("mod_Normalization_nav",
                                                          dataIn = reactive({SendCurrentDataset('Normalization')}),
-                                                         remoteReset = reactive({rv$timeline$rstBtn()}),
-                                                         forcePosition = reactive({NULL})
+                                                         remoteReset = reactive({rv$timeline$rstBtn()})
         )
         
-        rv$tmp[['Imputation']] <- mod_wf_wf1_C_server("mod_C_nav",
+        rv$tmp[['Imputation']] <- mod_wf_wf1_Imputation_server("mod_Imputation_nav",
                                                       dataIn = reactive({SendCurrentDataset('Imputation')}),
-                                                      remoteReset = reactive({rv$timeline$rstBtn()}),
-                                                      forcePosition = reactive({NULL})
+                                                      remoteReset = reactive({rv$timeline$rstBtn()})
         )
       }
       
@@ -326,7 +330,7 @@ mod_super_timeline_server <- function(id,
         tagList(
           div(id=ns('screen2'),
               tags$h3(config$stepsName[2]),
-              mod_wf_wf1_A_ui(ns('mod_A_nav'))
+              mod_wf_wf1_Filtering_ui(ns('mod_Filtering_nav'))
           )
         )
       })
@@ -338,7 +342,7 @@ mod_super_timeline_server <- function(id,
         tagList(
           div(id=ns('screen3'),
               tags$h3(config$stepsName[3]),
-              mod_wf_wf1_B_ui(ns('mod_B_nav'))
+              mod_wf_wf1_Normalization_ui(ns('mod_Normalization_nav'))
           )
         )
       })
@@ -349,7 +353,7 @@ mod_super_timeline_server <- function(id,
         tagList(
           div(id=ns('screen4'),
               tags$h3(config$stepsName[4]),
-              mod_wf_wf1_C_ui(ns('mod_C_nav'))
+              mod_wf_wf1_Imputation_ui(ns('mod_Imputation_nav'))
           )
         )
       })
