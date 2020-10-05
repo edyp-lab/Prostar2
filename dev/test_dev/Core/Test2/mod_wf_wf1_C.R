@@ -31,16 +31,16 @@ mod_wf_wf1_Imputation_ui <- function(id){
 #' 
 #' 
 mod_wf_wf1_Imputation_server <- function(id, 
-                                dataIn=NULL,
-                                remoteReset=FALSE,
-                                forcePosition = 1){
+                                        dataIn=NULL,
+                                        remoteReset=FALSE,
+                                        forcePosition = 1){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
-      
+      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
       
       
@@ -72,7 +72,8 @@ mod_wf_wf1_Imputation_server <- function(id,
         #print(' ------- MODULE _C_ : Initialisation de rv$dataIn ------- ')
         
         if (is.null(rv$dataIn))
-        {#print(' ------- MODULE _C_ : Entering for the first time ------')
+        {
+          #print(' ------- MODULE _C_ : Entering for the first time ------')
           InitializeModule()
         }
         if (config$isDone[[nbSteps()]])
@@ -81,43 +82,13 @@ mod_wf_wf1_Imputation_server <- function(id,
       })
       
       
-      # ------------ START OF COMMON FUNCTIONS --------------------
-      InitActions <- function(n){
-        setNames(lapply(1:n,
-                        function(x){T}),
-                 paste0('screen', 1:n)
-        )
-      }
-      
-      CreateScreens <- function(n){
-        setNames(
-          lapply(1:n, 
-                 function(x){
-                   do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
-          paste0('screenStep', 1:n))
-      }
-      
-      nbSteps <- reactive({
-        req(config$stepsNames)
-        length(config$stepsNames)
-      })
-      
-      Init_isDone <- function(){
-        setNames(lapply(1:nbSteps(), 
-                        function(x){ x == 1}), 
-                 config$stepsNames)
-      }
       
       InitializeModule <- function(){
         #print(' ------- MODULE _C_ : InitializeModule() ------- ')
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
-        
-        rv$event_counter <- 0
-        rv$screens <- InitActions(nbSteps())
-        config$screens <- CreateScreens(nbSteps())
-        config$isDone <- Init_isDone()
+        CommonInitializeFunctions()
         
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
@@ -130,8 +101,8 @@ mod_wf_wf1_Imputation_server <- function(id,
         # This listener appears only in modules that are called by another one.
         # It allows the caller to force a new position
         # observeEvent(forcePosition(),{
-        #   #print(' ------- MODULE _C_ : observeEvent(forcePosition()) ------- ')
-        #   #print(paste0('force position to : ', forcePosition()))
+        #   print(' ------- MODULE _C_ : observeEvent(forcePosition()) ------- ')
+        #   print(paste0('force position to : ', forcePosition()))
         #   rv$current.pos <- forcePosition() })
         
         
@@ -189,7 +160,7 @@ mod_wf_wf1_Imputation_server <- function(id,
         observe({
           reactiveValuesToList(input)
           rv$event_counter <- sum(as.numeric(unlist(reactiveValuesToList(input))), na.rm=T)
-          ##print(paste0('----MODULE _C_ : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
+          #print(paste0('----MODULE _C_ : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
         })
         
         

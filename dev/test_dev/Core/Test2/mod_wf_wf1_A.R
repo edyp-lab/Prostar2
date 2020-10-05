@@ -40,7 +40,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       ns <- session$ns
       
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
-      
+      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
 
   
@@ -82,44 +82,14 @@ mod_wf_wf1_Filtering_server <- function(id,
       })
       
       
-      # ------------ START OF COMMON FUNCTIONS --------------------
-      InitActions <- function(n){
-        setNames(lapply(1:n,
-                        function(x){T}),
-                 paste0('screen', 1:n)
-        )
-      }
-      
-      CreateScreens <- function(n){
-        setNames(
-          lapply(1:n, 
-                 function(x){
-                   do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
-          paste0('screenStep', 1:n))
-      }
-      
-      nbSteps <- reactive({
-        req(config$stepsNames)
-        length(config$stepsNames)
-      })
-      
-      Init_isDone <- function(){
-        setNames(lapply(1:nbSteps(), 
-                        function(x){ x == 1}), 
-                 config$stepsNames)
-      }
       
       InitializeModule <- function(){
         #print(' ------- MODULE _A_ : InitializeModule() ------- ')
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
-        
-        rv$event_counter <- 0
-        rv$screens <- InitActions(nbSteps())
-        config$screens <- CreateScreens(nbSteps())
-        config$isDone <- Init_isDone()
-        
+        CommonInitializeFunctions()
+
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
                                            config = config, 

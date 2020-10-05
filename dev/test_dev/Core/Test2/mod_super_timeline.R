@@ -38,6 +38,7 @@ mod_super_timeline_server <- function(id,
       ns <- session$ns
       
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
+      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
       
       
@@ -74,12 +75,7 @@ mod_super_timeline_server <- function(id,
       )
       
       #--------------------------------------------------------------
-      
-      Init_isDone <- function(){
-        setNames(lapply(1:nbSteps(), 
-                        function(x){ x == 1}), 
-                 names(config$stepsNames))
-      }
+     
       
       
       # Initialization of the process
@@ -87,13 +83,8 @@ mod_super_timeline_server <- function(id,
        # print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
         rv$dataIn <- dataIn()
         rv$dataOut <- dataIn()
-         
-        rv$event_counter <- 0
-        rv$screens <- InitActions(nbSteps())
-        config$screens <- CreateScreens(nbSteps())
-        config$stepsNames <- setNames(config$stepsNames,config$stepsNames)
-        config$stepsNames[1] <- 'Description'
-        config$isDone <- Init_isDone()
+        
+        CommonInitializeFunctions()
         
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
@@ -107,27 +98,7 @@ mod_super_timeline_server <- function(id,
       
 
       
-      # ------------ START OF COMMON FUNCTIONS --------------------
-      InitActions <- function(n){
-        setNames(lapply(1:n,
-                        function(x){T}),
-                 paste0('screen', 1:n)
-        )
-      }
-      
-      CreateScreens <- function(n){
-        setNames(
-          lapply(1:n, 
-                 function(x){
-                   do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
-          paste0('screenStep', 1:n))
-      }
-      
-      nbSteps <- reactive({
-        req(config$stepsNames)
-        length(config$stepsNames)
-      })
-      
+     
 
       # This function cannot be implemented in the timeline module because 
       # the id of the screens to reset are not known elsewhere.
@@ -174,13 +145,7 @@ mod_super_timeline_server <- function(id,
       
       
       
-      Reset_Pipeline_Data_logics <- function(){
-        rv$dataOut <- dataIn()
-      }
-      
-      GetMaxTrue <- function(bound = nbSteps()){
-         max(which(unlist(config$isDone)[1:bound]==T))
-        }
+     
       
       #To avoid intempestive initializations of modules due to dataIn changes
       # one define the following logics :
