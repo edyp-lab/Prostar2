@@ -6,6 +6,7 @@ library(tibble)
 library(shinyalert)
 library(QFeatures)
 library(SummarizedExperiment)
+library(shiny)
 
 source(file.path('../../../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
@@ -24,11 +25,10 @@ source(file.path('../../../../R', 'mod_observe_dynamic_colourPicker_input.R'), l
 
 options(shiny.fullstacktrace = FALSE)
 
-
 ui <- fluidPage(
   tagList(
     selectInput('n_assay', 'Assay', choices = 1:2),
-  mod_pipe_protein_Filtering_ui('pipe_filter'),
+    mod_pipe_protein_Filtering_ui('pipe_filter'),
     mod_infos_dataset_ui('infos')
   )
 )
@@ -43,17 +43,15 @@ server <- function(input, output, session) {
     current.obj = Exp1_R25_prot
   )
   
-
   
-  rv$ret <- callModule(mod_pipe_protein_Filtering_server,
-                       'pipe_filter',
-                       obj = reactive({rv$current.obj}),
-                       indice = reactive({as.numeric(input$n_assay)
-                         })
-                       )
   
-  callModule(mod_infos_dataset_server,'infos',
-             obj = reactive({rv$current.obj}))
+  rv$ret <- mod_pipe_protein_Filtering_server('pipe_filter',
+                                              obj = reactive({rv$current.obj}),
+                                              indice = reactive({as.numeric(input$n_assay)})
+  )
+  
+  mod_infos_dataset_server('infos',
+                           obj = reactive({rv$current.obj}))
   
   
   observe({

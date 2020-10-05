@@ -90,7 +90,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
   })
   
   
-  callModule(mod_navigation_server, 'nav_pipe_prot_hypotest', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_prot_hypotest', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -102,9 +102,8 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
   ##
   ##
   
-  rv.hypotest$settings <- callModule(mod_settings_server,
-                                     "settings",
-                                     obj = reactive({obj()}))
+  rv.hypotest$settings <- mod_settings_server("settings",
+                                              obj = reactive({obj()}))
   
   
   
@@ -261,7 +260,7 @@ mod_pipe_protein_HypothesisTest_server <- function(input, output, session, obj, 
     })
     
   })
- 
+  
   
   
   output$correspondingRatio <- renderUI({

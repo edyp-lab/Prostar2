@@ -91,7 +91,7 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj, indi
     ## end of no modifiable part
   })
   
-  callModule(mod_navigation_server, 'nav_pipe_process', style=2, pages=r.nav)
+  mod_navigation_server('nav_pipe_process', style=2, pages=r.nav)
   
   #### END of template part of the module
   
@@ -113,34 +113,34 @@ mod_pipe_protein_Imputation_server <- function(input, output, session, obj, indi
   ## Calls to other modules
   ##
   ##
-  rv.impute$settings <- callModule(mod_settings_server, "settings", obj=reactive({rv.impute$dataIn}))
+  rv.impute$settings <- mod_settings_server("settings", obj=reactive({rv.impute$dataIn}))
   
-  callModule(mod_plots_mv_for_imputation_server,"mvImputationPlots_MV", 
+  mod_plots_mv_for_imputation_server("mvImputationPlots_MV", 
              obj = reactive({obj()}),
              ind = reactive({rv.impute$i}),
              title = reactive({"POV distribution"}),
              palette = reactive({rv.impute$settings()$basePalette}))
   
-  callModule(mod_plots_mv_for_imputation_server,"mvImputationPlots_MEC", 
+  mod_plots_mv_for_imputation_server("mvImputationPlots_MEC", 
              obj = reactive({rv.impute$imputePlotsSteps$step1}),
              ind = reactive({length(names(rv.impute$imputePlotsSteps$step1))}),
              title = reactive({"Distribution after POV imputation"}),
              palette = reactive({rv.impute$settings()$basePalette}))
   
-  callModule(mod_plots_mv_for_imputation_server,"mvImputationPlots_Valid", 
+  mod_plots_mv_for_imputation_server("mvImputationPlots_Valid", 
              obj = reactive({rv.impute$imputePlotsSteps$step2}),
              ind = reactive({length(names(rv.impute$imputePlotsSteps$step2))}),
              title = reactive({"Distribution after POV and MEC imputation"}),
              palette = reactive({rv.impute$settings()$basePalette}))
 
-  callModule(mod_det_quant_impute_Values_server, "POV_DetQuantValues_DT", 
+  mod_det_quant_impute_Values_server("POV_DetQuantValues_DT", 
              qData = reactive({req(rv.impute$dataIn, rv.impute$i)
                                 SummarizedExperiment::assay(rv.impute$dataIn[[rv.impute$i]])
                                    }),
              quant = reactive({rv.impute$widgets$POV_detQuant_quantile}), 
              factor = reactive({rv.impute$widgets$POV_detQuant_factor}))
   
-  callModule(mod_det_quant_impute_Values_server, "MEC_DetQuantValues_DT", 
+  mod_det_quant_impute_Values_server("MEC_DetQuantValues_DT", 
              qData = reactive({req(rv.impute$dataIn, rv.impute$i)
                               SummarizedExperiment::assay(rv.impute$dataIn[[rv.impute$i]])
                               }),

@@ -30,11 +30,10 @@ server <- function(input, output, session) {
     demoData = NULL
   )
   
-  rv$demoData <- callModule(mod_open_demo_dataset_server, "rl", pipeline.def=reactive({pipeline.defs}))
-
-  callModule(mod_infos_dataset_server, 
-             'infos', 
-             obj = reactive({rv$demoData() })
+  rv$demoData <- mod_open_demo_dataset_server("rl", pipeline.def=reactive({pipeline.defs}))
+  
+  mod_infos_dataset_server('infos', 
+                           obj = reactive({rv$demoData() })
   )
   
   

@@ -1,9 +1,8 @@
 
-Watch_mod_pipe_protein_Filtering <- callModule(mod_pipe_protein_Filtering_server,
-                                               'mod_pipe_protein_Filtering',  
-                                                obj = reactive({rv.core$current.obj}),
-                                                indice = reactive({rv.core$current.indice})
-                                       )
+Watch_mod_pipe_protein_Filtering <- mod_pipe_protein_Filtering_server('mod_pipe_protein_Filtering',  
+                                                                      obj = reactive({rv.core$current.obj}),
+                                                                      indice = reactive({rv.core$current.indice})
+)
 
 
 

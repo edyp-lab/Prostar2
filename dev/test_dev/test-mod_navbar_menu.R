@@ -25,6 +25,8 @@ source(file.path('../../R', 'mod_release_notes.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_check_updates.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
 
+utils::data('Exp1_R25_pept', package='DAPARdata2')
+
 ui <- function() {
   tagList(
     fluidPage(

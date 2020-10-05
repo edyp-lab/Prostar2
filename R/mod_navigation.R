@@ -144,7 +144,7 @@ mod_navigation_server <- function(id, style=1, pages){
       shinyjs::toggleState(id = "prevBtn", condition = cond.prev.btn)
       
       
-      # Disable all previous screensbut
+      # Disable all previous screens but
       if (pages$isDone[current$val])
         lapply(1:current$val, function(x){ shinyjs::disable(paste0('screen', x))})
     })

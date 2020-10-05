@@ -1,9 +1,8 @@
 
-Watch_mod_pipe_protein_Imputation <- callModule(module=mod_pipe_protein_Imputation_server,
-                                                'mod_pipe_protein_Imputation',  
-                                                obj = reactive({rv.core$current.obj}),
-                                                indice = reactive({rv.core$current.indice})
-                                                )
+Watch_mod_pipe_protein_Imputation <- mod_pipe_protein_Imputation_server('mod_pipe_protein_Imputation',  
+                                                                        obj = reactive({rv.core$current.obj}),
+                                                                        indice = reactive({rv.core$current.indice})
+)
 
 
 
