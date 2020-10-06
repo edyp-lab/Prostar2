@@ -42,10 +42,18 @@ server <- function(input, output, session) {
     tmp = NULL
   )
   
+  config <- reactiveValues(
+    type = 'pipeline',
+    process.name = 'Pipeline',
+    stepsNames = c("Original", "Filtering", "Normalization", "Imputation"),
+    mandatory =  c(TRUE, FALSE, FALSE, FALSE)
+  )
+  
   rv$tmp <- mod_super_timeline_server("super_nav", 
                                 dataIn = reactive({
                                   names(rv$current.obj)[1] <- 'Original'
-                                rv$current.obj}) )
+                                rv$current.obj}),
+                                config = config)
   
    observeEvent(rv$tmp(), {
      print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')

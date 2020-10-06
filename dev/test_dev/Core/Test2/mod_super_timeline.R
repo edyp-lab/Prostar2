@@ -31,7 +31,8 @@ mod_super_timeline_ui <- function(id){
 #' 
 #' 
 mod_super_timeline_server <- function(id, 
-                                      dataIn=NULL){
+                                      dataIn=NULL,
+                                      config){
   moduleServer(
     id,
     function(input, output, session){
@@ -39,18 +40,6 @@ mod_super_timeline_server <- function(id,
       
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
-      
-      
-      
-
-      #################################################################################
-      # variables to communicate with the navigation module
-      config <- reactiveValues(
-        type = 'pipeline',
-        process.name = 'Pipeline',
-        stepsNames = c("Original", "Filtering", "Normalization", "Imputation"),
-        mandatory =  c(TRUE, FALSE, FALSE, FALSE)
-      )
       
       rv <- reactiveValues(
         # Current position of the cursor in the timeline
@@ -92,7 +81,7 @@ mod_super_timeline_server <- function(id,
                                    cmd = reactive({rv$cmd}),
                                    position = reactive({rv$current.pos})
                                   )
-        
+        BuildScreensUI()
         Launch_Module_Server()
         })
       
@@ -300,54 +289,43 @@ mod_super_timeline_server <- function(id,
       ##
       ############### SCREEN 1 ######################################
       output$screen1 <- renderUI({
-        tagList(
-          tags$h3(paste0('Pipeline ', config$name))
+        #tagList(
+         # tags$h3(paste0('Pipeline ', config$name))
+       # )
+        do.call('tagList', list(
+          do.call('h3', list(
+            paste0('Pipeline ', config$name)))
         )
+       )
       })
       
+      # This function creates the UI parts of the screens (dynamically set 
+      # renderUIs). 
+      BuildScreensUI <- function(){
+        
+        FillScreen <- function(name, id){
+        ll <- tagList(
+                div(id=ns(paste0('screen', id)),
+                    h3(paste0('Pipeline ', config$name)),
+                    do.call(paste0('mod_wf_wf1_', name, '_ui'),
+                            list(ns(paste0('mod_',name, '_nav'))))
+                          )
+                  )
+        ll
+        }
+        
+        #Creates the renderUI for the process modules. The first id is bypassed
+        # because it is the description screen and is not linked to a process
+        # module
+        lapply(2:nbSteps(), 
+               function(x){
+                 name <- names(config$stepsNames)[x]
+                 output[[paste0('screen', x)]] <- renderUI(FillScreen(name, x))
+        })
+        
+        # Creates the renderUI for the Description screen
       
-      ############### SCREEN 2 ######################################
-      
-      output$screen2 <- renderUI({
-        tagList(
-          div(id=ns('screen2'),
-              tags$h3(config$stepsName[2]),
-              mod_wf_wf1_Filtering_ui(ns('mod_Filtering_nav'))
-          )
-        )
-      })
-
-      
-      
-         ############### SCREEN 3 ######################################
-      output$screen3 <- renderUI({
-        tagList(
-          div(id=ns('screen3'),
-              tags$h3(config$stepsName[3]),
-              mod_wf_wf1_Normalization_ui(ns('mod_Normalization_nav'))
-          )
-        )
-      })
-
-     
-      ############### SCREEN 4 ######################################
-      output$screen4 <- renderUI({
-        tagList(
-          div(id=ns('screen4'),
-              tags$h3(config$stepsName[4]),
-              mod_wf_wf1_Imputation_ui(ns('mod_Imputation_nav'))
-          )
-        )
-      })
-
-      ############### SCREEN 5 ######################################
-      output$screen5 <- renderUI({
-        tagList(
-          div(id='screen5',
-              tags$h3(config$stepsName[5])
-          )
-        )
-      })
+      }
       
       ##########################################################
       

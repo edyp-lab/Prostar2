@@ -67,7 +67,7 @@ mod_timeline_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_timeline_server <- function(id, style=1, config, cmd, position){
+mod_timeline_server <- function(id, style=1, config, cmd='', position){
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -149,7 +149,7 @@ mod_timeline_server <- function(id, style=1, config, cmd, position){
     # an event_count in the caller module. This is used to virtually create a
     # new event which will be triggered by observeEvent event if the value
     # is the same.
-    observeEvent(cmd(), {
+    observeEvent(req(cmd()), {
       #print(paste0('------ MODULE TL : New event on actions()$toggleSteps : ', cmd()))
       #browser()
       AnalyseCmd <- function(c) {
