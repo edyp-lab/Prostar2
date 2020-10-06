@@ -56,13 +56,7 @@ server <- function(input, output, session) {
                                   names(rv$current.obj)[1] <- 'Original'
                                 rv$current.obj}),
                                 config = config)
-  
-   observeEvent(rv$tmp(), {
-     print('TEST SUPER_TIMELINE : retour du module mod_super_timeline_server : rv$tmp$dataOut() = ')
-     print(rv$tmp())
-     })
-
-
+ 
   
    output$show_dataIn <- renderUI({
      tagList(lapply(names(rv$current.obj), function(x){tags$p(x)}))

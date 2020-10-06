@@ -54,6 +54,7 @@ mod_wf_wf1_Filtering_server <- function(id,
                      Step3 = T)
       )
       
+      #################################################################################
       
       rv <- reactiveValues(
         current.pos = 1,
@@ -63,11 +64,10 @@ mod_wf_wf1_Filtering_server <- function(id,
         event_counter = 0,
         cmd = NULL)
 
-      #################################################################################
       
       # Main listener of the module which initialize it
-      observeEvent(req(dataIn() ), ignoreNULL=T,{ 
-        #print(' ------- MODULE _A_ : Initialisation de rv$dataIn ------- ')
+      observeEvent(dataIn(), ignoreNULL=F,{ 
+        #print(' ------- MODULE _A_ : Initialization de rv$dataIn ------- ')
         
         if (is.null(rv$dataIn))
           {
@@ -117,7 +117,7 @@ mod_wf_wf1_Filtering_server <- function(id,
           #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
           
           # Add external events to counter
-          rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
+          rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + rv$timeline$prvBtn()
         })
         
         

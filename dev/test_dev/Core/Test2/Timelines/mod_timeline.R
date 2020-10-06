@@ -31,9 +31,7 @@ mod_timeline_ui <- function(id){
     fluidRow(
       align= 'center',
       column(width=2,div(style=btn_style,
-                         actionButton(ns("rstBtn"), "Reset ",
-                                      class = redBtnClass,
-                                      style='padding:4px; font-size:80%'),
+                         uiOutput(ns('showResetBtn')),
                          shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
                                                         class = PrevNextBtnClass,
                                                         style='padding:4px; font-size:80%'))
@@ -71,6 +69,12 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    output$showResetBtn <- renderUI({
+      actionButton(ns("rstBtn"), paste0("Reset ", config$type),
+                   class = redBtnClass,
+                   style='padding:4px; font-size:80%')
+      })
     
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
@@ -120,8 +124,9 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     output$show_screens <- renderUI({tagList(config$screens)})
     
     NextBtn_default_logics <- reactive({
+     
       end_of_tl <- current$val == current$nbSteps
-      mandatory_step <- isTRUE(config$mandatory[current$val])
+      mandatory_step <- isTRUE(config$steps[[current$val]])
       validated <- isTRUE(config$isDone[[current$val]])
       !mandatory_step || validated
     })
@@ -195,9 +200,7 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
       code[[1]][1] <- paste0(prefix, current$nbSteps, suffix, collapse='')
       
       shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-      
-      
-      
+   
     })
     
     
@@ -258,7 +261,7 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
       
       for (i in 1:length(config$stepsNames)){
         status <- config$isDone[[i]]
-        col <- ifelse(!is.null(config$steps) && config$steps[i], "red", orangeProstar)
+        col <- ifelse(!is.null(config$steps) && config$steps[[i]], "red", orangeProstar)
         ifelse(status, color[i] <- "green", color[i] <- col)
       }
       
@@ -284,6 +287,169 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
       html.table
     })
     
+    
+    
+    output$timeline10 <- renderUI({
+      txt <- "<section class='cd-horizontal-timeline'>
+        <div class='timeline'>
+          <div class='events-wrapper'>
+            <div class='events'>
+              <ol>
+              <li><a href='#0' data-date='00/00/00' class='selected'>00:00</a></li>
+                <li><a href='#0' data-date='01/00/00'>01:00</a></li>
+                  <li><a href='#0' data-date='02/00/00'>02:00</a></li>
+                    <li><a href='#0' data-date='03/00/00'>03:00</a></li>
+                      <li><a href='#0' data-date='04/00/00'>04:00</a></li>
+                        <li><a href='#0' data-date='05/00/00'>05:00</a></li>
+                          <li><a href='#0' data-date='06/00/00'>06:00</a></li>
+                            <li><a href='#0' data-date='07/00/00'>07:00</a></li>
+                              <li><a href='#0' data-date='08/00/00'>08:00</a></li>
+                                <li><a href='#0' data-date='09/00/00'>09:00</a></li>
+                                  <li><a href='#0' data-date='10/00/00'>10:00</a></li>
+                                    <li><a href='#0' data-date='11/00/00'>11:00</a></li>
+                                      <li><a href='#0' data-date='12/00/00'>12:00</a></li>
+                                        <li><a href='#0' data-date='13/00/00'>13:00</a></li>
+                                          <li><a href='#0' data-date='14/00/00'>14:00</a></li>
+                                            <li><a href='#0' data-date='15/00/00'>15:00</a></li>
+                                              <li><a href='#0' data-date='16/00/00'>16:00</a></li>
+                                                <li><a href='#0' data-date='17/00/00'>17:00</a></li>
+                                                  <li><a href='#0' data-date='18/00/00'>18:00</a></li>
+                                                    <li><a href='#0' data-date='19/00/00'>19:00</a></li>
+                                                      <li><a href='#0' data-date='20/00/00'>20:00</a></li>
+                                                        <li><a href='#0' data-date='21/00/00'>21:00</a></li>
+                                                          <li><a href='#0' data-date='22/00/00'>22:00</a></li>
+                                                            <li><a href='#0' data-date='23/00/00'>23:00</a></li>
+                                                              </ol>
+                                                              
+                                                              <span class='filling-line' aria-hidden='true'></span>
+                                                                </div>
+                                                                <!-- .events -->
+                                                                </div>
+                                                                <!-- .events-wrapper -->
+                                                                
+                                                                <ul class='cd-timeline-navigation'>
+                                                                  <li><a href='#0' class='prev inactive'>Prev</a></li>
+                                                                    <li><a href='#0' class='next'>Next</a></li>
+                                                                      </ul>
+                                                                      <!-- .cd-timeline-navigation -->
+                                                                      </div>
+                                                                      <!-- .timeline -->
+                                                                      
+                                                                      <div class='events-content'>
+                                                                        <ol>
+                                                                        <li class='selected' data-date='00/00/00'>
+                                                                          
+                                                                          <p>Consectetur adipisicing elit.
+                                                                        </p>
+                                                                          </li>
+                                                                          <li data-date='01/00/00'>
+                                                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                          </p>
+                                                                            </li>
+                                                                            <li data-date='02/00/00'>
+                                                                              <p>Dolor sit amet, consectetur adipisicing elit.
+                                                                            </p>
+                                                                              </li>
+                                                                              
+                                                                              <li data-date='03/00/00'>
+                                                                                <p>Lorem ipsum dolor sit amet
+                                                                              </p>
+                                                                                </li>
+                                                                                
+                                                                                <li data-date='04/00/00'>
+                                                                                  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                </p>
+                                                                                  </li>
+                                                                                  
+                                                                                  <li data-date='05/00/00'>
+                                                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                  </p>
+                                                                                    </li>
+                                                                                    
+                                                                                    <li data-date='06/00/00'>
+                                                                                      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                    </p>
+                                                                                      </li>
+                                                                                      
+                                                                                      <li data-date='07/00/00'>
+                                                                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                      </p>
+                                                                                        </li>
+                                                                                        
+                                                                                        <li data-date='08/00/00'>
+                                                                                          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. 
+                                                                                        </p>
+                                                                                          </li>
+                                                                                          
+                                                                                          <li data-date='09/00/00'>
+                                                                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                          </p>
+                                                                                            </li>
+                                                                                            
+                                                                                            <li data-date='10/00/00'>
+                                                                                              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                            </p>
+                                                                                              </li>
+                                                                                              
+                                                                                              <li data-date='11/00/00'>
+                                                                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                              </p>
+                                                                                                </li>
+                                                                                                <li data-date='12/00/00'>
+                                                                                                  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                </p>
+                                                                                                  </li>
+                                                                                                  <li data-date='13/00/00'>
+                                                                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                  </p>
+                                                                                                    </li>
+                                                                                                    <li data-date='14/00/00'>
+                                                                                                      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                    </p>
+                                                                                                      </li>
+                                                                                                      <li data-date='15/00/00'>
+                                                                                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                      </p>
+                                                                                                        </li>
+                                                                                                        <li data-date='16/00/00'>
+                                                                                                          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                        </p>
+                                                                                                          </li>
+                                                                                                          <li data-date='17/00/00'>
+                                                                                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                          </p>
+                                                                                                            </li>
+                                                                                                            <li data-date='18/00/00'>
+                                                                                                              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                            </p>
+                                                                                                              </li>
+                                                                                                              <li data-date='19/00/00'>
+                                                                                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                              </p>
+                                                                                                                </li>
+                                                                                                                <li data-date='20/00/00'>
+                                                                                                                  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                                </p>
+                                                                                                                  </li>
+                                                                                                                  <li data-date='21/00/00'>
+                                                                                                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                                  </p>
+                                                                                                                    </li>
+                                                                                                                    <li data-date='22/00/00'>
+                                                                                                                      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                                    </p>
+                                                                                                                      </li>
+                                                                                                                      <li data-date='23/00/00'>
+                                                                                                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                                                                                      </p>
+                                                                                                                        </li>
+                                                                                                                        </ol>
+                                                                                                                        </div>
+                                                                                                                        <!-- .events-content -->
+                                                                                                                        </section>
+                                                                                                                        "
+   HTML(txt)
+    })
     
     
     list(rstBtn = reactive(input$rstBtn),

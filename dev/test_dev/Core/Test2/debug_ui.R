@@ -13,16 +13,9 @@ output$show_rv_dataOut <- renderUI({
 })
 output$show_isDone <- renderUI({
   req(config$isDone)
-  #config$isDone <- setNames(config$isDone, config$stepsNames)
   tagList(lapply(1:nbSteps(), 
                  function(x){if (x == rv$current.pos) tags$p(tags$b(paste0('-> ',names(config$isDone)[x], ' - ', config$isDone[[x]])))
                    else tags$p(paste0(names(config$isDone)[x], ' - ', config$isDone[[x]]))
                  }))
 })
 
-output$show_rvtmp <- renderUI({
-  req(config$isDone)
-  #config$isDone <- setNames(config$isDone, config$stepsNames)
-  #browser()
-  #tagList(lapply(reactiveValuesToList(rv$tmp), function(x){tags$p(paste0(names(x()), collapse=' '))}) )
-})

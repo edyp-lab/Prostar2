@@ -1,14 +1,18 @@
+---
+output:
+  html_document:
+   theme: united
+   highlight: tango  # specifies the syntax highlighting style
+---
+<style>
+body {
+text-align: justify}
+</style>
+------
+
 ## Pipeline xxx
 
-### Filtering
-
-* xxx
-
-
-### Normalization
-
-
-### Imputation
-
-
-### Hypothesis test
+* Filtering
+*  Normalization
+* Imputation
+* Hypothesis test

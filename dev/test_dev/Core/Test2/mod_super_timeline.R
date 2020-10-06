@@ -7,7 +7,6 @@ mod_super_timeline_ui <- function(id){
     uiOutput(ns('show_screens')),
     hr(),
     wellPanel(
-      h3('Pipeline'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -48,7 +47,7 @@ mod_super_timeline_server <- function(id,
         # Use to pass the reset info to the process modules
         remoteReset = NULL,
         
-        dataIn = NULL,
+        #dataIn = NULL,
         dataOut = NULL,
         sendPosition = 1,
         
@@ -70,7 +69,7 @@ mod_super_timeline_server <- function(id,
       # Initialization of the process
       observeEvent(req(dataIn()), {
        # print('------ MODULE SUPER_TIMELINE : Initialisation du module ------')
-        rv$dataIn <- dataIn()
+        #rv$dataIn <- dataIn()
         rv$dataOut <- dataIn()
         
         CommonInitializeFunctions()
@@ -148,17 +147,20 @@ mod_super_timeline_server <- function(id,
       SendCurrentDataset <- function(name){
         #browser()
         data2send <- NULL
+        
+        # Returns NULL to all modules except the one pointed by the current position
         if (names(config$isDone)[rv$current.pos] != name) return(NULL)
+        
         #print(paste0('--- MODULE SUPER TL, current.pos = ', rv$current.pos))
         if (config$isDone[[rv$current.pos]]){
-          # The processus is already validated and the reception of a value
-          # means that the user has reseted it and want to revalidate this module
-          data2send <- rv$dataOut
-          #browser()
+          # This case does not normally exists because a validated process
+          # is disabled and the user cannot validate it.
+          # For that, it must be reseted
         } else {
-          # The processus has not yet been validated and one want to run it and 
-          # validate it
+          # The processus is not validated
           if (GetMaxTrue() < rv$current.pos) {
+            # The current position is after the last validated process (the one
+            # just after or further (there will be skipped processes))
             data2send <- rv$dataOut
           } else {
             # it is a skipped module
@@ -166,9 +168,7 @@ mod_super_timeline_server <- function(id,
             ind.name <- grep(name, names(rv$dataOut))
             data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
           }
-          # Test if the process has been skipped or if it is a new process
-          # Name of the last validated dataset before the current one
-          
+
         }
         
       
@@ -178,10 +178,7 @@ mod_super_timeline_server <- function(id,
       }
       
       #Catch a new position from timeline
-      observeEvent(req(rv$timeline$pos()),{ 
-        #print('---- MODULE TL = new position detected')
-        rv$current.pos <- rv$timeline$pos()
-        })
+      observeEvent(req(rv$timeline$pos()),{ rv$current.pos <- rv$timeline$pos()})
       
 ### End of part for managing the timeline
       
@@ -195,11 +192,12 @@ mod_super_timeline_server <- function(id,
       # anymore)
       # If a value (not NULL) is received, then it corresponds to the module
       # pointed by the current position
+      # This function also updates the list isDone
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
         #print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
         #browser()
         if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
-          && (length(which(config$isDone==T))) ){
+          && (length(which(config$isDone==T))==1) ){
           print("It is a global reset")
           return(NULL)
         }
@@ -207,7 +205,7 @@ mod_super_timeline_server <- function(id,
         # has changed. One compares the item which has changed between the two lists
         # if a dataset passed from NULL to a non-NULL value then is has been validated
         # else if the dataset passed from a non-NULL value to NULL, it has been reseted
-        module_which_returned <- unlist(lapply(names(config$isDone), 
+        module_which_has_returned <- unlist(lapply(names(config$isDone), 
                                                function(x){
                                                  if (!is.null(reactiveValuesToList(rv$tmp)[[x]]()) != config$isDone[[x]]) {x}
                                                  }
@@ -217,10 +215,10 @@ mod_super_timeline_server <- function(id,
         #module_which_returned <- names(which(lapply(reactiveValuesToList(rv$tmp), 
         #                                            function(x){!is.null(x())}) == T))
         
-        if (is.null(rv$tmp[[module_which_returned]]())){
-          # This means that the corresponding module has been reseted
-          config$isDone[[module_which_returned]] <- FALSE
-         browser() 
+        if (is.null(rv$tmp[[module_which_has_returned]]())){
+          # The corresponding module has been reseted
+          config$isDone[[module_which_has_returned]] <- FALSE
+         #browser() 
           # renvoyer le dernier dataset non NULL avant la position courante
           name <- names(config$isDone)[ GetMaxTrue(rv$current.pos - 1)]
           ind.name <- grep(name, names(rv$dataOut))
@@ -230,15 +228,16 @@ mod_super_timeline_server <- function(id,
         } else {
           # This means that the corresponding module has return a value
           # It has been validated
-          config$isDone[[module_which_returned]] <- TRUE
+          config$isDone[[module_which_has_returned]] <- TRUE
           # Set to FALSE all further steps (in case of rerun a process
-          #browser()
-          ind <- which(names(config$isDone)==module_which_returned)
+          # or if one points to a skipped process)
+          ind <- which(names(config$isDone)==module_which_has_returned)
+          # Check if the current position is on the last step
           if (ind < nbSteps())
             config$isDone[(1+ind):nbSteps()] <- FALSE
           #rv$dataIn <- rv$tmp[[module_which_returned]]()
           
-          rv$dataOut <- rv$tmp[[module_which_returned]]()
+          rv$dataOut <- rv$tmp[[module_which_has_returned]]()
         }
         
       })
@@ -248,6 +247,7 @@ mod_super_timeline_server <- function(id,
       
      
       Launch_Module_Server <- function(){
+        
         BuildServer <- function(name){
           if (name == 'Original'){
             rv$tmp[[name]] <- reactive({dataIn()})

@@ -13,48 +13,19 @@ server <- function(input, output, session) {
 
   
   config <- reactiveValues(
-    stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
-    mandatory = c(FALSE, FALSE, TRUE, TRUE),
-    isDone = c(TRUE, FALSE, FALSE, FALSE)
+    type = 'pipeline',
+    process.name = 'Pipeline',
+    steps = append(list(Original = T), pipeline.defs$protein )
   )
   
-  rv <- reactiveValues(
-    current.pos = 1, 
-    screens = NULL)
-  
-    actions <- reactiveValues(rst = TRUE,
-                   nxt = TRUE,
-                   prv = TRUE)
 
-    
-    InitScreens <- reactive({
-      # initialisation of the screens
-      for (i in 1:length(config$stepsNames))
-        rv$screens[[i]] <- if (i == rv$current.pos) 
-          div(id = paste0("screen", i),  rv$screens[[i]])
-      else  
-        shinyjs::hidden(div(id = paste0("screen", i),  rv$screens[[i]]))
-      rv$screens
-    })
-    
-    CreateScreens <- reactive({
-      rv$screens <- lapply(1:length(config$stepsNames), function(x){
-        do.call(uiOutput, list(outputId=paste0("screen", x)))})
-      rv$screens
-    })
-    
-    
-    observeEvent(rv$screens, ignoreNULL=F,{
-      CreateScreens()
-      InitScreens()
- print(rv$screens)
-    })
   
   mod_timeline_server("timeline", 
-                      style = 2, 
-                      screens = rv$screens, 
-                      process_config=config, 
-                      actions=actions)
+                      style = 11, 
+                      config = config, 
+                      cmd = reactive({NULL}),
+                      position = reactive({1})
+  )
 }
 
 

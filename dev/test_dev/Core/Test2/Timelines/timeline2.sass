@@ -4,7 +4,7 @@ $colSkipped: #ECF4F8;
   $colMandatory: #D30505;
   $colDefault: #B3AFAB;
   $radius: 20px;
-$lineWidth: 5px;
+$lineWidth: 3px;
 .timeline{
   list-style-type: none;
   display: flex;
@@ -63,15 +63,15 @@ $lineWidth: 5px;
 }
 .li.skipped{
   .status{
-    border-top: $lineWidth dashed solid $colDefault;
+    border-top: $lineWidth dashed  $colDefault;
     &:before{
       background-color: $colSkipped;
-      border: $lineWidth dashed solid $colSkipped;
+      border: $lineWidth dashed  $colSkipped;
       transition: all 200ms ease-in;
     }
     h4{
       color: $colSkipped;
-      border-bottom: 3px dashed solid white;
+      border-bottom: 3px dashed  white;
     }
   }
 }
@@ -104,7 +104,13 @@ $lineWidth: 5px;
     }
   }
 }
-
+.li.skipped.active{
+  .status{
+    h4{
+      border-bottom: 3px dashed currentColor ;
+    }
+  }
+}
 .li.mandatory.active{
   .status{
     h4{

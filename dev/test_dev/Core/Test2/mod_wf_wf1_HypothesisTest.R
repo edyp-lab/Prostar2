@@ -53,6 +53,7 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
                      Step2 = F,
                      Step3 = T)
       )
+      #################################################################################
       
       
       rv <- reactiveValues(
@@ -63,10 +64,9 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
         event_counter = 0,
         cmd = NULL)
       
-      #################################################################################
-      
+       
       # Main listener of the module which initialize it
-      observeEvent(req(dataIn() ), ignoreNULL=T,{ 
+      observeEvent(dataIn() , ignoreNULL=F,{ 
         #print(' ------- MODULE _A_ : Initialisation de rv$dataIn ------- ')
         
         if (is.null(rv$dataIn))

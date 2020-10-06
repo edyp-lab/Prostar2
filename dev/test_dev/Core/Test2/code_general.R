@@ -6,11 +6,11 @@ InitActions <- function(n){
   )
 }
 
-CreateScreens <- function(stepsNames){
+CreateScreens <- function(names){
   setNames(
-    lapply(1:length(stepsNames), 
+    lapply(1:length(names), 
            function(x){
-             do.call(uiOutput, list(outputId=ns(stepsNames)[x]))}),
+             do.call(uiOutput, list(outputId=ns(names)[x]))}),
     paste0('screen_', names(config$steps)))
 }
 
@@ -38,7 +38,9 @@ GetMaxTrue <- function(bound = nbSteps()){
   max(which(unlist(config$isDone)[1:bound]==T))
 }
 
-
+# isDone is a static list of n elements (the number of steps)
+# It indicates whether a step has been validated (TRUE) or not (FALSE)
+# It is updated by the return of module server
 Init_isDone <- function(){
   setNames(lapply(1:nbSteps(), 
                   function(x){ x == 1}), 
