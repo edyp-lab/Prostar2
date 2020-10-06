@@ -19,13 +19,15 @@ nbSteps <- reactive({
   length(config$stepsNames)
 })
 
-Init_isDone <- function(){
-  setNames(lapply(1:nbSteps(), 
-                  function(x){ x == 1}), 
-           config$stepsNames)
+
+
+InsertDescriptionUI <- function(){
+  output[['Description']] <- renderUI({
+    mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+  })
+  mod_insert_md_server(paste0(config$process.name, "_md"), 
+                       paste0('./md/',config$process.name, '.md'))
 }
-
-
 
 
 Reset_Pipeline_Data_logics <- function(){
@@ -37,11 +39,19 @@ GetMaxTrue <- function(bound = nbSteps()){
 }
 
 
+Init_isDone <- function(){
+  setNames(lapply(1:nbSteps(), 
+                  function(x){ x == 1}), 
+           names(config$stepsNames))
+}
+
 CommonInitializeFunctions <- function(){
   rv$event_counter <- 0
   rv$screens <- InitActions(nbSteps())
+  
   config$stepsNames <- setNames(config$stepsNames, config$stepsNames)
   config$stepsNames[1] <- 'Description'
+  
   config$isDone <- Init_isDone()
   
   # Must be placed after the initialisation of the 'config$stepsNames' variable

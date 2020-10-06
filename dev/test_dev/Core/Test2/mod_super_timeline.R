@@ -198,7 +198,7 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
         print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
         browser()
-        if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x}))) == 1) 
+        if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
           && (length(which(config$isDone==T))) ){
           print("It is a global reset")
           return(NULL)
@@ -261,25 +261,7 @@ mod_super_timeline_server <- function(id,
         }
         
         lapply(1:nbSteps(), function(x){BuildServer(names(config$stepsNames)[x])})
-        
-        
-        # rv$tmp[['Original']] <- reactive({dataIn()})
-        # 
-        # rv$tmp[['Filtering']] <- mod_wf_wf1_Filtering_server("mod_Filtering_nav",
-        #                                              dataIn = reactive({SendCurrentDataset('Filtering')}),
-        #                                              remoteReset = reactive({rv$timeline$rstBtn()})
-        # )
-        # 
-        # rv$tmp[['Normalization']] <- mod_wf_wf1_Normalization_server("mod_Normalization_nav",
-        #                                                  dataIn = reactive({SendCurrentDataset('Normalization')}),
-        #                                                  remoteReset = reactive({rv$timeline$rstBtn()})
-        # )
-        # 
-        # rv$tmp[['Imputation']] <- mod_wf_wf1_Imputation_server("mod_Imputation_nav",
-        #                                               dataIn = reactive({SendCurrentDataset('Imputation')}),
-        #                                               remoteReset = reactive({rv$timeline$rstBtn()})
-        # )
-      }
+         }
       
       
       
@@ -317,16 +299,14 @@ mod_super_timeline_server <- function(id,
         
         # Creates the renderUI for the Description screen
         output[[names(config$stepsNames)[1]]] <- renderUI({
-          #tagList(
-          # tags$h3(paste0('Pipeline ', config$name))
-          # )
-          do.call('tagList', list(
-            do.call('h3', list(
-              paste0('Pipeline ', config$name)))
-          )
-          )
-        })
+          mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+          })
+        mod_insert_md_server(paste0(config$process.name, "_md"), 
+                             paste0('./md/',config$process.name, '.md'))
+        
+        
       }
+      
       
       ##########################################################
       

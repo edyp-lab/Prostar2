@@ -4,9 +4,10 @@ library(shinyjs)
 source(file.path('./Timelines', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('.', 'mod_super_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
-source(file.path('.', 'mod_wf_wf1_A.R'), local=TRUE)$value
-source(file.path('.', 'mod_wf_wf1_B.R'), local=TRUE)$value
-source(file.path('.', 'mod_wf_wf1_C.R'), local=TRUE)$value
+source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_Filtering.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_Normalization.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_Imputation.R'), local=TRUE)$value
 source(file.path('.', 'formal_funcs.R'), local=TRUE)$value
 
 

@@ -47,8 +47,8 @@ mod_wf_wf1_Normalization_server <- function(id,
       #################################################################################
       config <- reactiveValues(
         type = 'process',
-        name = 'Normalization',
-        stepsNames = c("Description", "Step 1", "Step 2", "Step 3"),
+        process.name = 'Normalization',
+        stepsNames = c("Description", "Step1", "Step2", "Step3"),
         mandatory =  c(FALSE, TRUE, FALSE, TRUE)
       )
       
@@ -60,10 +60,6 @@ mod_wf_wf1_Normalization_server <- function(id,
         dataOut = NULL,
         event_counter = 0,
         cmd = NULL)
-      
-      
-      
-      
       
       #################################################################################
       
@@ -170,7 +166,7 @@ mod_wf_wf1_Normalization_server <- function(id,
         # does not work
         ResetScreens <- function(screens){
           lapply(1:nbSteps(), function(x){
-            shinyjs::reset(paste0('screen', x))
+            shinyjs::reset(names(config$stepsNames)[x])
           })
         }
         
@@ -185,8 +181,8 @@ mod_wf_wf1_Normalization_server <- function(id,
           # Update datasets logics
           #browser()
           
-          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
-          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$name)
+          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$process.name)
+          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$process.name)
           rv$dataOut <- NULL
           config$isDone <- Init_isDone()
         }
@@ -203,22 +199,17 @@ mod_wf_wf1_Normalization_server <- function(id,
       ## screens of the module
       ##
       ############### SCREEN 1 ######################################
-      output$screen1 <- renderUI({
-        tagList(
-          tags$h3(paste0('Process ', config$name))
-        )
-      })
+      InsertDescriptionUI()
       
       ############### SCREEN 2 ######################################
       
-      output$screen2 <- renderUI({
+      output$Step1 <- renderUI({
+        name <- 'Step1'
         
-        observeEvent(input$perform_screen2_btn, {
-          config$isDone[[2]] <- TRUE
-        })
+        
         
         tagList(
-          div(id=ns('screen2'),
+          div(id=ns(name),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
                   tags$h2('Step 1')),
               div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
@@ -228,19 +219,21 @@ mod_wf_wf1_Normalization_server <- function(id,
                               width = '150px')
               ),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                  actionButton(ns('perform_screen2_btn'), 'Perform'))
+                  actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
           )
         )
       })
       
       
-      
+      observeEvent(input$perform_Step1_btn, {
+        config$isDone[['Step1']] <- TRUE
+      })
       
       ############### SCREEN 3 ######################################
-      output$screen3 <- renderUI({
-        
+      output$Step2 <- renderUI({
+        name <- 'Step2'
         tagList(
-          div(id=ns('screen3'),
+          div(id=ns(name),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
                   tags$h3('Step 2')),
               div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
@@ -249,7 +242,7 @@ mod_wf_wf1_Normalization_server <- function(id,
                               selected = 1,
                               width = '150px')),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                  actionButton(ns('perform_screen3_btn'), 'Perform'))
+                  actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
           )
         )
       })
@@ -257,37 +250,50 @@ mod_wf_wf1_Normalization_server <- function(id,
       ## Logics to implement: here, we must take the last data not null
       # in previous datas. The objective is to take account
       # of skipped steps
-      observeEvent(input$perform_screen3_btn, {
-        config$isDone[[3]] <- TRUE
+      observeEvent(input$perform_Step2_btn, {
+        config$isDone[['Step2']] <- TRUE
       })
       
       
+      
+      
       ############### SCREEN 4 ######################################
-      output$screen4 <- renderUI({
+      output$Step3 <- renderUI({
+        name <- 'Step3'
+        
+        
+        
+        
+        
         
         tagList(
-          div(id=ns('screen4'),
+          div(id=ns(name),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                  tags$h3('Step 4')),
+                  tags$h3('Step 3')),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
                   actionButton(ns('validate_btn'), 'Validate'))
           )
         )
+        
+        
+        
+        
+        
       })
       
       
       Validate_Module_Data_logics <- function(){
-        #rv$dataIn <- AddItemToDataset(rv$dataIn, config$name)
-        rv$dataOut <- AddItemToDataset(rv$dataIn, config$name)
+        #rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
+        rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
+        print(rv$dataOut)
       }
+      
+      
       observeEvent(input$validate_btn, {
-        #isolate({
         #browser()
         Validate_Module_Data_logics()
-        config$isDone[[4]] <- TRUE
-        # })
+        config$isDone[['Step3']] <- TRUE
       })
-      
       
       
       

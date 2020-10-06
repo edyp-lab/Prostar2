@@ -1,13 +1,13 @@
 
 
-mod_wf_wf1_Filtering_ui <- function(id){
+mod_wf_wf1_Imputation_ui <- function(id){
   ns <- NS(id)
   tagList(
     useShinyjs(),
     mod_timeline_ui(ns("timeline")),
     hr(),
     wellPanel(
-      h3('Module _A_'),
+      h3('Module _C_'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -30,10 +30,10 @@ mod_wf_wf1_Filtering_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_Filtering_server <- function(id, 
-                                dataIn=NULL,
-                                remoteReset=FALSE,
-                                forcePosition = 1){
+mod_wf_wf1_Imputation_server <- function(id, 
+                                        dataIn=NULL,
+                                        remoteReset=FALSE,
+                                        forcePosition = 1){
   moduleServer(
     id,
     function(input, output, session){
@@ -42,12 +42,12 @@ mod_wf_wf1_Filtering_server <- function(id,
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
-
-  
+      
+      
       #################################################################################
       config <- reactiveValues(
         type = 'process',
-        name = 'Filtering',
+        process.name = 'Imputation',
         stepsNames = c("Description", "Step1", "Step2", "Step3"),
         mandatory =  c(FALSE, TRUE, FALSE, TRUE)
       )
@@ -60,18 +60,18 @@ mod_wf_wf1_Filtering_server <- function(id,
         dataOut = NULL,
         event_counter = 0,
         cmd = NULL)
-
+      
       #################################################################################
       
       # Main listener of the module which initialize it
       observeEvent(req(dataIn() ), ignoreNULL=T,{ 
-        #print(' ------- MODULE _A_ : Initialisation de rv$dataIn ------- ')
+        #print(' ------- MODULE _C_ : Initialisation de rv$dataIn ------- ')
         
         if (is.null(rv$dataIn))
-          {
-          #print(' ------- MODULE _A_ : Entering for the first time ------')
+        {
+          #print(' ------- MODULE _C_ : Entering for the first time ------')
           InitializeModule()
-          }
+        }
         if (config$isDone[[nbSteps()]])
           rv$current.pos <- nbSteps()
         
@@ -80,12 +80,12 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       
       InitializeModule <- function(){
-        #print(' ------- MODULE _A_ : InitializeModule() ------- ')
+        #print(' ------- MODULE _C_ : InitializeModule() ------- ')
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
         CommonInitializeFunctions()
-
+        
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
                                            config = config, 
@@ -97,7 +97,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         # This listener appears only in modules that are called by another one.
         # It allows the caller to force a new position
         # observeEvent(forcePosition(),{
-        #   print(' ------- MODULE _A_ : observeEvent(forcePosition()) ------- ')
+        #   print(' ------- MODULE _C_ : observeEvent(forcePosition()) ------- ')
         #   print(paste0('force position to : ', forcePosition()))
         #   rv$current.pos <- forcePosition() })
         
@@ -105,14 +105,14 @@ mod_wf_wf1_Filtering_server <- function(id,
         
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()),{ 
-          #print(' ------- MODULE _A_ : observeEvent(req(rv$timeline$pos()) ------- ')
+          #print(' ------- MODULE _C_ : observeEvent(req(rv$timeline$pos()) ------- ')
           rv$current.pos <- rv$timeline$pos() })
         
         
         # Catches an clic on the next or previous button in the timeline
         # and updates the event_counter
         observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0)),{
-          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
+          #print(' ------- MODULE _C_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
           
           # Add external events to counter
           rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
@@ -121,8 +121,8 @@ mod_wf_wf1_Filtering_server <- function(id,
         
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
-          #print("---- MODULE _A_ : reset activated ----------------")
-          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+          #print("---- MODULE _C_ : reset activated ----------------")
+          #print(' ------- MODULE _C_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
           # Add external events to counter
           rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
@@ -143,8 +143,8 @@ mod_wf_wf1_Filtering_server <- function(id,
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
         observeEvent(config$isDone,  ignoreInit = T, {
-          #print(' ------- MODULE _A_ : A new step is validated ------- ')
-          #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+          #print(' ------- MODULE _C_ : A new step is validated ------- ')
+          #print(' ------- MODULE _C_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
           
           rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
         })
@@ -156,7 +156,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         observe({
           reactiveValuesToList(input)
           rv$event_counter <- sum(as.numeric(unlist(reactiveValuesToList(input))), na.rm=T)
-          #print(paste0('----MODULE _A_ : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
+          #print(paste0('----MODULE _C_ : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
         })
         
         
@@ -181,8 +181,8 @@ mod_wf_wf1_Filtering_server <- function(id,
           # Update datasets logics
           #browser()
           
-          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$name)
-          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$name)
+          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$process.name)
+          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$process.name)
           rv$dataOut <- NULL
           config$isDone <- Init_isDone()
         }
@@ -195,117 +195,113 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       
       
-       #####################################################################
-       ## screens of the module
-       ##
-       ############### SCREEN 1 ######################################
-       output$Description <- renderUI({
-         tagList(
-           tags$h3(paste0('Process ', config$name))
-         )
-       })
-
-       ############### SCREEN 2 ######################################
-       
-       output$Step1 <- renderUI({
-         name <- 'Step1'
-         
-         
-         
-         tagList(
-           div(id=ns(name),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-               tags$h2('Step 1')),
-               div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
-                   selectInput(ns('select1'), 'Select step 1', 
-                           choices = 1:5, 
-                           selected = 1,
-                           width = '150px')
-               ),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                   actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
-           )
-         )
-       })
-       
-       
+      #####################################################################
+      ## screens of the module
+      ##
+      ############### SCREEN 1 ######################################
+      InsertDescriptionUI()
+      
+      ############### SCREEN 2 ######################################
+      
+      output$Step1 <- renderUI({
+        name <- 'Step1'
+        
+        
+        
+        tagList(
+          div(id=ns(name),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  tags$h2('Step 1')),
+              div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
+                  selectInput(ns('select1'), 'Select step 1', 
+                              choices = 1:5, 
+                              selected = 1,
+                              width = '150px')
+              ),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+          )
+        )
+      })
+      
+      
       observeEvent(input$perform_Step1_btn, {
         config$isDone[['Step1']] <- TRUE
       })
-       
-       ############### SCREEN 3 ######################################
-       output$Step2 <- renderUI({
-         name <- 'Step2'
-         tagList(
-           div(id=ns(name),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                   tags$h3('Step 2')),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
-                   selectInput(ns('select2'), 'Select step 2',
-                           choices = 1:5,
-                           selected = 1,
-                           width = '150px')),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                   actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
-           )
-         )
-       })
-       
-       ## Logics to implement: here, we must take the last data not null
-       # in previous datas. The objective is to take account
-       # of skipped steps
-       observeEvent(input$perform_Step2_btn, {
-         config$isDone[['Step2']] <- TRUE
-       })
-       
       
-       
+      ############### SCREEN 3 ######################################
+      output$Step2 <- renderUI({
+        name <- 'Step2'
+        tagList(
+          div(id=ns(name),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  tags$h3('Step 2')),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
+                  selectInput(ns('select2'), 'Select step 2',
+                              choices = 1:5,
+                              selected = 1,
+                              width = '150px')),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+          )
+        )
+      })
       
-       ############### SCREEN 4 ######################################
-       output$Step3 <- renderUI({
-         name <- 'Step3'
-         
-         
-         
-         
-         
-         
-         tagList(
-           div(id=ns(name),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                   tags$h3('Step 3')),
-               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                   actionButton(ns('validate_btn'), 'Validate'))
-           )
-         )
-         
-         
-         
-
-         
-       })
-         
-       
-       Validate_Module_Data_logics <- function(){
-         #rv$dataIn <- AddItemToDataset(rv$dataIn, config$name)
-         rv$dataOut <- AddItemToDataset(rv$dataIn, config$name)
-         print(rv$dataOut)
-       }
-       
-          
-       observeEvent(input$validate_btn, {
-         #browser()
-         Validate_Module_Data_logics()
-         config$isDone[['Step3']] <- TRUE
-       })
-
-         
-       
-          
-          
-       ##########################################################
+      ## Logics to implement: here, we must take the last data not null
+      # in previous datas. The objective is to take account
+      # of skipped steps
+      observeEvent(input$perform_Step2_btn, {
+        config$isDone[['Step2']] <- TRUE
+      })
+      
+      
+      
+      
+      ############### SCREEN 4 ######################################
+      output$Step3 <- renderUI({
+        name <- 'Step3'
         
-  reactive({rv$dataOut})
+        
+        
+        
+        
+        
+        tagList(
+          div(id=ns(name),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  tags$h3('Step 3')),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  actionButton(ns('validate_btn'), 'Validate'))
+          )
+        )
+        
+        
+        
+        
+        
+      })
+      
+      
+      Validate_Module_Data_logics <- function(){
+        #rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
+        rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
+        print(rv$dataOut)
+      }
+      
+      
+      observeEvent(input$validate_btn, {
+        #browser()
+        Validate_Module_Data_logics()
+        config$isDone[['Step3']] <- TRUE
+      })
+      
+      
+      
+      
+      
+      ##########################################################
+      
+      reactive({rv$dataOut})
     })
   
 }
