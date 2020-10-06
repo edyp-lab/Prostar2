@@ -255,7 +255,8 @@ mod_super_timeline_server <- function(id,
             rv$tmp[[name]] <- do.call(as.character(paste0('mod_wf_wf1_', name, '_server')), 
                                       list(id = as.character(paste0("mod_",name, "_nav")),
                                            dataIn = reactive({SendCurrentDataset(name)}),
-                                           remoteReset = reactive({rv$timeline$rstBtn()})))
+                                           remoteReset = reactive({rv$timeline$rstBtn()}),
+                                           is.skipped = reactive({is.skipped(name)})))
             
           }
         }

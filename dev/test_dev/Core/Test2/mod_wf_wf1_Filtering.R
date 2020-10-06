@@ -33,7 +33,7 @@ mod_wf_wf1_Filtering_ui <- function(id){
 mod_wf_wf1_Filtering_server <- function(id, 
                                 dataIn=NULL,
                                 remoteReset=FALSE,
-                                forcePosition = 1){
+                                is.skipped = FALSE){
   moduleServer(
     id,
     function(input, output, session){
@@ -73,10 +73,10 @@ mod_wf_wf1_Filtering_server <- function(id,
           {
           #print(' ------- MODULE _A_ : Entering for the first time ------')
           InitializeModule()
-          }
-        if (config$isDone[[nbSteps()]])
+        }
+        is.validated <- config$isDone[[nbSteps()]]
+        if (is.validated || is.skipped())
           rv$current.pos <- nbSteps()
-        
       })
       
       
