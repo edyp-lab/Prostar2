@@ -46,8 +46,9 @@ server <- function(input, output, session) {
   config <- reactiveValues(
     type = 'pipeline',
     process.name = 'Pipeline',
-    stepsNames = c("Original", "Filtering", "Normalization", "Imputation"),
-    mandatory =  c(TRUE, FALSE, FALSE, FALSE)
+    steps = setNames(lapply(c(T,F,F,F), 
+                            function(x){x}),
+                     c("Original", "Filtering", "Normalization", "Imputation"))
   )
   
   rv$tmp <- mod_super_timeline_server("super_nav", 

@@ -1,20 +1,20 @@
 pipeline.defs <- list(
-  peptidomic = c('Filtering',
-                  'Normalization',
-                  'Imputation',
-                  'HypothesisTest'),
-  protein = c('Filtering',
-              'Normalization',
-              'Imputation',
-              'HypothesisTest'
+  peptidomic = list(Filtering = T,
+                  Normalization = F,
+                  Imputation = F,
+                  HypothesisTest = F),
+  protein = list(Filtering=T,
+              Normalization=F,
+              Imputation=F,
+              HypothesisTest=F
             ),
-  p2p = c('module_p2p_1',
-          'module_p2p_2',
-          'module_p2p_3',
-          'module_p2p_4'),
-  fullPeptide = c('module_metabo_1',
-             'module_metabo_2',
-             'module_metabo_3',
-             'module_metabo_4')
+  p2p = list(module_p2p_1=T,
+          module_p2p_2=F,
+          module_p2p_3=F,
+          module_p2p_4=F),
+  fullPeptide = list(module_metabo_1=T,
+             module_metabo_2=F,
+             module_metabo_3=F,
+             module_metabo_4=F)
 )
 

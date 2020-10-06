@@ -88,7 +88,7 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     )
     
     observeEvent(req(config),{
-      current$nbSteps <- length(config$stepsNames)
+      current$nbSteps <- length(config$steps)
       InitScreens()
     })
     
@@ -182,7 +182,7 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     ## Functions defining timeline and styles
     ##
     output$load_css_style <- renderUI({
-      req(length(config$stepsNames))
+      req(current$nbSteps)
       req(style != 3)
       
       file <- paste0('./Timelines/timeline',style, '.sass')
@@ -206,11 +206,11 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     ### Definition of timelines style
     output$timeline1 <- renderUI({
       config
-      status <- rep('',length(config$stepsNames))
+      status <- rep('', current$nbSteps)
       status[current$val] <- ' active'
-      steps <- config$stepsNames
+      steps <- names(config$steps)
       txt <- "<div class='flex-parent'> <div class='input-flex-container'>"
-      for (i in 1:length(config$stepsNames)){
+      for (i in 1:current$nbSteps){
         txt <- paste0(txt, "<div class='input",status[i], "'><span name='", steps[i],"'></span>  </div>")
       }
       txt <- paste0(txt,"</div></div>")
@@ -224,25 +224,24 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     
     output$timeline2 <- renderUI({
       config
-      status <- rep('', length(config$stepsNames))
-     # browser()
-      if( !is.null(config$mandatory))
-        status[which(config$mandatory)] <- 'mandatory'
+      status <- rep('', current$nbSteps)
+      #browser()
+      if( !is.null(config$steps))
+        status[which(unlist(config$steps))] <- 'mandatory'
       
       #status <- rep('',length(config$stepsNames))
       status[which(unlist(config$isDone))] <- 'complete'
       
       #Compute the skipped steps
-      maxT <- GetMaxTrue()
-      status[which(toto==F)[which(which(toto == FALSE ) < maxT)]] <- 'skipped'
+      status[which(config$isDone==F)[which(which(config$isDone == FALSE ) < GetMaxTrue())]] <- 'skipped'
       
       
-      active  <- rep('', length(config$stepsNames))
+      active  <- rep('', GetMaxTrue())
       active[current$val] <- 'active'
       
-      steps <- config$stepsNames
+      steps <- names(config$steps)
       txt <- "<ul class='timeline' id='timeline'>"
-      for (i in 1:length(config$stepsNames)){
+      for (i in 1:current$nbSteps){
         txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
       }
       txt <- paste0(txt,"</ul>")
@@ -254,18 +253,18 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     output$timeline3 <- renderUI({
       config
       
-      color <- rep("lightgrey", length(config$stepsNames))
-      colorForCursor <- rep("white", length(config$stepsNames))
+      color <- rep("lightgrey", current$nbSteps)
+      colorForCursor <- rep("white", current$nbSteps)
       
       for (i in 1:length(config$stepsNames)){
         status <- config$isDone[[i]]
-        col <- ifelse(!is.null(config$mandatory) && config$mandatory[i], "red", orangeProstar)
+        col <- ifelse(!is.null(config$steps) && config$steps[i], "red", orangeProstar)
         ifelse(status, color[i] <- "green", color[i] <- col)
       }
       
       colorForCursor[current$val] <- "black"
       
-      steps <- config$stepsNames
+      steps <- config$steps
       colorCurrentPos <- colorForCursor
       paste0("     ", steps, "     ")
       rows.color <- rows.text <-  rows.cursor <- list()

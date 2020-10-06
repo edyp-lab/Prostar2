@@ -95,7 +95,7 @@ mod_super_timeline_server <- function(id,
       # does not work
       ResetScreens <- function(screens){
         lapply(1:nbSteps(), function(x){
-          shinyjs::reset(names(config$stepsNames)[x])
+          shinyjs::reset(names(config$steps)[x])
         })
       }
       
@@ -196,8 +196,8 @@ mod_super_timeline_server <- function(id,
       # If a value (not NULL) is received, then it corresponds to the module
       # pointed by the current position
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
-        print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
-        browser()
+        #print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
+        #browser()
         if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
           && (length(which(config$isDone==T))) ){
           print("It is a global reset")
@@ -260,7 +260,7 @@ mod_super_timeline_server <- function(id,
           }
         }
         
-        lapply(1:nbSteps(), function(x){BuildServer(names(config$stepsNames)[x])})
+        lapply(1:nbSteps(), function(x){BuildServer(names(config$steps)[x])})
          }
       
       
@@ -293,12 +293,12 @@ mod_super_timeline_server <- function(id,
         # module
         lapply(2:nbSteps(), 
                function(x){
-                 name <- names(config$stepsNames)[x]
+                 name <- names(config$steps)[x]
                  output[[name]] <- renderUI(FillScreen(name))
         })
         
         # Creates the renderUI for the Description screen
-        output[[names(config$stepsNames)[1]]] <- renderUI({
+        output[[names(config$steps)[1]]] <- renderUI({
           mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
           })
         mod_insert_md_server(paste0(config$process.name, "_md"), 

@@ -48,8 +48,9 @@ mod_wf_wf1_Filtering_server <- function(id,
       config <- reactiveValues(
         type = 'process',
         process.name = 'Filtering',
-        stepsNames = c("Description", "Step1", "Step2", "Step3"),
-        mandatory =  c(FALSE, TRUE, FALSE, TRUE)
+        steps = setNames(lapply(c(T,T,F,T), 
+                                function(x){x}),
+                         c("Description", "Step1", "Step2", "Step3"))
       )
       
       
@@ -166,7 +167,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         # does not work
         ResetScreens <- function(screens){
           lapply(1:nbSteps(), function(x){
-            shinyjs::reset(names(config$stepsNames)[x])
+            shinyjs::reset(names(config$steps)[x])
           })
         }
         
