@@ -244,12 +244,11 @@ mod_super_timeline_server <- function(id,
 
 
       is.skipped <- function(name){
-        
+        browser()
         i <- GetMaxTrue()
         is.validated <- config$isDone[[name]]
-        
-        name <- names(config$isDone)[ GetMaxTrue(rv$current.pos - 1)]
-        ind.name <- grep(name, names(rv$dataOut))
+        ind.name <- which(name == names(config$isDone))
+        !is.validated && ind.name < i
       }
       
      
