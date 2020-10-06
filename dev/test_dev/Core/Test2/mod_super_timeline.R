@@ -95,7 +95,7 @@ mod_super_timeline_server <- function(id,
       # does not work
       ResetScreens <- function(screens){
         lapply(1:nbSteps(), function(x){
-          shinyjs::reset(paste0('screen', x))
+          shinyjs::reset(names(config$stepsNames)[x])
         })
       }
       
@@ -196,9 +196,9 @@ mod_super_timeline_server <- function(id,
       # If a value (not NULL) is received, then it corresponds to the module
       # pointed by the current position
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
-        #print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
-        #browser()
-        if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
+        print("----- MODULE SUPER_TL : reception d'un retour sur rv$tmp")
+        browser()
+        if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x}))) == 1) 
           && (length(which(config$isDone==T))) ){
           print("It is a global reset")
           return(NULL)
@@ -252,10 +252,11 @@ mod_super_timeline_server <- function(id,
           if (name == 'Original'){
             rv$tmp[[name]] <- reactive({dataIn()})
           } else {
-            rv$tmp[[name]] <- do.call('mod_wf_wf1_Filtering_server', 
-                                      list(paste0("mod_",name, "_nav"),
+            rv$tmp[[name]] <- do.call(as.character(paste0('mod_wf_wf1_', name, '_server')), 
+                                      list(id = as.character(paste0("mod_",name, "_nav")),
                                            dataIn = reactive({SendCurrentDataset(name)}),
                                            remoteReset = reactive({rv$timeline$rstBtn()})))
+            
           }
         }
         
@@ -288,24 +289,15 @@ mod_super_timeline_server <- function(id,
       ## screens of the module
       ##
       ############### SCREEN 1 ######################################
-      output$screen1 <- renderUI({
-        #tagList(
-         # tags$h3(paste0('Pipeline ', config$name))
-       # )
-        do.call('tagList', list(
-          do.call('h3', list(
-            paste0('Pipeline ', config$name)))
-        )
-       )
-      })
+      
       
       # This function creates the UI parts of the screens (dynamically set 
       # renderUIs). 
       BuildScreensUI <- function(){
         
-        FillScreen <- function(name, id){
+        FillScreen <- function(name){
         ll <- tagList(
-                div(id=ns(paste0('screen', id)),
+                div(id=ns(name),
                     h3(paste0('Pipeline ', config$name)),
                     do.call(paste0('mod_wf_wf1_', name, '_ui'),
                             list(ns(paste0('mod_',name, '_nav'))))
@@ -320,11 +312,20 @@ mod_super_timeline_server <- function(id,
         lapply(2:nbSteps(), 
                function(x){
                  name <- names(config$stepsNames)[x]
-                 output[[paste0('screen', x)]] <- renderUI(FillScreen(name, x))
+                 output[[name]] <- renderUI(FillScreen(name))
         })
         
         # Creates the renderUI for the Description screen
-      
+        output[[names(config$stepsNames)[1]]] <- renderUI({
+          #tagList(
+          # tags$h3(paste0('Pipeline ', config$name))
+          # )
+          do.call('tagList', list(
+            do.call('h3', list(
+              paste0('Pipeline ', config$name)))
+          )
+          )
+        })
       }
       
       ##########################################################

@@ -6,12 +6,12 @@ InitActions <- function(n){
   )
 }
 
-CreateScreens <- function(n){
+CreateScreens <- function(stepsNames){
   setNames(
-    lapply(1:n, 
+    lapply(1:length(stepsNames), 
            function(x){
-             do.call(uiOutput, list(outputId=ns(paste0("screen", x))))}),
-    paste0('screenStep', 1:n))
+             do.call(uiOutput, list(outputId=ns(stepsNames)[x]))}),
+    paste0('screen_', config$stepsNames))
 }
 
 nbSteps <- reactive({
@@ -40,8 +40,11 @@ GetMaxTrue <- function(bound = nbSteps()){
 CommonInitializeFunctions <- function(){
   rv$event_counter <- 0
   rv$screens <- InitActions(nbSteps())
-  config$screens <- CreateScreens(nbSteps())
-  config$stepsNames <- setNames(config$stepsNames,config$stepsNames)
+  config$stepsNames <- setNames(config$stepsNames, config$stepsNames)
   config$stepsNames[1] <- 'Description'
   config$isDone <- Init_isDone()
+  
+  # Must be placed after the initialisation of the 'config$stepsNames' variable
+  config$screens <- CreateScreens(names(config$stepsNames))
+  
 }
