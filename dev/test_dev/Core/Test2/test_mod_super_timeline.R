@@ -4,10 +4,12 @@ library(shinyjs)
 source(file.path('./Timelines', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('.', 'mod_super_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
+source(file.path('../../../../R', 'config.R'), local=TRUE)$value
 source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_Filtering.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_Normalization.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_Imputation.R'), local=TRUE)$value
+source(file.path('.', 'mod_wf_wf1_HypothesisTest.R'), local=TRUE)$value
 source(file.path('.', 'formal_funcs.R'), local=TRUE)$value
 
 
@@ -39,16 +41,14 @@ server <- function(input, output, session) {
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv <- reactiveValues(
-    current.obj = Exp1_R25_prot[1:10,,-1],
+    current.obj = Exp1_R25_prot[1:10, , -1],
     tmp = NULL
   )
   
   config <- reactiveValues(
     type = 'pipeline',
     process.name = 'Pipeline',
-    steps = setNames(lapply(c(T,F,F,F), 
-                            function(x){x}),
-                     c("Original", "Filtering", "Normalization", "Imputation"))
+    steps = append(list(Original = T), pipeline.defs$protein )
   )
   
   rv$tmp <- mod_super_timeline_server("super_nav", 

@@ -48,9 +48,10 @@ mod_wf_wf1_Filtering_server <- function(id,
       config <- reactiveValues(
         type = 'process',
         process.name = 'Filtering',
-        steps = setNames(lapply(c(T,T,F,T), 
-                                function(x){x}),
-                         c("Description", "Step1", "Step2", "Step3"))
+        steps = list(Description = T,
+                     Step1 = T,
+                     Step2 = F,
+                     Step3 = T)
       )
       
       
