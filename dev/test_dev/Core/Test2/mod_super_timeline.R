@@ -51,10 +51,6 @@ mod_super_timeline_server <- function(id,
         dataOut = NULL,
         sendPosition = 1,
         
-        # Used to create a different value for some variables in order to 
-        # trigger observeEvent functions
-        event_counter = 0,
-        
         # A vector of strings which are commands keywords to manipulate the timeline
         cmd = NULL,
         
@@ -98,17 +94,6 @@ mod_super_timeline_server <- function(id,
         })
       }
       
-      SendCmdToTimeline <- function(names){
-        append(as.list(names), list(rv$event_counter))
-        #paste0(name, '_', rv$event_counter)
-      }
-      
-      # Catches an clic on the next or previous button in the timeline
-      # and updates the event_counter
-      observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0)),{
-        # Add external events to counter
-        rv$event_counter <- rv$event_counter + rv$timeline$rstBtn()
-      })
       # ------------ END OF COMMON FUNCTIONS --------------------
       
       
@@ -116,14 +101,10 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(rv$timeline$rstBtn()!=0), {
         #print("---- MODULE SUPER_TIMELINE : reset activated")
         
-        # Add external events to counter
-        rv$event_counter <- rv$event_counter + rv$timeline$rstBtn()
-        
         rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
         config$isDone <- Init_isDone()
         
         rv$current.pos <- 1
-        rv$event_counter <- 0
         ResetScreens()
         
         # Update datasets logics
@@ -244,11 +225,9 @@ mod_super_timeline_server <- function(id,
 
 
       is.skipped <- function(name){
-        browser()
-        i <- GetMaxTrue()
         is.validated <- config$isDone[[name]]
         ind.name <- which(name == names(config$isDone))
-        !is.validated && ind.name < i
+        !is.validated && ind.name < GetMaxTrue()
       }
       
      

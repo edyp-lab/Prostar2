@@ -155,7 +155,7 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     # new event which will be triggered by observeEvent event if the value
     # is the same.
     observeEvent(req(cmd()), {
-      #print(paste0('------ MODULE TL : New event on actions()$toggleSteps : ', cmd()))
+      print(paste0('------ MODULE TL : New event on actions()$toggleSteps : ', cmd()))
       #browser()
       AnalyseCmd <- function(c) {
         #print(paste0('extracted cmd = ', c))

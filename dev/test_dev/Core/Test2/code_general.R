@@ -1,4 +1,9 @@
 # ------------ START OF COMMON FUNCTIONS --------------------
+SendCmdToTimeline <- function(names){
+  append(as.list(names), list(runif(1, min=0, max=1e5)))
+}
+
+
 InitActions <- function(n){
   setNames(lapply(1:n,
                   function(x){T}),

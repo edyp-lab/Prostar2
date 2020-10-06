@@ -75,10 +75,12 @@ mod_wf_wf1_Imputation_server <- function(id,
           InitializeModule()
         }
         is.validated <- config$isDone[[nbSteps()]]
-        if (is.validated || is.skipped())
+        if (is.validated || is.skipped()){
           rv$current.pos <- nbSteps()
-        
+          rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
+        }
       })
+
       
       
       

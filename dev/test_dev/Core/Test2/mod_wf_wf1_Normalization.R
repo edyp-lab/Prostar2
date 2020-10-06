@@ -75,10 +75,13 @@ mod_wf_wf1_Normalization_server <- function(id,
           InitializeModule()
         }
         is.validated <- config$isDone[[nbSteps()]]
-        if (is.validated || is.skipped())
+        if (is.validated || is.skipped()){
+          print('MODULE NORM : is.validated or is.skipped')
           rv$current.pos <- nbSteps()
-        
+          rv$cmd <- SendCmdToTimeline('DisableAllSteps') 
+        }
       })
+
       
       
       
