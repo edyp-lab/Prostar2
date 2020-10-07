@@ -39,6 +39,7 @@ mod_wf_wf1_Filtering_server <- function(id,
     function(input, output, session){
       ns <- session$ns
       
+      verbose = T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
@@ -66,19 +67,21 @@ mod_wf_wf1_Filtering_server <- function(id,
 
       
       # Main listener of the module which initialize it
-      observeEvent(dataIn(), ignoreNULL=F,{ 
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
         #print(' ------- MODULE _A_ : Initialization de rv$dataIn ------- ')
-        
+        #browser()
         if (is.null(rv$dataIn))
           {
-          #print(' ------- MODULE _A_ : Entering for the first time ------')
+          print(' ------- MODULE _A_ : Entering for the first time ------')
           InitializeModule()
-        }
-        is.validated <- config$isDone[[nbSteps()]]
-        if (is.validated || is.skipped()){
-          rv$current.pos <- nbSteps()
-          rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
-          }
+        } else{
+            print(' ------- MODULE _A_ : Check if skipped ------')
+            is.validated <- config$isDone[[nbSteps()]]
+            if (is.validated || is.skipped()){
+              rv$current.pos <- nbSteps()
+              rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
+            }
+         }
       })
       
       

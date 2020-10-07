@@ -1,6 +1,6 @@
 ---
 title: "Inside Prostar core"
-subtitle: "A developer's guidelines"
+subtitle: "A developer's guideline"
 author: "Samuel Wieczorek"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
@@ -29,62 +29,18 @@ BiocStyle::markdown()
 
 # Introduction
 
-This vignette aims to describe the core code of Prostar and is addressed to developers. It describes how
-Prostar works in terms of information system and how it is built.
-This document is written as a tutorial to be followed step-by-step in order to understand the different parts of the shiny app.
 
-Prostar is thought to be as much generic as possible. This has the great advantage to be easier for a developer to implement new process modules and new pipelines. The counterpart of this feature is that the code of the core part maybe be a bit complex to understand due to the heavy use of variables.
-This is why the nomenclature is extremely important when coding Prostar 
+# Introducing Prostar 2.0
 
-This is also another reason for that tutorial made step-by-step
+
+## A collection of modules
 
 
 
 
-# Generalities
-
-## Workflows
-
-* A process cannot appear more than once in a workflow
-
-# Data processing modules
+# Understanding the source code of workflows
 
 
-## Generalities
-
-A process module takes as parameter one dataset of 'n' items returns a dataset of n + 1 items. The return value of the process p is the last item of the dataset.
-A dataset cannot be run several times on its own result
-
-## Navigation module
-
-
-
-Navigation buttons ('previous' and 'next'):
-
-### Next button
-
-The 'next button is enabled if two conditions are valid at the same time:
-* if there is at least one more step forward,
-* if the user is on a mandatory step, this step must has been validated (Done)
-
-  
-
-### Previous button
-
-The 'prev' button needs two conditions being TRUE to be enabled:
-* if there is at least one more step backward,
-* if the process is not yet validated (otherwise, the user must use the 'undo' button)
-
-### Reset button
-
-The 'reset' button is only enabled while the user fill the UI and has not yet clicked on the 'validate' button. Its effects is to set all inputs of the process to their default value.
-
-
-  
-If the user goes backward on a previous step and validate this step, then  the following steps are automatically set to 'undone' and have to be rerun. This guarantees that the steps are always done in the same way. This feature must be implemented in each module source code. It cannot be coded in the navigation module (recursive loop on the listener of isDone vector)
-
-
-The undo button is enabled only if the user is on the last step and has validated it.The action is the same as reset but, in addition, we get back the previous dataset
 
 ## Initialization of a navigation module instance
 

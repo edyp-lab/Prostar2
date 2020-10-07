@@ -49,7 +49,6 @@ mod_super_timeline_server <- function(id,
         
         #dataIn = NULL,
         dataOut = NULL,
-        sendPosition = 1,
         
         # A vector of strings which are commands keywords to manipulate the timeline
         cmd = NULL,
@@ -127,10 +126,10 @@ mod_super_timeline_server <- function(id,
       # non-NULL dataset before current position
       SendCurrentDataset <- function(name){
         #browser()
-        data2send <- NULL
+        data2send <- NA
         
         # Returns NULL to all modules except the one pointed by the current position
-        if (names(config$isDone)[rv$current.pos] != name) return(NULL)
+        if (names(config$isDone)[rv$current.pos] == name){
         
         #print(paste0('--- MODULE SUPER TL, current.pos = ', rv$current.pos))
         if (config$isDone[[rv$current.pos]]){
@@ -139,21 +138,21 @@ mod_super_timeline_server <- function(id,
           # For that, it must be reseted
         } else {
           # The processus is not validated
-          if (GetMaxTrue() < rv$current.pos) {
+          if (GetMaxTrue(config$isDone, nbSteps()) < rv$current.pos) {
             # The current position is after the last validated process (the one
             # just after or further (there will be skipped processes))
             data2send <- rv$dataOut
           } else {
             # it is a skipped module
-            name <- names(config$isDone)[GetMaxTrue(bound = rv$current.pos-1)]
+            name <- names(config$isDone)[GetMaxTrue(tab = config$isDone, bound = rv$current.pos-1)]
             ind.name <- grep(name, names(rv$dataOut))
             data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
           }
 
         }
-        
+        }
       
-        #print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data2send)))
+        print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data2send)))
         
         return(data2send)
       }
@@ -201,7 +200,7 @@ mod_super_timeline_server <- function(id,
           config$isDone[[module_which_has_returned]] <- FALSE
          #browser() 
           # renvoyer le dernier dataset non NULL avant la position courante
-          name <- names(config$isDone)[ GetMaxTrue(rv$current.pos - 1)]
+          name <- names(config$isDone)[ GetMaxTrue(config$isDone, rv$current.pos - 1)]
           ind.name <- grep(name, names(rv$dataOut))
           rv$dataOut <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
           #rv$dataOut <- rv$dataOut[,,-c(rv$current.pos:length(rv$dataIn))]
@@ -227,7 +226,7 @@ mod_super_timeline_server <- function(id,
       is.skipped <- function(name){
         is.validated <- config$isDone[[name]]
         ind.name <- which(name == names(config$isDone))
-        !is.validated && ind.name < GetMaxTrue()
+        !is.validated && ind.name < GetMaxTrue(config$isDone, nbSteps())
       }
       
      
