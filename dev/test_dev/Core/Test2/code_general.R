@@ -35,12 +35,12 @@ InsertDescriptionUI <- function(){
 }
 
 
-Reset_Pipeline_Data_logics <- function(){
-  rv$dataOut <- dataIn()
-}
 
-GetMaxTrue <- function(bound = nbSteps()){
-  max(which(unlist(config$isDone)[1:bound]==T))
+
+GetMaxTrue <- function(tab = NULL, bound = NULL){
+  stopifnot(!is.null(tab))
+  stopifnot(!is.null(bound))
+  max(which(unlist(tab)[1:bound]==T))
 }
 
 # isDone is a static list of n elements (the number of steps)

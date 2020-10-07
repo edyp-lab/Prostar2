@@ -70,6 +70,9 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    source(file.path('.', 'code_general.R'), local=TRUE)$value
+    
+    
     output$showResetBtn <- renderUI({
       actionButton(ns("rstBtn"), paste0("Reset ", config$type),
                    class = redBtnClass,
@@ -220,11 +223,6 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
       HTML(txt)
     })
     
-    GetMaxTrue <- function(bound = length(config$isDone)){
-      max(which(unlist(config$isDone)[1:bound]==T))
-    }
-    
-    
     output$timeline2 <- renderUI({
       config
       status <- rep('', current$nbSteps)
@@ -236,10 +234,10 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
       status[which(unlist(config$isDone))] <- 'complete'
       
       #Compute the skipped steps
-      status[which(config$isDone==F)[which(which(config$isDone == FALSE ) < GetMaxTrue())]] <- 'skipped'
+      status[which(config$isDone==F)[which(which(config$isDone == FALSE ) < GetMaxTrue(config$isDone, current$nbSteps))]] <- 'skipped'
       
       
-      active  <- rep('', GetMaxTrue())
+      active  <- rep('', GetMaxTrue(config$isDone, current$nbSteps))
       active[current$val] <- 'active'
       
       steps <- names(config$steps)

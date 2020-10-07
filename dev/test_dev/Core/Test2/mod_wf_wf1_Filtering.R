@@ -66,36 +66,54 @@ mod_wf_wf1_Filtering_server <- function(id,
 
       
       # Main listener of the module which initialize it
+
       #observeEvent(dataIn(), ignoreNULL = T,{
-      observeEvent(req(dataIn()),{
-        #dataIn()
-        if(verbose)
-          print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
-        #isolate({
-        #browser()
-        if (is.null(names((dataIn()))) && !is.null(rv$dataIn))
-        {
-          if(verbose)
-            print(paste0(config$process.name, ' :  Search for skipped status'))
-          
-          #This case is when no new dataset has been sent to the module and it has nothing
-          # to do but repositioning the current position
-          # As there are some actions to do in this case, one delete the 'req()' command
-          # in the observeEvent
-          is.validated <- config$isDone[[nbSteps()]]
-          if (is.validated || is.skipped()){
-            rv$current.pos <- nbSteps()
-            rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
-          }
-          if(verbose)
-            print(paste0(config$process.name, ' : Just repositioning cursor'))
-          
-        } else if (!is.null(names(dataIn())) && is.null(rv$dataIn))
-          {
-          print(paste0(config$process.name, ' : Entering for the first time ------'))
-          InitializeModule()
-        }
+      # observeEvent(req(dataIn()),{
+      #   #dataIn()
+      #   if(verbose)
+      #     print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
+      #   #isolate({
+      #   #browser()
+      #   if (is.null(names((dataIn()))) && !is.null(rv$dataIn))
+      #   {
+      #     if(verbose)
+      #       print(paste0(config$process.name, ' :  Search for skipped status'))
+      #     
+      #     #This case is when no new dataset has been sent to the module and it has nothing
+      #     # to do but repositioning the current position
+      #     # As there are some actions to do in this case, one delete the 'req()' command
+      #     # in the observeEvent
+      #     is.validated <- config$isDone[[nbSteps()]]
+      #     if (is.validated || is.skipped()){
+      #       rv$current.pos <- nbSteps()
+      #       rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
+      #     }
+      #     if(verbose)
+      #       print(paste0(config$process.name, ' : Just repositioning cursor'))
+      #     
+      #   } else if (!is.null(names(dataIn())) && is.null(rv$dataIn))
+      #     {
+      #     print(paste0(config$process.name, ' : Entering for the first time ------'))
+      #     InitializeModule()
+      #   }
 #})
+
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+        #print(' ------- MODULE _A_ : Initialization de rv$dataIn ------- ')
+        #browser()
+        if (is.null(rv$dataIn))
+          {
+          print(' ------- MODULE _A_ : Entering for the first time ------')
+          InitializeModule()
+        } else{
+            print(' ------- MODULE _A_ : Check if skipped ------')
+            is.validated <- config$isDone[[nbSteps()]]
+            if (is.validated || is.skipped()){
+              rv$current.pos <- nbSteps()
+              rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
+            }
+         }
+
       })
       
       
@@ -116,7 +134,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         )
         
         #Catch a new position from timeline
-        observeEvent(req(rv$timeline$pos()), ignoreInit=T,{ 
+        observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
           if(verbose)
             print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
           rv$current.pos <- rv$timeline$pos() 

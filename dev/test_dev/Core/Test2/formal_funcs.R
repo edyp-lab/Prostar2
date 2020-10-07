@@ -1,3 +1,7 @@
+#' @description Removes the item called 'name' and all further items
+#' in the list
+#' 
+#' 
 RemoveItemFromDataset <- function(dataset, name){
   ind <- grep(name, names(dataset))
   if (length(ind) > 0)
@@ -6,6 +10,7 @@ RemoveItemFromDataset <- function(dataset, name){
     dataset
 }
 
+
 AddItemToDataset <- function(dataset, name){
 addAssay(dataset, 
          dataset[[length(dataset)]], 
@@ -13,10 +18,6 @@ addAssay(dataset,
 }
 
 
-# is.validated <- function(value){value == 'validated'}
-# is.notrun <- function(value){value == 'notrun'}
-# is.skipped  <- function(value){value == 'skipped'}
-# 
-# SetSkipped <-function(ll, name){ll[[name]] <- 'skipped'}
-# SetNotRun <-function(ll, name){ll[[name]] <- 'notrun'}
-# SetValidated <- function(ll, name){ll[[name]] <- 'validated'}
+Reset_Pipeline_Data_logics <- function(){
+  rv$dataOut <- dataIn()
+}
