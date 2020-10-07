@@ -99,23 +99,29 @@ mod_wf_wf1_Filtering_server <- function(id,
 #})
 
       observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
-        #print(' ------- MODULE _A_ : Initialization de rv$dataIn ------- ')
+        if(verbose)
+          print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
+        
         #browser()
-        if (is.null(rv$dataIn))
-          {
-          print(' ------- MODULE _A_ : Entering for the first time ------')
+        if (length(names(dataIn()))==0 && !is.null(rv$dataIn))
+        {
+          if(verbose)
+            print(paste0(config$process.name, ' :  Search for skipped status'))
+          is.validated <- config$isDone[[nbSteps()]]
+          if (is.validated || is.skipped()){
+            rv$current.pos <- nbSteps()
+            rv$cmd <- SendCmdToTimeline('DisableAllSteps') 
+            if(verbose)
+              print(paste0(config$process.name, ' : Just repositioning cursor'))
+          }
+          
+        } else if (length(names(dataIn())) != 0 && is.null(rv$dataIn)){
+          if(verbose)
+            print(paste0(config$process.name, ' : Entering for the first time ------'))
           InitializeModule()
-        } else{
-            print(' ------- MODULE _A_ : Check if skipped ------')
-            is.validated <- config$isDone[[nbSteps()]]
-            if (is.validated || is.skipped()){
-              rv$current.pos <- nbSteps()
-              rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
-            }
-         }
-
+        }
+        
       })
-      
       
       
       InitializeModule <- function(){

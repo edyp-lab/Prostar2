@@ -7,7 +7,6 @@ mod_wf_wf1_Imputation_ui <- function(id){
     mod_timeline_ui(ns("timeline")),
     hr(),
     wellPanel(
-      h3('Module _C_'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -31,14 +30,15 @@ mod_wf_wf1_Imputation_ui <- function(id){
 #' 
 #' 
 mod_wf_wf1_Imputation_server <- function(id, 
-                                        dataIn=NULL,
-                                        remoteReset=FALSE,
-                                        is.skipped = FALSE){
+                                            dataIn=NULL,
+                                            remoteReset=FALSE,
+                                            is.skipped = FALSE){
   moduleServer(
     id,
     function(input, output, session){
       ns <- session$ns
       
+      verbose = T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
@@ -53,8 +53,8 @@ mod_wf_wf1_Imputation_server <- function(id,
                      Step2 = F,
                      Step3 = T)
       )
-      #################################################################################
       
+      #################################################################################
       
       rv <- reactiveValues(
         current.pos = 1,
@@ -65,26 +65,69 @@ mod_wf_wf1_Imputation_server <- function(id,
       
       
       # Main listener of the module which initialize it
-      observeEvent(dataIn() , ignoreNULL=F,{ 
-        #print(' ------- MODULE _C_ : Initialisation de rv$dataIn ------- ')
-        
-        if (is.null(rv$dataIn))
+      
+      #observeEvent(dataIn(), ignoreNULL = T,{
+      # observeEvent(req(dataIn()),{
+      #   #dataIn()
+      #   if(verbose)
+      #     print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
+      #   #isolate({
+      #   #browser()
+      #   if (is.null(names((dataIn()))) && !is.null(rv$dataIn))
+      #   {
+      #     if(verbose)
+      #       print(paste0(config$process.name, ' :  Search for skipped status'))
+      #     
+      #     #This case is when no new dataset has been sent to the module and it has nothing
+      #     # to do but repositioning the current position
+      #     # As there are some actions to do in this case, one delete the 'req()' command
+      #     # in the observeEvent
+      #     is.validated <- config$isDone[[nbSteps()]]
+      #     if (is.validated || is.skipped()){
+      #       rv$current.pos <- nbSteps()
+      #       rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
+      #     }
+      #     if(verbose)
+      #       print(paste0(config$process.name, ' : Just repositioning cursor'))
+      #     
+      #   } else if (!is.null(names(dataIn())) && is.null(rv$dataIn))
+      #     {
+      #     print(paste0(config$process.name, ' : Entering for the first time ------'))
+      #     InitializeModule()
+      #   }
+      #})
+      
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+        if(verbose)
+               print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
+          
+         
+        if (length(names(dataIn()))==0 && !is.null(rv$dataIn))
         {
-          #print(' ------- MODULE _C_ : Entering for the first time ------')
+          if(verbose)
+            print(paste0(config$process.name, ' :  Search for skipped status'))
+          is.validated <- config$isDone[[nbSteps()]]
+          if (is.validated || is.skipped()){
+            rv$current.pos <- nbSteps()
+            rv$cmd <- SendCmdToTimeline('DisableAllSteps') 
+            if(verbose)
+              print(paste0(config$process.name, ' : Just repositioning cursor'))
+            
+          }
+
+        } else if (length(names(dataIn())) != 0 && is.null(rv$dataIn)){
+          if(verbose)
+            print(paste0(config$process.name, ' : Entering for the first time ------'))
           InitializeModule()
         }
-        is.validated <- config$isDone[[nbSteps()]]
-        if (is.validated || is.skipped()){
-          rv$current.pos <- nbSteps()
-          rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
-        }
+        
       })
-
       
       
       
       InitializeModule <- function(){
-        #print(' ------- MODULE _C_ : InitializeModule() ------- ')
+        if(verbose)
+          print(paste0(config$process.name, ' : InitializeModule() ------- '))
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
@@ -97,29 +140,27 @@ mod_wf_wf1_Imputation_server <- function(id,
                                            position = reactive({rv$current.pos})
         )
         
-        
-        # This listener appears only in modules that are called by another one.
-        # It allows the caller to force a new position
-        # observeEvent(forcePosition(),{
-        #   print(' ------- MODULE _C_ : observeEvent(forcePosition()) ------- ')
-        #   print(paste0('force position to : ', forcePosition()))
-        #   rv$current.pos <- forcePosition() })
-        
-        
-        
         #Catch a new position from timeline
-        observeEvent(req(rv$timeline$pos()),{ 
-          #print(' ------- MODULE _C_ : observeEvent(req(rv$timeline$pos()) ------- ')
-          rv$current.pos <- rv$timeline$pos() })
-
+        observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
+          if(verbose)
+            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
+          rv$current.pos <- rv$timeline$pos() 
+        })
+        
+        
+        
+        
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
-          #print("---- MODULE _C_ : reset activated ----------------")
-          #print(' ------- MODULE _C_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+          if(verbose)
+            print(paste0(config$process.name, ' : reset activated ----------------'))
+          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+          
           
           rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
           
           rv$current.pos <- 1
+          
           ResetScreens()
           
           Reset_Module_Data_logics()
@@ -132,13 +173,15 @@ mod_wf_wf1_Imputation_server <- function(id,
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
         observeEvent(config$isDone,  ignoreInit = T, {
-          #print(' ------- MODULE _C_ : A new step is validated ------- ')
-          #print(' ------- MODULE _C_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
-          
+          if(verbose)
+            print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
+          #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+          #print(paste0(unlist(config$isDone), collapse=' '))
           rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
         })
         
-
+        
+        
         # This function cannot be implemented in the timeline module because 
         # the id of the screens to reset are not known elsewhere.
         # Trying to reset the global 'div_screens' in the timeline module
@@ -148,9 +191,10 @@ mod_wf_wf1_Imputation_server <- function(id,
             shinyjs::reset(names(config$steps)[x])
           })
         }
-
+        
         Reset_Module_Data_logics <- function(){
-          # Update datasets logics
+          if(verbose)
+            print(paste0(config$process.name, '# Update datasets logics'))
           #browser()
           
           #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$process.name)
@@ -233,11 +277,6 @@ mod_wf_wf1_Imputation_server <- function(id,
       output$Step3 <- renderUI({
         name <- 'Step3'
         
-        
-        
-        
-        
-        
         tagList(
           div(id=ns(name),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
@@ -247,17 +286,12 @@ mod_wf_wf1_Imputation_server <- function(id,
           )
         )
         
-        
-        
-        
-        
       })
       
       
       Validate_Module_Data_logics <- function(){
         #rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
         rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
-        print(rv$dataOut)
       }
       
       

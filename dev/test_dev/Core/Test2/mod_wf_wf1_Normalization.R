@@ -7,7 +7,6 @@ mod_wf_wf1_Normalization_ui <- function(id){
     mod_timeline_ui(ns("timeline")),
     hr(),
     wellPanel(
-      h3('Module _B_'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -39,6 +38,7 @@ mod_wf_wf1_Normalization_server <- function(id,
     function(input, output, session){
       ns <- session$ns
       
+      verbose = T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
@@ -53,8 +53,8 @@ mod_wf_wf1_Normalization_server <- function(id,
                      Step2 = F,
                      Step3 = T)
       )
-      #################################################################################
       
+      #################################################################################
       
       rv <- reactiveValues(
         current.pos = 1,
@@ -65,27 +65,73 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       
       # Main listener of the module which initialize it
-      observeEvent(dataIn(), ignoreNULL=F,{ 
-        #print(' ------- MODULE _B_ : Initialisation de rv$dataIn ------- ')
+      
+      #observeEvent(dataIn(), ignoreNULL = T,{
+      # observeEvent(req(dataIn()),{
+      #   #dataIn()
+      #   if(verbose)
+      #     print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
+      #   #isolate({
+      #   #browser()
+      #   if (is.null(names((dataIn()))) && !is.null(rv$dataIn))
+      #   {
+      #     if(verbose)
+      #       print(paste0(config$process.name, ' :  Search for skipped status'))
+      #     
+      #     #This case is when no new dataset has been sent to the module and it has nothing
+      #     # to do but repositioning the current position
+      #     # As there are some actions to do in this case, one delete the 'req()' command
+      #     # in the observeEvent
+      #     is.validated <- config$isDone[[nbSteps()]]
+      #     if (is.validated || is.skipped()){
+      #       rv$current.pos <- nbSteps()
+      #       rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
+      #     }
+      #     if(verbose)
+      #       print(paste0(config$process.name, ' : Just repositioning cursor'))
+      #     
+      #   } else if (!is.null(names(dataIn())) && is.null(rv$dataIn))
+      #     {
+      #     print(paste0(config$process.name, ' : Entering for the first time ------'))
+      #     InitializeModule()
+      #   }
+      #})
+      
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+        if(verbose)
+          print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         
-        if (is.null(rv$dataIn))
+        #browser()
+        if (length(names(dataIn()))==0 && !is.null(rv$dataIn))
         {
-          #print(' ------- MODULE _B_ : Entering for the first time ------')
+          is.validated <- config$isDone[[nbSteps()]]
+          if(verbose)
+            print(paste0(config$process.name, ' :  Search for skipped status. Validated = ', is.validated, ', is.skipped = ', is.skipped()))
+          if (is.validated ){
+            rv$current.pos <- nbSteps()
+            rv$cmd <- SendCmdToTimeline('DisableAllSteps') 
+            if(verbose)
+              print(paste0(config$process.name, ' : Just repositioning cursor'))
+            
+          }
+          
+        } else if (length(names(dataIn())) != 0 && is.null(rv$dataIn)){
+          if(verbose)
+            print(paste0(config$process.name, ' : Entering for the first time ------'))
           InitializeModule()
         }
-        is.validated <- config$isDone[[nbSteps()]]
-        if (is.validated || is.skipped()){
-          print('MODULE NORM : is.validated or is.skipped')
-          rv$current.pos <- nbSteps()
-          rv$cmd <- SendCmdToTimeline('DisableAllSteps') 
-        }
+        
       })
-
       
-      
+      observeEvent(is.skipped(), ignoreNULL=T, {
+        if(verbose)
+          print(paste0(config$process.name, ' : is.skipped() detected :', is.skipped()))
+        
+      })
       
       InitializeModule <- function(){
-        #print(' ------- MODULE _B_ : InitializeModule() ------- ')
+        if(verbose)
+          print(paste0(config$process.name, ' : InitializeModule() ------- '))
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
@@ -98,33 +144,27 @@ mod_wf_wf1_Normalization_server <- function(id,
                                            position = reactive({rv$current.pos})
         )
         
-        
-        # This listener appears only in modules that are called by another one.
-        # It allows the caller to force a new position
-        # observeEvent(forcePosition(),{
-        #   print(' ------- MODULE _B_ : observeEvent(forcePosition()) ------- ')
-        #   print(paste0('force position to : ', forcePosition()))
-        #   rv$current.pos <- forcePosition() })
-        
-        
-        
         #Catch a new position from timeline
-        observeEvent(req(rv$timeline$pos()),{ 
-          #print(' ------- MODULE _B_ : observeEvent(req(rv$timeline$pos()) ------- ')
-          rv$current.pos <- rv$timeline$pos() })
+        observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
+          if(verbose)
+            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
+          rv$current.pos <- rv$timeline$pos() 
+        })
         
-
+        
+        
+        
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
-          #print("---- MODULE _B_ : reset activated ----------------")
-          #print(' ------- MODULE _B_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+          if(verbose)
+            print(paste0(config$process.name, ' : reset activated ----------------'))
+          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
-          # Add external events to counter
-          rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
           
           rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
           
           rv$current.pos <- 1
+          
           ResetScreens()
           
           Reset_Module_Data_logics()
@@ -137,11 +177,14 @@ mod_wf_wf1_Normalization_server <- function(id,
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
         observeEvent(config$isDone,  ignoreInit = T, {
-          #print(' ------- MODULE _B_ : A new step is validated ------- ')
-          #print(' ------- MODULE _B_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
-          
+          if(verbose)
+            print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
+          #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+          #print(paste0(unlist(config$isDone), collapse=' '))
           rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
         })
+        
+        
         
         # This function cannot be implemented in the timeline module because 
         # the id of the screens to reset are not known elsewhere.
@@ -153,9 +196,9 @@ mod_wf_wf1_Normalization_server <- function(id,
           })
         }
         
-
         Reset_Module_Data_logics <- function(){
-          # Update datasets logics
+          if(verbose)
+            print(paste0(config$process.name, '# Update datasets logics'))
           #browser()
           
           #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$process.name)
@@ -238,11 +281,6 @@ mod_wf_wf1_Normalization_server <- function(id,
       output$Step3 <- renderUI({
         name <- 'Step3'
         
-        
-        
-        
-        
-        
         tagList(
           div(id=ns(name),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
@@ -252,17 +290,12 @@ mod_wf_wf1_Normalization_server <- function(id,
           )
         )
         
-        
-        
-        
-        
       })
       
       
       Validate_Module_Data_logics <- function(){
         #rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
         rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
-        print(rv$dataOut)
       }
       
       
