@@ -130,8 +130,9 @@ mod_super_timeline_server <- function(id,
       # corresponds to the current position and one send always the last
       # non-NULL dataset before current position
       SendCurrentDataset <- function(name){
-        
-        #browser()
+        if(verbose)
+          print(paste0(config$process.name, ' : SendCurrentDataset()'))
+       # browser()
         data2send <- NA
         
         # Returns NULL to all modules except the one pointed by the current position
@@ -151,8 +152,8 @@ mod_super_timeline_server <- function(id,
             data2send <- rv$dataOut
           } else {
             # it is a skipped module
-            name <- names(config$isDone)[GetMaxTrue(tab = config$isDone, bound = rv$current.pos-1)]
-            ind.name <- grep(name, names(rv$dataOut))
+            previous.validated.name <- names(config$isDone)[GetMaxTrue(tab = config$isDone, bound = rv$current.pos-1)]
+            ind.name <- grep(previous.validated.name, names(rv$dataOut))
             data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
           }
 
@@ -160,13 +161,11 @@ mod_super_timeline_server <- function(id,
         }
         }
       
-
-        #print(paste0('MODULE TL : SendCurrentDataset from pos = ', rv$current.pos, ', name = ', name, ' = ', names(data2send)))
-        if(verbose){
-          if (is.null(data2send))
-            print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, ' => NA'))
+if(verbose){
+          if (length(names(data2send))==0)
+            print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, '(',rv$current.pos, ') => NA'))
           else
-            print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, ' => ', paste0(names(data2send), collapse=' ')))
+            print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, '(',rv$current.pos, ') => ', paste0(names(data2send), collapse=' ')))
         }
 
         return(data2send)
@@ -244,10 +243,13 @@ mod_super_timeline_server <- function(id,
       })
 
 
-      is.skipped <- function(name){
+      isSkipped <- function(name){
         is.validated <- config$isDone[[name]]
         ind.name <- which(name == names(config$isDone))
-        !is.validated && ind.name < GetMaxTrue(config$isDone, nbSteps())
+        is.skipped <- !is.validated && ind.name < GetMaxTrue(config$isDone, nbSteps())
+        if(verbose)
+          print(paste0(config$process.name, " : is.skipped(", name, ") = ", is.skipped))
+        return(is.skipped)
       }
       
      
@@ -263,7 +265,7 @@ mod_super_timeline_server <- function(id,
                                       list(id = as.character(paste0("mod_",name, "_nav")),
                                            dataIn = reactive({SendCurrentDataset(name)}),
                                            remoteReset = reactive({rv$timeline$rstBtn()}),
-                                           is.skipped = reactive({is.skipped(name)})))
+                                           isSkipped = reactive({isSkipped(name)})))
             
           }
         }

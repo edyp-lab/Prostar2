@@ -32,7 +32,7 @@ mod_wf_wf1_Normalization_ui <- function(id){
 mod_wf_wf1_Normalization_server <- function(id, 
                                         dataIn=NULL,
                                         remoteReset=FALSE,
-                                        is.skipped = FALSE){
+                                        isSkipped = FALSE){
   moduleServer(
     id,
     function(input, output, session){
@@ -61,77 +61,69 @@ mod_wf_wf1_Normalization_server <- function(id,
         timeline = NULL,
         dataIn = NULL,
         dataOut = NULL,
-        cmd = NULL)
+        cmd = NULL,
+        skipped = FALSE)
       
       
       # Main listener of the module which initialize it
+
       
-      #observeEvent(dataIn(), ignoreNULL = T,{
-      # observeEvent(req(dataIn()),{
-      #   #dataIn()
-      #   if(verbose)
-      #     print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
-      #   #isolate({
-      #   #browser()
-      #   if (is.null(names((dataIn()))) && !is.null(rv$dataIn))
-      #   {
-      #     if(verbose)
-      #       print(paste0(config$process.name, ' :  Search for skipped status'))
-      #     
-      #     #This case is when no new dataset has been sent to the module and it has nothing
-      #     # to do but repositioning the current position
-      #     # As there are some actions to do in this case, one delete the 'req()' command
-      #     # in the observeEvent
-      #     is.validated <- config$isDone[[nbSteps()]]
-      #     if (is.validated || is.skipped()){
-      #       rv$current.pos <- nbSteps()
-      #       rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps') 
-      #     }
-      #     if(verbose)
-      #       print(paste0(config$process.name, ' : Just repositioning cursor'))
-      #     
-      #   } else if (!is.null(names(dataIn())) && is.null(rv$dataIn))
-      #     {
-      #     print(paste0(config$process.name, ' : Entering for the first time ------'))
-      #     InitializeModule()
-      #   }
-      #})
+      observeEvent(isSkipped(), {
+        rv$skipped <- isSkipped()
+        rv$cmd <- SendCmdToTimeline(c('ResetActionBtns', 'DisableAllSteps'))
+      })
       
       observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         
-        #browser()
-        if (length(names(dataIn()))==0 && !is.null(rv$dataIn))
-        {
-          is.validated <- config$isDone[[nbSteps()]]
-          if(verbose)
-            print(paste0(config$process.name, ' :  Search for skipped status. Validated = ', is.validated, ', is.skipped = ', is.skipped()))
-          if (is.validated ){
-            rv$current.pos <- nbSteps()
-            rv$cmd <- SendCmdToTimeline('DisableAllSteps') 
-            if(verbose)
-              print(paste0(config$process.name, ' : Just repositioning cursor'))
-            
-          }
-          
-        } else if (length(names(dataIn())) != 0 && is.null(rv$dataIn)){
-          if(verbose)
-            print(paste0(config$process.name, ' : Entering for the first time ------'))
-          InitializeModule()
-        }
+       # browser()
+        inputExists <- length(names(dataIn())) > 0
+        tmpExists <- length(names(rv$dataIn)) > 0
         
+        if (inputExists && tmpExists){
+          # this case is either the module is skipped or validated
+          rv$current.pos <- nbSteps()
+          if(rv$skipped){
+            if(verbose)
+              print(paste0(config$process.name, ' : Skipped processe'))
+            rv$cmd <- SendCmdToTimeline(c( 'DisableAllSteps'))
+          }
+        }
+        else if (inputExists && !tmpExists){
+          # The current position is pointed on a new module
+          InitializeModule()
+          rv$cmd <- SendCmdToTimeline(c( 'DisableAllSteps'))
+          if(verbose)
+            print(paste0(config$process.name, ' : InitializeModule()'))
+        }
+        else if (!inputExists && tmpExists){
+          #The current position points to a validated module
+          rv$current.pos <- nbSteps()
+          if(verbose)
+            print(paste0(config$process.name, ' : Just repositioning cursor'))
+        }
+        else if (!inputExists && !tmpExists){
+          # Initialization of Prostar
+        }
+       
       })
       
-      observeEvent(is.skipped(), ignoreNULL=T, {
-        if(verbose)
-          print(paste0(config$process.name, ' : is.skipped() detected :', is.skipped()))
-        
-      })
+      
+      
+      # observeEvent(req(rv$skipped), {
+      #  
+      #   if(verbose)
+      #     print(paste0(config$process.name, ' : rv$skipped detected :', rv$skipped, '. Set rv$dataIn-> NULL'))
+      #   if (rv$skipped)
+      #     rv$dataIn <- NULL
+      # 
+      # })
       
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
+        
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
@@ -164,7 +156,7 @@ mod_wf_wf1_Normalization_server <- function(id,
           rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
           
           rv$current.pos <- 1
-          
+          rv$skipped <- FALSE
           ResetScreens()
           
           Reset_Module_Data_logics()

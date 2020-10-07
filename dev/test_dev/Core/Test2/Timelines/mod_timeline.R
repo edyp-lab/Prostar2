@@ -70,6 +70,7 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    verbose = T
     source(file.path('.', 'code_general.R'), local=TRUE)$value
     
     
@@ -141,6 +142,9 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     
     # Catch a new position or a change in the isDone list
     observeEvent(c(current$val, config$isDone), {
+      if(verbose)
+        print(paste0('TL(',config$process.name, ') : observeEvent(c(current$val, config$isDone, current$userToggleBtns : ', paste0(current$userToggleBtns, collapse=' ')))
+      
       shinyjs::toggleState('prevBtn', cond = PrevBtn_default_logics() && current$userToggleBtns$prv)
       shinyjs::toggleState('nextBtn', cond = NextBtn_default_logics() &&  current$userToggleBtns$nxt)
       
@@ -158,7 +162,8 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     # new event which will be triggered by observeEvent event if the value
     # is the same.
     observeEvent(req(cmd()), {
-      print(paste0(config$process.name, '( -- TL --) : New event on actions()$toggleSteps : ', paste0(cmd(), collapse=' ')))
+      if(verbose)
+        print(paste0('TL(',config$process.name, ') : New event on actions()$toggleSteps : ', paste0(cmd(), collapse=' ')))
       #browser()
       AnalyseCmd <- function(c) {
         #print(paste0('extracted cmd = ', c))
@@ -178,6 +183,9 @@ mod_timeline_server <- function(id, style=1, config, cmd='', position){
     })
     
     toggleState_Steps <- function(cond, i){
+      if(verbose)
+        print(paste0('TL(',config$process.name, ') : toggleState_Steps() : cond = ', cond, ', i = ', i))
+      
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     }
