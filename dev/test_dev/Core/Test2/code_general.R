@@ -53,7 +53,6 @@ Init_isDone <- function(){
 }
 
 CommonInitializeFunctions <- function(){
-  rv$event_counter <- 0
   rv$screens <- InitActions(nbSteps())
   
   #config$stepsNames <- setNames(config$stepsNames, config$stepsNames)

@@ -61,7 +61,6 @@ mod_wf_wf1_Imputation_server <- function(id,
         timeline = NULL,
         dataIn = NULL,
         dataOut = NULL,
-        event_counter = 0,
         cmd = NULL)
       
       
@@ -112,30 +111,15 @@ mod_wf_wf1_Imputation_server <- function(id,
         observeEvent(req(rv$timeline$pos()),{ 
           #print(' ------- MODULE _C_ : observeEvent(req(rv$timeline$pos()) ------- ')
           rv$current.pos <- rv$timeline$pos() })
-        
-        
-        # Catches an clic on the next or previous button in the timeline
-        # and updates the event_counter
-        observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0)),{
-          #print(' ------- MODULE _C_ : observeEvent(req(c(rv$timeline$nxtBtn()!=0, rv$timeline$prvBtn()!=0))) ------- ')
-          
-          # Add external events to counter
-          rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
-        })
-        
-        
+
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
           #print("---- MODULE _C_ : reset activated ----------------")
           #print(' ------- MODULE _C_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
-          # Add external events to counter
-          rv$event_counter <- rv$event_counter + rv$timeline$rstBtn() + remoteReset()
-          
           rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
           
           rv$current.pos <- 1
-          rv$event_counter <- 0
           ResetScreens()
           
           Reset_Module_Data_logics()
@@ -154,17 +138,7 @@ mod_wf_wf1_Imputation_server <- function(id,
           rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
         })
         
-        # This listener catches the changes in the local input but not
-        # those which come from caller or called modules
-        # It is not necessary in the pipeline module because the toggle state
-        # of process ui are managed by the process module itself.
-        observe({
-          reactiveValuesToList(input)
-          rv$event_counter <- sum(as.numeric(unlist(reactiveValuesToList(input))), na.rm=T)
-          #print(paste0('----MODULE _C_ : new event detected on reactiveValuesToList(input) : ', rv$event_counter))
-        })
-        
-        
+
         # This function cannot be implemented in the timeline module because 
         # the id of the screens to reset are not known elsewhere.
         # Trying to reset the global 'div_screens' in the timeline module
@@ -174,14 +148,7 @@ mod_wf_wf1_Imputation_server <- function(id,
             shinyjs::reset(names(config$steps)[x])
           })
         }
-        
-        
-        SendCmdToTimeline <- function(names){
-          append(as.list(names), list(rv$event_counter))
-          #paste0(name, '_', rv$event_counter)
-        }
-        
-        
+
         Reset_Module_Data_logics <- function(){
           # Update datasets logics
           #browser()
