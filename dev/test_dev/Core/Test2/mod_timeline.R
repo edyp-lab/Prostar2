@@ -109,7 +109,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       
       config$screens <- lapply(1:current$nbSteps,
                                function(x){
-                                 config$screens[[x]] <- if (x == current$val) 
+                                 config$screens[[x]] <- if (x == 1) 
                                    div(id = ns(paste0("div_screen", x)),  config$screens[[x]])
                                  else 
                                    shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  config$screens[[x]]))
@@ -130,17 +130,21 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     output$show_screens <- renderUI({tagList(config$screens)})
     
-    NextBtn_default_logics <- reactive({
+    NextBtn_logics <- reactive({
      
       end_of_tl <- current$val == current$nbSteps
       mandatory_step <- isTRUE(config$steps[[current$val]])
       validated <- config$isDone[[current$val]] == VALIDATED
-      !mandatory_step || validated
+      skipped <- config$isDone[[current$val]] == SKIPPED
+      entireProcessSkipped <- config$isDone[[current$nbSteps]] == SKIPPED
+      !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
     })
     
-    PrevBtn_default_logics <- reactive({
+    PrevBtn_logics <- reactive({
       start_of_tl <- current$val == 1
-      !start_of_tl
+      entireProcessSkipped <- config$isDone[[current$nbSteps]] == SKIPPED
+      
+      !start_of_tl && !entireProcessSkipped
     })
     
     # Catch a new position or a change in the isDone list
@@ -149,16 +153,27 @@ mod_timeline_server <- function(id, style=2, config, position){
         print(paste0('TL(',config$process.name, ') : observeEvent(c(current$val, config$isDone : '))
         print(paste0('TL(',config$process.name, ') : isDone = ', paste0(config$isDone, collapse=' ')))
       }
-      shinyjs::toggleState('prevBtn', cond = PrevBtn_default_logics())
-      shinyjs::toggleState('nextBtn', cond = NextBtn_default_logics())
       
-      
+      shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
+      shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
+      Update_Cursor_position()
       Analyse_isDone()
-      
-      
       # Display current page
       lapply(1:current$nbSteps, function(x){
-        shinyjs::toggle(paste0('div_screen', x), condition = x==current$val)})
+        shinyjs::toggle(paste0('div_screen', x), condition = x==current$val && config$isDone[[current$val]] != SKIPPED)})
+      
+      
+    })
+
+
+    Update_Cursor_position <- reactive({
+      if(verbose)
+        print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
+      n <- current$nbSteps
+      if ((config$isDone[[n]] == VALIDATED))
+        current$val <- current$nbSteps
+      else if (config$isDone[[n]] == SKIPPED)
+        current$val <- 1
     })
     
     is.equal <- function(ll1, ll2){
@@ -172,31 +187,34 @@ mod_timeline_server <- function(id, style=2, config, position){
     Analyse_isDone <- reactive({
       
       #browser()
+      SetSkippedStatus()
       initial_isDone <- setNames(lapply(1:current$nbSteps, 
                                         function(x){ if (x == 1) VALIDATED else UNDONE}), 
                                  names(config$steps))
       is.equal(config$isDone, initial_isDone)
+      
       if (is.equal(config$isDone,initial_isDone)){
         # This is the case at the initialization of a process or after a reset
-        
+        if(verbose)
+          print(paste0('TL(',config$process.name, ') : Analyse_isDone() : Init -> Enable all steps'))
+          
         # Enable all steps
-        toggleState_Steps(cond = T, i = current$nbSteps)
-      } 
-      
-      if (config$isDone[[length(config$isDone)]] == VALIDATED){
-        # Process validated, then Disable All Steps
-        toggleState_Steps(cond = F, i = current$nbSteps)
+        toggleState_Steps(cond = TRUE, i = current$nbSteps)
+      } else if (config$isDone[[length(current$nbSteps)]] == SKIPPED){
+        # The entire process is skipped
+        if(verbose)
+          print(paste0('TL(',config$process.name, ') : Analyse_isDone() : The entire process is skipped'))
+        # Disable all steps
+        toggleState_Steps(cond = FALSE, i = current$nbSteps)
+      } else {
+        # Disable all previous steps from each VALIDATED step
+        if(verbose)
+          print(paste0('TL(',config$process.name, ') : Analyse_isDone() : Disable all previous steps from each VALIDATED step'))
+        ind.max <- max(grep(VALIDATED, unlist(config$isDone)))
+        toggleState_Steps(cond = F, i = ind.max)
       }
       
-      #browser()
-      # Disable all previous steps from current position
-      ind.max <- max(grep(VALIDATED, unlist(config$isDone)))
-      toggleState_Steps(cond = F, i = ind.max)
-      
-      # Update value in isDone for all skipped steps
-      # Disabling screens for skipped steps
-      SetSkippedStatus()
-      toggleState_SkippedSteps()
+
     })
     
     
@@ -209,12 +227,15 @@ mod_timeline_server <- function(id, style=2, config, position){
       
     })
     
-    
-    toggleState_SkippedSteps <- function(){
-      lapply(1:current$nbSteps, function(x){
-        shinyjs::toggleState(paste0('div_screen', x), 
-                             condition = if(config$isDone[[x]] == SKIPPED) FALSE)})
-    }
+    # 
+    # toggleState_SkippedSteps <- function(){
+    #   if(verbose)
+    #     print(paste0('TL(',config$process.name, ') : toggleState_SkippedSteps() :', paste0(unlist(config$isDone), collapse=' ')))
+    #  # browser()
+    #   lapply(1:current$nbSteps, function(x){
+    #     shinyjs::toggleState(paste0('div_screen', x), 
+    #                          condition = if(config$isDone[[x]] == SKIPPED) FALSE else TRUE)})
+    # }
     
     
     toggleState_Steps <- function(cond, i){
@@ -224,6 +245,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
+      #browser()
     }
     
     # ResetActionsBtns <- function(){

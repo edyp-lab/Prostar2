@@ -53,7 +53,12 @@ GetMaxTrue <- function(tab = NULL, bound = NULL){
 # It indicates whether a step has been validated (TRUE) or not (FALSE)
 # It is updated by the return of module server
 Init_isDone <- function(){
-  setNames(lapply(1:nbSteps(), 
+  if(isSkipped())
+    setNames(lapply(1:nbSteps(), 
+                    function(x){SKIPPED}), 
+             names(config$steps))
+  else
+    setNames(lapply(1:nbSteps(), 
                   function(x){ if (x == 1) VALIDATED else UNDONE}), 
            names(config$steps))
 }

@@ -38,7 +38,7 @@ rv <- reactiveValues(
   mod_wf_wf1_Filtering_server(id = "mod_Filtering_nav", 
                                 dataIn = reactive({rv$current.obj}), 
                                 remoteReset = reactive({input$testclic}),
-                                isSkipped = reactive({input$testclic==4})
+                                isSkipped = reactive({input$testclic==1})
                                 )
   
   #observeEvent(rv$tmp$dataOut(),{rv$current.obj <- rv$tmp$dataOu()  })

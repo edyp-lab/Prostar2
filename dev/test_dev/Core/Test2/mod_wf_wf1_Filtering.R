@@ -65,27 +65,48 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       # Main listener of the module which initialize it
 
-
+      
+      observeEvent(isSkipped(), {
+        if(verbose)
+          print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
+        
+        rv$skipped <- isSkipped()
+        config$isDone <- setNames(lapply(1:nbSteps(), 
+                                         function(x){ SKIPPED}), 
+                                  names(config$steps))
+      })
+      
       observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         
-        #browser()
-        if (length(names(dataIn()))==0 && !is.null(rv$dataIn))
-        {
-          if(verbose)
-            print(paste0(config$process.name, ' :  Search for skipped status'))
-          is.validated <- config$isDone[[nbSteps()]]==VALIDATED
-          if (is.validated || is.skipped()){
-            rv$current.pos <- nbSteps()
+        # browser()
+        inputExists <- length(names(dataIn())) > 0
+        tmpExists <- length(names(rv$dataIn)) > 0
+        
+        if (inputExists && tmpExists){
+          # this case is either the module is skipped or validated
+          #rv$current.pos <- nbSteps()
+          if(rv$skipped){
             if(verbose)
-              print(paste0(config$process.name, ' : Just repositioning cursor'))
+              print(paste0(config$process.name, ' : Skipped processe'))
+            
           }
-          
-        } else if (length(names(dataIn())) != 0 && is.null(rv$dataIn)){
-          if(verbose)
-            print(paste0(config$process.name, ' : Entering for the first time ------'))
+        }
+        else if (inputExists && !tmpExists){
+          # The current position is pointed on a new module
           InitializeModule()
+          if(verbose)
+            print(paste0(config$process.name, ' : InitializeModule()'))
+        }
+        else if (!inputExists && tmpExists){
+          #The current position points to a validated module
+          rv$current.pos <- nbSteps()
+          if(verbose)
+            print(paste0(config$process.name, ' : Just repositioning cursor'))
+        }
+        else if (!inputExists && !tmpExists){
+          # Initialization of Prostar
         }
         
       })
@@ -144,13 +165,13 @@ mod_wf_wf1_Filtering_server <- function(id,
         
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
-        observeEvent(config$isDone,  ignoreInit = T, {
-          if(verbose)
-            print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
-          #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
-          #print(paste0(unlist(config$isDone), collapse=' '))
-          })
-        
+        # observeEvent(config$isDone,  ignoreInit = T, {
+        #   if(verbose)
+        #     print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
+        #   #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+        #   #print(paste0(unlist(config$isDone), collapse=' '))
+        #   })
+        # 
 
         
         # This function cannot be implemented in the timeline module because 
