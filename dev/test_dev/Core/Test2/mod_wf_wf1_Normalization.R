@@ -7,6 +7,7 @@ mod_wf_wf1_Normalization_ui <- function(id){
     mod_timeline_ui(ns("timeline")),
     hr(),
     wellPanel(
+      h3('Module _A_'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -42,8 +43,6 @@ mod_wf_wf1_Normalization_server <- function(id,
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
       
-      
-      
       #################################################################################
       config <- reactiveValues(
         type = 'process',
@@ -61,23 +60,31 @@ mod_wf_wf1_Normalization_server <- function(id,
         timeline = NULL,
         dataIn = NULL,
         dataOut = NULL,
-        cmd = NULL,
-        skipped = FALSE)
+        cmd = NULL)
       
       
       # Main listener of the module which initialize it
-
+      
       
       observeEvent(isSkipped(), {
+        if(verbose)
+          print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
+        
         rv$skipped <- isSkipped()
-        rv$cmd <- SendCmdToTimeline(c('ResetActionBtns', 'DisableAllSteps'))
+        if (isSkipped())
+          config$isDone <- setNames(lapply(1:nbSteps(), 
+                                           function(x){ if (x==1) VALIDATED else SKIPPED}), 
+                                    names(config$steps))
       })
       
-      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+      
+   
+      
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         
-       # browser()
+        # browser()
         inputExists <- length(names(dataIn())) > 0
         tmpExists <- length(names(rv$dataIn)) > 0
         
@@ -86,17 +93,13 @@ mod_wf_wf1_Normalization_server <- function(id,
           #rv$current.pos <- nbSteps()
           if(rv$skipped){
             if(verbose)
-              print(paste0(config$process.name, ' : Skipped processe'))
-            rv$cmd <- SendCmdToTimeline(c( 'DisableAllSteps', 'DisableAllPrevSteps'))
-            config$isDone <- setNames(lapply(1:nbSteps(), 
-                                             function(x){ T}), 
-                                      names(config$steps))
+              print(paste0(config$process.name, ' : Skipped process'))
+            
           }
         }
         else if (inputExists && !tmpExists){
           # The current position is pointed on a new module
           InitializeModule()
-          rv$cmd <- SendCmdToTimeline(c( 'DisableAllSteps'))
           if(verbose)
             print(paste0(config$process.name, ' : InitializeModule()'))
         }
@@ -109,24 +112,16 @@ mod_wf_wf1_Normalization_server <- function(id,
         else if (!inputExists && !tmpExists){
           # Initialization of Prostar
         }
-       
+        
       })
       
       
       
-      # observeEvent(req(rv$skipped), {
-      #  
-      #   if(verbose)
-      #     print(paste0(config$process.name, ' : rv$skipped detected :', rv$skipped, '. Set rv$dataIn-> NULL'))
-      #   if (rv$skipped)
-      #     rv$dataIn <- NULL
-      # 
-      # })
+      
       
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
-        
         rv$dataIn <- dataIn()
         rv$dataOut <- NULL
         
@@ -135,7 +130,6 @@ mod_wf_wf1_Normalization_server <- function(id,
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
                                            config = config, 
-                                           cmd = reactive({rv$cmd}),
                                            position = reactive({rv$current.pos})
         )
         
@@ -144,6 +138,9 @@ mod_wf_wf1_Normalization_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
           rv$current.pos <- rv$timeline$pos() 
+          if(verbose)
+            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ', paste0(config$isDone, collapse=' ') ))
+          
         })
         
         
@@ -155,11 +152,8 @@ mod_wf_wf1_Normalization_server <- function(id,
             print(paste0(config$process.name, ' : reset activated ----------------'))
           #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
-          
-          rv$cmd <- SendCmdToTimeline(c('EnableAllSteps', 'ResetActionBtns'))
-          
           rv$current.pos <- 1
-          rv$skipped <- FALSE
+          
           ResetScreens()
           
           Reset_Module_Data_logics()
@@ -171,14 +165,13 @@ mod_wf_wf1_Normalization_server <- function(id,
         
         # Catch a change in isDone (validation of a step)
         # Specific to the modules of process and do not appear in pipeline module
-        observeEvent(config$isDone,  ignoreInit = T, {
-          if(verbose)
-            print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
-          #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
-          #print(paste0(unlist(config$isDone), collapse=' '))
-          rv$cmd <- SendCmdToTimeline('DisableAllPrevSteps')
-        })
-        
+        # observeEvent(config$isDone,  ignoreInit = T, {
+        #   if(verbose)
+        #     print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
+        #   #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
+        #   #print(paste0(unlist(config$isDone), collapse=' '))
+        #   })
+        # 
         
         
         # This function cannot be implemented in the timeline module because 
@@ -214,7 +207,11 @@ mod_wf_wf1_Normalization_server <- function(id,
       ## screens of the module
       ##
       ############### SCREEN 1 ######################################
-      InsertDescriptionUI()
+      output$Description <- renderUI({
+        # mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+      })
+      # mod_insert_md_server(paste0(config$process.name, "_md"), 
+      #                      paste0('./md/',config$process.name, '.md'))
       
       ############### SCREEN 2 ######################################
       
@@ -241,7 +238,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       
       observeEvent(input$perform_Step1_btn, {
-        config$isDone[['Step1']] <- TRUE
+        config$isDone[['Step1']] <- VALIDATED
       })
       
       ############### SCREEN 3 ######################################
@@ -266,7 +263,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
-        config$isDone[['Step2']] <- TRUE
+        config$isDone[['Step2']] <- VALIDATED
       })
       
       
@@ -297,7 +294,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       observeEvent(input$validate_btn, {
         #browser()
         Validate_Module_Data_logics()
-        config$isDone[['Step3']] <- TRUE
+        config$isDone[['Step3']] <- VALIDATED
       })
       
       

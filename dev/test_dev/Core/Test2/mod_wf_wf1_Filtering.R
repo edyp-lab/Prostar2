@@ -65,15 +65,24 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       # Main listener of the module which initialize it
 
-      
+
       observeEvent(isSkipped(), {
         if(verbose)
           print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
         
         rv$skipped <- isSkipped()
-        config$isDone <- setNames(lapply(1:nbSteps(), 
-                                         function(x){ SKIPPED}), 
+        if (isSkipped())
+          config$isDone <- setNames(lapply(1:nbSteps(), 
+                                         function(x){ if (x==1) VALIDATED else SKIPPED}), 
                                   names(config$steps))
+      })
+      
+     
+      observe({
+        config$isDone
+        paste0(config$process.name, ' :  config$isDone = ', paste0(config$isDone, collapse=' '))
+        if (sum(unlist(config$isDone))==-4)
+          browser()
       })
       
       observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
@@ -89,7 +98,7 @@ mod_wf_wf1_Filtering_server <- function(id,
           #rv$current.pos <- nbSteps()
           if(rv$skipped){
             if(verbose)
-              print(paste0(config$process.name, ' : Skipped processe'))
+              print(paste0(config$process.name, ' : Skipped process'))
             
           }
         }
@@ -113,14 +122,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       
       
-      observeEvent(isSkipped(), ignoreNULL=T, {
-        if (isSkipped())
-          config$isDone <- setNames(lapply(1:nbSteps(), 
-                                           function(x){ SKIPPED}), 
-                                    names(config$steps))
-        
-      })
-      
+     
       
       InitializeModule <- function(){
         if(verbose)
@@ -141,6 +143,9 @@ mod_wf_wf1_Filtering_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
           rv$current.pos <- rv$timeline$pos() 
+          if(verbose)
+            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ', paste0(config$isDone, collapse=' ') ))
+          
           })
         
         

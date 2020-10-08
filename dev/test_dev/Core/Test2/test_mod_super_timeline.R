@@ -1,7 +1,7 @@
 library(shinyjs)
 
 
-source(file.path('./Timelines', 'mod_timeline.R'), local=TRUE)$value
+source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('.', 'mod_super_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../../../R', 'config.R'), local=TRUE)$value
@@ -14,7 +14,8 @@ source(file.path('.', 'formal_funcs.R'), local=TRUE)$value
 
 
 options(shiny.fullstacktrace = T)
-options(shiny.reactlog=TRUE) 
+options(shiny.reactlog=F) 
+
 
 ui <- fluidPage(
   tagList(

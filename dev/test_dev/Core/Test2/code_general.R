@@ -40,7 +40,7 @@ InsertDescriptionUI <- reactive({
 
 
 
-GetMaxTrue <- function(tab = NULL, bound = NULL){
+GetMaxValidated <- function(tab = NULL, bound = NULL){
   stopifnot(!is.null(tab))
   stopifnot(!is.null(bound))
   ind <- max(which(unlist(tab)[1:bound]==VALIDATED))
@@ -53,11 +53,11 @@ GetMaxTrue <- function(tab = NULL, bound = NULL){
 # It indicates whether a step has been validated (TRUE) or not (FALSE)
 # It is updated by the return of module server
 Init_isDone <- function(){
-  if(isSkipped())
-    setNames(lapply(1:nbSteps(), 
-                    function(x){SKIPPED}), 
-             names(config$steps))
-  else
+  # if(isSkipped())
+  #   setNames(lapply(1:nbSteps(), 
+  #                   function(x){SKIPPED}), 
+  #            names(config$steps))
+  # else
     setNames(lapply(1:nbSteps(), 
                   function(x){ if (x == 1) VALIDATED else UNDONE}), 
            names(config$steps))
