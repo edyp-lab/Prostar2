@@ -83,11 +83,14 @@ mod_wf_wf1_Normalization_server <- function(id,
         
         if (inputExists && tmpExists){
           # this case is either the module is skipped or validated
-          rv$current.pos <- nbSteps()
+          #rv$current.pos <- nbSteps()
           if(rv$skipped){
             if(verbose)
               print(paste0(config$process.name, ' : Skipped processe'))
-            rv$cmd <- SendCmdToTimeline(c( 'DisableAllSteps'))
+            rv$cmd <- SendCmdToTimeline(c( 'DisableAllSteps', 'DisableAllPrevSteps'))
+            config$isDone <- setNames(lapply(1:nbSteps(), 
+                                             function(x){ T}), 
+                                      names(config$steps))
           }
         }
         else if (inputExists && !tmpExists){

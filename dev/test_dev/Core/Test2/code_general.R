@@ -1,8 +1,11 @@
 # ------------ START OF COMMON FUNCTIONS --------------------
-SendCmdToTimeline <- function(names){
-  append(as.list(names), list(runif(1, min=0, max=1e5)))
-}
+# SendCmdToTimeline <- function(names){
+#   append(as.list(names), list(runif(1, min=0, max=1e5)))
+# }
 
+VALIDATED <- 1
+UNDONE <- 0
+SKIPPED <- -1
 
 InitActions <- function(n){
   setNames(lapply(1:n,
@@ -26,13 +29,13 @@ nbSteps <- reactive({
 
 
 
-InsertDescriptionUI <- function(){
+InsertDescriptionUI <- reactive({
   output[['Description']] <- renderUI({
     mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
   })
   mod_insert_md_server(paste0(config$process.name, "_md"), 
                        paste0('./md/',config$process.name, '.md'))
-}
+})
 
 
 
@@ -40,7 +43,10 @@ InsertDescriptionUI <- function(){
 GetMaxTrue <- function(tab = NULL, bound = NULL){
   stopifnot(!is.null(tab))
   stopifnot(!is.null(bound))
-  max(which(unlist(tab)[1:bound]==T))
+  ind <- max(which(unlist(tab)[1:bound]==VALIDATED))
+  if (is.infinite(ind))
+    ind <- NULL
+  ind
 }
 
 # isDone is a static list of n elements (the number of steps)
@@ -48,7 +54,7 @@ GetMaxTrue <- function(tab = NULL, bound = NULL){
 # It is updated by the return of module server
 Init_isDone <- function(){
   setNames(lapply(1:nbSteps(), 
-                  function(x){ x == 1}), 
+                  function(x){ if (x == 1) VALIDATED else UNDONE}), 
            names(config$steps))
 }
 
