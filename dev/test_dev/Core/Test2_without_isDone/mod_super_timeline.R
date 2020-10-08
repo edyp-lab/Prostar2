@@ -41,7 +41,6 @@ mod_super_timeline_server <- function(id,
       verbose <- T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
-      source(file.path('.', 'formal_funcs.R'), local=TRUE)$value
       
       rv <- reactiveValues(
         # Current position of the cursor in the timeline
@@ -82,7 +81,12 @@ mod_super_timeline_server <- function(id,
       
 
       
-     
+     # For a given step, this function looks if is it present in the object (list of datasets)
+     # to compute its status : UNDONE, VALIDATED or SKIPPED
+      GetStatus <- function(name){
+       
+       
+     }
 
       # This function cannot be implemented in the timeline module because 
       # the id of the screens to reset are not known elsewhere.
@@ -140,18 +144,16 @@ mod_super_timeline_server <- function(id,
           # is disabled and the user cannot validate it.
           # For that, it must be reseted
         } else {
-          # The process is not validated
+          # The processus is not validated
           if (GetMaxValidated(config$isDone, nbSteps()) < rv$current.pos) {
             # The current position is after the last validated process (the one
             # just after or further (there will be skipped processes))
             data2send <- rv$dataOut
           } else {
             # it is a skipped module
-            prev.name <- names(config$isDone)[GetMaxValidated(tab = config$isDone, bound = rv$current.pos-1)]
-            ind.name <- grep(prev.name, names(rv$dataOut))
-            rv$dataOut <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
-            
-            #rv$dataOut <- Remove_Last_Item_From_Current_Pos()
+            previous.validated.name <- names(config$isDone)[GetMaxValidated(tab = config$isDone, bound = rv$current.pos-1)]
+            ind.name <- grep(previous.validated.name, names(rv$dataOut))
+            data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
           }
 
 
@@ -159,7 +161,7 @@ mod_super_timeline_server <- function(id,
           
         }
       
-      if(verbose){
+if(verbose){
           if (length(names(data2send))==0)
             print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, '(',rv$current.pos, ') => NA'))
           else
@@ -174,11 +176,6 @@ mod_super_timeline_server <- function(id,
         return(data2send)
       }
       
-      
-      
-      
-      
-      
       #Catch a new position from timeline
       observeEvent(req(rv$timeline$pos()),{
         if(verbose)
@@ -189,15 +186,6 @@ mod_super_timeline_server <- function(id,
 ### End of part for managing the timeline
       
 
-      
-      Remove_Last_Item_From_Current_Pos <- reactive({
-        name <- names(config$isDone)[GetMaxValidated(tab = config$isDone, bound = rv$current.pos-1)]
-        ind.name <- grep(name, names(rv$dataOut))
-        data <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
-        
-        data
-      })
-      
       # Catch the return value of a module and update the list of isDone modules
       # This list is updated with the names of datasets present in the rv$tmp
       # variable. One set to TRUE all the elements in isDone which have a corresponding
@@ -231,23 +219,19 @@ mod_super_timeline_server <- function(id,
                                                )
                                         )
        
+        #module_which_returned <- names(which(lapply(reactiveValuesToList(rv$tmp), 
+        #                                            function(x){!is.null(x())}) == T))
         
         if (is.null(rv$tmp[[module_which_has_returned]]())){
           # The corresponding module has been reseted
-          
+          config$isDone[[module_which_has_returned]] <- UNDONE
+         #browser() 
           # renvoyer le dernier dataset non NULL avant la position courante
-           #rv$dataOut <- Remove_Last_Item_From_Current_Pos()
-           prev.name <- names(config$isDone)[GetMaxValidated(tab = config$isDone, bound = rv$current.pos-1)]
-           ind.name <- grep(prev.name, names(rv$dataOut))
-           rv$dataOut <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
-           
-           # One must reset all further steps. If not, the current step will be
-           # considered as skipped
-          # browser()
-           i <- grep(module_which_has_returned, names(config$isDone))
-           config$isDone[c(i:nbSteps())] <- UNDONE
-           
-
+          name <- names(config$isDone)[ GetMaxValidated(config$isDone, rv$current.pos - 1)]
+          ind.name <- grep(name, names(rv$dataOut))
+          rv$dataOut <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
+          #rv$dataOut <- rv$dataOut[,,-c(rv$current.pos:length(rv$dataIn))]
+          #rv$dataIn <- rv$dataIn[,,-c(rv$current.pos:length(rv$dataIn))]
         } else {
           # This means that the corresponding module has return a value
           # It has been validated
@@ -258,6 +242,7 @@ mod_super_timeline_server <- function(id,
           # Check if the current position is on the last step
           if (ind < nbSteps())
             config$isDone[(1+ind):nbSteps()] <- UNDONE
+          #rv$dataIn <- rv$tmp[[module_which_returned]]()
           
           rv$dataOut <- rv$tmp[[module_which_has_returned]]()
         }
@@ -271,6 +256,7 @@ mod_super_timeline_server <- function(id,
 
 
       isSkipped <- function(name){
+        #browser()
         is.validated <- config$isDone[[name]] == VALIDATED
         ind.name <- which(name == names(config$isDone))
         is.skipped <- !is.validated && ind.name < GetMaxValidated(config$isDone, nbSteps())
@@ -300,7 +286,10 @@ mod_super_timeline_server <- function(id,
         lapply(1:nbSteps(), function(x){BuildServer(names(config$steps)[x])})
          }
       
-
+      
+      
+      
+      
       #####################################################################
       ## screens of the module
       ##

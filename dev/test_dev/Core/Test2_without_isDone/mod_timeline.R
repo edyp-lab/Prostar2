@@ -162,11 +162,11 @@ mod_timeline_server <- function(id, style=2, config, position){
       
       shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
       shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
+      Update_Cursor_position()
       
-      if (config$type == 'process'){
-        Update_Cursor_position()
+      if (config$type == 'process')
         Analyse_isDone_Process()
-      } else if (config$type == 'pipeline')
+      else if (config$type == 'pipeline')
         Analyse_isDone_Pipeline()
       
       # Display current page
@@ -253,7 +253,7 @@ mod_timeline_server <- function(id, style=2, config, position){
     SetSkippedStatus <- reactive({
       if(verbose)
         print(paste0('TL(',config$process.name, ') : SetSkippedStatus()'))
-     # browser()
+      
       if (!is.equal(config$isDone, setNames(lapply(1:nbSteps(),
                                                   function(x){ SKIPPED}),
                                            names(config$steps))))
@@ -317,7 +317,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       
       config
       status <- rep('', current$nbSteps)
-  
+      #browser()
       if( !is.null(config$steps))
         status[which(unlist(config$steps))] <- 'mandatory'
       

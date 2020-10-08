@@ -1,6 +1,6 @@
 
 
-mod_wf_wf1_Normalization_ui <- function(id){
+mod_wf_wf1_HypothesisTest_ui <- function(id){
   ns <- NS(id)
   tagList(
     useShinyjs(),
@@ -30,7 +30,7 @@ mod_wf_wf1_Normalization_ui <- function(id){
 #'
 #' 
 #' 
-mod_wf_wf1_Normalization_server <- function(id, 
+mod_wf_wf1_HypothesisTest_server <- function(id, 
                                         dataIn=NULL,
                                         remoteReset=FALSE,
                                         isSkipped = FALSE){
@@ -46,7 +46,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       #################################################################################
       config <- reactiveValues(
         type = 'process',
-        process.name = 'Normalization',
+        process.name = 'HypothesisTest',
         steps = list(Description = T,
                      Step1 = T,
                      Step2 = F,
@@ -73,14 +73,19 @@ mod_wf_wf1_Normalization_server <- function(id,
         rv$skipped <- isSkipped()
         if (isSkipped())
           config$isDone <- setNames(lapply(1:nbSteps(), 
-                                           function(x){ if (x==1) VALIDATED else SKIPPED}), 
+                                           function(x){ if (x==1) VALIDATED else SKIPPED}),
                                     names(config$steps))
       })
       
       
-   
+      observe({
+        config$isDone
+        paste0(config$process.name, ' :  config$isDone = ', paste0(config$isDone, collapse=' '))
+        if (sum(unlist(config$isDone))==-4)
+          browser()
+      })
       
-      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         

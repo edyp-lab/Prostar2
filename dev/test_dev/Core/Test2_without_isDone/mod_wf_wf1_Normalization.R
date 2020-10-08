@@ -80,7 +80,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       
    
       
-      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         
