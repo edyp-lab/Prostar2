@@ -83,6 +83,43 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
+    #-------------------------------------------------------
+    # Return the UI for a modal dialog with data selection input. If 'failed' is
+    # TRUE, then display a message that the previous value was invalid.
+    dataModal <- function() {
+     
+
+      if(config$type == "pipeline")
+       txt <- 'This action will reset the entire pipeline and delete all the datasets.'
+     else if (config$type == "process")
+       txt <- paste0("This action will reset this process. The input dataset will be the output of the previous
+                     validated process and all further datasets will be removed")
+       
+       modalDialog(
+        span(txt),
+        
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(ns("modal_ok"), "OK")
+        )
+      )
+    }
+    
+    
+    # Show modal when button reset is clicked
+    observeEvent(input$rstBtn, {
+      showModal(dataModal())
+    })
+    
+    # When OK button is pressed, update the reactive value which will be sent
+    # to the caller
+    observeEvent(input$modal_ok, {
+      current$reset_OK <- input$rstBtn
+      removeModal()
+    })
+    
+    #----------------------------------------------------------
+    
     
     observe({
       config$isDone
@@ -95,7 +132,8 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     current <- reactiveValues(
       val = 1,
-      nbSteps = NULL
+      nbSteps = NULL,
+      reset_OK = FALSE
     )
     
     observeEvent(req(config),{
@@ -378,7 +416,7 @@ mod_timeline_server <- function(id, style=2, config, position){
     
 
     
-    list(rstBtn = reactive(input$rstBtn),
+    list(rstBtn = reactive(current$reset_OK),
          prvBtn = reactive(input$prevBtn),
          nxtBtn = reactive(input$nextBtn),
          pos = reactive(current$val)
