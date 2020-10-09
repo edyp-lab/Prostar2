@@ -59,8 +59,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         current.pos = 1,
         timeline = NULL,
         dataIn = NULL,
-        dataOut = NULL,
-        cmd = NULL)
+        dataOut = NULL)
 
       
       # Main listener of the module which initialize it
@@ -185,10 +184,7 @@ mod_wf_wf1_Filtering_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, '# Update datasets logics'))
           #browser()
-          
-          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$process.name)
-          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$process.name)
-          rv$dataOut <- NULL
+          rv$dataOut <- dataIn()
           config$isDone <- Init_isDone()
         }
         

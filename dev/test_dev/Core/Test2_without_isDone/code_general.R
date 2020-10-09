@@ -4,6 +4,7 @@
 VALIDATED <- 1
 UNDONE <- 0
 SKIPPED <- -1
+RESETED <- 2
 
 InitActions <- function(n){
   setNames(lapply(1:n,
@@ -42,6 +43,7 @@ InsertDescriptionUI <- reactive({
 GetMaxValidated <- function(tab = NULL, bound = NULL){
   stopifnot(!is.null(tab))
   stopifnot(!is.null(bound))
+  browser()
   ind <- max(which(unlist(tab)[1:bound]==VALIDATED))
   if (is.infinite(ind))
     # There is no Validated step in the tab
@@ -54,7 +56,7 @@ GetMaxValidated <- function(tab = NULL, bound = NULL){
 #' It is updated by the return of module server
 Init_isDone <- function(){
  setNames(lapply(1:nbSteps(), 
-                  function(x){ if (x == 1) VALIDATED else UNDONE}), 
+                  function(x){UNDONE}), 
            names(config$steps))
 }
 
