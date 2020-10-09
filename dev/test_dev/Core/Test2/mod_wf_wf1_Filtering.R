@@ -59,8 +59,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         current.pos = 1,
         timeline = NULL,
         dataIn = NULL,
-        dataOut = NULL,
-        cmd = NULL)
+        dataOut = NULL)
 
       
       # Main listener of the module which initialize it
@@ -128,9 +127,7 @@ mod_wf_wf1_Filtering_server <- function(id,
 
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
-                                           config = config, 
-                                           position = reactive({rv$current.pos})
-        )
+                                           config = config)
         
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 

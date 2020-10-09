@@ -51,9 +51,15 @@ mod_timeline_ui <- function(id){
 
 #' @rdname mod_navigation
 #' 
-#' @param style xxx
+#' @param id the id to connect the ui and server parts of the module
 #' 
-#' @param config xxxx
+#' @param style An integer which codes for the style of timeline
+#' 
+#' @param config A list of xx elements to configure and update the timeline:
+#'   * type: 
+#'   * process.name:
+#'   * position An integer which specify the position to which to go. This is
+#'   used by the caller to force the 
 #' 
 #' @param  btns xxx
 #' 
@@ -65,7 +71,7 @@ mod_timeline_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_timeline_server <- function(id, style=2, config, position){
+mod_timeline_server <- function(id, style=2, config){
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -120,19 +126,15 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     #----------------------------------------------------------
     
-    
-    observe({
-      config$isDone
-      if (verbose)
-        print(paste0('TL(',config$process.name, ', ' ,paste0(config$isDone, collapse=' ')))
-    })
-    
-    observeEvent(position(),{current$val <- position()})
+    # Update current position with the value received by the caller module
+    #observeEvent(position(),{current$val <- position()})
     
     
     current <- reactiveValues(
       val = 1,
       nbSteps = NULL,
+      
+      # Transit variable to manage the clics on the reset button
       reset_OK = FALSE
     )
     
@@ -144,7 +146,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       InitScreens()
     })
     
-    # Initialization of the screens with integrating them into a div specific
+    # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
     InitScreens <- reactive({
@@ -174,8 +176,8 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     output$show_screens <- renderUI({tagList(config$screens)})
     
+    # Builds the condition to enable/disable the next button
     NextBtn_logics <- reactive({
-     
       end_of_tl <- current$val == current$nbSteps
       mandatory_step <- isTRUE(config$steps[[current$val]])
       validated <- config$isDone[[current$val]] == VALIDATED
@@ -184,6 +186,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
     })
     
+    # Builds the condition to enable/disable the 'Previous' button
     PrevBtn_logics <- reactive({
       start_of_tl <- current$val == 1
       entireProcessSkipped <- config$isDone[[current$nbSteps]] == SKIPPED
@@ -295,7 +298,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       if (!is.equal(config$isDone, setNames(lapply(1:nbSteps(),
                                                   function(x){ SKIPPED}),
                                            names(config$steps))))
-      config$isDone[which(config$isDone==UNDONE)[which(which(config$isDone == UNDONE ) < GetMaxTrue(config$isDone, current$nbSteps))]] <- SKIPPED
+      config$isDone[which(config$isDone==UNDONE)[which(which(config$isDone == UNDONE ) < GetMaxValidated(config$isDone, current$nbSteps))]] <- SKIPPED
       else
         print(paste0('TL(',config$process.name, ') : Process entire skipped !!!!!'))
     })

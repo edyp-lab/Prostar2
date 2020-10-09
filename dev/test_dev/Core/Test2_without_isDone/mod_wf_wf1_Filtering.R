@@ -78,18 +78,12 @@ mod_wf_wf1_Filtering_server <- function(id,
       })
       
      
-      observe({
-        config$isDone
-        paste0(config$process.name, ' :  config$isDone = ', paste0(config$isDone, collapse=' '))
-        if (sum(unlist(config$isDone))==-4)
-          browser()
-      })
-      
-      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
+
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         
-        # browser()
+         #browser()
         inputExists <- length(names(dataIn())) > 0
         tmpExists <- length(names(rv$dataIn)) > 0
         
@@ -134,9 +128,7 @@ mod_wf_wf1_Filtering_server <- function(id,
 
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
-                                           config = config, 
-                                           position = reactive({rv$current.pos})
-        )
+                                           config = config)
         
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 

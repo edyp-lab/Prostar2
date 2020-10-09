@@ -77,15 +77,9 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
                                     names(config$steps))
       })
       
+
       
-      observe({
-        config$isDone
-        paste0(config$process.name, ' :  config$isDone = ', paste0(config$isDone, collapse=' '))
-        if (sum(unlist(config$isDone))==-4)
-          browser()
-      })
-      
-      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = F, { 
+      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
         if(verbose)
           print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
         

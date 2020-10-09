@@ -51,9 +51,15 @@ mod_timeline_ui <- function(id){
 
 #' @rdname mod_navigation
 #' 
-#' @param style xxx
+#' @param id the id to connect the ui and server parts of the module
 #' 
-#' @param config xxxx
+#' @param style An integer which codes for the style of timeline
+#' 
+#' @param config A list of xx elements to configure and update the timeline:
+#'   * type: 
+#'   * process.name:
+#'   * position An integer which specify the position to which to go. This is
+#'   used by the caller to force the 
 #' 
 #' @param  btns xxx
 #' 
@@ -65,7 +71,7 @@ mod_timeline_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_timeline_server <- function(id, style=2, config, position){
+mod_timeline_server <- function(id, style=2, config){
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -83,19 +89,53 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
     
+    #-------------------------------------------------------
+    # Return the UI for a modal dialog with data selection input. If 'failed' is
+    # TRUE, then display a message that the previous value was invalid.
+    dataModal <- function() {
+     
+
+      if(config$type == "pipeline")
+       txt <- 'This action will reset the entire pipeline and delete all the datasets.'
+     else if (config$type == "process")
+       txt <- paste0("This action will reset this process. The input dataset will be the output of the previous
+                     validated process and all further datasets will be removed")
+       
+       modalDialog(
+        span(txt),
+        
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(ns("modal_ok"), "OK")
+        )
+      )
+    }
     
-    observe({
-      config$isDone
-      if (verbose)
-        print(paste0('TL(',config$process.name, ', ' ,paste0(config$isDone, collapse=' ')))
+    
+    # Show modal when button reset is clicked
+    observeEvent(input$rstBtn, {
+      showModal(dataModal())
     })
     
-    observeEvent(position(),{current$val <- position()})
+    # When OK button is pressed, update the reactive value which will be sent
+    # to the caller
+    observeEvent(input$modal_ok, {
+      current$reset_OK <- input$rstBtn
+      removeModal()
+    })
+    
+    #----------------------------------------------------------
+    
+    # Update current position with the value received by the caller module
+    #observeEvent(position(),{current$val <- position()})
     
     
     current <- reactiveValues(
       val = 1,
-      nbSteps = NULL
+      nbSteps = NULL,
+      
+      # Transit variable to manage the clics on the reset button
+      reset_OK = FALSE
     )
     
     observeEvent(req(config),{
@@ -106,7 +146,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       InitScreens()
     })
     
-    # Initialization of the screens with integrating them into a div specific
+    # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
     InitScreens <- reactive({
@@ -136,8 +176,8 @@ mod_timeline_server <- function(id, style=2, config, position){
     
     output$show_screens <- renderUI({tagList(config$screens)})
     
+    # Builds the condition to enable/disable the next button
     NextBtn_logics <- reactive({
-     
       end_of_tl <- current$val == current$nbSteps
       mandatory_step <- isTRUE(config$steps[[current$val]])
       validated <- config$isDone[[current$val]] == VALIDATED
@@ -146,6 +186,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
     })
     
+    # Builds the condition to enable/disable the 'Previous' button
     PrevBtn_logics <- reactive({
       start_of_tl <- current$val == 1
       entireProcessSkipped <- config$isDone[[current$nbSteps]] == SKIPPED
@@ -162,11 +203,11 @@ mod_timeline_server <- function(id, style=2, config, position){
       
       shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
       shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
-      Update_Cursor_position()
       
-      if (config$type == 'process')
+      if (config$type == 'process'){
+        Update_Cursor_position()
         Analyse_isDone_Process()
-      else if (config$type == 'pipeline')
+      } else if (config$type == 'pipeline')
         Analyse_isDone_Pipeline()
       
       # Display current page
@@ -253,11 +294,11 @@ mod_timeline_server <- function(id, style=2, config, position){
     SetSkippedStatus <- reactive({
       if(verbose)
         print(paste0('TL(',config$process.name, ') : SetSkippedStatus()'))
-      
+     # browser()
       if (!is.equal(config$isDone, setNames(lapply(1:nbSteps(),
                                                   function(x){ SKIPPED}),
                                            names(config$steps))))
-      config$isDone[which(config$isDone==UNDONE)[which(which(config$isDone == UNDONE ) < GetMaxTrue(config$isDone, current$nbSteps))]] <- SKIPPED
+      config$isDone[which(config$isDone==UNDONE)[which(which(config$isDone == UNDONE ) < GetMaxValidated(config$isDone, current$nbSteps))]] <- SKIPPED
       else
         print(paste0('TL(',config$process.name, ') : Process entire skipped !!!!!'))
     })
@@ -317,7 +358,7 @@ mod_timeline_server <- function(id, style=2, config, position){
       
       config
       status <- rep('', current$nbSteps)
-      #browser()
+  
       if( !is.null(config$steps))
         status[which(unlist(config$steps))] <- 'mandatory'
       
@@ -378,7 +419,7 @@ mod_timeline_server <- function(id, style=2, config, position){
     
 
     
-    list(rstBtn = reactive(input$rstBtn),
+    list(rstBtn = reactive(current$reset_OK),
          prvBtn = reactive(input$prevBtn),
          nxtBtn = reactive(input$nextBtn),
          pos = reactive(current$val)

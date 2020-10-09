@@ -52,6 +52,9 @@ mod_super_timeline_server <- function(id,
         #dataIn = NULL,
         dataOut = NULL,
         
+        # A vector of strings which are commands keywords to manipulate the timeline
+        cmd = NULL,
+        
         # Variable to store the results of process modules
         tmp = reactiveValues()
       )
@@ -68,25 +71,21 @@ mod_super_timeline_server <- function(id,
         #rv$dataIn <- dataIn()
         rv$dataOut <- dataIn()
         
-        CommonInitializeFunctions()
+        rv$screens <- InitActions(nbSteps())
+        
+        # Must be placed after the initialisation of the 'config$stepsNames' variable
+        config$screens <- CreateScreens(names(config$steps))
         
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
-                                   config = config, 
-                                   position = reactive({rv$current.pos})
-                                  )
+                                   config = config)
         BuildScreensUI()
         Launch_Module_Server()
         })
       
 
       
-     # For a given step, this function looks if is it present in the object (list of datasets)
-     # to compute its status : UNDONE, VALIDATED or SKIPPED
-      GetStatus <- function(name){
-       
-       
-     }
+     
 
       # This function cannot be implemented in the timeline module because 
       # the id of the screens to reset are not known elsewhere.
@@ -105,8 +104,11 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(rv$timeline$rstBtn()!=0), {
         if(verbose)
           print(paste0(config$process.name, " : reset activated"))
-
+        
         config$isDone <- Init_isDone()
+        
+        rv$current.pos <- 1
+        ResetScreens()
         
         # Update datasets logics
         Reset_Pipeline_Data_logics()
@@ -127,10 +129,8 @@ mod_super_timeline_server <- function(id,
       # corresponds to the current position and one send always the last
       # non-NULL dataset before current position
       SendCurrentDataset <- function(name){
-        if(verbose){
-          print(paste0(config$process.name, ' : SendCurrentDataset() begin'))
-          print(paste0(config$process.name, ' : isDone = ', paste0(config$isDone, collapse=' ')))
-        }
+        if(verbose)
+          print(paste0(config$process.name, ' : SendCurrentDataset()'))
        # browser()
         data2send <- NA
         
@@ -139,7 +139,7 @@ mod_super_timeline_server <- function(id,
         if (names(config$isDone)[rv$current.pos] == name){
         
         #print(paste0('--- MODULE SUPER TL, current.pos = ', rv$current.pos))
-        if (config$isDone[[rv$current.pos]] == VALIDATED){
+        if (config$isDone[[rv$current.pos]]){
           # This case does not normally exists because a validated process
           # is disabled and the user cannot validate it.
           # For that, it must be reseted
@@ -158,7 +158,6 @@ mod_super_timeline_server <- function(id,
 
 
         }
-          
         }
       
 if(verbose){
@@ -168,11 +167,6 @@ if(verbose){
             print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, '(',rv$current.pos, ') => ', paste0(names(data2send), collapse=' ')))
         }
 
-        
-        if(verbose){
-          print(paste0(config$process.name, ' : SendCurrentDataset() end'))
-          print(paste0(config$process.name, ' : isDone = ', paste0(config$isDone, collapse=' ')))
-        }
         return(data2send)
       }
       
@@ -186,6 +180,21 @@ if(verbose){
 ### End of part for managing the timeline
       
 
+      
+      
+      GetModuleHasReturned <- reactive({
+        name.current <- unlist(lapply(names(rv$tmp), 
+                                      function(x){
+                                        if (!is.na(reactiveValuesToList(rv$tmp)[[x]]())) {x}
+                                      }
+        )
+        )
+        name.old <- names(which(!is.na(rv$tmp.old)))
+        
+        c(name.current, name.old)
+      })
+      
+      
       # Catch the return value of a module and update the list of isDone modules
       # This list is updated with the names of datasets present in the rv$tmp
       # variable. One set to TRUE all the elements in isDone which have a corresponding
@@ -197,14 +206,12 @@ if(verbose){
       # pointed by the current position
       # This function also updates the list isDone
       observeEvent(req(lapply(reactiveValuesToList(rv$tmp), function(x){x()})), ignoreNULL = T, ignoreInit=T, { 
-        if(verbose){
-          print(paste0(config$process.name, " : reception d'un retour sur rv$tmp BEGIN"))
-          print(paste0(config$process.name, ' : isDone = ', paste0(config$isDone, collapse=' ')))
-        }
+        if(verbose)
+          print(paste0(config$process.name, " : reception d'un retour sur rv$tmp"))
         
         #browser()
         if ((length(unlist(lapply(reactiveValuesToList(rv$tmp), function(x){x()}))) == 1) 
-          && (length(which(config$isDone==VALIDATED))==1) ){
+          && (length(which(config$isDone==T))==1) ){
           print("It is a global reset")
           return(NULL)
         }
@@ -212,19 +219,14 @@ if(verbose){
         # has changed. One compares the item which has changed between the two lists
         # if a dataset passed from NULL to a non-NULL value then is has been validated
         # else if the dataset passed from a non-NULL value to NULL, it has been reseted
-        module_which_has_returned <- unlist(lapply(names(config$isDone), 
-                                               function(x){
-                                                 if (!is.null(reactiveValuesToList(rv$tmp)[[x]]()) != config$isDone[[x]]) {x}
-                                                 }
-                                               )
-                                        )
+        module_which_has_returned <- GetModuleHasReturned()
        
         #module_which_returned <- names(which(lapply(reactiveValuesToList(rv$tmp), 
         #                                            function(x){!is.null(x())}) == T))
         
         if (is.null(rv$tmp[[module_which_has_returned]]())){
           # The corresponding module has been reseted
-          config$isDone[[module_which_has_returned]] <- UNDONE
+          config$isDone[[module_which_has_returned]] <- FALSE
          #browser() 
           # renvoyer le dernier dataset non NULL avant la position courante
           name <- names(config$isDone)[ GetMaxValidated(config$isDone, rv$current.pos - 1)]
@@ -235,29 +237,27 @@ if(verbose){
         } else {
           # This means that the corresponding module has return a value
           # It has been validated
-          config$isDone[[module_which_has_returned]] <- VALIDATED
+          config$isDone[[module_which_has_returned]] <- TRUE
           # Set to FALSE all further steps (in case of rerun a process
           # or if one points to a skipped process)
           ind <- which(names(config$isDone)==module_which_has_returned)
           # Check if the current position is on the last step
           if (ind < nbSteps())
-            config$isDone[(1+ind):nbSteps()] <- UNDONE
+            config$isDone[(1+ind):nbSteps()] <- FALSE
           #rv$dataIn <- rv$tmp[[module_which_returned]]()
           
           rv$dataOut <- rv$tmp[[module_which_has_returned]]()
         }
-        
-        if(verbose){
-          print(paste0(config$process.name, " : reception d'un retour sur rv$tmp AFTER"))
-          print(paste0(config$process.name, ' : isDone = ', paste0(config$isDone, collapse=' ')))
-        }
-        
+        rv$tmp.old <- rv$tmp
       })
 
 
+      # Test if a process module (identified by its name) has been skipped.
+      # This function is called each time the list config$isDone is updated
+      # because one can know the status 'Skipped' only when a further module
+      # has been validated
       isSkipped <- function(name){
-        #browser()
-        is.validated <- config$isDone[[name]] == VALIDATED
+        is.validated <- config$isDone[[name]]
         ind.name <- which(name == names(config$isDone))
         is.skipped <- !is.validated && ind.name < GetMaxValidated(config$isDone, nbSteps())
         if(verbose)
@@ -266,6 +266,7 @@ if(verbose){
       }
       
      
+      # This function calls the server part of each module composing the pipeline
       Launch_Module_Server <- function(){
         if(verbose)
           print(paste0(config$process.name, " : Launch_Module_Server"))
@@ -302,6 +303,8 @@ if(verbose){
         if(verbose)
           print(paste0(config$process.name, " : BuildScreensUI() "))
         
+        
+        # Accessory function
         FillScreen <- function(name){
         ll <- tagList(
                 div(id=ns(name),
@@ -328,8 +331,7 @@ if(verbose){
           })
         mod_insert_md_server(paste0(config$process.name, "_md"), 
                              paste0('./md/',config$process.name, '.md'))
-        
-        
+
       }
       
       
