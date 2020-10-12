@@ -91,10 +91,6 @@ mod_wf_wf1_Original_server <- function(id,
           # this case is either the module is skipped or validated
           #rv$current.pos <- nbSteps()
           rv$wake <- runif(1,0,1)
-          if(rv$skipped){
-            if(verbose)
-              print(paste0(config$process.name, ' : Skipped process'))
-          }
         }
         else if (inputExists && !tmpExists){
           # The current position is pointed on a new module
@@ -192,11 +188,6 @@ mod_wf_wf1_Original_server <- function(id,
                                            wake = reactive({rv$wake})
                                            )
         
-        ## For this particular module, no need to validate manually the start,
-        # it is automatically done
-        # rv$dataOut <- rv$dataIn
-        # UpdateDataOut()
-        # config$status[['Description']] <- VALIDATED
          BuildStatus()
         
         

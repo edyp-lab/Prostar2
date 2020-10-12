@@ -1,5 +1,6 @@
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
+
 # Module UI
 
 #' @title   mod_navigation_ui and mod_navigation_server
@@ -155,7 +156,9 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     current <- reactiveValues(
       val = 1,
       nbSteps = NULL,
-      
+      DEFAULT_SKIPPED_POSITION = 1,
+      DEFAULT_VALIDATED_POSITION = 1,
+      DEFAULT_UNDONE_POSITION = 1,
       # Transit variable to manage the clics on the reset button
       reset_OK = FALSE
     )
@@ -175,6 +178,13 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     })
     
 
+    Init_Default_Positions <- reactive({
+      current$DEFAULT_VALIDATED_POSITION <- current$nbSteps
+      current$DEFAULT_SKIPPED_POSITION <- current$nbSteps
+      current$DEFAULT_UNDONE_POSITION <- 1
+    })
+    
+    
     # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
@@ -182,7 +192,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
       if(verbose)
         print(paste0('TL(',config$process.name, ') : call to InitScreens() '))
       current$nbSteps <- length(config$steps)
-      
+      Init_Default_Positions() 
       config$screens <- lapply(1:current$nbSteps,
                                function(x){
                                  config$screens[[x]] <- if (x == 1) 
@@ -260,25 +270,13 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
         print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
       n <- current$nbSteps
       browser()
-      initial_status <- setNames(lapply(1:current$nbSteps, 
-                                        function(x){UNDONE}), 
-                                 names(config$steps))
-      #is.equal(config$status, initial_status)
       
       if ((config$status[[n]] == VALIDATED))
-        current$val <- current$nbSteps
+        current$val <- current$DEFAULT_VALIDATED_POSITION
       else if (config$status[[n]] == SKIPPED)
-        current$val <- 1
-      else if (is.equal(config$status, initial_status))
-        current$val <- 1
-    }
-    
-    is.equal <- function(ll1, ll2){
-      A <- names(ll1)==names(ll2)
-      B <- length(ll1)==length(ll2)
-      C <- sum(unlist(ll1)==unlist(ll2))==length(ll1)
-      
-      A && B && C
+        current$val <- current$DEFAULT_SKIPPED_POSITION
+      else if (config$status[[n]] == UNDONE)
+        current$val <- current$DEFAULT_UNDONE_POSITION
     }
    
     
@@ -287,12 +285,11 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     Analyse_status_Process <- reactive({
       
       #browser()
-      #SetSkippedStatus()
       initial_status <- setNames(lapply(1:current$nbSteps, 
                                         function(x){UNDONE}), 
                                  names(config$steps))
       
-      if (is.equal(config$status,initial_status)){
+      if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:current$nbSteps])== 0 )){
         # This is the case at the initialization of a process or after a reset
         if(verbose)
           print(paste0('TL(',config$process.name, ') : Analyse_status() : Init -> Enable all steps'))

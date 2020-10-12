@@ -102,13 +102,12 @@ mod_wf_wf1_Filtering_server <- function(id,
         rv$wake <- FALSE
         if (inputExists && tmpExists){
           # this case is either the module is skipped or validated
-          rv$current.pos <- nbSteps()
           rv$wake <- runif(1,0,1)
-          if(rv$skipped){
-            if(verbose)
-              print(paste0(config$process.name, ' : Skipped process'))
-         
-          }
+          # if(rv$skipped){
+          #   if(verbose)
+          #     print(paste0(config$process.name, ' : Skipped process'))
+          # 
+          # }
         }
         else if (inputExists && !tmpExists){
           # The current position is pointed on a new module
@@ -137,6 +136,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
         rv$dataIn <- dataIn()
+        rv$current.pos <- 1
         
         CommonInitializeFunctions()
         BuildStatus()
@@ -151,9 +151,7 @@ mod_wf_wf1_Filtering_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
           rv$current.pos <- rv$timeline$pos() 
-          if(verbose)
-            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ', paste0(config$status, collapse=' ') ))
-          
+ 
         })
         
         
@@ -164,20 +162,12 @@ mod_wf_wf1_Filtering_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, ' : reset activated ----------------'))
          
-          rv$current.pos <- 1
-          
           ResetScreens()
           rv$old.rst <- rv$timeline$rstBtn()
-          
+
           InitializeModule()
-          browser()
           BuildStatus()
         })
-        
-        
-        
-        
-        
         
         
         

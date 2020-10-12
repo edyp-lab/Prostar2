@@ -61,7 +61,8 @@ mod_wf_wf1_Normalization_server <- function(id,
         timeline = NULL,
         dataIn = NULL,
         dataOut = NULL,
-        old.rst = 0)
+        old.rst = 0,
+        wake = FALSE)
       
       # Main listener of the module which initialize it
       
@@ -98,16 +99,15 @@ mod_wf_wf1_Normalization_server <- function(id,
         #browser()
         inputExists <- length(dataIn()) > 0
         tmpExists <- !is.null(rv$dataIn)
-        
+        rv$wake <- FALSE
         if (inputExists && tmpExists){
           # this case is either the module is skipped or validated
-          #rv$current.pos <- nbSteps()
           rv$wake <- runif(1,0,1)
-          if(rv$skipped){
-            if(verbose)
-              print(paste0(config$process.name, ' : Skipped process'))
-            
-          }
+          # if(rv$skipped){
+          #   if(verbose)
+          #     print(paste0(config$process.name, ' : Skipped process'))
+          # 
+          # }
         }
         else if (inputExists && !tmpExists){
           # The current position is pointed on a new module
@@ -151,7 +151,7 @@ mod_wf_wf1_Normalization_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
           rv$current.pos <- rv$timeline$pos() 
-
+          
         })
         
         
@@ -162,19 +162,12 @@ mod_wf_wf1_Normalization_server <- function(id,
           if(verbose)
             print(paste0(config$process.name, ' : reset activated ----------------'))
           
-          
           ResetScreens()
           rv$old.rst <- rv$timeline$rstBtn()
           
           InitializeModule()
-          browser()
           BuildStatus()
         })
-        
-        
-        
-        
-        
         
         
         
