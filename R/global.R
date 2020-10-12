@@ -19,8 +19,22 @@ URL_versionNotes <- paste0(base_URL, "versionNotes.md")
 
 actionBtnClass <- "btn-primary"
 
+# Bootstrap colors for buttons
+
+# ="btn btn-primary">Primary</button>
+#   <button type="button" class="btn btn-secondary">Secondary</button>
+#   <button type="button" class="btn btn-success">Success</button>
+#   <button type="button" class="btn btn-danger">Danger</button>
+#   <button type="button" class="btn btn-warning">Warning</button>
+#   <button type="button" class="btn btn-info">Info</button>
+#   <button type="button" class="btn btn-light">Light</button>
+#   <button type="button" class="btn btn-dark">Dark</button>
+#   
+#   <button type="button" class="btn btn-link">Link</button>
+
 redBtnClass <- "btn-danger"
 PrevNextBtnClass <- "btn-info"
+btn_success_color <- "btn-success"
 optionsBtnClass <- "info"
 
 

@@ -53,20 +53,28 @@ server <- function(input, output, session) {
     steps = append(list(Original = T), pipeline.defs$protein )
   )
   
-  rv$tmp <- mod_super_timeline_server("super_nav", 
-                                dataIn = reactive({
+  superTL_dataOut <- reactiveValues(
+    name = NULL,
+    trigger = NULL,
+    obj = NULL
+  )
+  
+  mod_super_timeline_server("super_nav",
+                            dataIn = reactive({
                                   names(rv$current.obj)[1] <- 'Original'
                                 rv$current.obj}),
-                                config = config)
+                            dataOut = superTL_dataOut,
+                            config = config
+                            )
  
   
    output$show_dataIn <- renderUI({
      tagList(lapply(names(rv$current.obj), function(x){tags$p(x)}))
    })
    output$show_rv_dataOut <- renderUI({
-     req(rv$tmp())
+     req(superTL_dataOut$trigger)
     tagList(
-       lapply(names(rv$tmp()), function(x){tags$p(x)})
+       lapply(names(superTL_dataOut$obj), function(x){tags$p(x)})
      )
    })
 

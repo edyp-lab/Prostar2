@@ -18,9 +18,9 @@ addAssay(dataset,
 }
 
 
-Reset_Pipeline_Data_logics <- function(){
-  rv$dataOut <- dataIn()
-}
+#Reset_Pipeline_Data_logics <- function(){
+ # rv$dataOut <- dataIn()
+#}
 
 
 

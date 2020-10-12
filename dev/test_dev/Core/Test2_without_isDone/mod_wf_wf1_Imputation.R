@@ -7,7 +7,7 @@ mod_wf_wf1_Imputation_ui <- function(id){
     mod_timeline_ui(ns("timeline")),
     hr(),
     wellPanel(
-      h3('Module _A_'),
+      h3('Module Imputation'),
       fluidRow(
         column(width=2,
                tags$b(h4(style = 'color: blue;', "Data input")),
@@ -19,8 +19,8 @@ mod_wf_wf1_Imputation_ui <- function(id){
                tags$b(h4(style = 'color: blue;', "Current pos")),
                uiOutput(ns('show_currentPos'))),
         column(width=4,
-               tags$b(h4(style = 'color: blue;', "List 'isDone'")),
-               uiOutput(ns('show_isDone')))
+               tags$b(h4(style = 'color: blue;', "List 'status'")),
+               uiOutput(ns('show_status')))
       )
     )
   )
@@ -32,6 +32,7 @@ mod_wf_wf1_Imputation_ui <- function(id){
 #' 
 mod_wf_wf1_Imputation_server <- function(id, 
                                         dataIn=NULL,
+                                        dataOut = NULL,
                                         remoteReset=FALSE,
                                         isSkipped = FALSE){
   moduleServer(
@@ -47,7 +48,7 @@ mod_wf_wf1_Imputation_server <- function(id,
       config <- reactiveValues(
         type = 'process',
         process.name = 'Imputation',
-        steps = list(Description = T,
+        steps = list(Description = F,
                      Step1 = T,
                      Step2 = F,
                      Step3 = T)
@@ -60,8 +61,7 @@ mod_wf_wf1_Imputation_server <- function(id,
         timeline = NULL,
         dataIn = NULL,
         dataOut = NULL,
-        cmd = NULL)
-      
+        old.rst = 0)
       
       # Main listener of the module which initialize it
       
@@ -72,24 +72,37 @@ mod_wf_wf1_Imputation_server <- function(id,
         
         rv$skipped <- isSkipped()
         if (isSkipped())
-          config$isDone <- setNames(lapply(1:nbSteps(), 
+          config$status <- setNames(lapply(1:nbSteps(), 
                                            function(x){ if (x==1) VALIDATED else SKIPPED}), 
                                     names(config$steps))
       })
       
-
       
-      observeEvent(dataIn(), ignoreNULL=T, ignoreInit = T, { 
+      
+      BuildStatus <- reactive({
+        #browser()
+        config$status <- setNames(lapply(1:nbSteps(), 
+                                         function(x){if (x==1) VALIDATED else GetStatusPosition(x)}), 
+                                  names(config$steps))
+      })
+      
+      
+      
+      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
+      GetStatusPosition <- function(pos){ config$status[[pos]] }
+      
+      observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
-          print(paste0(config$process.name, ' :  Initialization de rv$dataIn ------- '))
+          print(paste0(config$process.name, " :  reception d'un nouveau dataIn() : ", paste0(names(dataIn()), collapse=' ')))
         
-        # browser()
-        inputExists <- length(names(dataIn())) > 0
-        tmpExists <- length(names(rv$dataIn)) > 0
+        #browser()
+        inputExists <- length(dataIn()) > 0
+        tmpExists <- !is.null(rv$dataIn)
         
         if (inputExists && tmpExists){
           # this case is either the module is skipped or validated
           #rv$current.pos <- nbSteps()
+          rv$wake <- runif(1,0,1)
           if(rv$skipped){
             if(verbose)
               print(paste0(config$process.name, ' : Skipped process'))
@@ -118,19 +131,19 @@ mod_wf_wf1_Imputation_server <- function(id,
       
       
       
+      
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
         rv$dataIn <- dataIn()
-        rv$dataOut <- NULL
         
         CommonInitializeFunctions()
+        BuildStatus()
         
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
-                                           config = config, 
-                                           position = reactive({rv$current.pos})
-        )
+                                           config = config,
+                                           wake = reactive({rv$wake}))
         
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
@@ -138,7 +151,7 @@ mod_wf_wf1_Imputation_server <- function(id,
             print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
           rv$current.pos <- rv$timeline$pos() 
           if(verbose)
-            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ', paste0(config$isDone, collapse=' ') ))
+            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ', paste0(config$status, collapse=' ') ))
           
         })
         
@@ -146,31 +159,25 @@ mod_wf_wf1_Imputation_server <- function(id,
         
         
         #--- Catch a reset from timeline or caller
-        observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)), {
+        observeEvent(req(c(rv$timeline$rstBtn() > rv$old.rst, remoteReset()!=0)), {
           if(verbose)
             print(paste0(config$process.name, ' : reset activated ----------------'))
-          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
           
           rv$current.pos <- 1
           
           ResetScreens()
+          rv$old.rst <- rv$timeline$rstBtn()
           
-          Reset_Module_Data_logics()
-          
-          
-          # Update datasets logics
+          InitializeModule()
+          browser()
+          BuildStatus()
         })
         
         
-        # Catch a change in isDone (validation of a step)
-        # Specific to the modules of process and do not appear in pipeline module
-        # observeEvent(config$isDone,  ignoreInit = T, {
-        #   if(verbose)
-        #     print(paste0(config$process.name, ' : A new step is validated ---- ', paste0(unlist(config$isDone), collapse=' ')))
-        #   #print(' ------- MODULE _A_ : observeEvent(config$isDone,  ignoreInit = T) ------- ')
-        #   #print(paste0(unlist(config$isDone), collapse=' '))
-        #   })
-        # 
+        
+        
+        
+        
         
         
         # This function cannot be implemented in the timeline module because 
@@ -183,24 +190,22 @@ mod_wf_wf1_Imputation_server <- function(id,
           })
         }
         
-        Reset_Module_Data_logics <- function(){
-          if(verbose)
-            print(paste0(config$process.name, '# Update datasets logics'))
-          #browser()
-          
-          #rv$dataIn <- RemoveItemFromDataset(dataIn(), config$process.name)
-          #rv$dataOut <- RemoveItemFromDataset(dataIn(), config$process.name)
-          rv$dataOut <- NULL
-          config$isDone <- Init_isDone()
-        }
-        
-        
-        
       }
       ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
       
       
       
+      
+      UpdateDataOut <- reactive({
+        print(paste0(config$process.name, ' : Execution of UpdateDataOut() : '))
+        
+        dataOut$obj <- rv$dataOut
+        dataOut$name <- config$process.name
+        dataOut$trigger <- runif(1,0,1)
+        
+        if(verbose)
+          print(paste0(config$process.name, ' : dataOut$obj =  : ', paste0(names(dataOut$obj), collapse=' ')))
+      })
       
       #####################################################################
       ## screens of the module
@@ -216,8 +221,6 @@ mod_wf_wf1_Imputation_server <- function(id,
       
       output$Step1 <- renderUI({
         name <- 'Step1'
-        
-        
         
         tagList(
           div(id=ns(name),
@@ -237,7 +240,7 @@ mod_wf_wf1_Imputation_server <- function(id,
       
       
       observeEvent(input$perform_Step1_btn, {
-        config$isDone[['Step1']] <- VALIDATED
+        config$status[['Step1']] <- VALIDATED
       })
       
       ############### SCREEN 3 ######################################
@@ -262,7 +265,7 @@ mod_wf_wf1_Imputation_server <- function(id,
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
-        config$isDone[['Step2']] <- VALIDATED
+        config$status[['Step2']] <- VALIDATED
       })
       
       
@@ -284,25 +287,13 @@ mod_wf_wf1_Imputation_server <- function(id,
       })
       
       
-      Validate_Module_Data_logics <- function(){
-        #rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
-        rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
-      }
-      
-      
       observeEvent(input$validate_btn, {
-        #browser()
-        Validate_Module_Data_logics()
-        config$isDone[['Step3']] <- VALIDATED
+        rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
+        UpdateDataOut()
+        config$status[['Step3']] <- VALIDATED
       })
       
       
-      
-      
-      
-      ##########################################################
-      
-      reactive({rv$dataOut})
     })
   
 }

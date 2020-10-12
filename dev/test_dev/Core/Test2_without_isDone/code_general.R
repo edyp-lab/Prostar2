@@ -43,7 +43,6 @@ InsertDescriptionUI <- reactive({
 GetMaxValidated <- function(tab = NULL, bound = NULL){
   stopifnot(!is.null(tab))
   stopifnot(!is.null(bound))
-  browser()
   ind <- max(which(unlist(tab)[1:bound]==VALIDATED))
   if (is.infinite(ind))
     # There is no Validated step in the tab
@@ -51,10 +50,10 @@ GetMaxValidated <- function(tab = NULL, bound = NULL){
   ind
 }
 
-#' isDone is a static list of n elements (the number of steps)
+#' status is a static list of n elements (the number of steps)
 #' It indicates whether a step has been validated (TRUE) or not (FALSE)
 #' It is updated by the return of module server
-Init_isDone <- function(){
+Init_status <- function(){
  setNames(lapply(1:nbSteps(), 
                   function(x){UNDONE}), 
            names(config$steps))
@@ -63,7 +62,7 @@ Init_isDone <- function(){
 CommonInitializeFunctions <- function(){
   rv$screens <- InitActions(nbSteps())
   
-  config$isDone <- Init_isDone()
+  config$status <- Init_status()
   
   # Must be placed after the initialisation of the 'config$stepsNames' variable
   config$screens <- CreateScreens(names(config$steps))

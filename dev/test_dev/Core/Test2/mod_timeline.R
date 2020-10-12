@@ -10,7 +10,7 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 #' @param input internal
 #' @param output internal
 #' @param session internal
-#' @param isDone xxxxx
+#' @param status xxxxx
 #' @param screens xxxxx
 #' @param rstFunc xxxxx
 #' @param iconType xxxxxx
@@ -180,25 +180,25 @@ mod_timeline_server <- function(id, style=2, config){
     NextBtn_logics <- reactive({
       end_of_tl <- current$val == current$nbSteps
       mandatory_step <- isTRUE(config$steps[[current$val]])
-      validated <- config$isDone[[current$val]] == VALIDATED
-      skipped <- config$isDone[[current$val]] == SKIPPED
-      entireProcessSkipped <- config$isDone[[current$nbSteps]] == SKIPPED
+      validated <- config$status[[current$val]] == VALIDATED
+      skipped <- config$status[[current$val]] == SKIPPED
+      entireProcessSkipped <- config$status[[current$nbSteps]] == SKIPPED
       !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
     })
     
     # Builds the condition to enable/disable the 'Previous' button
     PrevBtn_logics <- reactive({
       start_of_tl <- current$val == 1
-      entireProcessSkipped <- config$isDone[[current$nbSteps]] == SKIPPED
+      entireProcessSkipped <- config$status[[current$nbSteps]] == SKIPPED
       
       !start_of_tl && !entireProcessSkipped
     })
     
-    # Catch a new position or a change in the isDone list
-    observeEvent(c(current$val, config$isDone), {
+    # Catch a new position or a change in the status list
+    observeEvent(c(current$val, config$status), {
       if(verbose){
-        print(paste0('TL(',config$process.name, ') : observeEvent(c(current$val, config$isDone : '))
-        print(paste0('TL(',config$process.name, ') : isDone = ', paste0(config$isDone, collapse=' ')))
+        print(paste0('TL(',config$process.name, ') : observeEvent(c(current$val, config$status : '))
+        print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
       }
       
       shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
@@ -206,9 +206,9 @@ mod_timeline_server <- function(id, style=2, config){
       
       if (config$type == 'process'){
         Update_Cursor_position()
-        Analyse_isDone_Process()
+        Analyse_status_Process()
       } else if (config$type == 'pipeline')
-        Analyse_isDone_Pipeline()
+        Analyse_status_Pipeline()
       
       # Display current page
       if (config$type == 'pipeline')
@@ -218,7 +218,7 @@ mod_timeline_server <- function(id, style=2, config){
       else if (config$type == 'process')
         # One only displays the steps that are not skipped
         lapply(1:current$nbSteps, function(x){
-          shinyjs::toggle(paste0('div_screen', x), condition = x==current$val && config$isDone[[current$val]] != SKIPPED)})
+          shinyjs::toggle(paste0('div_screen', x), condition = x==current$val && config$status[[current$val]] != SKIPPED)})
       
       
     })
@@ -228,16 +228,16 @@ mod_timeline_server <- function(id, style=2, config){
       if(verbose)
         print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
       n <- current$nbSteps
-      initial_isDone <- setNames(lapply(1:current$nbSteps, 
+      initial_status <- setNames(lapply(1:current$nbSteps, 
                                         function(x){ if (x == 1) VALIDATED else UNDONE}), 
                                  names(config$steps))
-      is.equal(config$isDone, initial_isDone)
+      is.equal(config$status, initial_status)
       
-      if ((config$isDone[[n]] == VALIDATED))
+      if ((config$status[[n]] == VALIDATED))
         current$val <- current$nbSteps
-      else if (config$isDone[[n]] == SKIPPED)
+      else if (config$status[[n]] == SKIPPED)
         current$val <- 1
-      else if (is.equal(config$isDone, initial_isDone))
+      else if (is.equal(config$status, initial_status))
         current$val <- 1
     })
     
@@ -250,42 +250,42 @@ mod_timeline_server <- function(id, style=2, config){
     }
    
     
-    # This function catches any event on config$isDone and analyze it
+    # This function catches any event on config$status and analyze it
     # to decide whether to disable/enable UI parts
-    Analyse_isDone_Process <- reactive({
+    Analyse_status_Process <- reactive({
       
       #browser()
       SetSkippedStatus()
-      initial_isDone <- setNames(lapply(1:current$nbSteps, 
+      initial_status <- setNames(lapply(1:current$nbSteps, 
                                         function(x){ if (x == 1) VALIDATED else UNDONE}), 
                                  names(config$steps))
-      is.equal(config$isDone, initial_isDone)
+      is.equal(config$status, initial_status)
       
-      if (is.equal(config$isDone,initial_isDone)){
+      if (is.equal(config$status,initial_status)){
         # This is the case at the initialization of a process or after a reset
         if(verbose)
-          print(paste0('TL(',config$process.name, ') : Analyse_isDone() : Init -> Enable all steps'))
+          print(paste0('TL(',config$process.name, ') : Analyse_status() : Init -> Enable all steps'))
           
         # Enable all steps
         toggleState_Steps(cond = TRUE, i = current$nbSteps)
-      } else if (config$isDone[[length(current$nbSteps)]] == SKIPPED){
+      } else if (config$status[[length(current$nbSteps)]] == SKIPPED){
         # The entire process is skipped
         if(verbose)
-          print(paste0('TL(',config$process.name, ') : Analyse_isDone() : The entire process is skipped'))
+          print(paste0('TL(',config$process.name, ') : Analyse_status() : The entire process is skipped'))
         # Disable all steps
         toggleState_Steps(cond = FALSE, i = current$nbSteps)
       } else {
         # Disable all previous steps from each VALIDATED step
         if(verbose)
-          print(paste0('TL(',config$process.name, ') : Analyse_isDone() : Disable all previous steps from each VALIDATED step'))
-        ind.max <- max(grep(VALIDATED, unlist(config$isDone)))
+          print(paste0('TL(',config$process.name, ') : Analyse_status() : Disable all previous steps from each VALIDATED step'))
+        ind.max <- max(grep(VALIDATED, unlist(config$status)))
         toggleState_Steps(cond = FALSE, i = ind.max)
       }
     })
       
 
       
-      Analyse_isDone_Pipeline <- reactive({
+      Analyse_status_Pipeline <- reactive({
         SetSkippedStatus()
     })
     
@@ -295,10 +295,10 @@ mod_timeline_server <- function(id, style=2, config){
       if(verbose)
         print(paste0('TL(',config$process.name, ') : SetSkippedStatus()'))
      # browser()
-      if (!is.equal(config$isDone, setNames(lapply(1:nbSteps(),
+      if (!is.equal(config$status, setNames(lapply(1:nbSteps(),
                                                   function(x){ SKIPPED}),
                                            names(config$steps))))
-      config$isDone[which(config$isDone==UNDONE)[which(which(config$isDone == UNDONE ) < GetMaxValidated(config$isDone, current$nbSteps))]] <- SKIPPED
+      config$status[which(config$status==UNDONE)[which(which(config$status == UNDONE ) < GetMaxValidated(config$status, current$nbSteps))]] <- SKIPPED
       else
         print(paste0('TL(',config$process.name, ') : Process entire skipped !!!!!'))
     })
@@ -354,7 +354,7 @@ mod_timeline_server <- function(id, style=2, config){
     
     output$timeline2 <- renderUI({
       if(verbose)
-        print(paste0('TL(', config$process.name, ') : timeline2. isDone = ', paste0(config$isDone, collapse=' ')))
+        print(paste0('TL(', config$process.name, ') : timeline2. status = ', paste0(config$status, collapse=' ')))
       
       config
       status <- rep('', current$nbSteps)
@@ -363,10 +363,10 @@ mod_timeline_server <- function(id, style=2, config){
         status[which(unlist(config$steps))] <- 'mandatory'
       
       #status <- rep('',length(config$stepsNames))
-      status[which(unlist(config$isDone) == VALIDATED)] <- 'complete'
+      status[which(unlist(config$status) == VALIDATED)] <- 'complete'
       
       #Compute the skipped steps
-      status[which(config$isDone==SKIPPED)] <- 'skipped'
+      status[which(config$status==SKIPPED)] <- 'skipped'
       
       #browser()
       active  <- rep('', current$nbSteps)
@@ -390,7 +390,7 @@ mod_timeline_server <- function(id, style=2, config){
       colorForCursor <- rep("white", current$nbSteps)
       
       for (i in 1:length(config$stepsNames)){
-        status <- config$isDone[[i]]
+        status <- config$status[[i]]
         col <- ifelse(!is.null(config$steps) && config$steps[[i]], "red", orangeProstar)
         ifelse(status==VALIDATED, color[i] <- "green", color[i] <- col)
       }

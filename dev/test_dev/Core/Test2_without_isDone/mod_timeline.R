@@ -27,21 +27,20 @@ mod_timeline_ui <- function(id){
   tagList(
     shinyjs::useShinyjs(),
     uiOutput(ns("load_css_style")),
-    
+    div(id = 'GlobalTL',
     fluidRow(
       align= 'center',
       column(width=2,div(style=btn_style,
                          uiOutput(ns('showResetBtn')),
-                         shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-                                                        class = PrevNextBtnClass,
-                                                        style='padding:4px; font-size:80%'))
+                         uiOutput(ns('showPrevBtn'))
       )),
       column(width=8,div( style = btn_style, uiOutput(ns("timelineStyle"))) ),
       column(width=2,div(style=btn_style,
-                         actionButton(ns("nextBtn"), "next",
-                                      class = PrevNextBtnClass,
-                                      style='padding:4px; font-size:80%'))
+                         uiOutput(ns('showNextBtn')),
+                         uiOutput(ns('showSaveExitBtn'))
+                         )
       )
+    )
     ),
     uiOutput(ns('show_screens'))
   )
@@ -71,7 +70,7 @@ mod_timeline_ui <- function(id){
 #' 
 #' @importFrom sass sass
 #' 
-mod_timeline_server <- function(id, style=2, config){
+mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn = FALSE, wake = NULL){
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -79,6 +78,13 @@ mod_timeline_server <- function(id, style=2, config){
     verbose = T
     source(file.path('.', 'code_general.R'), local=TRUE)$value
     
+    output$showSaveExitBtn <- renderUI({
+      req(showSaveBtn)
+      print(paste0('TL(',config$process.name, ') : output$showSaveExitBtn <- renderUI'))
+      actionButton(ns("saveExitBtn"), paste0("Save & Exit ", config$type),
+                   class = btn_success_color,
+                   style='padding:4px; font-size:80%')
+    })
     
     output$showResetBtn <- renderUI({
       print(paste0('TL(',config$process.name, ') : output$showResetBtn <- renderUI'))
@@ -87,7 +93,23 @@ mod_timeline_server <- function(id, style=2, config){
                    style='padding:4px; font-size:80%')
       })
     
-    output$timelineStyle <- renderUI({ uiOutput(ns(paste0('timeline', style))) })
+    output$showPrevBtn <- renderUI({
+      req(!isTRUE(onlyReset))
+      shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                     class = PrevNextBtnClass,
+                                     style='padding:4px; font-size:80%'))
+    })
+    
+    output$showNextBtn <- renderUI({
+      req(!isTRUE(onlyReset))
+      actionButton(ns("nextBtn"), "next",
+                   class = PrevNextBtnClass,
+                   style='padding:4px; font-size:80%')
+    })
+    
+    output$timelineStyle <- renderUI({ 
+      req(!isTRUE(onlyReset))
+      uiOutput(ns(paste0('timeline', style))) })
     
     #-------------------------------------------------------
     # Return the UI for a modal dialog with data selection input. If 'failed' is
@@ -138,20 +160,28 @@ mod_timeline_server <- function(id, style=2, config){
       reset_OK = FALSE
     )
     
+    
+    observeEvent(req(wake()), {
+      if(verbose)
+        print(paste0('TL(',config$process.name, ') : observeEvent(current$wake() '))
+      Update_Cursor_position()
+    })
+    
+    
     observeEvent(req(config),{
       if(verbose)
         print(paste0('TL(',config$process.name, ') : observeEvent(req(config)() '))
-      
-      current$nbSteps <- length(config$steps)
-      InitScreens()
+     InitScreens()
     })
     
+
     # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
     InitScreens <- reactive({
       if(verbose)
         print(paste0('TL(',config$process.name, ') : call to InitScreens() '))
+      current$nbSteps <- length(config$steps)
       
       config$screens <- lapply(1:current$nbSteps,
                                function(x){
@@ -194,10 +224,11 @@ mod_timeline_server <- function(id, style=2, config){
       !start_of_tl && !entireProcessSkipped
     })
     
+    
     # Catch a new position or a change in the status list
-    observeEvent(c(current$val, config$status), {
+    observeEvent(req(c(current$val, config$status)), {
       if(verbose){
-        print(paste0('TL(',config$process.name, ') : observeEvent(c(current$val, config$status : '))
+        print(paste0('TL(',config$process.name, ') : observeEvent(req(c(current$val, config$status)) : '))
         print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
       }
       
@@ -205,11 +236,11 @@ mod_timeline_server <- function(id, style=2, config){
       shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
       
       if (config$type == 'process'){
-        Update_Cursor_position()
+       # Update_Cursor_position()
         Analyse_status_Process()
-      } else if (config$type == 'pipeline')
-        Analyse_status_Pipeline()
-      
+      } else if (config$type == 'pipeline'){
+        #Analyse_status_Pipeline()
+      }
       # Display current page
       if (config$type == 'pipeline')
         # One display all processes, even the validated ones
@@ -224,14 +255,15 @@ mod_timeline_server <- function(id, style=2, config){
     })
 
 
-    Update_Cursor_position <- reactive({
+    Update_Cursor_position <- function(){
       if(verbose)
         print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
       n <- current$nbSteps
+      browser()
       initial_status <- setNames(lapply(1:current$nbSteps, 
-                                        function(x){ if (x == 1) VALIDATED else UNDONE}), 
+                                        function(x){UNDONE}), 
                                  names(config$steps))
-      is.equal(config$status, initial_status)
+      #is.equal(config$status, initial_status)
       
       if ((config$status[[n]] == VALIDATED))
         current$val <- current$nbSteps
@@ -239,7 +271,7 @@ mod_timeline_server <- function(id, style=2, config){
         current$val <- 1
       else if (is.equal(config$status, initial_status))
         current$val <- 1
-    })
+    }
     
     is.equal <- function(ll1, ll2){
       A <- names(ll1)==names(ll2)
@@ -255,18 +287,17 @@ mod_timeline_server <- function(id, style=2, config){
     Analyse_status_Process <- reactive({
       
       #browser()
-      SetSkippedStatus()
+      #SetSkippedStatus()
       initial_status <- setNames(lapply(1:current$nbSteps, 
-                                        function(x){ if (x == 1) VALIDATED else UNDONE}), 
+                                        function(x){UNDONE}), 
                                  names(config$steps))
-      is.equal(config$status, initial_status)
       
       if (is.equal(config$status,initial_status)){
         # This is the case at the initialization of a process or after a reset
         if(verbose)
           print(paste0('TL(',config$process.name, ') : Analyse_status() : Init -> Enable all steps'))
           
-        # Enable all steps
+        # Enable all steps and buttons
         toggleState_Steps(cond = TRUE, i = current$nbSteps)
       } else if (config$status[[length(current$nbSteps)]] == SKIPPED){
         # The entire process is skipped
@@ -284,26 +315,6 @@ mod_timeline_server <- function(id, style=2, config){
     })
       
 
-      
-      Analyse_status_Pipeline <- reactive({
-        SetSkippedStatus()
-    })
-    
-    
-    
-    SetSkippedStatus <- reactive({
-      if(verbose)
-        print(paste0('TL(',config$process.name, ') : SetSkippedStatus()'))
-     # browser()
-      if (!is.equal(config$status, setNames(lapply(1:nbSteps(),
-                                                  function(x){ SKIPPED}),
-                                           names(config$steps))))
-      config$status[which(config$status==UNDONE)[which(which(config$status == UNDONE ) < GetMaxValidated(config$status, current$nbSteps))]] <- SKIPPED
-      else
-        print(paste0('TL(',config$process.name, ') : Process entire skipped !!!!!'))
-    })
-    
-
     toggleState_Steps <- function(cond, i){
       if(verbose)
         print(paste0('TL(',config$process.name, ') : toggleState_Steps() : cond = ', cond, ', i = ', i))
@@ -320,6 +331,7 @@ mod_timeline_server <- function(id, style=2, config){
         print(paste0('TL(', config$process.name, ') : load_css_style'))
       
       req(current$nbSteps)
+      req(!isTRUE(onlyReset))
       req(style != 3)
       
       file <- paste0('./Timelines/timeline',style, '.sass')
@@ -366,7 +378,7 @@ mod_timeline_server <- function(id, style=2, config){
       status[which(unlist(config$status) == VALIDATED)] <- 'complete'
       
       #Compute the skipped steps
-      status[which(config$status==SKIPPED)] <- 'skipped'
+      status[which(unlist(config$status) == SKIPPED)] <- 'skipped'
       
       #browser()
       active  <- rep('', current$nbSteps)
@@ -422,6 +434,7 @@ mod_timeline_server <- function(id, style=2, config){
     list(rstBtn = reactive(current$reset_OK),
          prvBtn = reactive(input$prevBtn),
          nxtBtn = reactive(input$nextBtn),
+         saveBtn = reactive({input$saveExitBtn}),
          pos = reactive(current$val)
     )
     

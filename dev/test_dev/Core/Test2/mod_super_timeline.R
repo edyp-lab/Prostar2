@@ -40,7 +40,7 @@ mod_super_timeline_server <- function(id,
       
       verbose <- T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
-      source(file.path('.', 'code_general.R'), local=TRUE)$value
+      #source(file.path('.', 'code_general.R'), local=TRUE)$value
       
       rv <- reactiveValues(
         # Current position of the cursor in the timeline
@@ -61,6 +61,42 @@ mod_super_timeline_server <- function(id,
       
       #--------------------------------------------------------------
      
+      VALIDATED <- 1
+      UNDONE <- 0
+      SKIPPED <- -1
+      
+      InitActions <- function(n){
+        setNames(lapply(1:n,
+                        function(x){T}),
+                 paste0('screen', 1:n)
+        )
+      }
+      
+      CreateScreens <- function(names){
+        setNames(
+          lapply(1:length(names), 
+                 function(x){
+                   do.call(uiOutput, list(outputId=ns(names)[x]))}),
+          paste0('screen_', names(config$steps)))
+      }
+      
+      nbSteps <- reactive({
+        req(config$steps)
+        length(config$steps)
+      })
+      
+      
+      
+      InsertDescriptionUI <- reactive({
+        output[['Description']] <- renderUI({
+          mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+        })
+        mod_insert_md_server(paste0(config$process.name, "_md"), 
+                             paste0('./md/',config$process.name, '.md'))
+      })
+      
+      
+      
       
       
       # Initialization of the process
@@ -71,8 +107,10 @@ mod_super_timeline_server <- function(id,
         #rv$dataIn <- dataIn()
         rv$dataOut <- dataIn()
         
-        CommonInitializeFunctions()
-        
+        rv$screens <- InitActions(nbSteps())
+         
+        # Must be placed after the initialisation of the 'config$stepsNames' variable
+        config$screens <- CreateScreens(names(config$steps))
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
                                    config = config)
@@ -129,7 +167,7 @@ mod_super_timeline_server <- function(id,
       SendCurrentDataset <- function(name){
         if(verbose)
           print(paste0(config$process.name, ' : SendCurrentDataset()'))
-       # browser()
+        browser()
         data2send <- NA
         
         # Returns NULL to all modules except the one pointed by the current position
@@ -151,9 +189,10 @@ mod_super_timeline_server <- function(id,
             data2send <- rv$dataOut
           } else {
             # it is a skipped module
-            previous.validated.name <- names(config$isDone)[GetMaxValidated(tab = config$isDone, bound = rv$current.pos-1)]
-            ind.name <- grep(previous.validated.name, names(rv$dataOut))
-            data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
+            # previous.validated.name <- names(config$isDone)[GetMaxValidated(tab = config$isDone, bound = rv$current.pos-1)]
+            # ind.name <- grep(previous.validated.name, names(rv$dataOut))
+            # data2send <- rv$dataOut[,,-c((ind.name+1):length(rv$dataOut))]
+             data2send <- rv$dataOut
           }
 }
 
