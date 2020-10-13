@@ -10,16 +10,13 @@ mod_wf_wf1_Original_ui <- function(id){
       h3('Module Original'),
       fluidRow(
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Data input")),
+               tags$b(h4(style = 'color: blue;', "Input")),
                uiOutput(ns('show_dataIn'))),
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Data output")),
+               tags$b(h4(style = 'color: blue;', "Output")),
                uiOutput(ns('show_rv_dataOut'))),
-        column(width=2,
-               tags$b(h4(style = 'color: blue;', "Current pos")),
-               uiOutput(ns('show_currentPos'))),
         column(width=4,
-               tags$b(h4(style = 'color: blue;', "List 'status'")),
+               tags$b(h4(style = 'color: blue;', "status")),
                uiOutput(ns('show_status')))
       )
     )
@@ -165,13 +162,13 @@ mod_wf_wf1_Original_server <- function(id,
       UpdateDataOut <- reactive({
         if(verbose)
           print(paste0(config$process.name, ' : Execution of UpdateDataOut() : '))
-        
+        isolate({
         dataOut$obj <- rv$dataOut
         dataOut$name <- config$process.name
         dataOut$trigger <- runif(1,0,1)
         if(verbose)
           print(paste0(config$process.name, ' : dataOut$obj =  : ', paste0(names(dataOut$obj), collapse=' ')))
-        
+        })
       })
       
  

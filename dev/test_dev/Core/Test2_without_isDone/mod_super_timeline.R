@@ -5,19 +5,24 @@ mod_super_timeline_ui <- function(id){
   tagList(
     useShinyjs(),
     mod_timeline_ui(ns("timeline")),
+    hr(),
     uiOutput(ns('show_screens')),
     hr(),
+    h3('Module pipeline'),
     wellPanel(
       fluidRow(
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Data input")),
+               tags$b(h4(style = 'color: blue;', "Input")),
                uiOutput(ns('show_dataIn'))),
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Data input")),
+               tags$b(h4(style = 'color: blue;', "Current dataset")),
                uiOutput(ns('show_rv_dataIn'))),
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Data output")),
-               uiOutput(ns('show_rv_dataOut')))
+               tags$b(h4(style = 'color: blue;', "Output")),
+               uiOutput(ns('show_rv_dataOut'))),
+        column(width=4,
+               tags$b(h4(style = 'color: blue;', "Status")),
+               uiOutput(ns('show_status')))
         # column(width=2,
         #        tags$b(h4(style = 'color: blue;', "Current pos")),
         #        uiOutput(ns('show_currentPos')))
@@ -113,7 +118,7 @@ mod_super_timeline_server <- function(id,
           print(paste0(config$process.name, ' :  Initialisation du module ------'))
         
         #rv$old.rst <- 0
-        rv$dataIn <- dataIn()
+        #rv$dataIn <- dataIn()
         BuildStatus()
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
@@ -335,7 +340,7 @@ mod_super_timeline_server <- function(id,
         print(paste0(config$process.name, " : BuildStatus()"))
       
       config$status <- setNames(lapply(1:nbSteps(), 
-                      function(x){GetStatusPosition(x)}), 
+                      function(x){if (x==1) VALIDATED else GetStatusPosition(x)}), 
                names(config$steps))
       #rv$wake <- Wake()
     })

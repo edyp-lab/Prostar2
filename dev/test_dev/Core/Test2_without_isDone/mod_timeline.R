@@ -167,6 +167,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     observeEvent(req(wake()), {
       if(verbose)
         print(paste0('TL(',config$process.name, ') : observeEvent(current$wake() '))
+     
       Update_Cursor_position()
     })
     

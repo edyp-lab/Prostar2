@@ -9,16 +9,18 @@ output$show_dataIn <- renderUI({
 })
 
 output$show_rv_dataIn <- renderUI({
-  tagList(lapply(names(dataIn()), function(x){tags$p(x)}))
+  tagList(lapply(names(rv$dataIn), function(x){tags$p(x)}))
   })
 
 output$show_rv_dataOut <- renderUI({
  # browser()
   req(rv$dataOut)
 tagList(
-    lapply(names(rv$dataOut), function(x){tags$p(x)})
+    lapply(names(dataOut$obj), function(x){tags$p(x)})
   )
 })
+
+
 output$show_status <- renderUI({
   req(config$status)
  # browser()
