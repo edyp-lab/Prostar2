@@ -60,6 +60,7 @@ mod_wf_wf1_Normalization_server <- function(id,
         current.pos = 1,
         timeline = NULL,
         dataIn = NULL,
+        ll_dataIn = NULL,
         dataOut = NULL,
         old.rst = 0,
         wake = FALSE)
@@ -85,12 +86,54 @@ mod_wf_wf1_Normalization_server <- function(id,
         config$status <- setNames(lapply(1:nbSteps(), 
                                          function(x){if (x==1) VALIDATED else GetStatusPosition(x)}), 
                                   names(config$steps))
+        #browser()
       })
       
       
       
+      ###### General functions
+      
       GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
-      GetStatusPosition <- function(pos){ config$status[[pos]] }
+      
+      
+      GetMaxValidated_AllSteps <- reactive({
+        last.name <- names(rv$ll_dataIn)[length(rv$ll_dataIn)]
+        ind <- which(last.name == names(config$steps))
+        if (length(ind) == 0)
+          ind <- NULL
+        ind
+      })
+      
+      GetMaxValidated_BeforeCurrentPos <- reactive({
+        ind.max <- NULL
+        current.name <- GetCurrentStepName()
+        ind.current <- which(current.name == names(config$steps))
+        indices.validated <- match(names(rv$ll_dataIn), names(config$steps))
+        if (length(indices.validated) > 0){
+          ind <- which(indices.validated < ind.current)
+          if(length(ind) > 0)
+            ind.max <- max(ind)
+        }
+        ind.max
+      })
+      
+      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
+      
+      GetStatusPosition <- function(pos){
+        status <- NULL
+        #browser()
+        if (length(grep(names(config$steps)[[pos]], names(rv$ll_dataIn)))== 1) 
+          status <- VALIDATED
+        else {
+          if (is.null(GetMaxValidated_AllSteps()) ||  GetMaxValidated_AllSteps() < pos)
+            status <- UNDONE
+          else if (GetMaxValidated_AllSteps() > pos)
+            status <- SKIPPED
+        }
+        status
+      }
+      
+      #### Genrala functions
       
       observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
@@ -139,6 +182,7 @@ mod_wf_wf1_Normalization_server <- function(id,
         rv$current.pos <- 1
         
         CommonInitializeFunctions()
+        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
         BuildStatus()
         
         rv$timeline <- mod_timeline_server("timeline", 
@@ -164,7 +208,7 @@ mod_wf_wf1_Normalization_server <- function(id,
           
           ResetScreens()
           rv$old.rst <- rv$timeline$rstBtn()
-          
+          rv$ll_dataIn <- NULL
           InitializeModule()
           BuildStatus()
         })
@@ -231,7 +275,9 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       
       observeEvent(input$perform_Step1_btn, {
-        config$status[['Step1']] <- VALIDATED
+        #config$status[['Step1']] <- VALIDATED
+        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
+        BuildStatus()
       })
       
       ############### SCREEN 3 ######################################
@@ -256,7 +302,9 @@ mod_wf_wf1_Normalization_server <- function(id,
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
-        config$status[['Step2']] <- VALIDATED
+        #config$status[['Step2']] <- VALIDATED
+        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
+        BuildStatus()
       })
       
       
@@ -281,7 +329,9 @@ mod_wf_wf1_Normalization_server <- function(id,
       observeEvent(input$validate_btn, {
         rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
         UpdateDataOut()
-        config$status[['Step3']] <- VALIDATED
+        #config$status[['Step3']] <- VALIDATED
+        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
+        BuildStatus()
       })
       
       

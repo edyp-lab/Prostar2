@@ -269,7 +269,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
       if(verbose)
         print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
       n <- current$nbSteps
-      browser()
+      #browser()
       
       if ((config$status[[n]] == VALIDATED))
         current$val <- current$DEFAULT_VALIDATED_POSITION
