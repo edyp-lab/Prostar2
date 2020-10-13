@@ -214,8 +214,7 @@ mod_wf_wf1_Original_server <- function(id,
           
           rv$current.pos <- 1
           ResetScreens()
-          InitializeModule()
-          rv$old.rst <- rv$timeline$rstBtn()
+          rv$dataIn <- dataIn()
           BuildStatus()
         })
         

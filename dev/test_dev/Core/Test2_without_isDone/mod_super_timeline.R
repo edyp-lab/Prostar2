@@ -48,9 +48,9 @@ mod_super_timeline_server <- function(id,
         #dataIn = NULL,
         dataOut = NULL,
         
-        data2send = NULL,
+        data2send = NULL
         
-        old.rst = 0
+        #wake = 0
       )
       
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
@@ -73,6 +73,7 @@ mod_super_timeline_server <- function(id,
         BuildStatus()
         inputExists <- length(dataIn()) > 0
         tmpExists <- !is.null(rv$dataIn)
+        rv$wake <- FALSE
         
         
         if (tmpExists){
@@ -108,19 +109,20 @@ mod_super_timeline_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, ' :  Initialisation du module ------'))
         
-        rv$old.rst <- 0
+        #rv$old.rst <- 0
         rv$dataIn <- dataIn()
         BuildStatus()
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
         
+       # rv$wake <- Wake()
         
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
                                    config = config,
                                    showSaveBtn = TRUE,
-                                   wake = reactive({F}))
+                                   wake = reactive({rv$wake}))
         ##browser()
         BuildScreensUI()
         
@@ -130,17 +132,23 @@ mod_super_timeline_server <- function(id,
         } # END OF observeEvent(dataIn())
       
       
+      Wake <- function(){ runif(1,0,1)}
+      
+      
       
       
       #Catch a reset command from timeline
-      observeEvent(req(rv$timeline$rstBtn() != rv$old.rst), {
+      observeEvent(req(rv$timeline$rstBtn()), {
         if(verbose)
           print(paste0(config$process.name, " : reset activated"))
         
         ResetScreens()
-        InitializeModule()
-        rv$old.rst <- rv$timeline$rstBtn()
+        #InitializeModule()
+         rv$dataIn <- dataIn()
+        rv$current.pos <- 1
+        rv$wake <- Wake()
         BuildStatus()
+
       })
       
       
@@ -326,6 +334,7 @@ mod_super_timeline_server <- function(id,
       config$status <- setNames(lapply(1:nbSteps(), 
                       function(x){GetStatusPosition(x)}), 
                names(config$steps))
+      #rv$wake <- Wake()
     })
 
       

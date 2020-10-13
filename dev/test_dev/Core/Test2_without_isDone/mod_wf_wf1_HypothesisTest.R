@@ -134,6 +134,7 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
       }
       
       #### Genrala functions
+      Wake <- function(){ runif(1,0,1)}
       
       observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
@@ -145,7 +146,7 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
         rv$wake <- FALSE
         if (inputExists && tmpExists){
           # this case is either the module is skipped or validated
-          rv$wake <- runif(1,0,1)
+          rv$wake <- Wake()
           # if(rv$skipped){
           #   if(verbose)
           #     print(paste0(config$process.name, ' : Skipped process'))
@@ -209,7 +210,12 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
           ResetScreens()
           rv$old.rst <- rv$timeline$rstBtn()
           rv$ll_dataIn <- NULL
-          InitializeModule()
+          #InitializeModule()
+          
+          rv$dataIn <- dataIn()
+          rv$current.pos <- 1
+          rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
+          rv$wake <- Wake()
           BuildStatus()
         })
         
