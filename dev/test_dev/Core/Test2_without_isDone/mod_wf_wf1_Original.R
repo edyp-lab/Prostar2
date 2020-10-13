@@ -95,6 +95,7 @@ mod_wf_wf1_Original_server <- function(id,
         else if (inputExists && !tmpExists){
           # The current position is pointed on a new module
           InitializeModule()
+          InitializeTimeline()
           if(verbose)
             print(paste0(config$process.name, ' : InitializeModule()'))
         }
@@ -174,23 +175,26 @@ mod_wf_wf1_Original_server <- function(id,
       })
       
  
+      InitializeTimeline <- function(){
+        rv$timeline <- mod_timeline_server("timeline",
+                                           style = 2,
+                                           config = config,
+                                           onlyReset = TRUE,
+                                           wake = reactive({rv$wake})
+                                           )
+      }
+      
       
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
+        rv$current.pos <- 1
         rv$dataIn <- dataIn()
+        rv$dataOut <- NULL
         CommonInitializeFunctions()
         
-        rv$timeline <- mod_timeline_server("timeline", 
-                                           style = 2, 
-                                           config = config, 
-                                           onlyReset = TRUE,
-                                           wake = reactive({rv$wake})
-                                           )
-        
-         BuildStatus()
-        
-        
+        BuildStatus()
+
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
           if(verbose)
@@ -201,9 +205,7 @@ mod_wf_wf1_Original_server <- function(id,
           
         })
         
-        
-        
-        
+
         
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn() > rv$old.rst, remoteReset())),{
@@ -231,9 +233,33 @@ mod_wf_wf1_Original_server <- function(id,
         }
 
       }
+
       ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
     
       
+      # This function cannot be implemented in the timeline module because 
+      # the id of the screens to reset are not known elsewhere.
+      # Trying to reset the global 'div_screens' in the timeline module
+      # does not work
+      ResetScreens <- function(screens){
+        lapply(1:nbSteps(), function(x){
+          shinyjs::reset(names(config$steps)[x])
+        })
+      }
+      
+      
+      #--- Catch a reset from timeline or caller
+      observeEvent(req(c(rv$timeline$rstBtn(), remoteReset())),{
+        if(verbose){
+          print(paste0(config$process.name, ' : ------reset activated------, rv$timeline$rstBtn()=',rv$timeline$rstBtn()))
+          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
+        }
+        
+        ResetScreens()
+        InitializeModule()
+        rv$old.rst <- rv$timeline$rstBtn()
+        BuildStatus()
+      })
       
       #####################################################################
       ## screens of the module
@@ -255,7 +281,7 @@ mod_wf_wf1_Original_server <- function(id,
         #browser()
         rv$dataOut <- rv$dataIn
         UpdateDataOut()
-        config$status[['Description']] <- VALIDATED
+        config$status[[rv$current.pos]] <- VALIDATED
       })
 
       

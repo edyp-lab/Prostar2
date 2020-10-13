@@ -156,6 +156,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         else if (inputExists && !tmpExists){
           # The current position is pointed on a new module
           InitializeModule()
+          InitializeTimeline()
           if(verbose)
             print(paste0(config$process.name, ' : InitializeModule()'))
         }
@@ -173,7 +174,12 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       
       
-      
+      InitializeTimeline <- function(){
+        rv$timeline <- mod_timeline_server("timeline", 
+                                           style = 2, 
+                                           config = config,
+                                           wake = reactive({rv$wake}))
+      }
       
       
       InitializeModule <- function(){
@@ -186,11 +192,6 @@ mod_wf_wf1_Filtering_server <- function(id,
         rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
         BuildStatus()
         
-        rv$timeline <- mod_timeline_server("timeline", 
-                                           style = 2, 
-                                           config = config,
-                                           wake = reactive({rv$wake}))
-        
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
           if(verbose)
@@ -198,9 +199,6 @@ mod_wf_wf1_Filtering_server <- function(id,
           rv$current.pos <- rv$timeline$pos() 
  
         })
-        
-        
-        
         
         #--- Catch a reset from timeline or caller
         observeEvent(req(c(rv$timeline$rstBtn(), remoteReset()!=0)), {
@@ -230,7 +228,7 @@ mod_wf_wf1_Filtering_server <- function(id,
             shinyjs::reset(names(config$steps)[x])
           })
         }
-        
+
       }
       ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
       

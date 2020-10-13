@@ -208,6 +208,9 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
       newval <- current$val + direction 
       newval <- max(1, newval)
       newval <- min(newval, current$nbSteps)
+      if(newval == 0)
+        browser()
+        
       current$val <- newval
     }
     observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
@@ -277,6 +280,8 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
         current$val <- current$DEFAULT_SKIPPED_POSITION
       else if (config$status[[n]] == UNDONE)
         current$val <- current$DEFAULT_UNDONE_POSITION
+      if(current$val==0)
+        browser()
     }
    
     
@@ -432,7 +437,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
          prvBtn = reactive(input$prevBtn),
          nxtBtn = reactive(input$nextBtn),
          saveBtn = reactive({input$saveExitBtn}),
-         pos = reactive(current$val)
+         pos = reactive({current$val})
     )
     
   })
