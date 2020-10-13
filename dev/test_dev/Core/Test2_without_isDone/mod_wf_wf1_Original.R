@@ -53,25 +53,14 @@ mod_wf_wf1_Original_server <- function(id,
       rv <- reactiveValues(
         current.pos = 1,
         timeline = NULL,
-        dataIn = NULL,
-        dataOut = NULL,
-        old.rst = 0)
+        dataIn = NULL
+        #dataOut = NULL
+        )
       
 
       # Main listener of the module which initialize it
       
-      
-      observeEvent(isSkipped(), {
-        if(verbose)
-          print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
-        #browser()
-        rv$skipped <- isSkipped()
-        if (isSkipped())
-          config$status <- setNames(lapply(1:nbSteps(), 
-                                           function(x){SKIPPED}), 
-                                    names(config$steps))
-      })
-      
+     
       
       
       observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
@@ -79,36 +68,37 @@ mod_wf_wf1_Original_server <- function(id,
           print(paste0(config$process.name, " :  reception d'un nouveau dataIn() : ", paste0(names(dataIn()), collapse=' ')))
         
         #browser()
-        BuildStatus()
         inputExists <- length(dataIn()) > 0
         tmpExists <- !is.null(rv$dataIn)
+        rv$wake <- FALSE
         
-        
-        if (inputExists && tmpExists){
+        if (tmpExists){
           # this case is either the module is skipped or validated
-          #rv$current.pos <- nbSteps()
-          rv$wake <- runif(1,0,1)
-        }
-        else if (inputExists && !tmpExists){
-          # The current position is pointed on a new module
-          InitializeModule()
-          InitializeTimeline()
-          if(verbose)
-            print(paste0(config$process.name, ' : InitializeModule()'))
-        }
-        else if (!inputExists && tmpExists){
-          #The current position points to a validated module
-          rv$current.pos <- nbSteps()
           if(verbose)
             print(paste0(config$process.name, ' : Just repositioning cursor'))
-        }
-        else if (!inputExists && !tmpExists){
-          # Initialization of Prostar
+          rv$current.pos <- nbSteps()
+          rv$wake <- Wake()
+        } else {
+          if (inputExists){
+            if(verbose)
+              print(paste0(config$process.name, ' : InitializeModule()'))
+            # The current position is pointed on a new module
+            InitializeModule()
+            InitializeTimeline()
+          } else if (!inputExists){
+            # Initialization of Prostar
+          }
         }
         
+      })
+      
+      
+      observeEvent(req(isSkipped()), {
         if(verbose)
-          print(paste0(config$process.name, " :  END OF reception d'un nouveau dataIn() : ", paste0(names(rv$dataIn), collapse=' ')))
+          print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
         
+        if (isSkipped())
+          Initialize_Status_Process()
       })
       
       
@@ -116,8 +106,33 @@ mod_wf_wf1_Original_server <- function(id,
       
       
       
+      
+      
+      InitializeModule <- function(){
+        if(verbose)
+          print(paste0(config$process.name, ' : InitializeModule() ------- '))
+        Initialize_Status()
+        rv$screens <- InitActions(nbSteps())
+        # Must be placed after the initialisation of the 'config$stepsNames' variable
+        config$screens <- CreateScreens(names(config$steps))
+        rv$dataIn <- dataIn()
+        rv$current.pos <- 1
+      }
+        
+        InitializeTimeline <- function(){
+          rv$timeline <- mod_timeline_server("timeline",
+                                             style = 2,
+                                             config = config,
+                                             onlyReset = TRUE,
+                                             wake = reactive({rv$wake})
+                                             )
+        }
+      
+        Wake <- function(){ runif(1,0,1)}
+        
+      
       GetMaxValidated_AllSteps <- reactive({
-        last.name <- names(rv$dataOut)[length(rv$dataOut)]
+        last.name <- names(rv$dataOut)[length(rv$dataIn)]
         ind <- which(last.name == names(config$steps))
         if (length(ind) == 0)
           ind <- NULL
@@ -139,7 +154,7 @@ mod_wf_wf1_Original_server <- function(id,
       GetStatusPosition <- function(pos){
         status <- NULL
         #browser()
-        if (length(grep(names(config$steps)[[pos]], names(rv$dataOut)))== 1) 
+        if (length(grep(names(config$steps)[[pos]], names(rv$dataIn)))== 1) 
           status <- VALIDATED
         else {
           if (is.null(GetMaxValidated_AllSteps()) ||  GetMaxValidated_AllSteps() < pos)
@@ -152,7 +167,6 @@ mod_wf_wf1_Original_server <- function(id,
       
       
       BuildStatus <- reactive({
-        rv$dataOut
         config$status <- setNames(lapply(1:nbSteps(), 
                                          function(x){GetStatusPosition(x)}), 
                                   names(config$steps))
@@ -172,26 +186,7 @@ mod_wf_wf1_Original_server <- function(id,
       })
       
  
-      InitializeTimeline <- function(){
-        rv$timeline <- mod_timeline_server("timeline",
-                                           style = 2,
-                                           config = config,
-                                           onlyReset = TRUE,
-                                           wake = reactive({rv$wake})
-                                           )
-      }
       
-      
-      InitializeModule <- function(){
-        if(verbose)
-          print(paste0(config$process.name, ' : InitializeModule() ------- '))
-        rv$current.pos <- 1
-        rv$dataIn <- dataIn()
-        rv$dataOut <- NULL
-        CommonInitializeFunctions()
-        
-        BuildStatus()
-
         #Catch a new position from timeline
         observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
           if(verbose)
@@ -217,19 +212,6 @@ mod_wf_wf1_Original_server <- function(id,
           BuildStatus()
         })
         
-        
-        
-        # This function cannot be implemented in the timeline module because 
-        # the id of the screens to reset are not known elsewhere.
-        # Trying to reset the global 'div_screens' in the timeline module
-        # does not work
-        ResetScreens <- function(screens){
-          lapply(1:nbSteps(), function(x){
-            shinyjs::reset(names(config$steps)[x])
-          })
-        }
-
-      }
 
       ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
     
@@ -257,6 +239,8 @@ mod_wf_wf1_Original_server <- function(id,
         rv$old.rst <- rv$timeline$rstBtn()
         BuildStatus()
       })
+      
+
       
       #####################################################################
       ## screens of the module

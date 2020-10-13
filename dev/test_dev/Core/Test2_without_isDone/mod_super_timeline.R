@@ -33,7 +33,9 @@ mod_super_timeline_ui <- function(id){
 
 #' @param dataIn xxx
 #'
+#' @param dataOut xxx
 #' 
+#' @param config
 #' 
 mod_super_timeline_server <- function(id, 
                                       dataIn=NULL,
@@ -45,6 +47,8 @@ mod_super_timeline_server <- function(id,
       ns <- session$ns
       
       verbose <- T
+      source(file.path('.', 'debug_ui.R'), local=TRUE)$value
+      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
       rv <- reactiveValues(
         # Current position of the cursor in the timeline
@@ -57,15 +61,11 @@ mod_super_timeline_server <- function(id,
         dataOut = NULL,
         
         data2send = NULL
-        
-        #wake = 0
       )
       
-      source(file.path('.', 'debug_ui.R'), local=TRUE)$value
-      source(file.path('.', 'code_general.R'), local=TRUE)$value
       
       
-      modules_dataOut <- reactiveValues(
+      return_of_process <- reactiveValues(
         name = NULL,
         trigger = NULL,
         obj = NULL
@@ -77,8 +77,6 @@ mod_super_timeline_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, " :  reception d'un nouveau dataIn() : ", paste0(names(dataIn()), collapse=' ')))
         
-        ##browser()
-        BuildStatus()
         inputExists <- length(dataIn()) > 0
         tmpExists <- !is.null(rv$dataIn)
         rv$wake <- FALSE
@@ -95,6 +93,7 @@ mod_super_timeline_server <- function(id,
           # The current position is pointed on a new module
           if(verbose)
             print(paste0(config$process.name, ' : InitializeModule()'))
+          
           InitializeModule()
           rv$data2send <- setNames(lapply(1:nbSteps(), 
                                           function(x){NA}), 
@@ -117,26 +116,18 @@ mod_super_timeline_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, ' :  Initialisation du module ------'))
         
-        #rv$old.rst <- 0
-        #rv$dataIn <- dataIn()
-        BuildStatus()
+
+        Initialize_Status()
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
-        
-       # rv$wake <- Wake()
-        
+ 
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
                                    config = config,
                                    showSaveBtn = TRUE,
                                    wake = reactive({rv$wake}))
-        ##browser()
         BuildScreensUI()
-        
-        #PrepareData2Send()
-        
-        
         } # END OF observeEvent(dataIn())
       
       
@@ -151,12 +142,10 @@ mod_super_timeline_server <- function(id,
           print(paste0(config$process.name, " : reset activated"))
         
         ResetScreens()
-        #InitializeModule()
-         rv$dataIn <- dataIn()
+        rv$dataIn <- dataIn()
         rv$current.pos <- 1
         rv$wake <- Wake()
-        BuildStatus()
-
+        Initialize_Status()
       })
       
       
@@ -170,20 +159,70 @@ mod_super_timeline_server <- function(id,
       # If a value (not NULL) is received, then it corresponds to the module
       # pointed by the current position
       # This function also updates the list isDone
-      observeEvent(req(modules_dataOut$trigger), ignoreNULL = T, ignoreInit=F, { 
+      observeEvent(req(return_of_process$trigger), ignoreNULL = T, ignoreInit=F, { 
         if(verbose){
           print(paste0(config$process.name, " : reception d'un retour sur rv$tmp"))
-          print(paste0(config$process.name, " : modules_dataOut$trigger = ", modules_dataOut$trigger))
-          print(paste0(config$process.name, " : modules_dataOut$name = ", modules_dataOut$name))
-          print(paste0(config$process.name, " : modules_dataOut$obj = ", paste0(names(modules_dataOut$obj), collapse=' ')))
+          print(paste0(config$process.name, " : return_of_process$trigger = ", return_of_process$trigger))
+          print(paste0(config$process.name, " : return_of_process$name = ", return_of_process$name))
+          print(paste0(config$process.name, " : return_of_process$obj = ", paste0(names(return_of_process$obj), collapse=' ')))
         }
         
-        #browser()
-        
-        Update_dataIn()
-       # PrepareData2Send()
-        BuildStatus()
+        # Store the result of a process module
+        rv$dataIn <- return_of_process$obj
+         # Update the status
+        config$status[return_of_process$name] <- class(rv$dataIn) == 'QFeatures'
+        Set_Skipped_Status()
       })
+      
+      
+      ## -----------------------------------------------------------------------
+      ## Functions to manage the config$status vector
+      ##
+      ## _______________________________________________________________________
+      
+      Initialize_Status <- reactive({
+        config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
+      })
+
+      GetMaxValidated_AllSteps <- reactive({
+        ind <- which(config$status == VALIDATED)
+        if (length(ind) == 0)
+          ind <- NULL
+        max(ind)
+      })
+      
+      GetMaxValidated_BeforeCurrentPos <- reactive({
+        ind.max <- NULL
+        indices.validated <- which(config$status == VALIDATED)
+        if (length(indices.validated) > 0){
+          ind <- which(indices.validated < rv$current.pos)
+          if(length(ind) > 0)
+            ind.max <- max(ind)
+        }
+        ind.max
+      })
+      
+      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
+      
+      Unskip <- function(pos){config$status[pos] <- UNDONE}
+      
+      GetStatusPosition <- function(pos){config$status[pos]}
+
+      Set_Skipped_Status <- function(){
+        for (i in nbSteps())
+          if (config$status[i] != 1 && GetMaxValidated_AllSteps() > i)
+              config$status <- SKIPPED
+      }
+
+      # Test if a process module (identified by its name) has been skipped.
+      # This function is called each time the list config$isDone is updated
+      # because one can know the status 'Skipped' only when a further module
+      # has been validated
+      isSkipped <- function(name){
+        pos <- which(name == names(config$steps))
+        return(GetStatusPosition(pos) == SKIPPED)
+      }
+      
       
       
       
@@ -206,7 +245,6 @@ mod_super_timeline_server <- function(id,
         # Returns NULL to all modules except the one pointed by the current position
         # Initialization of the pipeline : one send dataIn() to the
         # original module
-        
         update <- function(name){
           data <- NA
           if (name == GetCurrentStepName()){
@@ -219,7 +257,6 @@ mod_super_timeline_server <- function(id,
             }
           }
 
-          
           if(verbose){
             print(paste0(config$process.name, ' : SendCurrentDataset() to ', name, ' => ', paste0(names(data), collapse=' ')))
           }
@@ -237,7 +274,7 @@ mod_super_timeline_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos(). New position = ', rv$timeline$pos()))
         rv$current.pos <- rv$timeline$pos()
-#browser()
+        #browser()
         PrepareData2Send()
       })
       
@@ -245,15 +282,16 @@ mod_super_timeline_server <- function(id,
       observeEvent(req(rv$timeline$saveBtn()),{
         if(verbose)
           print(paste0(config$process.name, " : Clic on the 'Save & Exit' button", rv$timeline$saveBtn()))
-        rv$current.pos <- rv$timeline$pos()
         
-        UpdateDataOut()
+        Send_Result_to_Caller()
       })
       
-      UpdateDataOut <- reactive({
+      
+      
+      Send_Result_to_Caller <- reactive({
         if(verbose)
-          print(paste0(config$process.name, ' : Execution of UpdateDataOut() : '))
-        
+          print(paste0(config$process.name, ' : Execution of Send_Result_to_Caller() : '))
+        browser()
         dataOut$obj <- rv$dataIn
         dataOut$name <- config$process.name
         dataOut$trigger <- runif(1,0,1)
@@ -274,87 +312,7 @@ mod_super_timeline_server <- function(id,
       
       # ------------ END OF COMMON FUNCTIONS --------------------
 
-      
-      ## IMPORTANT FUNCTION !!!
-     Update_dataIn <- reactive({
-       if(verbose)
-         print(paste0(config$process.name, " : Update_dataIn()"))
-       ##browser() 
-       rv$dataIn <- modules_dataOut$obj
-
-    ##browser()
-     })
-      
-      
-      
-      
-      
-      GetMaxValidated_AllSteps <- reactive({
-        last.name <- names(rv$dataIn)[length(rv$dataIn)]
-        ind <- which(last.name == names(config$steps))
-        if (length(ind) == 0)
-          ind <- NULL
-        ind
-      })
-      
-      GetMaxValidated_BeforeCurrentPos <- reactive({
-        ind.max <- NULL
-        current.name <- GetCurrentStepName()
-        ind.current <- which(current.name == names(config$steps))
-        indices.validated <- match(names(rv$dataIn),names(config$steps))
-        if (length(indices.validated) > 0){
-          ind <- which(indices.validated < ind.current)
-          if(length(ind) > 0)
-            ind.max <- max(ind)
-        }
-        ind.max
-      })
-      
-      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
-      
-      Unskip <- function(pos){
-        config$status[[pos]] <- UNDONE
-      }
-      
-      GetStatusPosition <- function(pos){
-        status <- NULL
-        ##browser()
-        if (length(grep(names(config$steps)[[pos]], names(rv$dataIn)))== 1) 
-          status <- VALIDATED
-        else {
-          if (is.null(GetMaxValidated_AllSteps()) ||  GetMaxValidated_AllSteps() < pos)
-            status <- UNDONE
-          else if (GetMaxValidated_AllSteps() > pos)
-            status <- SKIPPED
-        }
-        status
-      }
-      
-      
-      
-      
-### End of part for managing the timeline
-      
-    BuildStatus <- reactive({
-      if(verbose)
-        print(paste0(config$process.name, " : BuildStatus()"))
-      
-      config$status <- setNames(lapply(1:nbSteps(), 
-                      function(x){if (x==1) VALIDATED else GetStatusPosition(x)}), 
-               names(config$steps))
-      #rv$wake <- Wake()
-    })
-
-      
-      # Test if a process module (identified by its name) has been skipped.
-      # This function is called each time the list config$isDone is updated
-      # because one can know the status 'Skipped' only when a further module
-      # has been validated
-      isSkipped <- function(name){
-       # #browser()
-        pos <- which(name == names(config$steps))
-        return(GetStatusPosition(pos) == SKIPPED)
-      }
+     
 
      
       # This function calls the server part of each module composing the pipeline
@@ -369,7 +327,7 @@ mod_super_timeline_server <- function(id,
           do.call(as.character(paste0('mod_wf_wf1_', x, '_server')), 
                   list(id = as.character(paste0("mod_",x, "_nav")),
                        dataIn = reactive({rv$data2send[[x]]}),
-                       dataOut = modules_dataOut,
+                       dataOut = return_of_process,
                        remoteReset = reactive({rv$timeline$rstBtn()}),
                        isSkipped = reactive({isSkipped(x)})
                   )

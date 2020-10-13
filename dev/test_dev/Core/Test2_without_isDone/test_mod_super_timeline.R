@@ -50,7 +50,7 @@ server <- function(input, output, session) {
   config <- reactiveValues(
     type = 'pipeline',
     process.name = 'Pipeline',
-    steps = append(list(Original = F), pipeline.defs$protein )
+    steps = append(list(Original = T), pipeline.defs$protein )
   )
   
   superTL_dataOut <- reactiveValues(

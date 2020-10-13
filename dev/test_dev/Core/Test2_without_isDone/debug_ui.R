@@ -21,12 +21,20 @@ tagList(
 })
 
 
+getStringStatus <- function(status){
+  if (status==1) "Validated"
+  else if (status==0) "Undone"
+  else if (status==-1) 'Skipped'
+}
+
 output$show_status <- renderUI({
   req(config$status)
- # browser()
+  # browser()
+  
   tagList(lapply(1:nbSteps(), 
-                 function(x){if (x == rv$current.pos) tags$p(tags$b(paste0('-> ',names(config$status)[x], ' - ', config$status[[x]])))
-                   else tags$p(paste0(names(config$status)[x], ' - ', config$status[[x]]))
+                 function(x){if (x == rv$current.pos) tags$p(tags$b(paste0('-> ',names(config$status)[x], ' - ', getStringStatus(config$status[[x]]))))
+                   else tags$p(paste0(names(config$status)[x], ' - ', getStringStatus(config$status[[x]])))
                  }))
 })
+
 

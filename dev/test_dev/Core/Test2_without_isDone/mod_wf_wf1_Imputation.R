@@ -51,7 +51,6 @@ mod_wf_wf1_Imputation_server <- function(id,
                      Step3 = T)
       )
       
-      #################################################################################
       
       rv <- reactiveValues(
         current.pos = 1,
@@ -59,79 +58,9 @@ mod_wf_wf1_Imputation_server <- function(id,
         dataIn = NULL,
         ll_dataIn = NULL,
         dataOut = NULL,
-        old.rst = 0,
         wake = FALSE)
       
       # Main listener of the module which initialize it
-      
-      
-      observeEvent(isSkipped(), {
-        if(verbose)
-          print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
-        
-        rv$skipped <- isSkipped()
-        if (isSkipped())
-          config$status <- setNames(lapply(1:nbSteps(), 
-                                           function(x){ if (x==1) VALIDATED else SKIPPED}), 
-                                    names(config$steps))
-      })
-      
-      
-      
-      BuildStatus <- reactive({
-        #browser()
-        config$status <- setNames(lapply(1:nbSteps(), 
-                                         function(x){if (x==1) VALIDATED else GetStatusPosition(x)}), 
-                                  names(config$steps))
-        #browser()
-      })
-      
-      
-      
-      ###### General functions
-      
-      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
-      
-      
-      GetMaxValidated_AllSteps <- reactive({
-        last.name <- names(rv$ll_dataIn)[length(rv$ll_dataIn)]
-        ind <- which(last.name == names(config$steps))
-        if (length(ind) == 0)
-          ind <- NULL
-        ind
-      })
-      
-      GetMaxValidated_BeforeCurrentPos <- reactive({
-        ind.max <- NULL
-        current.name <- GetCurrentStepName()
-        ind.current <- which(current.name == names(config$steps))
-        indices.validated <- match(names(rv$ll_dataIn), names(config$steps))
-        if (length(indices.validated) > 0){
-          ind <- which(indices.validated < ind.current)
-          if(length(ind) > 0)
-            ind.max <- max(ind)
-        }
-        ind.max
-      })
-      
-      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
-      
-      GetStatusPosition <- function(pos){
-        status <- NULL
-        #browser()
-        if (length(grep(names(config$steps)[[pos]], names(rv$ll_dataIn)))== 1) 
-          status <- VALIDATED
-        else {
-          if (is.null(GetMaxValidated_AllSteps()) ||  GetMaxValidated_AllSteps() < pos)
-            status <- UNDONE
-          else if (GetMaxValidated_AllSteps() > pos)
-            status <- SKIPPED
-        }
-        status
-      }
-      
-      #### Genrala functions
-      Wake <- function(){ runif(1,0,1)}
       
       observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
         if(verbose)
@@ -141,103 +70,153 @@ mod_wf_wf1_Imputation_server <- function(id,
         inputExists <- length(dataIn()) > 0
         tmpExists <- !is.null(rv$dataIn)
         rv$wake <- FALSE
-        if (inputExists && tmpExists){
+        if (tmpExists){
           # this case is either the module is skipped or validated
-          rv$wake <- Wake()
-          # if(rv$skipped){
-          #   if(verbose)
-          #     print(paste0(config$process.name, ' : Skipped process'))
-          # 
-          # }
-        }
-        else if (inputExists && !tmpExists){
-          # The current position is pointed on a new module
-          InitializeModule()
-          if(verbose)
-            print(paste0(config$process.name, ' : InitializeModule()'))
-        }
-        else if (!inputExists && tmpExists){
-          #The current position points to a validated module
-          rv$current.pos <- nbSteps()
           if(verbose)
             print(paste0(config$process.name, ' : Just repositioning cursor'))
-        }
-        else if (!inputExists && !tmpExists){
-          # Initialization of Prostar
+          rv$current.pos <- nbSteps()
+          rv$wake <- Wake()
+        } else {
+          if (inputExists){
+            if(verbose)
+              print(paste0(config$process.name, ' : InitializeModule()'))
+            # The current position is pointed on a new module
+            InitializeModule()
+            InitializeTimeline()
+          } else if (!inputExists){
+            # Initialization of Prostar
+          }
         }
         
       })
       
       
       
+      observeEvent(req(isSkipped()), {
+        if(verbose)
+          print(paste0(config$process.name, ' : New value for isSkipped() : ', isSkipped()))
+        
+        if (isSkipped())
+          Initialize_Status_Process()
+      })
       
       
       
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
+        Initialize_Status()
+        rv$screens <- InitActions(nbSteps())
+        # Must be placed after the initialisation of the 'config$stepsNames' variable
+        config$screens <- CreateScreens(names(config$steps))
         rv$dataIn <- dataIn()
         rv$current.pos <- 1
-        
-        CommonInitializeFunctions()
-        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
-        BuildStatus()
-        
+      }
+      
+      InitializeTimeline <- function(){
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
                                            config = config,
                                            wake = reactive({rv$wake}))
-        
-        #Catch a new position from timeline
-        observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
-          if(verbose)
-            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
-          rv$current.pos <- rv$timeline$pos() 
-          
-        })
-        
-        
-        
-        
-        #--- Catch a reset from timeline or caller
-        observeEvent(req(c(rv$timeline$rstBtn() > rv$old.rst, remoteReset()!=0)), {
-          if(verbose)
-            print(paste0(config$process.name, ' : reset activated ----------------'))
-          
-          ResetScreens()
-          rv$old.rst <- rv$timeline$rstBtn()
-          rv$ll_dataIn <- NULL
-          #InitializeModule()
-          
-          rv$dataIn <- dataIn()
-          rv$current.pos <- 1
-          rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
-          rv$wake <- Wake()
-          BuildStatus()
-        })
-        
-        
-        
-        # This function cannot be implemented in the timeline module because 
-        # the id of the screens to reset are not known elsewhere.
-        # Trying to reset the global 'div_screens' in the timeline module
-        # does not work
-        ResetScreens <- function(screens){
-          lapply(1:nbSteps(), function(x){
-            shinyjs::reset(names(config$steps)[x])
-          })
-        }
-        
       }
+      
+      
+      Wake <- function(){ runif(1,0,1)}
+      
+      
+      #--- Catch a reset from timeline or caller
+      observeEvent(req(c(rv$timeline$rstBtn(), remoteReset()!=0)), {
+        if(verbose)
+          print(paste0(config$process.name, ' : reset activated ----------------'))
+        
+        ResetScreens()
+        rv$ll_dataIn <- NULL
+        
+        rv$dataIn <- dataIn()
+        rv$current.pos <- 1
+        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
+        rv$wake <- Wake()
+        Initialize_Status()
+      })
+      
+      
+      
+      Initialize_Status_Process <- function(){
+        config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
+        config$status[1] <- VALIDATED
+      }
+      
+      GetMaxValidated_AllSteps <- reactive({
+        ind <- which(config$status == VALIDATED)
+        if (length(ind) == 0)
+          ind <- NULL
+        max(ind)
+      })
+      
+      
+      GetMaxValidated_BeforeCurrentPos <- reactive({
+        ind.max <- NULL
+        indices.validated <- which(config$status == VALIDATED)
+        if (length(indices.validated) > 0){
+          ind <- which(indices.validated < rv$current.pos)
+          if(length(ind) > 0)
+            ind.max <- max(ind)
+        }
+        ind.max
+      })
+      
+      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
+      
+      Unskip <- function(pos){config$status[pos] <- UNDONE}
+      
+      GetStatusPosition <- function(pos){config$status[pos]}
+      
+      Set_Skipped_Status <- function(){
+        for (i in nbSteps())
+          if (config$status[i] != 1 && GetMaxValidated_AllSteps() > i)
+            config$status <- SKIPPED
+      }
+      
+      
+      
+      
+      #Catch a new position from timeline
+      observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
+        if(verbose)
+          print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
+        rv$current.pos <- rv$timeline$pos() 
+        
+      })
+      
+      
+      # This function cannot be implemented in the timeline module because 
+      # the id of the screens to reset are not known elsewhere.
+      # Trying to reset the global 'div_screens' in the timeline module
+      # does not work
+      ResetScreens <- function(screens){
+        lapply(1:nbSteps(), function(x){
+          shinyjs::reset(names(config$steps)[x])
+        })
+      }
+      
+      
+      
+      
+      
+      
+      
+      observeEvent(config$status, {Set_Skipped_Status() })
+      
+      
       ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
       
       
       
       
-      UpdateDataOut <- reactive({
+      Send_Result_to_Caller <- reactive({
         print(paste0(config$process.name, ' : Execution of UpdateDataOut() : '))
         
-        dataOut$obj <- rv$dataOut
+        dataOut$obj <- rv$dataIn
         dataOut$name <- config$process.name
         dataOut$trigger <- runif(1,0,1)
         
@@ -279,8 +258,7 @@ mod_wf_wf1_Imputation_server <- function(id,
       
       observeEvent(input$perform_Step1_btn, {
         #config$status[['Step1']] <- VALIDATED
-        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
-        BuildStatus()
+        config$status[rv$current.pos] <- VALIDATED
       })
       
       ############### SCREEN 3 ######################################
@@ -306,8 +284,7 @@ mod_wf_wf1_Imputation_server <- function(id,
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
         #config$status[['Step2']] <- VALIDATED
-        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
-        BuildStatus()
+        config$status[rv$current.pos] <- VALIDATED
       })
       
       
@@ -333,8 +310,7 @@ mod_wf_wf1_Imputation_server <- function(id,
         rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
         UpdateDataOut()
         #config$status[['Step3']] <- VALIDATED
-        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
-        BuildStatus()
+        config$status[rv$current.pos] <- VALIDATED
       })
       
       

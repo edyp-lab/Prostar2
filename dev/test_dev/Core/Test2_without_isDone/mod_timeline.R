@@ -32,8 +32,8 @@ mod_timeline_ui <- function(id){
     fluidRow(
       align= 'center',
       column(width=2,div(style=btn_style,
-                         uiOutput(ns('showResetBtn')),
-                         uiOutput(ns('showPrevBtn'))
+                         uiOutput(ns('showPrevBtn')),
+                         uiOutput(ns('showResetBtn'))
       )),
       column(width=8,div( style = btn_style, uiOutput(ns("timelineStyle"))) ),
       column(width=2,div(style=btn_style,
@@ -192,6 +192,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     InitScreens <- reactive({
       if(verbose)
         print(paste0('TL(',config$process.name, ') : call to InitScreens() '))
+      
       current$nbSteps <- length(config$steps)
       Init_Default_Positions() 
       config$screens <- lapply(1:current$nbSteps,
@@ -245,7 +246,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
         print(paste0('TL(',config$process.name, ') : observeEvent(req(c(current$val, config$status)) : '))
         print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
       }
-      
+     # browser()
       shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
       shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
       
@@ -264,8 +265,6 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
         # One only displays the steps that are not skipped
         lapply(1:current$nbSteps, function(x){
           shinyjs::toggle(paste0('div_screen', x), condition = x==current$val && config$status[[current$val]] != SKIPPED)})
-      
-      
     })
 
 
@@ -316,6 +315,10 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
         toggleState_Steps(cond = FALSE, i = ind.max)
       }
     })
+    
+    
+    
+    
       
 
     toggleState_Steps <- function(cond, i){
