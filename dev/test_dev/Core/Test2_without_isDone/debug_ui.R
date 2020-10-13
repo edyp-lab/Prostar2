@@ -8,7 +8,9 @@ output$show_dataIn <- renderUI({
   tagList(lapply(names(dataIn()), function(x){tags$p(x)}))
 })
 
-output$show_rv_dataIn <- renderPrint({names(rv$dataIn)})
+output$show_rv_dataIn <- renderUI({
+  tagList(lapply(names(dataIn()), function(x){tags$p(x)}))
+  })
 
 output$show_rv_dataOut <- renderUI({
  # browser()

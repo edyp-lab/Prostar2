@@ -13,11 +13,14 @@ mod_super_timeline_ui <- function(id){
                tags$b(h4(style = 'color: blue;', "Data input")),
                uiOutput(ns('show_dataIn'))),
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Data output")),
-               uiOutput(ns('show_rv_dataOut'))),
+               tags$b(h4(style = 'color: blue;', "Data input")),
+               uiOutput(ns('show_rv_dataIn'))),
         column(width=2,
-               tags$b(h4(style = 'color: blue;', "Current pos")),
-               uiOutput(ns('show_currentPos')))
+               tags$b(h4(style = 'color: blue;', "Data output")),
+               uiOutput(ns('show_rv_dataOut')))
+        # column(width=2,
+        #        tags$b(h4(style = 'color: blue;', "Current pos")),
+        #        uiOutput(ns('show_currentPos')))
       )
     )
   )
