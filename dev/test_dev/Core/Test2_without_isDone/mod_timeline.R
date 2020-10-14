@@ -79,13 +79,13 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     verbose = T
     source(file.path('.', 'code_general.R'), local=TRUE)$value
     
-    output$showSaveExitBtn <- renderUI({
-      req(showSaveBtn)
-      print(paste0('TL(',config$process.name, ') : output$showSaveExitBtn <- renderUI'))
-      actionButton(ns("saveExitBtn"), paste0("Save & Exit ", config$type),
-                   class = btn_success_color,
-                   style='padding:4px; font-size:80%')
-    })
+    # output$showSaveExitBtn <- renderUI({
+    #   req(showSaveBtn)
+    #   print(paste0('TL(',config$process.name, ') : output$showSaveExitBtn <- renderUI'))
+    #   actionButton(ns("saveExitBtn"), paste0("Save & Exit ", config$type),
+    #                class = btn_success_color,
+    #                style='padding:4px; font-size:80%')
+    # })
     
     output$showResetBtn <- renderUI({
       print(paste0('TL(',config$process.name, ') : output$showResetBtn <- renderUI'))
@@ -103,9 +103,9 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     
     output$showNextBtn <- renderUI({
       req(!isTRUE(onlyReset))
-      actionButton(ns("nextBtn"), "next",
+      shinyjs::disabled(actionButton(ns("nextBtn"), "next",
                    class = PrevNextBtnClass,
-                   style='padding:4px; font-size:80%')
+                   style='padding:4px; font-size:80%'))
     })
     
     output$timelineStyle <- renderUI({ 
@@ -169,10 +169,11 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
         print(paste0('TL(',config$process.name, ') : observeEvent(current$wake() '))
      
       Update_Cursor_position()
+      
     })
     
     
-    observeEvent(req(config),{
+    observeEvent(req(config), ignoreInit=F,{
       if(verbose)
         print(paste0('TL(',config$process.name, ') : observeEvent(req(config)() '))
      InitScreens()
@@ -240,45 +241,57 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     })
     
     
+    Update_Buttons <- reactive({
+      
+      shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
+      shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
+      
+    })
+    
     # Catch a new position or a change in the status list
     observeEvent(req(c(current$val, config$status)), {
       if(verbose){
         print(paste0('TL(',config$process.name, ') : observeEvent(req(c(current$val, config$status)) : '))
         print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
+        print(paste0('TL(',config$process.name, ') : PrevBtn_logics() = ', PrevBtn_logics(), ', NextBtn_logics() = ', NextBtn_logics()))
       }
      # browser()
-      shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
-      shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
       
       if (config$type == 'process'){
        # Update_Cursor_position()
         Analyse_status_Process()
-      } else if (config$type == 'pipeline'){
-        #Analyse_status_Pipeline()
-      }
-      # Display current page
-      if (config$type == 'pipeline')
-        # One display all processes, even the validated ones
-        lapply(1:current$nbSteps, function(x){
-        shinyjs::toggle(paste0('div_screen', x), condition = x==current$val)})
-      else if (config$type == 'process')
+        
         # One only displays the steps that are not skipped
         lapply(1:current$nbSteps, function(x){
           shinyjs::toggle(paste0('div_screen', x), condition = x==current$val && config$status[[current$val]] != SKIPPED)})
+        
+      } else if (config$type == 'pipeline'){
+        #Analyse_status_Pipeline()
+        
+        # Display current page
+        # One display all processes, even the validated ones
+        lapply(1:current$nbSteps, function(x){
+          shinyjs::toggle(paste0('div_screen', x), condition = x==current$val)})
+      }
+
+      Update_Buttons()
+      
     })
 
 
     Update_Cursor_position <- function(){
+      req(current$nbSteps)
+      
       if(verbose)
         print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
-      n <- current$nbSteps
+
       #browser()
       
-      if ((config$status[[n]] == VALIDATED))
+      if ((config$status[[current$nbSteps]] == VALIDATED))
         current$val <- current$DEFAULT_VALIDATED_POSITION
-      else if (config$status[[n]] == SKIPPED)
+      else if (config$status[[current$nbSteps]] == SKIPPED)
         current$val <- current$DEFAULT_SKIPPED_POSITION
-      else if (config$status[[n]] == UNDONE)
+      else if (config$status[[current$nbSteps]] == UNDONE)
         current$val <- current$DEFAULT_UNDONE_POSITION
       if(current$val==0)
         browser()
@@ -290,10 +303,7 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     Analyse_status_Process <- reactive({
       
       #browser()
-      initial_status <- setNames(lapply(1:current$nbSteps, 
-                                        function(x){UNDONE}), 
-                                 names(config$steps))
-      
+
       if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:current$nbSteps])== 0 )){
         # This is the case at the initialization of a process or after a reset
         if(verbose)

@@ -46,7 +46,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       config <- reactiveValues(
         type = 'process',
         process.name = 'Filtering',
-        steps = list(Description = F,
+        steps = list(Description = T,
                      Step1 = T,
                      Step2 = F,
                      Step3 = T)
@@ -54,11 +54,9 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       
       rv <- reactiveValues(
-        current.pos = 1,
+        current.pos = NULL,
         timeline = NULL,
         dataIn = NULL,
-        #ll_dataIn = NULL
-        #dataOut = NULL,
         wake = FALSE)
       
       # Main listener of the module which initialize it
@@ -71,6 +69,7 @@ mod_wf_wf1_Filtering_server <- function(id,
         inputExists <- length(dataIn()) > 0
         tmpExists <- !is.null(rv$dataIn)
         rv$wake <- FALSE
+        
         if (tmpExists){
           # this case is either the module is skipped or validated
           if(verbose)
@@ -110,11 +109,18 @@ mod_wf_wf1_Filtering_server <- function(id,
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
-        InitializeDataIn()
+        #InitializeDataIn()
         rv$current.pos <- 1
       }
       
-      InitializeDataIn <- function(){rv$dataIn <- dataIn()}
+      InitializeDataIn <- function(){
+        if(verbose)
+          print(paste0(config$process.name, ' : InitializeDataIn() ------- '))
+        
+        rv$dataIn <- dataIn()
+      }
+      
+      
       
       InitializeTimeline <- function(){
         rv$timeline <- mod_timeline_server("timeline", 
@@ -158,17 +164,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       }
       
 
-      observeEvent(config$status, {
-        if(verbose)
-          print(paste0(config$process.name, ' : observeEvent(config$status) = ', paste0(config$status, collapse=' ')))
-        
-        Set_Skipped_Status()
-        if (config$status[nbSteps()] == VALIDATED)
-          # Either the process has been validated, one can prepare data to ben sent to caller
-          # Or the module has been reseted
-          Send_Result_to_Caller()
-      })
-      
+
       
       Send_Result_to_Caller <- reactive({
         if(verbose)
@@ -183,12 +179,26 @@ mod_wf_wf1_Filtering_server <- function(id,
       })
       
       
+      observeEvent(config$status,{Set_Skipped_Status()})
+      
+      ValidateCurrentPos <- reactive({
+        if(verbose)
+          print(paste0(config$process.name, ' : ValidateCurrentPos() = '))
+        
+        config$status[rv$current.pos] <- VALIDATED
+        Set_Skipped_Status()
+        #browser()
+        if (config$status[nbSteps()] == VALIDATED)
+          # Either the process has been validated, one can prepare data to ben sent to caller
+          # Or the module has been reseted
+          Send_Result_to_Caller()
+      })
       
       
-      
-      
-      
-      
+      GetValidationBtnIds <- reactive({
+        
+        validated.btns <-grep('_validate_btn', names(input))
+      })
       
       
       #####################################################################
@@ -196,11 +206,24 @@ mod_wf_wf1_Filtering_server <- function(id,
       ##
       ############### SCREEN 1 ######################################
       output$Description <- renderUI({
-        # mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+        tagList(
+          actionButton(ns('start_btn'), 
+                       paste0('Start ', config$process.name),
+                       class = btn_success_color),
+          mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+        )
       })
-      # mod_insert_md_server(paste0(config$process.name, "_md"), 
-      #                      paste0('./md/',config$process.name, '.md'))
+       mod_insert_md_server(paste0(config$process.name, "_md"), 
+                            paste0('./md/',config$process.name, '.md'))
       
+       observeEvent(input$start_btn, {
+         if(verbose)
+           print(paste0(config$process.name, ' : Clic on start_btn'))
+
+         InitializeDataIn()
+         ValidateCurrentPos()
+       })
+       
       ############### SCREEN 2 ######################################
       
       output$Step1 <- renderUI({
@@ -224,7 +247,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       
       observeEvent(input$perform_Step1_btn, {
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
       
       ############### SCREEN 3 ######################################
@@ -249,7 +272,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
       
       
@@ -273,7 +296,7 @@ mod_wf_wf1_Filtering_server <- function(id,
       
       observeEvent(input$validate_btn, {
         rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
       
       

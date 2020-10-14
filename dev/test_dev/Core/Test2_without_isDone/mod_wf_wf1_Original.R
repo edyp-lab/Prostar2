@@ -150,7 +150,7 @@ mod_wf_wf1_Original_server <- function(id,
             Initialize_Status_Process()
             Send_Result_to_Caller()
             InitializeDataIn()
-            browser()
+            #browser()
           })
           
         }
@@ -169,16 +169,18 @@ mod_wf_wf1_Original_server <- function(id,
         }
         
         
-        observeEvent(config$status, {
+        ValidateCurrentPos <- reactive({
           if(verbose)
-            print(paste0(config$process.name, ' : observeEvent(config$status) = ', paste0(config$status, collapse=' ')))
-
+            print(paste0(config$process.name, ' : ValidateCurrentPos() = '))
+          
+          config$status[rv$current.pos] <- VALIDATED
           Set_Skipped_Status()
           if (config$status[nbSteps()] == VALIDATED)
             # Either the process has been validated, one can prepare data to ben sent to caller
             # Or the module has been reseted
             Send_Result_to_Caller()
-          })
+        })
+        
         
         
         Send_Result_to_Caller <- reactive({
@@ -201,7 +203,7 @@ mod_wf_wf1_Original_server <- function(id,
       ############### SCREEN 1 ######################################
       output$Description <- renderUI({
         tagList(
-          actionButton(ns('validate_btn'), 'Start'),
+          actionButton(ns('validate_btn'), 'Start pipeline',class=btn_success_color),
           mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
         )
       })
@@ -213,7 +215,7 @@ mod_wf_wf1_Original_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, ' : Clic on validate_btn, pos = ', rv$current.pos))
         
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
 
       

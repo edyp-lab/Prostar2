@@ -109,7 +109,7 @@ mod_super_timeline_server <- function(id,
         
         if(verbose)
           print(paste0(config$process.name, " :  END OF reception d'un nouveau dataIn() : ", paste0(names(rv$dataIn), collapse=' ')))
-        
+
       })
       
       # Initialization of the process
@@ -127,9 +127,9 @@ mod_super_timeline_server <- function(id,
         rv$timeline <- mod_timeline_server("timeline", 
                                    style = 2, 
                                    config = config,
-                                   showSaveBtn = TRUE,
                                    wake = reactive({rv$wake}))
         BuildScreensUI()
+        rv$wake <- Wake()
         } # END OF observeEvent(dataIn())
       
       
@@ -172,7 +172,7 @@ mod_super_timeline_server <- function(id,
           print(paste0(config$process.name, " : return_of_process$obj = ", paste0(names(return_of_process$obj), collapse=' ')))
         }
         
-        browser()
+        #browser()
         valid_obj_val <-  class(return_of_process$obj) == 'QFeatures'
         # Update the status
         config$status[return_of_process$name] <- valid_obj_val
@@ -181,7 +181,11 @@ mod_super_timeline_server <- function(id,
         # Store the result of a process module
         if (valid_obj_val)
           rv$dataIn <- return_of_process$obj
+        else
+          rv$dataIn <- rv$dataIn[,,1:GetMaxValidated_BeforeCurrentPos()]
         
+        
+        Send_Result_to_Caller()
       })
       
       
@@ -233,6 +237,7 @@ mod_super_timeline_server <- function(id,
         }
         
         lapply(names(rv$data2send), function(x){rv$data2send[[x]] <- update(x)})
+        return_of_process$obj <- NA
         #browser()
       })
       
@@ -248,19 +253,11 @@ mod_super_timeline_server <- function(id,
       })
       
 
-      # observeEvent(req(rv$timeline$saveBtn()),{
-      #   if(verbose)
-      #     print(paste0(config$process.name, " : Clic on the 'Save & Exit' button", rv$timeline$saveBtn()))
-      #   
-      #   Send_Result_to_Caller()
-      # })
-      
-      
       
       Send_Result_to_Caller <- reactive({
         if(verbose)
           print(paste0(config$process.name, ' : Execution of Send_Result_to_Caller() : '))
-        browser()
+       # browser()
         dataOut$obj <- rv$dataIn
         dataOut$name <- config$process.name
         dataOut$trigger <- runif(1,0,1)

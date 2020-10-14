@@ -46,7 +46,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       config <- reactiveValues(
         type = 'process',
         process.name = 'Normalization',
-        steps = list(Description = F,
+        steps = list(Description = T,
                      Step1 = T,
                      Step2 = F,
                      Step3 = T)
@@ -57,8 +57,6 @@ mod_wf_wf1_Normalization_server <- function(id,
         current.pos = 1,
         timeline = NULL,
         dataIn = NULL,
-        #ll_dataIn = NULL
-        #dataOut = NULL,
         wake = FALSE)
       
       # Main listener of the module which initialize it
@@ -110,7 +108,7 @@ mod_wf_wf1_Normalization_server <- function(id,
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
-        InitializeDataIn()
+        #InitializeDataIn()
         rv$current.pos <- 1
       }
       
@@ -159,10 +157,11 @@ mod_wf_wf1_Normalization_server <- function(id,
       }
       
       
-      observeEvent(config$status, {
+      ValidateCurrentPos <- reactive({
         if(verbose)
-          print(paste0(config$process.name, ' : observeEvent(config$status) = ', paste0(config$status, collapse=' ')))
+          print(paste0(config$process.name, ' : ValidateCurrentPos() = '))
         
+        config$status[rv$current.pos] <- VALIDATED
         Set_Skipped_Status()
         if (config$status[nbSteps()] == VALIDATED)
           # Either the process has been validated, one can prepare data to ben sent to caller
@@ -197,11 +196,16 @@ mod_wf_wf1_Normalization_server <- function(id,
       ##
       ############### SCREEN 1 ######################################
       output$Description <- renderUI({
-        # mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+        tagList(
+          actionButton(ns('start_btn'), 'Start'),
+          mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+        )
       })
-      # mod_insert_md_server(paste0(config$process.name, "_md"), 
-      #                      paste0('./md/',config$process.name, '.md'))
-      
+       mod_insert_md_server(paste0(config$process.name, "_md"), 
+                            paste0('./md/',config$process.name, '.md'))
+      observeEvent(input$start_btn, {
+        ValidateCurrentPos()
+      })
       ############### SCREEN 2 ######################################
       
       output$Step1 <- renderUI({
@@ -225,7 +229,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       
       observeEvent(input$perform_Step1_btn, {
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
       
       ############### SCREEN 3 ######################################
@@ -250,7 +254,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
       
       
@@ -274,7 +278,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       observeEvent(input$validate_btn, {
         rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
-        config$status[rv$current.pos] <- VALIDATED
+        ValidateCurrentPos()
       })
       
       

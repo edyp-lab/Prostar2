@@ -6,7 +6,7 @@ Initialize_Status <- reactive({
 })
 
 GetMaxValidated_AllSteps <- reactive({
-  browser()
+  #browser()
   val <- 0
   ind <- which(config$status == VALIDATED)
   if (length(ind) > 0)
@@ -15,20 +15,27 @@ GetMaxValidated_AllSteps <- reactive({
 })
 
 GetMaxValidated_BeforeCurrentPos <- reactive({
-  ind.max <- NULL
+  ind.max <- 0
   indices.validated <- which(config$status == VALIDATED)
   if (length(indices.validated) > 0){
     ind <- which(indices.validated < rv$current.pos)
     if(length(ind) > 0)
       ind.max <- max(ind)
   }
+  
+  if (ind.max == 0)
+    ind.max <- 1
+  
   ind.max
 })
 
 Set_Skipped_Status <- function(){
-  for (i in nbSteps())
-    if (config$status[i] != 1 && GetMaxValidated_AllSteps() > i)
-      config$status <- SKIPPED
+  if(verbose)
+    print(paste0(config$process.name, ' : Set_Skipped_Status() = '))
+  #browser()
+  for (i in 1:nbSteps())
+    if (config$status[i] != VALIDATED && GetMaxValidated_AllSteps() > i)
+      config$status[i] <- SKIPPED
 }
 
 # Test if a process module (identified by its name) has been skipped.
@@ -43,11 +50,14 @@ is.skipped <- function(name){
 
 
 Initialize_Status_Process <- function(){
+  if(verbose)
+    print(paste0(config$process.name, ' : Initialize_Status_Process() : '))
+  
   config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
 }
 
 GetMaxValidated_AllSteps <- reactive({
-  browser()
+  #browser()
   val <- 0
   ind <- which(config$status == VALIDATED)
   if (length(ind) > 0)
