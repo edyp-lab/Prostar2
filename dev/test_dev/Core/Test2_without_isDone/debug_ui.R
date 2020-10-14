@@ -13,8 +13,7 @@ output$show_rv_dataIn <- renderUI({
   })
 
 output$show_rv_dataOut <- renderUI({
- # browser()
-  req(rv$dataOut)
+  req(dataOut$trigger)
 tagList(
     lapply(names(dataOut$obj), function(x){tags$p(x)})
   )

@@ -40,6 +40,7 @@ mod_wf_wf1_Original_server <- function(id,
       verbose = T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
+      source(file.path('.', 'private_methods.R'), local=TRUE)$value
       
       #################################################################################
       config <- reactiveValues(
@@ -54,7 +55,6 @@ mod_wf_wf1_Original_server <- function(id,
         current.pos = 1,
         timeline = NULL,
         dataIn = NULL
-        #dataOut = NULL
         )
       
 
@@ -101,24 +101,22 @@ mod_wf_wf1_Original_server <- function(id,
           Initialize_Status_Process()
       })
       
-      
-      
-      
-      
-      
-      
-      
+
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
-        Initialize_Status()
+        #browser()
+        Initialize_Status_Process()
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
-        rv$dataIn <- dataIn()
+        InitializeDataIn()
         rv$current.pos <- 1
       }
         
+      
+      InitializeDataIn <- function(){rv$dataIn <- dataIn()}
+
         InitializeTimeline <- function(){
           rv$timeline <- mod_timeline_server("timeline",
                                              style = 2,
@@ -126,118 +124,73 @@ mod_wf_wf1_Original_server <- function(id,
                                              onlyReset = TRUE,
                                              wake = reactive({rv$wake})
                                              )
+          #Catch a new position from timeline
+          observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
+            if(verbose)
+              print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
+            rv$current.pos <- rv$timeline$pos() 
+          })
+          
+          
+          
+          # Remember that, at a given position, the process module alsways receive the dataset
+          # it has to analyze (ie dataIn() is always instantiated)
+          # When the user reset a module, the ojective is to put the module in the same state as
+          # if it is the first time he put the focus on
+          # Thus, the only thing to do is to reset the interface. and to put dataIn() in rv$dataIn
+          # DO not forget to reset config$status
+          observeEvent(req(c(rv$timeline$rstBtn(), remoteReset())),{
+            if(verbose)
+              print(paste0(config$process.name, ' : ------reset activated------, rv$timeline$rstBtn()=',rv$timeline$rstBtn()))
+            
+            ResetScreens()
+            rv$dataIn <- NA
+            rv$current.pos <- 1
+            rv$wake <- Wake()
+            Initialize_Status_Process()
+            Send_Result_to_Caller()
+            InitializeDataIn()
+            browser()
+          })
+          
         }
       
-        Wake <- function(){ runif(1,0,1)}
+
         
-      
-      GetMaxValidated_AllSteps <- reactive({
-        last.name <- names(rv$dataOut)[length(rv$dataIn)]
-        ind <- which(last.name == names(config$steps))
-        if (length(ind) == 0)
-          ind <- NULL
-        ind
-      })
-      
-      GetMaxValidated_BeforeCurrentPos <- reactive({
-        current.name <- GetCurrentStepName()
-        ind.current <- which(current.name == names(config$steps))
-        indices.validated <- match(names(rv$dataIn),names(config$steps))
-        ind.max <- max(which(indices.validated < ind.current))
-        ind.max
-      })
-      
-      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
-      
-      
-      
-      GetStatusPosition <- function(pos){
-        status <- NULL
-        #browser()
-        if (length(grep(names(config$steps)[[pos]], names(rv$dataIn)))== 1) 
-          status <- VALIDATED
-        else {
-          if (is.null(GetMaxValidated_AllSteps()) ||  GetMaxValidated_AllSteps() < pos)
-            status <- UNDONE
-          else if (GetMaxValidated_AllSteps() > pos)
-            status <- SKIPPED
+        
+        # This function cannot be implemented in the timeline module because 
+        # the id of the screens to reset are not known elsewhere.
+        # Trying to reset the global 'div_screens' in the timeline module
+        # does not work
+        ResetScreens <- function(screens){
+          lapply(1:nbSteps(), function(x){
+            shinyjs::reset(names(config$steps)[x])
+          })
         }
-        status
-      }
-      
-      
-      BuildStatus <- reactive({
-        config$status <- setNames(lapply(1:nbSteps(), 
-                                         function(x){GetStatusPosition(x)}), 
-                                  names(config$steps))
-      })
-      
-      
-      UpdateDataOut <- reactive({
+        
+        
+        observeEvent(config$status, {
+          if(verbose)
+            print(paste0(config$process.name, ' : observeEvent(config$status) = ', paste0(config$status, collapse=' ')))
+
+          Set_Skipped_Status()
+          if (config$status[nbSteps()] == VALIDATED)
+            # Either the process has been validated, one can prepare data to ben sent to caller
+            # Or the module has been reseted
+            Send_Result_to_Caller()
+          })
+        
+        
+        Send_Result_to_Caller <- reactive({
         if(verbose)
-          print(paste0(config$process.name, ' : Execution of UpdateDataOut() : '))
-        isolate({
-        dataOut$obj <- rv$dataOut
+          print(paste0(config$process.name, ' : Execution of Send_Result_to_Caller() : '))
+
+        dataOut$obj <- rv$dataIn
         dataOut$name <- config$process.name
-        dataOut$trigger <- runif(1,0,1)
+        dataOut$trigger <- Wake()
+        
         if(verbose)
           print(paste0(config$process.name, ' : dataOut$obj =  : ', paste0(names(dataOut$obj), collapse=' ')))
-        })
-      })
-      
- 
-      
-        #Catch a new position from timeline
-        observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
-          if(verbose)
-            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
-          rv$current.pos <- rv$timeline$pos() 
-          if(verbose)
-            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ', paste0(config$status, collapse=' ') ))
-          
-        })
-        
-
-        
-        #--- Catch a reset from timeline or caller
-        observeEvent(req(c(rv$timeline$rstBtn() > rv$old.rst, remoteReset())),{
-          if(verbose){
-            print(paste0(config$process.name, ' : ------reset activated------, rv$timeline$rstBtn()=',rv$timeline$rstBtn()))
-            #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
-          }
-          
-          rv$current.pos <- 1
-          ResetScreens()
-          rv$dataIn <- dataIn()
-          BuildStatus()
-        })
-        
-
-      ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
-    
-      
-      # This function cannot be implemented in the timeline module because 
-      # the id of the screens to reset are not known elsewhere.
-      # Trying to reset the global 'div_screens' in the timeline module
-      # does not work
-      ResetScreens <- function(screens){
-        lapply(1:nbSteps(), function(x){
-          shinyjs::reset(names(config$steps)[x])
-        })
-      }
-      
-      
-      #--- Catch a reset from timeline or caller
-      observeEvent(req(c(rv$timeline$rstBtn(), remoteReset())),{
-        if(verbose){
-          print(paste0(config$process.name, ' : ------reset activated------, rv$timeline$rstBtn()=',rv$timeline$rstBtn()))
-          #print(' ------- MODULE _A_ : observeEvent(req(c(rv$timeline$rstBtn()!=0, remoteReset()!=0)) ------- ')
-        }
-        
-        ResetScreens()
-        InitializeModule()
-        rv$old.rst <- rv$timeline$rstBtn()
-        BuildStatus()
       })
       
 
@@ -258,11 +211,9 @@ mod_wf_wf1_Original_server <- function(id,
 
       observeEvent(input$validate_btn, {
         if(verbose)
-          print(paste0(config$process.name, ' : Clic on validate_btn'))
-        #browser()
-        rv$dataOut <- rv$dataIn
-        UpdateDataOut()
-        config$status[[rv$current.pos]] <- VALIDATED
+          print(paste0(config$process.name, ' : Clic on validate_btn, pos = ', rv$current.pos))
+        
+        config$status[rv$current.pos] <- VALIDATED
       })
 
       

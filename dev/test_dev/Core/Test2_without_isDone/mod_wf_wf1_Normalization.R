@@ -40,6 +40,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       verbose = T
       source(file.path('.', 'debug_ui.R'), local=TRUE)$value
       source(file.path('.', 'code_general.R'), local=TRUE)$value
+      source(file.path('.', 'private_methods.R'), local=TRUE)$value
       
       #################################################################################
       config <- reactiveValues(
@@ -56,8 +57,8 @@ mod_wf_wf1_Normalization_server <- function(id,
         current.pos = 1,
         timeline = NULL,
         dataIn = NULL,
-        ll_dataIn = NULL,
-        dataOut = NULL,
+        #ll_dataIn = NULL
+        #dataOut = NULL,
         wake = FALSE)
       
       # Main listener of the module which initialize it
@@ -105,88 +106,46 @@ mod_wf_wf1_Normalization_server <- function(id,
       InitializeModule <- function(){
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
-        Initialize_Status()
+        Initialize_Status_Process()
         rv$screens <- InitActions(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
-        rv$dataIn <- dataIn()
+        InitializeDataIn()
         rv$current.pos <- 1
       }
+      
+      InitializeDataIn <- function(){rv$dataIn <- dataIn()}
       
       InitializeTimeline <- function(){
         rv$timeline <- mod_timeline_server("timeline", 
                                            style = 2, 
                                            config = config,
                                            wake = reactive({rv$wake}))
-      }
-      
-      
-      Wake <- function(){ runif(1,0,1)}
-      
-      
-      #--- Catch a reset from timeline or caller
-      observeEvent(req(c(rv$timeline$rstBtn(), remoteReset()!=0)), {
-        if(verbose)
-          print(paste0(config$process.name, ' : reset activated ----------------'))
         
-        ResetScreens()
-        rv$ll_dataIn <- NULL
+        #Catch a new position from timeline
+        observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
+          if(verbose)
+            print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
+          rv$current.pos <- rv$timeline$pos() 
+          
+        })
         
-        rv$dataIn <- dataIn()
-        rv$current.pos <- 1
-        rv$ll_dataIn[[names(config$steps)[[rv$current.pos]]]] <- VALIDATED
-        rv$wake <- Wake()
-        Initialize_Status()
-      })
-      
-      
-      
-      Initialize_Status_Process <- function(){
-        config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
-        config$status[1] <- VALIDATED
-      }
-      
-      GetMaxValidated_AllSteps <- reactive({
-        ind <- which(config$status == VALIDATED)
-        if (length(ind) == 0)
-          ind <- NULL
-        max(ind)
-      })
-      
-      
-      GetMaxValidated_BeforeCurrentPos <- reactive({
-        ind.max <- NULL
-        indices.validated <- which(config$status == VALIDATED)
-        if (length(indices.validated) > 0){
-          ind <- which(indices.validated < rv$current.pos)
-          if(length(ind) > 0)
-            ind.max <- max(ind)
-        }
-        ind.max
-      })
-      
-      GetCurrentStepName <- reactive({ names(config$steps)[rv$current.pos] })
-      
-      Unskip <- function(pos){config$status[pos] <- UNDONE}
-      
-      GetStatusPosition <- function(pos){config$status[pos]}
-      
-      Set_Skipped_Status <- function(){
-        for (i in nbSteps())
-          if (config$status[i] != 1 && GetMaxValidated_AllSteps() > i)
-            config$status <- SKIPPED
-      }
-      
-      
-      
-      
-      #Catch a new position from timeline
-      observeEvent(req(rv$timeline$pos()), ignoreInit=T, { 
-        if(verbose)
-          print(paste0(config$process.name, ' : observeEvent(req(rv$timeline$pos()) ------- ',  rv$timeline$pos() ))
-        rv$current.pos <- rv$timeline$pos() 
         
-      })
+        #--- Catch a reset from timeline or caller
+        observeEvent(req(c(rv$timeline$rstBtn(), remoteReset()!=0)), {
+          if(verbose)
+            print(paste0(config$process.name, ' : reset activated ----------------'))
+          
+          ResetScreens()
+          rv$dataIn <- NA
+          rv$current.pos <- 1
+          rv$wake <- Wake()
+          Initialize_Status_Process()
+          nitialize_Status_Process()
+          Send_Result_to_Caller()
+          InitializeDataIn()
+        })
+      }
       
       
       # This function cannot be implemented in the timeline module because 
@@ -200,29 +159,38 @@ mod_wf_wf1_Normalization_server <- function(id,
       }
       
       
-      
-      
-      
-      
-      
-      observeEvent(config$status, {Set_Skipped_Status() })
-      
-      
-      ############ ---   END OF REACTIVE PART OF THE SERVER   --- ###########
-      
-      
+      observeEvent(config$status, {
+        if(verbose)
+          print(paste0(config$process.name, ' : observeEvent(config$status) = ', paste0(config$status, collapse=' ')))
+        
+        Set_Skipped_Status()
+        if (config$status[nbSteps()] == VALIDATED)
+          # Either the process has been validated, one can prepare data to ben sent to caller
+          # Or the module has been reseted
+          Send_Result_to_Caller()
+      })
       
       
       Send_Result_to_Caller <- reactive({
-        print(paste0(config$process.name, ' : Execution of UpdateDataOut() : '))
+        if(verbose)
+          print(paste0(config$process.name, ' : Execution of Send_Result_to_Caller() : '))
         
         dataOut$obj <- rv$dataIn
         dataOut$name <- config$process.name
-        dataOut$trigger <- runif(1,0,1)
+        dataOut$trigger <- Wake()
         
         if(verbose)
           print(paste0(config$process.name, ' : dataOut$obj =  : ', paste0(names(dataOut$obj), collapse=' ')))
       })
+      
+      
+      
+      
+      
+      
+      
+      
+      
       
       #####################################################################
       ## screens of the module
@@ -257,7 +225,6 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       
       observeEvent(input$perform_Step1_btn, {
-        #config$status[['Step1']] <- VALIDATED
         config$status[rv$current.pos] <- VALIDATED
       })
       
@@ -283,7 +250,6 @@ mod_wf_wf1_Normalization_server <- function(id,
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$perform_Step2_btn, {
-        #config$status[['Step2']] <- VALIDATED
         config$status[rv$current.pos] <- VALIDATED
       })
       
@@ -307,9 +273,7 @@ mod_wf_wf1_Normalization_server <- function(id,
       
       
       observeEvent(input$validate_btn, {
-        rv$dataOut <- AddItemToDataset(rv$dataIn, config$process.name)
-        UpdateDataOut()
-        #config$status[['Step3']] <- VALIDATED
+        rv$dataIn <- AddItemToDataset(rv$dataIn, config$process.name)
         config$status[rv$current.pos] <- VALIDATED
       })
       
