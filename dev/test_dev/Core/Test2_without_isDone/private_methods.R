@@ -1,3 +1,36 @@
+#' Declaration of global variables
+VALIDATED <- 1
+UNDONE <- 0
+SKIPPED <- -1
+RESETED <- 2
+
+
+
+
+InitScreens <- function(n){
+  setNames(lapply(1:n,
+                  function(x){T}),
+           paste0('screen', 1:n)
+  )
+}
+
+CreateScreens <- function(names){
+  setNames(
+    lapply(1:length(names), 
+           function(x){
+             do.call(uiOutput, list(outputId=ns(names)[x]))}),
+    paste0('screen_', names(config$steps)))
+}
+
+nbSteps <- reactive({
+  req(config$steps)
+  length(config$steps)
+})
+
+
+
+
+
 Wake <- function(){ runif(1,0,1)}
 
 

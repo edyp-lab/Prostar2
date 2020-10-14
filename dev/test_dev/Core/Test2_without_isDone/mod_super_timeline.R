@@ -120,7 +120,7 @@ mod_super_timeline_server <- function(id,
 
         Initialize_Status_Process()
         InitializeDataIn()
-        rv$screens <- InitActions(nbSteps())
+        rv$screens <- InitScreens(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
  

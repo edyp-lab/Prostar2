@@ -302,8 +302,6 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
     # to decide whether to disable/enable UI parts
     Analyse_status_Process <- reactive({
       
-      #browser()
-
       if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:current$nbSteps])== 0 )){
         # This is the case at the initialization of a process or after a reset
         if(verbose)

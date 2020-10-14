@@ -26,13 +26,15 @@ InfoBox = R6Class(
     },
     
     # server
-    server = function(input, output, session, msg){
+    server = function(input, output, session, msg, ind){
       output$text = renderText({ msg })
+      
+      observeEvent(ind, { print(ind)})
     },
     
     # call
-    call = function(input, ouput, session, msg){
-      callModule(self$server, self$id, msg)
+    call = function(input, ouput, session, msg, ind){
+      callModule(self$server, self$id, msg, ind)
     }
   )
 )

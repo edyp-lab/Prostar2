@@ -105,7 +105,7 @@ mod_wf_wf1_HypothesisTest_server <- function(id,
         if(verbose)
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
         Initialize_Status_Process()
-        rv$screens <- InitActions(nbSteps())
+        rv$screens <- InitScreens(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
         #InitializeDataIn()

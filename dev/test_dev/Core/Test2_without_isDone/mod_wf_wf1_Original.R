@@ -107,7 +107,7 @@ mod_wf_wf1_Original_server <- function(id,
           print(paste0(config$process.name, ' : InitializeModule() ------- '))
         #browser()
         Initialize_Status_Process()
-        rv$screens <- InitActions(nbSteps())
+        rv$screens <- InitScreens(nbSteps())
         # Must be placed after the initialisation of the 'config$stepsNames' variable
         config$screens <- CreateScreens(names(config$steps))
         InitializeDataIn()
