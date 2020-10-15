@@ -21,20 +21,22 @@ InfoBox = R6Class(
         # The id in each UI element must be wrapped in the ns function, in
         # order to be correctly recognized in the server function inside 
         # the module.
-        textOutput(ns('text'))
+        textOutput(ns('text')),
+        actionButton(ns('clicModule'), 'Clic in module')
       )
     },
     
     # server
-    server = function(input, output, session, msg, ind){
+    server = function(input, output, session, msg, rv){
       output$text = renderText({ msg })
       
-      observeEvent(ind, { print(ind)})
+      observeEvent(rv$clic, { print(rv$clic)})
+      observeEvent(input$clicModule, {rv$clic <- input$clicModule})
     },
     
     # call
-    call = function(input, ouput, session, msg, ind){
-      callModule(self$server, self$id, msg, ind)
+    call = function(input, ouput, session, msg, rv){
+      callModule(self$server, self$id, msg, rv)
     }
   )
 )

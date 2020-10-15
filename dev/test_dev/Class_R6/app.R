@@ -4,8 +4,8 @@
 library(shiny); library(R6)
 
 # you can use source("InfoBox.R"), however, using import::here makes your code more clear.
-import::here(InfoBox, .from = "InfoBox.R")
-
+#import::here(InfoBox, .from = "InfoBox.R")
+#source("./InfoBox.R")
 
 # UI
 ui = function(){
@@ -33,8 +33,8 @@ server = function(input, output, session){
   output$info1 <- renderUI({infoBox1$ui()})
   output$info2 <- renderUI({infoBox2$ui()})
   
-  infoBox1$call(msg = "I am groot", ind=rv$clic)
-  infoBox2$call(msg = "I am Steve Rogers", ind=rv$clic)
+  infoBox1$call(msg = "I am groot", rv=rv)
+  infoBox2$call(msg = "I am Steve Rogers", rv=rv)
 }
 
 
