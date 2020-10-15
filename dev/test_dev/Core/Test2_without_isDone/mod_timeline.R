@@ -446,9 +446,6 @@ mod_timeline_server <- function(id, style=2, config, onlyReset=NULL, showSaveBtn
 
     
     list(rstBtn = reactive(current$reset_OK),
-         prvBtn = reactive(input$prevBtn),
-         nxtBtn = reactive(input$nextBtn),
-         saveBtn = reactive({input$saveExitBtn}),
          pos = reactive({current$val})
     )
     
