@@ -2,14 +2,14 @@
 TimelineProcess = R6Class("TimelineProcess",
                    inherit = Timeline,
   private = list(
-    modal_txt = "This action will reset this process. The input dataset will be the output of the previous
+    modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
     # This function catches any event on config$status and analyze it
     # to decide whether to disable/enable UI parts
     Analyse_status = function(){
       if(private$verbose)
         print(paste0('TL(',config$process.name, ') : Analyse_status_Process() :'))
-      
+
       if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:private$length])== 0 )){
         # This is the case at the initialization of a process or after a reset
         if(private$verbose)

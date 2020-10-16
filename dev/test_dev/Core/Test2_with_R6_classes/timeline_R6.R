@@ -11,6 +11,8 @@ Timeline = R6Class(
     DEFAULT_VALIDATED_POSITION = 1,
     DEFAULT_UNDONE_POSITION = 1,
     reset_OK = 0,
+    timeline = NULL,
+    
     
     
     CheckConfig = function(conf){
@@ -47,38 +49,23 @@ Timeline = R6Class(
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     },
     
-    Analyse_status_Process = function(){}
+    Analyse_status_Process = function(){},
     
-    
-    
-    # # This function catches any event on config$status and analyze it
-    # # to decide whether to disable/enable UI parts
-    # Analyse_status_Process = function(){
-    #   if(private$verbose)
-    #     print(paste0('TL(',config$process.name, ') : Analyse_status_Process() :'))
-    #   
-    #   if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:private$length])== 0 )){
-    #     # This is the case at the initialization of a process or after a reset
-    #     if(private$verbose)
-    #       print(paste0('TL(',config$process.name, ') : Analyse_status() : Init -> Enable all steps'))
-    #     
-    #     # Enable all steps and buttons
-    #     private$toggleState_Steps(cond = TRUE, i = private$length)
-    #   } else if (config$status[[length(private$length)]] == SKIPPED){
-    #     # The entire process is skipped
-    #     if(private$verbose)
-    #       print(paste0('TL(',config$process.name, ') : Analyse_status() : The entire process is skipped'))
-    #     # Disable all steps
-    #     private$toggleState_Steps(cond = FALSE, i = private$length)
-    #   } else {
-    #     # Disable all previous steps from each VALIDATED step
-    #     if(private$verbose)
-    #       print(paste0('TL(',config$process.name, ') : Analyse_status() : Disable all previous steps from each VALIDATED step'))
-    #     ind.max <- max(grep(VALIDATED, unlist(config$status)))
-    #     private$toggleState_Steps(cond = FALSE, i = ind.max)
-    #   }
-    # }
-    
+    Update_Cursor_position = function(){
+      req(private$length)
+      
+      if(private$verbose)
+        print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
+      
+      if ((config$status[[private$length]] == VALIDATED))
+        self$rv$current.pos <- private$DEFAULT_VALIDATED_POSITION
+      else if (config$status[[private$length]] == SKIPPED)
+        self$rv$current.pos <- private$DEFAULT_SKIPPED_POSITION
+      else if (config$status[[private$length]] == UNDONE)
+        self$rv$current.pos <- private$DEFAULT_UNDONE_POSITION
+      if(self$rv$current.pos==0)
+        browser()
+    }
     
     ),
   
@@ -98,6 +85,9 @@ Timeline = R6Class(
       private$style = style
     },
     
+    
+    
+    
     # UI
     ui = function(){
       
@@ -106,7 +96,6 @@ Timeline = R6Class(
       
       tagList(
         shinyjs::useShinyjs(),
-        uiOutput(ns("load_css_style")),
         div(id = 'GlobalTL',
             fluidRow(
               align= 'center',
@@ -114,7 +103,7 @@ Timeline = R6Class(
                                  uiOutput(ns('showPrevBtn')),
                                  uiOutput(ns('showResetBtn'))
               )),
-              column(width=8,div( style = btn_style, uiOutput(ns("timelineStyle"))) ),
+              column(width=8,div( style = btn_style, mod_timeline_ui(ns("timeline")))),
               column(width=2,div(style=btn_style,
                                  uiOutput(ns('showNextBtn')),
                                  uiOutput(ns('showSaveExitBtn'))
@@ -131,7 +120,12 @@ Timeline = R6Class(
       # the ns function here will prepend a prefix to all the ids in the app.
       ns = NS(self$id)
       
-      
+      mod_timeline_server("timeline", 
+                          style=2,
+                          config = config,
+                          pos = self$rv$current.pos
+                          )
+     
       output$showResetBtn <- renderUI({
         print(paste0('TL(',config$process.name, ') : output$showResetBtn <- renderUI'))
         actionButton(ns("rstBtn"), paste0("Reset ", config$type),
@@ -148,8 +142,6 @@ Timeline = R6Class(
                                        style='padding:4px; font-size:80%'))
       })
       
-      output$timelineStyle <- renderUI({ 
-        uiOutput(ns(paste0('timeline', private$style))) })
       
       #-------------------------------------------------------
       # Return the UI for a modal dialog with data selection input. If 'failed' is
@@ -191,25 +183,40 @@ Timeline = R6Class(
       }
       
       
-      observeEvent(req(wake), {
+      observeEvent(req(wake()),{
         if(private$verbose)
           print(paste0('TL(',config$process.name, ') : observeEvent(current$wake() '))
         
-        Update_Cursor_position()
+        private$Update_Cursor_position()
       })
       
       
       observeEvent(req(config), ignoreInit=F,{
         if(private$verbose)
           print(paste0('TL(',config$process.name, ') : observeEvent(req(config)() '))
-        if (length(config$screens)==0)return(NULL)
+        req(length(config$screens)>0)
         
         if (!private$CheckConfig(config)$passed)
           stop(paste0("Errors in 'config'", paste0(private$CheckConfig(config)$msg, collapse=' ')))
         
         InitScreens()
+        
       })
+ 
       
+      
+      
+      
+      # output$timelineStyle <- renderUI({
+      #   browser()
+      #   req(self$tlStyle)
+      #   
+      #   if(private$verbose)
+      #     print(paste0('TL(',config$process.name, ') : call to timelineStyle() '))
+      #   
+      #   self$tlStyle$ui()
+      #   })
+      # 
       
       Init_Default_Positions <- reactive({
         private$DEFAULT_VALIDATED_POSITION <- private$length
@@ -270,97 +277,12 @@ Timeline = R6Class(
           print(paste0('TL(',config$process.name, ') : observeEvent(req(c(self$rv$current.pos, config$status)) : '))
           print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
           }
-        # browser()
-        
+ 
         private$Analyse_status()
-        
         Update_Buttons()
       })
-      
-      
-      Update_Cursor_position <- function(){
-        req(private$length)
-        
-        if(private$verbose)
-          print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
-        
-        if ((config$status[[private$length]] == VALIDATED))
-          self$rv$current.pos <- private$DEFAULT_VALIDATED_POSITION
-        else if (config$status[[private$length]] == SKIPPED)
-          self$rv$current.pos <- private$DEFAULT_SKIPPED_POSITION
-        else if (config$status[[private$length]] == UNDONE)
-          self$rv$current.pos <- private$DEFAULT_UNDONE_POSITION
-        if(self$rv$current.pos==0)
-          browser()
-      }
-      
-      
-      
-      
-      
-      
-      
-      
-     
-      
-      ##
-      ## Functions defining timeline and styles
-      ##
-      output$load_css_style <- renderUI({
-        if(private$verbose)
-          print(paste0('TL(', config$process.name, ') : load_css_style'))
-        
-        req(private$length)
-        req(private$style != 3)
-        
-        file <- paste0('./Timelines/timeline',private$style, '.sass')
-        #code <- code_sass_timeline[[paste0('private$style',private$style)]],"\n")
-        code <- strsplit(readLines(file),"\n")
-        firstLine <- code[[1]][1]
-        prefix <- substr(firstLine, 1, unlist(gregexpr(pattern =':',firstLine)))
-        suffix <- substr(firstLine, unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
-        
-        code[[1]][1] <- paste0(prefix, private$length, suffix, collapse='')
-        
-        shinyjs::inlineCSS( sass::sass(paste(unlist(code), collapse = '')))
-        
-      })
-      
-      
-      
-      #### -----
-      ### Definition of timelines style
-      output$timeline2 <- renderUI({
-        req(private$length)
-        if(private$verbose)
-          print(paste0('TL(', config$process.name, ') : timeline2. status = ', paste0(config$status, collapse=' ')))
-        
-        config
-        status <- rep('', private$length)
-        
-        if( !is.null(config$steps))
-          status[which(unlist(config$steps))] <- 'mandatory'
-        
-        #status <- rep('',length(config$stepsNames))
-        status[which(unlist(config$status) == VALIDATED)] <- 'complete'
-        
-        #Compute the skipped steps
-        status[which(unlist(config$status) == SKIPPED)] <- 'skipped'
-        
-        #browser()
-        active  <- rep('', private$length)
-        active[self$rv$current.pos] <- 'active'
-        
-        steps <- names(config$steps)
-        txt <- "<ul class='timeline' id='timeline'>"
-        for (i in 1:private$length){
-          txt <- paste0(txt, "<li class='li ",status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", steps[i],"</h4></div></li>")
-        }
-        txt <- paste0(txt,"</ul>")
-        
-        HTML(txt)
-      })
     },
+    
     
     GetCurrentPosition = function(){invisible(self$rv$current.pos)},
     
@@ -371,10 +293,9 @@ Timeline = R6Class(
     # call
     call = function(input, ouput, session, config=NULL, wake = NULL){
       if(missing(config))
-        stop("'config' is required")
-      
-      
-      callModule(self$server, self$id, config, wake = NULL)
+        stop("'config' is required.")
+     
+      callModule(self$server, self$id, config, wake)
     }
   )
 )

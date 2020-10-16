@@ -17,16 +17,18 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   source(file.path('.', 'private_methods.R'), local=TRUE)$value
   source(file.path('.', 'timeline_R6.R'), local=TRUE)$value
+  source(file.path('.', 'timeline_Pipeline_R6.R'), local=TRUE)$value
   source(file.path('.', 'timeline_Process_R6.R'), local=TRUE)$value
+  source(file.path('.', 'timeline_Style_R6.R'), local=TRUE)$value
   
   verbose <- T
-  output$timeline <- renderUI({
-    timeline$ui()
-  })
+  output$timeline <- renderUI({ timeline$ui() })
   
   rv <- reactiveValues(
-    tl = NULL
+    tl = NULL,
+    wake = NULL
   )
+  wake <- reactiveVal(3)
   config <- reactiveValues(
     type = 'process',
     process.name = 'Pipeline',
@@ -41,7 +43,12 @@ server <- function(input, output, session) {
     Initialize_Status_Process()
     rv$screens <- InitScreens(nbSteps())
     # Must be placed after the initialisation of the 'config$stepsNames' variable
-    config$screens <- CreateScreens(names(config$steps))
+    config$screens <- setNames(
+      lapply(1:length(names(config$steps)), 
+             function(x){
+               do.call(uiOutput, list(outputId=names(config$steps)[x]))}),
+      paste0('screen_', names(config$steps)))
+    
 })
   
   
@@ -49,9 +56,11 @@ server <- function(input, output, session) {
   #timeline$call(config=config, wake = reactive({NULL}))
   
   timeline <- TimelineProcess$new('timeline', style=2)
-  timeline$call(config=config, wake = reactive({NULL}))
+  timeline$call(config=config, wake = wake)
  
   
+observeEvent(input$testWake,{wake(input$testWake)})
+
   output$Description <- renderUI({
     tagList(
       h3('Description'),
@@ -114,14 +123,7 @@ server <- function(input, output, session) {
     )
   }
   
-  CreateScreens <- function(names){
-    setNames(
-      lapply(1:length(names), 
-             function(x){
-               do.call(uiOutput, list(outputId=names[x]))}),
-      paste0('screen_', names(config$steps)))
-  }
-  
+
   
 }
 

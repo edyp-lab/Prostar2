@@ -2,8 +2,8 @@
 TimelinePipeline = R6Class("TimelinePipeline",
                           inherit = Timeline,
                           private = list(
-                            modal_txt = "This action will reset this process. The input dataset will be the output of the previous
-                      validated process and all further datasets will be removed",
+                            modal_txt = "This action will reset this process, all further results will be deleted The new input dataset becomes the output of the last previous
+                      validated process",
                             # This function catches any event on config$status and analyze it
                             # to decide whether to disable/enable UI parts
                             Analyse_status = function(){
