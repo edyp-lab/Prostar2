@@ -1,10 +1,10 @@
 library(R6)
 
 
-#source(file.path('../../../../R', 'global.R'), local=TRUE)$value
-source(file.path('.', 'timeline_R6.R'), local=TRUE)$value
 
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
+
+
 
 options(shiny.fullstacktrace = T)
 ui <- fluidPage(
@@ -15,8 +15,11 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
-
+  source(file.path('.', 'private_methods.R'), local=TRUE)$value
+  source(file.path('.', 'timeline_R6.R'), local=TRUE)$value
+  source(file.path('.', 'timeline_Process_R6.R'), local=TRUE)$value
   
+  verbose <- T
   output$timeline <- renderUI({
     timeline$ui()
   })
@@ -25,16 +28,101 @@ server <- function(input, output, session) {
     tl = NULL
   )
   config <- reactiveValues(
-    type = 'pipeline',
+    type = 'process',
     process.name = 'Pipeline',
-    steps = append(list(Original = T), pipeline.defs$protein )
+    steps = list(Description=T,
+                 Step1 = F,
+                 Step2 = T)
   )
   
 
+  observe({
+    req(config)
+    Initialize_Status_Process()
+    rv$screens <- InitScreens(nbSteps())
+    # Must be placed after the initialisation of the 'config$stepsNames' variable
+    config$screens <- CreateScreens(names(config$steps))
+})
   
-  timeline <- Timeline$new('timeline', style=2)
+  
+  #timeline <- Timeline$new('timeline', style=2)
+  #timeline$call(config=config, wake = reactive({NULL}))
+  
+  timeline <- TimelineProcess$new('timeline', style=2)
   timeline$call(config=config, wake = reactive({NULL}))
-
+ 
+  
+  output$Description <- renderUI({
+    tagList(
+      h3('Description'),
+    actionButton('Description_validate_btn', 'Validate')
+    )
+  })
+  
+  observeEvent(input$Description_validate_btn, {
+    config$status[timeline$GetCurrentPosition()] <- VALIDATED
+  })
+  
+  output$Step1 <- renderUI({
+    tagList(
+      h3('Step1'),
+      selectInput('select_Step1', 'Select', choices=1:4),
+      actionButton('Step1_validate_btn', 'Validate')
+    )
+  })
+  
+  observeEvent(input$Step1_validate_btn, {
+    config$status[timeline$GetCurrentPosition()] <- VALIDATED
+  })
+  
+  output$Step2 <- renderUI({
+    tagList(
+      h3('Step2'),
+      selectInput('select_Step2', 'Select', choices=1:4),
+      actionButton('Step2_validate_btn', 'Validate')
+    )
+  })
+  
+  observeEvent(input$Step2_validate_btn, {
+    config$status[timeline$GetCurrentPosition()] <- VALIDATED
+  })
+  
+  
+  
+  #######################################################################
+  Initialize_Status_Process <- function(){
+   # browser()
+    req(config)
+    if(verbose)
+      print(paste0(config$process.name, ' : Initialize_Status_Process() : '))
+    
+    config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
+  }
+  
+  VALIDATED <- 1
+  UNDONE <- 0
+  SKIPPED <- -1
+  RESETED <- 2
+  
+  verbose <- T
+  
+  
+  InitScreens <- function(n){
+    setNames(lapply(1:n,
+                    function(x){T}),
+             paste0('screen', 1:n)
+    )
+  }
+  
+  CreateScreens <- function(names){
+    setNames(
+      lapply(1:length(names), 
+             function(x){
+               do.call(uiOutput, list(outputId=names[x]))}),
+      paste0('screen_', names(config$steps)))
+  }
+  
+  
 }
 
 

@@ -4,7 +4,7 @@ UNDONE <- 0
 SKIPPED <- -1
 RESETED <- 2
 
-
+verbose <- T
 
 
 InitScreens <- function(n){
@@ -83,6 +83,8 @@ is.skipped <- function(name){
 
 
 Initialize_Status_Process <- function(){
+ # browser()
+  req(config)
   if(verbose)
     print(paste0(config$process.name, ' : Initialize_Status_Process() : '))
   

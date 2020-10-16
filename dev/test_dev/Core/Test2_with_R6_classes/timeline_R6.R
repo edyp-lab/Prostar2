@@ -5,10 +5,82 @@ Timeline = R6Class(
     # attributes
     verbose = T,
     style = 2,
+    length = NULL,
+    modal_txt = NULL,
     DEFAULT_SKIPPED_POSITION = 1,
     DEFAULT_VALIDATED_POSITION = 1,
     DEFAULT_UNDONE_POSITION = 1,
-    reset_OK = 0),
+    reset_OK = 0,
+    
+    
+    CheckConfig = function(conf){
+      passed <- T
+      msg <- ""
+      if (!is.list(conf)){
+        passed <- F
+        msg <- c(msg, "'config' is not a list")
+      }
+      if (length(config)!=3){
+        passed <- F
+        msg <- c(msg, "The length of 'config' is not equal to 4")
+      }
+      names.conf <- c("process.name", "type", "steps")
+      if (!all(sapply(names.conf, function(x){x %in% names(config)}))){
+        passed <- F
+        msg <- c(msg, "The names of elements in 'config' must be the following: 'process.name', 'type', 'steps'")
+      }
+      if (!is.list(conf$steps)){
+        passed <- F
+        msg <- c(msg, "The 'steps' slot is not a list")
+      }
+      
+      list(passed=passed,
+           msg = msg)
+    },
+    
+    
+    toggleState_Steps = function(cond, i){
+      if(private$verbose)
+        print(paste0('TL(',config$process.name, ') : toggleState_Steps() : cond = ', cond, ', i = ', i))
+      
+      lapply(1:i, function(x){
+        shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
+    },
+    
+    Analyse_status_Process = function(){}
+    
+    
+    
+    # # This function catches any event on config$status and analyze it
+    # # to decide whether to disable/enable UI parts
+    # Analyse_status_Process = function(){
+    #   if(private$verbose)
+    #     print(paste0('TL(',config$process.name, ') : Analyse_status_Process() :'))
+    #   
+    #   if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:private$length])== 0 )){
+    #     # This is the case at the initialization of a process or after a reset
+    #     if(private$verbose)
+    #       print(paste0('TL(',config$process.name, ') : Analyse_status() : Init -> Enable all steps'))
+    #     
+    #     # Enable all steps and buttons
+    #     private$toggleState_Steps(cond = TRUE, i = private$length)
+    #   } else if (config$status[[length(private$length)]] == SKIPPED){
+    #     # The entire process is skipped
+    #     if(private$verbose)
+    #       print(paste0('TL(',config$process.name, ') : Analyse_status() : The entire process is skipped'))
+    #     # Disable all steps
+    #     private$toggleState_Steps(cond = FALSE, i = private$length)
+    #   } else {
+    #     # Disable all previous steps from each VALIDATED step
+    #     if(private$verbose)
+    #       print(paste0('TL(',config$process.name, ') : Analyse_status() : Disable all previous steps from each VALIDATED step'))
+    #     ind.max <- max(grep(VALIDATED, unlist(config$status)))
+    #     private$toggleState_Steps(cond = FALSE, i = ind.max)
+    #   }
+    # }
+    
+    
+    ),
   
   public = list(
     # attributes
@@ -19,6 +91,7 @@ Timeline = R6Class(
       position = 0,
       current.pos = 1
     ),
+    
     # initializer
     initialize = function(id, style=2 ){
       self$id = id
@@ -82,16 +155,8 @@ Timeline = R6Class(
       # Return the UI for a modal dialog with data selection input. If 'failed' is
       # TRUE, then display a message that the previous value was invalid.
       dataModal <- function() {
-        
-        if(config$type == "pipeline")
-          txt <- 'This action will reset the entire pipeline and delete all the datasets.'
-        else if (config$type == "process")
-          txt <- paste0("This action will reset this process. The input dataset will be the output of the previous
-                     validated process and all further datasets will be removed")
-        
         modalDialog(
-          span(txt),
-          
+          span(private$modal_txt),
           footer = tagList(
             modalButton("Cancel"),
             actionButton(ns("modal_ok"), "OK")
@@ -114,13 +179,6 @@ Timeline = R6Class(
       
       #----------------------------------------------------------
       
-      
-      
-      
-      Length <- reactive({
-        req(config$status)
-        base::length(config$status)
-      })
       
       navPage <- function(direction) {
         newval <- self$rv$current.pos + direction 
@@ -145,14 +203,18 @@ Timeline = R6Class(
         if(private$verbose)
           print(paste0('TL(',config$process.name, ') : observeEvent(req(config)() '))
         if (length(config$screens)==0)return(NULL)
+        
+        if (!private$CheckConfig(config)$passed)
+          stop(paste0("Errors in 'config'", paste0(private$CheckConfig(config)$msg, collapse=' ')))
+        
         InitScreens()
       })
       
       
       Init_Default_Positions <- reactive({
-        current$DEFAULT_VALIDATED_POSITION <- Length()
-        current$DEFAULT_SKIPPED_POSITION <- Length()
-        current$DEFAULT_UNDONE_POSITION <- 1
+        private$DEFAULT_VALIDATED_POSITION <- private$length
+        private$DEFAULT_SKIPPED_POSITION <- private$length
+        private$DEFAULT_UNDONE_POSITION <- 1
       })
       
       
@@ -176,38 +238,29 @@ Timeline = R6Class(
       
       
       
-     
-      
       observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
       observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
       
       
       output$show_screens <- renderUI({tagList(config$screens)})
       
-      # Builds the condition to enable/disable the next button
-      NextBtn_logics <- reactive({
-        end_of_tl <- self$rv$current.pos == private$length()
+      
+      Update_Buttons <- reactive({
+        # Compute status for the Next button
+        end_of_tl <- self$rv$current.pos == private$length
         mandatory_step <- isTRUE(config$steps[[self$rv$current.pos]])
         validated <- config$status[[self$rv$current.pos]] == VALIDATED
         skipped <- config$status[[self$rv$current.pos]] == SKIPPED
         entireProcessSkipped <- config$status[[private$length]] == SKIPPED
-        !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
-      })
-      
-      # Builds the condition to enable/disable the 'Previous' button
-      PrevBtn_logics <- reactive({
+        NextBtn_logics <- !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
+        
+        # Compute status for the Previous button
         start_of_tl <- self$rv$current.pos == 1
         entireProcessSkipped <- config$status[[private$length]] == SKIPPED
+        PrevBtn_logics <- !start_of_tl && !entireProcessSkipped
         
-        !start_of_tl && !entireProcessSkipped
-      })
-      
-      
-      Update_Buttons <- reactive({
-        
-        shinyjs::toggleState('prevBtn', cond = PrevBtn_logics())
-        shinyjs::toggleState('nextBtn', cond = NextBtn_logics())
-        
+        shinyjs::toggleState('prevBtn', cond = PrevBtn_logics)
+        shinyjs::toggleState('nextBtn', cond = NextBtn_logics)
       })
       
       # Catch a new position or a change in the status list
@@ -216,29 +269,12 @@ Timeline = R6Class(
         if(private$verbose){
           print(paste0('TL(',config$process.name, ') : observeEvent(req(c(self$rv$current.pos, config$status)) : '))
           print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
-          print(paste0('TL(',config$process.name, ') : PrevBtn_logics() = ', PrevBtn_logics(), ', NextBtn_logics() = ', NextBtn_logics()))
-        }
+          }
         # browser()
         
-        if (config$type == 'process'){
-          # Update_Cursor_position()
-          Analyse_status_Process()
-          
-          # One only displays the steps that are not skipped
-          lapply(1:private$length, function(x){
-            shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos && config$status[[self$rv$current.pos]] != SKIPPED)})
-          
-        } else if (config$type == 'pipeline'){
-          #Analyse_status_Pipeline()
-          
-          # Display current page
-          # One display all processes, even the validated ones
-          lapply(1:private$length, function(x){
-            shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos)})
-        }
+        private$Analyse_status()
         
         Update_Buttons()
-        
       })
       
       
@@ -248,57 +284,24 @@ Timeline = R6Class(
         if(private$verbose)
           print(paste0('TL(',config$process.name, ') : Update_Cursor_position() :'))
         
-        #browser()
-        
         if ((config$status[[private$length]] == VALIDATED))
-          self$rv$current.pos <- current$DEFAULT_VALIDATED_POSITION
+          self$rv$current.pos <- private$DEFAULT_VALIDATED_POSITION
         else if (config$status[[private$length]] == SKIPPED)
-          self$rv$current.pos <- current$DEFAULT_SKIPPED_POSITION
+          self$rv$current.pos <- private$DEFAULT_SKIPPED_POSITION
         else if (config$status[[private$length]] == UNDONE)
-          self$rv$current.pos <- current$DEFAULT_UNDONE_POSITION
+          self$rv$current.pos <- private$DEFAULT_UNDONE_POSITION
         if(self$rv$current.pos==0)
           browser()
       }
       
       
-      # This function catches any event on config$status and analyze it
-      # to decide whether to disable/enable UI parts
-      Analyse_status_Process <- reactive({
-        
-        if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:private$length])== 0 )){
-          # This is the case at the initialization of a process or after a reset
-          if(private$verbose)
-            print(paste0('TL(',config$process.name, ') : Analyse_status() : Init -> Enable all steps'))
-          
-          # Enable all steps and buttons
-          toggleState_Steps(cond = TRUE, i = private$length)
-        } else if (config$status[[length(private$length)]] == SKIPPED){
-          # The entire process is skipped
-          if(private$verbose)
-            print(paste0('TL(',config$process.name, ') : Analyse_status() : The entire process is skipped'))
-          # Disable all steps
-          toggleState_Steps(cond = FALSE, i = private$length)
-        } else {
-          # Disable all previous steps from each VALIDATED step
-          if(private$verbose)
-            print(paste0('TL(',config$process.name, ') : Analyse_status() : Disable all previous steps from each VALIDATED step'))
-          ind.max <- max(grep(VALIDATED, unlist(config$status)))
-          toggleState_Steps(cond = FALSE, i = ind.max)
-        }
-      })
       
       
       
       
       
       
-      toggleState_Steps <- function(cond, i){
-        if(private$verbose)
-          print(paste0('TL(',config$process.name, ') : toggleState_Steps() : cond = ', cond, ', i = ', i))
-        
-        lapply(1:i, function(x){
-          shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
-      }
+     
       
       ##
       ## Functions defining timeline and styles
@@ -363,9 +366,14 @@ Timeline = R6Class(
     
     GetResetAction = function(){invisible(private$reset_OK)},
     
+    SetModalTxt = function(txt){private$modal_txt <- txt},
     
     # call
-    call = function(input, ouput, session, config, wake = NULL){
+    call = function(input, ouput, session, config=NULL, wake = NULL){
+      if(missing(config))
+        stop("'config' is required")
+      
+      
       callModule(self$server, self$id, config, wake = NULL)
     }
   )
