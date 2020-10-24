@@ -1,6 +1,6 @@
 #Timeline_Pipeline_R6.R
 TimelinePipeline = R6Class("TimelinePipeline",
-                          inherit = Timeline,
+                          inherit = TimelineManager,
                           private = list(
                             modal_txt = "This action will reset this process, all further results will be deleted The new input dataset becomes the output of the last previous
                       validated process",

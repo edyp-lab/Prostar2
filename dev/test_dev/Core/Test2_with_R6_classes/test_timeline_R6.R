@@ -16,13 +16,12 @@ ui <- fluidPage(
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output, session) {
   source(file.path('.', 'private_methods.R'), local=TRUE)$value
-  source(file.path('.', 'timeline_R6.R'), local=TRUE)$value
+  source(file.path('.', 'timeline_Manager_R6.R'), local=TRUE)$value
   source(file.path('.', 'timeline_Pipeline_R6.R'), local=TRUE)$value
   source(file.path('.', 'timeline_Process_R6.R'), local=TRUE)$value
-  source(file.path('.', 'timeline_Style_R6.R'), local=TRUE)$value
+  source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
   
   verbose <- T
-  output$timeline <- renderUI({ timeline$ui() })
   
   rv <- reactiveValues(
     tl = NULL,
@@ -37,7 +36,7 @@ server <- function(input, output, session) {
                  Step2 = T)
   )
   
-
+  
   observe({
     req(config)
     Initialize_Status_Process()
@@ -55,9 +54,10 @@ server <- function(input, output, session) {
   #timeline <- Timeline$new('timeline', style=2)
   #timeline$call(config=config, wake = reactive({NULL}))
   
-  timeline <- TimelineProcess$new('timeline', style=2)
-  timeline$call(config=config, wake = wake)
+  timelineManager <- TimelineProcess$new('timeline', style=2)
+  timelineManager$call(config=config, wake = wake)
  
+  output$timeline <- renderUI({ timelineManager$ui() })
   
 observeEvent(input$testWake,{wake(input$testWake)})
 

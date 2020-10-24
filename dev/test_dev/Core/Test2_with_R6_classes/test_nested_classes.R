@@ -1,97 +1,91 @@
 # app.R
 library(shiny); library(R6)
-source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
 
+# TODO make uiOutput work with nested classes
 
-Temp = R6Class(
-  "Temp",
-  public = list(
-    # attributes
-    temp = NULL,
-    id = NULL,
-    
-    # initialize
-    initialize = function(id){
-      self$id = id
-    },
-    # UI
-    ui = function(){
-      ns = NS(self$id)
-      tagList(
-        mod_timeline_ui(ns("timeline"))
-      )
-    },
-    
-    # server
-    server = function(input, output, session){
-      ns = NS(self$id)
-      mod_timeline_server("timeline", 
-                          style=2,
-                          steps = list(Description=T,
-                                       Step1 = F,
-                                       Step2 = T),
-                          status = c(Description=  1,
-                                     Step1 = -1,
-                                     Step2 = 1),
-                          pos = 1
+MyChildModule = R6Class(
+  "MyChildModule",
+  public = list(id = NULL,
+                res = NULL,
+                initialize = function(id){
+                  self$id = id
+                  },
+                ui = function(){
+                  ns = NS(self$id)
+                  tagList(h4(self$id),
+                          uiOutput(ns("showText")),
+                          selectInput(ns("select_UI"), 'Select in UI', choices=1:3),
+                          uiOutput(ns("showSelect2")),
+                          actionButton(ns("do"), "Calc!")
                           )
-
-      
-      output$tutu <- renderUI({ 
-        #browser()
-        self$temp$ui()
+        },
+    
+    server = function(){
+      moduleServer(self$id, function(input, output, session) {
+        ns = NS(self$id)
+        output$showText <- renderUI({
+          print(names(input))
+          tagList(
+            p("I am the showText renderUI of the child class")
+            )
+          })
+        output$showSelect2 <- renderUI({
+          selectInput(ns("select2"),'Select2', choices=1:3)
         })
-    },
-
-    call = function(input, ouput, session){
-      callModule(self$server, self$id)
+      observeEvent(input$do,{print(input$do)})
+      }
+  )
     }
   )
-)
+  )
 
 
+#----------------------------------------------------------
 
 
-App = R6Class(
-  "App",
-  public = list(
-    # attributes
-    temp = NULL,
-    classA = NULL,
-    
-    # initialize
-    initialize = function(){
-      self$temp = Temp$new('timeline')
+MyMotherModule = R6Class(
+  "MyMotherModule",
+  public = list(child = NULL,
+                id = NULL,
+                rv=reactiveValues(res=NULL),
+                initialize = function(id){
+                  self$id = id
+                  self$child <- MyChildModule$new(NS(id)("child"))
+                  },
+                ui = function(){
+                  self$child$ui()
+                  },
+                server = function(){
+                  moduleServer(self$id, function(input, output, session) {
+                    self$rv$res <- self$child$server()
+                    #observeEvent(self$rv$res(),{print(self$rv$res())})
+                    }
+                  )
+                  }
+                )
+  )
 
-      
-    },
-    # UI
-    ui = function(){
+#----------------------------------------------------------
+
+
+mother = MyMotherModule$new('mother')
+child = MyChildModule$new('child')
+
+# UI
+ui = function(){
       tagList(
-        self$temp$ui(),
+        mother$ui(),
         hr(),
-        
-        mod_timeline_ui("timeline")
+        child$ui()
       )
-    },
+}
     
-    # server
-    server = function(input, output, session){
-      self$temp$call()
-      mod_timeline_server("timeline", 
-                          style=2,
-                          steps = list(Description=T,
-                                       Step1 = F,
-                                       Step2 = T),
-                          status = c(Description=  1,
-                                     Step1 = -1,
-                                     Step2 = 1),
-                          pos = 1
-                          )
-    }
-  )
-)
+# server
+server = function(input, output, session){
+      child$server()
+      mother$server()
+}
 
-app = App$new()
 
-shiny::shinyApp(app$ui(), app$server)
+
+shiny::shinyApp(ui, server)
