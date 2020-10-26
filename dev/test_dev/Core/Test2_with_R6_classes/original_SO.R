@@ -38,6 +38,7 @@ Process <- R6Class(
   )
 )
 
+#----------------------------------------------------------------------------
 Pipeline <- R6Class(
   "Pipeline",
   public = list(id = NULL,
@@ -89,7 +90,7 @@ Pipeline <- R6Class(
   )
 )
 
-
+#----------------------------------------------------------------------------
 mother <- Pipeline$new("mother")
 ui = function() {mother$ui()}
 server = function(input, output, session) {mother$server()}

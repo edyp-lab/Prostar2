@@ -1,6 +1,10 @@
 library(shinyjs)
+library(R6)
 
-
+source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
+source(file.path('.', 'timeline_Manager_R6.R'), local=TRUE)$value
+source(file.path('.', 'timeline_Pipeline_R6.R'), local=TRUE)$value
+source(file.path('.', 'timeline_Process_R6.R'), local=TRUE)$value
 source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'mod_wf_wf1_Filtering_R6.R'), local=TRUE)$value
@@ -9,10 +13,13 @@ source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 
 options(shiny.fullstacktrace = T)
 
+proc <- Process$new('Filtering')
+
 ui <- fluidPage(
   tagList(
     actionButton('testclic', 'Remote reset'),
-uiOutput('show_process'))
+    uiOutput('show_process')
+  )
   )
 
 
@@ -30,16 +37,12 @@ rv <- reactiveValues(
   remoteReset = 0
 )
 
-dataOut <- reactiveValues(
-  name = NULL,
-  trigger = NULL,
-  obj = NULL
-)
+dataOut <- reactiveValues()
 
   observeEvent(input$testclic, {rv$current.obj <- NULL})
   
-  proc <- Process$new('Filtering')
-  proc$call(dataIn = reactive({rv$current.obj}), 
+  #proc <- Process$new('Filtering')
+  proc$server(dataIn = reactive({rv$current.obj}), 
             dataOut = dataOut,
             remoteReset = reactive({input$testclic}),
             isSkipped = reactive({input$testclic==1})

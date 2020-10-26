@@ -1,6 +1,8 @@
 # TODO COnvert to R6 class then in super class
 Process = R6Class(
   "Process",
+  private=list(dataIn = NULL,
+               timelineManager = NULL),
   public = list(
     # attributes
     id = NULL,
@@ -14,7 +16,7 @@ Process = R6Class(
       ns = NS(self$id)
       tagList(
     useShinyjs(),
-    uiOutput(ns("show_timeline")),
+    private$timelineManager$ui(),
     hr(),
     wellPanel(
       h3('Module Filtering'),
@@ -34,9 +36,11 @@ Process = R6Class(
 },
 
 
-server = function(input, ouput, session, dataIn, dataOut, remoteReset, isSkipped){
+server = function(dataIn, dataOut, remoteReset, isSkipped){
   ns <- NS(self$id)
   
+  moduleServer(self$id, function(input, output, session) {
+    
   
   verbose = T
   source(file.path('.', 'debug_ui.R'), local=TRUE)$value
@@ -61,8 +65,7 @@ server = function(input, ouput, session, dataIn, dataOut, remoteReset, isSkipped
   
   # Main listener of the module which initialize it
   
-  
-  output$show_timeline <- renderUI({timeline$ui()})
+
   
   observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
     if(verbose)
@@ -301,10 +304,9 @@ server = function(input, ouput, session, dataIn, dataOut, remoteReset, isSkipped
     ValidateCurrentPos()
   })
   
-},
+  }
+)
 
-call = function(input, ouput, session, dataIn, dataOut, remoteReset, isSkipped){
-  callModule(self$server, self$id, dataIn, dataOut, remoteReset, isSkipped)
-}
+  }
 )
 )

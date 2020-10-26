@@ -1,25 +1,23 @@
 library(R6)
 
+source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
+source(file.path('.', 'class_TimelineStyle.R'), local=TRUE)$value
+source(file.path('.', 'class_TimelineManager.R'), local=TRUE)$value
 
 
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
-
+#timelineManager <- TimelineForProcess$new(NS('App')('timeline'), style=2)
+timelineManager <- TimelineManager$new(NS('App')('timeline'), style=2)
 
 options(shiny.fullstacktrace = T)
-ui <- fluidPage(
-  tagList(
-    uiOutput("timeline")
-  )
-)
+
+ui = function(){ timelineManager$ui()}
+
 
 # Define server logic to summarize and view selected dataset ----
-server <- function(input, output, session) {
+server = function(input, output, session) {
   source(file.path('.', 'private_methods.R'), local=TRUE)$value
-  source(file.path('.', 'timeline_Manager_R6.R'), local=TRUE)$value
-  source(file.path('.', 'timeline_Pipeline_R6.R'), local=TRUE)$value
-  source(file.path('.', 'timeline_Process_R6.R'), local=TRUE)$value
-  source(file.path('.', 'mod_timeline.R'), local=TRUE)$value
   
   verbose <- T
   
@@ -50,14 +48,11 @@ server <- function(input, output, session) {
     
 })
   
+
   
-  #timeline <- Timeline$new('timeline', style=2)
-  #timeline$call(config=config, wake = reactive({NULL}))
-  
-  timelineManager <- TimelineProcess$new('timeline', style=2)
-  timelineManager$call(config=config, wake = wake)
+  timelineManager$server(config = config, wake = wake)
  
-  output$timeline <- renderUI({ timelineManager$ui() })
+ # output$timeline <- renderUI({ timelineManager$ui() })
   
 observeEvent(input$testWake,{wake(input$testWake)})
 
@@ -69,7 +64,7 @@ observeEvent(input$testWake,{wake(input$testWake)})
   })
   
   observeEvent(input$Description_validate_btn, {
-    config$status[timeline$GetCurrentPosition()] <- VALIDATED
+    config$status[timelineManager$GetCurrentPosition()] <- VALIDATED
   })
   
   output$Step1 <- renderUI({
@@ -81,7 +76,7 @@ observeEvent(input$testWake,{wake(input$testWake)})
   })
   
   observeEvent(input$Step1_validate_btn, {
-    config$status[timeline$GetCurrentPosition()] <- VALIDATED
+    config$status[timelineManager$GetCurrentPosition()] <- VALIDATED
   })
   
   output$Step2 <- renderUI({
@@ -93,7 +88,7 @@ observeEvent(input$testWake,{wake(input$testWake)})
   })
   
   observeEvent(input$Step2_validate_btn, {
-    config$status[timeline$GetCurrentPosition()] <- VALIDATED
+    config$status[timelineManager$GetCurrentPosition()] <- VALIDATED
   })
   
   
