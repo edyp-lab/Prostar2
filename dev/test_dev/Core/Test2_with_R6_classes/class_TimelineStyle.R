@@ -15,6 +15,8 @@ TimelineStyle = R6Class(
     id = NULL,
     style = NULL,
     steps = NULL,
+    status = NULL,
+    pos = NULL,
     
     # initializer
     initialize = function(id, style){
@@ -39,12 +41,16 @@ TimelineStyle = R6Class(
     # server
     server = function(steps, status, pos) {
       ns = NS(self$id)
-      private$length <- length(steps)
+     
+      observe({
+        private$length <- length(steps)
       self$steps = steps
-      
+      self$status <- status
+      self$pos <- pos
+      })
       moduleServer(self$id, function(input, output, session) {
         
-      
+        browser()
       ##
       ## Functions defining timeline and styles
       ##
@@ -60,7 +66,7 @@ TimelineStyle = R6Class(
         if(private$verbose)
           print(paste0(self$id, 'show_TL<-renderUI()'))
 
-          HTML(self[[paste0('BuildTimeline', self$style)]](status(), self$steps, pos()))
+          HTML(self[[paste0('BuildTimeline', self$style)]](self$status, self$steps, pos()))
 
         })
 
@@ -85,7 +91,7 @@ TimelineStyle = R6Class(
       tl_status[which(unlist(status) == SKIPPED)] <- 'skipped'
       
       active  <- rep('', private$length)
-      active[pos] <- 'active'
+      active[self$pos] <- 'active'
       
       txt <- "<ul class='timeline' id='timeline'>"
       for (i in 1:private$length){

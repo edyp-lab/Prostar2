@@ -43,7 +43,7 @@ TimelineManager = R6Class(
     
     toggleState_Steps = function(cond, i){
       if(private$verbose)
-        print(paste0('TL(', self$rv$process.name, ') : toggleState_Steps() : cond = ', cond, ', i = ', i))
+        print(paste0('TL(', self$id, ') : toggleState_Steps() : cond = ', cond, ', i = ', i))
       
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
@@ -55,7 +55,7 @@ TimelineManager = R6Class(
       req(private$length)
       
       if(private$verbose)
-        print(paste0('TL(',self$rv$process.name, ') : Update_Cursor_position() :'))
+        print(paste0('TL(', self$id, ') : Update_Cursor_position() :'))
       
       if ((self$rv$status[[private$length]] == VALIDATED))
         self$rv$current.pos <- private$DEFAULT_VALIDATED_POSITION
@@ -73,12 +73,12 @@ TimelineManager = R6Class(
   public = list(
     # attributes
     id = NULL,
+    config = NULL,
     
     rv = reactiveValues(
       rst_btn = NULL,
       position = 0,
       current.pos = 1,
-      process.name = NULL,
       status = NULL,
       steps = NULL
     ),
@@ -87,7 +87,7 @@ TimelineManager = R6Class(
     initialize = function(id, style=2 ){
       self$id = id
       private$style = style
-      private$timeline <- TimelineStyle$new(NS(self$id)('timeline'), style = style)
+      private$timeline <- TimelineStyle$new(NS(id)('timeline'), style = style)
     },
     
     
@@ -108,7 +108,7 @@ TimelineManager = R6Class(
                                  uiOutput(ns('showPrevBtn')),
                                  uiOutput(ns('showResetBtn'))
               )),
-              column(width=8,div( style = btn_style, uiOutput(ns('test')))),
+              column(width=8,div( style = btn_style, private$timeline$ui())),
               column(width=2,div(style=btn_style,
                                  uiOutput(ns('showNextBtn')),
                                  uiOutput(ns('showSaveExitBtn'))
@@ -125,24 +125,32 @@ TimelineManager = R6Class(
       ns <- NS(self$id)
       #browser()
       
+      self$config <- config
+      #self$rv$status <- reactive({config$status})
+      
+      private$timeline$server(steps = config$steps,
+                              status = config$status,
+                              pos = self$rv$current.pos
+      )
+      
+      
       moduleServer(self$id, function(input, output, session) {
         
-        output$test <- renderUI({private$timeline$ui()})
+        #output$test <- renderUI({private$timeline$ui()})
   
-         observeEvent(req(config), {
-          self$rv$steps <- config$steps
-          self$rv$process.name <- config$process.name
-          self$rv$status <- config$status
-          
-         private$timeline$server(steps = self$rv$steps,
-                                  status = self$rv$status,
-                                  pos = self$rv$current.pos
-                                  )
-         print('after calling timeline$server()')
-          })
+         # observeEvent(req(config), {
+         #  self$rv$steps <- config$steps
+         #  self$rv$status <- config$status
+         #  
+         # private$timeline$server(steps = self$rv$steps,
+         #                          status = self$rv$status,
+         #                          pos = self$rv$current.pos
+         #                          )
+         # print('after calling timeline$server()')
+         #  })
         
         output$showResetBtn <- renderUI({
-          print(paste0('TL(',config$process.name, ') : output$showResetBtn <- renderUI'))
+          print(paste0('TL(',self$id, ') : output$showResetBtn <- renderUI'))
           actionButton(ns("rstBtn"), paste0("Reset ", config$type),
                        style='padding:4px; font-size:80%')
         })
@@ -201,7 +209,7 @@ TimelineManager = R6Class(
         
         observeEvent(req(wake()),{
           if(private$verbose)
-            print(paste0('TL(',config$process.name, ') : observeEvent(current$wake() '))
+            print(paste0('TL(',self$id, ') : observeEvent(current$wake() '))
           
           private$Update_Cursor_position()
         })
@@ -209,7 +217,7 @@ TimelineManager = R6Class(
         
         observeEvent(req(config), ignoreInit=F,{
           if(private$verbose)
-            print(paste0('TL(',config$process.name, ') : observeEvent(req(config)() '))
+            print(paste0('TL(',self$id, ') : observeEvent(req(config)() '))
           req(length(config$screens)>0)
           
           if (!private$CheckConfig(config)$passed)
@@ -233,7 +241,7 @@ TimelineManager = R6Class(
         # Those div englobs the div of the caller where screens are defined
         InitScreens <- reactive({
           if(private$verbose)
-            print(paste0('TL(',config$process.name, ') : call to InitScreens() '))
+            print(paste0('TL(',self$id, ') : call to InitScreens() '))
           req(config$screens)
           private$length <- length(config$steps)
           Init_Default_Positions() 
@@ -277,8 +285,8 @@ TimelineManager = R6Class(
         observeEvent(req(c(self$rv$current.pos, config$status)), {
           req(private$length)
           if(private$verbose){
-            print(paste0('TL(',config$process.name, ') : observeEvent(req(c(self$rv$current.pos, config$status)) : '))
-            print(paste0('TL(',config$process.name, ') : status = ', paste0(config$status, collapse=' ')))
+            print(paste0('TL(', self$id, ') : observeEvent(req(c(self$rv$current.pos, config$status)) : '))
+            print(paste0('TL(', self$id, ') : status = ', paste0(config$status, collapse=' ')))
           }
           
           private$Analyse_status()

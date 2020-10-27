@@ -8,7 +8,7 @@ source(file.path('.', 'class_TimelineManager.R'), local=TRUE)$value
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
 #timelineManager <- TimelineForProcess$new(NS('App')('timeline'), style=2)
-timelineManager <- TimelineManager$new(NS('App')('timeline'), style=2)
+timelineManager <- TimelineManager$new(NS('App')('Filtering'), style=2)
 
 options(shiny.fullstacktrace = T)
 
@@ -25,13 +25,15 @@ server = function(input, output, session) {
     tl = NULL,
     wake = NULL
   )
+  
   wake <- reactiveVal(3)
+  
   config <- reactiveValues(
     type = 'process',
     process.name = 'Pipeline',
-    steps = list(Description=T,
-                 Step1 = F,
-                 Step2 = T)
+    steps = list(Description=T, Step1 = F, Step2 = T),
+    screens = NULL,
+    status = NULL
   )
   
   
@@ -50,7 +52,8 @@ server = function(input, output, session) {
   
 
   
-  timelineManager$server(config = config, wake = wake)
+  timelineManager$server(config = config, 
+                         wake = wake)
  
  # output$timeline <- renderUI({ timelineManager$ui() })
   

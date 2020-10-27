@@ -14,19 +14,20 @@ Process <- R6Class(
                 ui = function() {
                   ns <- NS(self$id)
                   tagList(h4(paste0('child id : ', self$id)), 
+                          uiOutput(ns('show_steps')),
                           uiOutput(ns("showBtn")) 
                           )
                 },
                 
-                server = function(dataIn, dataOut) {
+                server = function(steps, status, dataIn, dataOut) {
                   ns <- NS(self$id)
+                  
                   moduleServer(self$id, function(input, output, session) {
 
-                    output$showBtn <- renderUI({
-                      actionButton(ns("do"), "Calc")
-                      })
+                    output$showBtn <- renderUI({actionButton(ns("do"), "Calc")})
+                    output$show_steps <- renderUI({p(paste0(paste0(steps, collapse=' '), ' | ',paste0(status, collapse=' ')))})
+
                     
-                     
                     observeEvent(input$do,{
                       dataOut$name = self$id
                       dataOut$obj = input$do
@@ -68,12 +69,14 @@ Pipeline <- R6Class(
                   )
                 },
                 
-                server = function() {
+                server = function(config) {
                   ns <- NS(self$id)
                   dataOut <- reactiveValues()
                   LaunchServers <- function() 
-                      lapply(1:self$n, function(x){self$childs[[x]]$server(dataIn = reactive({self$rv$data}),
-                                          dataOut = dataOut)
+                      lapply(1:self$n, function(x){self$childs[[x]]$server(steps = config$steps,
+                                                                           status = config$status,
+                                                                           dataIn = reactive({self$rv$data}),
+                                                                           dataOut = dataOut)
                       })
 
                   LaunchServers()
@@ -91,7 +94,14 @@ Pipeline <- R6Class(
 )
 
 #----------------------------------------------------------------------------
-mother <- Pipeline$new("mother")
+config <- reactiveValues(
+  steps = data.frame(mandatory = c(T, F, T),
+                     status = c(0, 0, 0),
+                     row.names  = c('Description', 'Step1', 'Step2')
+                     ),
+  screens = NULL
+)
+mother <- Pipeline$new("Pipeline")
 ui = function() {mother$ui()}
-server = function(input, output, session) {mother$server()}
+server = function(input, output, session) {mother$server(config)}
 shinyApp(ui, server)
