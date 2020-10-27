@@ -18,15 +18,12 @@ Timeline <- R6Class(
                   )
                 },
                 
-                server = function(steps, status) {
+                server = function(steps, status, pos) {
                   ns <- NS(self$id)
                   
                   moduleServer(self$id, function(input, output, session) {
-                    
                     output$show_steps <- renderUI({p(paste0(paste0(steps, collapse=' '), ' | ',paste0(status, collapse=' ')))})
-                    
-                    
-                    
+
                   })
                 }
   )
@@ -56,7 +53,9 @@ Process <- R6Class(
                   ns <- NS(self$id)
                   tagList(h3(paste0('Mother id : ', self$id)),
                           uiOutput(ns("select")),
-                          uiOutput(ns('showBtn')),
+                          actionButton(ns("dataOut_btn"), "Simulate change in dataOut"),
+                          actionButton(ns("status_btn"), "Simulate change in status"),
+                          actionButton(ns("pos_btn"), "Simulate change in pos"),
                           hr(),
                           self$child$ui()
                   )
@@ -66,23 +65,25 @@ Process <- R6Class(
                   ns <- NS(self$id)
 
                   self$child$server(steps = config$steps,
-                                    status = config$status)
+                                    status = config$status,
+                                    pos = 2)
 
                   moduleServer(self$id, function(input, output, session) {
                     
                     output$select <- renderUI({selectInput(ns('selectData'), 'Mother : Select data', 1:4) })
-                    output$showBtn <- renderUI({actionButton(ns("do"), "Simulate change in dataOut")})
                     
                     observeEvent(dataOut$trigger,{print(paste0('receive new dataOut : ', paste0(lapply(reactiveValuesToList(dataOut),function(x){ x}), collapse=' ')))})
                     
                     observeEvent(input$selectData,{self$rv$data <- input$selectData})
                     
-                    observeEvent(input$do,{
+                    observeEvent(input$dataOut_btn,{
                       dataOut$name = self$id
                       dataOut$obj = input$do
                       dataOut$trigger = runif(1,0,1)
                       print(paste0('send dataOut :', paste0(lapply(reactiveValuesToList(dataOut),function(x){ x}), collapse=' ')))
                     })
+                    
+                    observeEvent(input$pos_btn,{ self$pos <- input$pos_btn %% 2})
                   }
                   ) }
   )
