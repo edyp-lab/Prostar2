@@ -11,7 +11,7 @@ TimelineManager = R6Class(
     DEFAULT_VALIDATED_POSITION = 1,
     DEFAULT_UNDONE_POSITION = 1,
     reset_OK = 0,
-    timeline = NULL,
+    timelineDraw  = NULL,
     
     
     
@@ -35,7 +35,8 @@ TimelineManager = R6Class(
         passed <- F
         msg <- c(msg, "The 'steps' slot is not a list")
       }
-      
+
+      passed <- T
       list(passed=passed,
            msg = msg)
     },
@@ -74,20 +75,23 @@ TimelineManager = R6Class(
     # attributes
     id = NULL,
     config = NULL,
+    steps = NULL,
     
     rv = reactiveValues(
       rst_btn = NULL,
-      position = 0,
-      current.pos = 1,
-      status = NULL,
-      steps = NULL
+      current.pos = 1
     ),
     
     # initializer
-    initialize = function(id, style=2 ){
+    initialize = function(id, steps, style=2 ){
       self$id = id
-      private$style = style
-      private$timeline <- TimelineStyle$new(NS(id)('timeline'), style = style)
+
+     self$steps = steps
+      source(file.path('.', 'class_TimelineDraw.R'), local=TRUE)$value
+      
+      private$timelineDraw <- TimelineDraw$new(NS(id)('timeline'), 
+                                               steps = steps,
+                                               style = style)
     },
     
     
@@ -108,7 +112,7 @@ TimelineManager = R6Class(
                                  uiOutput(ns('showPrevBtn')),
                                  uiOutput(ns('showResetBtn'))
               )),
-              column(width=8,div( style = btn_style, private$timeline$ui())),
+              column(width=8,div( style = btn_style, private$timelineDraw$ui())),
               column(width=2,div(style=btn_style,
                                  uiOutput(ns('showNextBtn')),
                                  uiOutput(ns('showSaveExitBtn'))
@@ -123,15 +127,10 @@ TimelineManager = R6Class(
     # server
     server = function(config, wake) {
       ns <- NS(self$id)
-      #browser()
-      
-      self$config <- config
-      #self$rv$status <- reactive({config$status})
-      
-      private$timeline$server(steps = config$steps,
-                              status = config$status,
-                              pos = self$rv$current.pos
-      )
+
+      private$timelineDraw$server(status = reactive({config$steps$status}),
+                                  position = reactive({self$rv$current.pos})
+                                   )
       
       
       moduleServer(self$id, function(input, output, session) {
@@ -240,8 +239,6 @@ TimelineManager = R6Class(
         # to this module (name prefixed with the ns() function
         # Those div englobs the div of the caller where screens are defined
         InitScreens <- reactive({
-          if(private$verbose)
-            print(paste0('TL(',self$id, ') : call to InitScreens() '))
           req(config$screens)
           private$length <- length(config$steps)
           Init_Default_Positions() 
@@ -292,15 +289,13 @@ TimelineManager = R6Class(
           private$Analyse_status()
           Update_Buttons()
         })
-       
+        list(current.pos = reactive({self$rv$current.pos}),
+             reset = reactive({private$reset_OK})
+        )
       
     } # End of moduleServer function
   ) # End of moduleServer function
 },
-
-GetCurrentPosition = function(){invisible(self$rv$current.pos)},
-
-GetResetAction = function(){invisible(private$reset_OK)},
 
 SetModalTxt = function(txt){private$modal_txt <- txt}# end of server function
 ) # End of public=list()

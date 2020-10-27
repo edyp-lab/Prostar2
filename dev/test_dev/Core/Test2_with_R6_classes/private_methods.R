@@ -7,36 +7,9 @@ RESETED <- 2
 verbose <- T
 
 
-InitScreens <- function(n){
-  setNames(lapply(1:n,
-                  function(x){T}),
-           paste0('screen', 1:n)
-  )
-}
-
-CreateScreens <- function(names){
-  setNames(
-    lapply(1:length(names), 
-           function(x){
-             do.call(uiOutput, list(outputId=ns(names)[x]))}),
-    paste0('screen_', names(config$steps)))
-}
-
-nbSteps <- reactive({
-  req(config$steps)
-  length(config$steps)
-})
 
 
 
-
-
-Wake <- function(){ runif(1,0,1)}
-
-
-Initialize_Status <- reactive({
-  config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
-})
 
 GetMaxValidated_AllSteps <- reactive({
   #browser()
@@ -82,14 +55,7 @@ is.skipped <- function(name){
 
 
 
-Initialize_Status_Process <- function(){
- # browser()
-  req(config)
-  if(verbose)
-    print(paste0(config$process.name, ' : Initialize_Status_Process() : '))
-  
-  config$status <- setNames(rep(UNDONE,length(config$steps)),names(config$steps))
-}
+
 
 GetMaxValidated_AllSteps <- reactive({
   #browser()

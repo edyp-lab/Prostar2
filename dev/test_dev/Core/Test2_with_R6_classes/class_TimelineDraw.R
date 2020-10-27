@@ -1,36 +1,34 @@
-VALIDATED <- 1
-UNDONE <- 0
-SKIPPED <- -1
-RESETED <- 2
+
 
 #Timeline_Style_R6.R
-TimelineStyle = R6Class(
-  "TimelineStyle",
+TimelineDraw = R6Class(
+  "TimelineDraw",
   private = list(
     verbose = T,
-    length = NULL
+    length = NULL,
+    VALIDATED = 1,
+    UNDONE = 0,
+    SKIPPED = -1,
+    RESETED = 2
   ),
   public = list(
     # attributes
     id = NULL,
     style = NULL,
     steps = NULL,
-    status = NULL,
-    pos = NULL,
+
     
     # initializer
-    initialize = function(id, style){
+    initialize = function(id, steps, style){
       self$id = id
       self$style <- style
+      self$steps <- steps
+      private$length <- length(steps)
       },
     
     # UI
     ui = function(){
-      if(private$verbose)
-        print(paste0('TL(style) : ui()'))
-      
-      # the ns function here will prepend a prefix to all the ids in the app.
-      ns = NS(self$id)
+       ns = NS(self$id)
       
       tagList(
         uiOutput(ns('load_CSS')),
@@ -39,18 +37,11 @@ TimelineStyle = R6Class(
     },
     
     # server
-    server = function(steps, status, pos) {
+    server = function(status, position) {
       ns = NS(self$id)
-     
-      observe({
-        private$length <- length(steps)
-      self$steps = steps
-      self$status <- status
-      self$pos <- pos
-      })
-      moduleServer(self$id, function(input, output, session) {
+     moduleServer(self$id, function(input, output, session) {
         
-        browser()
+
       ##
       ## Functions defining timeline and styles
       ##
@@ -66,7 +57,7 @@ TimelineStyle = R6Class(
         if(private$verbose)
           print(paste0(self$id, 'show_TL<-renderUI()'))
 
-          HTML(self[[paste0('BuildTimeline', self$style)]](self$status, self$steps, pos()))
+          HTML(self[[paste0('BuildTimeline', self$style)]](status(), self$steps, position()))
 
         })
 
@@ -74,28 +65,26 @@ TimelineStyle = R6Class(
     )
     },
     
-    BuildTimeline2 = function(status, steps, pos){
+    BuildTimeline2 = function(status, pos){
       req(private$length)
-      if(private$verbose)
-        print(paste0('TL(style) : timeline2. status = ', paste0(status, collapse=' ')))
       
       tl_status <- rep('', private$length)
       #browser()
-      if( !is.null(steps))
-        tl_status[which(unlist(steps))] <- 'mandatory'
+      if( !is.null(self$steps))
+        tl_status[which(unlist(self$steps))] <- 'mandatory'
       
       #status <- rep('',length(config$stepsNames))
-      tl_status[which(unlist(status) == VALIDATED)] <- 'complete'
+      tl_status[which(unlist(status) == private$VALIDATED)] <- 'complete'
       
       #Compute the skipped steps
-      tl_status[which(unlist(status) == SKIPPED)] <- 'skipped'
+      tl_status[which(unlist(status) == private$SKIPPED)] <- 'skipped'
       
       active  <- rep('', private$length)
-      active[self$pos] <- 'active'
+      active[pos] <- 'active'
       
       txt <- "<ul class='timeline' id='timeline'>"
       for (i in 1:private$length){
-        txt <- paste0(txt, "<li class='li ",tl_status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", names(steps)[i],"</h4></div></li>")
+        txt <- paste0(txt, "<li class='li ",tl_status[i]," ",active[i],"'><div class='timestamp'></div><div class='status'><h4>", names(self$steps)[i],"</h4></div></li>")
       }
       txt <- paste0(txt,"</ul>")
       
@@ -103,6 +92,7 @@ TimelineStyle = R6Class(
     },
     
     GetCSSCode = function(){
+      browser()
       file <- paste0('./Timelines/timeline',self$style, '.sass')
       #code <- code_sass_timeline[[paste0('private$style',private$style)]],"\n")
       code <- strsplit(readLines(file),"\n")

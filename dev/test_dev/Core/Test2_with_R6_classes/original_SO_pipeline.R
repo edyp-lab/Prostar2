@@ -15,6 +15,7 @@ Process <- R6Class(
                   ns <- NS(self$id)
                   tagList(h4(paste0('child id : ', self$id)), 
                           uiOutput(ns('show_steps')),
+                          uiOutput(ns('show_dataIn')),
                           uiOutput(ns("showBtn")) 
                           )
                 },
@@ -26,7 +27,8 @@ Process <- R6Class(
 
                     output$showBtn <- renderUI({actionButton(ns("do"), "Calc")})
                     output$show_steps <- renderUI({p(paste0(paste0(steps, collapse=' '), ' | ',paste0(status, collapse=' ')))})
-
+                    output$show_dataIn <- renderUI({p(paste0('dataIn = ', dataIn()))})
+                    
                     
                     observeEvent(input$do,{
                       dataOut$name = self$id
@@ -83,7 +85,7 @@ Pipeline <- R6Class(
                   moduleServer(self$id, function(input, output, session) {
                   
                     output$select <- renderUI({selectInput(ns('selectData'), 'Mother : Select data', 1:4) })
-                    
+                    observeEvent(input$selectData,{self$rv$data <- input$selectData})
                     observeEvent(dataOut$trigger,{print(paste0('receive new dataOut : ', paste0(lapply(reactiveValuesToList(dataOut),function(x){ x}), collapse=' ')))})
                     
                     observeEvent(input$selectData,{self$rv$data <- input$selectData
