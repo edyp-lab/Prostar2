@@ -149,155 +149,36 @@ TimelineManager = R6Class(
          # print('after calling timeline$server()')
          #  })
         
-        output$showResetBtn <- renderUI({
-          print(paste0('TL(',self$id, ') : output$showResetBtn <- renderUI'))
-          actionButton(ns("rstBtn"), paste0("Reset ", config$type),
-                       style='padding:4px; font-size:80%')
-        })
-        
-        output$showPrevBtn <- renderUI({
-          shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-                                         style='padding:4px; font-size:80%'))
-        })
-        
-        output$showNextBtn <- renderUI({
-          shinyjs::disabled(actionButton(ns("nextBtn"), "next",
-                                         style='padding:4px; font-size:80%'))
-        })
-        
-        
-        
-        #-------------------------------------------------------
-        # Return the UI for a modal dialog with data selection input. If 'failed' is
-        # TRUE, then display a message that the previous value was invalid.
-        dataModal <- function() {
-          modalDialog(
-            span(private$modal_txt),
-            footer = tagList(
-              modalButton("Cancel"),
-              actionButton(ns("modal_ok"), "OK")
-            )
-          )
-        }
-        
-        
-        # Show modal when button reset is clicked
-        observeEvent(input$rstBtn, {
-          showModal(dataModal())
-        })
-        
-        # When OK button is pressed, update the reactive value which will be sent
-        # to the caller
-        observeEvent(input$modal_ok, {
-          private$reset_OK <- input$rstBtn
-          removeModal()
-        })
         
         #----------------------------------------------------------
         
         
-        navPage <- function(direction) {
-          newval <- self$rv$current.pos + direction 
-          newval <- max(1, newval)
-          newval <- min(newval, private$length)
-          if(newval == 0)
-            browser()
-          
-          self$rv$current.pos <- newval
-        }
-        
-        
-        observeEvent(req(wake()),{
-          if(private$verbose)
-            print(paste0('TL(',self$id, ') : observeEvent(current$wake() '))
-          
-          private$Update_Cursor_position()
-        })
-        
-        
-        observeEvent(req(config), ignoreInit=F,{
-          if(private$verbose)
-            print(paste0('TL(',self$id, ') : observeEvent(req(config)() '))
-          req(length(config$screens)>0)
-          
-          if (!private$CheckConfig(config)$passed)
-            stop(paste0("Errors in 'config'", paste0(private$CheckConfig(config)$msg, collapse=' ')))
-          
-          InitScreens()
-          
-        })
         
         
         
-        Init_Default_Positions <- reactive({
-          private$DEFAULT_VALIDATED_POSITION <- private$length
-          private$DEFAULT_SKIPPED_POSITION <- private$length
-          private$DEFAULT_UNDONE_POSITION <- 1
-        })
-        
-        
-        # Initialization of the screens by integrating them into a div specific
-        # to this module (name prefixed with the ns() function
-        # Those div englobs the div of the caller where screens are defined
-        InitScreens <- reactive({
-          req(config$screens)
-          private$length <- length(config$steps)
-          Init_Default_Positions() 
-          config$screens <- lapply(1:private$length,
-                                   function(x){
-                                     config$screens[[x]] <- if (x == 1) 
-                                       div(id = ns(paste0("div_screen", x)),  config$screens[[x]])
-                                     else 
-                                       shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  config$screens[[x]]))
-                                   })
-        })
         
         
         
-        observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-        observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
         
-        output$show_screens <- renderUI({tagList(config$screens)})
         
         
-        Update_Buttons <- reactive({
-          # Compute status for the Next button
-          end_of_tl <- self$rv$current.pos == private$length
-          mandatory_step <- isTRUE(config$steps[[self$rv$current.pos]])
-          validated <- config$status[[self$rv$current.pos]] == VALIDATED
-          skipped <- config$status[[self$rv$current.pos]] == SKIPPED
-          entireProcessSkipped <- config$status[[private$length]] == SKIPPED
-          NextBtn_logics <- !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
-          
-          # Compute status for the Previous button
-          start_of_tl <- self$rv$current.pos == 1
-          entireProcessSkipped <- config$status[[private$length]] == SKIPPED
-          PrevBtn_logics <- !start_of_tl && !entireProcessSkipped
-          
-          shinyjs::toggleState('prevBtn', cond = PrevBtn_logics)
-          shinyjs::toggleState('nextBtn', cond = NextBtn_logics)
-        })
         
-        # Catch a new position or a change in the status list
-        observeEvent(req(c(self$rv$current.pos, config$status)), {
-          req(private$length)
-          if(private$verbose){
-            print(paste0('TL(', self$id, ') : observeEvent(req(c(self$rv$current.pos, config$status)) : '))
-            print(paste0('TL(', self$id, ') : status = ', paste0(config$status, collapse=' ')))
-          }
-          
-          private$Analyse_status()
-          Update_Buttons()
-        })
-        list(current.pos = reactive({self$rv$current.pos}),
-             reset = reactive({private$reset_OK})
-        )
+        
+        
+        
+        
+        
+        
+        
+        
+        
+       
       
     } # End of moduleServer function
   ) # End of moduleServer function
 },
 
-SetModalTxt = function(txt){private$modal_txt <- txt}# end of server function
+# end of server function
 ) # End of public=list()
 ) # End of R6class
