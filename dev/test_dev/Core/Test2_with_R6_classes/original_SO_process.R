@@ -4,53 +4,9 @@ library(tibble)
 
 options(shiny.fullstacktrace = F)
 
-#----------------------------------------------------------------------------------
-TimelineDraw <- R6Class(
-  "TimelineDraw",
-  private=list(verbose = T,
-               length = NULL,
-               VALIDATED = 1,
-               UNDONE = 0,
-               SKIPPED = -1,
-               RESETED = 2,
-               reset_OK = NULL),
-  public = list(id = NULL,
-                
-                style = NULL,
-                steps = NULL,
-                rv = reactiveValues(
-                  current.pos = 1
-                ),
-                initialize = function(id, steps, style) {
-                  self$id = id
-                  self$style <- style
-                  self$steps <- steps
-                  private$length <- length(steps)
-                }, 
-                
-                ui = function() {
-                  ns <- NS(self$id)
-                  wellPanel(h3('TimelineDraw'),
-                     uiOutput(ns('show'))
-                  )
-                },
-                
-                server = function(status, position) {
-                  ns <- NS(self$id)
-                  
-                  moduleServer(self$id, function(input, output, session) {
-                    output$show <- renderUI({
-                      tagList(
-                        p(paste0('status = ', paste0(status(), collapse=' '))),
-                        p(paste0('current.pos = ', position()))
-                      )
-                    })
+#------------------------ Class TimelineDraw --------------------------------------
+source(file.path('.', 'class_TimelineDraw.R'), local=TRUE)$value
 
-
-                  })
-                }
-  )
-)
 
 
 
@@ -61,45 +17,56 @@ TimelineManager <- R6Class(
                style = 2,
                length = NULL,
                modal_txt = NULL,
-               DEFAULT_SKIPPED_POSITION = 1,
-               DEFAULT_VALIDATED_POSITION = 1,
-               DEFAULT_UNDONE_POSITION = 1,
+               global = list(VALIDATED = 1,
+                             UNDONE = 0,
+                             SKIPPED = -1,
+                             RESETED = 2),
                reset_OK = 0,
-               timelineDraw  = NULL),
+               timelineDraw  = NULL,
+               
+               CheckConfig = function(conf){},
+               toggleState_Steps = function(cond, i){},
+               Analyse_status_Process = function(){},
+               Update_Cursor_position = function(){},
+               Analyse_status = function(){}
+               ),
   
   public = list(id = NULL,
-                tl_draw = NULL,
+                steps = NULL,
                 rv = reactiveValues(
                   current.pos = 1
                   ),
-                initialize = function(id) {
+                initialize = function(id, steps, style=2 ) {
                   self$id <- id
-                  self$tl_draw <- TimelineDraw$new(NS(id)('tl_draw'),
-                                                   steps = reactive({NULL}),
-                                                   style = 2)
+                  self$steps = steps
+                  private$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'),
+                                                   steps = steps,
+                                                   style = style)
                 }, 
                 
+                # UI
                 ui = function() {
                   ns <- NS(self$id)
                   fluidPage(
-                    wellPanel(
-                    tagList(h3('TimelineManager'), 
-                            self$tl_draw$ui(),
-                            actionButton(ns('rstBtn'), "reset"),
-                            actionButton(ns('pos'), "Simulate change position"),
-                            actionButton(ns("status_btn"), "Simulate change in status"),
-                            dataTableOutput(ns('show_config')),
-                            uiOutput(ns('show_pos'))
-                  )
-                  )
-                  )
+                    wellPanel(style="background-color: lightblue;",
+                              tagList(h3('TimelineManager'),
+                                      private$timelineDraw$ui(),
+                                      actionButton(ns('pos'), "Simulate change position"),
+                                      actionButton(ns("status_btn"), "Simulate change in status"),
+                                      dataTableOutput(ns('show_config')),
+                                      uiOutput(ns('show_pos'))
+                                      )
+                              )
+                    )
                 },
                 
                 server = function(config, wake) {
                   ns <- NS(self$id)
                   
-                  self$tl_draw$server(status = reactive({config$steps$status}),
-                                      position = reactive({self$rv$current.pos}))
+                  private$timelineDraw$server(
+                    status = reactive({config$steps$status}),
+                    position = reactive({self$rv$current.pos})
+                    )
                   
                   moduleServer(self$id, function(input, output, session) {
                     
@@ -125,20 +92,19 @@ TimelineManager <- R6Class(
   )
 )
 
-#----------------------------------------------------------------------------
+#----------------------- Class ProcessManager ----------------------------------
 ProcessManager <- R6Class(
   "ProcessManager",
   private = list(
-    TimelineManager = NULL
+    timelineManager = NULL
   ),
   public = list(id = NULL,
-
+                length = 3,
                 config = reactiveValues(
-                  steps = tibble(
-                    name = c("Description", "Step1", "Step2"),
-                    mandatory = c(T, F, T),
-                    status = c(0, 0, 0),
-                    screens = c('a', 'a', 'a')
+                  steps = list(
+                    mandatory = setNames(c(T, F, T), c("Description", "Step1", "Step2")),
+                    status = setNames(c(0, 0, 0), c("Description", "Step1", "Step2")),
+                    screens = setNames(c('a', 'a', 'a'), c("Description", "Step1", "Step2"))
                   )
                 ),
                 
@@ -157,43 +123,56 @@ ProcessManager <- R6Class(
                 
                 initialize = function(id) {
                   self$id <- id
-                  private$TimelineManager <- TimelineManager$new(NS(id)('timeline'))
+                  
                 },
-                
+                # UI
                 ui = function() {
                   ns <- NS(self$id)
                   fluidPage(
-                  wellPanel(
-                    tagList(h3('ProcessManager'),
-                          uiOutput(ns("select")),
-                          actionButton(ns("dataOut_btn"), "Simulate validate (change in dataOut)"),
-                          actionButton(ns("pos_btn"), "Simulate change in pos"),
-                          hr(),
-                          private$TimelineManager$ui(),
-                          uiOutput(ns('show_dataIn'))
-                  )
-                  )
+                  wellPanel(style="background-color: yellow;",
+                            h3('ProcessManager'),
+                            uiOutput(ns('show_timeline_ui')),
+                            uiOutput(ns("select")),
+                            actionButton(ns("dataOut_btn"), "Simulate validate (change in dataOut)"),
+                            actionButton(ns("pos_btn"), "Simulate change in pos"),
+                            hr(),
+                            #private$timelineManager$ui(),
+                            uiOutput(ns('show_dataIn'))
+                            )
                   )
                 },
                 
+                Wake = function(){ runif(1,0,1)},
+                
+                # SERVER
                 server = function(dataIn, dataOut) {
                   ns <- NS(self$id)
                   
                   current.pos = reactiveVal()
-                  res <- private$TimelineManager$server(config = self$config,
-                                                 wake = NULL)
+                  private$timelineManager <- TimelineManager$new(
+                    id = NS(self$id)('timeline'),
+                    steps = reactive({self$config$steps$mandatory})
+                    )
+                  
+                  res <- private$timelineManager$server(
+                    config = self$config,
+                    wake = reactive({self$Wake()})
+                    )
+                  
+                  
                   observeEvent(dataIn(), {self$rv$dataIn <- dataIn })
 
+                  # MODULE SERVER
                   moduleServer(self$id, function(input, output, session) {
                     
+                    output$show_timeline_ui <- renderUI({
+                      private$timelineManager$ui()
+                    })
+                    
                     output$select <- renderUI({selectInput(ns('selectData'), 'Mother : Select data', 1:4) })
-                    
                     output$show_dataIn <- renderUI({paste0('received dataIn = ', dataIn())})
-                    
                     observeEvent(dataOut$trigger,{print(paste0('receive new dataOut : ', paste0(lapply(reactiveValuesToList(dataOut),function(x){ x}), collapse=' ')))})
-                    
                     observeEvent(input$selectData,{self$rv$data <- input$selectData})
-                    
                     observeEvent(self$rv$data,{print(paste0('new value for self$rv$data : ', self$rv$data)) })
                     
                     observeEvent(input$dataOut_btn,{
@@ -222,16 +201,20 @@ rv = reactiveValues(data = 3)
 dataOut <- reactiveValues()
 
 processManager <- ProcessManager$new("ProcessManager")
+
 ui = function() {
   fluidPage(
-    wellPanel(h3('Prostar'),
+    wellPanel(style="background-color: green;",
+              h3('Prostar'),
               processManager$ui()
     )
   )
     }
 server = function(input, output, session) {
-  processManager$server(dataIn = reactive({rv$data}),
-                 dataOut = dataOut)
+  processManager$server(
+    dataIn = reactive({rv$data}),
+    dataOut = dataOut
+    )
 }
 
 shinyApp(ui, server)

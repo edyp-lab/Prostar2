@@ -128,9 +128,10 @@ TimelineManager = R6Class(
     server = function(config, wake) {
       ns <- NS(self$id)
 
-      private$timelineDraw$server(status = reactive({config$steps$status}),
-                                  position = reactive({self$rv$current.pos})
-                                   )
+      private$timelineDraw$server(
+        status = reactive({config$steps$status}),
+        position = reactive({self$rv$current.pos})
+        )
       
       
       moduleServer(self$id, function(input, output, session) {

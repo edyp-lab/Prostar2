@@ -54,13 +54,16 @@ ProcessManager <- R6Class(
     self$config$steps$status <- setNames(rep(UNDONE,length(self$config$steps$status)),
                                                        names(self$config$steps$status))
     },
+  
   Wake = function(){ runif(1,0,1)},
+  
   InitScreens = function(n){
     setNames(lapply(1:n,
                     function(x){T}),
              paste0('screen', 1:n)
     )
   },
+  
   server = function(dataIn, dataOut) {
                   ns <- NS(self$id)
                   
