@@ -88,7 +88,22 @@ TimelineManager <- R6Class(
                },
                
                Display_Current_Step = function(){},
-               Analyse_Status = function(){}
+               Analyse_Status = function(){},
+               # Initialization of the screens by integrating them into a div specific
+               # to this module (name prefixed with the ns() function
+               # Those div englobs the div of the caller where screens are defined
+               EncapsulateScreens = function(){
+                 req(private$config$screens)
+                 ns <- NS(self$id)
+                 private$Init_Default_Positions() 
+                 private$config$screens <- lapply(1:private$nbSteps,
+                                                  function(x){
+                                                    private$config$screens[[x]] <- if (x == 1) 
+                                                      div(id = ns(paste0("div_screen", x)),  private$config$screens[[x]])
+                                                    else 
+                                                      shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  private$config$screens[[x]]))
+                                                  })
+               }
                
                
   ),
@@ -99,16 +114,13 @@ TimelineManager <- R6Class(
                   stop(" TimelineManager is an abstract class that can't be initialized.")
                 },
                 
-                 
-                
+
                 toggleState_Steps = function(cond, i){
                   lapply(1:i, function(x){
                     shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
                 },
                 
-                
-                
-                
+
                 # UI
                 ui = function() {
                   ns <- NS(self$id)
@@ -122,15 +134,15 @@ TimelineManager <- R6Class(
                                             column(width=2,div(style = private$btn_style,
                                                                uiOutput(ns('showPrevBtn')),
                                                                uiOutput(ns('showResetBtn'))
-                                            )
-                                            ),
+                                                               )
+                                                   ),
                                             column(width=8,div( style = private$btn_style,
                                                                 private$timelineDraw$ui())),
                                             column(width=2,div(style = private$btn_style,
                                                                uiOutput(ns('showNextBtn')),
                                                                uiOutput(ns('showSaveExitBtn'))
-                                            )
-                                            )
+                                                               )
+                                                   )
                                           ),
                                           uiOutput(ns('show_screens'))
                                       )
@@ -142,9 +154,15 @@ TimelineManager <- R6Class(
                 SetModalTxt = function(txt){private$modal_txt <- txt},
                 
                 # SERVER
-                server = function(config, wake) {
+                server = function(config, wake, remoteReset) {
                   ns <- NS(self$id)
-                  private$config <- config
+                  
+                  observeEvent(config,{private$config <- config})
+                  
+                  observeEvent(config$status,{private$config$status <- config$status})
+                  
+                  observeEvent(req(wake()),{private$Update_Cursor_position()})
+                  
                   
                   private$timelineDraw$server(
                     status = reactive({private$config$status}),
@@ -156,10 +174,11 @@ TimelineManager <- R6Class(
                     ns <- NS(self$id)
                     
                     
+                    # Show modal when button reset is clicked
+                    observeEvent(input$rstBtn, {showModal(dataModal())})
                     
                     ###############################
                     output$showResetBtn <- renderUI({
-                      print(paste0('TL(',self$id, ') : output$showResetBtn <- renderUI'))
                       actionButton(ns("rstBtn"), paste0("Reset ", private$type),
                                    style='padding:4px; font-size:80%')
                     })
@@ -190,16 +209,14 @@ TimelineManager <- R6Class(
                     }
                     
                     
-                    # Show modal when button reset is clicked
-                    observeEvent(input$rstBtn, {showModal(dataModal())})
                     
-                    observeEvent(req(wake()),{private$Update_Cursor_position()})
+                    
                     
                     # When OK button is pressed, update the reactive value which will be sent
                     # to the caller
-                    observeEvent(input$modal_ok, {
+                    observeEvent(c(input$modal_ok, remoteReset()), {
                       private$rv$reset_OK <- input$rstBtn
-                      #private$Update_Cursor_position()
+                      private$rv$current.pos <- 1
                       removeModal()
                     })
                     
@@ -237,32 +254,9 @@ TimelineManager <- R6Class(
                       if (!check$passed)
                         stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
                       
-                      EncapsulateScreens()
-                      
+                      private$EncapsulateScreens()
                     })
                     
-                    # Initialization of the screens by integrating them into a div specific
-                    # to this module (name prefixed with the ns() function
-                    # Those div englobs the div of the caller where screens are defined
-                    EncapsulateScreens <- reactive({
-                      req(private$config$screens)
-                      #length(private$config$status) <- length(config$status)
-                      # browser()
-                      private$Init_Default_Positions() 
-                      private$config$screens <- lapply(1:private$nbSteps,
-                                                       function(x){
-                                                         private$config$screens[[x]] <- if (x == 1) 
-                                                           div(id = ns(paste0("div_screen", x)),  private$config$screens[[x]])
-                                                         else 
-                                                           shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  private$config$screens[[x]]))
-                                                       })
-                    })
-                    
-
-                    
-                    
-                    
-                    #####################################
                     list(current.pos = reactive({private$rv$current.pos}),
                          reset = reactive({private$rv$reset_OK})
                     )

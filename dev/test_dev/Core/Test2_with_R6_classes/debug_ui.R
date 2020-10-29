@@ -9,7 +9,7 @@ output$show_dataIn <- renderUI({
 })
 
 output$show_rv_dataIn <- renderUI({
-  tagList(lapply(names(rv$dataIn), function(x){tags$p(x)}))
+  tagList(lapply(names(self$rv$dataIn), function(x){tags$p(x)}))
   })
 
 output$show_rv_dataOut <- renderUI({
