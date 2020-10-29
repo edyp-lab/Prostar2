@@ -11,319 +11,9 @@ source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 
 # ------------- Class TimelineDataManager  --------------------------------------
-TimelineManager <- R6Class(
-  "TimelineManager",
-  private=list(verbose = T,
-               style = 2,
-               global = list(VALIDATED = 1,
-                             SKIPPED = -1,
-                             UNDONE = 1
-                             ),
-               default_pos =list(VALIDATED = 1,
-                                 SKIPPED = 1,
-                                 UNDONE = 1
-                                 ), 
-               length = NULL,
-               modal_txt = NULL,
-               btn_style = "display:inline-block; vertical-align: middle; padding: 7px",
-               timelineDraw  = NULL,
-               
-               
-               Analyse_status = function(){}
-               ),
-  
-  public = list(id = NULL,
-                steps = NULL,
-                
-                
-                initialize = function(id, steps, style=2 ) {
-                  self$id <- id
-                  self$steps = steps
-                  private$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'),
-                                                   steps = steps,
-                                                   style = style)
-                }, 
-                
-                # UI
-                ui = function() {
-                  ns <- NS(self$id)
-                  fluidPage(
-                    wellPanel(style="background-color: lightblue;",
-                              tagList(h3('TimelineManager'),
-                                      shinyjs::useShinyjs(),
-                                      div(id = 'GlobalTL',
-                                          fluidRow(
-                                            align= 'center',
-                                            column(width=2,div(style = private$btn_style,
-                                                         uiOutput(ns('showPrevBtn')),
-                                                         uiOutput(ns('showResetBtn'))
-                                                         )
-                                                   ),
-                                            column(width=8,div( style = private$btn_style,
-                                                                private$timelineDraw$ui())),
-                                            column(width=2,div(style = private$btn_style,
-                                                               uiOutput(ns('showNextBtn')),
-                                                               uiOutput(ns('showSaveExitBtn'))
-                                                               )
-                                                   )
-                                            ),
-                                          uiOutput(ns('show_screens'))
-                                          )
-                                      )
-                              )
-                  )
-                },
-                
-                SetModalTxt = function(txt){private$modal_txt <- txt},
-                
-                # SERVER
-                server = function(config, wake) {
-                  ns <- NS(self$id)
-                  rv = reactiveValues(
-                    current.pos = 1,
-                    reset_OK = NULL
-                  )
-                  private$timelineDraw$server(
-                    status = reactive({config$status}),
-                    position = reactive({rv$current.pos})
-                    )
-                  
-                  # MODULE SERVER
-                  moduleServer(self$id, function(input, output, session) {
-                    ns <- NS(self$id)
-                    
-                   
-
-                    ###############################
-                    output$showResetBtn <- renderUI({
-                      print(paste0('TL(',self$id, ') : output$showResetBtn <- renderUI'))
-                      actionButton(ns("rstBtn"), paste0("Reset ", config$type),
-                                   style='padding:4px; font-size:80%')
-                    })
-                    
-                    output$showPrevBtn <- renderUI({
-                      shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-                                                     style='padding:4px; font-size:80%'))
-                    })
-                    
-                    output$showNextBtn <- renderUI({
-                      shinyjs::disabled(actionButton(ns("nextBtn"), "next",
-                                                     style='padding:4px; font-size:80%'))
-                    })
-                    
-                    
-                    
-                    #-------------------------------------------------------
-                    # Return the UI for a modal dialog with data selection input. If 'failed' is
-                    # TRUE, then display a message that the previous value was invalid.
-                    dataModal <- function() {
-                      modalDialog(
-                        span(private$modal_txt),
-                        footer = tagList(
-                          modalButton("Cancel"),
-                          actionButton(ns("modal_ok"), "OK")
-                        )
-                      )
-                    }
-                    
-                    
-                    # Show modal when button reset is clicked
-                    observeEvent(input$rstBtn, {
-                      showModal(dataModal())
-                    })
-                    
-                    # When OK button is pressed, update the reactive value which will be sent
-                    # to the caller
-                    observeEvent(input$modal_ok, {
-                      print('EVENT ON MODAL RESET')
-                      rv$reset_OK <- input$rstBtn
-                      removeModal()
-                    })
-                    
-                    navPage <- function(direction) {
-                      newval <- rv$current.pos + direction 
-                      newval <- max(1, newval)
-                      newval <- min(newval, length(config$status))
-                      if(newval == 0)
-                        browser()
-                      
-                      rv$current.pos <- newval
-                    }
-                    
-                    observeEvent(req(wake()),{Update_Cursor_position()})
-                    
-                    
-                    Init_Default_Positions <- reactive({
-                      private$default_pos <- list(VALIDATED = length(config$status),
-                                                  SKIPPED = length(config$status),
-                                                  UNDONE = 1
-                                                  )
-                    })
-                    
-                    
-                    
-                    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-                    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
-                    
-                    
-                    output$show_screens <- renderUI({tagList(config$screens)})
-                    
-                    
-                    Analyse_status_Process = function(){
-                      req(length(config$status))
-                      if ((length(config$status)==1) || (length(config$status)>=2 && sum(unlist(config$status)[2:length(config$status)])== 0 )){
-                        # This is the case at the initialization of a process or after a reset
-                        # Enable all steps and buttons
-                        toggleState_Steps(cond = TRUE, i = length(config$status))
-                      } else if (config$status[[length(config$status)]] == private$global$SKIPPED){
-                        # Disable all steps
-                        toggleState_Steps(cond = FALSE, i = length(self$config$status))
-                      } else {
-                        # Disable all previous steps from each VALIDATED step
-                        ind.max <- max(grep(private$global$VALIDATED, unlist(config$status)))
-                        toggleState_Steps(cond = FALSE, i = ind.max)
-                      }
-                    }
-                    
-                    # Catch a new position or a change in the status list
-                    observeEvent(req(c(rv$current.pos, config$status)), {
-                      
-
-                      
-                    #  if (config$type == 'process'){
-                        # Update_Cursor_position()
-                        Analyse_status_Process()
-                        
-                        # One only displays the steps that are not skipped
-                     #   lapply(1:length(self$config$status), function(x){
-                     #     shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos && config$status[[self$rv$current.pos]] != private$global$SKIPPED)})
-                        
-                     # } else if (config$type == 'pipeline'){
-                        #Analyse_status_Pipeline()
-                        
-                        # Display current page
-                        # One display all processes, even the validated ones
-                        lapply(1:length(config$status), function(x){
-                          shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos)})
-                      #}
-
-                      Update_Buttons()
-                    })
-                    
-                    
-                    observeEvent(req(config), ignoreInit=F,{
-                      req(length(config$screens)>0)
-                      
-                      if (!CheckConfig(config)$passed)
-                        stop(paste0("Errors in 'config'", paste0(CheckConfig(config)$msg, collapse=' ')))
-                      
-                      EncapsulateScreens()
-                      
-                    })
-                    
-                    # Initialization of the screens by integrating them into a div specific
-                    # to this module (name prefixed with the ns() function
-                    # Those div englobs the div of the caller where screens are defined
-                    EncapsulateScreens <- reactive({
-                      req(config$screens)
-                      #length(self$config$status) <- length(config$status)
-                     # browser()
-                      Init_Default_Positions() 
-                      config$screens <- lapply(1:length(config$status),
-                                               function(x){
-                                                 config$screens[[x]] <- if (x == 1) 
-                                                   div(id = ns(paste0("div_screen", x)),  config$screens[[x]])
-                                                 else 
-                                                   shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  config$screens[[x]]))
-                                               })
-                    })
-                    
-                    Update_Buttons <- reactive({
-                      # Compute status for the Next button
-                      end_of_tl <- rv$current.pos == length(config$status)
-                      mandatory_step <- isTRUE(config$mandatory[[rv$current.pos]])
-                      validated <- config$status[[rv$current.pos]] == private$global$VALIDATED
-                      skipped <- config$status[[rv$current.pos]] == private$global$SKIPPED
-                      entireProcessSkipped <- config$status[[length(config$status)]] == private$global$SKIPPED
-                      NextBtn_logics <- !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
-                      
-                      # Compute status for the Previous button
-                      start_of_tl <- rv$current.pos == 1
-                      entireProcessSkipped <- config$status[[length(config$status)]] == private$global$SKIPPED
-                      PrevBtn_logics <- !start_of_tl && !entireProcessSkipped
-                      
-                      shinyjs::toggleState('prevBtn', cond = PrevBtn_logics)
-                      shinyjs::toggleState('nextBtn', cond = NextBtn_logics)
-                    })
-                    
-                    
-                    CheckConfig = function(conf){
-                      passed <- T
-                      msg <- ""
-                      if (!is.list(conf)){
-                        passed <- F
-                        msg <- c(msg, "'config' is not a list")
-                      }
-                      if (length(conf)!=3){
-                        passed <- F
-                        msg <- c(msg, "The length of 'config' is not equal to 4")
-                      }
-                      names.conf <- c("process.name", "type", "steps")
-                      if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
-                        passed <- F
-                        msg <- c(msg, "The names of elements in 'config' must be the following: 'process.name', 'type', 'steps'")
-                      }
-                      if (!is.list(conf$steps)){
-                        passed <- F
-                        msg <- c(msg, "The 'steps' slot is not a list")
-                      }
-                      
-                      passed <- T
-                      list(passed=passed,
-                           msg = msg)
-                    }
-                    
-                    toggleState_Steps = function(cond, i){
-                      lapply(1:i, function(x){
-                        shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
-                    }
-                    
-                    
-                    
-                    Update_Cursor_position = function(){
-                      req(config$status)
-
-                      if (config$status[length(config$status)] == private$global$VALIDATED)
-                        rv$current.pos <- private$default_pos$VALIDATED
-                      else if (config$status[length(config$status)] == private$global$SKIPPED)
-                        rv$current.pos <- private$default_pos$SKIPPED
-                      else if (config$status[length(config$status)] == private$global$UNDONE)
-                        rv$current.pos <- private$default_pos$UNDONE
-                    }
-                    
-                    #####################################
-                    list(current.pos = reactive({rv$current.pos}),
-                         reset = reactive({rv$reset_OK})
-                         )
-                  })
-                }
-  )
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+source(file.path('.', 'class_TimelineManager.R'), local=TRUE)$value
+source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
+source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 
 
 
@@ -331,7 +21,7 @@ TimelineManager <- R6Class(
 ProcessManager <- R6Class(
   "ProcessManager",
   private = list(
-    timelineManager = NULL,
+    timelineForProcess = NULL,
     global = list(VALIDATED = 1,
                   SKIPPED = -1,
                   UNDONE = 1
@@ -380,7 +70,10 @@ ProcessManager <- R6Class(
                 },
                 
                 Wake = function(){ runif(1,0,1)},
-                
+                Initialize_Status_Process = function(){
+                  self$config$status <- setNames(rep(0,length(self$config$status)),
+                                                 names(self$config$status))
+                },
 
                 # SERVER
                 server = function(dataIn = NULL, 
@@ -392,10 +85,7 @@ ProcessManager <- R6Class(
                  
                   
                   current.pos = reactiveVal()
-                  Initialize_Status_Process = function(){
-                    self$config$status <- setNames(rep(0,length(self$config$status)),
-                                                         names(self$config$status))
-                  }
+                  
                   
                   #Initialize_Status_Process()
                   self$config$screens <- list(uiOutput(ns('Description')),
@@ -437,12 +127,12 @@ ProcessManager <- R6Class(
                   
                   
                   InitializeTimeline <- function(){
-                    private$timelineManager <- TimelineManager$new(
+                    private$timelineForProcess <- TimelineForProcess$new(
                       id = NS(self$id)('timeline'),
                       steps = reactive({self$config$mandatory})
                     )
                     
-                    self$rv$timeline.res <- private$timelineManager$server(
+                    self$rv$timeline.res <- private$timelineForProcess$server(
                       config = self$config,
                       wake = reactive({self$rv$wake})
                     )
@@ -454,18 +144,15 @@ ProcessManager <- R6Class(
                       
                     })
                     
-                    observe({
-                      print(self$rv$timeline.res$current.pos())
-                   
-                    })
+
                     #--- Catch a reset from timeline or caller
                     observeEvent(req(c(self$rv$timeline.res$reset()!=0, remoteReset()!=0)), {
                       print("RESET FROM TIMELINE")
                       ResetScreens()
                       self$rv$dataIn <- NA
                       self$rv$current.pos <- 1
-                      self$rv$wake <- Wake()
-                      Initialize_Status_Process()
+                      self$rv$wake <- self$Wake()
+                      self$Initialize_Status_Process()
                       Send_Result_to_Caller()
                       InitializeDataIn()
                     })
@@ -475,7 +162,7 @@ ProcessManager <- R6Class(
                   
                   
                   InitializeModule <- function(){
-                    Initialize_Status_Process()
+                    self$Initialize_Status_Process()
                     # rv$screens <- InitScreens(length(self$config$status))
                     self$config$screens <- list(uiOutput(ns('Description')),
                                                 uiOutput(ns('Step1')),
@@ -500,9 +187,7 @@ ProcessManager <- R6Class(
                       shinyjs::reset(names(self$config$mandatory)[x])
                     })
                   }
-                  
-                  
-                  
+
                   
                   Send_Result_to_Caller <- reactive({
                     dataOut$obj <- rv$dataIn
@@ -514,8 +199,8 @@ ProcessManager <- R6Class(
                   moduleServer(self$id, function(input, output, session) {
                     
                     output$show_timeline_ui <- renderUI({
-                      req(private$timelineManager)
-                      private$timelineManager$ui()
+                      req(private$timelineForProcess)
+                      private$timelineForProcess$ui()
                     })
                     
                     output$select <- renderUI({selectInput(ns('selectData'), 'Mother : Select data', 1:4) })
@@ -542,7 +227,7 @@ ProcessManager <- R6Class(
                     
                     observeEvent(req(isSkipped()), {
                       if (isSkipped())
-                        Initialize_Status_Process()
+                        self$Initialize_Status_Process()
                     })
                     
                     

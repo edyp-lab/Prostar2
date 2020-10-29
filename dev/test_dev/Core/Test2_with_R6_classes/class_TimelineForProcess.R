@@ -1,43 +1,44 @@
 #Timeline_R6.R
-TimelineForProcess = R6Class("TimelineForProcess",
-                   inherit = TimelineManager,
+TimelineForProcess = R6Class(
+  "TimelineForProcess",
+  inherit = TimelineManager,
   private = list(
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
-    # This function catches any event on config$status and analyze it
-    # to decide whether to disable/enable UI parts
-    Analyse_status = function(){
-      if(private$verbose)
-        print(paste0('TL(', self$rv$process.name, ') : Analyse_status_Process() :'))
 
-      if ((length(self$rv$status)==1) || (length(self$rv$status)>=2 && sum(unlist(self$rv$status)[2:private$length])== 0 )){
+
+    Analyse_Status = function(){
+      req(private$nbSteps)
+      if ((private$nbSteps==1) || (private$nbSteps>=2 && sum(private$config$status[2:private$nbSteps])== 0 )){
         # This is the case at the initialization of a process or after a reset
-        if(private$verbose)
-          print(paste0('TL(',self$rv$process.name, ') : Analyse_status() : Init -> Enable all steps'))
-        
         # Enable all steps and buttons
-        private$toggleState_Steps(cond = TRUE, i = private$length)
-      } else if (self$rv$status[[length(private$length)]] == SKIPPED){
-        # The entire process is skipped
-        if(private$verbose)
-          print(paste0('TL(',self$rv$process.name, ') : Analyse_status() : The entire process is skipped'))
+        self$toggleState_Steps(cond = TRUE, i = private$nbSteps)
+      } else if (private$config$status[private$nbSteps] == private$global$SKIPPED){
         # Disable all steps
-        private$toggleState_Steps(cond = FALSE, i = private$length)
+        self$toggleState_Steps(cond = FALSE, i = private$nbSteps)
       } else {
         # Disable all previous steps from each VALIDATED step
-        if(private$verbose)
-          print(paste0('TL(',self$rv$process.name, ') : Analyse_status() : Disable all previous steps from each VALIDATED step'))
-        ind.max <- max(grep(VALIDATED, unlist(self$rv$status)))
-        private$toggleState_Steps(cond = FALSE, i = ind.max)
+        ind.max <- max(grep(private$global$VALIDATED, private$config$status))
+        self$toggleState_Steps(cond = FALSE, i = ind.max)
       }
-      
-      
+
+    },
+    
+    Display_Current_Step = function(){
       # One only displays the steps that are not skipped
-      lapply(1:private$length, function(x){
-        shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos && self$rv$status[[self$rv$current.pos]] != SKIPPED)})
+         lapply(1:length(private$config$status), function(x){
+           shinyjs::toggle(paste0('div_screen', x), condition = x==private$rv$current.pos && private$config$status[private$rv$current.pos] != private$global$SKIPPED)})
       
     }
   ),
   
-  public = list()
+  public = list(
+    initialize = function(id, steps, style=2 ) {
+      self$id <- id
+      private$nbSteps <- length(steps())
+      private$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'), 
+                                               steps = steps,
+                                               style = style)
+    }
+  )
 )
