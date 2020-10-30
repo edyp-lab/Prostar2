@@ -47,7 +47,8 @@ ProcessManager <- R6Class(
                                 column(width=4,
                                        tags$b(h4(style = 'color: blue;', "status")),
                                        uiOutput(ns('show_status')))
-                              )
+                              ),
+                              uiOutput(ns('screens'))
                     )
                   )
                 },
@@ -58,6 +59,113 @@ ProcessManager <- R6Class(
                   self$config$status <- setNames(rep(0,length(self$config$status)),
                                                  names(self$config$status))
                 },
+                
+                
+                ##########################################################################"
+                #####################################################################
+                ## screens of the module
+                ##
+                ############### SCREEN 1 ######################################
+                ServerScreens = function(){
+                  ns <- NS(self$id)
+                  moduleServer(self$id, function(input, output, session) {
+                  output$Description <- renderUI({
+                  tagList(
+                    actionButton(ns('start_btn'), 
+                                 paste0('Start ', self$config$process.name),
+                                 class = btn_success_color),
+                    mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
+                  )
+                })
+                
+                
+                observe({
+                  mod_insert_md_server(paste0(self$config$process.name, "_md"), 
+                                       paste0('./md/', self$config$process.name, '.md'))
+                })
+                
+                observeEvent(input$start_btn, {
+                  InitializeDataIn()
+                  ValidateCurrentPos()
+                })
+                
+                ############### SCREEN 2 ######################################
+                
+                output$Step1 <- renderUI({
+                  name <- 'Step1'
+                  
+                  tagList(
+                    div(id=ns(name),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                            tags$h2(name)),
+                        div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
+                            selectInput(ns('select1'), 'Select step 1', 
+                                        choices = 1:5, 
+                                        selected = 1,
+                                        width = '150px')
+                        ),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                            actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+                    )
+                  )
+                })
+                
+                
+                observeEvent(input$perform_Step1_btn, {
+                  ValidateCurrentPos()
+                })
+                
+                ############### SCREEN 3 ######################################
+                output$Step2 <- renderUI({
+                  name <- 'Step2'
+                  tagList(
+                    div(id=ns(name),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                            tags$h3(name)),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
+                            selectInput(ns('select2'), 'Select step 2',
+                                        choices = 1:5,
+                                        selected = 1,
+                                        width = '150px')),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                            actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+                    )
+                  )
+                })
+                
+                ## Logics to implement: here, we must take the last data not null
+                # in previous datas. The objective is to take account
+                # of skipped steps
+                observeEvent(input$perform_Step2_btn, {
+                  ValidateCurrentPos()
+                })
+                
+                
+                
+                
+                ############### SCREEN 4 ######################################
+                output$Step3 <- renderUI({
+                  name <- 'Step3'
+                  
+                  tagList(
+                    div(id=ns(name),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                            tags$h3(name)),
+                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                            actionButton(ns('validate_btn'), 'Validate'))
+                    )
+                  )
+                  
+                })
+                
+                
+                observeEvent(input$validate_btn, {
+                  # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
+                  ValidateCurrentPos()
+                })
+                  })
+                },
+                ################################################################################
                 
                 # SERVER
                 server = function(dataIn = NULL, 
@@ -169,7 +277,7 @@ ProcessManager <- R6Class(
                     self$rv$wake <- self$Wake()
                     
                     dataOut$obj <- self$rv$dataIn
-                    dataOut$name <- 'toto'
+                    dataOut$name <- self$config$process.name
                     dataOut$trigger <- self$rv$wake
                   })
                   
@@ -299,118 +407,11 @@ ProcessManager <- R6Class(
                     })
                     
                     
-                    GetValidationBtnIds <- reactive({
-                      
-                      validated.btns <- grep('_validate_btn', names(input))
-                    })
+                    GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
                     
                     
                     ###################################################
-                    #####################################################################
-                    ## screens of the module
-                    ##
-                    ############### SCREEN 1 ######################################
-                    output$Description <- renderUI({
-                      tagList(
-                        actionButton(ns('start_btn'), 
-                                     paste0('Start ', self$config$process.name),
-                                     class = btn_success_color),
-                        mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
-                      )
-                    })
-                    
-                    
-                    observe({
-                      mod_insert_md_server(paste0(self$config$process.name, "_md"), 
-                                           paste0('./md/', self$config$process.name, '.md'))
-                    })
-                    
-                    observeEvent(input$start_btn, {
-                      InitializeDataIn()
-                      ValidateCurrentPos()
-                    })
-                    
-                    ############### SCREEN 2 ######################################
-                    
-                    output$Step1 <- renderUI({
-                      name <- 'Step1'
-                      
-                      tagList(
-                        div(id=ns(name),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                                tags$h2('Step 1')),
-                            div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
-                                selectInput(ns('select1'), 'Select step 1', 
-                                            choices = 1:5, 
-                                            selected = 1,
-                                            width = '150px')
-                            ),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                                actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
-                        )
-                      )
-                    })
-                    
-                    
-                    observeEvent(input$perform_Step1_btn, {
-                      print('event on perform_Step1_btn')
-                      ValidateCurrentPos()
-                    })
-                    
-                    ############### SCREEN 3 ######################################
-                    output$Step2 <- renderUI({
-                      name <- 'Step2'
-                      tagList(
-                        div(id=ns(name),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                                tags$h3('Step 2')),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
-                                selectInput(ns('select2'), 'Select step 2',
-                                            choices = 1:5,
-                                            selected = 1,
-                                            width = '150px')),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                                actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
-                        )
-                      )
-                    })
-                    
-                    ## Logics to implement: here, we must take the last data not null
-                    # in previous datas. The objective is to take account
-                    # of skipped steps
-                    observeEvent(input$perform_Step2_btn, {
-                      print('event on perform_Step2_btn')
-                      ValidateCurrentPos()
-                    })
-                    
-                    
-                    
-                    
-                    ############### SCREEN 4 ######################################
-                    output$Step3 <- renderUI({
-                      name <- 'Step3'
-                      
-                      tagList(
-                        div(id=ns(name),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                                tags$h3('Step 3')),
-                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                                actionButton(ns('validate_btn'), 'Validate'))
-                        )
-                      )
-                      
-                    })
-                    
-                    
-                    observeEvent(input$validate_btn, {
-                      # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
-                      print('event on validate_btn')
-                      ValidateCurrentPos()
-                    })
-                    
-                    
-                    
-                    #################################################
+                    output$screens <- renderUI({self$ServerScreens()})
                     
                   }
                   ) }

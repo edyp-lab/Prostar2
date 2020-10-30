@@ -88,6 +88,7 @@ TimelineManager <- R6Class(
                },
                
                Display_Current_Step = function(){},
+               
                Analyse_Status = function(){},
                # Initialization of the screens by integrating them into a div specific
                # to this module (name prefixed with the ns() function
