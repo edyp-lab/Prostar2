@@ -35,11 +35,11 @@ TimelineForProcess = R6Class(
   ),
   
   public = list(
-    initialize = function(id, steps, style=2 ) {
+    initialize = function(id, mandatory, style=2 ) {
       self$id <- id
-      private$nbSteps <- length(steps())
+      private$nbSteps <- length(mandatory)
       private$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'), 
-                                               steps = steps,
+                                               mandatory = mandatory,
                                                style = style)
     }
   )

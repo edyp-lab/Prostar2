@@ -10,7 +10,7 @@ ProcessManager <- R6Class(
   public = list(id = NULL,
                 config = reactiveValues() ,
                 steps = NULL,
-                
+                dataOut = reactiveValues(),
                 rv = reactiveValues(
                   dataIn = NULL,
                   current.pos = NULL,
@@ -60,122 +60,199 @@ ProcessManager <- R6Class(
                                                  names(self$config$status))
                 },
                 
+                ValidateCurrentPos = function(){
+                  self$config$status[self$rv$current.pos] <- private$global$VALIDATED
+                  self$Set_Skipped_Status()
+                  #browser()
+                  if (self$config$status[length(self$config$status)] == private$global$VALIDATED)
+                    # Either the process has been validated, one can prepare data to ben sent to caller
+                    # Or the module has been reseted
+                    self$Send_Result_to_Caller()
+                },
+                
+                
+                Set_Skipped_Status = function(){
+                  for (i in 1:length(self$config$mandatory))
+                    if (self$config$status[i] != private$global$VALIDATED && self$GetMaxValidated_AllSteps() > i)
+                      self$config$status[i] <- private$global$SKIPPED
+                },
+                
+                Send_Result_to_Caller = function(){
+                  self$rv$wake <- self$Wake()
+                  
+                  self$dataOut$obj <- self$rv$dataIn
+                  self$dataOut$name <- self$config$process.name
+                  self$dataOut$trigger <- self$rv$wake
+                },
+                
+                
+                GetMaxValidated_AllSteps = function(){
+                  val <- 0
+                  ind <- which(self$config$status == private$global$VALIDATED)
+                  if (length(ind) > 0)
+                    val <- max(ind)
+                  val
+                },
+                
+                GetMaxValidated_BeforeCurrentPos = function(){
+                  ind.max <- 0
+                  indices.validated <- which(self$config$status == private$global$VALIDATED)
+                  if (length(indices.validated) > 0){
+                    ind <- which(indices.validated < self$rv$current.pos)
+                    if(length(ind) > 0)
+                      ind.max <- max(ind)
+                  }
+                  
+                  if (ind.max == 0)
+                    ind.max <- 1
+                  
+                  ind.max
+                },
+                
+                
+                # Test if a process module (identified by its name) has been skipped.
+                # This function is called each time the list config$isDone is updated
+                # because one can know the status 'Skipped' only when a further module
+                # has been validated
+                is.skipped = function(name){
+                  pos <- which(name == names(config$mandatory))
+                  return(GetStatusPosition(pos) == private$global$SKIPPED)
+                },
+                
+
+                
+                GetCurrentStepName = reactive({ names(config$mandatory)[self$rv$current.pos] }),
+                
+                Unskip = function(pos){config$status[pos] <- private$global$UNDONE},
+                
+                GetStatusPosition = function(pos){config$status[pos]},
+                
+                
                 
                 ##########################################################################"
                 #####################################################################
                 ## screens of the module
                 ##
                 ############### SCREEN 1 ######################################
-                ServerScreens = function(){
-                  ns <- NS(self$id)
-                  moduleServer(self$id, function(input, output, session) {
+                ProcessLogics = function(id, input, output){
+                  ns <- NS(id)
                   output$Description <- renderUI({
-                  tagList(
-                    actionButton(ns('start_btn'), 
-                                 paste0('Start ', self$config$process.name),
-                                 class = btn_success_color),
-                    mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
-                  )
-                })
-                
-                
-                observe({
-                  mod_insert_md_server(paste0(self$config$process.name, "_md"), 
-                                       paste0('./md/', self$config$process.name, '.md'))
-                })
-                
-                observeEvent(input$start_btn, {
-                  InitializeDataIn()
-                  ValidateCurrentPos()
-                })
-                
-                ############### SCREEN 2 ######################################
-                
-                output$Step1 <- renderUI({
-                  name <- 'Step1'
-                  
-                  tagList(
-                    div(id=ns(name),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                            tags$h2(name)),
-                        div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
-                            selectInput(ns('select1'), 'Select step 1', 
-                                        choices = 1:5, 
-                                        selected = 1,
-                                        width = '150px')
-                        ),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                            actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
-                    )
-                  )
-                })
-                
-                
-                observeEvent(input$perform_Step1_btn, {
-                  ValidateCurrentPos()
-                })
-                
-                ############### SCREEN 3 ######################################
-                output$Step2 <- renderUI({
-                  name <- 'Step2'
-                  tagList(
-                    div(id=ns(name),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                            tags$h3(name)),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
-                            selectInput(ns('select2'), 'Select step 2',
-                                        choices = 1:5,
-                                        selected = 1,
-                                        width = '150px')),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                            actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
-                    )
-                  )
-                })
-                
-                ## Logics to implement: here, we must take the last data not null
-                # in previous datas. The objective is to take account
-                # of skipped steps
-                observeEvent(input$perform_Step2_btn, {
-                  ValidateCurrentPos()
-                })
-                
-                
-                
-                
-                ############### SCREEN 4 ######################################
-                output$Step3 <- renderUI({
-                  name <- 'Step3'
-                  
-                  tagList(
-                    div(id=ns(name),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                            tags$h3(name)),
-                        div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-                            actionButton(ns('validate_btn'), 'Validate'))
-                    )
-                  )
-                  
-                })
-                
-                
-                observeEvent(input$validate_btn, {
-                  # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
-                  ValidateCurrentPos()
-                })
-                  })
-                },
+                      tagList(
+                        actionButton(ns('start_btn'), 
+                                     paste0('Start ', self$config$process.name),
+                                     class = btn_success_color),
+                        mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
+                      )
+                    })
+                    
+                    
+                    observe({
+                      mod_insert_md_server(paste0(self$config$process.name, "_md"), 
+                                           paste0('./md/', self$config$process.name, '.md'))
+                    })
+                    
+                    # observeEvent(input$start_btn, {
+                    #   self$InitializeDataIn()
+                    #   ValidateCurrentPos()
+                    # })
+                    
+                    ############### SCREEN 2 ######################################
+                    
+                    output$Step1 <- renderUI({
+                      name <- 'Step1'
+                      
+                      tagList(
+                        div(id=ns(name),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                                tags$h2(name)),
+                            div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
+                                selectInput(ns('select1'), 'Select step 1', 
+                                            choices = 1:5, 
+                                            selected = 1,
+                                            width = '150px')
+                            ),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                                actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+                        )
+                      )
+                    })
+                    
+                    
+                    observeEvent(input$perform_Step1_btn, {
+                      self$ValidateCurrentPos()
+                    })
+                    
+                    ############### SCREEN 3 ######################################
+                    output$Step2 <- renderUI({
+                      name <- 'Step2'
+                      tagList(
+                        div(id=ns(name),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                                tags$h3(name)),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
+                                selectInput(ns('select2'), 'Select step 2',
+                                            choices = 1:5,
+                                            selected = 1,
+                                            width = '150px')),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                                actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+                        )
+                      )
+                    })
+                    
+                    ## Logics to implement: here, we must take the last data not null
+                    # in previous datas. The objective is to take account
+                    # of skipped steps
+                    observeEvent(input$perform_Step2_btn, {
+                      self$ValidateCurrentPos()
+                    })
+                    
+                    
+                    
+                    
+                    ############### SCREEN 4 ######################################
+                    output$Step3 <- renderUI({
+                      name <- 'Step3'
+                      
+                      tagList(
+                        div(id=ns(name),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                                tags$h3(name)),
+                            div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                                actionButton(ns('validate_btn'), 'Validate'))
+                        )
+                      )
+                      
+                    })
+                    
+                    
+                    observeEvent(input$validate_btn, {
+                      # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
+                      self$ValidateCurrentPos()
+                    })
+                  },
                 ################################################################################
                 
                 # SERVER
                 server = function(dataIn = NULL, 
                                   dataOut = NULL,
                                   remoteReset = FALSE,
-                                  isSkipped = FALSE) {
+                                  isSkipped = FALSE,
+                                  logics = NULL) {
                   ns <- NS(self$id)
                   current.pos = reactiveVal()
                   
-
+                  
+                  observeEvent(self$dataOut$trigger, {
+                    print("new values on self$dataOut$trigger")
+                    dataOut$name <- self$dataOut$name
+                    dataOut$obj <- self$dataOut$obj
+                    dataOut$trigger <- self$dataOut$trigger
+                  })
+                  
+                  
+                  
+                  
                   observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
                     
                     print('event detected on dataIn()')
@@ -199,6 +276,7 @@ ProcessManager <- R6Class(
                         InitializeDataIn()
                         InitializeModule()
                         InitializeTimeline()
+                        self$ValidateCurrentPos()
                       } else if (!inputExists){
                         # Initialization of Prostar
                       }
@@ -208,9 +286,10 @@ ProcessManager <- R6Class(
                   
                   
                   observe({
+                    #browser()
                     private$timelineForProcess <- TimelineForProcess$new(
                       id = NS(self$id)('timeline'),
-                      steps = reactive({self$config$mandatory})
+                      mandatory = self$config$mandatory
                     )
                   })
                   
@@ -233,7 +312,7 @@ ProcessManager <- R6Class(
                       ResetScreens()
                       self$rv$dataIn <- NA
                       self$Initialize_Status_Process()
-                      Send_Result_to_Caller()
+                      self$Send_Result_to_Caller()
                       InitializeDataIn()
                     })
                   }
@@ -273,13 +352,7 @@ ProcessManager <- R6Class(
                   }
                   
                   
-                  Send_Result_to_Caller <- reactive({
-                    self$rv$wake <- self$Wake()
-                    
-                    dataOut$obj <- self$rv$dataIn
-                    dataOut$name <- self$config$process.name
-                    dataOut$trigger <- self$rv$wake
-                  })
+                  
                   
                   # MODULE SERVER
                   moduleServer(self$id, function(input, output, session) {
@@ -335,84 +408,13 @@ ProcessManager <- R6Class(
                     })
                     
                     
-                    
-                    
-                    GetMaxValidated_AllSteps <- reactive({
-                      val <- 0
-                      ind <- which(self$config$status == private$global$VALIDATED)
-                      if (length(ind) > 0)
-                        val <- max(ind)
-                      val
-                    })
-                    
-                    GetMaxValidated_BeforeCurrentPos <- reactive({
-                      ind.max <- 0
-                      indices.validated <- which(self$config$status == private$global$VALIDATED)
-                      if (length(indices.validated) > 0){
-                        ind <- which(indices.validated < self$rv$current.pos)
-                        if(length(ind) > 0)
-                          ind.max <- max(ind)
-                      }
-                      
-                      if (ind.max == 0)
-                        ind.max <- 1
-                      
-                      ind.max
-                    })
-                    
-                    
-                    # Test if a process module (identified by its name) has been skipped.
-                    # This function is called each time the list config$isDone is updated
-                    # because one can know the status 'Skipped' only when a further module
-                    # has been validated
-                    is.skipped <- function(name){
-                      pos <- which(name == names(config$mandatory))
-                      return(GetStatusPosition(pos) == private$global$SKIPPED)
-                    }
-                    
-                    
-                    
-                    GetMaxValidated_AllSteps <- reactive({
-                      val <- 0
-                      ind <- which(self$config$status == private$global$VALIDATED)
-                      if (length(ind) > 0)
-                        val <- max(ind)
-                      val
-                    })
-                    
-                    
-                    
-                    GetCurrentStepName <- reactive({ names(config$mandatory)[self$rv$current.pos] })
-                    
-                    Unskip <- function(pos){config$status[pos] <- private$global$UNDONE}
-                    
-                    GetStatusPosition <- function(pos){config$status[pos]}
-                    
-                    
-                    
-                    Set_Skipped_Status <- function(){
-                      for (i in 1:length(self$config$mandatory))
-                        if (self$config$status[i] != private$global$VALIDATED && GetMaxValidated_AllSteps() > i)
-                          self$config$status[i] <- private$global$SKIPPED
-                    }
-                    
-                    ValidateCurrentPos <- reactive({
-                      self$config$status[self$rv$current.pos] <- private$global$VALIDATED
-                      Set_Skipped_Status()
-                      #browser()
-                      if (self$config$status[length(self$config$status)] == private$global$VALIDATED)
-                        # Either the process has been validated, one can prepare data to ben sent to caller
-                        # Or the module has been reseted
-                        Send_Result_to_Caller()
-                    })
-                    
-                    
                     GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
                     
                     
                     ###################################################
-                    output$screens <- renderUI({self$ServerScreens()})
-                    
+                    #output$screens <- renderUI({self$ServerScreens()})
+                    #logics(self$id, input, output)
+                    self$ProcessLogics(self$id, input, output)
                   }
                   ) }
   )

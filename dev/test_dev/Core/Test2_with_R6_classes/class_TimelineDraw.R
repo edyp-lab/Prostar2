@@ -3,7 +3,7 @@ TimelineDraw <- R6Class(
   private=list(verbose = T,
                length = NULL,
                style = NULL,
-               steps = NULL,
+               mandatory = NULL,
                
                global = list(VALIDATED = 1,
                              UNDONE = 0,
@@ -25,7 +25,7 @@ TimelineDraw <- R6Class(
                
                BuildTimeline2 = function(status, pos){
                  tl_status <- rep('', private$length)
-                 tl_status[which(unlist(private$steps()))] <- 'mandatory'
+                 tl_status[which(private$mandatory)] <- 'mandatory'
                  tl_status[which(unlist(status) == private$global$VALIDATED)] <- 'complete'
                  tl_status[which(unlist(status) == private$global$SKIPPED)] <- 'skipped'
                  
@@ -40,7 +40,7 @@ TimelineDraw <- R6Class(
                                  " ",
                                  active[i],
                                  "'><div class='timestamp'></div><div class='status'><h4>", 
-                                 names(private$steps())[i],
+                                 names(private$mandatory)[i],
                                  "</h4></div></li>")
                  }
                  txt <- paste0(txt,"</ul>")
@@ -50,11 +50,12 @@ TimelineDraw <- R6Class(
                ),
   public = list(id = NULL,
                 
-                initialize = function(id, steps, style) {
+                initialize = function(id, mandatory, style) {
+                  #browser()
                   self$id <- id
                   private$style <- style
-                  private$steps <- steps
-                  private$length <- length(private$steps())
+                  private$mandatory <- mandatory
+                  private$length <- length(private$mandatory)
                 }, 
                 
                 ui = function() {

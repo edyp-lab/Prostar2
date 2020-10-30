@@ -39,7 +39,7 @@ ui = function() {
               uiOutput('show_ui')
     )
   )
-    }
+}
 server = function(input, output, session) {
   
   utils::data(Exp1_R25_prot, package='DAPARdata2')
@@ -47,7 +47,7 @@ server = function(input, output, session) {
   rv = reactiveValues(
     dataIn = NULL,
     remoteReset = NULL
-    )
+  )
   
   dataOut <- reactiveValues()
   
@@ -67,18 +67,18 @@ server = function(input, output, session) {
   
   processManager <- ProcessManager$new("ProcessManager",
                                        config = list(
-                                         process.name = 'processX',
-                                         mandatory = setNames(c(T, F, F,T), c("Description", "Step1", "Step2", "Step3")),
+                                         process.name = 'Filtering',
+                                         mandatory = setNames(c(F, F, F,T), c("Description", "Step1", "Step2", "Step3")),
                                          status = setNames(c(0, 0, 0,0), c("Description", "Step1", "Step2", "Step3"))
                                        )
-                                       )
+  )
   
   processManager$server(
     dataIn = reactive({rv$dataIn}),
     dataOut = dataOut,
     remoteReset = reactive({input$remoteReset}),
     isSkipped = reactive({input$skip %%2 == 0})
-    )
+  )
   
   output$show_ui <- renderUI({
     req(processManager)

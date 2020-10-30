@@ -190,8 +190,8 @@ TimelineManager <- R6Class(
                     })
                     
                     output$showNextBtn <- renderUI({
-                      shinyjs::disabled(actionButton(ns("nextBtn"), "next",
-                                                     style='padding:4px; font-size:80%'))
+                      actionButton(ns("nextBtn"), "next",
+                                                     style='padding:4px; font-size:80%')
                     })
                     
                     
