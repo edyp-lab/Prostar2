@@ -6,27 +6,27 @@ config <- list(
 
 ##################################################################################################
 
-ProcessLogics = function(id, input, output){
-  ns <- NS(id)
+ProcessLogics = function(self, input, output){
+  ns <- NS(self$id)
   output$Description <- renderUI({
     tagList(
       actionButton(ns('start_btn'), 
-                   paste0('Start ', config$process.name),
+                   paste0('Start ', self$config$process.name),
                    class = btn_success_color),
-      mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
+      mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
     )
   })
   
   
   observe({
-    mod_insert_md_server(paste0(config$process.name, "_md"), 
-                         paste0('./md/', config$process.name, '.md'))
+    mod_insert_md_server(paste0(self$config$process.name, "_md"), 
+                         paste0('./md/', self$config$process.name, '.md'))
   })
   
-  observeEvent(input$start_btn, {
-    #InitializeDataIn()
-    ValidateCurrentPos()
-  })
+  # observeEvent(input$start_btn, {
+  #   self$InitializeDataIn()
+  #   ValidateCurrentPos()
+  # })
   
   ############### SCREEN 2 ######################################
   
@@ -51,7 +51,7 @@ ProcessLogics = function(id, input, output){
   
   
   observeEvent(input$perform_Step1_btn, {
-    ValidateCurrentPos()
+    self$ValidateCurrentPos()
   })
   
   ############### SCREEN 3 ######################################
@@ -76,7 +76,7 @@ ProcessLogics = function(id, input, output){
   # in previous datas. The objective is to take account
   # of skipped steps
   observeEvent(input$perform_Step2_btn, {
-    ValidateCurrentPos()
+    self$ValidateCurrentPos()
   })
   
   
@@ -100,7 +100,6 @@ ProcessLogics = function(id, input, output){
   
   observeEvent(input$validate_btn, {
     # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
-    ValidateCurrentPos()
+    self$ValidateCurrentPos()
   })
-  
 }

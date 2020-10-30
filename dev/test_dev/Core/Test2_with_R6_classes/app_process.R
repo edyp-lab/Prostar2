@@ -19,6 +19,7 @@ source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
+source(file.path('.', 'process_A.R'), local=TRUE)$value
 
 
 #----------------------------------------------------------------------------
@@ -77,7 +78,8 @@ server = function(input, output, session) {
     dataIn = reactive({rv$dataIn}),
     dataOut = dataOut,
     remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0})
+    isSkipped = reactive({input$skip %%2 == 0}),
+    logics = ProcessLogics
   )
   
   output$show_ui <- renderUI({
