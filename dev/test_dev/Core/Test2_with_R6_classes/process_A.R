@@ -8,25 +8,25 @@ config <- list(
 
 ProcessLogics = function(self, input, output){
   ns <- NS(self$id)
+  
   output$Description <- renderUI({
     tagList(
-      actionButton(ns('start_btn'), 
+      actionButton(ns('btn_validate_Description'), 
                    paste0('Start ', self$config$process.name),
                    class = btn_success_color),
       mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
     )
   })
   
-  
   observe({
     mod_insert_md_server(paste0(self$config$process.name, "_md"), 
                          paste0('./md/', self$config$process.name, '.md'))
   })
   
-  # observeEvent(input$start_btn, {
-  #   self$InitializeDataIn()
-  #   ValidateCurrentPos()
-  # })
+   observeEvent(input$btn_validate_Description, {
+     self$InitializeDataIn()
+     self$ValidateCurrentPos()
+   })
   
   ############### SCREEN 2 ######################################
   
@@ -44,13 +44,13 @@ ProcessLogics = function(self, input, output){
                           width = '150px')
           ),
           div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-              actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+              actionButton(ns(paste0('btn_validate_', name)), 'Perform'))
       )
     )
   })
   
   
-  observeEvent(input$perform_Step1_btn, {
+  observeEvent(input$btn_validate_Step1, {
     self$ValidateCurrentPos()
   })
   
@@ -67,7 +67,7 @@ ProcessLogics = function(self, input, output){
                           selected = 1,
                           width = '150px')),
           div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-              actionButton(ns(paste0('perform_', name, '_btn')), 'Perform'))
+              actionButton(ns(paste0('btn_validate_', name)), 'Perform'))
       )
     )
   })
@@ -75,7 +75,7 @@ ProcessLogics = function(self, input, output){
   ## Logics to implement: here, we must take the last data not null
   # in previous datas. The objective is to take account
   # of skipped steps
-  observeEvent(input$perform_Step2_btn, {
+  observeEvent(input$btn_validate_Step2, {
     self$ValidateCurrentPos()
   })
   
@@ -91,14 +91,14 @@ ProcessLogics = function(self, input, output){
           div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
               tags$h3(name)),
           div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
-              actionButton(ns('validate_btn'), 'Validate'))
+              actionButton(ns(paste0('btn_validate_', name)), 'Validate'))
       )
     )
     
   })
   
   
-  observeEvent(input$validate_btn, {
+  observeEvent(input$btn_validate_Step3, {
     # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
     self$ValidateCurrentPos()
   })

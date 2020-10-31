@@ -209,13 +209,10 @@ TimelineManager <- R6Class(
                       )
                     }
                     
-                    
-                    
-                    
-                    
+          
                     # When OK button is pressed, update the reactive value which will be sent
                     # to the caller
-                    observeEvent(c(input$modal_ok, remoteReset()), {
+                    observeEvent(req(c(input$modal_ok, remoteReset()!=0)), ignoreInit=T,{
                       private$rv$reset_OK <- input$rstBtn
                       private$rv$current.pos <- 1
                       removeModal()

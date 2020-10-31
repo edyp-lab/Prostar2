@@ -69,11 +69,12 @@ server = function(input, output, session) {
   processManager <- ProcessManager$new("ProcessManager",
                                        config = list(
                                          process.name = 'Filtering',
-                                         mandatory = setNames(c(F, F, F,T), c("Description", "Step1", "Step2", "Step3")),
+                                         mandatory = setNames(c(T, F, F,T), c("Description", "Step1", "Step2", "Step3")),
                                          status = setNames(c(0, 0, 0,0), c("Description", "Step1", "Step2", "Step3"))
                                        )
   )
   
+
   processManager$server(
     dataIn = reactive({rv$dataIn}),
     dataOut = dataOut,

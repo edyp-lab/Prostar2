@@ -94,10 +94,11 @@ MotherClass <- R6Class(
                   tagList(
                     shinyjs::useShinyjs(),
                     actionButton(ns('showScreenBtn'), "Show/hide screen"),
-                    self$child$ui()
+                    uiOutput(ns('showUI'))
                   )
                 },
 
+                
                 #---------------------------------------------------------------------------
                 CreateScreens = function(){
                   ns <- NS(self$id)
@@ -119,11 +120,27 @@ MotherClass <- R6Class(
                  
                   moduleServer(self$id, function(input, output, session) {
                     
+                    CheckLogics = function(FUN){
+                      FUN(self, input, output)
+                      out <- outputOptions(output)
+                      all(names(config$status) %in% names(out))
+                    }
                     observeEvent(input$showScreenBtn,{
                       self$rv$showScreenBtn <- (input$showScreenBtn %% 2 ) == 0
                       })
                     
-                    logics(self$id, input, output)
+                    observeEvent(logics, {
+                      browser()
+                      #CheckLogics(logics)
+                      
+                      if (!CheckLogics(ProcessLogics)){
+                        warning("Your logics function is malformed. Some of renderUI functions are missing")
+                        return(NULL)
+                      }
+                      logics(self, input, output)
+                      output$showUI <- renderUI({ self$child$ui()})
+                    })
+                    
                     #browser()
                   }
                   )
@@ -146,16 +163,7 @@ ui = fluidPage(app$ui())
 
 server = function(input, output){
   #browser()
-  CheckLogics = function(FUN){
-    FUN('foo', input, output)
-    out <- outputOptions(output)
-  all(names(config$status) %in% names(out))
-  }
-
-  if (!CheckLogics(ProcessLogics)){
-    warning("Your logics function is malformed. Some of renderUI functions are missing")
-  return(NULL)
-}
+  
 
     app$server(ProcessLogics)
 }

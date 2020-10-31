@@ -119,6 +119,12 @@ ProcessManager <- R6Class(
                   return(GetStatusPosition(pos) == private$global$SKIPPED)
                 },
                 
+                InitializeModule = function(){
+                  self$Initialize_Status_Process()
+                  self$config$screens <- self$CreateScreens()
+                  self$rv$current.pos <- 1
+                },
+                
 
                 
                 GetCurrentStepName = reactive({ names(config$mandatory)[self$rv$current.pos] }),
@@ -127,7 +133,28 @@ ProcessManager <- R6Class(
                 
                 GetStatusPosition = function(pos){config$status[pos]},
                 
+                # This function cannot be implemented in the timeline module because 
+                # the id of the screens to reset are not known elsewhere.
+                # Trying to reset the global 'div_screens' in the timeline module
+                # does not work
+                ResetScreens = function(){
+                  lapply(1:length(self$config$status), function(x){
+                    shinyjs::reset(NS(self$id)(names(self$config$mandatory)[x]))
+                  })
+                },
                 
+                CreateScreens = function(){
+                  setNames(
+                    lapply(1:length(self$steps), 
+                           function(x){
+                             do.call(uiOutput, list(outputId=NS(self$id)(self$steps[x])))}),
+                    self$steps)
+                },
+                
+                InitializeDataIn = function(){ 
+                  self$rv$dataIn <- self$rv$temp.dataIn
+                  #self$rv$dataIn <- dataIn()
+                },
                 
                 ##########################################################################"
                 #####################################################################
@@ -147,8 +174,9 @@ ProcessManager <- R6Class(
                   current.pos = reactiveVal()
                   
                   
+                  # Catch the new values of the temporary dataOut (instanciated by the last validation button of scrrens
+                  # and set the variable which will be read by the caller
                   observeEvent(self$dataOut$trigger, {
-                    print("new values on self$dataOut$trigger")
                     dataOut$name <- self$dataOut$name
                     dataOut$obj <- self$dataOut$obj
                     dataOut$trigger <- self$dataOut$trigger
@@ -158,6 +186,8 @@ ProcessManager <- R6Class(
                   
                   
                   observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
+                    
+                    self$rv$temp.dataIn <- dataIn()
                     
                     print('event detected on dataIn()')
                     # Test if input is NA or not
@@ -176,11 +206,8 @@ ProcessManager <- R6Class(
                       if (inputExists){
                         # The current position is pointed on a new module
                         print("launch case 3")
-                        
-                        InitializeDataIn()
-                        InitializeModule()
+                        self$InitializeModule()
                         InitializeTimeline()
-                        self$ValidateCurrentPos()
                       } else if (!inputExists){
                         # Initialization of Prostar
                       }
@@ -190,7 +217,6 @@ ProcessManager <- R6Class(
                   
                   
                   observe({
-                    #browser()
                     private$timelineForProcess <- TimelineForProcess$new(
                       id = NS(self$id)('timeline'),
                       mandatory = self$config$mandatory
@@ -213,53 +239,59 @@ ProcessManager <- R6Class(
                     
                     #--- Catch a reset from timeline or caller
                     observeEvent(req(c(self$rv$timeline.res$reset()!=0, remoteReset()!=0)), {
-                      ResetScreens()
+                      self$ResetScreens()
                       self$rv$dataIn <- NA
                       self$Initialize_Status_Process()
                       self$Send_Result_to_Caller()
-                      InitializeDataIn()
+                      self$InitializeDataIn()
                     })
                   }
-                  #})
                   
                   
-                  CreateScreens <- function(){
-                    setNames(
-                      lapply(1:length(self$steps), 
-                             function(x){
-                               do.call(uiOutput, list(outputId=ns(self$steps)[x]))}),
-                      self$steps)
-                  }
                   
-                  InitializeModule <- function(){
-                    self$Initialize_Status_Process()
-                    
-                    self$config$screens <- CreateScreens()
-                    
-                    
-                    # Must be placed after the initialisation of the 'config$stepsNames' variable
-                    # config$screens <- CreateScreens(names(config$mandatory))
-                    #InitializeDataIn()
-                    self$rv$current.pos <- 1
-                  }
-                  
-                  InitializeDataIn <- function(){ self$rv$dataIn <- dataIn()}
-                  
-                  # This function cannot be implemented in the timeline module because 
-                  # the id of the screens to reset are not known elsewhere.
-                  # Trying to reset the global 'div_screens' in the timeline module
-                  # does not work
-                  ResetScreens <- function(screens){
-                    lapply(1:length(self$config$status), function(x){
-                      shinyjs::reset(names(self$config$mandatory)[x])
-                    })
-                  }
                   
                   
                   
                   
                   # MODULE SERVER
                   moduleServer(self$id, function(input, output, session) {
+                    
+                    # TODO In a script for dev, write a test function to check the validity of the logics for the new processLogics
+                    # CheckLogics = function(FUN){
+                    #   FUN(self, input, output)
+                    #   out <- names(outputOptions(output))
+                    #   otherUI <- c("ProcessManager-show_dataIn",
+                    #                "ProcessManager-show_rv_dataIn" , 
+                    #                "ProcessManager-show_rv_dataOut",
+                    #                "ProcessManager-show_status",
+                    #                "show_ui")
+                    #   out <- out[-which(!is.na(match(out, otherUI)))]
+                    # 
+                    #   browser()
+                    #   outInStatusNotInOut <- names(config$status)[which( NS(self$id)(names(config$status)) %in% out == F)]
+                    #   outInOutNotInStatus <- out[which( out %in% NS(self$id)(names(config$status)) == FALSE)]
+                    #   
+                    #   list(outInStatusNotInOut = outInStatusNotInOut,
+                    #        outInOutNotInStatus = outInOutNotInStatus
+                    #        )
+                    # }
+                    # 
+                    # observeEvent(logics, {
+                    #   missingUI <- CheckLogics(ProcessLogics)
+                    #   if (length(missingUI)>0){
+                    #     warning(paste0("Your logics function is malformed. The following renderUI functions are missing:", 
+                    #                    paste0(missingUI, collapse=' ')))
+                    #     return(NULL)
+                    #   }
+                      logics(self, input, output)
+                    
+                      output$show_timeline_ui <- renderUI({
+                        req(private$timelineForProcess)
+                        private$timelineForProcess$ui()
+                     # })
+                      
+                    })
+                    
                     
                     ###########---------------------------#################
                     output$show_dataIn <- renderUI({
@@ -277,13 +309,7 @@ ProcessManager <- R6Class(
                         lapply(names(dataOut$obj), function(x){tags$p(x)})
                       )
                     })
-                    
-                    
-                    output$show_timeline_ui <- renderUI({
-                      req(private$timelineForProcess)
-                      private$timelineForProcess$ui()
-                    })
-                    
+
                     output$show_status <- renderUI({
                       req(self$config$status, self$rv$current.pos)
                       tagList(lapply(1:length(self$config$status), 
@@ -307,8 +333,7 @@ ProcessManager <- R6Class(
                     
                     
                     GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
-                    
-                    logics(self, input, output)
+
                   }
                   ) }
   )
