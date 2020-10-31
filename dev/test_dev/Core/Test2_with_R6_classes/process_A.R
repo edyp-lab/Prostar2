@@ -6,26 +6,26 @@ config <- list(
 
 ##################################################################################################
 
-ProcessLogics = function(self, input, output){
-  ns <- NS(self$id)
+ProcessLogics = function(private, input, output){
+  ns <- NS(private$id)
   
   output$Description <- renderUI({
     tagList(
       actionButton(ns('btn_validate_Description'), 
-                   paste0('Start ', self$config$process.name),
+                   paste0('Start ', private$config$process.name),
                    class = btn_success_color),
-      mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
+      mod_insert_md_ui(ns(paste0(private$config$process.name, "_md")))
     )
   })
   
   observe({
-    mod_insert_md_server(paste0(self$config$process.name, "_md"), 
-                         paste0('./md/', self$config$process.name, '.md'))
+    mod_insert_md_server(paste0(private$config$process.name, "_md"), 
+                         paste0('./md/', private$config$process.name, '.md'))
   })
   
    observeEvent(input$btn_validate_Description, {
-     self$InitializeDataIn()
-     self$ValidateCurrentPos()
+     private$InitializeDataIn()
+     private$ValidateCurrentPos()
    })
   
   ############### SCREEN 2 ######################################
@@ -51,7 +51,7 @@ ProcessLogics = function(self, input, output){
   
   
   observeEvent(input$btn_validate_Step1, {
-    self$ValidateCurrentPos()
+    private$ValidateCurrentPos()
   })
   
   ############### SCREEN 3 ######################################
@@ -76,7 +76,7 @@ ProcessLogics = function(self, input, output){
   # in previous datas. The objective is to take account
   # of skipped steps
   observeEvent(input$btn_validate_Step2, {
-    self$ValidateCurrentPos()
+    private$ValidateCurrentPos()
   })
   
   
@@ -99,7 +99,7 @@ ProcessLogics = function(self, input, output){
   
   
   observeEvent(input$btn_validate_Step3, {
-    # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
-    self$ValidateCurrentPos()
+    # rv$dataIn <- AddItemToDataset(private$rv$dataIn, private$config$process.name)
+    private$ValidateCurrentPos()
   })
 }
