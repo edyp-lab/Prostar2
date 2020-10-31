@@ -11,14 +11,15 @@ source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 
 # ------------- Class TimelineDataManager  --------------------------------------
-source(file.path('.', 'class_TimelineManager.R'), local=TRUE)$value
+source(file.path('.', 'class_abstract_TimelineManager.R'), local=TRUE)$value
 source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
 source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 
 
 
 #----------------------- Class ProcessManager ----------------------------------
-source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
+source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
+source(file.path('.', 'class_Process.R'), local=TRUE)$value
 source(file.path('.', 'process_A.R'), local=TRUE)$value
 
 
@@ -66,7 +67,7 @@ server = function(input, output, session) {
       rv$dataIn <- NA
   })
   
-  processManager <- ProcessManager$new("ProcessManager",
+  processManager <- Process$new("ProcessManager",
                                        config = list(
                                          process.name = 'Filtering',
                                          mandatory = setNames(c(T, F, F,T), c("Description", "Step1", "Step2", "Step3")),

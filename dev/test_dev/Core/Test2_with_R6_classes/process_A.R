@@ -1,8 +1,12 @@
-config <- list(
-  process.name = 'Filtering',
-  mandatory = setNames(c(F,F,F), c('Description', 'Step1', 'Step2')),
-  status = setNames(c(F,F,F), c('Description', 'Step1', 'Step2'))
+steps <- c('Description', 'Step1', 'Step2', 'Step3')
+mandatory <- c(F,F,F,F)
+
+config <- list(process.name = 'Filtering',
+               steps = steps,
+                mandatory = setNames(c(F,F,F,F), steps)
 )
+
+
 
 ##################################################################################################
 
