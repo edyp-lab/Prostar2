@@ -3,14 +3,9 @@ Process = R6Class(
   "Process",
   inherit = ProcessManager,
   private = list(
-    ActionsOnDataTrigger = function(){
-      dataOut$name <- private$dataOut$name
-      dataOut$obj <- private$dataOut$obj
-      dataOut$trigger <- private$dataOut$trigger
-    },
     ActionsOnNewPosition = function(){},
     ActionsOnIsSkipped = function(){
-      if (isSkipped())
+      if (private$rv$isSkipped)
         tag <- private$global$SKIPPED
       else
         tag <- private$global$UNDONE

@@ -33,6 +33,40 @@ Pipeline = R6Class(
       private$PrepareData2Send()
     },
 
+    # This function creates the UI parts of the screens (dynamically set 
+    # renderUIs). 
+    BuildScreensUI = function(){
+      #Creates the renderUI for the process modules. The first id is bypassed
+      # because it is the description screen and is not linked to a process
+      # module
+      lapply(private$steps, 
+             function(x){
+               output[[x]] <- renderUI(tagList(
+                 div(id=ns(x),
+                     h3(paste0('Pipeline ', config$name)),
+                     do.call(paste0('mod_wf_wf1_', x, '_ui'),
+                             list(ns(paste0('mod_',x, '_nav'))))
+                 )
+               ))
+             })
+      
+    },
+    
+    # This function calls the server part of each module composing the pipeline
+    Launch_Module_Server = function(){
+      lapply(private$steps, function(x){
+        
+        do.call(as.character(paste0('mod_wf_wf1_', x, '_server')), 
+                list(id = as.character(paste0("mod_",x, "_nav")),
+                     dataIn = reactive({rv$data2send[[x]]}),
+                     dataOut = return_of_process,
+                     remoteReset = reactive({rv$timeline$rstBtn()}),
+                     isSkipped = reactive({is.skipped(x)})
+                )
+        )
+      })
+    },
+    
     #To avoid "intempestive" initializations of modules due to dataIn changes
     # one define the following logics :
     #  A dataset is loaded in a module only if this module is not yet

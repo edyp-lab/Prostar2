@@ -9,7 +9,11 @@ source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 ScreenManagerClass <- R6Class(
   "ScreenManagerClass",
   private = list(
-    config = list()
+    config = list(),
+    rv = reactiveValues(
+      current.pos = 1,
+      reset_OK = NULL
+    )
   ),
   public = list(
     id = NULL,
@@ -21,6 +25,7 @@ ScreenManagerClass <- R6Class(
       ns <- NS(self$id)
       tagList(
         shinyjs::useShinyjs(),
+        actionButton(ns('action'), 'Action'),
         uiOutput(ns('showScreen'))
         )
     },
@@ -50,6 +55,12 @@ ScreenManagerClass <- R6Class(
         
         output$showScreen <- renderUI({ tagList(private$config$screens)})
 
+        
+        reactive({
+          list(current.pos = input$action,
+             reset = private$rv$reset_OK
+        )
+        })
       }
       )
     }
@@ -68,6 +79,7 @@ ChildClass <- R6Class(
       self$child <- ScreenManagerClass$new(NS(self$id)('child'))
       lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
       self$steps <- names(config$mandatory)
+       
     }
     
   )
@@ -82,7 +94,10 @@ MotherClass <- R6Class(
                 child = NULL,
                 steps = NULL,
                 rv = reactiveValues(
-                  showScreenBtn=0
+                  showScreenBtn=0,
+                  launch = NULL,
+                  timeline = NULL,
+                  timeline.res = NULL
                   ),
                 
                 initialize = function(){
@@ -94,6 +109,7 @@ MotherClass <- R6Class(
                   tagList(
                     shinyjs::useShinyjs(),
                     actionButton(ns('showScreenBtn'), "Show/hide screen"),
+                    actionButton(ns('launch'), 'Launch screens'),
                     uiOutput(ns('showUI'))
                   )
                 },
@@ -109,39 +125,34 @@ MotherClass <- R6Class(
                     self$steps)
                 },
                 
+                InitializeTimeline = function(){
+                  self$rv$timeline.res <- self$child$server(show = reactive({self$rv$showScreenBtn}),
+                                                            config = self$config
+                  )
+                  
+                  observeEvent(self$rv$timeline.res(), {
+                    print(paste0('new event : ', paste0(self$rv$timeline.res(), collapse=' ')))
+                  })
+                },
                 server = function( logics){
                   ns <- NS(self$id)
-
-                  self$child$server(show = reactive({self$rv$showScreenBtn}),
-                                    config = self$config
-                                    )
                   
+                  observeEvent(self$rv$launch,{self$InitializeTimeline()})
+
                   self$config$screens <- self$CreateScreens()
                  
                   moduleServer(self$id, function(input, output, session) {
                     
-                    CheckLogics = function(FUN){
-                      FUN(self, input, output)
-                      out <- outputOptions(output)
-                      all(names(config$status) %in% names(out))
-                    }
+                    observeEvent(input$launch,{self$rv$launch <- input$launch})
+                    
                     observeEvent(input$showScreenBtn,{
                       self$rv$showScreenBtn <- (input$showScreenBtn %% 2 ) == 0
                       })
                     
-                    observeEvent(logics, {
-                      browser()
-                      #CheckLogics(logics)
-                      
-                      if (!CheckLogics(ProcessLogics)){
-                        warning("Your logics function is malformed. Some of renderUI functions are missing")
-                        return(NULL)
-                      }
+                    
                       logics(self, input, output)
                       output$showUI <- renderUI({ self$child$ui()})
-                    })
-                    
-                    #browser()
+
                   }
                   )
                 }

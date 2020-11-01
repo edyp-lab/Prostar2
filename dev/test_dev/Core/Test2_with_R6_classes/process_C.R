@@ -1,9 +1,9 @@
 steps <- c('Description', 'Step1', 'Step2', 'Step3')
 mandatory <- c(F,F,F,F)
 
-config <- list(process.name = 'ProcessA',
+config <- list(process.name = 'ProcessC',
                steps = steps,
-                mandatory = setNames(c(F,F,F,F), steps)
+               mandatory = setNames(c(F,F,F,F), steps)
 )
 
 
@@ -27,10 +27,10 @@ ProcessLogics = function(private, input, output){
                          paste0('./md/', private$config$process.name, '.md'))
   })
   
-   observeEvent(input$btn_validate_Description, {
-     private$InitializeDataIn()
-     private$ValidateCurrentPos()
-   })
+  observeEvent(input$btn_validate_Description, {
+    private$InitializeDataIn()
+    private$ValidateCurrentPos()
+  })
   
   ############### SCREEN 2 ######################################
   

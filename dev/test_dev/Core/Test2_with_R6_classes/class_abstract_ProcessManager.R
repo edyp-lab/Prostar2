@@ -16,6 +16,7 @@ ProcessManager <- R6Class(
       current.pos = NULL,
       wake = F,
       reset = NULL,
+      isSkipped = FALSE,
       timeline.res = NULL),
     
     Wake = function(){ runif(1,0,1)},
@@ -78,6 +79,7 @@ ProcessManager <- R6Class(
       private$config$screens <- private$CreateScreens()
       private$rv$current.pos <- 1
     },
+    
     ActionsOnNewPosition = function(){},
     ActionsOnReset = function(){
       private$ResetScreens()
@@ -102,11 +104,12 @@ ProcessManager <- R6Class(
       })
     },
     
-    ActionsOnDataTrigger = function(){
-      dataOut$name <- private$dataOut$name
-      dataOut$obj <- private$dataOut$obj
-      dataOut$trigger <- private$dataOut$trigger
-    },
+    ActionsOnDataTrigger = function(data){
+      data$name <- private$dataOut$name
+      data$obj <- private$dataOut$obj
+      data$trigger <- private$dataOut$trigger
+      data
+      },
 
     ValidateCurrentPos = function(){
       private$config$status[private$rv$current.pos] <- private$global$VALIDATED
@@ -135,7 +138,69 @@ ProcessManager <- R6Class(
     Initialize_Status_Process = function(){
       private$config$status <- setNames(rep(0, private$length),
                                         config$steps)
+    },
+    
+    
+    #Actions onf receive new dataIn()
+    ActionsOn_Tmp_NoInput = function(){
+      private$rv$wake <- private$Wake()},
+    
+    ActionsOn_NoTmp_NoInput = function(){},
+    
+    ActionsOn_Tmp_Input = function(){},
+    
+    ActionsOn_NoTmp_Input = function(){
+      print("launch case 3")
+      private$InitializeModule()
+      self$InitializeTimeline()
+    },
+    
+    ActionsOnNewDataIn = function(data){
+      # This variable serves as a tampon while waiting the user click on the
+      # validate button in the Description screen.
+      # Once done, this variable is observed and the real rv$dataIn function can be
+      # instanciated
+      private$rv$temp.dataIn <- data
+      
+      private$rv$wake <- FALSE
+      
+      # Test if input is NA or not
+      inputExists <- length(data) > 0
+      
+      #Test if a dataset is already loaded
+      tmpExists <- !is.null(private$rv$dataIn)
+      
+      
+      if (tmpExists){
+        # this case is either the module is skipped or validated
+        #private$rv$current.pos <- length(private$config$status)
+        private$ActionsOn_Tmp_NoInput()
+      } else {
+        if (inputExists){
+          # The current position is pointed on a new module
+          #private$ActionsOn_NoTmp_Input()
+          print("launch case 3")
+          private$InitializeModule()
+          private$InitializeTimeline()
+        } else if (!inputExists){
+          # Initialization of Prostar
+        }
+      }
+      },
+
+    InitializeTimeline = function(){
+      private$rv$timeline.res <- private$timelineForProcess$server(
+        config = private$config,
+        wake = reactive({private$rv$wake}),
+        remoteReset = reactive({private$rv$remoteReset})
+      )
+      
+      observeEvent(req(private$rv$timeline.res()), ignoreInit=T, {
+        private$rv$current.pos <- private$rv$timeline.res()$current.pos
+        private$rv$reset <- private$rv$timeline.res()$reset
+      })
     }
+
   ),
   public = list(
                 
@@ -185,43 +250,16 @@ ProcessManager <- R6Class(
                   # Catch the new values of the temporary dataOut (instanciated by the last validation button of scrrens
                   # and set the variable which will be read by the caller
                   observeEvent(private$dataOut$trigger, {
-                    private$ActionsOnDataTrigger()
+                    dataOut <- private$ActionsOnDataTrigger(dataOut)
+                    
                   })
                   
 
                   observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
-                    # This variable serves as a tampon while waiting the user click on the
-                    # validate button in the Description screen.
-                    # Once done, this variable is observed and the real rv$dataIn function can be
-                    # instanciated
-                    private$rv$temp.dataIn <- dataIn()
-                    
-                    # Test if input is NA or not
-                    inputExists <- length(dataIn()) > 0
-                    
-                    #Test if a dataset is already loaded
-                    tmpExists <- !is.null(private$rv$dataIn)
-                    
-                    private$rv$wake <- FALSE
-                    
-                    if (tmpExists){
-                      # this case is either the module is skipped or validated
-                      #private$rv$current.pos <- length(private$config$status)
-                      private$rv$wake <- private$Wake()
-                    } else {
-                      if (inputExists){
-                        # The current position is pointed on a new module
-                        print("launch case 3")
-                        private$InitializeModule()
-                        InitializeTimeline()
-                      } else if (!inputExists){
-                        # Initialization of Prostar
-                      }
-                    }
-                    
+                    private$ActionsOnNewDataIn(dataIn())
                   })
                   
-                  
+
                   observe({
                     private$timelineForProcess <- TimelineForProcess$new(
                       id = NS(private$id)('timeline'),
@@ -229,34 +267,20 @@ ProcessManager <- R6Class(
                     )
                   })
                   
-                  
-                  InitializeTimeline <- function(){
-                    private$rv$timeline.res <- private$timelineForProcess$server(
-                      config = private$config,
-                      wake = reactive({private$rv$wake}),
-                      remoteReset = remoteReset
-                    )
-                    
-                    observeEvent(req(private$rv$timeline.res$current.pos()), ignoreInit=T, {
-                      private$rv$current.pos <- private$rv$timeline.res$current.pos()
-                    })
-                    observeEvent(req(private$rv$timeline.res$reset()!=0),{
-                      private$rv$reset <- private$rv$timeline.res$reset()
-                    })
-                    
-                  }
-                  
                   observeEvent(req(private$rv$current.pos), ignoreInit=T, {
                     private$ActionsOnNewPosition()
                   })
 
+                  observeEvent(req(remoteReset()!=0), { private$rv$remoteReset <- remoteReset()})
+                  
                   #--- Catch a reset from timeline or caller
-                  observeEvent(req(c(private$rv$reset, remoteReset()!=0)), {
+                  observeEvent(req(c(private$rv$reset, private$rv$remoteReset)), {
                     private$ActionsOnReset()
                   })
                   
-                  observeEvent(isSkipped(), ignoreInit = T, {
-                   private$ActionsOnIsSkipped()
+                  observeEvent(isSkipped(), ignoreInit = T, { 
+                    private$rv$isSkipped <- isSkipped()
+                    private$ActionsOnIsSkipped()
                   })
                   
                   # MODULE SERVER

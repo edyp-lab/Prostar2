@@ -255,9 +255,11 @@ TimelineManager <- R6Class(
                       private$EncapsulateScreens()
                     })
                     
-                    list(current.pos = reactive({private$rv$current.pos}),
-                         reset = reactive({private$rv$reset_OK})
+                    reactive({
+                      list(current.pos = private$rv$current.pos,
+                         reset = private$rv$reset_OK
                     )
+                      })
                   })
                 }
   )
