@@ -1,4 +1,4 @@
-config_processA <- list(process.name = 'ProcessA',
+config <- list(process.name = 'ProcessA',
                         steps = c('Description', 'Step1', 'Step2', 'Step3'),
                         mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
 )
@@ -6,7 +6,7 @@ config_processA <- list(process.name = 'ProcessA',
 
 ##################################################################################################
 
-ProcessLogics = function(private, input, output){
+ProcessLogics = function(input, output){
   ns <- NS(private$id)
   
   output$Description <- renderUI({

@@ -2,7 +2,7 @@ ProcessManager <- R6Class(
   "ProcessManager",
   private = list(
     id = NULL,
-    timelineForProcess = NULL,
+    timeline = NULL,
     global = list(VALIDATED = 1,
                   SKIPPED = -1,
                   UNDONE = 1
@@ -11,6 +11,8 @@ ProcessManager <- R6Class(
     steps = NULL,
     dataOut = reactiveValues(),
     length = NULL,
+    logics = NULL,
+
     rv = reactiveValues(
       dataIn = NULL,
       current.pos = NULL,
@@ -50,7 +52,7 @@ ProcessManager <- R6Class(
     },
     
     GetMaxValidated_BeforeCurrentPos = function(){
-      ind.max <- 0
+      ind.max <- NULL
       indices.validated <- which(private$config$status == private$global$VALIDATED)
       if (length(indices.validated) > 0){
         ind <- which(indices.validated < private$rv$current.pos)
@@ -58,9 +60,9 @@ ProcessManager <- R6Class(
           ind.max <- max(ind)
       }
       
-      if (ind.max == 0)
-        ind.max <- 1
-      
+      # if (ind.max == 0)
+      #   ind.max <- 1
+      # 
       ind.max
     },
     
@@ -70,17 +72,14 @@ ProcessManager <- R6Class(
     # because one can know the status 'Skipped' only when a further module
     # has been validated
     is.skipped = function(name){
-      pos <- which(name == config$steps)
+      pos <- which(name == private$config$steps)
       return(private$GetStatusPosition(pos) == private$global$SKIPPED)
     },
     
-    InitializeModule = function(){
-      private$Initialize_Status_Process()
-      private$config$screens <- private$CreateScreens()
-      private$rv$current.pos <- 1
-    },
+    InitializeModule = function(){},
     
     ActionsOnNewPosition = function(){},
+    
     ActionsOnReset = function(){
       private$ResetScreens()
       private$rv$dataIn <- NA
@@ -89,18 +88,26 @@ ProcessManager <- R6Class(
       private$InitializeDataIn()
     },
     ActionsOnIsSkipped = function(){},
-    GetCurrentStepName = reactive({ config$steps[private$rv$current.pos] }),
     
-    Unskip = function(pos){config$status[pos] <- private$global$UNDONE},
+    GetCurrentStepName = function(){
+      private$config$steps[private$rv$current.pos]
+      },
     
-    GetStatusPosition = function(pos){config$status[pos]},
+    Unskip = function(pos){
+      private$config$status[pos] <- private$global$UNDONE
+      },
+    
+    GetStatusPosition = function(pos){
+      private$config$status[pos]
+      },
+    
     # This function cannot be implemented in the timeline module because 
     # the id of the screens to reset are not known elsewhere.
     # Trying to reset the global 'div_screens' in the timeline module
     # does not work
     ResetScreens = function(){
       lapply(1:private$length, function(x){
-        shinyjs::reset(NS(private$id)(config$steps[x]))
+        shinyjs::reset(NS(private$id)(private$config$steps[x]))
       })
     },
     
@@ -116,28 +123,29 @@ ProcessManager <- R6Class(
       private$Set_Skipped_Status()
       #browser()
       if (private$config$status[private$length] == private$global$VALIDATED)
-        # Either the process has been validated, one can prepare data to ben sent to caller
+        # Either the process has been validated, one can prepare data to be sent to caller
         # Or the module has been reseted
         private$Send_Result_to_Caller()
     },
+    
     InitializeDataIn = function(){ 
       private$rv$dataIn <- private$rv$temp.dataIn
-      #private$rv$dataIn <- dataIn()
     },
     
     
     CreateScreens = function(){
+
       setNames(
         lapply(1:private$length, 
                function(x){
-                 do.call(uiOutput, list(outputId=NS(private$id)(private$steps[x])))}),
-        config$steps)
+                 do.call(uiOutput, list(outputId=NS(private$id)(private$config$steps[x])))}),
+        private$config$steps)
     },
     
     
     Initialize_Status_Process = function(){
       private$config$status <- setNames(rep(0, private$length),
-                                        config$steps)
+                                        private$config$steps)
     },
     
     
@@ -145,15 +153,18 @@ ProcessManager <- R6Class(
     ActionsOn_Tmp_NoInput = function(){
       private$rv$wake <- private$Wake()},
     
-    ActionsOn_NoTmp_NoInput = function(){},
-    
-    ActionsOn_Tmp_Input = function(){},
+    ActionsOn_Tmp_Input = function(){
+      private$rv$wake <- private$Wake()
+    },
     
     ActionsOn_NoTmp_Input = function(){
       print("launch case 3")
+
       private$InitializeModule()
-      self$InitializeTimeline()
+      private$InitializeTimeline()
     },
+    
+    ActionsOn_NoTmp_NoInput = function(){},
     
     ActionsOnNewDataIn = function(data){
       # This variable serves as a tampon while waiting the user click on the
@@ -171,25 +182,26 @@ ProcessManager <- R6Class(
       tmpExists <- !is.null(private$rv$dataIn)
       
       
-      if (tmpExists){
+      if (tmpExists && inputExists){
         # this case is either the module is skipped or validated
         #private$rv$current.pos <- length(private$config$status)
-        private$ActionsOn_Tmp_NoInput()
-      } else {
-        if (inputExists){
+        private$ActionsOn_Tmp_Input()
+      } else if (tmpExists && !inputExists) {
+        private$ActionsOn_Tmp_Input()
+        } else if (!tmpExists && inputExists){
           # The current position is pointed on a new module
           #private$ActionsOn_NoTmp_Input()
-          print("launch case 3")
-          private$InitializeModule()
-          private$InitializeTimeline()
-        } else if (!inputExists){
+          private$ActionsOn_NoTmp_Input()
+          } else if (!tmpExists && !inputExists){
           # Initialization of Prostar
-        }
-      }
+          private$ActionsOn_NoTmp_NoInput()
+            }
       },
 
+    CreateTimeline = function(){},
+    
     InitializeTimeline = function(){
-      private$rv$timeline.res <- private$timelineForProcess$server(
+      private$rv$timeline.res <- private$timeline$server(
         config = private$config,
         wake = reactive({private$rv$wake}),
         remoteReset = reactive({private$rv$remoteReset})
@@ -199,6 +211,17 @@ ProcessManager <- R6Class(
         private$rv$current.pos <- private$rv$timeline.res()$current.pos
         private$rv$reset <- private$rv$timeline.res()$reset
       })
+    },
+    
+    # This function adds the renderUI functions of the screens.
+    # In the process child class, these functions are written in a separate file for each process
+    # One just have to call them by setting the variable logics (which is the name of the function
+    # containing the renderUIs
+    # In the pipeline child class, these functions are dynamically created 
+    Add_RenderUIs_Definitions = function(input, output){},
+    
+    TimelineUI = function(){
+      private$timeline$ui()
     }
 
   ),
@@ -206,20 +229,19 @@ ProcessManager <- R6Class(
                 
                 initialize = function(id, config = NULL) {
                   private$id <- id
-                  private$steps <- config$steps
                   private$length <- length(config$steps)
                   lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
                 },
                 
+
                 
                 # UI
                 ui = function() {
                   ns <- NS(private$id)
                   fluidPage(
                     wellPanel(style="background-color: yellow;",
-                              h3('ProcessManager'),
+                              uiOutput(ns('title')),
                               uiOutput(ns('show_timeline_ui')),
-                              #private$timelineForProcess$ui(),
                               hr(),
                               fluidRow(
                                 column(width=2,
@@ -231,8 +253,7 @@ ProcessManager <- R6Class(
                                 column(width=4,
                                        tags$b(h4(style = 'color: blue;', "status")),
                                        uiOutput(ns('show_status')))
-                              ),
-                              uiOutput(ns('screens'))
+                              )
                     )
                   )
                 },
@@ -241,11 +262,19 @@ ProcessManager <- R6Class(
                 server = function(dataIn = NULL, 
                                   dataOut = NULL,
                                   remoteReset = FALSE,
-                                  isSkipped = FALSE,
-                                  logics = NULL) {
+                                  isSkipped = FALSE) {
                   ns <- NS(private$id)
                   current.pos = reactiveVal()
                   
+                  observeEvent(private$config$steps, {
+                    print('__________________________In class_abstract_ProcessManager::observeEvent(private$config$steps)')
+                    print(paste0('#### ID = ', private$id))
+                    print(paste0('steps = ',paste0(private$config$steps, collapse=' ')))
+                    print(paste0('status = ',paste0(private$config$status, collapse=' ')))
+                    print(paste0('mandatory = ',paste0(private$config$mandatory, collapse=' ')))
+                    print(paste0('process.name = ',paste0(private$config$process.name, collapse=' ')))
+                    
+                  })
                   
                   # Catch the new values of the temporary dataOut (instanciated by the last validation button of scrrens
                   # and set the variable which will be read by the caller
@@ -256,15 +285,14 @@ ProcessManager <- R6Class(
                   
 
                   observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
+                    
+                    print(paste0("############# recu un dataIn sur le process", private$id))
                     private$ActionsOnNewDataIn(dataIn())
                   })
                   
 
                   observe({
-                    private$timelineForProcess <- TimelineForProcess$new(
-                      id = NS(private$id)('timeline'),
-                      mandatory = private$config$mandatory
-                    )
+                    private$CreateTimeline()
                   })
                   
                   observeEvent(req(private$rv$current.pos), ignoreInit=T, {
@@ -285,39 +313,12 @@ ProcessManager <- R6Class(
                   
                   # MODULE SERVER
                   moduleServer(private$id, function(input, output, session) {
-                    
+                    print(paste0("## in moduleServer for id = ", private$id))
                     # TODO In a script for dev, write a test function to check the validity of the logics for the new processLogics
-                    # CheckLogics = function(FUN){
-                    #   FUN(self, input, output)
-                    #   out <- names(outputOptions(output))
-                    #   otherUI <- c("ProcessManager-show_dataIn",
-                    #                "ProcessManager-show_rv_dataIn" , 
-                    #                "ProcessManager-show_rv_dataOut",
-                    #                "ProcessManager-show_status",
-                    #                "show_ui")
-                    #   out <- out[-which(!is.na(match(out, otherUI)))]
-                    # 
-                    #   browser()
-                    #   outInStatusNotInOut <- names(config$status)[which( NS(private$id)(names(config$status)) %in% out == F)]
-                    #   outInOutNotInStatus <- out[which( out %in% NS(private$id)(names(config$status)) == FALSE)]
-                    #   
-                    #   list(outInStatusNotInOut = outInStatusNotInOut,
-                    #        outInOutNotInStatus = outInOutNotInStatus
-                    #        )
-                    # }
-                    # 
-                    # observeEvent(logics, {
-                    #   missingUI <- CheckLogics(ProcessLogics)
-                    #   if (length(missingUI)>0){
-                    #     warning(paste0("Your logics function is malformed. The following renderUI functions are missing:", 
-                    #                    paste0(missingUI, collapse=' ')))
-                    #     return(NULL)
-                    #   }
-                      logics(private, input, output)
-                    
-                    output$show_timeline_ui <- renderUI({
-                      private$timelineForProcess$ui()
-                    })
+
+                     private$Add_RenderUIs_Definitions( input, output)
+
+                    output$show_timeline_ui <- renderUI({private$TimelineUI() })
 
                     
                     ###########---------------------------#################
@@ -331,9 +332,9 @@ ProcessManager <- R6Class(
                     })
                     
                     output$show_rv_dataOut <- renderUI({
-                      req(dataOut$trigger)
+                      req(private$dataOut$trigger)
                       tagList(
-                        lapply(names(dataOut$obj), function(x){tags$p(x)})
+                        lapply(names(private$dataOut$obj), function(x){tags$p(x)})
                       )
                     })
 
@@ -341,11 +342,13 @@ ProcessManager <- R6Class(
                       req(private$config$status, private$rv$current.pos)
                       tagList(lapply(1:private$length, 
                                      function(x){if (x == private$rv$current.pos) 
-                                       tags$p(tags$b(paste0('-> ', config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]]))))
+                                       tags$p(tags$b(paste0('-> ', private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]]))))
                                        else 
-                                         tags$p(paste0(config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]])))
+                                         tags$p(paste0(private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]])))
                                      }))
                     })
+                    
+                    output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
                    
                     #################################################
                     # Main listener of the module which initialize it

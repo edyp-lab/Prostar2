@@ -127,7 +127,8 @@ TimelineManager <- R6Class(
                   ns <- NS(self$id)
                   fluidPage(
                     wellPanel(style="background-color: lightblue;",
-                              tagList(h3('TimelineManager'),
+                              tagList(
+                                uiOutput(ns('title')),
                                       shinyjs::useShinyjs(),
                                       div(id = 'GlobalTL',
                                           fluidRow(
@@ -194,7 +195,7 @@ TimelineManager <- R6Class(
                                                      style='padding:4px; font-size:80%')
                     })
                     
-                    
+                    output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
                     
                     #-------------------------------------------------------
                     # Return the UI for a modal dialog with data selection input. If 'failed' is
@@ -247,7 +248,6 @@ TimelineManager <- R6Class(
                     
                     observeEvent(req(private$config), ignoreInit=F,{
                       req(private$nbSteps>0)
-                      
                       check <- private$CheckConfig(private$config)
                       if (!check$passed)
                         stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))

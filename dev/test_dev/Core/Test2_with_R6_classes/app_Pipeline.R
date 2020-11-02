@@ -20,8 +20,7 @@ source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
-source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
-source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
+source(file.path('.', 'class_Pipeline.R'), local=TRUE)$value
 
 
 #----------------------------------------------------------------------------
@@ -43,6 +42,7 @@ ui = function() {
     )
   )
 }
+
 server = function(input, output, session) {
   
   utils::data(Exp1_R25_prot, package='DAPARdata2')
@@ -62,41 +62,20 @@ server = function(input, output, session) {
       rv$dataIn <- NA
   })
   
+ 
+  pipelineManager <- Pipeline$new("PipelineManager")
   
-  # 
-  #source(file.path('.', 'process_Description.R'), local=TRUE)$value
-
-  processA <- ProcessA$new("process_A")
-  #processDescription <- ProcessDescription$new("process_Description")
   
-  processA$GetConfig()
-  #processDescription$GetConfig()
-  
-
-  # processDescription$server(
-  #   dataIn = reactive({rv$dataIn}),
-  #   dataOut = dataOut,
-  #   remoteReset = reactive({input$remoteReset}),
-  #   isSkipped = reactive({input$skip %%2 == 0})
-  #   )
-  
-  #source(file.path('.', 'process_A.R'), local=TRUE)$value
-  # config_processA <- list(process.name = 'ProcessA',
-  #                         steps = c('Description', 'Step1', 'Step2', 'Step3'),
-  #                         mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-  # )
-
-
-  processA$server(
+  pipelineManager$server(
     dataIn = reactive({rv$dataIn}),
     dataOut = dataOut,
-    remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0}))
-
+    remoteReset = reactive({NULL}),
+    isSkipped = reactive({NULL})
+  )
   
   output$show_ui <- renderUI({
-    req(processA)
-    processA$ui()
+    req(pipelineManager)
+    pipelineManager$ui()
   })
   
   observeEvent(req(dataOut$trigger), {

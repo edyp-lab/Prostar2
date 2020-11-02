@@ -4,6 +4,7 @@ Process = R6Class(
   inherit = ProcessManager,
   private = list(
     ActionsOnNewPosition = function(){},
+    
     ActionsOnIsSkipped = function(){
       if (private$rv$isSkipped)
         tag <- private$global$SKIPPED
@@ -12,17 +13,33 @@ Process = R6Class(
       
       private$config$status <- setNames(rep(tag, private$length),
                                         config$steps)
+    },
+    
+    InitializeModule = function(){
+
+      private$config$screens <- private$CreateScreens()
+      private$rv$current.pos <- 1
+    },
+    
+   # Add_RenderUIs_Definitions = function( input, output){},
+    
+    CreateTimeline = function(){
+      private$timeline <- TimelineForProcess$new(
+        id = NS(private$id)('timeline'),
+        mandatory = private$config$mandatory
+      )
+    },
+    
+    TimelineUI = function(){
+      private$timeline$ui()
     }
     
   ),
   
   public = list(
-    initialize = function(id, config=NULL) {
-      private$id <- id
-      private$steps <- names(config$status)
-      private$length <- length(config$status)
-      lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      private$Initialize_Status_Process()
+    initialize = function() {},
+    GetConfig = function(){
+      observe({print(paste0('-----GetConfig(', private$id, ') : ', paste0(private$config$steps, collapse=' ')))})
     }
     
   )

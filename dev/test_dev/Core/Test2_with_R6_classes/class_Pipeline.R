@@ -3,6 +3,27 @@ Pipeline = R6Class(
   "Pipeline",
   inherit = ProcessManager,
   private = list(
+    rv = reactiveValues(
+      processManagerList = NULL,
+      data2send = NULL
+    ),
+    listUIs = NULL,
+    
+    ActionsOn_NoTmp_Input = function(){
+      print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
+      private$InitializeModule()
+      private$InitializeTimeline()
+      private$rv$data2send <- setNames(lapply(1:private$length, 
+                                      function(x){NA}), 
+                               private$config$steps)
+      private$Launch_Module_Server()
+      private$PrepareData2Send()
+    },
+    
+    InitializeModule = function(){
+      private$config$screens <- private$CreateScreens()
+      private$rv$current.pos <- 1
+    },
     
     # Catch the return value of a module and update the list of isDone modules
     # This list is updated with the names of datasets present in the rv$tmp
@@ -35,36 +56,51 @@ Pipeline = R6Class(
 
     # This function creates the UI parts of the screens (dynamically set 
     # renderUIs). 
-    BuildScreensUI = function(){
-      #Creates the renderUI for the process modules. The first id is bypassed
-      # because it is the description screen and is not linked to a process
-      # module
-      lapply(private$steps, 
-             function(x){
-               output[[x]] <- renderUI(tagList(
-                 div(id=ns(x),
-                     h3(paste0('Pipeline ', config$name)),
-                     do.call(paste0('mod_wf_wf1_', x, '_ui'),
-                             list(ns(paste0('mod_',x, '_nav'))))
-                 )
-               ))
-             })
+    # In the process child class, this method corresponds to the logics function
+    Add_RenderUIs_Definitions = function(fun = NULL, input, output){
       
+      print("In class_Pipeline::Add_RenderUIs_Definitions()")
+     # req(is.null(fun))
+      
+      #private$logics
+
+      output$process_A <- renderUI(
+        tagList(
+          div(id=NS(private$id)('process_A'),
+              private$logics[['process_A']]$ui(),
+              )
+          )
+        )
+      
+      output$process_Description <- renderUI(
+        tagList(
+          div(id=NS(private$id)('process_Description'),
+              private$logics[['process_Description']]$ui(),
+              )
+        )
+      )
+
     },
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
-      lapply(private$steps, function(x){
-        
-        do.call(as.character(paste0('mod_wf_wf1_', x, '_server')), 
-                list(id = as.character(paste0("mod_",x, "_nav")),
-                     dataIn = reactive({rv$data2send[[x]]}),
-                     dataOut = return_of_process,
-                     remoteReset = reactive({rv$timeline$rstBtn()}),
-                     isSkipped = reactive({is.skipped(x)})
-                )
-        )
-      })
+
+      # print("In class_Pipeline::Launch_Module_Server()")
+      # source(file.path('.', 'process_A.R'), local=TRUE)$value
+      # 
+      private$logics[['process_A']]$server(
+        dataIn = reactive({private$rv$data2send[['process_A']]}),
+        dataOut = dataOut,
+        remoteReset = reactive({NULL}),
+        isSkipped = reactive({NULL}),
+        logics = ProcessLogics_processA)
+      
+      private$logics[['process_Description']]$server(
+        dataIn = reactive({private$rv$data2send[['process_Description']]}),
+        dataOut = dataOut,
+        remoteReset = reactive({NULL}),
+        isSkipped = reactive({NULL}),
+        logics = ProcessLogics_Description)
     },
     
     #To avoid "intempestive" initializations of modules due to dataIn changes
@@ -83,31 +119,70 @@ Pipeline = R6Class(
       # original module
       update <- function(name){
         data <- NA
-        if (name == GetCurrentStepName()){
+
+        if (name == private$GetCurrentStepName()){
           # One treat the dataset for the current position
-          ind.last.validated <- GetMaxValidated_BeforeCurrentPos()
+          ind.last.validated <- private$GetMaxValidated_BeforeCurrentPos()
           if (is.null(ind.last.validated)){
-            data <- dataIn()
+            data <- private$rv$temp.dataIn
           } else {
-            data <- rv$dataIn[,,c(1:ind.last.validated)]
+            data <- private$rv$dataIn[,,c(1:ind.last.validated)]
           }
         }
-        
         return(data)
       }
       
-      lapply(names(rv$data2send), function(x){rv$data2send[[x]] <- update(x)})
+      lapply(private$config$steps, function(x){
+        private$rv$data2send[[x]] <- update(x)})
+
+      #return_of_process$obj <- NA
     },
+
+    
+    TimelineUI = function(){
+      private$timeline$ui()
+    },
+    
+    CreateTimeline = function(){
+
+      private$timeline <- TimelineForPipeline$new(
+        id = NS(private$id)('timeline'),
+        mandatory = private$config$mandatory
+      )
+    }
     
   ),
   
   public = list(
-    initialize = function(id, config=NULL) {
+    initialize = function(id) {
+
       private$id <- id
-      private$steps <- names(config$status)
-      private$length <- length(config$status)
-      lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      private$Initialize_Status_Process()
+      
+      
+      
+      conf <- list(process.name = 'Pipeline',
+                     steps = c('process_Description', 'process_A'),
+                     mandatory = setNames(c(T,F), c('process_Description', 'process_A'))
+      )
+      
+      private$steps <-  conf$steps
+      private$length <- length(conf$steps)
+
+      lapply(names(conf), function(x){private$config[[x]] <- conf[[x]]})
+      private$config$status <- setNames(rep(0, private$length),
+                                        conf$steps)
+      
+      
+      source(file.path('.', 'process_A.R'), local=TRUE)$value
+      source(file.path('.', 'process_Description.R'), local=TRUE)$value
+      
+      private$logics <- list(process_Description = Process$new("process_Description", config_Description),
+                             process_A = Process$new("process_A", config_processA)
+      )
+      observe({
+browser()
+        
+      })
     }
     
   )
