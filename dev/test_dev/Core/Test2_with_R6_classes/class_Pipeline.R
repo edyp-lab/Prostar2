@@ -3,10 +3,17 @@ Pipeline = R6Class(
   "Pipeline",
   inherit = ProcessManager,
   private = list(
+    config = reactiveValues() ,
+    dataOut = reactiveValues(),
     rv = reactiveValues(
       processManagerList = NULL,
-      data2send = NULL
-    ),
+      data2send = NULL,
+      dataIn = NULL,
+      current.pos = NULL,
+      wake = F,
+      reset = NULL,
+      isSkipped = FALSE,
+      timeline.res = NULL),
     listUIs = NULL,
     
     ActionsOn_NoTmp_Input = function(){
@@ -157,9 +164,6 @@ Pipeline = R6Class(
     initialize = function(id) {
 
       private$id <- id
-      
-      
-      
       conf <- list(process.name = 'Pipeline',
                      steps = c('process_Description', 'process_A'),
                      mandatory = setNames(c(T,F), c('process_Description', 'process_A'))
@@ -173,16 +177,11 @@ Pipeline = R6Class(
                                         conf$steps)
       
       
-      source(file.path('.', 'process_A.R'), local=TRUE)$value
-      source(file.path('.', 'process_Description.R'), local=TRUE)$value
       
-      private$logics <- list(process_Description = Process$new("process_Description", config_Description),
-                             process_A = Process$new("process_A", config_processA)
+      private$logics <- list(process_Description = Process$new("process_Description"),
+                             process_A = Process$new("process_A")
       )
-      observe({
-browser()
-        
-      })
+
     }
     
   )

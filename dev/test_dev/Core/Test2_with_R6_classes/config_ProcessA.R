@@ -1,27 +1,27 @@
-#Timeline_R6.R
-ProcessA = R6Class(
-  "ProcessA",
-  inherit = Process,
-  private = list(
-    Add_RenderUIs_Definitions = function(input, output){
+list(
+  config = list(process.name = 'ProcessA',
+                steps = c('Description', 'Step1', 'Step2', 'Step3'),
+                mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
+  ),
+  RenderUIs_Definitions = function(input, output, config){
       ns <- NS(private$id)
       output$Description <- renderUI({
         tagList(
           actionButton(ns('btn_validate_Description'), 
-                       paste0('Start ', private$config$process.name),
+                       paste0('Start ', config$process.name),
                        class = btn_success_color),
-          mod_insert_md_ui(ns(paste0(private$config$process.name, "_md")))
+          mod_insert_md_ui(ns(paste0(config$process.name, "_md")))
         )
       })
       
       observe({
-        mod_insert_md_server(paste0(private$config$process.name, "_md"), 
-                             paste0('./md/', private$config$process.name, '.md'))
+        mod_insert_md_server(paste0(config$process.name, "_md"), 
+                             paste0('./md/', config$process.name, '.md'))
       })
       
       observeEvent(input$btn_validate_Description, {
-        private$InitializeDataIn()
-        private$ValidateCurrentPos()
+        self$InitializeDataIn()
+        ValidateCurrentPos()
       })
       
       ############### SCREEN 2 ######################################
@@ -47,7 +47,7 @@ ProcessA = R6Class(
       
       
       observeEvent(input$btn_validate_Step1, {
-        private$ValidateCurrentPos()
+        ValidateCurrentPos()
       })
       
       ############### SCREEN 3 ######################################
@@ -72,7 +72,7 @@ ProcessA = R6Class(
       # in previous datas. The objective is to take account
       # of skipped steps
       observeEvent(input$btn_validate_Step2, {
-        private$ValidateCurrentPos()
+        ValidateCurrentPos()
       })
 
       ############### SCREEN 4 ######################################
@@ -93,28 +93,9 @@ ProcessA = R6Class(
       
       observeEvent(input$btn_validate_Step3, {
         # rv$dataIn <- AddItemToDataset(private$rv$dataIn, private$config$process.name)
-        private$ValidateCurrentPos()
+        ValidateCurrentPos()
       })
       
-    }
-    
-  ),
-  
-  public = list(
-    initialize = function(id) {
-      print(paste0("----------in initialize of class Process with id = ", id))
-      
-      private$id <- id
-      config <- list(process.name = 'ProcessA',
-                     steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                     mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-      )
-      private$steps <- config$steps
-      private$length <- length(config$steps)
-      lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      private$config$status <- setNames(rep(0, private$length),
-                                        config$steps)
-    }
-    
-  )
+  }
 )
+    

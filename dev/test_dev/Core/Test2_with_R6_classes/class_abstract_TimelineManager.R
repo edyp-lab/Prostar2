@@ -3,7 +3,7 @@ TimelineManager <- R6Class(
   private=list(verbose = T,
                style = 2,
                type = 'generic',
-               config = list(),
+               config = reactiveValues(),
                rv = reactiveValues(
                  current.pos = 1,
                  reset_OK = NULL
@@ -159,9 +159,15 @@ TimelineManager <- R6Class(
                 server = function(config, wake, remoteReset) {
                   ns <- NS(self$id)
                   
-                  observeEvent(config,{private$config <- config})
-                  
-                  observeEvent(config$status,{private$config$status <- config$status})
+                  observeEvent(config,{
+                      print("Catch event on config")
+                    private$config <- config
+                    })
+
+                  observeEvent(req(config$status),{
+                    print(paste0("Catch event on config$status, new value = ", paste0(config$status, collapse=' ')))
+                    private$config$status <- config$status
+                    })
                   
                   observeEvent(req(wake()),{private$Update_Cursor_position()})
                   

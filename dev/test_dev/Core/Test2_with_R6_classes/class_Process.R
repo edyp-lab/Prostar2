@@ -16,12 +16,12 @@ Process = R6Class(
     },
     
     InitializeModule = function(){
-
+      
       private$config$screens <- private$CreateScreens()
       private$rv$current.pos <- 1
     },
     
-   # Add_RenderUIs_Definitions = function( input, output){},
+    # Add_RenderUIs_Definitions = function( input, output){},
     
     CreateTimeline = function(){
       private$timeline <- TimelineForProcess$new(
@@ -37,7 +37,6 @@ Process = R6Class(
   ),
   
   public = list(
-    initialize = function() {},
     GetConfig = function(){
       observe({print(paste0('-----GetConfig(', private$id, ') : ', paste0(private$config$steps, collapse=' ')))})
     }
