@@ -20,14 +20,11 @@ source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
+source(file.path('.', 'class_Filtering.R'), local=TRUE)$value
+source(file.path('.', 'class_Description.R'), local=TRUE)$value
 
 
 #----------------------------------------------------------------------------
-
-
-
-
-
 
 
 ui = function() {
@@ -64,27 +61,17 @@ server = function(input, output, session) {
   # 
   #source(file.path('.', 'process_Description.R'), local=TRUE)$value
   
-  processA <- Process$new("ProcessA")
+  processA <- ProcessFiltering$new("ProcessA")
   #processDescription <- ProcessDescription$new("process_Description")
+
   
-  processA$GetConfig()
-  #processDescription$GetConfig()
-  
-  
-  # processDescription$server(
-  #   dataIn = reactive({rv$dataIn}),
-  #   dataOut = dataOut,
-  #   remoteReset = reactive({input$remoteReset}),
-  #   isSkipped = reactive({input$skip %%2 == 0})
-  #   )
-  
-  #source(file.path('.', 'process_A.R'), local=TRUE)$value
-  # config_processA <- list(process.name = 'ProcessA',
-  #                         steps = c('Description', 'Step1', 'Step2', 'Step3'),
-  #                         mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-  # )
-  
-  
+  #processDescription$server(
+  #  dataIn = reactive({rv$dataIn}),
+  #  dataOut = dataOut,
+  #  remoteReset = reactive({input$remoteReset}),
+  #  isSkipped = reactive({input$skip %%2 == 0})
+  #  )
+
   processA$server(
     dataIn = reactive({rv$dataIn}),
     dataOut = dataOut,
@@ -94,7 +81,11 @@ server = function(input, output, session) {
   
   output$show_ui <- renderUI({
     req(processA)
-    processA$ui()
+    tagList(
+      processA$ui(),
+      hr()
+      #processDescription$ui()
+    )
   })
   
   observeEvent(req(dataOut$trigger), {

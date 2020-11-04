@@ -21,6 +21,9 @@ source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_Pipeline.R'), local=TRUE)$value
+source(file.path('.', 'class_PipelineProtein.R'), local=TRUE)$value
+source(file.path('.', 'class_Filtering.R'), local=TRUE)$value
+source(file.path('.', 'class_Description.R'), local=TRUE)$value
 
 
 #----------------------------------------------------------------------------
@@ -63,7 +66,7 @@ server = function(input, output, session) {
   })
   
  
-  pipelineManager <- Pipeline$new("PipelineManager")
+  pipelineManager <- PipelineProtein$new("PipelineProtein")
   
   
   pipelineManager$server(

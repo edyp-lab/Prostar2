@@ -3,19 +3,7 @@ Pipeline = R6Class(
   "Pipeline",
   inherit = ProcessManager,
   private = list(
-    config = reactiveValues() ,
-    dataOut = reactiveValues(),
-    rv = reactiveValues(
-      processManagerList = NULL,
-      data2send = NULL,
-      dataIn = NULL,
-      current.pos = NULL,
-      wake = F,
-      reset = NULL,
-      isSkipped = FALSE,
-      timeline.res = NULL),
-    listUIs = NULL,
-    
+logics = list(),
     ActionsOn_NoTmp_Input = function(){
       print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
       private$InitializeModule()
@@ -26,11 +14,7 @@ Pipeline = R6Class(
       private$Launch_Module_Server()
       private$PrepareData2Send()
     },
-    
-    InitializeModule = function(){
-      private$config$screens <- private$CreateScreens()
-      private$rv$current.pos <- 1
-    },
+
     
     # Catch the return value of a module and update the list of isDone modules
     # This list is updated with the names of datasets present in the rv$tmp
@@ -61,33 +45,6 @@ Pipeline = R6Class(
       private$PrepareData2Send()
     },
 
-    # This function creates the UI parts of the screens (dynamically set 
-    # renderUIs). 
-    # In the process child class, this method corresponds to the logics function
-    Add_RenderUIs_Definitions = function(fun = NULL, input, output){
-      
-      print("In class_Pipeline::Add_RenderUIs_Definitions()")
-     # req(is.null(fun))
-      
-      #private$logics
-
-      output$process_A <- renderUI(
-        tagList(
-          div(id=NS(private$id)('process_A'),
-              private$logics[['process_A']]$ui(),
-              )
-          )
-        )
-      
-      output$process_Description <- renderUI(
-        tagList(
-          div(id=NS(private$id)('process_Description'),
-              private$logics[['process_Description']]$ui(),
-              )
-        )
-      )
-
-    },
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
@@ -95,19 +52,19 @@ Pipeline = R6Class(
       # print("In class_Pipeline::Launch_Module_Server()")
       # source(file.path('.', 'process_A.R'), local=TRUE)$value
       # 
-      private$logics[['process_A']]$server(
-        dataIn = reactive({private$rv$data2send[['process_A']]}),
+      private$logics[['Filtering']]$server(
+        dataIn = reactive({private$rv$data2send[['Filtering']]}),
         dataOut = dataOut,
         remoteReset = reactive({NULL}),
-        isSkipped = reactive({NULL}),
-        logics = ProcessLogics_processA)
+        isSkipped = reactive({NULL})
+        )
       
-      private$logics[['process_Description']]$server(
-        dataIn = reactive({private$rv$data2send[['process_Description']]}),
+      private$logics[['Description']]$server(
+        dataIn = reactive({private$rv$data2send[['Description']]}),
         dataOut = dataOut,
         remoteReset = reactive({NULL}),
-        isSkipped = reactive({NULL}),
-        logics = ProcessLogics_Description)
+        isSkipped = reactive({NULL})
+        )
     },
     
     #To avoid "intempestive" initializations of modules due to dataIn changes
@@ -143,46 +100,15 @@ Pipeline = R6Class(
         private$rv$data2send[[x]] <- update(x)})
 
       #return_of_process$obj <- NA
-    },
-
-    
-    TimelineUI = function(){
-      private$timeline$ui()
-    },
-    
-    CreateTimeline = function(){
-
-      private$timeline <- TimelineForPipeline$new(
-        id = NS(private$id)('timeline'),
-        mandatory = private$config$mandatory
-      )
     }
+
     
   ),
   
   public = list(
-    initialize = function(id) {
-
-      private$id <- id
-      conf <- list(process.name = 'Pipeline',
-                     steps = c('process_Description', 'process_A'),
-                     mandatory = setNames(c(T,F), c('process_Description', 'process_A'))
-      )
-      
-      private$steps <-  conf$steps
-      private$length <- length(conf$steps)
-
-      lapply(names(conf), function(x){private$config[[x]] <- conf[[x]]})
-      private$config$status <- setNames(rep(0, private$length),
-                                        conf$steps)
-      
-      
-      
-      private$logics <- list(process_Description = Process$new("process_Description"),
-                             process_A = Process$new("process_A")
-      )
-
+    initialize = function() {
+      stop(" Process is an abstract class that can't be initialized.")
     }
-    
+
   )
 )

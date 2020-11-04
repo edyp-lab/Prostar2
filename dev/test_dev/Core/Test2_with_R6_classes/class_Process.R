@@ -13,33 +13,16 @@ Process = R6Class(
       
       private$config$status <- setNames(rep(tag, private$length),
                                         config$steps)
-    },
-    
-    InitializeModule = function(){
-      
-      private$config$screens <- private$CreateScreens()
-      private$rv$current.pos <- 1
-    },
-    
-    # Add_RenderUIs_Definitions = function( input, output){},
-    
-    CreateTimeline = function(){
-      private$timeline <- TimelineForProcess$new(
-        id = NS(private$id)('timeline'),
-        mandatory = private$config$mandatory
-      )
-    },
-    
-    TimelineUI = function(){
-      private$timeline$ui()
     }
+
     
   ),
   
   public = list(
-    GetConfig = function(){
-      observe({print(paste0('-----GetConfig(', private$id, ') : ', paste0(private$config$steps, collapse=' ')))})
+    initialize = function(){
+      stop(" Process is an abstract class that can't be initialized.")
     }
+   
     
   )
 )
