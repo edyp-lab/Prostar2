@@ -48,22 +48,14 @@ logics = list(),
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
-
-      # print("In class_Pipeline::Launch_Module_Server()")
-      # source(file.path('.', 'process_A.R'), local=TRUE)$value
-      # 
-      private$logics[['Filtering']]$server(
-        dataIn = reactive({private$rv$data2send[['Filtering']]}),
-        dataOut = dataOut,
-        remoteReset = reactive({NULL}),
-        isSkipped = reactive({NULL})
-        )
-      
-      private$logics[['Description']]$server(
-        dataIn = reactive({private$rv$data2send[['Description']]}),
-        dataOut = dataOut,
-        remoteReset = reactive({NULL}),
-        isSkipped = reactive({NULL})
+        lapply(names(private$logics), function(x){
+          private$logics[[x]]$server(
+            dataIn = reactive({private$rv$data2send[[x]]}),
+            dataOut = dataOut,
+            remoteReset = reactive({NULL}),
+            isSkipped = reactive({NULL})
+            )
+        }
         )
     },
     

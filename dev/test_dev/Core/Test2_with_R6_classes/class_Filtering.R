@@ -118,6 +118,7 @@ ProcessFiltering = R6Class(
       # private$config$status = setNames(c(0, 0, 0, 0), c('Description', 'Step1', 'Step2', 'Step3'))
       # private$config$process.name <- 'Filtering' 
       private$length <- length(private$config$steps)
+      private$CreateTimeline()
      })
       
     }

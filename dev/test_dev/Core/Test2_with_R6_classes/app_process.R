@@ -62,15 +62,15 @@ server = function(input, output, session) {
   #source(file.path('.', 'process_Description.R'), local=TRUE)$value
   
   processA <- ProcessFiltering$new("ProcessA")
-  #processDescription <- ProcessDescription$new("process_Description")
+  processDescription <- ProcessDescription$new("process_Description")
 
   
-  #processDescription$server(
-  #  dataIn = reactive({rv$dataIn}),
-  #  dataOut = dataOut,
-  #  remoteReset = reactive({input$remoteReset}),
-  #  isSkipped = reactive({input$skip %%2 == 0})
-  #  )
+  processDescription$server(
+    dataIn = reactive({rv$dataIn}),
+    dataOut = dataOut,
+    remoteReset = reactive({input$remoteReset}),
+    isSkipped = reactive({input$skip %%2 == 0})
+    )
 
   processA$server(
     dataIn = reactive({rv$dataIn}),
@@ -83,8 +83,8 @@ server = function(input, output, session) {
     req(processA)
     tagList(
       processA$ui(),
-      hr()
-      #processDescription$ui()
+      hr(),
+      processDescription$ui()
     )
   })
   

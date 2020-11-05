@@ -7,7 +7,6 @@ ProcessManager <- R6Class(
                   SKIPPED = -1,
                   UNDONE = 1
     ),
-    #config = reactiveValues() ,
     steps = NULL,
     dataOut = reactiveValues(),
     length = NULL,
@@ -107,11 +106,10 @@ ProcessManager <- R6Class(
       })
     },
     
-    ActionsOnDataTrigger = function(data){
-      data$name <- private$dataOut$name
-      data$obj <- private$dataOut$obj
-      data$trigger <- private$dataOut$trigger
-      data
+    ActionsOnDataTrigger = function(){
+      list(name = private$dataOut$name,
+              obj = private$dataOut$obj,
+              trigger = private$dataOut$trigger)
     },
     
     ValidateCurrentPos = function(){
@@ -145,7 +143,7 @@ ProcessManager <- R6Class(
     },
     
     
-    #Actions onf receive new dataIn()
+    #Actions on receive new dataIn()
     ActionsOn_Tmp_NoInput = function(){
       private$rv$wake <- private$Wake()},
     
@@ -175,7 +173,6 @@ ProcessManager <- R6Class(
       #Test if a dataset is already loaded
       tmpExists <- !is.null(private$rv$dataIn)
       
-      
       if (tmpExists && inputExists){
         # this case is either the module is skipped or validated
         #private$rv$current.pos <- length(private$config$status)
@@ -201,8 +198,8 @@ ProcessManager <- R6Class(
     
     InitializeTimeline = function(){
       print(paste0("in InitializeTimeline for", private$id))
- 
-       private$CreateTimeline()
+
+       
       private$rv$timeline.res <- private$timeline$server(
         config = private$config,
         wake = reactive({private$rv$wake}),
@@ -275,8 +272,7 @@ ProcessManager <- R6Class(
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
       observeEvent(private$dataOut$trigger, {
-        dataOut <- private$ActionsOnDataTrigger(dataOut)
-        
+        dataOut <- private$ActionsOnDataTrigger()
       })
       
       
@@ -323,8 +319,6 @@ ProcessManager <- R6Class(
         
         output$show_timeline_ui <- renderUI({private$TimelineUI() })
         
-        
-        ###########---------------------------#################
         output$show_dataIn <- renderUI({
           req(dataIn())
           tagList(lapply(names(dataIn()), function(x){tags$p(x)}))
@@ -352,12 +346,6 @@ ProcessManager <- R6Class(
         })
         
         output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
-        
-        #################################################
-        # Main listener of the module which initialize it
-        
-        
-        
         
         GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
         

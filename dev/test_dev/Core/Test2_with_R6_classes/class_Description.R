@@ -47,6 +47,7 @@ ProcessDescription = R6Class(
         # private$config$process.name <- 'Description' 
         
         private$length <- length(private$config$steps)
+        private$CreateTimeline()
       })
       
     }

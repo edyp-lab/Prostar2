@@ -52,6 +52,7 @@ PipelineProtein = R6Class(
 
         private$config$status <- setNames(rep(0, private$length), private$config$steps)
         
+        private$CreateTimeline()
         
         private$logics[['Description']] <- ProcessDescription$new(NS(private$id)('ProcessDescription'))
         private$logics[['Filtering']] <- ProcessFiltering$new(NS(private$id)('ProcessFiltering'))
