@@ -11,8 +11,7 @@ Process = R6Class(
       else
         tag <- private$global$UNDONE
       
-      private$config$status <- setNames(rep(tag, private$length),
-                                        config$steps)
+      private$InitStatus()
     }
 
     

@@ -4,21 +4,20 @@ ProcessFiltering = R6Class(
   "ProcessFiltering",
   inherit = Process,
   private = list(
-    config = reactiveValues(),
     Add_RenderUIs_Definitions = function( input, output){
       ns <- NS(private$id)
       output$Description <- renderUI({
         tagList(
           actionButton(ns('btn_validate_Description'), 
-                       paste0('Start ', private$config$process.name),
+                       paste0('Start ', private$GetName()),
                        class = btn_success_color),
-          mod_insert_md_ui(ns(paste0(private$config$process.name, "_md")))
+          mod_insert_md_ui(ns(paste0(private$GetName(), "_md")))
         )
       })
       
       observe({
-        mod_insert_md_server(paste0(private$config$process.name, "_md"), 
-                             paste0('./md/', private$config$process.name, '.md'))
+        mod_insert_md_server(paste0(private$GetName(), "_md"), 
+                             paste0('./md/', private$GetName(), '.md'))
       })
       
       observeEvent(input$btn_validate_Description, {
@@ -105,24 +104,15 @@ ProcessFiltering = R6Class(
   public = list(
     initialize = function(id) {
       private$id <- id
-      
-     observe({
-       tmp <- list(steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                   mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3')),
-                     status = setNames(c(0, 0, 0, 0), c('Description', 'Step1', 'Step2', 'Step3')),
-                     process.name = 'Filtering')
-       lapply(names(tmp), function(x){private$config[[x]] <- tmp[[x]]})
-       
-      #  private$config$steps = c('Description', 'Step1', 'Step2', 'Step3')
-      # private$config$mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-      # private$config$status = setNames(c(0, 0, 0, 0), c('Description', 'Step1', 'Step2', 'Step3'))
-      # private$config$process.name <- 'Filtering' 
-      private$length <- length(private$config$steps)
-      private$CreateTimeline()
-     })
-      
-    }
-    
+      config <- list(process.name = 'ProcessA',
+                     steps = c('Description', 'Step1', 'Step2', 'Step3'),
+                     mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
+      )
+      private$SetConfig(config)
+      private$InitStatus()
+      observe({private$CreateTimeline()})
+     }
+
   )
 )
 

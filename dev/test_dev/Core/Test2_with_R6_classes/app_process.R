@@ -49,6 +49,32 @@ server = function(input, output, session) {
   
   dataOut <- reactiveValues()
   
+  ll.process = list()
+  ll.process[['processA']] <- ProcessFiltering$new("ProcessA")
+  ll.process[['Description']] <- ProcessDescription$new("process_Description")
+
+  
+  rv[['description']] <- ll.process[['Description']]$server(
+    dataIn = reactive({rv$dataIn}),
+    remoteReset = reactive({input$remoteReset}),
+    isSkipped = reactive({input$skip %%2 == 0})
+    )
+
+  rv[['processA']] <- ll.process[['processA']]$server(
+    dataIn = reactive({rv$dataIn}),
+    remoteReset = reactive({input$remoteReset}),
+    isSkipped = reactive({input$skip %%2 == 0}))
+  
+  
+  output$show_ui <- renderUI({
+    #req(processA)
+    tagList(
+      ll.process[['processA']]$ui(),
+      hr(),
+      ll.process[['Description']]$ui()
+    )
+  })
+  
   
   observeEvent(input$changeDataset,{
     if (input$changeDataset%%2 ==0)
@@ -57,40 +83,7 @@ server = function(input, output, session) {
       rv$dataIn <- NA
   })
   
-  
-  # 
-  #source(file.path('.', 'process_Description.R'), local=TRUE)$value
-  
-  processA <- ProcessFiltering$new("ProcessA")
-  processDescription <- ProcessDescription$new("process_Description")
 
-  
-  processDescription$server(
-    dataIn = reactive({rv$dataIn}),
-    dataOut = dataOut,
-    remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0})
-    )
-
-  processA$server(
-    dataIn = reactive({rv$dataIn}),
-    dataOut = dataOut,
-    remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0}))
-  
-  
-  output$show_ui <- renderUI({
-    req(processA)
-    tagList(
-      processA$ui(),
-      hr(),
-      processDescription$ui()
-    )
-  })
-  
-  observeEvent(req(dataOut$trigger), {
-    print('reveceived response from a process')
-  })
 }
 
 shinyApp(ui, server)

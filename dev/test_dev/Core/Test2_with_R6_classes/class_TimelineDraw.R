@@ -1,7 +1,6 @@
 TimelineDraw <- R6Class(
   "TimelineDraw",
-  private=list(verbose = T,
-               length = NULL,
+  private=list(length = NULL,
                style = NULL,
                mandatory = NULL,
                

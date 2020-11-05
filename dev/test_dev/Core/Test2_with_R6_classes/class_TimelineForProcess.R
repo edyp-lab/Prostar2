@@ -8,34 +8,33 @@ TimelineForProcess = R6Class(
 
 
     Analyse_Status = function(){
-      req(private$nbSteps)
-      if ((private$nbSteps==1) || (private$nbSteps>=2 && sum(private$config$status[2:private$nbSteps])== 0 )){
+      req(private$Length())
+      if ((private$Length()==1) || (private$Length()>=2 && sum(private$GetStatus()[2:private$Length()])== 0 )){
         # This is the case at the initialization of a process or after a reset
         # Enable all steps and buttons
-        self$toggleState_Steps(cond = TRUE, i = private$nbSteps)
-      } else if (private$config$status[private$nbSteps] == private$global$SKIPPED){
+        self$toggleState_Steps(cond = TRUE, i = private$Length())
+      } else if (private$GetStatus()[private$Length()] == private$global$SKIPPED){
         # Disable all steps
-        self$toggleState_Steps(cond = FALSE, i = private$nbSteps)
+        self$toggleState_Steps(cond = FALSE, i = private$Length())
       } else {
         # Disable all previous steps from each VALIDATED step
-        ind.max <- max(grep(private$global$VALIDATED, private$config$status))
+        ind.max <- max(grep(private$global$VALIDATED, private$GetStatus()))
         self$toggleState_Steps(cond = FALSE, i = ind.max)
       }
 
     },
     
     Display_Current_Step = function(){
-      req(private$nbSteps)
+      req(private$Length())
       # One only displays the steps that are not skipped
-         lapply(1:private$nbSteps, function(x){
-           shinyjs::toggle(paste0('div_screen', x), condition = x==private$rv$current.pos && private$config$status[private$rv$current.pos] != private$global$SKIPPED)})
+         lapply(1:private$Length(), function(x){
+           shinyjs::toggle(paste0('div_screen', x), condition = x==private$GetCurrentPos() && private$GetStatus()[private$GetCurrentPos()] != private$global$SKIPPED)})
     }
   ),
   
   public = list(
     initialize = function(id, mandatory, style=2 ) {
-      self$id <- id
-      private$nbSteps <- length(mandatory)
+      private$id <- id
       private$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'), 
                                                mandatory = mandatory,
                                                style = style)

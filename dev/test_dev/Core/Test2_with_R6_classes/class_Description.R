@@ -33,25 +33,14 @@ ProcessDescription = R6Class(
   public = list(
     initialize = function(id) {
       private$id <- id
-      
-      observe({
-        tmp <- list(steps = c('Description'),
+      config <- list(steps = c('Description'),
                     mandatory = setNames(c(F), c('Description')),
                     status = setNames(c(0), c('Description')),
                     process.name = 'Description')
-        lapply(names(tmp), function(x){private$config[[x]] <- tmp[[x]]})
-        
-        # private$config$steps = c('Description')
-        # private$config$mandatory = setNames(c(F), c('Description'))
-        # private$config$status = setNames(c(0), c('Description'))
-        # private$config$process.name <- 'Description' 
-        
-        private$length <- length(private$config$steps)
-        private$CreateTimeline()
-      })
-      
-    }
-    
+        private$SetConfig(config)
+        private$InitStatus()
+       observe({private$CreateTimeline()})
+      }
   )
 )
 
