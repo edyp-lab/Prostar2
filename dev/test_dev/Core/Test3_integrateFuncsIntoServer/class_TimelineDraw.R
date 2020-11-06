@@ -23,6 +23,7 @@ TimelineDraw <- R6Class(
                },
                
                BuildTimeline2 = function(status, pos){
+
                  tl_status <- rep('', private$length)
                  tl_status[which(private$mandatory)] <- 'mandatory'
                  tl_status[which(unlist(status) == private$global$VALIDATED)] <- 'complete'
@@ -49,11 +50,11 @@ TimelineDraw <- R6Class(
                ),
   public = list(id = NULL,
                 
-                initialize = function(id, mandatory, style) {
+                initialize = function(id,style=2) {
+                  
                   self$id <- id
                   private$style <- style
-                  private$mandatory <- mandatory
-                  private$length <- length(private$mandatory)
+
                 }, 
                 
                 ui = function() {
@@ -65,14 +66,14 @@ TimelineDraw <- R6Class(
                   )
                 },
                 
-                server = function(status, position) {
+                server = function( mandatory=NULL, status, position) {
                   ns <- NS(self$id)
-                  
-                  
-                 
-                  observeEvent(req(status()), {
-                    print(paste0("in timelineDraw, status = ", paste0(status(), collapse=' ')))
-                  })
+                  if (is.null(mandatory)){
+                    warning("TimelineDraw::Initialize() : mandatory is NULL")
+                    return(NULL)
+                  }
+                  private$mandatory <- mandatory
+                  private$length <- length(private$mandatory)
                   
                   moduleServer(self$id, function(input, output, session) {
                     

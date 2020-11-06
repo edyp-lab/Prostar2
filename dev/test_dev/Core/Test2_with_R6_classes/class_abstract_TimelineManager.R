@@ -18,15 +18,18 @@ TimelineManager <- R6Class(
                SetConfig = function(value){private$config[[private$id]] <- value},
                GetSteps = function(){private$config[[private$id]]$steps},
                SetSteps = function(pos, value){private$config[[private$id]]$steps[pos] <- value},
+               SetCompleteSteps = function(value){private$config[[private$id]]$steps <- value},
                GetStatus = function(){private$config[[private$id]]$status},
                SetStatus = function(pos, value){private$config[[private$id]]$status[pos] <- value},
                SetCompleteStatus = function( value){private$config[[private$id]]$status <- value},
                GetMandatory = function(){private$config[[private$id]]$mandatory},
                SetMandatory = function(pos, value){private$config[[private$id]]$mandatory[pos] <- value},
+               SetCompleteMandatory = function(value){private$config[[private$id]]$mandatory <- value},
                GetName = function(){private$config[[private$id]]$name},
                SetName = function(value){private$config[[private$id]]$name <- value},
                GetScreens = function(){private$config[[private$id]]$screens},
                SetScreens = function(pos, value){private$config[[private$id]]$screens[[pos]] <- value},
+               SetCompleteScreens = function(value){private$config[[private$id]]$screens <- value},
                GetDataOut = function() {private$dataOut[[private$id]]},
                SetDataOut = function(data){private$dataOut[[private$id]] <- data},
                Length = function(){length(private$config[[private$id]]$steps)},
@@ -109,17 +112,20 @@ TimelineManager <- R6Class(
                # Those div englobs the div of the caller where screens are defined
                EncapsulateScreens = function(){
                  print("encapsulate screens")
+                 browser()
                  req(private$GetScreens())
                  ns <- NS(private$id)
                  private$Init_Default_Positions() 
-                 private$config$screens <- lapply(1:private$Length(),
-                                                  function(x){
-                                                    private$SetScreens(x, if (x == 1) 
-                                                      div(id = ns(paste0("div_screen", x)),  private$GetScreens()[[x]])
-                                                    else 
-                                                      shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  private$GetScreens()[[x]]))
-                                                    )
-                                                  })
+                 private$SetCompleteScreens(setNames(
+                   lapply(1:private$Length(),
+                        function(x){
+                          if (x == 1) 
+                            div(id = ns(paste0("div_screen", x)),  private$GetScreens()[[x]])
+                            else 
+                              shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  private$GetScreens()[[x]]))
+                          }),
+                   private$GetSteps())
+                 )
                }
                
                
@@ -173,10 +179,20 @@ TimelineManager <- R6Class(
       ns <- NS(private$id)
       
       
-      observeEvent(config,{
+      observeEvent(config$steps,{
         print("---------> Catch event on config")
-        private$SetConfig(config)
+        private$SetCompleteSteps(config$steps)
         })
+      
+      observeEvent(config$mandatory,{
+        print("---------> Catch event on config")
+        private$SetCompleteMandatory(config$mandatory)
+      })
+      
+      observeEvent(config$screens,{
+        print("---------> Catch event on config")
+        private$SetCompleteScreens(config$screens)
+      })
       
       observeEvent(req(config$status),{
         print(paste0("Catch event on config$status, new value = ", paste0(config$status, collapse=' ')))
@@ -223,6 +239,7 @@ TimelineManager <- R6Class(
           })
         
         output$title <- renderUI({ h3(paste0('title=private$id = ', private$id)) })
+        
         # Return the UI for a modal dialog with data selection input. If 'failed' is
         # TRUE, then display a message that the previous value was invalid.
         dataModal <- function() {
@@ -266,7 +283,7 @@ TimelineManager <- R6Class(
           shinyjs::toggleState('nextBtn', cond = private$NextBtn_logics())
           })
         
-        observeEvent(req(private$GetConfig()$Steps), ignoreInit=F,{
+        observeEvent(req(private$GetConfig()$steps), ignoreInit=F,{
           print("observeEvent(req(private$GetConfig())")
 
           req(private$Length()>0)

@@ -39,7 +39,7 @@ ui = function() {
   )
 }
 server = function(input, output, session) {
-  ns <- NS('App')
+  
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv = reactiveValues(
@@ -49,37 +49,42 @@ server = function(input, output, session) {
   
   dataOut <- reactiveValues()
   
-  ll.process = list()
-  ll.process[['processA']] <- ProcessFiltering$new(ns("ProcessA"))
-  ll.process[['Description']] <- ProcessDescription$new(ns("process_Description"))
-
-  
-  rv[['description']] <- ll.process[['Description']]$server(
-    dataIn = reactive({rv$dataIn}),
-    remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0})
-    )
-
-  #rv[['processA']] <- ll.process[['processA']]$server(
-  #  dataIn = reactive({rv$dataIn}),
-  #  remoteReset = reactive({input$remoteReset}),
-  #  isSkipped = reactive({input$skip %%2 == 0}))
-  
-  
-  output$show_ui <- renderUI({
-    tagList(
-      #ll.process[['processA']]$ui(),
-      hr(),
-      ll.process[['Description']]$ui()
-    )
-  })
-  
   
   observeEvent(input$changeDataset,{
     if (input$changeDataset%%2 ==0)
       rv$dataIn <- Exp1_R25_prot[1:10, , -1]
     else
       rv$dataIn <- NA
+  })
+  
+ 
+  processA <- ProcessFiltering$new("ProcessA")
+ # processDescription <- ProcessDescription$new("process_Description")
+  
+  
+  # processDescription$server(
+  #   dataIn = reactive({rv$dataIn}),
+  #   remoteReset = reactive({input$remoteReset}),
+  #   isSkipped = reactive({input$skip %%2 == 0})
+  # )
+  
+  processA$server(
+    config = list(steps = c('Description', 'Step1', 'Step2', 'Step3'),
+                  mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3')),
+                  status = setNames(c(0, 0, 0, 0), c('Description', 'Step1', 'Step2', 'Step3')),
+                  name = 'Filtering'),
+    dataIn = reactive({rv$dataIn}),
+    remoteReset = reactive({input$remoteReset}),
+    isSkipped = reactive({input$skip %%2 == 0}))
+  
+  
+  output$show_ui <- renderUI({
+    req(processA)
+    tagList(
+      processA$ui(),
+      hr()
+      #processDescription$ui()
+    )
   })
   
 

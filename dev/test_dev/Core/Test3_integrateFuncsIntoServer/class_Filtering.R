@@ -1,0 +1,112 @@
+#Timeline_R6.R
+ProcessFiltering = R6Class(
+  "ProcessFiltering",
+  inherit = Process,
+  private = list(
+    config = reactiveValues(),
+    Add_RenderUIs_Definitions = function( input, output){
+      print("Call to Add_RenderUIs_Definitions()")
+      ns <- NS(private$id)
+      output$Description <- renderUI({
+        tagList(
+          actionButton(ns('btn_validate_Description'), 
+                       paste0('Start ', private$config[[private$id]]$name),
+                       class = btn_success_color),
+          mod_insert_md_ui(ns(paste0(private$config[[private$id]]$name, "_md")))
+        )
+      })
+      
+      observe({
+        mod_insert_md_server(paste0(private$config[[private$id]]$name, "_md"), 
+                             paste0('./md/', private$config[[private$id]]$.name, '.md'))
+      })
+      
+      observeEvent(input$btn_validate_Description, {
+        private$InitializeDataIn()
+        private$ValidateCurrentPos()
+      })
+      
+      ############### SCREEN 2 ######################################
+      
+      output$Step1 <- renderUI({
+        name <- 'Step1'
+        
+        tagList(
+          div(id=ns(name),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  tags$h2(name)),
+              div(style="display:inline-block; vertical-align: middle; padding-right: 40px;",
+                  selectInput(ns('select1'), 'Select step 1', 
+                              choices = 1:5, 
+                              selected = 1,
+                              width = '150px')
+              ),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  actionButton(ns(paste0('btn_validate_', name)), 'Perform'))
+          )
+        )
+      })
+      
+      
+      observeEvent(input$btn_validate_Step1, {
+        private$ValidateCurrentPos()
+      })
+      
+      ############### SCREEN 3 ######################################
+      output$Step2 <- renderUI({
+        name <- 'Step2'
+        tagList(
+          div(id=ns(name),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  tags$h3(name)),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 40px;",
+                  selectInput(ns('select2'), 'Select step 2',
+                              choices = 1:5,
+                              selected = 1,
+                              width = '150px')),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  actionButton(ns(paste0('btn_validate_', name)), 'Perform'))
+          )
+        )
+      })
+      
+      ## Logics to implement: here, we must take the last data not null
+      # in previous datas. The objective is to take account
+      # of skipped steps
+      observeEvent(input$btn_validate_Step2, {
+        private$ValidateCurrentPos()
+      })
+      
+      ############### SCREEN 4 ######################################
+      output$Step3 <- renderUI({
+        name <- 'Step3'
+        
+        tagList(
+          div(id=ns(name),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  tags$h3(name)),
+              div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
+                  actionButton(ns(paste0('btn_validate_', name)), 'Validate'))
+          )
+        )
+        
+      })
+      
+      
+      observeEvent(input$btn_validate_Step3, {
+        # rv$dataIn <- AddItemToDataset(private$rv$dataIn, private$config$process.name)
+        private$ValidateCurrentPos()
+      })
+      
+    }
+    
+  ),
+  
+  public = list(
+    initialize = function(id) {
+      print(paste0('in class_Filtering::initialize(', id, ')'))
+      private$id <- id
+       }
+    
+  )
+)

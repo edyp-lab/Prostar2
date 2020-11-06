@@ -20,11 +20,18 @@ source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
+source(file.path('.', 'class_Pipeline.R'), local=TRUE)$value
+source(file.path('.', 'class_PipelineProtein.R'), local=TRUE)$value
 source(file.path('.', 'class_Filtering.R'), local=TRUE)$value
 source(file.path('.', 'class_Description.R'), local=TRUE)$value
 
 
 #----------------------------------------------------------------------------
+
+
+
+
+
 
 
 ui = function() {
@@ -38,8 +45,9 @@ ui = function() {
     )
   )
 }
+
 server = function(input, output, session) {
-  ns <- NS('App')
+  
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv = reactiveValues(
@@ -49,31 +57,6 @@ server = function(input, output, session) {
   
   dataOut <- reactiveValues()
   
-  ll.process = list()
-  ll.process[['processA']] <- ProcessFiltering$new(ns("ProcessA"))
-  ll.process[['Description']] <- ProcessDescription$new(ns("process_Description"))
-
-  
-  rv[['description']] <- ll.process[['Description']]$server(
-    dataIn = reactive({rv$dataIn}),
-    remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0})
-    )
-
-  #rv[['processA']] <- ll.process[['processA']]$server(
-  #  dataIn = reactive({rv$dataIn}),
-  #  remoteReset = reactive({input$remoteReset}),
-  #  isSkipped = reactive({input$skip %%2 == 0}))
-  
-  
-  output$show_ui <- renderUI({
-    tagList(
-      #ll.process[['processA']]$ui(),
-      hr(),
-      ll.process[['Description']]$ui()
-    )
-  })
-  
   
   observeEvent(input$changeDataset,{
     if (input$changeDataset%%2 ==0)
@@ -82,7 +65,25 @@ server = function(input, output, session) {
       rv$dataIn <- NA
   })
   
-
+  
+  pipelineManager <- PipelineProtein$new("PipelineProtein")
+  
+  
+  pipelineManager$server(
+    dataIn = reactive({rv$dataIn}),
+    dataOut = dataOut,
+    remoteReset = reactive({NULL}),
+    isSkipped = reactive({NULL})
+  )
+  
+  output$show_ui <- renderUI({
+    req(pipelineManager)
+    pipelineManager$ui()
+  })
+  
+  observeEvent(req(dataOut$trigger), {
+    print('reveceived response from a process')
+  })
 }
 
 shinyApp(ui, server)
