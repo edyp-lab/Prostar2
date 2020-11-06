@@ -59,7 +59,7 @@ TimelineDraw <- R6Class(
                 ui = function() {
                   ns <- NS(self$id)
                   wellPanel(style="background-color: orange;",
-                            print('tutu'),
+                            p('Timeline Draw'),
                             uiOutput(ns('load_CSS')),
                             uiOutput(ns('show_TL'))
                   )

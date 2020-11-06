@@ -67,7 +67,6 @@ server = function(input, output, session) {
   
   
   output$show_ui <- renderUI({
-    #req(processA)
     tagList(
       ll.process[['processA']]$ui(),
       hr(),

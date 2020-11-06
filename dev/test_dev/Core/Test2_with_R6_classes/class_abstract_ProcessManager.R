@@ -266,6 +266,7 @@ ProcessManager <- R6Class(
       ns <- NS(private$id)
       fluidPage(
         wellPanel(style="background-color: yellow;",
+                  p('abstract ProcessManager'),
                   uiOutput(ns('title')),
                   uiOutput(ns('show_timeline_ui')),
                   hr(),

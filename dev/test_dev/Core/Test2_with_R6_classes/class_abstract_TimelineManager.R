@@ -108,6 +108,7 @@ TimelineManager <- R6Class(
                # to this module (name prefixed with the ns() function
                # Those div englobs the div of the caller where screens are defined
                EncapsulateScreens = function(){
+                 print("encapsulate screens")
                  req(private$GetScreens())
                  ns <- NS(private$id)
                  private$Init_Default_Positions() 
@@ -139,8 +140,8 @@ TimelineManager <- R6Class(
       fluidPage(
         wellPanel(style="background-color: lightblue;",
                   tagList(
+                    p('abstract TimelineManager'),
                     uiOutput(ns('title')),
-                    p('in abstract_TImelineManager'),
                     shinyjs::useShinyjs(),
                     div(id = 'GlobalTL',
                         fluidRow(
@@ -169,10 +170,11 @@ TimelineManager <- R6Class(
     
     # SERVER
     server = function(config, wake, remoteReset) {
-      ns <- NS(self$id)
+      ns <- NS(private$id)
+      
       
       observeEvent(config,{
-        print("Catch event on config")
+        print("---------> Catch event on config")
         private$SetConfig(config)
         })
       
@@ -199,8 +201,8 @@ TimelineManager <- R6Class(
       }
       
       # MODULE SERVER
-      moduleServer(self$id, function(input, output, session) {
-        ns <- NS(self$id)
+      moduleServer(private$id, function(input, output, session) {
+        ns <- NS(private$id)
         
         # Show modal when button reset is clicked
         observeEvent(input$rstBtn, {showModal(dataModal())})
@@ -220,7 +222,7 @@ TimelineManager <- R6Class(
                        style='padding:4px; font-size:80%')
           })
         
-        output$title <- renderUI({ h3(paste0('private$id = ', private$id)) })
+        output$title <- renderUI({ h3(paste0('title=private$id = ', private$id)) })
         # Return the UI for a modal dialog with data selection input. If 'failed' is
         # TRUE, then display a message that the previous value was invalid.
         dataModal <- function() {
@@ -247,7 +249,13 @@ TimelineManager <- R6Class(
         
         observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
-        output$show_screens <- renderUI({tagList(private$GetScreens())})
+        output$show_screens <- renderUI({
+          #browser()
+          tagList(
+            print("In show_screens"),
+            private$GetScreens()
+            )
+          })
         
         # Catch a new position or a change in the status list
         observeEvent(req(c(private$GetCurrentPos(), private$GetStatus())), {
@@ -258,7 +266,9 @@ TimelineManager <- R6Class(
           shinyjs::toggleState('nextBtn', cond = private$NextBtn_logics())
           })
         
-        observeEvent(req(private$GetConfig()), ignoreInit=F,{
+        observeEvent(req(private$GetConfig()$Steps), ignoreInit=F,{
+          print("observeEvent(req(private$GetConfig())")
+
           req(private$Length()>0)
           check <- private$CheckConfig()
           if (!check$passed)
