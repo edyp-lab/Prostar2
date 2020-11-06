@@ -6,7 +6,7 @@ Process = R6Class(
     ActionsOnNewPosition = function(){},
     
     ActionsOnIsSkipped = function(){
-      if (private$rv$isSkipped)
+      if (private$GetIsSkipped())
         tag <- private$global$SKIPPED
       else
         tag <- private$global$UNDONE

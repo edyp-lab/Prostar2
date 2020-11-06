@@ -18,8 +18,12 @@ ProcessManager <- R6Class(
       isSkipped = FALSE,
       timeline.res = NULL),
     
+    GetRemoteReset = function(){private$rv[[private$id]]$remoteReset},
+    SetRemoteReset = function(value){private$rv[[private$id]]$remoteReset <- value},
     GetDataIn = function(){private$rv[[private$id]]$dataIn},
     SetDataIn = function(value){private$rv[[private$id]]$dataIn <- value},
+    GetTempDataIn = function(){private$rv[[private$id]]$temp.dataIn},
+    SetTempDataIn = function(value){private$rv[[private$id]]$temp.dataIn <- value},
     GetCurrentPos = function(){private$rv[[private$id]]$current.pos},
     SetCurrentPos = function(value){private$rv[[private$id]]$current.pos <- value},
     GetWake = function(){private$rv[[private$id]]$wake},
@@ -37,8 +41,10 @@ ProcessManager <- R6Class(
     SetConfig = function(value){private$config[[private$id]] <- value},
     GetSteps = function(){private$config[[private$id]]$steps},
     SetSteps = function(pos, value){private$config[[private$id]]$steps[pos] <- value},
-    GetStatus = function(){private$config[[private$id]]$status},
+    GetStatus = function(pos){private$config[[private$id]]$status[pos]},
     SetStatus = function(pos, value){private$config[[private$id]]$status[pos] <- value},
+    GetCompleteStatus = function(){private$config[[private$id]]$status},
+    SetCompleteStatus = function( value){private$config[[private$id]]$status <- value},
     GetMandatory = function(){private$config[[private$id]]$mandatory},
     SetMandatory = function(pos, value){private$config[[private$id]]$mandatory[pos] <- value},
     GetName = function(){private$config[[private$id]]$name},
@@ -60,7 +66,7 @@ ProcessManager <- R6Class(
     },
     
     Send_Result_to_Caller = function(){
-      private$rv$wake <- private$Wake()
+      private$SetWake(private$Wake())
       self$SetDataOut(list(obj=private$GetDataIn(),
                            trigger = private$GetWake())
       )
@@ -68,13 +74,13 @@ ProcessManager <- R6Class(
     
     Set_Skipped_Status = function(){
       for (i in 1:private$Length())
-        if (private$GetStatus()[i] != private$global$VALIDATED && private$GetMaxValidated_AllSteps() > i)
+        if (private$GetStatus(i) != private$global$VALIDATED && private$GetMaxValidated_AllSteps() > i)
           private$SetStatus(i, private$global$SKIPPED)
     },
     
     GetMaxValidated_AllSteps = function(){
       val <- 0
-      ind <- which(private$GetStatus() == private$global$VALIDATED)
+      ind <- which(private$GetCompleteStatus() == private$global$VALIDATED)
       if (length(ind) > 0)
         val <- max(ind)
       val
@@ -102,7 +108,7 @@ ProcessManager <- R6Class(
     # has been validated
     is.skipped = function(name){
       pos <- which(name == private$GetSteps())
-      return(private$GetStatus()[pos] == private$global$SKIPPED)
+      return(private$GetStatus(pos) == private$global$SKIPPED)
     },
     
     InitializeModule = function(){
@@ -152,12 +158,11 @@ ProcessManager <- R6Class(
     },
     
     InitializeDataIn = function(){ 
-      private$SetDataIn(private$rv$temp.dataIn)
+      private$SetDataIn(private$GetTempDataIn())
     },
     
     
     CreateScreens = function(){
-      
       setNames(
         lapply(1:private$Length(), 
                function(x){
@@ -167,10 +172,10 @@ ProcessManager <- R6Class(
  
     #Actions on receive new dataIn()
     ActionsOn_Tmp_NoInput = function(){
-      private$rv$wake <- private$Wake()},
+      private$SetWake(private$Wake())},
     
     ActionsOn_Tmp_Input = function(){
-      private$rv$wake <- private$Wake()
+      private$SetWake(private$Wake())
     },
     
     ActionsOn_NoTmp_Input = function(){
@@ -185,7 +190,7 @@ ProcessManager <- R6Class(
       # validate button in the Description screen.
       # Once done, this variable is observed and the real rv$dataIn function can be
       # instanciated
-      private$rv$temp.dataIn <- data
+      private$SetTempDataIn(data)
       
       private$SetWake(FALSE)
       
@@ -222,15 +227,16 @@ ProcessManager <- R6Class(
       print(paste0("in InitializeTimeline for", private$id))
 
        
-      private$rv$timeline.res <- private$timeline$server(
+      private$SetTimelineRes(private$timeline$server(
         config = private$GetConfig(),
         wake = reactive({private$GetWake()}),
-        remoteReset = reactive({private$rv$remoteReset})
+        remoteReset = reactive({private$GetRemoteReset()})
+      )
       )
       
-      observeEvent(req(private$rv$timeline.res()), ignoreInit=T, {
-        private$rv$current.pos <- private$rv$timeline.res()$current.pos
-        private$rv$reset <- private$rv$timeline.res()$reset
+      observeEvent(req(private$GetRemoteReset()), ignoreInit=T, {
+        private$SetCurrentPos(private$GetRemoteReset()$current.pos)
+        private$SetReset(private$GetRemoteReset()$reset)
       })
     },
     
@@ -243,6 +249,7 @@ ProcessManager <- R6Class(
     
     TimelineUI = function(){
      # req(private$timeline)
+      print("launch timeline$ui()")
       private$timeline$ui()
     }
     
@@ -282,12 +289,11 @@ ProcessManager <- R6Class(
                       remoteReset = FALSE,
                       isSkipped = FALSE) {
       ns <- NS(private$id)
-      current.pos = reactiveVal()
      
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
-      observeEvent(private$dataOut$trigger, {
-        dataOut <- private$ActionsOnDataTrigger()
+      observeEvent(private$GetDataOut()$trigger, {
+        private$SetDataOut(private$ActionsOnDataTrigger())
       })
       
       
@@ -300,11 +306,13 @@ ProcessManager <- R6Class(
       
       observe({private$CreateTimeline()})
       
-      observeEvent(req(private$rv$current.pos), ignoreInit=T, {
+      observeEvent(req(private$GetCurrentPos()), ignoreInit=T, {
         private$ActionsOnNewPosition()
       })
       
-      observeEvent(req(remoteReset()!=0), { private$SetRemoteReset(remoteReset())})
+      observeEvent(req(remoteReset()!=0), { 
+        private$SetRemoteReset(remoteReset())
+        })
       
       
       ActionsOnReset = function(){
@@ -316,7 +324,7 @@ ProcessManager <- R6Class(
       }
       
       #--- Catch a reset from timeline or caller
-      observeEvent(req(c(private$rv$reset, private$rv$remoteReset)), {
+      observeEvent(req(c(private$GetReset(), private$GetRemoteReset())), {
         ActionsOnReset()
       })
       
@@ -359,7 +367,7 @@ ProcessManager <- R6Class(
                          }))
         })
         
-        output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
+        output$title <- renderUI({ h3(paste0('private$id = ', private$id)) })
         
         GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
         

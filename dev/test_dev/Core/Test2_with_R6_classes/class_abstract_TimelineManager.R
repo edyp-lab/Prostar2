@@ -7,15 +7,8 @@ TimelineManager <- R6Class(
                  current.pos = 1,
                  reset_OK = NULL
                ),
-               global = list(VALIDATED = 1,
-                             SKIPPED = -1,
-                             UNDONE = 1
-               ),
-               default_pos = list(VALIDATED = 1,
-                                 SKIPPED = 1,
-                                 UNDONE = 1
-               ), 
-               nbSteps = 0,
+               global = list(VALIDATED = 1, SKIPPED = -1, UNDONE = 1),
+               default_pos = list(VALIDATED = 1, SKIPPED = 1, UNDONE = 1), 
                modal_txt = NULL,
                btn_style = "display:inline-block; vertical-align: middle; padding: 7px",
                timelineDraw  = NULL,
@@ -147,6 +140,7 @@ TimelineManager <- R6Class(
         wellPanel(style="background-color: lightblue;",
                   tagList(
                     uiOutput(ns('title')),
+                    p('in abstract_TImelineManager'),
                     shinyjs::useShinyjs(),
                     div(id = 'GlobalTL',
                         fluidRow(
@@ -194,6 +188,16 @@ TimelineManager <- R6Class(
         position = reactive({private$GetCurrentPos()})
         )
       
+      
+      navPage <- function(direction) {
+        newval <- private$GetCurrentPos() + direction
+        newval <- max(1, newval)
+        newval <- min(newval, private$Length())
+        if(newval == 0)
+          browser()
+        private$SetCurrentPos(newval)
+      }
+      
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
@@ -237,14 +241,7 @@ TimelineManager <- R6Class(
           removeModal()
           })
         
-        navPage <- function(direction) {
-          newval <- private$GetCurrentPos() + direction
-          newval <- max(1, newval)
-          newval <- min(newval, privateLength())
-          if(newval == 0)
-            browser()
-          private$SetCurrentPos(newval)
-          }
+        
         
         observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
         

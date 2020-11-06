@@ -39,7 +39,7 @@ ui = function() {
   )
 }
 server = function(input, output, session) {
-  
+  ns <- NS('App')
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   rv = reactiveValues(
@@ -50,8 +50,8 @@ server = function(input, output, session) {
   dataOut <- reactiveValues()
   
   ll.process = list()
-  ll.process[['processA']] <- ProcessFiltering$new("ProcessA")
-  ll.process[['Description']] <- ProcessDescription$new("process_Description")
+  ll.process[['processA']] <- ProcessFiltering$new(ns("ProcessA"))
+  ll.process[['Description']] <- ProcessDescription$new(ns("process_Description"))
 
   
   rv[['description']] <- ll.process[['Description']]$server(
