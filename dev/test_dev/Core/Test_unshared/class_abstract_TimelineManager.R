@@ -33,10 +33,10 @@ TimelineManager <- R6Class(
                
                NextBtn_logics = function(){
                  # Compute status for the Next button
-                 end_of_tl <- private$rv$current.pos == private$nbSteps
-                 mandatory_step <- isTRUE(private$config[[private$id]]$mandatory[private$rv$current.pos])
-                 validated <- private$config[[private$id]]$status[private$rv$current.pos] == private$global$VALIDATED
-                 skipped <- private$config[[private$id]]$status[private$rv$current.pos] == private$global$SKIPPED
+                 end_of_tl <- private$rv[[private$id]]$current.pos == private$nbSteps
+                 mandatory_step <- isTRUE(private$config[[private$id]]$mandatory[private$rv[[private$id]]$current.pos])
+                 validated <- private$config[[private$id]]$status[private$rv[[private$id]]$current.pos] == private$global$VALIDATED
+                 skipped <- private$config[[private$id]]$status[private$rv[[private$id]]$current.pos] == private$global$SKIPPED
                  entireProcessSkipped <- private$config[[private$id]]$status[private$nbSteps] == private$global$SKIPPED
                  NextBtn_logics <- !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
                  NextBtn_logics
@@ -44,7 +44,7 @@ TimelineManager <- R6Class(
                
                PrevBtn_logics = function(){
                  # Compute status for the Previous button
-                 start_of_tl <- private$rv$current.pos == 1
+                 start_of_tl <- private$rv[[private$id]]$current.pos == 1
                  entireProcessSkipped <- private$config[[private$id]]$status[private$nbSteps] == private$global$SKIPPED
                  PrevBtn_logics <- !start_of_tl && !entireProcessSkipped
                  PrevBtn_logics
@@ -80,11 +80,11 @@ TimelineManager <- R6Class(
                Update_Cursor_position = function(){
                  req(private$config[[private$id]]$status)
                  if (private$config[[private$id]]$status[private$nbSteps] == private$global$VALIDATED)
-                   private$rv$current.pos <- private$default_pos$VALIDATED
+                   private$rv[[private$id]]$current.pos <- private$default_pos$VALIDATED
                  else if (private$config[[private$id]]$status[private$nbSteps] == private$global$SKIPPED)
-                   private$rv$current.pos <- private$default_pos$SKIPPED
+                   private$rv[[private$id]]$current.pos <- private$default_pos$SKIPPED
                  else if (private$config[[private$id]]$status[private$nbSteps] == private$global$UNDONE)
-                   private$rv$current.pos <- private$default_pos$UNDONE
+                   private$rv[[private$id]]$current.pos <- private$default_pos$UNDONE
                },
                
                Display_Current_Step = function(){},
@@ -95,7 +95,7 @@ TimelineManager <- R6Class(
                # Those div englobs the div of the caller where screens are defined
                EncapsulateScreens = function(){
                  req(private$config[[private$id]]$screens)
-                 ns <- NS(self$id)
+                 ns <- NS(private$id)
                  private$Init_Default_Positions() 
                  private$config[[private$id]]$screens <- lapply(1:private$nbSteps,
                                                   function(x){
@@ -123,7 +123,7 @@ TimelineManager <- R6Class(
 
                 # UI
                 ui = function() {
-                  ns <- NS(self$id)
+                  ns <- NS(private$id)
                   fluidPage(
                     wellPanel(style="background-color: lightblue;",
                               tagList(
@@ -156,9 +156,12 @@ TimelineManager <- R6Class(
                 
                 # SERVER
                 server = function(config, wake, remoteReset) {
-                  ns <- NS(self$id)
+                  ns <- NS(private$id)
                   
-                  observeEvent(config,{private$config[[private$id]] <- config})
+                  observeEvent(config,{
+                    private$config[[private$id]] <- config
+                    private$rv[[private$id]]$current.pos <- 1
+                    })
                   
                   observeEvent(config$status,{
                     browser()
@@ -167,15 +170,15 @@ TimelineManager <- R6Class(
                   
                   observeEvent(req(wake()),{private$Update_Cursor_position()})
                   
-                  browser()
+              
                   private$timelineDraw$server(
                     status = reactive({private$config[[private$id]]$status}),
-                    position = reactive({private$rv$current.pos})
+                    position = reactive({private$rv[[private$id]]$current.pos})
                   )
                   
                   # MODULE SERVER
-                  moduleServer(self$id, function(input, output, session) {
-                    ns <- NS(self$id)
+                  moduleServer(private$id, function(input, output, session) {
+                    ns <- NS(private$id)
                     
                     
                     # Show modal when button reset is clicked
@@ -197,7 +200,7 @@ TimelineManager <- R6Class(
                                                      style='padding:4px; font-size:80%')
                     })
                     
-                    output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
+                    output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
                     
                     #-------------------------------------------------------
                     # Return the UI for a modal dialog with data selection input. If 'failed' is
@@ -216,19 +219,19 @@ TimelineManager <- R6Class(
                     # When OK button is pressed, update the reactive value which will be sent
                     # to the caller
                     observeEvent(req(c(input$modal_ok, remoteReset()!=0)), ignoreInit=T,{
-                      private$rv$reset_OK <- input$rstBtn
-                      private$rv$current.pos <- 1
+                      private$rv[[private$id]]$reset_OK <- input$rstBtn
+                      private$rv[[private$id]]$current.pos <- 1
                       removeModal()
                     })
                     
                     navPage <- function(direction) {
-                      newval <- private$rv$current.pos + direction 
+                      newval <- private$rv[[private$id]]$current.pos + direction 
                       newval <- max(1, newval)
                       newval <- min(newval, private$nbSteps)
                       if(newval == 0)
                         browser()
                       
-                      private$rv$current.pos <- newval
+                      private$rv[[private$id]]$current.pos <- newval
                     }
                     
                     
@@ -238,7 +241,8 @@ TimelineManager <- R6Class(
                     
                     
                     # Catch a new position or a change in the status list
-                    observeEvent(req(c(private$rv$current.pos, private$config[[private$id]]$status)), {
+                    observeEvent(req(c(private$rv[[private$id]]$current.pos, private$config[[private$id]]$status)), {
+                      browser()
                       private$Update_Cursor_position()
                       private$Analyse_Status()
                       private$Display_Current_Step()
@@ -258,8 +262,8 @@ TimelineManager <- R6Class(
                     })
                     
                     reactive({
-                      list(current.pos = private$rv$current.pos,
-                         reset = private$rv$reset_OK
+                      list(current.pos = private$rv[[private$id]]$current.pos,
+                         reset = private$rv[[private$id]]$reset_OK
                     )
                       })
                   })
