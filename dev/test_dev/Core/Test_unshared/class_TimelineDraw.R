@@ -47,7 +47,7 @@ TimelineDraw <- R6Class(
                  
                  txt
                }
-               ),
+  ),
   public = list(id = NULL,
                 
                 initialize = function(id, mandatory, style) {
@@ -69,7 +69,7 @@ TimelineDraw <- R6Class(
                 server = function(status, position) {
                   ns <- NS(self$id)
                   moduleServer(self$id, function(input, output, session) {
-
+                    
                     output$load_CSS <- renderUI({
                       shinyjs::inlineCSS(sass::sass(private$GetCSSCode()))
                     })

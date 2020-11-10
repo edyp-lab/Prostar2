@@ -52,7 +52,7 @@ server = function(input, output, session) {
   )
   
   dataOut <- reactiveValues()
-
+  
   
   observeEvent(input$changeDataset,{
     if (input$changeDataset%%2 ==0)
@@ -64,14 +64,14 @@ server = function(input, output, session) {
   
   # 
   #source(file.path('.', 'process_Description.R'), local=TRUE)$value
-
+  
   processA <- ProcessA$new("process_A")
   #processDescription <- ProcessDescription$new("process_Description")
   
   processA$GetConfig()
   #processDescription$GetConfig()
   
-
+  
   # processDescription$server(
   #   dataIn = reactive({rv$dataIn}),
   #   dataOut = dataOut,
@@ -84,14 +84,14 @@ server = function(input, output, session) {
   #                         steps = c('Description', 'Step1', 'Step2', 'Step3'),
   #                         mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
   # )
-
-
+  
+  
   processA$server(
     dataIn = reactive({rv$dataIn}),
     dataOut = dataOut,
     remoteReset = reactive({input$remoteReset}),
     isSkipped = reactive({input$skip %%2 == 0}))
-
+  
   
   output$show_ui <- renderUI({
     req(processA)

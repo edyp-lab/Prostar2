@@ -74,7 +74,7 @@ ProcessA = R6Class(
       observeEvent(input$btn_validate_Step2, {
         private$ValidateCurrentPos()
       })
-
+      
       ############### SCREEN 4 ######################################
       output$Step3 <- renderUI({
         name <- 'Step3'
@@ -92,7 +92,7 @@ ProcessA = R6Class(
       
       
       observeEvent(input$btn_validate_Step3, {
-        # rv$dataIn <- AddItemToDataset(private$rv$dataIn, private$config$process.name)
+        # rv$dataIn <- AddItemToDataset(private$rv[[private$id]]$dataIn, private$config$process.name)
         private$ValidateCurrentPos()
       })
       

@@ -98,175 +98,175 @@ TimelineManager <- R6Class(
                  ns <- NS(private$id)
                  private$Init_Default_Positions() 
                  private$config[[private$id]]$screens <- lapply(1:private$nbSteps,
-                                                  function(x){
-                                                    private$config[[private$id]]$screens[[x]] <- if (x == 1) 
-                                                      div(id = ns(paste0("div_screen", x)),  private$config[[private$id]]$screens[[x]])
-                                                    else 
-                                                      shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  private$config[[private$id]]$screens[[x]]))
-                                                  })
+                                                                function(x){
+                                                                  private$config[[private$id]]$screens[[x]] <- if (x == 1) 
+                                                                    div(id = ns(paste0("div_screen", x)),  private$config[[private$id]]$screens[[x]])
+                                                                  else 
+                                                                    shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  private$config[[private$id]]$screens[[x]]))
+                                                                })
                }
                
                
   ),
   
   public = list(
-                initialize = function(){
-                  stop(" TimelineManager is an abstract class that can't be initialized.")
-                },
-                
-
-                toggleState_Steps = function(cond, i){
-                  lapply(1:i, function(x){
-                    shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
-                },
-                
-
-                # UI
-                ui = function() {
-                  ns <- NS(private$id)
-                  fluidPage(
-                    wellPanel(style="background-color: lightblue;",
-                              tagList(
-                                uiOutput(ns('title')),
-                                      shinyjs::useShinyjs(),
-                                      div(id = 'GlobalTL',
-                                          fluidRow(
-                                            align= 'center',
-                                            column(width=2,div(style = private$btn_style,
-                                                               uiOutput(ns('showPrevBtn')),
-                                                               uiOutput(ns('showResetBtn'))
-                                                               )
-                                                   ),
-                                            column(width=8,div( style = private$btn_style,
-                                                                private$timelineDraw$ui())),
-                                            column(width=2,div(style = private$btn_style,
-                                                               uiOutput(ns('showNextBtn')),
-                                                               uiOutput(ns('showSaveExitBtn'))
-                                                               )
-                                                   )
-                                          ),
-                                          uiOutput(ns('show_screens'))
-                                      )
-                              )
+    initialize = function(){
+      stop(" TimelineManager is an abstract class that can't be initialized.")
+    },
+    
+    
+    toggleState_Steps = function(cond, i){
+      lapply(1:i, function(x){
+        shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
+    },
+    
+    
+    # UI
+    ui = function() {
+      ns <- NS(private$id)
+      fluidPage(
+        wellPanel(style="background-color: lightblue;",
+                  tagList(
+                    uiOutput(ns('title')),
+                    shinyjs::useShinyjs(),
+                    div(id = 'GlobalTL',
+                        fluidRow(
+                          align= 'center',
+                          column(width=2,div(style = private$btn_style,
+                                             uiOutput(ns('showPrevBtn')),
+                                             uiOutput(ns('showResetBtn'))
+                          )
+                          ),
+                          column(width=8,div( style = private$btn_style,
+                                              private$timelineDraw$ui())),
+                          column(width=2,div(style = private$btn_style,
+                                             uiOutput(ns('showNextBtn')),
+                                             uiOutput(ns('showSaveExitBtn'))
+                          )
+                          )
+                        ),
+                        uiOutput(ns('show_screens'))
                     )
                   )
-                },
-                
-                SetModalTxt = function(txt){private$modal_txt <- txt},
-                
-                # SERVER
-                server = function(config, wake, remoteReset) {
-                  ns <- NS(private$id)
-                  
-                  observeEvent(config,{
-                    private$config[[private$id]] <- config
-                    private$rv[[private$id]]$current.pos <- 1
-                    })
-                  
-                  observeEvent(config$status,{
-                    browser()
-                    private$config[[private$id]]$status <- config$status
-                    })
-                  
-                  observeEvent(req(wake()),{private$Update_Cursor_position()})
-                  
-              
-                  private$timelineDraw$server(
-                    status = reactive({private$config[[private$id]]$status}),
-                    position = reactive({private$rv[[private$id]]$current.pos})
-                  )
-                  
-                  # MODULE SERVER
-                  moduleServer(private$id, function(input, output, session) {
-                    ns <- NS(private$id)
-                    
-                    
-                    # Show modal when button reset is clicked
-                    observeEvent(input$rstBtn, {showModal(dataModal())})
-                    
-                    ###############################
-                    output$showResetBtn <- renderUI({
-                      actionButton(ns("rstBtn"), paste0("Reset ", private$type),
-                                   style='padding:4px; font-size:80%')
-                    })
-                    
-                    output$showPrevBtn <- renderUI({
-                      shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-                                                     style='padding:4px; font-size:80%'))
-                    })
-                    
-                    output$showNextBtn <- renderUI({
-                      actionButton(ns("nextBtn"), "next",
-                                                     style='padding:4px; font-size:80%')
-                    })
-                    
-                    output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
-                    
-                    #-------------------------------------------------------
-                    # Return the UI for a modal dialog with data selection input. If 'failed' is
-                    # TRUE, then display a message that the previous value was invalid.
-                    dataModal <- function() {
-                      modalDialog(
-                        span(private$modal_txt),
-                        footer = tagList(
-                          modalButton("Cancel"),
-                          actionButton(ns("modal_ok"), "OK")
-                        )
-                      )
-                    }
-                    
+        )
+      )
+    },
+    
+    SetModalTxt = function(txt){private$modal_txt <- txt},
+    
+    # SERVER
+    server = function(config, wake, remoteReset) {
+      ns <- NS(private$id)
+      
+      observeEvent(config,{
+        private$config[[private$id]] <- config
+        private$rv[[private$id]]$current.pos <- 1
+      })
+      
+      observeEvent(config$status,{
+        browser()
+        private$config[[private$id]]$status <- config$status
+      })
+      
+      observeEvent(req(wake()),{private$Update_Cursor_position()})
+      
+      
+      private$timelineDraw$server(
+        status = reactive({private$config[[private$id]]$status}),
+        position = reactive({private$rv[[private$id]]$current.pos})
+      )
+      
+      # MODULE SERVER
+      moduleServer(private$id, function(input, output, session) {
+        ns <- NS(private$id)
+        
+        
+        # Show modal when button reset is clicked
+        observeEvent(input$rstBtn, {showModal(dataModal())})
+        
+        ###############################
+        output$showResetBtn <- renderUI({
+          actionButton(ns("rstBtn"), paste0("Reset ", private$type),
+                       style='padding:4px; font-size:80%')
+        })
+        
+        output$showPrevBtn <- renderUI({
+          shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                         style='padding:4px; font-size:80%'))
+        })
+        
+        output$showNextBtn <- renderUI({
+          actionButton(ns("nextBtn"), "next",
+                       style='padding:4px; font-size:80%')
+        })
+        
+        output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
+        
+        #-------------------------------------------------------
+        # Return the UI for a modal dialog with data selection input. If 'failed' is
+        # TRUE, then display a message that the previous value was invalid.
+        dataModal <- function() {
+          modalDialog(
+            span(private$modal_txt),
+            footer = tagList(
+              modalButton("Cancel"),
+              actionButton(ns("modal_ok"), "OK")
+            )
+          )
+        }
+        
+        
+        # When OK button is pressed, update the reactive value which will be sent
+        # to the caller
+        observeEvent(req(c(input$modal_ok, remoteReset()!=0)), ignoreInit=T,{
+          private$rv[[private$id]]$reset_OK <- input$rstBtn
+          private$rv[[private$id]]$current.pos <- 1
+          removeModal()
+        })
+        
+        navPage <- function(direction) {
+          newval <- private$rv[[private$id]]$current.pos + direction 
+          newval <- max(1, newval)
+          newval <- min(newval, private$nbSteps)
+          if(newval == 0)
+            browser()
           
-                    # When OK button is pressed, update the reactive value which will be sent
-                    # to the caller
-                    observeEvent(req(c(input$modal_ok, remoteReset()!=0)), ignoreInit=T,{
-                      private$rv[[private$id]]$reset_OK <- input$rstBtn
-                      private$rv[[private$id]]$current.pos <- 1
-                      removeModal()
-                    })
-                    
-                    navPage <- function(direction) {
-                      newval <- private$rv[[private$id]]$current.pos + direction 
-                      newval <- max(1, newval)
-                      newval <- min(newval, private$nbSteps)
-                      if(newval == 0)
-                        browser()
-                      
-                      private$rv[[private$id]]$current.pos <- newval
-                    }
-                    
-                    
-                    observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-                    observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
-                    output$show_screens <- renderUI({tagList(private$config[[private$id]]$screens)})
-                    
-                    
-                    # Catch a new position or a change in the status list
-                    observeEvent(req(c(private$rv[[private$id]]$current.pos, private$config[[private$id]]$status)), {
-                      browser()
-                      private$Update_Cursor_position()
-                      private$Analyse_Status()
-                      private$Display_Current_Step()
-                      
-                      shinyjs::toggleState('prevBtn', cond = private$PrevBtn_logics())
-                      shinyjs::toggleState('nextBtn', cond = private$NextBtn_logics())
-                    })
-                    
-                    
-                    observeEvent(req(private$config[[private$id]]), ignoreInit=F,{
-                      req(private$nbSteps>0)
-                      check <- private$CheckConfig(private$config[[private$id]])
-                      if (!check$passed)
-                        stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
-                      
-                      private$EncapsulateScreens()
-                    })
-                    
-                    reactive({
-                      list(current.pos = private$rv[[private$id]]$current.pos,
-                         reset = private$rv[[private$id]]$reset_OK
-                    )
-                      })
-                  })
-                }
+          private$rv[[private$id]]$current.pos <- newval
+        }
+        
+        
+        observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
+        observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
+        output$show_screens <- renderUI({tagList(private$config[[private$id]]$screens)})
+        
+        
+        # Catch a new position or a change in the status list
+        observeEvent(req(c(private$rv[[private$id]]$current.pos, private$config[[private$id]]$status)), {
+          browser()
+          private$Update_Cursor_position()
+          private$Analyse_Status()
+          private$Display_Current_Step()
+          
+          shinyjs::toggleState('prevBtn', cond = private$PrevBtn_logics())
+          shinyjs::toggleState('nextBtn', cond = private$NextBtn_logics())
+        })
+        
+        
+        observeEvent(req(private$config[[private$id]]), ignoreInit=F,{
+          req(private$nbSteps>0)
+          check <- private$CheckConfig(private$config[[private$id]])
+          if (!check$passed)
+            stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
+          
+          private$EncapsulateScreens()
+        })
+        
+        reactive({
+          list(current.pos = private$rv[[private$id]]$current.pos,
+               reset = private$rv[[private$id]]$reset_OK
+          )
+        })
+      })
+    }
   )
 )
