@@ -19,20 +19,11 @@ Process = R6Class(
       
       private$config$screens <- private$CreateScreens()
       private$rv$current.pos <- 1
-    },
+    }
     
     # Add_RenderUIs_Definitions = function( input, output){},
     
-    CreateTimeline = function(){
-      private$timeline <- TimelineForProcess$new(
-        id = NS(private$id)('timeline'),
-        mandatory = private$config$mandatory
-      )
-    },
     
-    TimelineUI = function(){
-      private$timeline$ui()
-    }
     
   ),
   

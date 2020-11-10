@@ -199,8 +199,13 @@ ProcessManager <- R6Class(
       }
     },
     
-    CreateTimeline = function(){},
-    
+    CreateTimeline = function(){
+      private$timeline <- TimelineForProcess$new(
+        id = NS(private$id)('timeline'),
+        mandatory = private$config$mandatory
+      )
+    },
+
     InitializeTimeline = function(){
       private$rv[[private$id]]$timeline.res <- private$timeline$server(
         config = private$config,
