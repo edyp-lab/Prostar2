@@ -310,12 +310,6 @@ ProcessManager <- R6Class(
         private$ActionsOnNewDataIn(dataIn())
       })
       
-     
-      # observeEvent(private$id, {
-      #   browser()
-      #   private$CreateTimeline()
-      # })
-      
       observeEvent(req(private$rv[[private$id]]$current.pos), ignoreInit=T, {
         private$ActionsOnNewPosition()
       })

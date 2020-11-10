@@ -12,7 +12,7 @@ Process = R6Class(
         tag <- private$global$UNDONE
       
       private$config$status <- setNames(rep(tag, private$length),
-                                        config$steps)
+                                        private$config$steps)
     },
     
     InitializeModule = function(){

@@ -84,32 +84,19 @@ server = function(dataIn ) {
                               names(self$ll.process)
   )
 
-  # self$tmp.return[['ProcessDescription']] <- self$ll.process[['ProcessDescription']]$server(dataIn = reactive({self$rv$dataIn}),
-  #                                                                       remoteReset = reactive({self$rv$remoteReset}),
-  #                                                                       isSkipped = reactive({self$rv$skipped %%2 == 0}))
-  # 
   lapply(names(self$ll.process), function(x){
     self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
                                                         remoteReset = reactive({self$rv$remoteReset}),
                                                         isSkipped = reactive({self$rv$skipped %%2 == 0}))
   })
   
-  # self$tmp.return[['ProcessA']] <- self$ll.process[['ProcessA']]$server(dataIn = reactive({self$rv$dataIn}),
-  #                                                                       remoteReset = reactive({self$rv$remoteReset}),
-  #                                                                       isSkipped = reactive({self$rv$skipped %%2 == 0}))
-  # 
-  
-  # observeEvent(self$tmp.return[['ProcessDescription']]()$trigger, {
-  #   print("change in ProcessDescription")
-  #   print(paste0("self$rv$tmp.return[['ProcessDescription']]()= ", paste0(self$tmp.return[['ProcessDescription']]()$value, collapse=' ')))
-  # })
-  
-  observeEvent(self$tmp.return[['ProcessA']]()$trigger, {
-    print("change in ProcessA")
-    print(paste0("self$rv$tmp.return[['ProcessA']]() = ", paste0(names(self$tmp.return[['ProcessA']]()$value), collapse=' ')))
+
+  observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
+    print("change in ProcessDescription OR ProcessA")
+    print(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}))
   })
   
-  
+
   moduleServer(self$id, function(input, output, session) {
     ns <- NS(self$id)
     
@@ -121,8 +108,9 @@ server = function(dataIn ) {
   
   output$show_ui <- renderUI({
     tagList(
-     # wellPanel(h3('ProcessDescription'), self$ll.process[['ProcessDescription']]$ui()),
-      wellPanel(h3('ProcessA A'), self$ll.process[['ProcessA']]$ui())
+     lapply(names(self$ll.process), function(x){
+        wellPanel(h3(x), self$ll.process[[x]]$ui())
+      })
     )
   })
   
