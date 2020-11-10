@@ -32,9 +32,10 @@ ProcessManager <- R6Class(
     Send_Result_to_Caller = function(){
       private$rv[[private$id]]$wake <- private$Wake()
       
-      private$dataOut$obj <- private$rv[[private$id]]$dataIn
-      private$dataOut$name <- private$config$process.name
+      private$dataOut$value <- private$rv[[private$id]]$dataIn
       private$dataOut$trigger <- private$rv[[private$id]]$wake
+      #private$dataOut$name <- private$config$process.name
+      
     },
     
     Set_Skipped_Status = function(){
@@ -111,12 +112,12 @@ ProcessManager <- R6Class(
       })
     },
     
-    ActionsOnDataTrigger = function(data){
-      data$name <- private$dataOut$name
-      data$obj <- private$dataOut$obj
-      data$trigger <- private$dataOut$trigger
-      data
-    },
+    # ActionsOnDataTrigger = function(data){
+    #   #data$name <- private$dataOut$name
+    #   data$obj <- private$dataOut$obj
+    #   data$trigger <- private$dataOut$trigger
+    #   data
+    # },
     
     ValidateCurrentPos = function(){
       private$config$status[private$rv[[private$id]]$current.pos] <- private$global$VALIDATED
@@ -260,26 +261,15 @@ ProcessManager <- R6Class(
     
     # SERVER
     server = function(dataIn = NULL, 
-                      dataOut = NULL,
                       remoteReset = FALSE,
                       isSkipped = FALSE) {
       ns <- NS(private$id)
-      current.pos = reactiveVal()
       
-      observeEvent(private$config$steps, {
-        print('__________________________In class_abstract_ProcessManager::observeEvent(private$config$steps)')
-        print(paste0('#### ID = ', private$id))
-        print(paste0('steps = ',paste0(private$config$steps, collapse=' ')))
-        print(paste0('status = ',paste0(private$config$status, collapse=' ')))
-        print(paste0('mandatory = ',paste0(private$config$mandatory, collapse=' ')))
-        print(paste0('process.name = ',paste0(private$config$process.name, collapse=' ')))
-        
-      })
       
-      # Catch the new values of the temporary dataOut (instanciated by the last validation button of scrrens
+      # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
       observeEvent(private$dataOut$trigger, {
-        dataOut <- private$ActionsOnDataTrigger(dataOut)
+        #private$ActionsOnDataTrigger()
         
       })
       
@@ -359,6 +349,8 @@ ProcessManager <- R6Class(
         GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
         
       }
-      ) }
+      )
+      reactive({private$dataOut})
+      }
   )
 )

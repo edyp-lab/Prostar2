@@ -3,6 +3,7 @@ ProcessA = R6Class(
   "ProcessA",
   inherit = Process,
   private = list(
+    
     Add_RenderUIs_Definitions = function(input, output){
       ns <- NS(private$id)
       output$Description <- renderUI({
@@ -112,8 +113,7 @@ ProcessA = R6Class(
       private$steps <- config$steps
       private$length <- length(config$steps)
       lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      private$config$status <- setNames(rep(0, private$length),
-                                        config$steps)
+      private$config$status <- setNames(rep(0, private$length), config$steps)
     }
     
   )

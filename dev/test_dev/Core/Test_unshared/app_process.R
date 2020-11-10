@@ -29,29 +29,96 @@ source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 
 
 
-
-
+Super <- R6Class(
+  "Super",
+  public = list(
+    id = NULL,
+    tmp.return = reactiveValues(),
+    rv = reactiveValues(
+      dataIn = NULL,
+      remoteReset = NULL,
+      skipped = NULL
+      ),
+    ll.process = list(
+      #Description = NULL,
+      ProcessA = NULL
+    ),
+    initialize = function(id){
+      self$id <- id
+    },
+    
 ui = function() {
+  ns <- NS(self$id)
   fluidPage(
     wellPanel(style="background-color: green;",
               h3('Prostar'),
-              actionButton('remoteReset', 'Simulate remote reset'),
-              actionButton('skip', 'Simulate skip entire process'),
-              actionButton('changeDataset', 'Simulate change of dataset'),
-              uiOutput('show_ui')
+              actionButton(ns('remoteReset'), 'Simulate remote reset'),
+              actionButton(ns('skip'), 'Simulate skip entire process'),
+              uiOutput(ns('show_ui'))
     )
   )
-}
-server = function(input, output, session) {
-  
+},
+server = function(dataIn ) {
+  ns <- NS(self$id)
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  rv = reactiveValues(
-    dataIn = NULL,
-    remoteReset = NULL
-  )
+  observeEvent(dataIn(),{self$rv$dataIn <- dataIn()})
   
-  dataOut <- reactiveValues()
+  
+  lapply(names(self$ll.process), function(x){
+    self$ll.process[[x]] <- ProcessA$new(ns(x))
+  })
+  
+  #self$tmp.return[['Description']] <- self$ll.process[['Description']]$server()
+  self$tmp.return[['ProcessA']] <- self$ll.process[['ProcessA']]$server(dataIn = reactive({self$rv$dataIn}),
+                                                                        remoteReset = reactive({self$rv$remoteReset}),
+                                                                        isSkipped = reactive({self$rv$skipped %%2 == 0}))
+  
+  
+  # observeEvent(self$tmp.return[['Description']]()$trigger, {
+  #   print("change in Description")
+  #   print(paste0("self$rv$tmp.return[['Description']]()= ", paste0(self$tmp.return[['Description']]()$value, collapse=' ')))
+  # })
+  
+  observeEvent(self$tmp.return[['ProcessA']]()$trigger, {
+    print("change in ProcessA")
+    print(paste0("self$rv$tmp.return[['ProcessA']]() = ", paste0(names(self$tmp.return[['ProcessA']]()$value), collapse=' ')))
+  })
+  
+  
+  moduleServer(self$id, function(input, output, session) {
+    ns <- NS(self$id)
+    
+  observeEvent(input$remoteReset,{rv$remoteReset <- input$remoteReset})
+  observeEvent(input$skip,{rv$skipped <- input$skip})
+  
+  output$show_ui <- renderUI({
+
+    tagList(
+      #wellPanel(h3('Description'), self$ll.process[['Description']]$ui()),
+      wellPanel(h3('ProcessA A'), self$ll.process[['ProcessA']]$ui())
+    )
+  })
+  
+
+  })
+}
+)
+)
+
+rv <- reactiveValues()
+super <- Super$new('App')
+ui = fluidPage(
+  tagList(
+    actionButton('changeDataset','Simulate new dataset'),
+    super$ui()
+    )
+)
+  
+server = function(input, output){
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
+  super$server(dataIn = reactive({rv$dataIn}))
   
   
   observeEvent(input$changeDataset,{
@@ -61,46 +128,5 @@ server = function(input, output, session) {
       rv$dataIn <- NA
   })
   
-  
-  # 
-  #source(file.path('.', 'process_Description.R'), local=TRUE)$value
-  
-  processA <- ProcessA$new("process_A")
-  #processDescription <- ProcessDescription$new("process_Description")
-  
-  processA$GetConfig()
-  #processDescription$GetConfig()
-  
-  
-  # processDescription$server(
-  #   dataIn = reactive({rv$dataIn}),
-  #   dataOut = dataOut,
-  #   remoteReset = reactive({input$remoteReset}),
-  #   isSkipped = reactive({input$skip %%2 == 0})
-  #   )
-  
-  #source(file.path('.', 'process_A.R'), local=TRUE)$value
-  # config_processA <- list(process.name = 'ProcessA',
-  #                         steps = c('Description', 'Step1', 'Step2', 'Step3'),
-  #                         mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-  # )
-  
-  
-  processA$server(
-    dataIn = reactive({rv$dataIn}),
-    dataOut = dataOut,
-    remoteReset = reactive({input$remoteReset}),
-    isSkipped = reactive({input$skip %%2 == 0}))
-  
-  
-  output$show_ui <- renderUI({
-    req(processA)
-    processA$ui()
-  })
-  
-  observeEvent(req(dataOut$trigger), {
-    print('reveceived response from a process')
-  })
-}
-
-shinyApp(ui, server)
+  }
+shiny::shinyApp(ui, server)

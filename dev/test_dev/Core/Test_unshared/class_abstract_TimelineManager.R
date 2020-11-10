@@ -164,7 +164,6 @@ TimelineManager <- R6Class(
       })
       
       observeEvent(config$status,{
-        browser()
         private$config[[private$id]]$status <- config$status
       })
       
@@ -242,7 +241,7 @@ TimelineManager <- R6Class(
         
         # Catch a new position or a change in the status list
         observeEvent(req(c(private$rv[[private$id]]$current.pos, private$config[[private$id]]$status)), {
-          browser()
+          #browser()
           private$Update_Cursor_position()
           private$Analyse_Status()
           private$Display_Current_Step()

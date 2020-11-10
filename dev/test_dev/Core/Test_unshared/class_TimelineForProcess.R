@@ -25,7 +25,7 @@ TimelineForProcess = R6Class(
     },
     
     Display_Current_Step = function(){
-      browser()
+
       req(private$nbSteps)
       req(private$rv[[private$id]]$current.pos)
       # One only displays the steps that are not skipped
