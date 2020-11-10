@@ -13,10 +13,11 @@ ProcessManager <- R6Class(
     dataOut = reactiveValues(),
     length = NULL,
     logics = NULL,
-    
+    remoteReset = NULL,
     rv = reactiveValues(
       dataIn = NULL,
       current.pos = NULL,
+      remoteReset = NULL,
       wake = F,
       reset = NULL,
       isSkipped = FALSE),
@@ -220,8 +221,14 @@ ProcessManager <- R6Class(
       })
       
       observeEvent(req(private$timeline.res$reset()), {
+        browser()
         private$ActionsOnReset()
       })
+      
+      # observeEvent(req(private$rv[[private$id]]$remoteReset), {
+      #   browser()
+      #   private$ActionsOnReset()
+      # })
       
     },
 
@@ -313,7 +320,12 @@ ProcessManager <- R6Class(
         private$ActionsOnNewPosition()
       })
       
-      observeEvent(req(remoteReset()!=0), { private$rv[[private$id]]$remoteReset <- remoteReset()})
+      observeEvent(remoteReset(), { 
+        browser()
+        print("remote reset activated")
+        private$rv[[private$id]]$remoteReset <- remoteReset()
+        private$ActionsOnReset()
+        })
       
       #--- Catch a reset from timeline or caller
       

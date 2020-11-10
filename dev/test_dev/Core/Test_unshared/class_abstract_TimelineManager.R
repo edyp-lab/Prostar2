@@ -169,6 +169,10 @@ TimelineManager <- R6Class(
       
       observeEvent(req(wake()),{private$Update_Cursor_position()})
       
+      observeEvent(remoteReset(),ignoreInit = T, {
+        print('toto')
+        private$rv[[private$id]]$current.pos <- 1
+      })
       
       private$timelineDraw$server(
         status = reactive({private$config[[private$id]]$status}),
@@ -214,10 +218,12 @@ TimelineManager <- R6Class(
           )
         }
         
+       
         
         # When OK button is pressed, update the reactive value which will be sent
         # to the caller
-        observeEvent(req(c(input$modal_ok, remoteReset()!=0)), ignoreInit=T,{
+        observeEvent(req(c(input$modal_ok)), ignoreInit=T,{
+          browser()
           private$rv[[private$id]]$reset_OK <- input$rstBtn
           private$rv[[private$id]]$current.pos <- 1
           removeModal()

@@ -34,6 +34,7 @@ Pipeline <- R6Class(
   public = list(
     id = NULL,
     tmp.return = reactiveValues(),
+    remoteReset = NULL,
     rv = reactiveValues(
       dataIn = NULL,
       remoteReset = NULL,
@@ -112,8 +113,11 @@ server = function(dataIn ) {
   moduleServer(self$id, function(input, output, session) {
     ns <- NS(self$id)
     
-  observeEvent(input$remoteReset,{rv$remoteReset <- input$remoteReset})
-  observeEvent(input$skip,{rv$skipped <- input$skip})
+  observeEvent(input$remoteReset,{
+    print("action on remoteReset")
+    self$rv$remoteReset <- input$remoteReset})
+  
+  observeEvent(input$skip,{self$rv$skipped <- input$skip})
   
   output$show_ui <- renderUI({
     tagList(
