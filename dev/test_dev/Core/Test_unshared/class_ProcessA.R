@@ -110,10 +110,7 @@ ProcessA = R6Class(
                      steps = c('Description', 'Step1', 'Step2', 'Step3'),
                      mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
       )
-      private$steps <- config$steps
-      private$length <- length(config$steps)
-      lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      private$config$status <- setNames(rep(0, private$length), config$steps)
+      private$InitConfig(config)
     }
     
   )

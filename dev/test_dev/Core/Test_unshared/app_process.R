@@ -75,14 +75,14 @@ server = function(dataIn ) {
   
   observeEvent(dataIn(),{self$rv$dataIn <- dataIn()})
   
-  browser()
+ 
   self$ll.process <- setNames(lapply(names(self$ll.process),
                                      function(x){
                                        assign(x, get(x))$new(x)
                                        }),
                               names(self$ll.process)
   )
-  browser()
+
   # self$tmp.return[['ProcessDescription']] <- self$ll.process[['ProcessDescription']]$server(dataIn = reactive({self$rv$dataIn}),
   #                                                                       remoteReset = reactive({self$rv$remoteReset}),
   #                                                                       isSkipped = reactive({self$rv$skipped %%2 == 0}))

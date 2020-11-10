@@ -228,7 +228,18 @@ ProcessManager <- R6Class(
     
     TimelineUI = function(){
       private$timeline$ui()
+    },
+    
+    InitConfig = function(config){
+      private$steps <- config$steps
+      private$length <- length(config$steps)
+      lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
+      private$config$status <- setNames(rep(0, private$length), config$steps)
+      
+      observe({private$CreateTimeline()})
+      
     }
+    
     
   ),
   public = list(
@@ -285,10 +296,11 @@ ProcessManager <- R6Class(
         private$ActionsOnNewDataIn(dataIn())
       })
       
-      
-      observe({
-        private$CreateTimeline()
-      })
+     
+      # observeEvent(private$id, {
+      #   browser()
+      #   private$CreateTimeline()
+      # })
       
       observeEvent(req(private$rv[[private$id]]$current.pos), ignoreInit=T, {
         private$ActionsOnNewPosition()
