@@ -114,7 +114,7 @@ ProcessManager <- R6Class(
     
     # ActionsOnDataTrigger = function(data){
     #   #data$name <- private$dataOut$name
-    #   data$obj <- private$dataOut$obj
+    #   data$obj <- private$dataOut$value
     #   data$trigger <- private$dataOut$trigger
     #   data
     # },
@@ -314,29 +314,36 @@ ProcessManager <- R6Class(
         ###########---------------------------#################
         output$show_dataIn <- renderUI({
           req(dataIn())
-          tagList(lapply(names(dataIn()), function(x){tags$p(x)}))
+          tagList(
+            h4('show dataIn()'),
+            lapply(names(dataIn()), function(x){tags$p(x)})
+            )
         })
         
         output$show_rv_dataIn <- renderUI({
-          tagList(lapply(names(private$rv[[private$id]]$dataIn), function(x){tags$p(x)}))
+          tagList(
+            h4('show private$rv[[private$id]]$dataIn)'),
+            lapply(names(private$rv[[private$id]]$dataIn), function(x){tags$p(x)})
+            )
         })
         
         output$show_rv_dataOut <- renderUI({
           req(private$dataOut$trigger)
           tagList(
-            lapply(names(private$dataOut$obj), function(x){tags$p(x)})
+            h4('show private$dataOut$value'),
+            lapply(names(private$dataOut$value), function(x){tags$p(x)})
           )
         })
         
-        output$show_status <- renderUI({
-          req(private$config$status, private$rv[[private$id]]$current.pos)
-          tagList(lapply(1:private$length, 
-                         function(x){if (x == private$rv[[private$id]]$current.pos) 
-                           tags$p(tags$b(paste0('-> ', private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]]))))
-                           else 
-                             tags$p(paste0(private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]])))
-                         }))
-        })
+        # output$show_status <- renderUI({
+        #   req(private$config$status, private$rv[[private$id]]$current.pos)
+        #   tagList(lapply(1:private$length, 
+        #                  function(x){if (x == private$rv[[private$id]]$current.pos) 
+        #                    tags$p(tags$b(paste0('-> ', private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]]))))
+        #                    else 
+        #                      tags$p(paste0(private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]])))
+        #                  }))
+        # })
         
         output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
         

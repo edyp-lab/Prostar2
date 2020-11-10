@@ -2,21 +2,22 @@
 ProcessDescription = R6Class(
   "ProcessDescription",
   inherit = Process,
+  
   private = list(
     Add_RenderUIs_Definitions = function(input, output){
       ns <- NS(private$id)
       output$Description <- renderUI({
         tagList(
           actionButton(ns('btn_validate_Description'), 
-                       paste0('Start ', private$config$process.name),
+                       paste0('Start ', private$config[[private$id]]$name),
                        class = btn_success_color),
-          mod_insert_md_ui(ns(paste0(private$config$process.name, "_md")))
+          mod_insert_md_ui(ns(paste0(private$config[[private$id]]$name, "_md")))
         )
       })
       
       observe({
-        mod_insert_md_server(paste0(private$config$process.name, "_md"), 
-                             paste0('./md/', private$config$process.name, '.md'))
+        mod_insert_md_server(paste0(private$config[[private$id]]$name, "_md"), 
+                             paste0('./md/', private$config[[private$id]]$name, '.md'))
       })
       
       observeEvent(input$btn_validate_Description, {
@@ -39,8 +40,7 @@ ProcessDescription = R6Class(
       private$steps <- config$steps
       private$length <- length(config$steps)
       lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      private$config$status <- setNames(rep(0, private$length),
-                                        config$steps)
+      private$config$status <- setNames(rep(0, private$length), config$steps)
     }
     
   )

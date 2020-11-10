@@ -29,8 +29,8 @@ source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 
 
 
-Super <- R6Class(
-  "Super",
+Pipeline <- R6Class(
+  "Pipeline",
   public = list(
     id = NULL,
     tmp.return = reactiveValues(),
@@ -40,7 +40,7 @@ Super <- R6Class(
       skipped = NULL
       ),
     ll.process = list(
-      #Description = NULL,
+      #ProcessDescription = NULL,
       ProcessA = NULL
     ),
     initialize = function(id){
@@ -54,7 +54,18 @@ ui = function() {
               h3('Prostar'),
               actionButton(ns('remoteReset'), 'Simulate remote reset'),
               actionButton(ns('skip'), 'Simulate skip entire process'),
-              uiOutput(ns('show_ui'))
+              uiOutput(ns('show_ui')),
+              fluidRow(
+                column(width=2,
+                       tags$b(h4(style = 'color: blue;', "Input")),
+                       uiOutput(ns('show_dataIn'))),
+                column(width=2,
+                       tags$b(h4(style = 'color: blue;', "Output")),
+                       uiOutput(ns('show_rv_dataOut')))
+                # column(width=4,
+                #        tags$b(h4(style = 'color: blue;', "status")),
+                #        uiOutput(ns('show_status')))
+              )
     )
   )
 },
@@ -64,20 +75,26 @@ server = function(dataIn ) {
   
   observeEvent(dataIn(),{self$rv$dataIn <- dataIn()})
   
-  
-  lapply(names(self$ll.process), function(x){
-    self$ll.process[[x]] <- ProcessA$new(ns(x))
-  })
-  
-  #self$tmp.return[['Description']] <- self$ll.process[['Description']]$server()
+  browser()
+  self$ll.process <- setNames(lapply(names(self$ll.process),
+                                     function(x){
+                                       assign(x, get(x))$new(x)
+                                       }),
+                              names(self$ll.process)
+  )
+  browser()
+  # self$tmp.return[['ProcessDescription']] <- self$ll.process[['ProcessDescription']]$server(dataIn = reactive({self$rv$dataIn}),
+  #                                                                       remoteReset = reactive({self$rv$remoteReset}),
+  #                                                                       isSkipped = reactive({self$rv$skipped %%2 == 0}))
+  # 
   self$tmp.return[['ProcessA']] <- self$ll.process[['ProcessA']]$server(dataIn = reactive({self$rv$dataIn}),
                                                                         remoteReset = reactive({self$rv$remoteReset}),
                                                                         isSkipped = reactive({self$rv$skipped %%2 == 0}))
   
   
-  # observeEvent(self$tmp.return[['Description']]()$trigger, {
-  #   print("change in Description")
-  #   print(paste0("self$rv$tmp.return[['Description']]()= ", paste0(self$tmp.return[['Description']]()$value, collapse=' ')))
+  # observeEvent(self$tmp.return[['ProcessDescription']]()$trigger, {
+  #   print("change in ProcessDescription")
+  #   print(paste0("self$rv$tmp.return[['ProcessDescription']]()= ", paste0(self$tmp.return[['ProcessDescription']]()$value, collapse=' ')))
   # })
   
   observeEvent(self$tmp.return[['ProcessA']]()$trigger, {
@@ -93,10 +110,29 @@ server = function(dataIn ) {
   observeEvent(input$skip,{rv$skipped <- input$skip})
   
   output$show_ui <- renderUI({
-
     tagList(
-      #wellPanel(h3('Description'), self$ll.process[['Description']]$ui()),
+     # wellPanel(h3('ProcessDescription'), self$ll.process[['ProcessDescription']]$ui()),
       wellPanel(h3('ProcessA A'), self$ll.process[['ProcessA']]$ui())
+    )
+  })
+  
+  output$show_dataIn <- renderUI({
+    req(dataIn())
+    tagList(
+      h4('show data sent to processes'),
+      lapply(names(dataIn()), function(x){tags$p(x)})
+    )
+  })
+  
+  
+  output$show_rv_dataOut <- renderUI({
+    req(self$tmp.return[['ProcessA']]()$trigger)
+    tagList(
+      h4('show return of processes'),
+      lapply(names(self$ll.process),function(x){
+         tags$p(paste0(x, ' -> ',paste0(names(self$tmp.return[[x]]()$value), collapse=' ')))
+        
+      })
     )
   })
   
@@ -107,18 +143,18 @@ server = function(dataIn ) {
 )
 
 rv <- reactiveValues()
-super <- Super$new('App')
+Pipeline <- Pipeline$new('App')
 ui = fluidPage(
   tagList(
     actionButton('changeDataset','Simulate new dataset'),
-    super$ui()
+    Pipeline$ui()
     )
 )
   
 server = function(input, output){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  super$server(dataIn = reactive({rv$dataIn}))
+  Pipeline$server(dataIn = reactive({rv$dataIn}))
   
   
   observeEvent(input$changeDataset,{
