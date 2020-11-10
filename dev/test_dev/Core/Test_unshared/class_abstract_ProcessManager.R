@@ -3,6 +3,7 @@ ProcessManager <- R6Class(
   private = list(
     id = NULL,
     timeline = NULL,
+    timeline.res = NULL,
     global = list(VALIDATED = 1,
                   SKIPPED = -1,
                   UNDONE = 1
@@ -18,8 +19,7 @@ ProcessManager <- R6Class(
       current.pos = NULL,
       wake = F,
       reset = NULL,
-      isSkipped = FALSE,
-      timeline.res = NULL),
+      isSkipped = FALSE),
     
     Wake = function(){ runif(1,0,1)},
     
@@ -31,12 +31,9 @@ ProcessManager <- R6Class(
     
     Send_Result_to_Caller = function(){
       private$rv[[private$id]]$wake <- private$Wake()
-      
       private$dataOut$value <- private$rv[[private$id]]$dataIn
       private$dataOut$trigger <- private$rv[[private$id]]$wake
-      #private$dataOut$name <- private$config$process.name
-      
-    },
+     },
     
     Set_Skipped_Status = function(){
       for (i in 1:private$length)
@@ -207,17 +204,27 @@ ProcessManager <- R6Class(
     },
 
     InitializeTimeline = function(){
-      private$rv[[private$id]]$timeline.res <- private$timeline$server(
+      private$timeline.res <- private$timeline$server(
         config = private$config,
         wake = reactive({private$rv[[private$id]]$wake}),
         remoteReset = reactive({private$rv[[private$id]]$remoteReset})
       )
       
-      observeEvent(req(private$rv[[private$id]]$timeline.res()), ignoreInit=T, {
-        private$rv[[private$id]]$current.pos <- private$rv[[private$id]]$timeline.res()$current.pos
-        private$rv[[private$id]]$reset <- private$rv[[private$id]]$timeline.res()$reset
+      # observeEvent(req(private$timeline.res$reset()), ignoreInit=F, {
+      #   browser()
+      #   private$rv[[private$id]]$reset <- private$timeline.res$reset()
+      # })
+      
+      observeEvent(req(private$timeline.res$current.pos()), ignoreInit=F, {
+        private$rv[[private$id]]$current.pos <- private$timeline.res$current.pos()
       })
+      
+      observeEvent(req(private$timeline.res$reset()), {
+        private$ActionsOnReset()
+      })
+      
     },
+
     
     # This function adds the renderUI functions of the screens.
     # In the process child class, these functions are written in a separate file for each process
@@ -309,9 +316,7 @@ ProcessManager <- R6Class(
       observeEvent(req(remoteReset()!=0), { private$rv[[private$id]]$remoteReset <- remoteReset()})
       
       #--- Catch a reset from timeline or caller
-      observeEvent(req(c(private$rv[[private$id]]$reset, private$rv[[private$id]]$remoteReset)), {
-        private$ActionsOnReset()
-      })
+      
       
       observeEvent(isSkipped(), ignoreInit = T, { 
         private$rv[[private$id]]$isSkipped <- isSkipped()

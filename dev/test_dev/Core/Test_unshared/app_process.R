@@ -89,8 +89,8 @@ server = function(dataIn ) {
   # 
   lapply(names(self$ll.process), function(x){
     self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
-                                                                 remoteReset = reactive({self$rv$remoteReset}),
-                                                                 isSkipped = reactive({self$rv$skipped %%2 == 0}))
+                                                        remoteReset = reactive({self$rv$remoteReset}),
+                                                        isSkipped = reactive({self$rv$skipped %%2 == 0}))
   })
   
   # self$tmp.return[['ProcessA']] <- self$ll.process[['ProcessA']]$server(dataIn = reactive({self$rv$dataIn}),
