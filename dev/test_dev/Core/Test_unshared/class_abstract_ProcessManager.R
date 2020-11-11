@@ -9,11 +9,10 @@ ProcessManager <- R6Class(
                   UNDONE = 1
     ),
     config = reactiveValues() ,
-    steps = NULL,
+
     dataOut = reactiveValues(),
     length = NULL,
-    logics = NULL,
-    remoteReset = NULL,
+
     rv = reactiveValues(
       dataIn = NULL,
       current.pos = NULL,
@@ -224,11 +223,7 @@ ProcessManager <- R6Class(
         browser()
         private$ActionsOnReset()
       })
-      
-      # observeEvent(req(private$rv[[private$id]]$remoteReset), {
-      #   browser()
-      #   private$ActionsOnReset()
-      # })
+
       
     },
 
@@ -245,8 +240,7 @@ ProcessManager <- R6Class(
     },
     
     InitConfig = function(config){
-      private$steps <- config$steps
-      private$length <- length(config$steps)
+       private$length <- length(config$steps)
       lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
       private$config$status <- setNames(rep(0, private$length), config$steps)
       

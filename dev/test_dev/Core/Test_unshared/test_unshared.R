@@ -69,7 +69,7 @@ Process <- R6Class(
     id = NULL,
     timeline = NULL,
     dataOut = reactiveValues(),
-    config = reactiveValues(),
+    config = list(),
     dataIn = reactiveValues(),
     rv = reactiveValues(
       current.pos = 1

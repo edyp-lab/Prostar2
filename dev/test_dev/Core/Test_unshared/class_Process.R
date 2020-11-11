@@ -6,7 +6,7 @@ Process = R6Class(
     ActionsOnNewPosition = function(){},
     
     ActionsOnIsSkipped = function(){
-      if (private$rv$isSkipped)
+      if (private$rv[[private$id]]$isSkipped)
         tag <- private$global$SKIPPED
       else
         tag <- private$global$UNDONE
@@ -18,7 +18,7 @@ Process = R6Class(
     InitializeModule = function(){
       
       private$config$screens <- private$CreateScreens()
-      private$rv$current.pos <- 1
+      private$rv[[private$id]]$current.pos <- 1
     }
     
     # Add_RenderUIs_Definitions = function( input, output){},
