@@ -41,7 +41,7 @@ Pipeline <- R6Class(
       skipped = NULL
       ),
     ll.process = list(
-      #ProcessDescription = NULL,
+      ProcessDescription = NULL,
       ProcessA = NULL
     ),
     initialize = function(id){
@@ -71,10 +71,14 @@ ui = function() {
   )
 },
 server = function(dataIn ) {
+  cat(paste0(class(self)[1], '::server()\n'))
   ns <- NS(self$id)
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  observeEvent(dataIn(),{self$rv$dataIn <- dataIn()})
+  observeEvent(dataIn(),{
+    cat(paste0(class(self)[1], '::observeEvent(dataIn())\n'))
+    self$rv$dataIn <- dataIn()
+    })
   
  
   self$ll.process <- setNames(lapply(names(self$ll.process),
@@ -92,7 +96,6 @@ server = function(dataIn ) {
   
 
   observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
-    print("change in ProcessDescription OR ProcessA")
     print(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}))
   })
   
@@ -100,6 +103,7 @@ server = function(dataIn ) {
   moduleServer(self$id, function(input, output, session) {
     ns <- NS(self$id)
     
+  
   observeEvent(input$remoteReset,{
     print("action on remoteReset")
     self$rv$remoteReset <- input$remoteReset})
@@ -156,6 +160,7 @@ server = function(input, output){
   
   
   observeEvent(input$changeDataset,{
+  
     if (input$changeDataset%%2 ==0)
       rv$dataIn <- Exp1_R25_prot[1:10, , -1]
     else

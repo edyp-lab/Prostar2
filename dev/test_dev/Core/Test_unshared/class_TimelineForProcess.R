@@ -8,6 +8,7 @@ TimelineForProcess = R6Class(
     
     
     Analyse_Status = function(){
+      cat(paste0(class(self)[1], '::Analyse_Status()\n'))
       req(private$nbSteps)
       if ((private$nbSteps==1) || (private$nbSteps>=2 && sum(private$config[[private$id]]$status[2:private$nbSteps])== 0 )){
         # This is the case at the initialization of a process or after a reset
@@ -25,7 +26,7 @@ TimelineForProcess = R6Class(
     },
     
     Display_Current_Step = function(){
-
+      cat(paste0(class(self)[1], '::Display_Current_Step()\n'))
       req(private$nbSteps)
       req(private$rv[[private$id]]$current.pos)
       # One only displays the steps that are not skipped
@@ -36,6 +37,7 @@ TimelineForProcess = R6Class(
   
   public = list(
     initialize = function(id, mandatory, style=2 ) {
+      cat(paste0(class(self)[1], '::initialize()\n'))
       private$id <- id
       private$nbSteps <- length(mandatory)
       private$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'), 

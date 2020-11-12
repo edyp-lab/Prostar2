@@ -1,6 +1,12 @@
 library(R6)
 
+###-----------------------------------------------------------------
+foo <- function() {
+  match.call()[[1]]
+}
 
+
+###----------------------------------------------------------------
 
 Timeline  <- R6Class(
   "Timeline",
@@ -28,10 +34,16 @@ Timeline  <- R6Class(
         ns <- NS(self$id)
 
         observeEvent(input$reset,{
-          #browser()
+          print(paste0(class(self)[1], '::', 'observeEvent(input$reset)'))
           print("action reset")
           self$rv[[self$id]]$reset <- input$reset
           })
+        
+        observeEvent(input$curpos,{
+          print(paste0(class(self)[1], '::', 'observeEvent(input$curpos)'))
+          self$rv[[self$id]]$current.pos <- input$curpos
+        })
+        
       }
       )
       
@@ -50,6 +62,14 @@ Filtering <- R6Class(
     
     initialize = function(id, dataIn){
       self$id <- id
+      self$dataOut = reactiveValues()
+      self$config = reactiveValues(list(name = 'Description', 
+                                        steps = LETTERS[1:sample.int(10,1)]))
+      self$dataIn = reactiveValues()
+      self$dataOut = reactiveValues()
+      self$rv = reactiveValues(
+        current.pos = 1
+        )
       observe({
         self$SetConfig(list(name = 'Description', 
                             steps = LETTERS[1:sample.int(10,1)]))
@@ -68,12 +88,11 @@ Process <- R6Class(
   public = list(
     id = NULL,
     timeline = NULL,
-    dataOut = reactiveValues(),
-    config = list(),
-    dataIn = reactiveValues(),
-    rv = reactiveValues(
-      current.pos = 1
-    ),
+    dataOut = "<reactiveValues>",
+    config = "<reactiveValues>",
+    dataIn = "<reactiveValues>",
+    rv = "<reactiveValues>",
+
     timeline.res = NULL,
     initialize = function(){ },
     
@@ -91,28 +110,6 @@ Process <- R6Class(
       )
     },
     
-    GetConfig = function(){self$config[[self$id]]},
-    SetConfig = function(value){self$config[[self$id]] <- value},
-    GetSteps = function(){self$config[[self$id]]$steps},
-    SetSteps = function(pos, value){self$config[[self$id]]$steps[pos] <- value},
-    GetStatus = function(){self$config[[self$id]]$status},
-    SetStatus = function(pos, value){self$config[[self$id]]$status[pos] <- value},
-    GetMandatory = function(){self$config[[self$id]]$mandatory},
-    SetMandatory = function(pos, value){self$config[[self$id]]$mandatory[pos] <- value},
-    GetName = function(){self$config[[self$id]]$name},
-    SetName = function(value){self$config[[self$id]]$name <- value},
-    GetDataOut = function() {self$dataOut[[self$id]]},
-    SetDataOut = function(data){self$dataOut[[self$id]] <- list(value = data,
-                                                                trigger = runif(1,0,1)
-    )},
-    SetDataIn = function(data){
-      if(is.na(data)) self$SetDataOut(data)
-      self$dataIn[[self$id]] <- data},
-    GetDataIn = function(){self$dataIn[[self$id]]},
-    
-    GetCurrentPos = function(){self$rv[[self$id]]$current.pos},
-    SetCurrentPos = function(value){self$rv[[self$id]]$current.pos <- value},
-    
     server = function(dataIn){
       ns <- NS(self$id)
 
@@ -126,39 +123,45 @@ Process <- R6Class(
         
         observeEvent(self$timeline.res$reset(), {
           print(paste0("self$timeline.res$reset() : ", self$id))
-          
-          
+          })
+        
+        observeEvent(self$timeline.res$current.pos(), {
+          print(paste0("self$timeline.res$current.pos() : ", self$timeline.res$current.pos()))
+          self$rv$current.pos = self$timeline.res$current.pos()
         })
+        
         output$show_tl <- renderUI({
           req(self$timeline)
           self$timeline$ui()
         })
         
         output$show_config <- renderUI({ 
-          self$GetDataIn()
+          self$dataIn
           tagList(
-            p(paste0("steps = ", paste0(self$GetSteps(), collapse=' '))),
-            p(paste0(', dataIn = ', self$GetDataIn())),
-            p(paste0('Current.pos = ', self$GetCurrentPos()))
+            p(paste0("steps = ", paste0(self$config$steps, collapse=' '))),
+            p(paste0(', dataIn = ', self$dataIn)),
+            p(paste0('Current.pos = ', self$rv$current.pos))
           )
         })
         
         
         
-        observeEvent(input$curpos, {self$SetCurrentPos(input$curpos)})
+        observeEvent(input$curpos, {
+          self$rv$current.pos = input$curpos
+          })
         
         observeEvent(input$change,{
-          self$SetSteps(1, input$change%%2 ==0)
+          self$config$steps[1] = input$change%%2 ==0
         })
         
         observeEvent(input$send,{
-          self$SetDataOut(self$GetSteps())
+          self$dataOut <- self$config$steps
         })
         
       }
       
       )
-      reactive({self$GetDataOut()})
+      reactive({self$dataOut})
       
     }
   )

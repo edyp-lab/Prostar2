@@ -6,6 +6,7 @@ Process = R6Class(
     ActionsOnNewPosition = function(){},
     
     ActionsOnIsSkipped = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped()\n'))
       if (private$rv[[private$id]]$isSkipped)
         tag <- private$global$SKIPPED
       else
@@ -16,7 +17,7 @@ Process = R6Class(
     },
     
     InitializeModule = function(){
-      
+      cat(paste0(class(self)[1], '::', 'InitializeModule()\n'))
       private$config$screens <- private$CreateScreens()
       private$rv[[private$id]]$current.pos <- 1
     }
@@ -28,10 +29,6 @@ Process = R6Class(
   ),
   
   public = list(
- 
-    GetConfig = function(){
-      observe({print(paste0('-----GetConfig(', private$id, ') : ', paste0(private$config$steps, collapse=' ')))})
-    }
-    
+
   )
 )

@@ -5,6 +5,7 @@ ProcessA = R6Class(
   private = list(
     
     Add_RenderUIs_Definitions = function(input, output){
+      cat(paste0(class(self)[1], '::', 'Add_RenderUIs_Definitions()\n'))
       ns <- NS(private$id)
       output$Description <- renderUI({
         tagList(
@@ -103,8 +104,7 @@ ProcessA = R6Class(
   
   public = list(
     initialize = function(id) {
-      print(paste0("----------in initialize of class Process with id = ", id))
-      
+      print(paste0(class(self)[1], '::', 'initialize()'))
       private$id <- id
       config <- list(process.name = 'ProcessA',
                      steps = c('Description', 'Step1', 'Step2', 'Step3'),
