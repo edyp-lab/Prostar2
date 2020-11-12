@@ -2,33 +2,31 @@
 Process = R6Class(
   "Process",
   inherit = ProcessManager,
-  private = list(
+  private = list(),
+  
+  public = list(
+    
     ActionsOnNewPosition = function(){},
     
     ActionsOnIsSkipped = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped()\n'))
-      if (private$rv[[private$id]]$isSkipped)
-        tag <- private$global$SKIPPED
+      if (self$rv$isSkipped)
+        tag <- self$global$SKIPPED
       else
-        tag <- private$global$UNDONE
+        tag <- self$global$UNDONE
       
-      private$config$status <- setNames(rep(tag, private$length),
-                                        private$config$steps)
+      self$config$status <- setNames(rep(tag, self$length),
+                                     self$config$steps)
     },
     
     InitializeModule = function(){
       cat(paste0(class(self)[1], '::', 'InitializeModule()\n'))
-      private$config$screens <- private$CreateScreens()
-      private$rv[[private$id]]$current.pos <- 1
+      self$config$screens <- self$CreateScreens()
+      self$rv$current.pos <- 1
     }
     
     # Add_RenderUIs_Definitions = function( input, output){},
     
     
-    
-  ),
-  
-  public = list(
-
   )
 )

@@ -3,41 +3,39 @@ ProcessDescription = R6Class(
   "ProcessDescription",
   inherit = Process,
   
-  private = list(
-    Add_RenderUIs_Definitions = function(input, output){
-      ns <- NS(private$id)
-      output$Description <- renderUI({
-        tagList(
-          actionButton(ns('btn_validate_Description'), 
-                       paste0('Start ', private$config[[private$id]]$name),
-                       class = btn_success_color),
-          mod_insert_md_ui(ns(paste0(private$config[[private$id]]$name, "_md")))
-        )
-      })
-      
-      observe({
-        mod_insert_md_server(paste0(private$config[[private$id]]$name, "_md"), 
-                             paste0('./md/', private$config[[private$id]]$name, '.md'))
-      })
-      
-      observeEvent(input$btn_validate_Description, {
-        private$InitializeDataIn()
-        private$ValidateCurrentPos()
-      })
-    }
-    
-  ),
+  private = list(),
   
   public = list(
     initialize = function(id) {
       print(paste0("----------in initialize of class Process with id = ", id))
       
-      private$id <- id
+      self$id <- id
       config <- list(process.name = 'Description',
                      steps = c('Description'),
                      mandatory = setNames(c(F), c('Description'))
       )
-      private$InitConfig(config)
+      self$InitConfig(config)
+    },
+    Add_RenderUIs_Definitions = function(input, output){
+      ns <- NS(self$id)
+      output$Description <- renderUI({
+        tagList(
+          actionButton(ns('btn_validate_Description'), 
+                       paste0('Start ', self$config$name),
+                       class = btn_success_color),
+          mod_insert_md_ui(ns(paste0(self$config$name, "_md")))
+        )
+      })
+      
+      observe({
+        mod_insert_md_server(paste0(self$config$name, "_md"), 
+                             paste0('./md/', self$config$name, '.md'))
+      })
+      
+      observeEvent(input$btn_validate_Description, {
+        self$InitializeDataIn()
+        self$ValidateCurrentPos()
+      })
     }
     
   )

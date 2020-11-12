@@ -1,6 +1,15 @@
 ProcessManager <- R6Class(
   "ProcessManager",
-  private = list(
+  private = list(),
+  public = list(
+    
+    initialize = function(id, config = NULL) {
+      cat(paste0(class(self)[1], '::', 'initialize()\n'))
+      self$id <- id
+      self$length <- length(config$steps)
+      lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+    },
+    
     id = NULL,
     timeline = NULL,
     timeline.res = NULL,
@@ -9,10 +18,10 @@ ProcessManager <- R6Class(
                   UNDONE = 1
     ),
     config = reactiveValues() ,
-
+    
     dataOut = reactiveValues(),
     length = NULL,
-
+    
     rv = reactiveValues(
       config = list(),
       dataIn = NULL,
@@ -26,30 +35,30 @@ ProcessManager <- R6Class(
     
     GetStringStatus = function(status){
       cat(paste0(class(self)[1], '::GetStringStatus()\n'))
-      if (status==private$global$VALIDATED) "Validated"
-      else if (status==private$global$UNDONE) "Undone"
-      else if (status==private$global$SKIPPED) 'Skipped'
+      if (status==self$global$VALIDATED) "Validated"
+      else if (status==self$global$UNDONE) "Undone"
+      else if (status==self$global$SKIPPED) 'Skipped'
     },
     
     Send_Result_to_Caller = function(){
       cat(paste0(class(self)[1], '::Send_Result_to_Caller()\n'))
       
-      private$rv[[private$id]]$wake <- private$Wake()
-      private$dataOut$value <- private$rv[[private$id]]$dataIn
-      private$dataOut$trigger <- private$rv[[private$id]]$wake
-     },
+      self$rv$wake <- self$Wake()
+      self$dataOut$value <- self$rv$dataIn
+      self$dataOut$trigger <- self$rv$wake
+    },
     
     Set_Skipped_Status = function(){
       cat(paste0(class(self)[1], '::Set_Skipped_Status()\n'))
-      for (i in 1:private$length)
-        if (private$config$status[i] != private$global$VALIDATED && private$GetMaxValidated_AllSteps() > i)
-          private$config$status[i] <- private$global$SKIPPED
+      for (i in 1:self$length)
+        if (self$config$status[i] != self$global$VALIDATED && self$GetMaxValidated_AllSteps() > i)
+          self$config$status[i] <- self$global$SKIPPED
     },
     
     GetMaxValidated_AllSteps = function(){
       cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps()\n'))
       val <- 0
-      ind <- which(private$config$status == private$global$VALIDATED)
+      ind <- which(self$config$status == self$global$VALIDATED)
       if (length(ind) > 0)
         val <- max(ind)
       val
@@ -58,9 +67,9 @@ ProcessManager <- R6Class(
     GetMaxValidated_BeforeCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos()\n'))
       ind.max <- NULL
-      indices.validated <- which(private$config$status == private$global$VALIDATED)
+      indices.validated <- which(self$config$status == self$global$VALIDATED)
       if (length(indices.validated) > 0){
-        ind <- which(indices.validated < private$rv[[private$id]]$current.pos)
+        ind <- which(indices.validated < self$rv$current.pos)
         if(length(ind) > 0)
           ind.max <- max(ind)
       }
@@ -78,8 +87,8 @@ ProcessManager <- R6Class(
     # has been validated
     is.skipped = function(name){
       cat(paste0(class(self)[1], '::', 'is.skipped()\n'))
-      pos <- which(name == private$config$steps)
-      return(private$GetStatusPosition(pos) == private$global$SKIPPED)
+      pos <- which(name == self$config$steps)
+      return(self$GetStatusPosition(pos) == self$global$SKIPPED)
     },
     
     InitializeModule = function(){},
@@ -88,24 +97,24 @@ ProcessManager <- R6Class(
     
     ActionsOnReset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
-      private$ResetScreens()
-      private$rv[[private$id]]$dataIn <- NA
-      private$Initialize_Status_Process()
-      private$Send_Result_to_Caller()
-      private$InitializeDataIn()
+      self$ResetScreens()
+      self$rv$dataIn <- NA
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+      self$InitializeDataIn()
     },
     ActionsOnIsSkipped = function(){},
     
     GetCurrentStepName = function(){
-      private$config$steps[private$rv[[private$id]]$current.pos]
+      self$config$steps[self$rv$current.pos]
     },
     
     Unskip = function(pos){
-      private$config$status[pos] <- private$global$UNDONE
+      self$config$status[pos] <- self$global$UNDONE
     },
     
     GetStatusPosition = function(pos){
-      private$config$status[pos]
+      self$config$status[pos]
     },
     
     # This function cannot be implemented in the timeline module because 
@@ -113,64 +122,64 @@ ProcessManager <- R6Class(
     # Trying to reset the global 'div_screens' in the timeline module
     # does not work
     ResetScreens = function(){
-      lapply(1:private$length, function(x){
-        shinyjs::reset(NS(private$id)(private$config$steps[x]))
+      lapply(1:self$length, function(x){
+        shinyjs::reset(NS(self$id)(self$config$steps[x]))
       })
     },
     
     # ActionsOnDataTrigger = function(data){
-    #   #data$name <- private$dataOut$name
-    #   data$obj <- private$dataOut$value
-    #   data$trigger <- private$dataOut$trigger
+    #   #data$name <- self$dataOut$name
+    #   data$obj <- self$dataOut$value
+    #   data$trigger <- self$dataOut$trigger
     #   data
     # },
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
-      private$config$status[private$rv[[private$id]]$current.pos] <- private$global$VALIDATED
-      private$Set_Skipped_Status()
+      self$config$status[self$rv$current.pos] <- self$global$VALIDATED
+      self$Set_Skipped_Status()
       #browser()
-      if (private$config$status[private$length] == private$global$VALIDATED)
+      if (self$config$status[self$length] == self$global$VALIDATED)
         # Either the process has been validated, one can prepare data to be sent to caller
         # Or the module has been reseted
-        private$Send_Result_to_Caller()
+        self$Send_Result_to_Caller()
     },
     
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn()\n'))
-      private$rv[[private$id]]$dataIn <- private$rv[[private$id]]$temp.dataIn
+      self$rv$dataIn <- self$rv$temp.dataIn
     },
     
     
     CreateScreens = function(){
       cat(paste0(class(self)[1], '::', 'CreateScreens()\n'))
       setNames(
-        lapply(1:private$length, 
+        lapply(1:self$length, 
                function(x){
-                 do.call(uiOutput, list(outputId=NS(private$id)(private$config$steps[x])))}),
-        private$config$steps)
+                 do.call(uiOutput, list(outputId=NS(self$id)(self$config$steps[x])))}),
+        self$config$steps)
     },
     
     
     Initialize_Status_Process = function(){
       cat(paste0(class(self)[1], '::', 'Initialize_Status_Process()\n'))
-      private$config$status <- setNames(rep(0, private$length),
-                                        private$config$steps)
+      self$config$status <- setNames(rep(0, self$length),
+                                     self$config$steps)
     },
     
     
     #Actions onf receive new dataIn()
     ActionsOn_Tmp_NoInput = function(){
-      private$rv[[private$id]]$wake <- private$Wake()},
+      self$rv$wake <- self$Wake()},
     
     ActionsOn_Tmp_Input = function(){
-      private$rv[[private$id]]$wake <- private$Wake()
+      self$rv$wake <- self$Wake()
     },
     
     ActionsOn_NoTmp_Input = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input()\n'))
-      private$InitializeModule()
-      private$InitializeTimeline()
+      self$InitializeModule()
+      self$InitializeTimeline()
     },
     
     ActionsOn_NoTmp_NoInput = function(){},
@@ -181,68 +190,68 @@ ProcessManager <- R6Class(
       # validate button in the Description screen.
       # Once done, this variable is observed and the real rv$dataIn function can be
       # instanciated
-      private$rv[[private$id]]$temp.dataIn <- data
+      self$rv$temp.dataIn <- data
       
-      private$rv[[private$id]]$wake <- FALSE
+      self$rv$wake <- FALSE
       
       # Test if input is NA or not
       inputExists <- length(data) > 0
       
       #Test if a dataset is already loaded
-      tmpExists <- !is.null(private$rv[[private$id]]$dataIn)
+      tmpExists <- !is.null(self$rv$dataIn)
       
       
       if (tmpExists && inputExists){
         # this case is either the module is skipped or validated
-        #private$rv[[private$id]]$current.pos <- length(private$config$status)
-        private$ActionsOn_Tmp_Input()
+        #self$rv$current.pos <- length(self$config$status)
+        self$ActionsOn_Tmp_Input()
       } else if (tmpExists && !inputExists) {
-        private$ActionsOn_Tmp_Input()
+        self$ActionsOn_Tmp_Input()
       } else if (!tmpExists && inputExists){
         # The current position is pointed on a new module
-        #private$ActionsOn_NoTmp_Input()
-        private$ActionsOn_NoTmp_Input()
+        #self$ActionsOn_NoTmp_Input()
+        self$ActionsOn_NoTmp_Input()
       } else if (!tmpExists && !inputExists){
         # Initialization of Prostar
-        private$ActionsOn_NoTmp_NoInput()
+        self$ActionsOn_NoTmp_NoInput()
       }
     },
     
     CreateTimeline = function(){
       cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
-      private$timeline <- TimelineForProcess$new(
-        id = NS(private$id)('timeline'),
-        mandatory = private$config$mandatory
+      self$timeline <- TimelineForProcess$new(
+        id = NS(self$id)('timeline'),
+        mandatory = self$config$mandatory
       )
     },
-
+    
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline()\n'))
-      private$timeline.res <- private$timeline$server(
-        config = private$config,
-        wake = reactive({private$rv[[private$id]]$wake}),
-        remoteReset = reactive({private$rv[[private$id]]$remoteReset})
+      self$timeline.res <- self$timeline$server(
+        config = self$config,
+        wake = reactive({self$rv$wake}),
+        remoteReset = reactive({self$rv$remoteReset})
       )
       
-      # observeEvent(req(private$timeline.res$reset()), ignoreInit=F, {
+      # observeEvent(req(self$timeline.res$reset()), ignoreInit=F, {
       #   browser()
-      #   private$rv[[private$id]]$reset <- private$timeline.res$reset()
+      #   self$rv$reset <- self$timeline.res$reset()
       # })
       
-      observeEvent(req(private$timeline.res$current.pos()), ignoreInit=F, {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(private$timeline.res$current.pos())\n'))
-        private$rv[[private$id]]$current.pos <- private$timeline.res$current.pos()
+      observeEvent(req(self$timeline.res$current.pos()), ignoreInit=F, {
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos())\n'))
+        self$rv$current.pos <- self$timeline.res$current.pos()
       })
       
-      observeEvent(req(private$timeline.res$reset()), {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(private$timeline.res$reset())\n'))
+      observeEvent(req(self$timeline.res$reset()), {
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$reset())\n'))
         browser()
-        private$ActionsOnReset()
+        self$ActionsOnReset()
       })
-
+      
       
     },
-
+    
     
     # This function adds the renderUI functions of the screens.
     # In the process child class, these functions are written in a separate file for each process
@@ -253,42 +262,31 @@ ProcessManager <- R6Class(
     
     TimelineUI = function(){
       cat(paste0(class(self)[1], '::', 'TimelineUI()\n'))
-      private$timeline$ui()
+      self$timeline$ui()
     },
     
     InitConfig = function(config){
       cat(paste0(class(self)[1], '::', 'InitConfig()\n'))
-      browser()
-       private$length <- length(config$steps)
-      #lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-      #private$config$status <- setNames(rep(0, private$length), config$steps)
+      # browser()
+      self$length <- length(config$steps)
+      #lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+      #self$config$status <- setNames(rep(0, self$length), config$steps)
       
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config)\n'))
-        lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
-        private$config$status <- setNames(rep(0, private$length), config$steps)
+        lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+        self$config$status <- setNames(rep(0, self$length), config$steps)
         
-        private$CreateTimeline()
-        })
+        self$CreateTimeline()
+      })
       
-    }
-    
-    
-  ),
-  public = list(
-    
-    initialize = function(id, config = NULL) {
-      cat(paste0(class(self)[1], '::', 'initialize()\n'))
-      private$id <- id
-      private$length <- length(config$steps)
-      lapply(names(config), function(x){private$config[[x]] <- config[[x]]})
     },
     
     
     
     # UI
     ui = function() {
-      ns <- NS(private$id)
+      ns <- NS(self$id)
       fluidPage(
         wellPanel(style="background-color: yellow;",
                   uiOutput(ns('title')),
@@ -313,33 +311,33 @@ ProcessManager <- R6Class(
     server = function(dataIn = NULL, 
                       remoteReset = FALSE,
                       isSkipped = FALSE) {
-      ns <- NS(private$id)
+      ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
       
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
-      observeEvent(private$dataOut$trigger, {
-        #private$ActionsOnDataTrigger()
+      observeEvent(self$dataOut$trigger, {
+        #self$ActionsOnDataTrigger()
         
       })
       
       
       observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
         cat(paste0(class(self)[1], '::observeEvent(req(dataIn())\n'))
-        private$ActionsOnNewDataIn(dataIn())
+        self$ActionsOnNewDataIn(dataIn())
       })
       
-      observeEvent(req(private$rv[[private$id]]$current.pos), ignoreInit=T, {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(private$rv[[private$id]]$current.pos)\n'))
-        private$ActionsOnNewPosition()
+      observeEvent(req(self$rv$current.pos), ignoreInit=T, {
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$rv$current.pos)\n'))
+        self$ActionsOnNewPosition()
       })
       
       observeEvent(remoteReset(), { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
         browser()
         print("remote reset activated")
-        private$rv[[private$id]]$remoteReset <- remoteReset()
-        private$ActionsOnReset()
+        self$rv$remoteReset <- remoteReset()
+        self$ActionsOnReset()
         })
       
       #--- Catch a reset from timeline or caller
@@ -347,20 +345,20 @@ ProcessManager <- R6Class(
       
       observeEvent(isSkipped(), ignoreInit = T, { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped())\n'))
-        private$rv[[private$id]]$isSkipped <- isSkipped()
-        private$ActionsOnIsSkipped()
+        self$rv$isSkipped <- isSkipped()
+        self$ActionsOnIsSkipped()
       })
       
       # MODULE SERVER
-      moduleServer(private$id, function(input, output, session) {
+      moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer()\n'))
         # TODO In a script for dev, write a test function to check the validity of the logics for the new processLogics
         
-        private$Add_RenderUIs_Definitions( input, output)
+        self$Add_RenderUIs_Definitions( input, output)
         
         output$show_timeline_ui <- renderUI({
           cat(paste0(class(self)[1], '::output$show_timeline_ui()\n'))
-          private$TimelineUI() 
+          self$TimelineUI() 
           })
         
         
@@ -375,30 +373,30 @@ ProcessManager <- R6Class(
         
         output$show_rv_dataIn <- renderUI({
           tagList(
-            h4('show private$rv[[private$id]]$dataIn)'),
-            lapply(names(private$rv[[private$id]]$dataIn), function(x){tags$p(x)})
+            h4('show self$rv$dataIn)'),
+            lapply(names(self$rv$dataIn), function(x){tags$p(x)})
             )
         })
         
         output$show_rv_dataOut <- renderUI({
-          req(private$dataOut$trigger)
+          req(self$dataOut$trigger)
           tagList(
-            h4('show private$dataOut$value'),
-            lapply(names(private$dataOut$value), function(x){tags$p(x)})
+            h4('show self$dataOut$value'),
+            lapply(names(self$dataOut$value), function(x){tags$p(x)})
           )
         })
         
         # output$show_status <- renderUI({
-        #   req(private$config$status, private$rv[[private$id]]$current.pos)
-        #   tagList(lapply(1:private$length, 
-        #                  function(x){if (x == private$rv[[private$id]]$current.pos) 
-        #                    tags$p(tags$b(paste0('-> ', private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]]))))
+        #   req(self$config$status, self$rv$current.pos)
+        #   tagList(lapply(1:self$length, 
+        #                  function(x){if (x == self$rv$current.pos) 
+        #                    tags$p(tags$b(paste0('-> ', self$config$steps[x], ' - ', self$GetStringStatus(self$config$status[[x]]))))
         #                    else 
-        #                      tags$p(paste0(private$config$steps[x], ' - ', private$GetStringStatus(private$config$status[[x]])))
+        #                      tags$p(paste0(self$config$steps[x], ' - ', self$GetStringStatus(self$config$status[[x]])))
         #                  }))
         # })
         
-        output$title <- renderUI({ h3(paste0('private$id = ',private$id)) })
+        output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
         
         #################################################
         # Main listener of the module which initialize it
@@ -410,7 +408,7 @@ ProcessManager <- R6Class(
         
       }
       )
-      reactive({private$dataOut})
+      reactive({self$dataOut})
       }
   )
 )

@@ -12,11 +12,14 @@ Timeline  <- R6Class(
   "Timeline",
   public = list(
     id = NULL,
-    rv = reactiveValues(
-      current.pos = 1,
-      reset = NULL
-    ),
-    initialize = function(id){ self$id <- id},
+    rv = "<reactiveValues>",
+    initialize = function(id){
+      self$id <- id
+      self$rv = reactiveValues(
+        current.pos = 1,
+        reset = NULL
+      )
+      },
     
     ui = function(){
       ns <- NS(self$id)
@@ -36,19 +39,19 @@ Timeline  <- R6Class(
         observeEvent(input$reset,{
           print(paste0(class(self)[1], '::', 'observeEvent(input$reset)'))
           print("action reset")
-          self$rv[[self$id]]$reset <- input$reset
+          self$rv$reset <- input$reset
           })
         
         observeEvent(input$curpos,{
           print(paste0(class(self)[1], '::', 'observeEvent(input$curpos)'))
-          self$rv[[self$id]]$current.pos <- input$curpos
+          self$rv$current.pos <- input$curpos
         })
         
       }
       )
       
-      list(current.pos = reactive({self$rv[[self$id]]$current.pos}),
-           reset = reactive({self$rv[[self$id]]$reset})
+      list(current.pos = reactive({self$rv$current.pos}),
+           reset = reactive({self$rv$reset})
       )
       
     }
@@ -60,23 +63,19 @@ Filtering <- R6Class(
   inherit = Process,
   public = list(
     
-    initialize = function(id, dataIn){
+    initialize = function(id){
       self$id <- id
       self$dataOut = reactiveValues()
-      self$config = reactiveValues(list(name = 'Description', 
-                                        steps = LETTERS[1:sample.int(10,1)]))
+      self$config = reactiveValues(
+        name = 'Description',
+        steps = LETTERS[1:sample.int(10,1)]
+        )
       self$dataIn = reactiveValues()
       self$dataOut = reactiveValues()
       self$rv = reactiveValues(
         current.pos = 1
         )
-      observe({
-        self$SetConfig(list(name = 'Description', 
-                            steps = LETTERS[1:sample.int(10,1)]))
-        self$SetDataIn(dataIn())
 
-          
-      })
     }
     
   )
@@ -121,6 +120,13 @@ Process <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
+        
+        
+        observeEvent(dataIn(), {
+          self$dataIn <- dataIn()
+          
+        })
+        
         observeEvent(self$timeline.res$reset(), {
           print(paste0("self$timeline.res$reset() : ", self$id))
           })
@@ -137,6 +143,8 @@ Process <- R6Class(
         
         output$show_config <- renderUI({ 
           self$dataIn
+          self$config
+          browser()
           tagList(
             p(paste0("steps = ", paste0(self$config$steps, collapse=' '))),
             p(paste0(', dataIn = ', self$dataIn)),
@@ -151,7 +159,8 @@ Process <- R6Class(
           })
         
         observeEvent(input$change,{
-          self$config$steps[1] = input$change%%2 ==0
+          print("change a value")
+          self$config$steps[1] <- input$change%%2 ==0
         })
         
         observeEvent(input$send,{
@@ -200,9 +209,7 @@ Pipeline <- R6Class(
       ns <- NS(self$id)
       
       lapply(names(self$ll.process), function(x){
-        self$ll.process[[x]] <- Filtering$new(ns(x), 
-                                              dataIn = reactive({self$rv$dataIn})
-                                              )
+        self$ll.process[[x]] <- Filtering$new(ns(x))
       })
       
       
@@ -218,8 +225,8 @@ Pipeline <- R6Class(
       
       # rv$description <- processDescription$server()
       # rv$processA <- processA$server()
-      self$tmp.return[['Description']] <- self$ll.process[['Description']]$server()
-      self$tmp.return[['processA']] <- self$ll.process[['processA']]$server()
+      self$tmp.return[['Description']] <- self$ll.process[['Description']]$server(dataIn = reactive({self$rv$dataIn}))
+      self$tmp.return[['processA']] <- self$ll.process[['processA']]$server(dataIn = reactive({self$rv$dataIn}))
       
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
