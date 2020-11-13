@@ -7,7 +7,13 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::initialize()\n'))
       self$id <- id
       
-      self$config = reactiveValues()
+      self$config = reactiveValues(
+        name = NULL,
+        mandatory = NULL,
+        steps = NULL,
+        screens = NULL,
+        status = NULL
+      )
       
       self$dataOut = reactiveValues(
         value = NULL,
@@ -151,7 +157,7 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
-      #browser()
+      browser()
       if (self$config$status[self$length] == self$global$VALIDATED)
         # Either the process has been validated, one can prepare data to be sent to caller
         # Or the module has been reseted
@@ -241,7 +247,7 @@ ProcessManager <- R6Class(
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline()\n'))
       self$timeline.res <- self$timeline$server(
-        config = self$config,
+        config = reactive({self$config}),
         wake = reactive({self$rv$wake}),
         remoteReset = reactive({self$rv$remoteReset})
       )
@@ -327,7 +333,7 @@ ProcessManager <- R6Class(
                       isSkipped = FALSE) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
-      browser()
+     # browser()
       
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
