@@ -7,6 +7,7 @@ TimelineForProcess = R6Class(
   public = list(
     initialize = function(id, mandatory, style=2 ) {
       cat(paste0(class(self)[1], '::initialize()\n'))
+      browser()
       self$id <- id
       self$nbSteps <- length(mandatory)
       
@@ -48,6 +49,7 @@ TimelineForProcess = R6Class(
       cat(paste0(class(self)[1], '::Display_Current_Step()\n'))
       req(self$nbSteps)
       req(self$rv$current.pos)
+      browser()
       # One only displays the steps that are not skipped
       lapply(1:self$nbSteps, function(x){
         shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos && self$config$status[self$rv$current.pos] != self$global$SKIPPED)})

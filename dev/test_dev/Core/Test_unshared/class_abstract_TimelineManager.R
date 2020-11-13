@@ -106,6 +106,7 @@ TimelineManager <- R6Class(
     EncapsulateScreens = function(){
       cat(paste0(class(self)[1], '::EncapsulateScreens()\n'))
       req(self$config$screens)
+      browser()
       ns <- NS(self$id)
       self$Init_Default_Positions() 
       self$config$screens <- lapply(1:self$nbSteps,
@@ -164,8 +165,16 @@ TimelineManager <- R6Class(
       
       observeEvent(config,{
         cat(paste0(class(self)[1], '::observeEvent(config)\n'))
+        browser()
         self$config <- config
         self$rv$current.pos <- 1
+        cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
+        req(self$nbSteps>0)
+        check <- self$CheckConfig(self$config)
+        if (!check$passed)
+          stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
+        
+        self$EncapsulateScreens()
       })
       
       observeEvent(config$status,{
@@ -276,15 +285,15 @@ TimelineManager <- R6Class(
         })
         
         
-        observeEvent(req(self$config), ignoreInit=F,{
-          cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
-          req(self$nbSteps>0)
-          check <- self$CheckConfig(self$config)
-          if (!check$passed)
-            stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
-          
-          self$EncapsulateScreens()
-        })
+        # observeEvent(req(self$config), ignoreInit=F,{
+        #   cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
+        #   req(self$nbSteps>0)
+        #   check <- self$CheckConfig(self$config)
+        #   if (!check$passed)
+        #     stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
+        #   
+        #   self$EncapsulateScreens()
+        # })
         
         
           list(current.pos = reactive({self$rv$current.pos}),
