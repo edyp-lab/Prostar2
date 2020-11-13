@@ -17,12 +17,6 @@ Process = R6Class(
       
       self$config$status <- setNames(rep(tag, self$length),
                                      self$config$steps)
-    },
-    
-    InitializeModule = function(){
-      cat(paste0(class(self)[1], '::', 'InitializeModule()\n'))
-      self$config$screens <- self$CreateScreens()
-      self$rv$current.pos <- 1
     }
     
     # Add_RenderUIs_Definitions = function( input, output){},

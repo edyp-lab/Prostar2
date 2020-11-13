@@ -5,16 +5,7 @@ ProcessA = R6Class(
   private = list(),
   
   public = list(
-    initialize = function(id) {
-      print(paste0(class(self)[1], '::', 'initialize()'))
-      self$id <- id
-      config <- list(process.name = 'ProcessA',
-                     steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                     mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-      )
-      self$InitConfig(config)
-    },
-    
+
     Add_RenderUIs_Definitions = function(input, output){
       cat(paste0(class(self)[1], '::', 'Add_RenderUIs_Definitions()\n'))
       ns <- NS(self$id)

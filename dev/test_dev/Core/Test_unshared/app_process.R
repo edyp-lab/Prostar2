@@ -80,7 +80,7 @@ server = function(dataIn ) {
     self$rv$dataIn <- dataIn()
     })
   
- 
+
   self$ll.process <- setNames(lapply(names(self$ll.process),
                                      function(x){
                                        assign(x, get(x))$new(x)
@@ -128,6 +128,7 @@ server = function(dataIn ) {
   
   
   output$show_rv_dataOut <- renderUI({
+
     req(self$tmp.return[['ProcessA']]()$trigger)
     tagList(
       h4('show return of processes'),
@@ -144,6 +145,8 @@ server = function(dataIn ) {
 )
 )
 
+
+## Main app
 rv <- reactiveValues()
 Pipeline <- Pipeline$new('App')
 ui = fluidPage(

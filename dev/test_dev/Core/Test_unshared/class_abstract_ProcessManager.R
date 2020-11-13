@@ -4,11 +4,31 @@ ProcessManager <- R6Class(
   public = list(
     
     initialize = function(id, config = NULL) {
-      cat(paste0(class(self)[1], '::', 'initialize()\n'))
+      cat(paste0(class(self)[1], '::initialize()\n'))
       self$id <- id
-      self$length <- length(config$steps)
-      lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
-    },
+      
+      self$config = reactiveValues()
+      
+      self$dataOut = reactiveValues(
+        value = NULL,
+        trigger = NULL
+      )
+      
+      self$rv = reactiveValues(
+        config = list(),
+        dataIn = NULL,
+        current.pos = NULL,
+        remoteReset = NULL,
+        wake = F,
+        reset = NULL,
+        isSkipped = FALSE)
+      
+      config <- list(process.name = 'ProcessA',
+                     steps = c('Description', 'Step1', 'Step2', 'Step3'),
+                     mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
+      )
+      self$InitConfig(config)
+      },
     
     id = NULL,
     timeline = NULL,
@@ -17,19 +37,12 @@ ProcessManager <- R6Class(
                   SKIPPED = -1,
                   UNDONE = 1
     ),
-    config = reactiveValues() ,
-    
-    dataOut = reactiveValues(),
+    config = "<reactiveValues>" ,
+    dataOut = "<reactiveValues>",
+    rv = "<reactiveValues>",
     length = NULL,
     
-    rv = reactiveValues(
-      config = list(),
-      dataIn = NULL,
-      current.pos = NULL,
-      remoteReset = NULL,
-      wake = F,
-      reset = NULL,
-      isSkipped = FALSE),
+
     
     Wake = function(){ runif(1,0,1)},
     
@@ -182,6 +195,12 @@ ProcessManager <- R6Class(
       self$InitializeTimeline()
     },
     
+    InitializeModule = function(){
+      cat(paste0(class(self)[1], '::', 'InitializeModule()\n'))
+      self$config$screens <- self$CreateScreens()
+      self$rv$current.pos <- 1
+    },
+    
     ActionsOn_NoTmp_NoInput = function(){},
     
     ActionsOnNewDataIn = function(data){
@@ -245,7 +264,7 @@ ProcessManager <- R6Class(
       
       observeEvent(req(self$timeline.res$reset()), {
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$reset())\n'))
-        browser()
+       # browser()
         self$ActionsOnReset()
       })
       
@@ -274,7 +293,8 @@ ProcessManager <- R6Class(
       
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config)\n'))
-        lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+        #lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+        self$config <- config
         self$config$status <- setNames(rep(0, self$length), config$steps)
         
         self$CreateTimeline()
@@ -313,7 +333,7 @@ ProcessManager <- R6Class(
                       isSkipped = FALSE) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
-      
+
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
       observeEvent(self$dataOut$trigger, {
