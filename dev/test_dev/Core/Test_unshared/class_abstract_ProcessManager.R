@@ -195,12 +195,6 @@ ProcessManager <- R6Class(
       self$InitializeTimeline()
     },
     
-    InitializeModule = function(){
-      cat(paste0(class(self)[1], '::', 'InitializeModule()\n'))
-      self$config$screens <- self$CreateScreens()
-      self$rv$current.pos <- 1
-    },
-    
     ActionsOn_NoTmp_NoInput = function(){},
     
     ActionsOnNewDataIn = function(data){
@@ -286,7 +280,7 @@ ProcessManager <- R6Class(
     
     InitConfig = function(config){
       cat(paste0(class(self)[1], '::', 'InitConfig()\n'))
-      # browser()
+       browser()
       self$length <- length(config$steps)
       #lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
       #self$config$status <- setNames(rep(0, self$length), config$steps)
@@ -299,7 +293,7 @@ ProcessManager <- R6Class(
         
         self$CreateTimeline()
       })
-      
+      browser()
     },
     
     
@@ -333,7 +327,8 @@ ProcessManager <- R6Class(
                       isSkipped = FALSE) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
-
+      browser()
+      
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
       observeEvent(self$dataOut$trigger, {
