@@ -3,19 +3,15 @@ ProcessDescription = R6Class(
   "ProcessDescription",
   inherit = Process,
   
-  private = list(),
+  private = list(
+    .config = list(process.name = 'Description',
+                   steps = c('Description'),
+                   mandatory = setNames(c(T), c('Description'))
+    )
+  ),
   
   public = list(
-    initialize = function(id) {
-      print(paste0("----------in initialize of class Process with id = ", id))
-      
-      self$id <- id
-      config <- list(process.name = 'Description',
-                     steps = c('Description'),
-                     mandatory = setNames(c(F), c('Description'))
-      )
-      self$InitConfig(config)
-    },
+
     Add_RenderUIs_Definitions = function(input, output){
       ns <- NS(self$id)
       output$Description <- renderUI({

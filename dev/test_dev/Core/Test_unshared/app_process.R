@@ -41,7 +41,7 @@ Pipeline <- R6Class(
       skipped = NULL
       ),
     ll.process = list(
-      #ProcessDescription = NULL,
+      ProcessDescription = NULL,
       ProcessA = NULL
     ),
     initialize = function(id){
