@@ -1,4 +1,5 @@
 library(shiny)
+setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
 
 ui <- fluidPage(
   
@@ -15,7 +16,7 @@ ui <- fluidPage(
     class = "w3-sidebar w3-bar-block w3-border-right",
     style = "display:block",
     id="mySidebar",
-    tags$button(class="w3-bar-item w3-large",
+    tags$button(class="w3-bar-item w3-teal w3-small",
                 onclick="w3_close()",
                 "Close X"),
     tags$a(href="#",
@@ -26,28 +27,20 @@ ui <- fluidPage(
            "Link 2"),
     tags$a(href="#",
            class="w3-bar-item w3-button",
-           "Link 3"),
-    tags$a(href="https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_sidebar_over","sidebar OK"),
+           "Link 3")
   ),
   
   # header
-  tags$div(
-    class = "w3-teal",
-    tags$button(class="w3-button w3-teal w3-large",
-                onclick="w3_open()",
-                "="),
-    tags$header(
-      tags$section(id = "container_header",
-                   tags$h1("Container du header"),
-                   tags$h2("Description du container du header: bla bla bla bla...")#,
-                   # tags$div(class = "element_header",
-                   #          tags$img(src="image_timeline.PNG",
-                   #                   alt="C'est la timeline.",
-                   #                   style="width:50px height:10px")
-                   #          )
-      )
-    )
+  tags$header(
+    id = "container_header",
+    tags$div(class="element_header",
+             tags$button(class="w3-button w3-teal w3-small",
+                  onclick="w3_open()",
+                  "=")),
+    tags$div(class="element_header",
+             tags$h1("Prostar"))
   ),
+  
   
   
   # navigation dessous sidebar
@@ -65,7 +58,10 @@ ui <- fluidPage(
   tags$section(
     id = "container_general",
     tags$h2("Container General"),
-    tags$h3("Description du container général: bla bla bla bla..."),
+    tags$h3("Description du container general: bla bla bla bla..."),
+    
+    tags$div(tags$a(href="https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_sidebar_over",
+                    "sidebar OK")),
     
     tags$div(class = "element",
              tags$h1("Partie 1"),

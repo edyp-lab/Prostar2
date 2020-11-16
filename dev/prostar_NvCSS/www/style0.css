@@ -1,0 +1,58 @@
+h1{
+ color: orange ;
+}
+
+
+a:link{
+ text-decoration: underline;
+ color:blue;
+}
+
+
+a:hover {
+ color: hotpink ;
+}
+
+
+p{
+ text-align: justify;
+ margin: auto;	
+}
+
+
+nav{
+  display: block;
+  float: left;
+  border: 1px black solid;
+  margin: 10px 10px 0 10px;
+  width: 10%;
+} 
+
+#container_header{
+ display: flex;
+ flex-direction: column;
+justify-content: space-around;
+ border: 1px black solid;
+}
+
+#container_general{
+ display: flex;
+ flex-direction: column;
+ justify-content: space-around;
+ heigth: 350px;
+ border: solid orange 5px;
+ margin: 10px 10px 0 10px;
+}
+
+
+.element{
+ display: block;
+ border: solid blue 1px;
+ margin: 10px 5px 10px 5px;
+}
+
+.element_header{
+ display: block;
+ border: solid blue 1px;
+ margin: 10px 5px 10px 5px;
+}
