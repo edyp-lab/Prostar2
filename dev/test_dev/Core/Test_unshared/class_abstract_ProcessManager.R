@@ -294,13 +294,10 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::', 'InitConfig()\n'))
 
       self$length <- length(config$steps)
-      #lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
-      #self$config$status <- setNames(rep(0, self$length), config$steps)
       
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config)\n'))
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
-        #self$config <- config
         self$config$status <- setNames(rep(0, self$length), config$steps)
         self$config$screens <- self$CreateScreens()
         self$CreateTimeline()
