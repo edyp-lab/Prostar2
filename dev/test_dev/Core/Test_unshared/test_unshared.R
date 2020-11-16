@@ -63,20 +63,7 @@ Filtering <- R6Class(
   inherit = Process,
   public = list(
     
-    initialize = function(id){
-      self$id <- id
-      self$dataOut = reactiveValues()
-      self$config = reactiveValues(
-        name = 'Description',
-        steps = LETTERS[1:sample.int(10,1)]
-        )
-      self$dataIn = reactiveValues()
-      self$dataOut = reactiveValues()
-      self$rv = reactiveValues(
-        current.pos = 1
-        )
-
-    }
+    
     
   )
 )
@@ -93,7 +80,23 @@ Process <- R6Class(
     rv = "<reactiveValues>",
 
     timeline.res = NULL,
-    initialize = function(){ },
+    initialize = function(id){
+      self$id <- id
+      self$dataOut = reactiveValues()
+      self$config = reactiveValues(
+        name = NULL,
+        steps = NULL
+      )
+      self$dataIn = reactiveValues()
+      self$dataOut = reactiveValues()
+      self$rv = reactiveValues(
+        current.pos = 1
+      )
+      
+      self$config$name <- description
+      self$config$steps <- LETTERS[1:sample.int(10,1)]
+      
+    },
     
     
     ui = function(){
@@ -144,7 +147,7 @@ Process <- R6Class(
         output$show_config <- renderUI({ 
           self$dataIn
           self$config
-          browser()
+
           tagList(
             p(paste0("steps = ", paste0(self$config$steps, collapse=' '))),
             p(paste0(', dataIn = ', self$dataIn)),

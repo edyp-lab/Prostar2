@@ -162,10 +162,10 @@ TimelineManager <- R6Class(
     server = function(config, wake, remoteReset) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::server()\n'))
-      
+      #browser()
       observeEvent(config(),{
         cat(paste0(class(self)[1], '::observeEvent(config)\n'))
-        #browser()
+       # browser()
         self$config <- config()
         self$rv$current.pos <- 1
         cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
@@ -175,11 +175,11 @@ TimelineManager <- R6Class(
           stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
         
         self$EncapsulateScreens()
-        browser()
+        #browser()
       })
       
       observeEvent(config()$status,{
-        browser()
+        #browser()
         cat(paste0(class(self)[1], '::observeEvent(config$status)\n'))
         self$config$status <- config()$status
       })

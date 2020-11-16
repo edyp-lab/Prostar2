@@ -3,6 +3,18 @@ ProcessManager <- R6Class(
   private = list(),
   public = list(
     
+    id = NULL,
+    timeline = NULL,
+    timeline.res = NULL,
+    global = list(VALIDATED = 1,
+                  SKIPPED = -1,
+                  UNDONE = 1
+    ),
+    config = "<reactiveValues>" ,
+    dataOut = "<reactiveValues>",
+    rv = "<reactiveValues>",
+    length = NULL,
+    
     initialize = function(id, config = NULL) {
       cat(paste0(class(self)[1], '::initialize()\n'))
       self$id <- id
@@ -21,7 +33,6 @@ ProcessManager <- R6Class(
       )
       
       self$rv = reactiveValues(
-        config = list(),
         dataIn = NULL,
         current.pos = NULL,
         remoteReset = NULL,
@@ -29,28 +40,16 @@ ProcessManager <- R6Class(
         reset = NULL,
         isSkipped = FALSE)
       
-      config <- list(process.name = 'ProcessA',
-                     steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                     mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-      )
-      self$InitConfig(config)
+      
+      self$InitConfig(private$.config)
       },
-    
-    id = NULL,
-    timeline = NULL,
-    timeline.res = NULL,
-    global = list(VALIDATED = 1,
-                  SKIPPED = -1,
-                  UNDONE = 1
-    ),
-    config = "<reactiveValues>" ,
-    dataOut = "<reactiveValues>",
-    rv = "<reactiveValues>",
-    length = NULL,
-    
+
 
     
-    Wake = function(){ runif(1,0,1)},
+    Wake = function(){ 
+      cat(paste0(class(self)[1], '::Wake()\n'))
+      runif(1,0,1)
+      },
     
     GetStringStatus = function(status){
       cat(paste0(class(self)[1], '::GetStringStatus()\n'))
@@ -125,14 +124,17 @@ ProcessManager <- R6Class(
     ActionsOnIsSkipped = function(){},
     
     GetCurrentStepName = function(){
+      cat(paste0(class(self)[1], '::GetCurrentStepName()\n'))
       self$config$steps[self$rv$current.pos]
     },
     
     Unskip = function(pos){
+      cat(paste0(class(self)[1], '::Unskip()\n'))
       self$config$status[pos] <- self$global$UNDONE
     },
     
     GetStatusPosition = function(pos){
+      cat(paste0(class(self)[1], '::GetStatusPosition()\n'))
       self$config$status[pos]
     },
     
@@ -141,28 +143,32 @@ ProcessManager <- R6Class(
     # Trying to reset the global 'div_screens' in the timeline module
     # does not work
     ResetScreens = function(){
+      cat(paste0(class(self)[1], '::ResetScreens()\n'))
+      
       lapply(1:self$length, function(x){
         shinyjs::reset(NS(self$id)(self$config$steps[x]))
       })
     },
     
-    # ActionsOnDataTrigger = function(data){
-    #   #data$name <- self$dataOut$name
-    #   data$obj <- self$dataOut$value
-    #   data$trigger <- self$dataOut$trigger
-    #   data
-    # },
+    ActionsOnDataTrigger = function(data){
+      # #data$name <- self$dataOut$name
+      # data$obj <- self$dataOut$value
+      # data$trigger <- self$dataOut$trigger
+      # data
+    },
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
-      browser()
+    #  browser()
       if (self$config$status[self$length] == self$global$VALIDATED)
         # Either the process has been validated, one can prepare data to be sent to caller
         # Or the module has been reseted
         self$Send_Result_to_Caller()
     },
+    
+   
     
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn()\n'))
@@ -251,7 +257,7 @@ ProcessManager <- R6Class(
         wake = reactive({self$rv$wake}),
         remoteReset = reactive({self$rv$remoteReset})
       )
-      
+
       # observeEvent(req(self$timeline.res$reset()), ignoreInit=F, {
       #   browser()
       #   self$rv$reset <- self$timeline.res$reset()
@@ -293,8 +299,8 @@ ProcessManager <- R6Class(
       
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config)\n'))
-        #lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
-        self$config <- config
+        lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+        #self$config <- config
         self$config$status <- setNames(rep(0, self$length), config$steps)
         self$config$screens <- self$CreateScreens()
         self$CreateTimeline()
@@ -338,9 +344,12 @@ ProcessManager <- R6Class(
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
       observeEvent(self$dataOut$trigger, {
-        self$ActionsOnDataTrigger()
+        cat(paste0(class(self)[1], '::observeEvent(self$dataOut$trigger)\n'))
         
+        #self$ActionsOnDataTrigger()
       })
+      
+      
       
       
       observeEvent(req(dataIn()), ignoreNULL=T, ignoreInit = F, { 
@@ -355,7 +364,7 @@ ProcessManager <- R6Class(
       
       observeEvent(remoteReset(), { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
-        browser()
+       # browser()
         print("remote reset activated")
         self$rv$remoteReset <- remoteReset()
         self$ActionsOnReset()
@@ -363,7 +372,12 @@ ProcessManager <- R6Class(
       
       #--- Catch a reset from timeline or caller
       
-      
+      observeEvent(self$config$status, {
+        #browser()
+        cat(paste0(class(self)[1], '::observeEvent(self$config$status)\n'))
+        print(paste0(self$config$status, collapse=' '))
+      })
+
       observeEvent(isSkipped(), ignoreInit = T, { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped())\n'))
         self$rv$isSkipped <- isSkipped()
@@ -385,6 +399,7 @@ ProcessManager <- R6Class(
         
         ###########---------------------------#################
         output$show_dataIn <- renderUI({
+          cat(paste0(class(self)[1], '::output$show_dataIn\n'))
           req(dataIn())
           tagList(
             h4('show dataIn()'),

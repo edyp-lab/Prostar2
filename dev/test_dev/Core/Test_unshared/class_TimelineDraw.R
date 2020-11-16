@@ -22,6 +22,7 @@ TimelineDraw <- R6Class(
                               RESETED = 2),
                 
                 GetCSSCode = function(){
+                  cat(paste0(class(self)[1], '::GetCSSCode()\n'))
                   file <- paste0('./Timelines/timeline',self$style, '.sass')
                   #code <- code_sass_timeline[[paste0('self$style',self$style)]],"\n")
                   code <- strsplit(readLines(file),"\n")
@@ -35,6 +36,8 @@ TimelineDraw <- R6Class(
                 },
                 
                 BuildTimeline2 = function(status, pos){
+                  cat(paste0(class(self)[1], '::BuildTimeline2())\n'))
+                  
                   tl_status <- rep('', self$length)
                   tl_status[which(self$mandatory)] <- 'mandatory'
                   tl_status[which(unlist(status) == self$global$VALIDATED)] <- 'complete'
@@ -69,13 +72,17 @@ TimelineDraw <- R6Class(
                 
                 server = function(status, position) {
                   ns <- NS(self$id)
+                  cat(paste0(class(self)[1], '::server()\n'))
+
                   moduleServer(self$id, function(input, output, session) {
-                    
+                    cat(paste0(class(self)[1], '::moduleServer()\n'))
                     output$load_CSS <- renderUI({
+                      cat(paste0(class(self)[1], '::output$load_CSS\n'))
                       shinyjs::inlineCSS(sass::sass(self$GetCSSCode()))
                     })
                     
                     output$show_TL <- renderUI({ 
+                      cat(paste0(class(self)[1], '::output$show_TLS\n'))
                       HTML(self[[paste0('BuildTimeline', self$style)]](status(), position()))
                     })
                     
