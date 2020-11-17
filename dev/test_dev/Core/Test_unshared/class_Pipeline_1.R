@@ -1,11 +1,11 @@
 #Timeline_R6.R
 Pipeline1 = R6Class(
   "Pipeline1",
-  inherit = Process,
+  inherit = Pipeline,
   private = list(
-    .config = list(process.name = 'Pipeline',
-                   steps = c('process_Description', 'process_A'),
-                   mandatory = setNames(c(T,F), c('process_Description', 'process_A'))
+    .config = list(name = 'Pipeline',
+                   steps = c('ProcessDescription', 'ProcessA'),
+                   mandatory = setNames(c(T,F), c('ProcessDescription', 'ProcessA'))
     )
   ),
   
@@ -21,21 +21,23 @@ Pipeline1 = R6Class(
       ns <- NS(self$id)
       
       print("In class_Pipeline::Add_RenderUIs_Definitions()")
-      output$process_A <- renderUI(
+      output$ProcessA <- renderUI({
+        #req(self$ll.process[['ProcessA']])
         tagList(
-          div(id=NS(self$id)('processA'),
-              self$ll.process[['processA']]$ui(),
+          div(id=NS(self$id)('ProcessA'),
+              self$ll.process[['ProcessA']]$ui()
           )
         )
-      )
+      })
       
-      output$process_Description <- renderUI(
+      output$ProcessDescription <- renderUI({
+        #req(self$ll.process[['ProcessDescription']])
         tagList(
-          div(id=NS(self$id)('processDescription'),
-              self$ll.process[['processDescription']]$ui(),
+          div(id=NS(self$id)('ProcessDescription'),
+              self$ll.process[['ProcessDescription']]$ui()
           )
         )
-      )
+      })
     }
     
     

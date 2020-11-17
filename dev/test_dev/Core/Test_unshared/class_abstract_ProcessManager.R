@@ -201,11 +201,7 @@ ProcessManager <- R6Class(
       self$rv$wake <- self$Wake()
     },
     
-    ActionsOn_NoTmp_Input = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input()\n'))
-      self$InitializeModule()
-      self$InitializeTimeline()
-    },
+    ActionsOn_NoTmp_Input = function(){},
     
     ActionsOn_NoTmp_NoInput = function(){},
     
@@ -231,10 +227,9 @@ ProcessManager <- R6Class(
         #self$rv$current.pos <- length(self$config$status)
         self$ActionsOn_Tmp_Input()
       } else if (tmpExists && !inputExists) {
-        self$ActionsOn_Tmp_Input()
+        self$ActionsOn_Tmp_NoInput()
       } else if (!tmpExists && inputExists){
         # The current position is pointed on a new module
-        #self$ActionsOn_NoTmp_Input()
         self$ActionsOn_NoTmp_Input()
       } else if (!tmpExists && !inputExists){
         # Initialization of Prostar

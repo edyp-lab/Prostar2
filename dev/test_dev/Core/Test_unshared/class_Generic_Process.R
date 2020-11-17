@@ -8,6 +8,12 @@ Process = R6Class(
     
     ActionsOnNewPosition = function(){},
     
+    ActionsOn_NoTmp_Input = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input()\n'))
+      self$InitializeModule()
+      self$InitializeTimeline()
+    },
+    
     ActionsOnIsSkipped = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped()\n'))
       if (self$rv$isSkipped)
