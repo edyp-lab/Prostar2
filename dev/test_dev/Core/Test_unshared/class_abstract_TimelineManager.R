@@ -9,7 +9,6 @@ TimelineManager <- R6Class(
     
     id = NULL,
     style = 2,
-    type = 'generic',
     config = "<reactiveValues>",
     rv = "<reactiveValues>",
     
@@ -71,7 +70,7 @@ TimelineManager <- R6Class(
         passed <- F
         msg <- c(msg, "The length of 'config' is not equal to 4")
       }
-      names.conf <- c("process.name", "type", "steps")
+      names.conf <- c("name", "type", "steps")
       if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
         passed <- F
         msg <- c(msg, "The names of elements in 'config' must be the following: 'process.name', 'type', 'steps'")
@@ -100,6 +99,7 @@ TimelineManager <- R6Class(
     Display_Current_Step = function(){},
     
     Analyse_Status = function(){},
+    
     # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
@@ -129,21 +129,22 @@ TimelineManager <- R6Class(
     ui = function() {
       ns <- NS(self$id)
       fluidPage(
-        wellPanel(style="background-color: lightblue;",
+        #wellPanel(
+          #style="background-color: lightblue;",
                   tagList(
-                    uiOutput(ns('title')),
+                    uiOutput(ns('show_currentPos')),
                     shinyjs::useShinyjs(),
                     div(id = 'GlobalTL',
                         fluidRow(
                           align= 'center',
-                          column(width=2,div(style = self$btn_style,
+                          column(width=2, div(style = self$btn_style,
                                              uiOutput(ns('showPrevBtn')),
                                              uiOutput(ns('showResetBtn'))
                           )
                           ),
-                          column(width=8,div( style = self$btn_style,
+                          column(width=8, div( style = self$btn_style,
                                               self$timelineDraw$ui())),
-                          column(width=2,div(style = self$btn_style,
+                          column(width=2, div(style = self$btn_style,
                                              uiOutput(ns('showNextBtn')),
                                              uiOutput(ns('showSaveExitBtn'))
                           )
@@ -152,7 +153,7 @@ TimelineManager <- R6Class(
                         uiOutput(ns('show_screens'))
                     )
                   )
-        )
+       # )
       )
     },
     
@@ -213,7 +214,7 @@ TimelineManager <- R6Class(
         
         ###############################
         output$showResetBtn <- renderUI({
-          actionButton(ns("rstBtn"), paste0("Reset ", self$type),
+          actionButton(ns("rstBtn"), paste0("Reset entire ", self$config$type),
                        style='padding:4px; font-size:80%')
         })
         
@@ -227,7 +228,7 @@ TimelineManager <- R6Class(
                        style='padding:4px; font-size:80%')
         })
         
-        output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
+        #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
         
         #-------------------------------------------------------
         # Return the UI for a modal dialog with data selection input. If 'failed' is
@@ -297,6 +298,7 @@ TimelineManager <- R6Class(
         #   self$EncapsulateScreens()
         # })
         
+        output$show_currentPos <- renderUI({p(self$rv$current.pos)})
         
           list(current.pos = reactive({self$rv$current.pos}),
                reset = reactive({self$rv$reset_OK})

@@ -13,6 +13,7 @@ source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 # ------------- Class TimelineDataManager  --------------------------------------
 source(file.path('.', 'class_abstract_TimelineManager.R'), local=TRUE)$value
 source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
+source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 
 
 

@@ -4,6 +4,7 @@ Pipeline1 = R6Class(
   inherit = Pipeline,
   private = list(
     .config = list(name = 'Pipeline',
+                   type = 'pipeline',
                    steps = c('ProcessDescription', 'ProcessA'),
                    mandatory = setNames(c(T,F), c('ProcessDescription', 'ProcessA'))
     )

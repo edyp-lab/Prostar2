@@ -64,10 +64,13 @@ TimelineDraw <- R6Class(
                 
                 ui = function() {
                   ns <- NS(self$id)
-                  wellPanel(style="background-color: orange;",
-                            uiOutput(ns('load_CSS')),
+                  #wellPanel(
+                    #style="background-color: orange;",
+                     tagList(
+                       uiOutput(ns('load_CSS')),
                             uiOutput(ns('show_TL'))
-                  )
+                     )
+                  #)
                 },
                 
                 server = function(status, position) {

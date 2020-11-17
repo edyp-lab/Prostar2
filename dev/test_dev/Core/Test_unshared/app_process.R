@@ -51,7 +51,7 @@ Pipeline <- R6Class(
 ui = function() {
   ns <- NS(self$id)
   fluidPage(
-    wellPanel(style="background-color: green;",
+    #wellPanel(style="background-color: green;",
               h3('Prostar'),
               actionButton(ns('remoteReset'), 'Simulate remote reset'),
               actionButton(ns('skip'), 'Simulate skip entire process'),
@@ -68,7 +68,7 @@ ui = function() {
                 #        uiOutput(ns('show_status')))
               )
     )
-  )
+  #)
 },
 server = function(dataIn ) {
   cat(paste0(class(self)[1], '::server()\n'))

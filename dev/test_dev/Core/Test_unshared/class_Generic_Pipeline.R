@@ -12,6 +12,14 @@ Pipeline = R6Class(
     ll.process = NULL,
     tmp.return = reactiveValues(),
     
+    CreateTimeline = function(){
+      cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
+      self$timeline <- TimelineForPipeline$new(
+        id = NS(self$id)('timeline'),
+        mandatory = self$config$mandatory
+      )
+    },
+    
     Additional_Funcs_In_Server = function(){},
     
     Additional_Funcs_In_ModuleServer = function(){},
@@ -68,60 +76,35 @@ Pipeline = R6Class(
     Launch_Module_Server = function(){
       ns <- NS(self$id)
 
-      # self$ll.process <- setNames(lapply(names(self$ll.process),
-      #                                    function(x){
-      #                                      assign(x, get(x))$new(ns(x))
-      #                                    }),
-      #                             names(self$ll.process)
-      # )
-      # 
-      # lapply(names(self$ll.process), function(x){
-      #   self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
-      #                                                       remoteReset = reactive({NULL}),
-      #                                                       isSkipped = reactive({NULL}))
-      # })
+      self$ll.process <- setNames(lapply(names(self$ll.process),
+                                         function(x){
+                                           assign(x, get(x))$new(ns(x))
+                                         }),
+                                  names(self$ll.process)
+      )
 
-      
-      
-      self$ll.process[['ProcessDescription']] <- ProcessDescription$new(ns('ProcessDescription'))
-      self$ll.process[['ProcessA']] <- ProcessA$new(ns('ProcessA'))
-      
-      self$tmp.return[['ProcessDescription']] <- self$ll.process[['ProcessDescription']]$server(dataIn = reactive({self$rv$data2send[['ProcessDescription']]}),
-                                                                                                remoteReset = reactive({NULL}),
-                                                                                                isSkipped = reactive({NULL}))
-     self$tmp.return[['ProcessA']] <- self$ll.process[['ProcessA']]$server(dataIn = reactive({self$rv$data2send[['ProcessA']]}),
-                                                                           remoteReset = reactive({NULL}),
-                                                                           isSkipped = reactive({NULL}))
-                                                                            
+      lapply(names(self$ll.process), function(x){
+        self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
+                                                            remoteReset = reactive({NULL}),
+                                                            isSkipped = reactive({NULL}))
+      })
+                                                                     
                                                                             
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
-        browser()
-        ret <- setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
-                        names(self$ll.process))
-        ret.indice <- which(!is.null(ret))
-        self$config$status[ret.indice] <- self$global$VALIDATED
+        #browser()
         print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
                        names(self$ll.process))
         )
+        ret <- setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
+                        names(self$ll.process))
+        ret.indice <- which(lapply(ret, function(x) { !is.null(x)})==TRUE)
+        self$config$status[ret.indice] <- self$global$VALIDATED
+        
         
         
       })
-      
-      # print("In class_Pipeline::Launch_Module_Server()")
-      # source(file.path('.', 'process_A.R'), local=TRUE)$value
-      # 
-      # self$logics[['process_A']]$server(
-      #   dataIn = reactive({self$rv$data2send[['process_A']]}),
-      #   remoteReset = reactive({NULL}),
-      #   isSkipped = reactive({NULL}))
-      # 
-      # self$logics[['process_Description']]$server(
-      #   dataIn = reactive({self$rv$data2send[['process_Description']]}),
-      #   dataOut = dataOut,
-      #   remoteReset = reactive({NULL}),
-      #   isSkipped = reactive({NULL}),
-      #   logics = ProcessLogics_Description)
+
     },
     
     #To avoid "intempestive" initializations of modules due to dataIn changes
@@ -134,7 +117,7 @@ Pipeline = R6Class(
     # corresponds to the current position and one send always the last
     # non-NULL dataset before current position
     PrepareData2Send = function(){
-      
+
       # Returns NULL to all modules except the one pointed by the current position
       # Initialization of the pipeline : one send dataIn() to the
       # original module
@@ -147,16 +130,14 @@ Pipeline = R6Class(
           if (is.null(ind.last.validated)){
             data <- self$rv$temp.dataIn
           } else {
-            data <- self$rv$dataIn[,,c(1:ind.last.validated)]
+            data <- self$rv$temp.dataIn[,,c(1:ind.last.validated)]
           }
         }
         return(data)
       }
       
-      lapply(self$config$steps, function(x){
+      lapply(names(self$ll.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
-      
-      #return_of_process$obj <- NA
     }
 
     

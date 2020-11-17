@@ -6,6 +6,14 @@ Process = R6Class(
   
   public = list(
     
+    CreateTimeline = function(){
+      cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
+      self$timeline <- TimelineForProcess$new(
+        id = NS(self$id)('timeline'),
+        mandatory = self$config$mandatory
+      )
+    },
+    
     ActionsOnNewPosition = function(){},
     
     ActionsOn_NoTmp_Input = function(){

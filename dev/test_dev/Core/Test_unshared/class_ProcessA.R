@@ -4,8 +4,9 @@ ProcessA = R6Class(
   inherit = Process,
   private = list(
     .config = list(name = 'ProcessA',
-                    steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                    mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
+                   type = 'process',
+                   steps = c('Description', 'Step1', 'Step2', 'Step3'),
+                   mandatory = setNames(c(F,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
                     )
   ),
   
@@ -17,7 +18,7 @@ ProcessA = R6Class(
       output$Description <- renderUI({
         tagList(
           actionButton(ns('btn_validate_Description'), 
-                       paste0('Start ', self$config$process.name),
+                       paste0('Start ', self$config$name),
                        class = btn_success_color),
           mod_insert_md_ui(ns(paste0(self$config$process.name, "_md")))
         )

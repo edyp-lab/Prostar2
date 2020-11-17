@@ -239,13 +239,7 @@ ProcessManager <- R6Class(
       }
     },
     
-    CreateTimeline = function(){
-      cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
-      self$timeline <- TimelineForProcess$new(
-        id = NS(self$id)('timeline'),
-        mandatory = self$config$mandatory
-      )
-    },
+    CreateTimeline = function(){},
     Additional_Funcs_In_Server = function(){},
     Additional_Funcs_In_ModuleServer = function(){},
     
@@ -310,8 +304,9 @@ ProcessManager <- R6Class(
     ui = function() {
       ns <- NS(self$id)
       fluidPage(
-        wellPanel(style="background-color: yellow;",
-                  uiOutput(ns('title')),
+        #wellPanel(
+          #style="background-color: yellow;",
+                  uiOutput(ns('show_currentPos')),
                   uiOutput(ns('show_timeline_ui')),
                   hr(),
                   fluidRow(
@@ -325,7 +320,7 @@ ProcessManager <- R6Class(
                            tags$b(h4(style = 'color: blue;', "status")),
                            uiOutput(ns('show_status')))
                   )
-        )
+       # )
       )
     },
     
@@ -433,8 +428,8 @@ ProcessManager <- R6Class(
         #                  }))
         # })
         
-        output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
-        
+        #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
+        output$show_currentPos <- renderUI({p(self$rv$current.pos)})
         #################################################
         # Main listener of the module which initialize it
         
