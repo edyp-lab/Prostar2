@@ -1,8 +1,15 @@
 
-.dropdown{
+/*.dropdown{
  border: grey solid 1px ;
+ margin: 0 2px 0 2px ;
+}*/
+
+h2, h3{
+ color: hotpink ;
 }
 
-h2{
- color: blue ;
+#v_timeline{
+ color: black ;
+ border: dotted black 1px ;
+ margin: auto ;
 }
