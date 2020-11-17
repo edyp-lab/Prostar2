@@ -121,6 +121,7 @@ ProcessManager <- R6Class(
       self$Send_Result_to_Caller()
       self$InitializeDataIn()
     },
+    
     ActionsOnIsSkipped = function(){},
     
     GetCurrentStepName = function(){
@@ -159,6 +160,7 @@ ProcessManager <- R6Class(
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
+
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
     #  browser()

@@ -4,7 +4,7 @@ ProcessDescription = R6Class(
   inherit = Process,
   
   private = list(
-    .config = list(process.name = 'Description',
+    .config = list(name = 'Description',
                    steps = c('Description'),
                    mandatory = setNames(c(T), c('Description'))
     )

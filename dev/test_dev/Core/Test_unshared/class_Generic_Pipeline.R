@@ -94,9 +94,18 @@ Pipeline = R6Class(
                                                                            isSkipped = reactive({NULL}))
                                                                             
                                                                             
-                                                                 
+      # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
-        print(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}))
+        browser()
+        ret <- setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
+                        names(self$ll.process))
+        ret.indice <- which(!is.null(ret))
+        self$config$status[ret.indice] <- self$global$VALIDATED
+        print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
+                       names(self$ll.process))
+        )
+        
+        
       })
       
       # print("In class_Pipeline::Launch_Module_Server()")
