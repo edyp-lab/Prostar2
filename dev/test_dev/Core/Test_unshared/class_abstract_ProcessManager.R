@@ -249,6 +249,8 @@ ProcessManager <- R6Class(
         mandatory = self$config$mandatory
       )
     },
+    Additional_Funcs_In_Server = function(){},
+    Additional_Funcs_In_ModuleServer = function(){},
     
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline()\n'))
@@ -332,11 +334,14 @@ ProcessManager <- R6Class(
     
     # SERVER
     server = function(dataIn = NULL, 
-                      remoteReset = FALSE,
-                      isSkipped = FALSE) {
+                      remoteReset = reactive({FALSE}),
+                      isSkipped = reactive({FALSE})) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
      # browser()
+      
+      
+      self$Additional_Funcs_In_Server()
       
       # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
       # and set the variable which will be read by the caller
@@ -385,6 +390,8 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer()\n'))
         # TODO In a script for dev, write a test function to check the validity of the logics for the new processLogics
+        
+        self$Additional_Funcs_In_ModuleServer()
         
         self$Add_RenderUIs_Definitions( input, output)
         

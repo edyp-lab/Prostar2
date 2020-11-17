@@ -18,7 +18,7 @@ source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
 
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
-source(file.path('.', 'class_Process.R'), local=TRUE)$value
+source(file.path('.', 'class_Generic_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 

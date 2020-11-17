@@ -18,9 +18,6 @@ Process = R6Class(
       self$config$status <- setNames(rep(tag, self$length),
                                      self$config$steps)
     }
-    
-    # Add_RenderUIs_Definitions = function( input, output){},
-    
-    
+
   )
 )
