@@ -34,7 +34,7 @@ ProcessManager <- R6Class(
       
       self$rv = reactiveValues(
         dataIn = NULL,
-        current.pos = NULL,
+        #current.pos = NULL,
         remoteReset = NULL,
         wake = F,
         reset = NULL,
@@ -87,7 +87,7 @@ ProcessManager <- R6Class(
       ind.max <- NULL
       indices.validated <- which(self$config$status == self$global$VALIDATED)
       if (length(indices.validated) > 0){
-        ind <- which(indices.validated < self$rv$current.pos)
+        ind <- which(indices.validated < self$timeline.res$current.pos())
         if(length(ind) > 0)
           ind.max <- max(ind)
       }
@@ -126,7 +126,7 @@ ProcessManager <- R6Class(
     
     GetCurrentStepName = function(){
       cat(paste0(class(self)[1], '::GetCurrentStepName()\n'))
-      self$config$steps[self$rv$current.pos]
+      self$config$steps[self$timeline.res$current.pos()]
     },
     
     Unskip = function(pos){
@@ -160,8 +160,8 @@ ProcessManager <- R6Class(
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
-
-      self$config$status[self$rv$current.pos] <- self$global$VALIDATED
+browser()
+      self$config$status[self$timeline.res$current.pos()] <- self$global$VALIDATED
       self$Set_Skipped_Status()
     #  browser()
       if (self$config$status[self$length] == self$global$VALIDATED)
@@ -249,17 +249,21 @@ ProcessManager <- R6Class(
         config = reactive({self$config}),
         wake = reactive({self$rv$wake}),
         remoteReset = reactive({self$rv$remoteReset})
-      )
-
+        )
+      
+      #self$rv$current.pos <- self$timeline.res$current.pos()
+      
       # observeEvent(req(self$timeline.res$reset()), ignoreInit=F, {
       #   browser()
       #   self$rv$reset <- self$timeline.res$reset()
       # })
       
-      observeEvent(req(self$timeline.res$current.pos()), ignoreInit=F, {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos())\n'))
-        self$rv$current.pos <- self$timeline.res$current.pos()
-      })
+      # observeEvent(req(self$timeline.res$current.pos()), ignoreInit=F, {
+      #   browser()
+      #   cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos())\n'))
+      #   self$rv$current.pos <- self$timeline.res$current.pos()
+      #   self$ActionsOnNewPosition()
+      # })
       
       observeEvent(req(self$timeline.res$reset()), {
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$reset())\n'))
@@ -351,11 +355,7 @@ ProcessManager <- R6Class(
         self$ActionsOnNewDataIn(dataIn())
       })
       
-      observeEvent(req(self$rv$current.pos), ignoreInit=T, {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$rv$current.pos)\n'))
-        self$ActionsOnNewPosition()
-      })
-      
+
       observeEvent(remoteReset(), { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
        # browser()
@@ -429,7 +429,9 @@ ProcessManager <- R6Class(
         # })
         
         #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
-        output$show_currentPos <- renderUI({p(self$rv$current.pos)})
+        output$show_currentPos <- renderUI({
+          req(self$timeline.res)
+          p(self$timeline.res$current.pos())})
         #################################################
         # Main listener of the module which initialize it
         

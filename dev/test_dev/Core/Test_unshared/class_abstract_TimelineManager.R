@@ -85,8 +85,8 @@ TimelineManager <- R6Class(
            msg = msg)
     },
     
-    Update_Cursor_position = function(){
-      cat(paste0(class(self)[1], '::Update_Cursor_position()\n'))
+    Force_Update_Cursor_position = function(){
+      cat(paste0(class(self)[1], '::Force_Update_Cursor_position()\n'))
       req(self$config$status)
       if (self$config$status[self$nbSteps] == self$global$VALIDATED)
         self$rv$current.pos <- self$default_pos$VALIDATED
@@ -166,7 +166,7 @@ TimelineManager <- R6Class(
       #browser()
       observeEvent(config(),{
         cat(paste0(class(self)[1], '::observeEvent(config)\n'))
-       # browser()
+        browser()
         self$config <- config()
         self$rv$current.pos <- 1
         cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
@@ -187,7 +187,7 @@ TimelineManager <- R6Class(
       
       observeEvent(req(wake()),{
         cat(paste0(class(self)[1], '::observeEvent(req(wake()))\n'))
-        self$Update_Cursor_position()
+        self$Force_Update_Cursor_position()
         })
       
       observeEvent(remoteReset(),ignoreInit = T, {
@@ -276,10 +276,10 @@ TimelineManager <- R6Class(
         
         
         # Catch a new position or a change in the status list
-        observeEvent(req(c(self$rv$current.pos, self$config$status)), {
-           cat(paste0(class(self)[1], '::observeEvent(req(c(self$rv$current.pos, self$config$status))\n'))
-          #browser()
-          self$Update_Cursor_position()
+        observeEvent(req(self$config$status), ignoreInit = T,{
+           cat(paste0(class(self)[1], '::observeEvent(req(s, self$config$status))\n'))
+          browser()
+          self$Force_Update_Cursor_position()
           self$Analyse_Status()
           self$Display_Current_Step()
           
@@ -287,6 +287,14 @@ TimelineManager <- R6Class(
           shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
         })
         
+        observeEvent(req(self$rv$current.pos), ignoreInit = T,{
+          cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos))\n'))
+          browser()
+          self$Display_Current_Step()
+          
+          shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
+          shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
+        })
         
         # observeEvent(req(self$config), ignoreInit=F,{
         #   cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
@@ -298,7 +306,7 @@ TimelineManager <- R6Class(
         #   self$EncapsulateScreens()
         # })
         
-        output$show_currentPos <- renderUI({p(self$rv$current.pos)})
+        output$show_currentPos <- renderUI({p(paste0(self$id, ': ', self$rv$current.pos))})
         
           list(current.pos = reactive({self$rv$current.pos}),
                reset = reactive({self$rv$reset_OK})
