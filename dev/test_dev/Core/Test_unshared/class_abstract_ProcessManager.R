@@ -293,6 +293,7 @@ browser()
       self$length <- length(config$steps)
       
       observeEvent(config, {
+        browser()
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config)\n'))
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
         self$config$status <- setNames(rep(0, self$length), config$steps)
@@ -366,11 +367,11 @@ browser()
       
       #--- Catch a reset from timeline or caller
       
-      observeEvent(self$config$status, {
-        #browser()
-        cat(paste0(class(self)[1], '::observeEvent(self$config$status)\n'))
-        print(paste0(self$config$status, collapse=' '))
-      })
+      # observeEvent(self$config$status, {
+      #   #browser()
+      #   cat(paste0(class(self)[1], '::observeEvent(self$config$status)\n'))
+      #   print(paste0(self$config$status, collapse=' '))
+      # })
 
       observeEvent(isSkipped(), ignoreInit = T, { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped())\n'))
