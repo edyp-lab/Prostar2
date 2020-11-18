@@ -49,6 +49,9 @@ ui <- dashboardPage(
   
   dashboardHeader(title="Prostar",
                   tags$li(class="dropdown",
+                          checkboxInput(inputId = 'data', label = 'Data Loaded?', value = FALSE)
+                  ),
+                  tags$li(class="dropdown",
                           a(href="http://www.prostar-proteomics.org/",
                             img(src="logo.png",
                                 title="Prostar website",
@@ -62,12 +65,13 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       br(),
-      menuItem("Home", tabName = "ProstarHome",icon = icon("home"), selected = TRUE),
+      menuItem("Home", tabName = "ProstarHome", icon = icon("home"), selected = TRUE),
       hr(),
       menuItem("Data Manager", icon = icon("folder"), #startExpanded = TRUE,
-               menuSubItem("Import Data", tabName = "import"),
-               menuSubItem("Export Results", tabName = "export"),
-               menuSubItem("Reload Prostar", tabName = "reload")),
+               menuSubItem("Open QFeature file", tabName = "openFile"),
+               menuSubItem("Convert Data", tabName = "convert"),
+               menuSubItem("Demo data", tabName = "demoData"),
+               menuSubItem("Export Results", tabName = "export")),
       hr(),
       menuItem("Global Settings", tabName = "globalSettings", icon = icon("cogs")),
       menuItem("Release Notes", tabName = "releaseNotes", icon = icon("clipboard")),
@@ -85,127 +89,103 @@ ui <- dashboardPage(
       tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
     ),
     
-    fluidPage(
-      
-      
-      tags$div(
-        column(2,
-               style = paste0("display: ","block",";"), # "block" if loaded data else "none"
-               id = "v_timeline",
-               br(),
-               h4('Statistic Descriptive'),
-               mod_bsmodal_ui('statsDescriptive'),
-               br(),
-               h4('Timeline'),
-               tags$img(src="timeline_v.PNG",
-                        title="General timeline",
-                        style="display:block ; height: 500px; margin: auto;")
-        )
-      ),
-      
-      
-      column(10,# 10 if loaded data else 12
-             tabItems(
-               tabItem(tabName = "ProstarHome",
-                       h2("Home Prostar"),
-                       mod_homepage_ui("home")),
-               tabItem(tabName = "import",
-                       h2("Import data"),
-                       tabsetPanel(type = "tabs",
-                                   tabPanel("Open QFeature file",
-                                            h3("Tab1"),
-                                            mod_import_file_from_ui("openFile")
-                                   ),
-                                   tabPanel("Convert Data",
-                                            h3("Tab2"),
-                                            mod_convert_ms_file_ui("convert")
-                                   ),
-                                   tabPanel("Demo data",
-                                            h3("Tab3"),
-                                            mod_open_demo_dataset_ui("demoData")))
-               ),
-               
-               
-               tabItem(tabName = "export",
-                       h2("Export")),
-               
-               tabItem(tabName = "reload",
-                       h2("Reload Prostar")),
-               
-               tabItem(tabName = "globalSettings",
-                       h2("Global settings"),
-                       mod_settings_ui("settingsOptions")),
-               
-               tabItem(tabName = "releaseNotes",
-                       h2("Release notes"),
-                       mod_release_notes_ui("rl")),
-               
-               tabItem(tabName = "updates",
-                       h2("Check for updates"),
-                       mod_check_updates_ui("test_check")),
-               
-               tabItem(tabName = "usefulLinks",
-                       h2("Useful links"),
-                       mod_insert_md_ui("links_MD")),
-               
-               tabItem(tabName = "faq",
-                       h2("FAQ"),
-                       mod_insert_md_ui("FAQ_MD")),
-               
-               tabItem(tabName = "bugReport",
-                       h2("Bug report"),
-                       mod_bug_report_ui('bugReport'))
-             ))
+    
+    
+    conditionalPanel(condition = "input.data == false",
+                     
+                     tabItems(
+                       tabItem(tabName = "ProstarHome", h2("Home Prostar"),mod_homepage_ui('home')
+                       ),
+                       tabItem(tabName = "openFile", h2("Open QFeature file")),
+                       tabItem(tabName = "convert", h2("Convert Data")),
+                       tabItem(tabName = "demoData", h2("Demo data")),
+                       tabItem(tabName = "export", h2("Export")),
+                       tabItem(tabName = "globalSettings", h2("Global settings")),
+                       tabItem(tabName = "releaseNotes", h2("Release notes")),
+                       tabItem(tabName = "updates", h2("Check for updates")),
+                       tabItem(tabName = "usefulLinks", h2("Useful links")),
+                       tabItem(tabName = "faq", h2("FAQ")),
+                       tabItem(tabName = "bugReport", h2("Bug report"))
+                     )
+                     
     ),
+    
+    conditionalPanel(condition = "input.data == true", # 'Data Loaded?'
+                     
+                     fluidPage(
+                       column(2, id = "v_timeline",
+                              br(),
+                              h4('Statistic Descriptive'),
+                              mod_bsmodal_ui('statsDescriptive'),
+                              br(),
+                              h4('Timeline'),
+                              tags$img(src="timeline_v.PNG",
+                                       title="General timeline",
+                                       style="display:block ; height: 500px; margin: auto;")
+                       ),
+                       
+                       column(10,
+                              box(p('Excitavit hic ardor milites per municipia plurima, quae isdem conterminant, dispositos et castella, sed quisque serpentes latius pro viribus repellere moliens, nunc globis confertos, aliquotiens et dispersos multitudine superabatur ingenti, quae nata et educata inter editos recurvosque ambitus montium eos ut loca plana persultat et mollia, missilibus obvios eminus lacessens et ululatu truci perterrens.'),
+                                  title = 'Data process',
+                                  width = NULL))
+                     ))
+    
   )
 )
 
 
 
+
 server <- function(input, output,session) {
+  
+  observeEvent(input$data, {
+    print(input$data)
+  })
+  
+  
   
   mod_homepage_server('home')
   
   #------------------------------------------------------------------------------#
-  
-  utils::data(Exp1_R25_prot, package="DAPARdata2")
-  
-  mod_import_file_from_server("openFile")
-  mod_convert_ms_file_server("convert")
-  mod_open_demo_dataset_server("demoData", pipeline.def=reactive({pipeline.defs}))
-  
-  mod_settings_server("settingsOptions", obj = reactive({Exp1_R25_prot}))
-  
-  mod_release_notes_server("rl")
-  
-  mod_check_updates_server("test_check")
-  
-  mod_insert_md_server("links_MD", URL_links)
-  
-  mod_insert_md_server("FAQ_MD", URL_FAQ)
-  
-  mod_bug_report_server("bugReport")
-  warning("Test warning message")
-  
-  #------------------------------------------------------------------------------#
-  r <- reactiveValues(
-    settings = NULL
-  )
-  
-  r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
-  
-  mod_all_plots_server("exemple_plot",
-                       dataIn = reactive({Exp1_R25_prot}),
-                       indice = reactive({2}),
-                       settings = reactive({r$settings()}) )
-  
-  mod_UI <- mod_all_plots_ui("exemple_plot")
-  mod_bsmodal_server("statsDescriptive",
-                     title = "Plots",
-                     mod_UI = mod_UI,
-                     width="75%"
-  )
-  #------------------------------------------------------------------------------#
+  # 
+  # utils::data(Exp1_R25_prot, package="DAPARdata2")
+  # 
+  # mod_import_file_from_server("openFile")
+  # mod_convert_ms_file_server("convert")
+  # mod_open_demo_dataset_server("demoData", pipeline.def=reactive({pipeline.defs}))
+  # 
+  # mod_settings_server("settingsOptions", obj = reactive({Exp1_R25_prot}))
+  # 
+  # mod_release_notes_server("rl")
+  # 
+  # mod_check_updates_server("test_check")
+  # 
+  # mod_insert_md_server("links_MD", URL_links)
+  # 
+  # mod_insert_md_server("FAQ_MD", URL_FAQ)
+  # 
+  # mod_bug_report_server("bugReport")
+  # warning("Test warning message")
+  # 
+  # #------------------------------------------------------------------------------#
+  # r <- reactiveValues(
+  #   settings = NULL
+  # )
+  # 
+  # r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
+  # 
+  # mod_all_plots_server("exemple_plot",
+  #                      dataIn = reactive({Exp1_R25_prot}),
+  #                      indice = reactive({2}),
+  #                      settings = reactive({r$settings()}) )
+  # 
+  # mod_UI <- mod_all_plots_ui("exemple_plot")
+  # mod_bsmodal_server("statsDescriptive",
+  #                    title = "Plots",
+  #                    mod_UI = mod_UI,
+  #                    width="75%"
+  # )
+  # #------------------------------------------------------------------------------#
   
 }
 
