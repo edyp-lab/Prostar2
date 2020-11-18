@@ -89,46 +89,7 @@ ui <- dashboardPage(
       tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
     ),
     
-    
-    
-    conditionalPanel(condition = "input.data == false",
-                     
-                     tabItems(
-                       tabItem(tabName = "ProstarHome", h2("Home Prostar"),mod_homepage_ui('home')
-                       ),
-                       tabItem(tabName = "openFile", h2("Open QFeature file")),
-                       tabItem(tabName = "convert", h2("Convert Data")),
-                       tabItem(tabName = "demoData", h2("Demo data")),
-                       tabItem(tabName = "export", h2("Export")),
-                       tabItem(tabName = "globalSettings", h2("Global settings")),
-                       tabItem(tabName = "releaseNotes", h2("Release notes")),
-                       tabItem(tabName = "updates", h2("Check for updates")),
-                       tabItem(tabName = "usefulLinks", h2("Useful links")),
-                       tabItem(tabName = "faq", h2("FAQ")),
-                       tabItem(tabName = "bugReport", h2("Bug report"))
-                     )
-                     
-    ),
-    
-    conditionalPanel(condition = "input.data == true", # 'Data Loaded?'
-                     
-                     fluidPage(
-                       column(2, id = "v_timeline",
-                              br(),
-                              h4('Statistic Descriptive'),
-                              mod_bsmodal_ui('statsDescriptive'),
-                              br(),
-                              h4('Timeline'),
-                              tags$img(src="timeline_v.PNG",
-                                       title="General timeline",
-                                       style="display:block ; height: 500px; margin: auto;")
-                       ),
-                       
-                       column(10,
-                              box(p('Excitavit hic ardor milites per municipia plurima, quae isdem conterminant, dispositos et castella, sed quisque serpentes latius pro viribus repellere moliens, nunc globis confertos, aliquotiens et dispersos multitudine superabatur ingenti, quae nata et educata inter editos recurvosque ambitus montium eos ut loca plana persultat et mollia, missilibus obvios eminus lacessens et ululatu truci perterrens.'),
-                                  title = 'Data process',
-                                  width = NULL))
-                     ))
+    uiOutput('body')
     
   )
 )
@@ -138,8 +99,53 @@ ui <- dashboardPage(
 
 server <- function(input, output,session) {
   
-  observeEvent(input$data, {
+  
+  output$body <- renderUI({
+    
     print(input$data)
+    
+    if (isFALSE(input$data)){
+      col_left <- 1
+      col_right <- 12
+      display <- "none"
+      print(paste0('col : ... and ', col_right,'; display : ', display))
+    } else{
+      col_left <- 2
+      col_right <- 10
+      display <- "block"
+      print(paste0('col :', col_left, ' and ', col_right,'; display : ', display))
+    }
+    
+    fluidPage(tags$div(style=paste0("display: ",display," ;"),
+                       column(col_left, id = "v_timeline",
+                              br(),
+                              h4('Statistic Descriptive'),
+                              mod_bsmodal_ui('statsDescriptive'),
+                              br(),
+                              h4('Timeline'),
+                              tags$img(src="timeline_v.PNG",
+                                       title="General timeline",
+                                       style="display:block ; height: 500px; margin: auto;")
+                       )
+    ),
+    
+    column(col_right, tabItems(
+      tabItem(tabName = "ProstarHome", h2("Home Prostar"),mod_homepage_ui('home')
+      ),
+      tabItem(tabName = "openFile", h2("Open QFeature file")),
+      tabItem(tabName = "convert", h2("Convert Data")),
+      tabItem(tabName = "demoData", h2("Demo data")),
+      tabItem(tabName = "export", h2("Export")),
+      tabItem(tabName = "globalSettings", h2("Global settings")),
+      tabItem(tabName = "releaseNotes", h2("Release notes")),
+      tabItem(tabName = "updates", h2("Check for updates")),
+      tabItem(tabName = "usefulLinks", h2("Useful links")),
+      tabItem(tabName = "faq", h2("FAQ")),
+      tabItem(tabName = "bugReport", h2("Bug report"))
+    )
+    
+    )
+    )
   })
   
   
