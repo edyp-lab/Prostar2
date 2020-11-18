@@ -27,8 +27,8 @@ TimelineForProcess = R6Class(
                       validated process and all further datasets will be removed",
     
     
-    Analyse_Status = function(){
-      cat(paste0(class(self)[1], '::Analyse_Status()\n'))
+    Force_ToggleState_Steps = function(){
+      cat(paste0(class(self)[1], '::Force_ToggleState_Steps()\n'))
       req(self$nbSteps)
       if ((self$nbSteps==1) || (self$nbSteps>=2 && sum(self$config$status[2:self$nbSteps])== 0 )){
         # This is the case at the initialization of a process or after a reset

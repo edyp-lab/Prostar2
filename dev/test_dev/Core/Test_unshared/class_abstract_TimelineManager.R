@@ -14,7 +14,7 @@ TimelineManager <- R6Class(
     
     global = list(VALIDATED = 1,
                   SKIPPED = -1,
-                  UNDONE = 1
+                  UNDONE = 0
     ),
     default_pos =list(VALIDATED = 1,
                       SKIPPED = 1,
@@ -26,7 +26,7 @@ TimelineManager <- R6Class(
     timelineDraw  = NULL,
     
     
-    Analyse_status = function(){},
+    Force_ToggleState_Steps = function(){},
     
     Init_Default_Positions = function(){
       cat(paste0(class(self)[1], '::Init_Default_Positions()\n'))
@@ -98,7 +98,6 @@ TimelineManager <- R6Class(
     
     Display_Current_Step = function(){},
     
-    Analyse_Status = function(){},
     
     # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
@@ -124,6 +123,11 @@ TimelineManager <- R6Class(
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     },
     
+    Update_Buttons_Status = function(){
+      #browser()
+      shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
+      shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
+    },
     
     # UI
     ui = function() {
@@ -176,6 +180,7 @@ TimelineManager <- R6Class(
           stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
         
         self$EncapsulateScreens()
+        self$Update_Buttons_Status()
         #browser()
       })
       
@@ -224,8 +229,9 @@ TimelineManager <- R6Class(
         })
         
         output$showNextBtn <- renderUI({
-          actionButton(ns("nextBtn"), "next",
+          shinyjs::disabled(actionButton(ns("nextBtn"), "next",
                        style='padding:4px; font-size:80%')
+          )
         })
         
         #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
@@ -276,17 +282,20 @@ TimelineManager <- R6Class(
         
         
         # Catch a new position or a change in the status list
-        observeEvent(req(c(self$rv$current.pos, self$config$status)), {
-           cat(paste0(class(self)[1], '::observeEvent(req(c(self$rv$current.pos, self$config$status))\n'))
-          #browser()
-          self$Update_Cursor_position()
-          self$Analyse_Status()
+        observeEvent(req(self$rv$current.pos), {
+           cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos))\n'))
+          #self$Force_ToggleState_Steps()
           self$Display_Current_Step()
-          
-          shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
-          shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
+          self$Update_Buttons_Status()
         })
         
+        observeEvent(req(self$config$status), {
+          cat(paste0(class(self)[1], '::observeEvent(req(self$config$status))\n'))
+          #browser()
+          self$Update_Cursor_position()
+          self$Force_ToggleState_Steps()
+          self$Update_Buttons_Status()
+        })
         
         # observeEvent(req(self$config), ignoreInit=F,{
         #   cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
@@ -298,7 +307,9 @@ TimelineManager <- R6Class(
         #   self$EncapsulateScreens()
         # })
         
-        output$show_currentPos <- renderUI({p(self$rv$current.pos)})
+        output$show_currentPos <- renderUI({
+          p(paste0(self$id, ' : ', self$rv$current.pos))
+          })
         
           list(current.pos = reactive({self$rv$current.pos}),
                reset = reactive({self$rv$reset_OK})

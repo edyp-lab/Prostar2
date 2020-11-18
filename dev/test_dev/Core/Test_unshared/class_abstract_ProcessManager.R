@@ -8,7 +8,7 @@ ProcessManager <- R6Class(
     timeline.res = NULL,
     global = list(VALIDATED = 1,
                   SKIPPED = -1,
-                  UNDONE = 1
+                  UNDONE = 0
     ),
     config = "<reactiveValues>" ,
     dataOut = "<reactiveValues>",
@@ -113,14 +113,7 @@ ProcessManager <- R6Class(
     
     ActionsOnNewPosition = function(){},
     
-    ActionsOnReset = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
-      self$ResetScreens()
-      self$rv$dataIn <- NA
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-      self$InitializeDataIn()
-    },
+    
     
     ActionsOnIsSkipped = function(){},
     
@@ -197,7 +190,9 @@ ProcessManager <- R6Class(
     
     #Actions onf receive new dataIn()
     ActionsOn_Tmp_NoInput = function(){
-      self$rv$wake <- self$Wake()},
+      self$rv$wake <- self$Wake()
+      self$ActionsOnReset()
+      },
     
     ActionsOn_Tmp_Input = function(){
       self$rv$wake <- self$Wake()
@@ -205,7 +200,9 @@ ProcessManager <- R6Class(
     
     ActionsOn_NoTmp_Input = function(){},
     
-    ActionsOn_NoTmp_NoInput = function(){},
+    ActionsOn_NoTmp_NoInput = function(){
+      self$ActionsOnReset()
+    },
     
     ActionsOnNewDataIn = function(data){
       cat(paste0(class(self)[1], '::', 'ActionsOnNewDataIn()\n'))
@@ -229,6 +226,8 @@ ProcessManager <- R6Class(
         #self$rv$current.pos <- length(self$config$status)
         self$ActionsOn_Tmp_Input()
       } else if (tmpExists && !inputExists) {
+        # The module has been reseted
+        browser()
         self$ActionsOn_Tmp_NoInput()
       } else if (!tmpExists && inputExists){
         # The current position is pointed on a new module
@@ -261,9 +260,9 @@ ProcessManager <- R6Class(
         self$rv$current.pos <- self$timeline.res$current.pos()
       })
       
-      observeEvent(req(self$timeline.res$reset()), {
+      observeEvent(self$timeline.res$reset(), ignoreInit = T,  ignoreNULL=T,{
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$reset())\n'))
-       # browser()
+        browser()
         self$ActionsOnReset()
       })
       
@@ -356,7 +355,7 @@ ProcessManager <- R6Class(
         self$ActionsOnNewPosition()
       })
       
-      observeEvent(remoteReset(), { 
+      observeEvent(remoteReset(), ignoreInit = T, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
        # browser()
         print("remote reset activated")
@@ -429,7 +428,9 @@ ProcessManager <- R6Class(
         # })
         
         #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
-        output$show_currentPos <- renderUI({p(self$rv$current.pos)})
+        output$show_currentPos <- renderUI({
+          p(paste0(self$id, ' : ', self$rv$current.pos))
+          })
         #################################################
         # Main listener of the module which initialize it
         

@@ -17,16 +17,22 @@ Timeline  <- R6Class(
       self$id <- id
       self$rv = reactiveValues(
         current.pos = 1,
-        reset = NULL
+        reset = NULL,
+        state = NULL
       )
       },
+    ChangeState = function(){
+      shinyjs::toggleState('reset', cond = self$rv$state)
+    },
     
     ui = function(){
       ns <- NS(self$id)
       wellPanel(style="background-color: lightblue;",
       tagList(
+        shinyjs::useShinyjs(),
         actionButton(ns('reset'), 'Simulate reset'),
-        actionButton(ns('curpos'), 'Change current position')
+        actionButton(ns('curpos'), 'Change current position'),
+        actionButton(ns('state'), 'Change state')
       )
       )
     },
@@ -36,6 +42,12 @@ Timeline  <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
 
+        
+        observeEvent(input$state, {
+          self$rv$state <- input$state%%2 != 0
+          self$ChangeState()
+        })
+        
         observeEvent(input$reset,{
           print(paste0(class(self)[1], '::', 'observeEvent(input$reset)'))
           print("action reset")

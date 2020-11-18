@@ -16,6 +16,16 @@ Process = R6Class(
     
     ActionsOnNewPosition = function(){},
     
+    ActionsOnReset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
+      browser()
+      self$ResetScreens()
+      self$rv$dataIn <- NA
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+      self$InitializeDataIn()
+    },
+    
     ActionsOn_NoTmp_Input = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input()\n'))
       self$InitializeModule()

@@ -11,6 +11,7 @@ Pipeline = R6Class(
     listUIs = NULL,
     ll.process = NULL,
     tmp.return = reactiveValues(),
+    old.tmp.return = NULL,
     
     CreateTimeline = function(){
       cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
@@ -23,6 +24,16 @@ Pipeline = R6Class(
     Additional_Funcs_In_Server = function(){},
     
     Additional_Funcs_In_ModuleServer = function(){},
+    
+    ActionsOnReset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
+      browser()
+      self$ResetScreens()
+      self$rv$dataIn <- NA
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+      self$InitializeDataIn()
+    },
     
     ActionsOn_NoTmp_Input = function(){
       print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
@@ -92,19 +103,33 @@ Pipeline = R6Class(
                                                                             
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
-        #browser()
+        
+        print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]$value}),
+                       names(self$ll.process))
+        )
         print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
                        names(self$ll.process))
         )
-        ret <- setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
-                        names(self$ll.process))
-        ret.indice <- which(lapply(ret, function(x) { !is.null(x)})==TRUE)
-        self$config$status[ret.indice] <- self$global$VALIDATED
-        
-        
-        
-      })
+       
+        processHasChanged <- unlist(lapply(names(self$ll.process), function(x){
+          if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]]$value)) {x}
+        }
+          ))
 
+        if (!is.null(processHasChanged))
+          if (is.na(self$tmp.return[[processHasChanged]]()$value))
+            # process has been reseted
+            self$config$status[processHasChanged] <- self$global$UNDONE
+          else
+            #process has been validated
+            self$config$status[processHasChanged] <- self$global$VALIDATED
+        
+        
+        #update self$old.tmp.return
+        self$old.tmp.return <- setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
+                                          names(self$ll.process))
+
+      })
     },
     
     #To avoid "intempestive" initializations of modules due to dataIn changes
