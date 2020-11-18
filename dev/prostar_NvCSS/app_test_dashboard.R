@@ -17,6 +17,7 @@ source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_homepage.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 source(file.path('../../R', 'config.R'), local=TRUE)$value
@@ -61,8 +62,10 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       br(),
-      menuItem("Data Manager", icon = icon("folder"), startExpanded = TRUE,
-               menuSubItem("Import Data", tabName = "import", selected = TRUE),
+      menuItem("Home", tabName = "ProstarHome",icon = icon("home"), selected = TRUE),
+      hr(),
+      menuItem("Data Manager", icon = icon("folder"), #startExpanded = TRUE,
+               menuSubItem("Import Data", tabName = "import"),
                menuSubItem("Export Results", tabName = "export"),
                menuSubItem("Reload Prostar", tabName = "reload")),
       hr(),
@@ -85,17 +88,27 @@ ui <- dashboardPage(
     fluidPage(
       
       
-      tags$div(column(2,
-                      id = "v_timeline",
-                      style = paste0("display: ","none",";"), # "block" if loaded data else "none"
-                      br(),
-                      h4('Statistic Descriptive'),
-                      mod_bsmodal_ui('statsDescriptive'),
-                      br(),
-                      h4('Timeline'))),
+      tags$div(
+        column(2,
+               style = paste0("display: ","block",";"), # "block" if loaded data else "none"
+               id = "v_timeline",
+               br(),
+               h4('Statistic Descriptive'),
+               mod_bsmodal_ui('statsDescriptive'),
+               br(),
+               h4('Timeline'),
+               tags$img(src="timeline_v.PNG",
+                        title="General timeline",
+                        style="display:block ; height: 500px; margin: auto;")
+        )
+      ),
       
-      column(10,
+      
+      column(10,# 10 if loaded data else 12
              tabItems(
+               tabItem(tabName = "ProstarHome",
+                       h2("Home Prostar"),
+                       mod_homepage_ui("home")),
                tabItem(tabName = "import",
                        h2("Import data"),
                        tabsetPanel(type = "tabs",
@@ -142,13 +155,18 @@ ui <- dashboardPage(
                tabItem(tabName = "bugReport",
                        h2("Bug report"),
                        mod_bug_report_ui('bugReport'))
-             )),
-    )
+             ))
+    ),
   )
-  
 )
 
+
+
 server <- function(input, output,session) {
+  
+  mod_homepage_server('home')
+  
+  #------------------------------------------------------------------------------#
   
   utils::data(Exp1_R25_prot, package="DAPARdata2")
   

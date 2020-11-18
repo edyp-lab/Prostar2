@@ -4,8 +4,9 @@
  margin: 0 2px 0 2px ;
 }*/
 
-h2, h3{
- color: hotpink ;
+h2, h3, h4{
+ color: blue ;
+ text-align: center;
 }
 
 #v_timeline{

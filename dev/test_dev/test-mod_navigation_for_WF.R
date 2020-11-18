@@ -1,5 +1,6 @@
 library(rhandsontable)
 source(file.path('../../R', 'mod_navigate_in_WF.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
 source(file.path('../../R', 'global.R'), local=TRUE)$value
 
 ui <- fluidPage(
@@ -31,7 +32,7 @@ server <- function(input, output, session) {
   
   
   
-  callModule(mod_navigation_server, "test_nav",style=2, pages = r.nav)
+  mod_navigation_server("test_nav",style=2, pages = r.nav)
   
   
   observeEvent(req(r.nav$reset),{
