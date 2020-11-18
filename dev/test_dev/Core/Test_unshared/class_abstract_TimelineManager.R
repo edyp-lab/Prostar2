@@ -85,8 +85,8 @@ TimelineManager <- R6Class(
            msg = msg)
     },
     
-    Update_Cursor_position = function(){
-      cat(paste0(class(self)[1], '::Update_Cursor_position()\n'))
+    Force_Update_Cursor_position = function(){
+      cat(paste0(class(self)[1], '::Force_Update_Cursor_position()\n'))
       req(self$config$status)
       if (self$config$status[self$nbSteps] == self$global$VALIDATED)
         self$rv$current.pos <- self$default_pos$VALIDATED
@@ -170,7 +170,7 @@ TimelineManager <- R6Class(
       #browser()
       observeEvent(config(),{
         cat(paste0(class(self)[1], '::observeEvent(config)\n'))
-       # browser()
+        browser()
         self$config <- config()
         self$rv$current.pos <- 1
         cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
@@ -192,7 +192,7 @@ TimelineManager <- R6Class(
       
       observeEvent(req(wake()),{
         cat(paste0(class(self)[1], '::observeEvent(req(wake()))\n'))
-        self$Update_Cursor_position()
+        self$Force_Update_Cursor_position()
         })
       
       observeEvent(remoteReset(),ignoreInit = T, {
@@ -282,6 +282,7 @@ TimelineManager <- R6Class(
         
         
         # Catch a new position or a change in the status list
+
         observeEvent(req(self$rv$current.pos), {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos))\n'))
           #self$Force_ToggleState_Steps()
@@ -289,12 +290,14 @@ TimelineManager <- R6Class(
           self$Update_Buttons_Status()
         })
         
+
         observeEvent(req(self$config$status), {
           cat(paste0(class(self)[1], '::observeEvent(req(self$config$status))\n'))
           #browser()
           self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
+
         })
         
         # observeEvent(req(self$config), ignoreInit=F,{
@@ -306,10 +309,11 @@ TimelineManager <- R6Class(
         #   
         #   self$EncapsulateScreens()
         # })
-        
+
         output$show_currentPos <- renderUI({
           p(paste0(self$id, ' : ', self$rv$current.pos))
           })
+
         
           list(current.pos = reactive({self$rv$current.pos}),
                reset = reactive({self$rv$reset_OK})
