@@ -29,18 +29,18 @@ TimelineForProcess = R6Class(
     
     Force_ToggleState_Steps = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps()\n'))
+      #browser()
       req(self$nbSteps)
-      if ((self$nbSteps==1) || (self$nbSteps>=2 && sum(self$config$status[2:self$nbSteps])== 0 )){
-        # This is the case at the initialization of a process or after a reset
-        # Enable all steps and buttons
-        self$toggleState_Steps(cond = TRUE, i = self$nbSteps)
-      } else if (self$config$status[self$nbSteps] == self$global$SKIPPED){
-        # Disable all steps
-        self$toggleState_Steps(cond = FALSE, i = self$nbSteps)
+      if (sum(self$config$status)== self$global$UNDONE){
+        # Enable all steps and buttons at the initialization of a process or after a reset
+        self$ToggleState_Steps(cond = TRUE, i = self$nbSteps)
+      } else if (sum(self$config$status) == self$global$SKIPPED){
+        # Disable all steps if all steps are skipped
+        self$ToggleState_Steps(cond = FALSE, i = self$nbSteps)
       } else {
         # Disable all previous steps from each VALIDATED step
         ind.max <- max(grep(self$global$VALIDATED, self$config$status))
-        self$toggleState_Steps(cond = FALSE, i = ind.max)
+        self$ToggleState_Steps(cond = FALSE, i = ind.max)
       }
       
     },

@@ -20,6 +20,7 @@ ProcessDescription = R6Class(
           actionButton(ns('btn_validate_Description'), 
                        paste0('Start ', self$config$name),
                        class = btn_success_color),
+          selectInput(ns('selectStep'), 'Test', choices=1:4),
           mod_insert_md_ui(ns(paste0(self$config$name, "_md")))
         )
       })

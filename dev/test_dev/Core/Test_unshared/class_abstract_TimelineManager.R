@@ -117,8 +117,10 @@ TimelineManager <- R6Class(
                                     })
     },
     
-    toggleState_Steps = function(cond, i){
-      cat(paste0(class(self)[1], '::toggleState_Steps()\n'))
+    ToggleState_Steps = function(cond, i){
+      ns <- NS(self$id)
+      cat(paste0(class(self)[1], '::ToggleState_Steps()\n'))
+      #browser()
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     },
@@ -138,7 +140,7 @@ TimelineManager <- R6Class(
                   tagList(
                     uiOutput(ns('show_currentPos')),
                     shinyjs::useShinyjs(),
-                    div(id = 'GlobalTL',
+                    div(id = ns('GlobalTL'),
                         fluidRow(
                           align= 'center',
                           column(width=2, div(style = self$btn_style,
