@@ -104,7 +104,7 @@ Pipeline = R6Class(
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
         browser()
-        print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]$value}),
+        print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                        names(self$ll.process))
         )
         print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
@@ -112,7 +112,7 @@ Pipeline = R6Class(
         )
        
         processHasChanged <- unlist(lapply(names(self$ll.process), function(x){
-          if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]]$value)) {x}
+          if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]])) {x}
         }
           ))
 
