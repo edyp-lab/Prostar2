@@ -5,10 +5,8 @@ Pipeline = R6Class(
   private = list(),
   public = list(
     rv = reactiveValues(
-      processManagerList = NULL,
       data2send = NULL
     ),
-    listUIs = NULL,
     ll.process = NULL,
     tmp.return = reactiveValues(),
     old.tmp.return = NULL,
@@ -29,7 +27,7 @@ Pipeline = R6Class(
       cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
       browser()
       self$ResetScreens()
-      self$rv$dataIn <- NA
+      self$rv$dataIn <- NULL
       self$Initialize_Status_Process()
       self$Send_Result_to_Caller()
       self$InitializeDataIn()
@@ -39,7 +37,7 @@ Pipeline = R6Class(
       print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
       print("-----------------------------------------------")
 
-      self$rv$data2send <- setNames(lapply(1:self$length,  function(x){NA}), self$config$steps)
+      self$rv$data2send <- setNames(lapply(1:self$length,  function(x){NULL}), self$config$steps)
       self$Launch_Module_Server()
       self$InitializeModule()
       self$InitializeTimeline()
@@ -117,7 +115,7 @@ Pipeline = R6Class(
           ))
 
         if (!is.null(processHasChanged))
-          if (is.na(self$tmp.return[[processHasChanged]]()$value))
+          if (is.null(self$tmp.return[[processHasChanged]]()$value))
             # process has been reseted
             self$config$status[processHasChanged] <- self$global$UNDONE
           else
@@ -147,7 +145,7 @@ Pipeline = R6Class(
       # Initialization of the pipeline : one send dataIn() to the
       # original module
       update <- function(name){
-        data <- NA
+        data <- NULL
         
         if (name == self$GetCurrentStepName()){
           # One treat the dataset for the current position

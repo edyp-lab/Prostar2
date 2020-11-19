@@ -129,7 +129,7 @@ server = function(dataIn ) {
   
   output$show_rv_dataOut <- renderUI({
 
-    req(self$tmp.return[['ProcessA']]()$trigger)
+    req(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}))
     tagList(
       h4('show return of processes'),
       lapply(names(self$ll.process),function(x){
@@ -167,7 +167,7 @@ server = function(input, output){
     if (input$changeDataset%%2 ==0)
       rv$dataIn <- Exp1_R25_prot[1:10, , -1]
     else
-      rv$dataIn <- NA
+      rv$dataIn <- NULL
   })
   
   }

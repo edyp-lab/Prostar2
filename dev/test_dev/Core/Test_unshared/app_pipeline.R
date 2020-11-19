@@ -50,7 +50,7 @@ server = function(input, output){
     if (input$changeDataset%%2 ==0)
       rv$dataIn <- Exp1_R25_prot[1:10, , -1]
     else
-      rv$dataIn <- NA
+      rv$dataIn <- NULL
   })
 }
 

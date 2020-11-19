@@ -215,7 +215,7 @@ ProcessManager <- R6Class(
       self$rv$wake <- FALSE
       
       # Test if input is NA or not
-      inputExists <- length(data) > 0
+      inputExists <- !is.null(data)
       
       #Test if a dataset is already loaded
       tmpExists <- !is.null(self$rv$dataIn)

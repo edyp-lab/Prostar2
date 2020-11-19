@@ -20,7 +20,7 @@ Process = R6Class(
       cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
       #browser()
       self$ResetScreens()
-      self$rv$dataIn <- NA
+      self$rv$dataIn <- NULL
       self$Initialize_Status_Process()
       self$Send_Result_to_Caller()
       self$InitializeDataIn()
