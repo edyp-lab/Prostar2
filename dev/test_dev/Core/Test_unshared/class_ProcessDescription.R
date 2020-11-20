@@ -7,7 +7,7 @@ ProcessDescription = R6Class(
     .config = list(name = 'Description',
                    type = 'process',
                    steps = c('Description'),
-                   mandatory = setNames(c(T), c('Description'))
+                   mandatory = c(T)
     )
   ),
   

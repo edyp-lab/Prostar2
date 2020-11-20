@@ -6,7 +6,7 @@ ProcessA = R6Class(
     .config = list(name = 'ProcessA',
                    type = 'process',
                    steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                   mandatory = setNames(c(T,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
+                   mandatory = c(T,F,F,F)
                     )
   ),
   

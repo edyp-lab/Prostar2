@@ -6,7 +6,7 @@ Pipeline1 = R6Class(
     .config = list(name = 'Pipeline',
                    type = 'pipeline',
                    steps = c('ProcessDescription', 'ProcessA', 'ProcessB'),
-                   mandatory = setNames(c(T,F, F), c('ProcessDescription', 'ProcessA', 'ProcessB'))
+                   mandatory = c(T,F, F)
     )
   ),
   
