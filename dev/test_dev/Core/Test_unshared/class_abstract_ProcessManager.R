@@ -1,3 +1,7 @@
+# Use of the tip in this page to unshare reactiveValues between different instances
+# of the same class
+# https://community.rstudio.com/t/r6-class-reactivevalues-property-and-instantiation/31025/2
+
 ProcessManager <- R6Class(
   "ProcessManager",
   private = list(),
@@ -94,7 +98,7 @@ ProcessManager <- R6Class(
       
       # if (ind.max == 0)
       #   ind.max <- 1
-      # 
+       
       ind.max
     },
     
@@ -144,7 +148,7 @@ ProcessManager <- R6Class(
       })
     },
     
-    ActionsOnDataTrigger = function(data){
+    Actions_On_Data_Trigger = function(data){
       # #data$name <- self$dataOut$name
       # data$obj <- self$dataOut$value
       # data$trigger <- self$dataOut$trigger
@@ -339,7 +343,7 @@ ProcessManager <- R6Class(
       observeEvent(self$dataOut$trigger, {
         cat(paste0(class(self)[1], '::observeEvent(self$dataOut$trigger)\n'))
         
-        #self$ActionsOnDataTrigger()
+        #self$Actions_On_Data_Trigger()
       })
       
       
@@ -410,7 +414,9 @@ ProcessManager <- R6Class(
         })
         
         output$show_rv_dataOut <- renderUI({
+         # browser()
           req(self$dataOut$trigger)
+          self$dataOut$value
           tagList(
             h4('show self$dataOut$value'),
             lapply(names(self$dataOut$value), function(x){tags$p(x)})

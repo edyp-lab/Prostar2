@@ -60,19 +60,49 @@ Pipeline = R6Class(
     # If a value (not NULL) is received, then it corresponds to the module
     # pointed by the current position
     # This function also updates the list isDone
-    ActionsOnDataTrigger = function(){
-      valid_obj_val <-  class(self$dataOut$obj) == 'QFeatures'
-      # Update the status
-      self$config$status[self$dataOut$name] <- valid_obj_val
-      self$Set_Skipped_Status()
+    Actions_On_Data_Trigger = function(){
+      #browser()
+      print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
+                     names(self$ll.process))
+      )
+      print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
+                     names(self$ll.process))
+      )
       
-      # Store the result of a process module
-      if (valid_obj_val)
-        self$rv$dataIn <- self$dataOut$obj
-      else
-        self$rv$dataIn <- rv$dataIn[,,1:self$GetMaxValidated_BeforeCurrentPos()]
+      processHasChanged <- unlist(lapply(names(self$ll.process), function(x){
+        if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]])) {x}
+      }
+      ))
+      
+      # Update the status of process
+      if (!is.null(processHasChanged))
+        if (is.null(self$tmp.return[[processHasChanged]]()$value)){
+          # process has been reseted
+          self$config$status[processHasChanged] <- self$global$UNDONE
+          browser()
+          # One take the last dataset not NULL
+          last.validated <- self$GetMaxValidated_BeforeCurrentPos()
+          
+          #There is no validated step (the first step has been reseted)
+          if(is.null(last.validated))
+            self$rv$dataIn
+          else
+            self$rv$dataIn <- self$rv$dataIn[ , , 1:self$GetMaxValidated_BeforeCurrentPos()]
+        }
+      else{
+        #process has been validated
+        self$config$status[processHasChanged] <- self$global$VALIDATED
+        self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
+      }
+      
+      
+      #update self$old.tmp.return
+      self$old.tmp.return <- setNames(lapply(names(self$ll.process), 
+                                             function(x){self$tmp.return[[x]]()$value}),
+                                      names(self$ll.process))
       
       self$Send_Result_to_Caller()
+      
     },
     
     ActionsOnNewPosition = function(){
@@ -101,33 +131,8 @@ Pipeline = R6Class(
                                                                             
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
-        browser()
-        print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
-                       names(self$ll.process))
-        )
-        print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
-                       names(self$ll.process))
-        )
-       
-        processHasChanged <- unlist(lapply(names(self$ll.process), function(x){
-          if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]])) {x}
-        }
-          ))
-
-        if (!is.null(processHasChanged))
-          if (is.null(self$tmp.return[[processHasChanged]]()$value))
-            # process has been reseted
-            self$config$status[processHasChanged] <- self$global$UNDONE
-          else
-            #process has been validated
-            self$config$status[processHasChanged] <- self$global$VALIDATED
-        
-        
-        #update self$old.tmp.return
-        self$old.tmp.return <- setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
-                                          names(self$ll.process))
-
-      })
+        self$Actions_On_Data_Trigger()
+    })
     },
     
     #To avoid "intempestive" initializations of modules due to dataIn changes
