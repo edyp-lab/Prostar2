@@ -39,7 +39,7 @@ ProcessManager <- R6Class(
       self$rv = reactiveValues(
         dataIn = NULL,
         current.pos = NULL,
-        wake = F,
+        #wake = F,
         reset = NULL,
         isSkipped = FALSE)
       
@@ -64,9 +64,9 @@ ProcessManager <- R6Class(
     Send_Result_to_Caller = function(){
       cat(paste0(class(self)[1], '::Send_Result_to_Caller()\n'))
       
-      self$rv$wake <- self$Wake()
+     # self$rv$wake <- self$Wake()
       self$dataOut$value <- self$rv$dataIn
-      self$dataOut$trigger <- self$rv$wake
+      self$dataOut$trigger <- self$Wake()
     },
     
     Set_Skipped_Status = function(){
@@ -255,9 +255,9 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::', 'InitializeTimeline()\n'))
       
       self$timeline.res <- self$timeline$server(
-        config = reactive({self$config}),
-        wake = reactive({self$rv$wake}),
-        reset = reactive({NULL})
+        config = reactive({self$config})
+        #wake = reactive({self$rv$wake}),
+       # reset = reactive({NULL})
       )
 
       

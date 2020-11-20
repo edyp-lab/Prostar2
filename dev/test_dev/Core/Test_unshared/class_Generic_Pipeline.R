@@ -76,7 +76,7 @@ Pipeline = R6Class(
         if (is.null(self$tmp.return[[processHasChanged]]()$value)){
           # process has been reseted
           self$config$status[processHasChanged] <- self$global$UNDONE
-          browser()
+         # browser()
           # One take the last dataset not NULL
           last.validated <- self$GetMaxValidated_BeforeCurrentPos()
           

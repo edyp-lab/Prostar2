@@ -166,7 +166,7 @@ TimelineManager <- R6Class(
     SetModalTxt = function(txt){self$modal_txt <- txt},
     
     # SERVER
-    server = function(config, wake, reset) {
+    server = function(config) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::server()\n'))
       #browser()
