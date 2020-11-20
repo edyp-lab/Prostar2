@@ -10,6 +10,8 @@ ProcessManager <- R6Class(
     id = NULL,
     timeline = NULL,
     timeline.res = NULL,
+    ll.process = NULL,
+    
     global = list(VALIDATED = 1,
                   SKIPPED = -1,
                   UNDONE = 0
@@ -39,7 +41,6 @@ ProcessManager <- R6Class(
       self$rv = reactiveValues(
         dataIn = NULL,
         current.pos = NULL,
-        #wake = F,
         reset = NULL,
         isSkipped = FALSE)
       
@@ -63,8 +64,6 @@ ProcessManager <- R6Class(
     
     Send_Result_to_Caller = function(){
       cat(paste0(class(self)[1], '::Send_Result_to_Caller()\n'))
-      
-     # self$rv$wake <- self$Wake()
       self$dataOut$value <- self$rv$dataIn
       self$dataOut$trigger <- self$Wake()
     },
@@ -201,9 +200,7 @@ ProcessManager <- R6Class(
       self$Actions_On_Reset()
       },
     
-    ActionsOn_Tmp_Input = function(){
-     # self$rv$wake <- self$Wake()
-    },
+    ActionsOn_Tmp_Input = function(){},
     
     ActionsOn_NoTmp_Input = function(){},
     
@@ -219,7 +216,6 @@ ProcessManager <- R6Class(
       # instanciated
       self$rv$temp.dataIn <- data
       
-     # self$rv$wake <- FALSE
       
       # Test if input is NA or not
       inputExists <- !is.null(data)
@@ -256,9 +252,7 @@ ProcessManager <- R6Class(
       
       self$timeline.res <- self$timeline$server(
         config = reactive({self$config})
-        #wake = reactive({self$rv$wake}),
-       # reset = reactive({NULL})
-      )
+        )
 
       
       observeEvent(req(self$timeline.res$current.pos()), ignoreInit=F, {
@@ -301,6 +295,9 @@ ProcessManager <- R6Class(
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
         self$config$status <- setNames(rep(0, self$length), config$steps)
         self$config$screens <- self$CreateScreens()
+
+        self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
+                                    self$config$steps)
         self$CreateTimeline()
       })
 

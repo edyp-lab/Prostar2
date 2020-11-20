@@ -23,6 +23,7 @@ Pipeline = R6Class(
     
     Additional_Funcs_In_ModuleServer = function(){},
     
+    Additional_Initialize_Class = function(){},
     
     ActionsOn_NoTmp_Input = function(){
       print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
@@ -164,7 +165,26 @@ Pipeline = R6Class(
       
       lapply(names(self$ll.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
+    },
+  
+  
+  Add_RenderUIs_Definitions = function(input, output){
+    cat(paste0(class(self)[1], '::', 'Add_RenderUIs_Definitions()\n'))
+    ns <- NS(self$id)
+    
+    
+    lapply(names(self$ll.process), function(x){
+      output[[x]] <- renderUI({
+        tagList(
+          div(id=NS(self$id)(x),
+              self$ll.process[[x]]$ui()
+          )
+        )
+      })
     }
+    )
+    
+  }
 
     
   )

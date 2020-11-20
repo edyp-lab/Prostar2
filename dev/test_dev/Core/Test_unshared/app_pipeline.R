@@ -21,6 +21,7 @@ source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
 source(file.path('.', 'class_abstract_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Generic_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
+source(file.path('.', 'class_ProcessB.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 
 source(file.path('.', 'class_Generic_Pipeline.R'), local=TRUE)$value

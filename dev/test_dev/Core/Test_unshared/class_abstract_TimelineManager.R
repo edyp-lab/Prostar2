@@ -73,7 +73,7 @@ TimelineManager <- R6Class(
       names.conf <- c("name", "type", "steps")
       if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
         passed <- F
-        msg <- c(msg, "The names of elements in 'config' must be the following: 'process.name', 'type', 'steps'")
+        msg <- c(msg, "The names of elements in 'config' must be the following: 'name', 'type', 'steps'")
       }
       if (!is.list(conf$steps)){
         passed <- F
@@ -183,25 +183,13 @@ TimelineManager <- R6Class(
         
         self$EncapsulateScreens()
         self$Update_Buttons_Status()
-        #browser()
       })
       
       observeEvent(config()$status,{
-        #browser()
         cat(paste0(class(self)[1], '::observeEvent(config$status)\n'))
         self$config$status <- config()$status
       })
-      
-      # observeEvent(req(wake()),{
-      #   cat(paste0(class(self)[1], '::observeEvent(req(wake()))\n'))
-      #   self$Update_Cursor_position()
-      #   })
-      
-      # observeEvent(reset(),ignoreInit = T, {
-      #   cat(paste0(class(self)[1], '::observeEvent(reset())\n'))
-      #   self$rv$current.pos <- 1
-      # })
-      
+
       cat(paste0(class(self)[1], '::self$timelineDraw$server()\n'))
       self$timelineDraw$server(
         status = reactive({self$config$status}),

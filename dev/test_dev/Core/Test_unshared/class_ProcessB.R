@@ -1,17 +1,17 @@
 #Timeline_R6.R
-ProcessA = R6Class(
-  "ProcessA",
+ProcessB = R6Class(
+  "ProcessB",
   inherit = Process,
   private = list(
-    .config = list(name = 'ProcessA',
+    .config = list(name = 'ProcessB',
                    type = 'process',
-                   steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                   mandatory = setNames(c(T,F,F,F), c('Description', 'Step1', 'Step2', 'Step3'))
-                    )
+                   steps = c('Description', 'Step1', 'Step2'),
+                   mandatory = setNames(c(T,F,F), c('Description', 'Step1', 'Step2'))
+    )
   ),
   
   public = list(
-
+    
     Add_RenderUIs_Definitions = function(input, output){
       cat(paste0(class(self)[1], '::', 'Add_RenderUIs_Definitions()\n'))
       ns <- NS(self$id)
@@ -102,7 +102,7 @@ ProcessA = R6Class(
       
       
       observeEvent(input$btn_validate_Step3, {
-        # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
+        # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)
         self$ValidateCurrentPos()
       })
       
