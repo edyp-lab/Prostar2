@@ -438,10 +438,13 @@ ProcessManager <- R6Class(
         #                  }))
         # })
         
+        
         #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
-        output$show_currentPos <- renderUI({
-          p(paste0(self$id, ' : ', self$rv$current.pos))
-          })
+        
+        # output$show_currentPos <- renderUI({
+        #   p(paste0(self$id, ' : ', self$rv$current.pos))
+        #   })
+        
         #################################################
         # Main listener of the module which initialize it
         

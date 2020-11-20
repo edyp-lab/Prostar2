@@ -297,9 +297,9 @@ TimelineManager <- R6Class(
         #   self$EncapsulateScreens()
         # })
         
-        output$show_currentPos <- renderUI({
-          p(paste0(self$id, ' : ', self$rv$current.pos))
-          })
+        # output$show_currentPos <- renderUI({
+        #   p(paste0(self$id, ' : ', self$rv$current.pos))
+        #   })
         
           list(current.pos = reactive({self$rv$current.pos}),
                tl.reset = reactive({self$rv$reset_OK})

@@ -90,6 +90,7 @@ Pipeline = R6Class(
       else{
         #process has been validated
         self$config$status[processHasChanged] <- self$global$VALIDATED
+        self$Set_Skipped_Status()
         self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
       }
       
