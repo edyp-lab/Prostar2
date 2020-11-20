@@ -4,10 +4,9 @@ ProcessA = R6Class(
   inherit = Process,
   private = list(
     .config = list(name = 'ProcessA',
-                   type = 'process',
                    steps = c('Description', 'Step1', 'Step2', 'Step3'),
                    mandatory = c(T,F,F,F)
-                    )
+                   )
   ),
   
   public = list(

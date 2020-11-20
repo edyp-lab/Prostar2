@@ -57,33 +57,7 @@ TimelineManager <- R6Class(
       PrevBtn_logics
     },
     
-    
-    CheckConfig = function(conf){
-      cat(paste0(class(self)[1], '::CheckConfig()\n'))
-      passed <- T
-      msg <- ""
-      if (!is.list(conf)){
-        passed <- F
-        msg <- c(msg, "'config' is not a list")
-      }
-      if (length(conf)!=3){
-        passed <- F
-        msg <- c(msg, "The length of 'config' is not equal to 4")
-      }
-      names.conf <- c("name", "type", "steps")
-      if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
-        passed <- F
-        msg <- c(msg, "The names of elements in 'config' must be the following: 'name', 'type', 'steps'")
-      }
-      if (!is.list(conf$steps)){
-        passed <- F
-        msg <- c(msg, "The 'steps' slot is not a list")
-      }
-      
-      passed <- T
-      list(passed=passed,
-           msg = msg)
-    },
+  
     
     Update_Cursor_position = function(){
       cat(paste0(class(self)[1], '::Update_Cursor_position()\n'))
@@ -177,9 +151,6 @@ TimelineManager <- R6Class(
         self$rv$current.pos <- 1
         cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
         req(self$nbSteps>0)
-        check <- self$CheckConfig(self$config)
-        if (!check$passed)
-          stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
         
         self$EncapsulateScreens()
         self$Update_Buttons_Status()
@@ -245,7 +216,6 @@ TimelineManager <- R6Class(
         # to the caller
         observeEvent(req(c(input$modal_ok)), ignoreInit=T,{
           cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok)))\n'))
-         # browser()
           self$rv$reset_OK <- input$rstBtn
           self$rv$current.pos <- 1
           removeModal()
@@ -274,33 +244,18 @@ TimelineManager <- R6Class(
         # Catch a new position or a change in the status list
         observeEvent(req(self$rv$current.pos), {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos))\n'))
-          #self$Force_ToggleState_Steps()
           self$Display_Current_Step()
           self$Update_Buttons_Status()
         })
         
         observeEvent(req(self$config$status), {
           cat(paste0(class(self)[1], '::observeEvent(req(self$config$status))\n'))
-          #browser()
           self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
         })
         
-        # observeEvent(req(self$config), ignoreInit=F,{
-        #   cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
-        #   req(self$nbSteps>0)
-        #   check <- self$CheckConfig(self$config)
-        #   if (!check$passed)
-        #     stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
-        #   
-        #   self$EncapsulateScreens()
-        # })
-        
-        # output$show_currentPos <- renderUI({
-        #   p(paste0(self$id, ' : ', self$rv$current.pos))
-        #   })
-        
+
           list(current.pos = reactive({self$rv$current.pos}),
                tl.reset = reactive({self$rv$reset_OK})
           )

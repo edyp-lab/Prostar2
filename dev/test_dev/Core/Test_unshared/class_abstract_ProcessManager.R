@@ -46,10 +46,11 @@ ProcessManager <- R6Class(
       
       
       self$InitConfig(private$.config)
+      self$Additional_Initialize_Class()
       },
 
 
-    
+    Additional_Initialize_Class = function(){},
     Wake = function(){ 
       cat(paste0(class(self)[1], '::Wake()\n'))
       runif(1,0,1)
@@ -111,7 +112,10 @@ ProcessManager <- R6Class(
       return(self$GetStatusPosition(pos) == self$global$SKIPPED)
     },
     
-    InitializeModule = function(){},
+    InitializeModule = function(){
+      self$config$screens <- self$CreateScreens()
+      self$rv$current.pos <- 1
+    },
     
     ActionsOnNewPosition = function(){},
     
@@ -147,7 +151,7 @@ ProcessManager <- R6Class(
     },
     
     #Function defined in child classes
-    Actions_On_Data_Trigger = function(data){},
+    Actions_On_Data_Trigger = function(){},
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
@@ -241,7 +245,14 @@ ProcessManager <- R6Class(
       }
     },
     
-    CreateTimeline = function(){},
+    CreateTimeline = function(){
+      cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
+      self$timeline <- TimelineForProcess$new(
+        id = NS(self$id)('timeline'),
+        mandatory = self$config$mandatory
+      )
+    },
+    
     Additional_Funcs_In_Server = function(){},
     Additional_Funcs_In_ModuleServer = function(){},
     
@@ -285,14 +296,48 @@ ProcessManager <- R6Class(
       self$timeline$ui()
     },
     
+    
+    CheckConfig = function(conf){
+      cat(paste0(class(self)[1], '::CheckConfig()\n'))
+      passed <- T
+      msg <- ""
+      if (!is.list(conf)){
+        passed <- F
+        msg <- c(msg, "'config' is not a list")
+      }
+      if (length(conf)!=3){
+        passed <- F
+        msg <- c(msg, "The length of 'config' is not equal to 4")
+      }
+      names.conf <- c("name", "steps", "mandatory")
+      if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
+        passed <- F
+        msg <- c(msg, "The names of elements in 'config' must be the following: 'name', 'steps', 'mandatory'")
+      }
+      if (length(conf$steps) != length(conf$mandatory)){
+        passed <- F
+        msg <- c(msg, "The length of 'steps' and 'mandatory' must be equal.")
+      }
+      
+      passed <- T
+      list(passed=passed,
+           msg = msg)
+    },
+    
+    
+    
     InitConfig = function(config){
       cat(paste0(class(self)[1], '::', 'InitConfig()\n'))
-
+      check <- self$CheckConfig(config)
+      if (!check$passed)
+        stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
+      
       self$length <- length(config$steps)
       
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config)\n'))
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+        self$config$type = class(self)[2]
         self$config$status <- setNames(rep(0, self$length), config$steps)
         self$config$screens <- self$CreateScreens()
         self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
@@ -336,7 +381,6 @@ ProcessManager <- R6Class(
                       isSkipped = reactive({FALSE})) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
-     # browser()
       
       
       self$Additional_Funcs_In_Server()
@@ -364,7 +408,6 @@ ProcessManager <- R6Class(
       
       observeEvent(reset(), ignoreInit = F, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
-       # browser()
         print("remote reset activated")
         
         # Used to transmit info of local Reset to child processes
@@ -419,7 +462,6 @@ ProcessManager <- R6Class(
         })
         
         output$show_rv_dataOut <- renderUI({
-         # browser()
           req(self$dataOut$trigger)
           self$dataOut$value
           tagList(
@@ -428,29 +470,7 @@ ProcessManager <- R6Class(
           )
         })
         
-        # output$show_status <- renderUI({
-        #   req(self$config$status, self$rv$current.pos)
-        #   tagList(lapply(1:self$length, 
-        #                  function(x){if (x == self$rv$current.pos) 
-        #                    tags$p(tags$b(paste0('-> ', self$config$steps[x], ' - ', self$GetStringStatus(self$config$status[[x]]))))
-        #                    else 
-        #                      tags$p(paste0(self$config$steps[x], ' - ', self$GetStringStatus(self$config$status[[x]])))
-        #                  }))
-        # })
-        
-        
-        #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
-        
-        # output$show_currentPos <- renderUI({
-        #   p(paste0(self$id, ' : ', self$rv$current.pos))
-        #   })
-        
-        #################################################
-        # Main listener of the module which initialize it
-        
-        
-        
-        
+       
         GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
         
       }

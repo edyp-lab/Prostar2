@@ -4,26 +4,18 @@ Pipeline = R6Class(
   inherit = ProcessManager,
   private = list(),
   public = list(
-    rv = reactiveValues(
-      data2send = NULL
-    ),
-    ll.process = NULL,
-    tmp.return = reactiveValues(),
-    old.tmp.return = NULL,
     
-    CreateTimeline = function(){
-      cat(paste0(class(self)[1], '::', 'CreateTimeline()\n'))
-      self$timeline <- TimelineForPipeline$new(
-        id = NS(self$id)('timeline'),
-        mandatory = self$config$mandatory
-      )
-    },
+    tmp.return = "<reactiveValues>",
+    old.tmp.return = NULL,
     
     Additional_Funcs_In_Server = function(){},
     
     Additional_Funcs_In_ModuleServer = function(){},
     
-    Additional_Initialize_Class = function(){},
+    Additional_Initialize_Class = function(){
+      self$rv$data2send <- NULL
+      self$tmp.return <- reactiveValues()
+    },
     
     ActionsOn_NoTmp_Input = function(){
       print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
@@ -37,10 +29,7 @@ Pipeline = R6Class(
       self$PrepareData2Send()
     },
     
-    InitializeModule = function(){
-      self$config$screens <- self$CreateScreens()
-      self$rv$current.pos <- 1
-    },
+
     
     # Catch the return value of a module and update the list of isDone modules
     # This list is updated with the names of datasets present in the rv$tmp
@@ -66,10 +55,14 @@ Pipeline = R6Class(
       }
       ))
       
-      if (length(processHasChanged) == length(self$ll.process) && 
+     if(is.null(processHasChanged)){
+       #No process have been modified
+       self$rv$dataIn <- NULL
+     } else if (length(processHasChanged) == length(self$ll.process) && 
           sum(unlist(lapply(names(self$ll.process), function(x){is.null(self$tmp.return[[x]]()$value)}))) == length(self$ll.process)){
     # All the child processes have been reseted
     self$rv$dataIn <- self$rv$temp.dataIn
+    self$rv$dataIn <- NULL
     
   } else{
       # Update the status of process
@@ -83,7 +76,7 @@ Pipeline = R6Class(
           
           #There is no validated step (the first step has been reseted)
           if(is.null(last.validated))
-            self$rv$dataIn
+            self$rv$dataIn <- NULL
           else
             self$rv$dataIn <- self$rv$dataIn[ , , 1:self$GetMaxValidated_BeforeCurrentPos()]
         }
@@ -125,7 +118,8 @@ Pipeline = R6Class(
       lapply(names(self$ll.process), function(x){
         self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
                                                             reset = reactive({self$rv$reset}),
-                                                            isSkipped = reactive({NULL}))
+                                                            isSkipped = reactive({NULL})
+                                                            )
       })
                                                                      
                                                                             
