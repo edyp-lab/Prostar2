@@ -1,4 +1,4 @@
-#Timeline_R6.R
+
 Pipeline1 = R6Class(
   "Pipeline1",
   inherit = Pipeline,

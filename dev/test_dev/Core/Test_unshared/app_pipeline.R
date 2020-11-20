@@ -27,11 +27,26 @@ source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 source(file.path('.', 'class_Generic_Pipeline.R'), local=TRUE)$value
 source(file.path('.', 'class_Pipeline_1.R'), local=TRUE)$value
 
+
+source(file.path('.', 'class_Pipeline_WF1.R'), local=TRUE)$value
+source(file.path('.', 'class_WF1_Original.R'), local=TRUE)$value
+source(file.path('.', 'class_WF1_Filtering.R'), local=TRUE)$value
+source(file.path('.', 'class_WF1_Normalization.R'), local=TRUE)$value
+source(file.path('.', 'class_WF1_Imputation.R'), local=TRUE)$value
+source(file.path('.', 'class_WF1_HypothesisTest.R'), local=TRUE)$value
+
 #----------------------------------------------------------------------------
+
+
+AddItemToDataset <- function(dataset, name){
+  addAssay(dataset, 
+           dataset[[length(dataset)]], 
+           name=name)
+}
 
 ## Main app
 rv <- reactiveValues()
-pipeline <- Pipeline1$new('App')
+pipeline <- Pipeline_WF1$new('App')
 
 ui = fluidPage(
   tagList(
