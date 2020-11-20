@@ -23,14 +23,16 @@ Pipeline = R6Class(
     
     Additional_Funcs_In_ModuleServer = function(){},
     
-    ActionsOnReset = function(){
+    Actions_On_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
-      browser()
+     # browser()
       self$ResetScreens()
       self$rv$dataIn <- NULL
       self$Initialize_Status_Process()
       self$Send_Result_to_Caller()
       self$InitializeDataIn()
+      
+      
     },
     
     ActionsOn_NoTmp_Input = function(){

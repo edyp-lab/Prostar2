@@ -194,8 +194,8 @@ ProcessManager <- R6Class(
     
     #Actions onf receive new dataIn()
     ActionsOn_Tmp_NoInput = function(){
-      self$rv$wake <- self$Wake()
-      self$ActionsOnReset()
+      #self$rv$wake <- self$Wake()
+      self$Actions_On_Reset()
       },
     
     ActionsOn_Tmp_Input = function(){
@@ -205,7 +205,7 @@ ProcessManager <- R6Class(
     ActionsOn_NoTmp_Input = function(){},
     
     ActionsOn_NoTmp_NoInput = function(){
-     # self$ActionsOnReset()
+     # self$Actions_On_Reset()
     },
     
     ActionsOnNewDataIn = function(data){
@@ -248,26 +248,26 @@ ProcessManager <- R6Class(
     
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline()\n'))
+      
       self$timeline.res <- self$timeline$server(
         config = reactive({self$config}),
         wake = reactive({self$rv$wake}),
         remoteReset = reactive({self$rv$remoteReset})
       )
 
-      # observeEvent(req(self$timeline.res$reset()), ignoreInit=F, {
-      #   browser()
-      #   self$rv$reset <- self$timeline.res$reset()
-      # })
       
       observeEvent(req(self$timeline.res$current.pos()), ignoreInit=F, {
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos())\n'))
         self$rv$current.pos <- self$timeline.res$current.pos()
       })
       
-      observeEvent(self$timeline.res$reset(), ignoreInit = T,  ignoreNULL=T,{
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$reset())\n'))
-        browser()
-        self$ActionsOnReset()
+     
+      
+      observeEvent(self$timeline.res$localReset(), ignoreInit = T,  ignoreNULL=T,{
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$localReset())\n'))
+       # browser()
+        self$rv$remoteReset <-  self$timeline.res$localReset()
+        self$Actions_On_Reset()
       })
       
       
@@ -329,7 +329,7 @@ ProcessManager <- R6Class(
     
     # SERVER
     server = function(dataIn = NULL, 
-                      remoteReset = reactive({FALSE}),
+                      remoteReset = reactive({NULL}),
                       isSkipped = reactive({FALSE})) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
@@ -359,12 +359,15 @@ ProcessManager <- R6Class(
         self$ActionsOnNewPosition()
       })
       
-      observeEvent(remoteReset(), ignoreInit = T, { 
+      observeEvent(remoteReset(), ignoreInit = F, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
         browser()
         print("remote reset activated")
-        self$rv$remoteReset <- remoteReset()
-        self$ActionsOnReset()
+        
+        # Used to transmit info of local Reset to child processes
+        #self$rv$remoteReset <- remoteReset()
+        
+        self$Actions_On_Reset()
         })
       
       #--- Catch a reset from timeline or caller

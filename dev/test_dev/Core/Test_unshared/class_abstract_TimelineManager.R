@@ -314,7 +314,7 @@ TimelineManager <- R6Class(
           })
         
           list(current.pos = reactive({self$rv$current.pos}),
-               reset = reactive({self$rv$reset_OK})
+               localReset = reactive({self$rv$reset_OK})
           )
       })
     }

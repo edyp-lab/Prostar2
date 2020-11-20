@@ -16,7 +16,7 @@ Process = R6Class(
     
     ActionsOnNewPosition = function(){},
     
-    ActionsOnReset = function(){
+    Actions_On_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
       #browser()
       self$ResetScreens()
