@@ -205,7 +205,7 @@ ProcessManager <- R6Class(
     ActionsOn_NoTmp_Input = function(){},
     
     ActionsOn_NoTmp_NoInput = function(){
-      self$ActionsOnReset()
+     # self$ActionsOnReset()
     },
     
     ActionsOnNewDataIn = function(data){
@@ -266,7 +266,7 @@ ProcessManager <- R6Class(
       
       observeEvent(self$timeline.res$reset(), ignoreInit = T,  ignoreNULL=T,{
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$reset())\n'))
-        #browser()
+        browser()
         self$ActionsOnReset()
       })
       
@@ -361,7 +361,7 @@ ProcessManager <- R6Class(
       
       observeEvent(remoteReset(), ignoreInit = T, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
-       # browser()
+        browser()
         print("remote reset activated")
         self$rv$remoteReset <- remoteReset()
         self$ActionsOnReset()

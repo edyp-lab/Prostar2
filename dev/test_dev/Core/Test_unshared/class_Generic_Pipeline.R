@@ -124,7 +124,7 @@ Pipeline = R6Class(
 
       lapply(names(self$ll.process), function(x){
         self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
-                                                            remoteReset = reactive({NULL}),
+                                                            remoteReset = reactive({self$rv$remoteReset}),
                                                             isSkipped = reactive({NULL}))
       })
                                                                      
