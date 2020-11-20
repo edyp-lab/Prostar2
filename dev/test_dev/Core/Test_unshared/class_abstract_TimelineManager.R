@@ -92,8 +92,8 @@ TimelineManager <- R6Class(
         self$rv$current.pos <- self$default_pos$VALIDATED
       else if (self$config$status[self$nbSteps] == self$global$SKIPPED)
         self$rv$current.pos <- self$default_pos$SKIPPED
-      else if (self$config$status[self$nbSteps] == self$global$UNDONE)
-        self$rv$current.pos <- self$default_pos$UNDONE
+     # else if (self$config$status[self$nbSteps] == self$global$UNDONE)
+     #   self$rv$current.pos <- self$default_pos$UNDONE
     },
     
     Display_Current_Step = function(){},
@@ -166,7 +166,7 @@ TimelineManager <- R6Class(
     SetModalTxt = function(txt){self$modal_txt <- txt},
     
     # SERVER
-    server = function(config, wake, remoteReset) {
+    server = function(config, wake, reset) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::server()\n'))
       #browser()
@@ -192,15 +192,15 @@ TimelineManager <- R6Class(
         self$config$status <- config()$status
       })
       
-      observeEvent(req(wake()),{
-        cat(paste0(class(self)[1], '::observeEvent(req(wake()))\n'))
-        self$Update_Cursor_position()
-        })
+      # observeEvent(req(wake()),{
+      #   cat(paste0(class(self)[1], '::observeEvent(req(wake()))\n'))
+      #   self$Update_Cursor_position()
+      #   })
       
-      observeEvent(remoteReset(),ignoreInit = T, {
-        cat(paste0(class(self)[1], '::observeEvent(remoteReset())\n'))
-        self$rv$current.pos <- 1
-      })
+      # observeEvent(reset(),ignoreInit = T, {
+      #   cat(paste0(class(self)[1], '::observeEvent(reset())\n'))
+      #   self$rv$current.pos <- 1
+      # })
       
       cat(paste0(class(self)[1], '::self$timelineDraw$server()\n'))
       self$timelineDraw$server(
@@ -314,7 +314,7 @@ TimelineManager <- R6Class(
           })
         
           list(current.pos = reactive({self$rv$current.pos}),
-               localReset = reactive({self$rv$reset_OK})
+               tl.reset = reactive({self$rv$reset_OK})
           )
       })
     }

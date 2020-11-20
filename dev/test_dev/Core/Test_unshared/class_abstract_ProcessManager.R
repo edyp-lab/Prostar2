@@ -39,7 +39,6 @@ ProcessManager <- R6Class(
       self$rv = reactiveValues(
         dataIn = NULL,
         current.pos = NULL,
-        remoteReset = NULL,
         wake = F,
         reset = NULL,
         isSkipped = FALSE)
@@ -148,12 +147,8 @@ ProcessManager <- R6Class(
       })
     },
     
-    Actions_On_Data_Trigger = function(data){
-      # #data$name <- self$dataOut$name
-      # data$obj <- self$dataOut$value
-      # data$trigger <- self$dataOut$trigger
-      # data
-    },
+    #Function defined in child classes
+    Actions_On_Data_Trigger = function(data){},
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos()\n'))
@@ -187,19 +182,27 @@ ProcessManager <- R6Class(
     
     Initialize_Status_Process = function(){
       cat(paste0(class(self)[1], '::', 'Initialize_Status_Process()\n'))
-      self$config$status <- setNames(rep(0, self$length),
+      self$config$status <- setNames(rep(self$global$UNDONE, self$length),
                                      self$config$steps)
     },
     
+    Actions_On_Reset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
+      #browser()
+      self$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+      self$InitializeDataIn()
+    },
     
     #Actions onf receive new dataIn()
     ActionsOn_Tmp_NoInput = function(){
-      #self$rv$wake <- self$Wake()
       self$Actions_On_Reset()
       },
     
     ActionsOn_Tmp_Input = function(){
-      self$rv$wake <- self$Wake()
+     # self$rv$wake <- self$Wake()
     },
     
     ActionsOn_NoTmp_Input = function(){},
@@ -216,7 +219,7 @@ ProcessManager <- R6Class(
       # instanciated
       self$rv$temp.dataIn <- data
       
-      self$rv$wake <- FALSE
+     # self$rv$wake <- FALSE
       
       # Test if input is NA or not
       inputExists <- !is.null(data)
@@ -246,13 +249,15 @@ ProcessManager <- R6Class(
     Additional_Funcs_In_Server = function(){},
     Additional_Funcs_In_ModuleServer = function(){},
     
+    
+    
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline()\n'))
       
       self$timeline.res <- self$timeline$server(
         config = reactive({self$config}),
         wake = reactive({self$rv$wake}),
-        remoteReset = reactive({self$rv$remoteReset})
+        reset = reactive({NULL})
       )
 
       
@@ -263,10 +268,10 @@ ProcessManager <- R6Class(
       
      
       
-      observeEvent(self$timeline.res$localReset(), ignoreInit = T,  ignoreNULL=T,{
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$localReset())\n'))
+      observeEvent(self$timeline.res$tl.reset(), ignoreInit = T,  ignoreNULL=T,{
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$tl.reset())\n'))
        # browser()
-        self$rv$remoteReset <-  self$timeline.res$localReset()
+        self$rv$reset <-  self$timeline.res$tl.reset()
         self$Actions_On_Reset()
       })
       
@@ -329,7 +334,7 @@ ProcessManager <- R6Class(
     
     # SERVER
     server = function(dataIn = NULL, 
-                      remoteReset = reactive({NULL}),
+                      reset = reactive({NULL}),
                       isSkipped = reactive({FALSE})) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server()\n'))
@@ -359,14 +364,13 @@ ProcessManager <- R6Class(
         self$ActionsOnNewPosition()
       })
       
-      observeEvent(remoteReset(), ignoreInit = F, { 
+      observeEvent(reset(), ignoreInit = F, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset())\n'))
-        browser()
+       # browser()
         print("remote reset activated")
         
         # Used to transmit info of local Reset to child processes
-        #self$rv$remoteReset <- remoteReset()
-        
+        self$rv$reset <- reset()
         self$Actions_On_Reset()
         })
       
@@ -404,14 +408,14 @@ ProcessManager <- R6Class(
           cat(paste0(class(self)[1], '::output$show_dataIn\n'))
           req(dataIn())
           tagList(
-            h4('show dataIn()'),
+           # h4('show dataIn()'),
             lapply(names(dataIn()), function(x){tags$p(x)})
             )
         })
         
         output$show_rv_dataIn <- renderUI({
           tagList(
-            h4('show self$rv$dataIn)'),
+            #h4('show self$rv$dataIn)'),
             lapply(names(self$rv$dataIn), function(x){tags$p(x)})
             )
         })
@@ -421,7 +425,7 @@ ProcessManager <- R6Class(
           req(self$dataOut$trigger)
           self$dataOut$value
           tagList(
-            h4('show self$dataOut$value'),
+            #h4('show self$dataOut$value'),
             lapply(names(self$dataOut$value), function(x){tags$p(x)})
           )
         })

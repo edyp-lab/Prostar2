@@ -23,17 +23,6 @@ Pipeline = R6Class(
     
     Additional_Funcs_In_ModuleServer = function(){},
     
-    Actions_On_Reset = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnReset()\n'))
-     # browser()
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-      self$InitializeDataIn()
-      
-      
-    },
     
     ActionsOn_NoTmp_Input = function(){
       print("ActionsOn_NoTmp_Input() on class_Pipeline.R")
@@ -63,7 +52,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     Actions_On_Data_Trigger = function(){
-      #browser()
+     # browser()
       print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$ll.process))
       )
@@ -76,6 +65,12 @@ Pipeline = R6Class(
       }
       ))
       
+      if (length(processHasChanged) == length(self$ll.process) && 
+          sum(unlist(lapply(names(self$ll.process), function(x){is.null(self$tmp.return[[x]]()$value)}))) == length(self$ll.process)){
+    # All the child processes have been reseted
+    self$rv$dataIn <- self$rv$temp.dataIn
+    
+  } else{
       # Update the status of process
       if (!is.null(processHasChanged))
         if (is.null(self$tmp.return[[processHasChanged]]()$value)){
@@ -97,6 +92,7 @@ Pipeline = R6Class(
         self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
       }
       
+  }
       
       #update self$old.tmp.return
       self$old.tmp.return <- setNames(lapply(names(self$ll.process), 
@@ -126,7 +122,7 @@ Pipeline = R6Class(
 
       lapply(names(self$ll.process), function(x){
         self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
-                                                            remoteReset = reactive({self$rv$remoteReset}),
+                                                            reset = reactive({self$rv$reset}),
                                                             isSkipped = reactive({NULL}))
       })
                                                                      

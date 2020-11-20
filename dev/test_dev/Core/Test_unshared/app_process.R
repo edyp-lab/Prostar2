@@ -34,10 +34,10 @@ Pipeline <- R6Class(
   public = list(
     id = NULL,
     tmp.return = reactiveValues(),
-    remoteReset = NULL,
+    reset = NULL,
     rv = reactiveValues(
       dataIn = NULL,
-      remoteReset = NULL,
+      reset = NULL,
       skipped = NULL
       ),
     ll.process = list(
@@ -53,7 +53,7 @@ ui = function() {
   fluidPage(
     #wellPanel(style="background-color: green;",
               h3('Prostar'),
-              actionButton(ns('remoteReset'), 'Simulate remote reset'),
+              actionButton(ns('reset'), 'Simulate remote reset'),
               actionButton(ns('skip'), 'Simulate skip entire process'),
               uiOutput(ns('show_ui')),
               fluidRow(
@@ -90,7 +90,7 @@ server = function(dataIn ) {
 
   lapply(names(self$ll.process), function(x){
     self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
-                                                        remoteReset = reactive({self$rv$remoteReset}),
+                                                        reset = reactive({self$rv$reset}),
                                                         isSkipped = reactive({self$rv$skipped %%2 == 0}))
   })
   
@@ -104,9 +104,9 @@ server = function(dataIn ) {
     ns <- NS(self$id)
     
   
-  observeEvent(input$remoteReset,{
-    print("action on remoteReset")
-    self$rv$remoteReset <- input$remoteReset})
+  observeEvent(input$reset,{
+    print("action on reset")
+    self$rv$reset <- input$reset})
   
   observeEvent(input$skip,{self$rv$skipped <- input$skip})
   
