@@ -357,7 +357,7 @@ ProcessManager <- R6Class(
       fluidPage(
         #wellPanel(
           #style="background-color: yellow;",
-                  uiOutput(ns('show_currentPos')),
+                 # uiOutput(ns('show_currentPos')),
                   uiOutput(ns('show_timeline_ui')),
                   hr(),
                   fluidRow(

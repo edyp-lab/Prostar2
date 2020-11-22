@@ -42,7 +42,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     Actions_On_Data_Trigger = function(){
-     # browser()
+      browser()
       print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$ll.process))
       )
@@ -58,7 +58,7 @@ Pipeline = R6Class(
      if(is.null(processHasChanged)){
        #No process have been modified
        self$rv$dataIn <- NULL
-     } else if (length(processHasChanged) == length(self$ll.process) && 
+     } else if ( 
           sum(unlist(lapply(names(self$ll.process), function(x){is.null(self$tmp.return[[x]]()$value)}))) == length(self$ll.process)){
     # All the child processes have been reseted
     self$rv$dataIn <- self$rv$temp.dataIn
@@ -66,7 +66,7 @@ Pipeline = R6Class(
     
   } else{
       # Update the status of process
-      if (!is.null(processHasChanged))
+      if (length(processHasChanged)==1)
         if (is.null(self$tmp.return[[processHasChanged]]()$value)){
           # process has been reseted
           self$config$status[processHasChanged] <- self$global$UNDONE
@@ -152,12 +152,12 @@ Pipeline = R6Class(
           if (is.null(ind.last.validated)){
             data <- self$rv$temp.dataIn
           } else {
-            data <- self$rv$temp.dataIn[,,c(1:ind.last.validated)]
+            data <- self$rv$dataIn[,,c(1:ind.last.validated)]
           }
         }
         return(data)
       }
-      
+      browser()
       lapply(names(self$ll.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
     },
