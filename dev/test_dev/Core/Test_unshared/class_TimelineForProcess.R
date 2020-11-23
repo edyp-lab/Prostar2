@@ -6,7 +6,7 @@ TimelineForProcess = R6Class(
   
   public = list(
     initialize = function(id, mandatory, style=2 ) {
-      cat(paste0(class(self)[1], '::initialize()\n'))
+      cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
       #browser()
       self$id <- id
       self$nbSteps <- length(mandatory)
@@ -28,8 +28,8 @@ TimelineForProcess = R6Class(
     
     
     Force_ToggleState_Steps = function(){
-      cat(paste0(class(self)[1], '::Force_ToggleState_Steps()\n'))
-      #browser()
+      cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
+      browser()
       req(self$nbSteps)
       if (sum(self$config$status)== self$global$UNDONE){
         # Enable all steps and buttons at the initialization of a process or after a reset
@@ -46,7 +46,7 @@ TimelineForProcess = R6Class(
     },
     
     Display_Current_Step = function(){
-      cat(paste0(class(self)[1], '::Display_Current_Step()\n'))
+      cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
       req(self$nbSteps)
       req(self$rv$current.pos)
       #browser()

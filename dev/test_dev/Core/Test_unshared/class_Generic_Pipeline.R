@@ -29,7 +29,13 @@ Pipeline = R6Class(
       self$PrepareData2Send()
     },
     
-
+    CreateTimeline = function(){
+      cat(paste0(class(self)[1], '::', 'CreateTimeline() from - ', self$id, '\n'))
+      self$timeline <- TimelineForPipeline$new(
+        id = NS(self$id)('timeline'),
+        mandatory = self$config$mandatory
+      )
+    },
     
     # Catch the return value of a module and update the list of isDone modules
     # This list is updated with the names of datasets present in the rv$tmp
@@ -42,7 +48,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     Actions_On_Data_Trigger = function(){
-      browser()
+      #browser()
       print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$ll.process))
       )
@@ -157,7 +163,7 @@ Pipeline = R6Class(
         }
         return(data)
       }
-      browser()
+      #browser()
       lapply(names(self$ll.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
     },

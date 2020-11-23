@@ -1,3 +1,10 @@
+redBtnClass <- "btn-danger"
+PrevNextBtnClass <- "btn-info"
+btn_success_color <- "btn-success"
+optionsBtnClass <- "info"
+
+btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
+
 TimelineManager <- R6Class(
   "TimelineManager",
   private=list( ),
@@ -29,7 +36,7 @@ TimelineManager <- R6Class(
     Force_ToggleState_Steps = function(){},
     
     Init_Default_Positions = function(){
-      cat(paste0(class(self)[1], '::Init_Default_Positions()\n'))
+      cat(paste0(class(self)[1], '::Init_Default_Positions() from - ', self$id, '\n'))
       self$default_pos <- list(VALIDATED = self$nbSteps,
                                SKIPPED = self$nbSteps,
                                UNDONE = 1
@@ -37,7 +44,7 @@ TimelineManager <- R6Class(
     },
     
     NextBtn_logics = function(){
-      cat(paste0(class(self)[1], '::NextBtn_logics()\n'))
+      cat(paste0(class(self)[1], '::NextBtn_logics() from - ', self$id, '\n'))
       # Compute status for the Next button
       end_of_tl <- self$rv$current.pos == self$nbSteps
       mandatory_step <- isTRUE(self$config$mandatory[self$rv$current.pos])
@@ -49,7 +56,7 @@ TimelineManager <- R6Class(
     },
     
     PrevBtn_logics = function(){
-      cat(paste0(class(self)[1], '::PrevBtn_logics()\n'))
+      cat(paste0(class(self)[1], '::PrevBtn_logics() from - ', self$id, '\n'))
       # Compute status for the Previous button
       start_of_tl <- self$rv$current.pos == 1
       entireProcessSkipped <- self$config$status[self$nbSteps] == self$global$SKIPPED
@@ -60,7 +67,8 @@ TimelineManager <- R6Class(
   
     
     Update_Cursor_position = function(){
-      cat(paste0(class(self)[1], '::Update_Cursor_position()\n'))
+      cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n'))
+      browser()
       req(self$config$status)
       if (self$config$status[self$nbSteps] == self$global$VALIDATED)
         self$rv$current.pos <- self$default_pos$VALIDATED
@@ -77,7 +85,7 @@ TimelineManager <- R6Class(
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
     EncapsulateScreens = function(){
-      cat(paste0(class(self)[1], '::EncapsulateScreens()\n'))
+      cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
       req(self$config$screens)
       #browser()
       ns <- NS(self$id)
@@ -91,16 +99,18 @@ TimelineManager <- R6Class(
                                     })
     },
     
+    GetStatus = function(){self$config$status},
+    
     ToggleState_Steps = function(cond, i){
       ns <- NS(self$id)
-      cat(paste0(class(self)[1], '::ToggleState_Steps()\n'))
-      #browser()
+      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      browser()
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     },
     
     Update_Buttons_Status = function(){
-      #browser()
+      browser()
       shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
       shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
     },
@@ -142,26 +152,26 @@ TimelineManager <- R6Class(
     # SERVER
     server = function(config) {
       ns <- NS(self$id)
-      cat(paste0(class(self)[1], '::server()\n'))
+      cat(paste0(class(self)[1], '::server() from - ', self$id, '\n'))
       #browser()
       observeEvent(config(),{
-        cat(paste0(class(self)[1], '::observeEvent(config)\n'))
-       # browser()
+        cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
+        browser()
         self$config <- config()
-        self$rv$current.pos <- 1
-        cat(paste0(class(self)[1], '::observeEvent(req(self$config)\n'))
+        #self$rv$current.pos <- 1
         req(self$nbSteps>0)
         
         self$EncapsulateScreens()
         self$Update_Buttons_Status()
       })
       
-      observeEvent(config()$status,{
-        cat(paste0(class(self)[1], '::observeEvent(config$status)\n'))
-        self$config$status <- config()$status
-      })
+      # observeEvent(config()$status, ignoreInit=T,{
+      #   cat(paste0(class(self)[1], '::observeEvent(config()$status) from - ', self$id, '\n'))
+      #   browser()
+      #   self$config$status <- config()$status
+      # })
 
-      cat(paste0(class(self)[1], '::self$timelineDraw$server()\n'))
+      cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
       self$timelineDraw$server(
         status = reactive({self$config$status}),
         position = reactive({self$rv$current.pos})
@@ -171,27 +181,30 @@ TimelineManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
-        cat(paste0(class(self)[1], '::moduleServer()\n'))
+        cat(paste0(class(self)[1], '::moduleServer() from - ', self$id, '\n'))
         # Show modal when button reset is clicked
         observeEvent(input$rstBtn, {
-          cat(paste0(class(self)[1], '::observeEvent(input$rstBtn)\n'))
+          cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
           showModal(dataModal())
           })
         
         ###############################
         output$showResetBtn <- renderUI({
           actionButton(ns("rstBtn"), paste0("Reset entire ", self$config$type),
+                       class = redBtnClass,
                        style='padding:4px; font-size:80%')
         })
         
         output$showPrevBtn <- renderUI({
           shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+                                         class = PrevNextBtnClass,
                                          style='padding:4px; font-size:80%'))
         })
-        
+
         output$showNextBtn <- renderUI({
           shinyjs::disabled(actionButton(ns("nextBtn"), "next",
-                       style='padding:4px; font-size:80%')
+                                         class = PrevNextBtnClass,
+                                         style='padding:4px; font-size:80%')
           )
         })
         
@@ -215,7 +228,7 @@ TimelineManager <- R6Class(
         # When OK button is pressed, update the reactive value which will be sent
         # to the caller
         observeEvent(req(c(input$modal_ok)), ignoreInit=T,{
-          cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok)))\n'))
+          cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n'))
           self$rv$reset_OK <- input$rstBtn
           self$rv$current.pos <- 1
           removeModal()
@@ -236,21 +249,25 @@ TimelineManager <- R6Class(
         observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
         output$show_screens <- renderUI({
-          cat(paste0(class(self)[1], '::output$show_screens\n'))
+          cat(paste0(class(self)[1], '::output$show_screens from - ', self$id, '\n'))
           tagList(self$config$screens)
           })
         
         
-        # Catch a new position or a change in the status list
-        observeEvent(req(self$rv$current.pos), {
-           cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos))\n'))
-          self$Display_Current_Step()
+        # Catch a new position
+        observeEvent(req(self$rv$current.pos), ignoreInit=T, {
+           cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
+          browser()
+          #self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
+          self$Display_Current_Step()
+         
         })
         
         observeEvent(req(self$config$status), {
-          cat(paste0(class(self)[1], '::observeEvent(req(self$config$status))\n'))
-          self$Update_Cursor_position()
+          cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
+          browser()
+          #self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
         })

@@ -7,17 +7,25 @@ Process = R6Class(
   public = list(
 
     ActionsOn_NoTmp_Input = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input()\n'))
+      cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input() from - ', self$id, '\n'))
       self$InitializeModule()
       self$InitializeTimeline()
     },
     
     ActionsOnIsSkipped = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped()\n'))
+      cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped() from - ', self$id, '\n'))
       tag <- if (self$rv$isSkipped) self$global$SKIPPED else self$global$UNDONE
       
       self$config$status <- setNames(rep(tag, self$length),
                                      self$config$steps)
+    },
+    
+    CreateTimeline = function(){
+      cat(paste0(class(self)[1], '::', 'CreateTimeline() from - ', self$id, '\n'))
+      self$timeline <- TimelineForProcess$new(
+        id = NS(self$id)('timeline'),
+        mandatory = self$config$mandatory
+      )
     }
 
   )
