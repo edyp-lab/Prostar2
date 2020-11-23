@@ -68,7 +68,7 @@ TimelineManager <- R6Class(
     
     Update_Cursor_position = function(){
       cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n'))
-      browser()
+      if (verbose) browser()
       req(self$config$status)
       if (self$config$status[self$nbSteps] == self$global$VALIDATED)
         self$rv$current.pos <- self$default_pos$VALIDATED
@@ -93,9 +93,14 @@ TimelineManager <- R6Class(
       self$config$screens <- lapply(1:self$nbSteps,
                                     function(x){
                                       self$config$screens[[x]] <- if (x == 1) 
-                                        div(id = ns(paste0("div_screen", x)),  self$config$screens[[x]])
+                                        div(id = ns(paste0("div_screen", x)),  
+                                            self$config$screens[[x]]
+                                              )
                                       else 
-                                        shinyjs::hidden(div(id = ns(paste0("div_screen", x)),  self$config$screens[[x]]))
+                                        shinyjs::hidden(div(id = ns(paste0("div_screen", x)),
+                                                            self$config$screens[[x]]
+                                                              )
+                                                            )
                                     })
     },
     
@@ -104,13 +109,13 @@ TimelineManager <- R6Class(
     ToggleState_Steps = function(cond, i){
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      browser()
+      if (verbose) browser()
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     },
     
     Update_Buttons_Status = function(){
-      browser()
+      if (verbose) browser()
       shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
       shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
     },
@@ -140,6 +145,7 @@ TimelineManager <- R6Class(
                           )
                           )
                         ),
+                        uiOutput(ns('SkippedInfoPanel')),
                         uiOutput(ns('show_screens'))
                     )
                   )
@@ -156,7 +162,7 @@ TimelineManager <- R6Class(
       #browser()
       observeEvent(config(),{
         cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
-        browser()
+        if (verbose) browser()
         self$config <- config()
         #self$rv$current.pos <- 1
         req(self$nbSteps>0)
@@ -248,6 +254,19 @@ TimelineManager <- R6Class(
         observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
         observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
+        
+        output$SkippedInfoPanel <- renderUI({
+          req(self$config$status[self$rv$current.pos] == self$global$SKIPPED)
+          wellPanel(
+            style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
+            height = 100,
+            width=300,
+            align="center",
+            p(style = "color: black;",
+              'Info: you skipped this step.')
+          )
+        })
+        
         output$show_screens <- renderUI({
           cat(paste0(class(self)[1], '::output$show_screens from - ', self$id, '\n'))
           tagList(self$config$screens)
@@ -257,7 +276,7 @@ TimelineManager <- R6Class(
         # Catch a new position
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
-          browser()
+          if (verbose) browser()
           #self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
           self$Display_Current_Step()
@@ -266,7 +285,7 @@ TimelineManager <- R6Class(
         
         observeEvent(req(self$config$status), {
           cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
-          browser()
+          if (verbose) browser()
           #self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()

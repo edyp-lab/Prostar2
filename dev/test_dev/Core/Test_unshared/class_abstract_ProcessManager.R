@@ -155,7 +155,7 @@ ProcessManager <- R6Class(
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-      browser()
+      if (verbose) browser()
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
     #  browser()
@@ -169,7 +169,7 @@ ProcessManager <- R6Class(
     
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
-      browser()
+      if (verbose) browser()
       self$rv$dataIn <- self$rv$temp.dataIn
     },
     
@@ -215,7 +215,7 @@ ProcessManager <- R6Class(
     
     Actions_On_New_DataIn = function(data){
       cat(paste0(class(self)[1], '::', 'Actions_On_New_DataIn() from - ', self$id, '\n'))
-      browser()
+      if (verbose) browser()
       # This variable serves as a tampon while waiting the user click on the
       # validate button in the Description screen.
       # Once done, this variable is observed and the real rv$dataIn function can be
@@ -264,7 +264,7 @@ ProcessManager <- R6Class(
       
       observeEvent(req(self$timeline.res$current.pos()), ignoreInit=T, {
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos()) from - ', self$id, '\n'))
-        browser()
+        if (verbose) browser()
         self$rv$current.pos <- self$timeline.res$current.pos()
       })
       

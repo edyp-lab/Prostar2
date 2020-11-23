@@ -29,7 +29,7 @@ TimelineForProcess = R6Class(
     
     Force_ToggleState_Steps = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
-      browser()
+      if (verbose) browser()
       req(self$nbSteps)
       if (sum(self$config$status)== self$global$UNDONE){
         # Enable all steps and buttons at the initialization of a process or after a reset
@@ -52,7 +52,7 @@ TimelineForProcess = R6Class(
       #browser()
       # One only displays the steps that are not skipped
       lapply(1:self$nbSteps, function(x){
-        shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos && self$config$status[self$rv$current.pos] != self$global$SKIPPED)})
+        shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos)})
     }
   )
 )

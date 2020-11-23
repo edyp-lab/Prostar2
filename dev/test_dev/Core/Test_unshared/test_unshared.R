@@ -1,5 +1,5 @@
 library(R6)
-
+library(shinyalert)
 ###-----------------------------------------------------------------
 foo <- function() {
   match.call()[[1]]
@@ -115,16 +115,18 @@ Process <- R6Class(
       ns <- NS(self$id)
       wellPanel(style="background-color: lightgreen;",
                 tagList(
-        uiOutput(ns('show_tl')),
-        actionButton(ns('change'), 'Simulate change config'),
-        actionButton(ns('send'), 'Send value'),
-        actionButton(ns('curpos'), 'Change current position'),
-        uiOutput(ns('show_config'))
-      )
-      )
-    },
+                  useShinyalert(),
+                  uiOutput(ns('show_tl')),
+                  uiOutput(ns('isSkipped')),
+                  actionButton(ns('change'), 'Simulate change config'),
+                  actionButton(ns('send'), 'Send value'),
+                  actionButton(ns('curpos'), 'Change current position'),
+                  uiOutput(ns('show_config'))
+                  )
+                )
+      },
     
-    server = function(dataIn){
+    server = function(dataIn, isSkipped = FALSE){
       ns <- NS(self$id)
 
       
@@ -150,6 +152,24 @@ Process <- R6Class(
           print(paste0("self$timeline.res$current.pos() : ", self$timeline.res$current.pos()))
           self$rv$current.pos = self$timeline.res$current.pos()
         })
+        
+        
+        output$isSkipped <- renderUI({
+          req(isSkipped())
+          # showModal(modalDialog(
+          #   title = "You have logged in.",
+          #   paste0("It seems you have logged in as",input$userid,'.'),
+          #   easyClose = F,
+          #   footer = NULL
+          # ))
+          #shinyalert("Oops!", "Something went wrong.", type = "error")
+          wellPanel(
+          style = "background-color: yellow; opacity: 0.72",
+                        
+                        h2("ZIP explorer")
+          )
+        })
+        
         
         output$show_tl <- renderUI({
           req(self$timeline)
@@ -215,6 +235,7 @@ Pipeline <- R6Class(
                           
         tagList(
           actionButton(ns('sendToProcesses'), "Send dataIn"),
+          actionButton(ns('skip'), "Set skipped"),
           uiOutput(ns('screen')),
           uiOutput(ns('res'))
         )
@@ -240,13 +261,16 @@ Pipeline <- R6Class(
       
       # rv$description <- processDescription$server()
       # rv$processA <- processA$server()
-      self$tmp.return[['Description']] <- self$ll.process[['Description']]$server(dataIn = reactive({self$rv$dataIn}))
-      self$tmp.return[['processA']] <- self$ll.process[['processA']]$server(dataIn = reactive({self$rv$dataIn}))
+      self$tmp.return[['Description']] <- self$ll.process[['Description']]$server(dataIn = reactive({self$rv$dataIn}),
+                                                                                  isSkipped = reactive({self$rv$isSkipped %%2 ==0}))
+      self$tmp.return[['processA']] <- self$ll.process[['processA']]$server(dataIn = reactive({self$rv$dataIn}),
+                                                                            isSkipped = reactive({self$rv$isSkipped %%2 ==0}))
       
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
         
+        observeEvent(input$skip,{ self$rv$isSkipped <- input$skip})
         
         output$screen <- renderUI({
           tagList(

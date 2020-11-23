@@ -3,6 +3,7 @@ library(R6)
 library(tibble)
 
 options(shiny.fullstacktrace = T)
+verbose <- F
 
 #------------------------ Class TimelineDraw --------------------------------------
 source(file.path('.', 'class_TimelineDraw.R'), local=TRUE)$value

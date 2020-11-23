@@ -29,15 +29,17 @@ TimelineForPipeline = R6Class(
     
     Force_ToggleState_Steps = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
-      # req(self$nbSteps)
+       req(self$nbSteps)
       # if ((self$nbSteps==1) || (self$nbSteps>=2 && sum(self$config$status[2:self$nbSteps])== 0 )){
       #   # This is the case at the initialization of a process or after a reset
       #   # Enable all steps and buttons
       #   self$toggleState_Steps(cond = TRUE, i = self$nbSteps)
-      # } else if (self$config$status[self$nbSteps] == self$global$SKIPPED){
-      #   # Disable all steps
-      #   self$toggleState_Steps(cond = FALSE, i = self$nbSteps)
-      # } else {
+      # } else 
+       if (self$config$status[self$nbSteps] == self$global$SKIPPED){
+         # Disable all steps
+         self$toggleState_Steps(cond = FALSE, i = self$nbSteps)
+       } 
+       #else {
       #   # Disable all previous steps from each VALIDATED step
       #   ind.max <- max(grep(self$global$VALIDATED, self$config$status))
       #   self$toggleState_Steps(cond = FALSE, i = ind.max)
@@ -50,9 +52,8 @@ TimelineForPipeline = R6Class(
       req(self$nbSteps)
       req(self$rv$current.pos)
       #browser()
-      # One only displays the steps that are not skipped
       lapply(1:self$nbSteps, function(x){
-        shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos && self$config$status[self$rv$current.pos] != self$global$SKIPPED)})
+        shinyjs::toggle(paste0('div_screen', x), condition = x==self$rv$current.pos)})
     }
   )
 )
