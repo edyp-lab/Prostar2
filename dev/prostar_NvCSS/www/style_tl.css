@@ -1,37 +1,113 @@
-body { font-family: Helvetica; }
-
-div {
-  width: 300px;
-  margin: auto;
+body{
+  background: grey;
 }
 
-.content {
-  border-top: 2px solid orange;
-  border-bottom: 2px solid orange;
-  border: 2px solid orange;
-  width: 150px;
+.timeline {
+  border-left: 8px solid blue;
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;    
+  background: orange;
+  color: black;
+  font-family: sans-serif;  
+  margin: 20px auto;  
+  letter-spacing: 0.5px;   
+  position: relative;
+  line-height: 1.4em;
+  font-size: 1.03em;   
+  padding: 50px;   
+  list-style: none;
+  text-align: left;  
+  font-weight: 100;  
+  max-width: 30%; 
+  
 }
 
-.content:after {
-  background: black;
+
+.event {
+  border-bottom: 2px dashed grey;
+  padding-bottom: 20px;
+  margin-bottom: 40px;
+  position: relative;
+  text-align: center;
+  font-size: 2em;
+}
+
+.event:last-of-type { 
+  padding-bottom: 0;
+  margin-bottom: 0; 
+  border: none;      
+}
+
+.event:after {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 50%;
-  width: 5px;
+  display: block;
+  top: 0;
 }
+
+
+
+.event:after {
+  box-shadow: 0 0 0 8px blue;
+  left: -60px;        
+  background: orange;    
+  border-radius: 50%;  
+  height: 12px;
+  width: 12px;
+  content: "";
+  top: 5px;
+}
+
+
+/* first
+.box:before{
+  background-color: orange; 
+  content: '';
+  display: block;
+  height: 35%;
+  position: absolute;
+  width: 2px;
+  z-index: -1;
+  margin: -2px;
+  left: 0;
+  top: 0;
+  
+}
+
+.box {
+  width: 200px;
+  margin: auto;
+  border-top: 2px solid ;
+  border-bottom: 2px solid ;
+  border-color: orange;
+  position: relative;
+}
+
+
+.box:after {
+  background-color: orange; 
+  right: 0;
+  content: '';
+  display: block;
+  height: 35%;
+  bottom: 0;
+  position: absolute;
+  width: 2px;
+  z-index: -1;
+  margin: -2px;
+}
+
 
 p {
   text-align: center;
   border-top: 2px solid;
   border-bottom: 2px solid;
-  border-color: orange !important;
+  border-color: orange;
   padding: 20px; margin: -2px;
 }
 
 
 p:nth-child(odd) {
-  border-right: 2px solid;
+  border-right: 2px orange solid;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   margin-left: 30px; 
@@ -40,7 +116,7 @@ p:nth-child(odd) {
 
 
 p:nth-child(even) {
-  border-left: 2px solid;
+  border-left: 2px orange solid;
   border-top-left-radius: 30px;
   border-bottom-left-radius: 30px;
   margin-right: 30px; 
@@ -50,18 +126,14 @@ p:nth-child(even) {
 
 
 p:first-child {
-  border-top: 0;
   border-top-right-radius:0;
   border-top-left-radius:0;
+  border-top: 0;
 }
 
 p:last-child {
-  border-bottom: 0;
   border-bottom-right-radius:0;
   border-bottom-left-radius:0;
+  border-bottom: 0;
 }
-
-p:hover {
-  
-  
-}
+*/
