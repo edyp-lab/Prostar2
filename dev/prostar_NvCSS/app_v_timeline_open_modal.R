@@ -18,16 +18,23 @@ ui <- fluidPage(
   
   
   
-  tags$ul(class="timeline",
-          tags$li(class="event",
-                  p('Filtration')),
-          tags$li(class="event",
-                  p('Normalization')),
-          tags$li(class="event",
-                  p('Imputation')),
-          tags$li(class="event",
-                  p('Aggregation')
-          ))
+  # tags$ul(class="timeline",
+  #         tags$li(class="event",
+  #                 p('Filtration')),
+  #         tags$li(class="event",
+  #                 p('Normalization')),
+  #         tags$li(class="event",
+  #                 p('Imputation')),
+  #         tags$li(class="event",
+  #                 p('Aggregation')
+  #         ))
+  
+  tags$div(class="main",
+           p('Filtration'),
+           p('Normalization'),
+           p('Imputation'),
+           p('Aggregation'))
+  
   
   
   
