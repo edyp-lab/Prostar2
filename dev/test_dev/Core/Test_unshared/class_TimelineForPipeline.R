@@ -14,7 +14,8 @@ TimelineForPipeline = R6Class(
       self$config <- reactiveValues()
       self$rv <- reactiveValues(
         current.pos = 1,
-        reset_OK = NULL
+        reset_OK = NULL,
+        isAllSkipped = FALSE
       )
       
       
@@ -35,15 +36,17 @@ TimelineForPipeline = R6Class(
       #   # Enable all steps and buttons
       #   self$toggleState_Steps(cond = TRUE, i = self$nbSteps)
       # } else 
-       if (self$config$status[self$nbSteps] == self$global$SKIPPED){
-         # Disable all steps
-         self$toggleState_Steps(cond = FALSE, i = self$nbSteps)
-       } 
-       #else {
-      #   # Disable all previous steps from each VALIDATED step
-      #   ind.max <- max(grep(self$global$VALIDATED, self$config$status))
-      #   self$toggleState_Steps(cond = FALSE, i = ind.max)
-      # }
+       # if (self$config$status[self$nbSteps] == self$global$SKIPPED){
+       #   # Disable all steps
+       #   self$ToggleState_Steps(cond = FALSE, i = self$nbSteps)
+       # } 
+       # else {
+       #   # Disable all previous steps from each VALIDATED step
+       #   ind.max <- max(grep(self$global$VALIDATED, self$config$status))
+       #   browser()
+       #   if (ind.max > 0)
+       #   self$ToggleState_Steps(cond = FALSE, i = ind.max)
+       # }
       
     },
     

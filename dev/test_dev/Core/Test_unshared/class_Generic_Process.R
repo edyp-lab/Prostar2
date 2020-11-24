@@ -14,10 +14,12 @@ Process = R6Class(
     
     ActionsOnIsSkipped = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped() from - ', self$id, '\n'))
-      tag <- if (self$rv$isSkipped) self$global$SKIPPED else self$global$UNDONE
+      if(verbose=='skip') browser()
+      isSkipTag <- if (self$rv$isSkipped) self$global$SKIPPED else self$global$UNDONE
       
-      self$config$status <- setNames(rep(tag, self$length),
+      self$config$status <- setNames(rep(isSkipTag, self$length),
                                      self$config$steps)
+      if(verbose=='skip') browser()
     },
     
     CreateTimeline = function(){

@@ -59,8 +59,8 @@ TimelineManager <- R6Class(
       cat(paste0(class(self)[1], '::PrevBtn_logics() from - ', self$id, '\n'))
       # Compute status for the Previous button
       start_of_tl <- self$rv$current.pos == 1
-      entireProcessSkipped <- self$config$status[self$nbSteps] == self$global$SKIPPED
-      PrevBtn_logics <- !start_of_tl && !entireProcessSkipped
+      #entireProcessSkipped <- sum(self$config$status) == self$global$SKIPPED * length(self$nbSteps)
+      PrevBtn_logics <- !start_of_tl && !self$rv$isAllSkipped
       PrevBtn_logics
     },
     
@@ -68,11 +68,11 @@ TimelineManager <- R6Class(
     
     Update_Cursor_position = function(){
       cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n'))
-      if (verbose) browser()
+      if (verbose==T) browser()
       req(self$config$status)
       if (self$config$status[self$nbSteps] == self$global$VALIDATED)
         self$rv$current.pos <- self$default_pos$VALIDATED
-      else if (self$config$status[self$nbSteps] == self$global$SKIPPED)
+      else if (self$rv$isAllSkipped)
         self$rv$current.pos <- self$default_pos$SKIPPED
      # else if (self$config$status[self$nbSteps] == self$global$UNDONE)
      #   self$rv$current.pos <- self$default_pos$UNDONE
@@ -109,13 +109,13 @@ TimelineManager <- R6Class(
     ToggleState_Steps = function(cond, i){
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      if (verbose) browser()
+      if (verbose==T) browser()
       lapply(1:i, function(x){
         shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
     },
     
     Update_Buttons_Status = function(){
-      if (verbose) browser()
+      if (verbose==T) browser()
       shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
       shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
     },
@@ -162,7 +162,7 @@ TimelineManager <- R6Class(
       #browser()
       observeEvent(config(),{
         cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
-        if (verbose) browser()
+        if (verbose=='skip') browser()
         self$config <- config()
         #self$rv$current.pos <- 1
         req(self$nbSteps>0)
@@ -171,11 +171,11 @@ TimelineManager <- R6Class(
         self$Update_Buttons_Status()
       })
       
-      # observeEvent(config()$status, ignoreInit=T,{
+       observeEvent(self$config$status, ignoreInit=T,{
       #   cat(paste0(class(self)[1], '::observeEvent(config()$status) from - ', self$id, '\n'))
       #   browser()
-      #   self$config$status <- config()$status
-      # })
+         self$rv$isAllSkipped <- sum(self$config$status) == self$global$SKIPPED * self$nbSteps
+       })
 
       cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
       self$timelineDraw$server(
@@ -256,6 +256,7 @@ TimelineManager <- R6Class(
         
         
         output$SkippedInfoPanel <- renderUI({
+          req(!self$rv$isAllSkipped)
           req(self$config$status[self$rv$current.pos] == self$global$SKIPPED)
           wellPanel(
             style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
@@ -276,8 +277,8 @@ TimelineManager <- R6Class(
         # Catch a new position
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
-          if (verbose) browser()
-          #self$Force_ToggleState_Steps()
+          if (verbose==T) browser()
+          self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
           self$Display_Current_Step()
          
@@ -285,7 +286,7 @@ TimelineManager <- R6Class(
         
         observeEvent(req(self$config$status), {
           cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
-          if (verbose) browser()
+          if (verbose==TRUE) browser()
           #self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
