@@ -71,9 +71,11 @@ ProcessManager <- R6Class(
     
     Set_Skipped_Status = function(){
       cat(paste0(class(self)[1], '::Set_Skipped_Status() from - ', self$id, '\n'))
+      if(verbose=='skip') browser()
       for (i in 1:self$length)
         if (self$config$status[i] != self$global$VALIDATED && self$GetMaxValidated_AllSteps() > i)
           self$config$status[i] <- self$global$SKIPPED
+        if(verbose=='skip') browser()
     },
     
     GetMaxValidated_AllSteps = function(){
@@ -108,6 +110,7 @@ ProcessManager <- R6Class(
     # has been validated
     is.skipped = function(name){
       cat(paste0(class(self)[1], '::', 'is.skipped() from - ', self$id, '\n'))
+      if(verbose=='skip') browser()
       pos <- which(name == self$config$steps)
       return(self$GetStatusPosition(pos) == self$global$SKIPPED)
     },
@@ -155,7 +158,7 @@ ProcessManager <- R6Class(
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-      if (verbose) browser()
+      if(verbose=='skip') browser()
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
     #  browser()
@@ -169,7 +172,7 @@ ProcessManager <- R6Class(
     
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
-      if (verbose) browser()
+      if (verbose==T) browser()
       self$rv$dataIn <- self$rv$temp.dataIn
     },
     
@@ -215,7 +218,7 @@ ProcessManager <- R6Class(
     
     Actions_On_New_DataIn = function(data){
       cat(paste0(class(self)[1], '::', 'Actions_On_New_DataIn() from - ', self$id, '\n'))
-      if (verbose) browser()
+      if (verbose=='skip') browser()
       # This variable serves as a tampon while waiting the user click on the
       # validate button in the Description screen.
       # Once done, this variable is observed and the real rv$dataIn function can be
@@ -264,7 +267,7 @@ ProcessManager <- R6Class(
       
       observeEvent(req(self$timeline.res$current.pos()), ignoreInit=T, {
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos()) from - ', self$id, '\n'))
-        if (verbose) browser()
+        if (verbose==T) browser()
         self$rv$current.pos <- self$timeline.res$current.pos()
       })
       
@@ -420,8 +423,9 @@ ProcessManager <- R6Class(
       #   print(paste0(self$config$status, collapse=' '))
       # })
 
-      observeEvent(isSkipped(), ignoreInit = T, { 
+      observeEvent(req(isSkipped()), ignoreInit = F, { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
+        if(verbose=='skip') browser()
         self$rv$isSkipped <- isSkipped()
         self$ActionsOnIsSkipped()
       })
