@@ -10,6 +10,7 @@ ui <- fluidPage(
     tags$link(rel = "stylesheet", type = "text/css", href = "style_tl.css")
   ),
   
+  # first and third
   # tags$div(class="box",
   #          p('Filtration'),
   #          p('Normalization'),
@@ -17,7 +18,7 @@ ui <- fluidPage(
   #          p('Aggregation'))
   
   
-  
+  # second
   # tags$ul(class="timeline",
   #         tags$li(class="event",
   #                 p('Filtration')),
@@ -29,12 +30,17 @@ ui <- fluidPage(
   #                 p('Aggregation')
   #         ))
   
-  tags$div(class="main",
-           p('Filtration'),
-           p('Normalization'),
-           p('Imputation'),
-           p('Aggregation'))
-  
+ 
+  tags$ul(class="timeline",
+                  tags$li(class="event",
+                          p('Filtration')),
+                  tags$li(class="event",
+                          p('Normalization')),
+                  tags$li(class="event",
+                          p('Imputation')),
+                  tags$li(class="event",
+                          p('Aggregation')
+                  ))
   
   
   
