@@ -2,7 +2,7 @@ library(shiny)
 library(shinyjs)
 library(R6)
 
-NUM_PAGES <- 5
+NUM_PAGES <- 3
 
 
 
@@ -11,11 +11,12 @@ Timeline  <- R6Class(
   "Timeline",
   public = list(
     id = NULL,
-    rv = "<reactiveValues>",
+    rv = reactiveValues(
+      page = 1,
+      screens = NULL
+    ),
     initialize = function(id){
       self$id <- id
-      rv <- reactiveValues( page = 1,
-                            screens = NULL)
     },
 
     GetScreens = function(){
@@ -33,46 +34,36 @@ Timeline  <- R6Class(
       ns <- NS(self$id)
       fluidPage(
         useShinyjs(),
-        hidden(
-          self$GetScreens()
-        ),
-        br(),
-        actionButton(ns("prevBtn"), "< Previous"),
-        actionButton(ns("nextBtn"), "Next >"),
-        actionButton(ns('toggle'), 'toggle')
+      hidden(
+        lapply(seq(NUM_PAGES), function(i) {
+          div(
+            class = "page",
+            id = ns(paste0("step", i)),
+            h4(paste0("Step", i)),
+            actionButton(ns(paste0('btn',i)), paste0('btn ',i))
+          )
+        })
+      ),
+      br(),
+      actionButton("prevBtn", "< Previous"),
+      actionButton("nextBtn", "Next >"),
+      actionButton('toggle', 'toggle')
       )
     },
     
     server = function(screens){
       ns <- NS(self$id)
-      
-      observeEvent(screens(), {self$rv$screens <- screens()})
-      
+       
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
+        rv <- reactiveValues(page = 1)
         
-        
-        output$step1 <- renderUI({
-          h4('Step 1')
-          actionButton(ns('btn1'), 'btn1')
-        })
-        
-        output$step2 <- renderUI({
-          h4('Step 2')
-          actionButton(ns('btn2'), 'btn2')
-        })
-        
-        output$step3 <- renderUI({
-          h4('Step 3')
-          actionButton(ns('btn3'), 'btn3')
-        })
-        
-        observeEvent(self$rv$page,{
-          cat(paste0(self$rv$page, '\n'))
-          toggleState(id = "prevBtn", condition = self$rv$page > 1)
-          toggleState(id = "nextBtn", condition = self$rv$page < NUM_PAGES)
+        observe({
+          cat(paste0('page ', rv$page, '\n'))
+          toggleState(id = "prevBtn", condition = rv$page > 1)
+          toggleState(id = "nextBtn", condition = rv$page < NUM_PAGES)
           hide(selector = ".page")
-          show(paste0("step", self$rv$page))
+          show(paste0("step", rv$page))
         })
         
         observeEvent(input$toggle,{
@@ -80,11 +71,32 @@ Timeline  <- R6Class(
         })
         
         navPage <- function(direction) {
-          self$rv$page <- self$rv$page + direction
+          rv$page <- rv$page + direction
         }
         
         observeEvent(input$prevBtn, navPage(-1))
         observeEvent(input$nextBtn, navPage(1))
+        
+        output$step1 <- renderUI({
+          tagList(
+            h4('Step 1'),
+            actionButton(ns('btn1'), 'btn1')
+          )
+        })
+        
+        output$step2 <- renderUI({
+          tagList(
+            h4('Step 2'), actionButton(ns('btn2'), 'btn2')
+          )
+        })
+        
+        output$step3 <- renderUI({
+          tagList(
+            h4('Step 3'),
+            actionButton(ns('btn3'), 'btn3')
+          )
+        })
+
       
     }
   )
@@ -114,9 +126,7 @@ Process  <- R6Class(
       
       screens <- list('step1',
                       'step2',
-                      'step3',
-                      'step4',
-                      'step5')
+                      'step3')
       
       tl <- Timeline$new(ns('App'))
       tl$server(screens=reactive({screens}))
