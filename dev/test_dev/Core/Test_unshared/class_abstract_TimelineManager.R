@@ -50,8 +50,7 @@ TimelineManager <- R6Class(
       mandatory_step <- isTRUE(self$config$mandatory[self$rv$current.pos])
       validated <- self$config$status[self$rv$current.pos] == self$global$VALIDATED
       skipped <- self$config$status[self$rv$current.pos] == self$global$SKIPPED
-      entireProcessSkipped <- self$config$status[self$nbSteps] == self$global$SKIPPED
-      NextBtn_logics <- !end_of_tl && !entireProcessSkipped && (!mandatory_step || (mandatory_step && (validated || skipped)))
+      NextBtn_logics <- !end_of_tl && (!mandatory_step || (mandatory_step && (validated || skipped)))
       NextBtn_logics
     },
     
@@ -60,7 +59,7 @@ TimelineManager <- R6Class(
       # Compute status for the Previous button
       start_of_tl <- self$rv$current.pos == 1
       #entireProcessSkipped <- sum(self$config$status) == self$global$SKIPPED * length(self$nbSteps)
-      PrevBtn_logics <- !start_of_tl && !self$rv$isAllSkipped
+      PrevBtn_logics <- !start_of_tl 
       PrevBtn_logics
     },
     
@@ -92,15 +91,14 @@ TimelineManager <- R6Class(
       self$Init_Default_Positions() 
       self$config$screens <- lapply(1:self$nbSteps,
                                     function(x){
-                                      self$config$screens[[x]] <- if (x == 1) 
-                                        div(id = ns(paste0("div_screen", x)),  
+                                      self$config$screens[[x]] <- div(id = ns(paste0("div_screen", x)),  
                                             self$config$screens[[x]]
                                               )
-                                      else 
-                                        shinyjs::hidden(div(id = ns(paste0("div_screen", x)),
-                                                            self$config$screens[[x]]
-                                                              )
-                                                            )
+                                      # else 
+                                      #   shinyjs::hidden(div(id = ns(paste0("div_screen", x)),
+                                      #                       self$config$screens[[x]]
+                                      #                         )
+                                      #                       )
                                     })
     },
     
@@ -111,7 +109,13 @@ TimelineManager <- R6Class(
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       if (verbose==T) browser()
       lapply(1:i, function(x){
-        shinyjs::toggleState(paste0('div_screen', x), condition = cond)})
+        shinyjs::toggleState(paste0('div_screen', x),condition = cond)
+        # if (cond)
+        #   shinyjs::enable(paste0('div_screen', x))
+        # else
+        #   shinyjs::disable(paste0('div_screen', x))
+        
+        })
     },
     
     Update_Buttons_Status = function(){
@@ -120,38 +124,53 @@ TimelineManager <- R6Class(
       shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
     },
     
-    # UI
-    ui = function() {
+    Main_UI = function(){
       ns <- NS(self$id)
-      fluidPage(
-        #wellPanel(
-          #style="background-color: lightblue;",
-                  tagList(
-                    uiOutput(ns('show_currentPos')),
-                    shinyjs::useShinyjs(),
-                    div(id = ns('GlobalTL'),
-                        fluidRow(
-                          align= 'center',
-                          column(width=2, div(style = self$btn_style,
-                                             uiOutput(ns('showPrevBtn')),
-                                             uiOutput(ns('showResetBtn'))
-                          )
-                          ),
-                          column(width=8, div( style = self$btn_style,
-                                              self$timelineDraw$ui())),
-                          column(width=2, div(style = self$btn_style,
-                                             uiOutput(ns('showNextBtn')),
-                                             uiOutput(ns('showSaveExitBtn'))
-                          )
-                          )
-                        ),
-                        uiOutput(ns('SkippedInfoPanel')),
-                        uiOutput(ns('show_screens'))
-                    )
-                  )
-       # )
+      tagList(
+        uiOutput(ns('show_currentPos')),
+        shinyjs::useShinyjs(),
+        div(id = ns('GlobalTL'),
+            fluidRow(
+              align= 'center',
+              column(width=2, div(style = self$btn_style,
+                                  uiOutput(ns('showPrevBtn')),
+                                  uiOutput(ns('showResetBtn'))
+              )
+              ),
+              column(width=8, div( style = self$btn_style,
+                                   self$timelineDraw$ui())),
+              column(width=2, div(style = self$btn_style,
+                                  uiOutput(ns('showNextBtn')),
+                                  uiOutput(ns('showSaveExitBtn'))
+              )
+              )
+            ),
+            uiOutput(ns('SkippedInfoPanel')),
+            #uiOutput(ns('show_screens'))
+            hidden(
+              lapply(1:length(self$config$screens), function(i) {
+                div(
+                  class = "page",
+                  id = ns(self$config$screens[i]),
+                  uiOutput(ns(self$config$screens[i]))
+                )
+              })
+            )
+        )
       )
     },
+    
+    GetMaxValidated_AllSteps = function(){
+      cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
+      val <- 0
+      ind <- which(self$config$status == self$global$VALIDATED)
+      if (length(ind) > 0)
+        val <- max(ind)
+      val
+    },
+    
+    # UI
+    ui = function() {},
     
     SetModalTxt = function(txt){self$modal_txt <- txt},
     
@@ -171,11 +190,7 @@ TimelineManager <- R6Class(
         self$Update_Buttons_Status()
       })
       
-       observeEvent(self$config$status, ignoreInit=T,{
-      #   cat(paste0(class(self)[1], '::observeEvent(config()$status) from - ', self$id, '\n'))
-      #   browser()
-         self$rv$isAllSkipped <- sum(self$config$status) == self$global$SKIPPED * self$nbSteps
-       })
+
 
       cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
       self$timelineDraw$server(
@@ -256,7 +271,7 @@ TimelineManager <- R6Class(
         
         
         output$SkippedInfoPanel <- renderUI({
-          req(!self$rv$isAllSkipped)
+          req(!isTRUE(sum(self$config$status) == self$global$SKIPPED * self$nbSteps))
           req(self$config$status[self$rv$current.pos] == self$global$SKIPPED)
           wellPanel(
             style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
@@ -270,7 +285,21 @@ TimelineManager <- R6Class(
         
         output$show_screens <- renderUI({
           cat(paste0(class(self)[1], '::output$show_screens from - ', self$id, '\n'))
-          tagList(self$config$screens)
+          # tagList(
+          #   shinyjs::useShinyjs(),
+          #   self$config$screens
+          #   )
+          
+          # hidden(
+          #   lapply(1:length(self$config$screens), function(i) {
+          #     div(
+          #       class = "page",
+          #       id = ns(self$config$screens[i]),
+          #       uiOutput(ns(self$config$screens[i]))
+          #     )
+          #   })
+          # )
+          
           })
         
         
@@ -281,12 +310,16 @@ TimelineManager <- R6Class(
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
           self$Display_Current_Step()
+          self$Disable_Current_Step()
          
         })
         
         observeEvent(req(self$config$status), {
           cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
           if (verbose==TRUE) browser()
+          self$rv$isAllSkipped <- sum(rep(self$global$SKIPPED, self$nbSteps)==self$config$status)==self$nbSteps
+          self$rv$isAllUndone <- sum(rep(self$global$UNDONE, self$nbSteps)==self$config$status)==self$nbSteps
+          
           #self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()

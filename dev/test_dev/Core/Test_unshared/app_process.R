@@ -93,7 +93,7 @@ server = function(dataIn ) {
   lapply(names(self$ll.process), function(x){
     self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
                                                         reset = reactive({self$rv$reset}),
-                                                        isSkipped = reactive({self$rv$skipped %%2 == 0}))
+                                                        isSkipped = reactive({self$rv$skipped}))
   })
   
 
@@ -106,10 +106,7 @@ server = function(dataIn ) {
     ns <- NS(self$id)
     
   
-  observeEvent(input$reset,{
-    print("action on reset")
-    self$rv$reset <- input$reset})
-  
+  observeEvent(input$reset,{self$rv$reset <- input$reset})
   observeEvent(input$skip,{self$rv$skipped <- input$skip})
   
   output$show_ui <- renderUI({
@@ -163,13 +160,8 @@ server = function(input, output){
   
   Pipeline$server(dataIn = reactive({rv$dataIn}))
   
-  
   observeEvent(input$changeDataset,{
-  
-    if (input$changeDataset%%2 ==0)
-      rv$dataIn <- Exp1_R25_prot[1:10, , -1]
-    else
-      rv$dataIn <- NULL
+  rv$dataIn <- Exp1_R25_prot[1:10, , -1]
   })
   
   }

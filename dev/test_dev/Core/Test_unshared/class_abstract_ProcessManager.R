@@ -182,7 +182,12 @@ ProcessManager <- R6Class(
       setNames(
         lapply(1:self$length, 
                function(x){
-                 do.call(uiOutput, list(outputId=NS(self$id)(self$config$steps[x])))}),
+                 div(
+                   class = "page",
+                   id = self$config$steps[x],
+                   do.call(uiOutput, list(outputId=NS(self$id)(self$config$steps[x])))
+                   )
+                 }),
         self$config$steps)
     },
     
@@ -378,7 +383,7 @@ ProcessManager <- R6Class(
     # SERVER
     server = function(dataIn = NULL, 
                       reset = reactive({NULL}),
-                      isSkipped = reactive({FALSE})) {
+                      isSkipped = reactive({NULL})) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::', 'server() from - ', self$id, '\n'))
       
@@ -423,7 +428,7 @@ ProcessManager <- R6Class(
       #   print(paste0(self$config$status, collapse=' '))
       # })
 
-      observeEvent(req(isSkipped()), ignoreInit = F, { 
+      observeEvent(req(isSkipped()), { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
         if(verbose=='skip') browser()
         self$rv$isSkipped <- isSkipped()

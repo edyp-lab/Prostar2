@@ -27,6 +27,11 @@ TimelineForPipeline = R6Class(
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
     
+    ui = function() {
+      fluidPage(
+        self$Main_UI()
+      )
+    },
     
     Force_ToggleState_Steps = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
