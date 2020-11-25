@@ -83,24 +83,49 @@ TimelineManager <- R6Class(
     # Initialization of the screens by integrating them into a div specific
     # to this module (name prefixed with the ns() function
     # Those div englobs the div of the caller where screens are defined
-    EncapsulateScreens = function(){
-      cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
-      req(self$config$screens)
-      #browser()
+    # EncapsulateScreens = function(){
+    #   cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+    #   req(self$config$screens)
+    #   #browser()
+    #   ns <- NS(self$id)
+    #   self$Init_Default_Positions() 
+    #   self$config$screens <- lapply(1:self$nbSteps,
+    #                                 function(x){
+    #                                   self$config$screens[[x]] <- div(id = ns(paste0("div_screen", x)),  
+    #                                         self$config$screens[[x]]
+    #                                           )
+    #                                   # else 
+    #                                   #   shinyjs::hidden(div(id = ns(paste0("div_screen", x)),
+    #                                   #                       self$config$screens[[x]]
+    #                                   #                         )
+    #                                   #                       )
+    #                                 })
+    # },
+    
+    GetScreens = function(){
+      cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       ns <- NS(self$id)
-      self$Init_Default_Positions() 
-      self$config$screens <- lapply(1:self$nbSteps,
-                                    function(x){
-                                      self$config$screens[[x]] <- div(id = ns(paste0("div_screen", x)),  
-                                            self$config$screens[[x]]
-                                              )
-                                      # else 
-                                      #   shinyjs::hidden(div(id = ns(paste0("div_screen", x)),
-                                      #                       self$config$screens[[x]]
-                                      #                         )
-                                      #                       )
-                                    })
+      req(self$config$screens)
+      
+      lapply(1:self$nbSteps, function(i) {
+        if (i==1) div(
+          class = "page",
+          id = ns(paste0("div_screen", i)),
+          self$config$screens[[i]]
+        )
+        else 
+          hidden(div(
+            class = "page",
+            id = ns(paste0("div_screen", i)),
+            self$config$screens[[i]]
+          )
+          )
+      }
+      )
+      
     },
+    
+    
     
     GetStatus = function(){self$config$status},
     
@@ -147,15 +172,7 @@ TimelineManager <- R6Class(
             ),
             uiOutput(ns('SkippedInfoPanel')),
             #uiOutput(ns('show_screens'))
-            hidden(
-              lapply(1:length(self$config$screens), function(i) {
-                div(
-                  class = "page",
-                  id = ns(self$config$screens[i]),
-                  uiOutput(ns(self$config$screens[i]))
-                )
-              })
-            )
+            self$GetScreens()
         )
       )
     },
@@ -283,24 +300,24 @@ TimelineManager <- R6Class(
           )
         })
         
-        output$show_screens <- renderUI({
-          cat(paste0(class(self)[1], '::output$show_screens from - ', self$id, '\n'))
-          # tagList(
-          #   shinyjs::useShinyjs(),
-          #   self$config$screens
-          #   )
-          
-          # hidden(
-          #   lapply(1:length(self$config$screens), function(i) {
-          #     div(
-          #       class = "page",
-          #       id = ns(self$config$screens[i]),
-          #       uiOutput(ns(self$config$screens[i]))
-          #     )
-          #   })
-          # )
-          
-          })
+        # output$show_screens <- renderUI({
+        #   cat(paste0(class(self)[1], '::output$show_screens from - ', self$id, '\n'))
+        #   # tagList(
+        #   #   shinyjs::useShinyjs(),
+        #   #   self$config$screens
+        #   #   )
+        #   
+        #   # hidden(
+        #   #   lapply(1:length(self$config$screens), function(i) {
+        #   #     div(
+        #   #       class = "page",
+        #   #       id = ns(self$config$screens[i]),
+        #   #       uiOutput(ns(self$config$screens[i]))
+        #   #     )
+        #   #   })
+        #   # )
+        #   
+        #   })
         
         
         # Catch a new position
@@ -310,8 +327,7 @@ TimelineManager <- R6Class(
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
           self$Display_Current_Step()
-          self$Disable_Current_Step()
-         
+
         })
         
         observeEvent(req(self$config$status), {

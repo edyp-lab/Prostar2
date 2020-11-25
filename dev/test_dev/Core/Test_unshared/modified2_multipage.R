@@ -56,32 +56,15 @@ GetScreens = function(){
        moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
-        observeEvent(ll.screens,{
-          cat('toto')
-          self$rv$ll.screens <- ll.screens
-        })
+        observeEvent(ll.screens,{self$rv$ll.screens <- ll.screens})
         
         observe({
-          
-          cat(paste0(self$rv$page, '\n'))
           toggleState(id = "prevBtn", condition = self$rv$page > 1)
           toggleState(id = "nextBtn", condition = self$rv$page < NUM_PAGES)
           shinyjs::hide(selector = ".page")
           shinyjs::show(paste0("step", self$rv$page))
         })
-        
-        output$toto <- renderUI({
-          
-         # hidden(
-            lapply(1:3, function(i) {div(
-              class = "page",
-              id = ns(paste0("step", i)),
-             ll.screens[[i]]
-            )
-            }
-            )
-         # )
-        })
+
 
         navPage <- function(direction) {
           self$rv$page <- self$rv$page + direction
@@ -90,9 +73,11 @@ GetScreens = function(){
         observeEvent(input$prevBtn, navPage(-1))
         observeEvent(input$nextBtn, navPage(1))
         observeEvent(input$toggle,{
+          shinyjs::toggleState('step1', condition=input$toggle%%2 == 0)
           shinyjs::toggleState('step2', condition=input$toggle%%2 == 0)
-          shinyjs::toggleState('step3', condition=input$toggle%%2 == 0)})
-        
+          shinyjs::toggleState('step3', condition=input$toggle%%2 == 0)
+
+        })
         
       }
       )
@@ -101,16 +86,86 @@ GetScreens = function(){
 )
 
 
+
+Child <- R6Class(
+  "Child",
+  inherit = Process,
+  public = list(
+    
+    ### Step 1
+    step1 = function(){
+      ns <- NS(self$id)
+      
+      select1 <- function(){
+        renderUI({
+          ns <- NS(self$id)
+          selectInput(ns('sel1'), 'Select 1', choices=1:3)
+        })
+      }
+      
+      observeEvent(input$btn1, {cat('btn 1 clicked, selection = ', input$sel1, '\n')})
+      
+      tagList(
+        h4(paste0("Step", 1)),
+        selectInput(ns('sel1'), 'Select 1', choices=1:3),
+        actionButton(ns(paste0('btn',1)), paste0('btn ',1))
+      )
+      
+    },
+    
+    
+    
+    ### Step 2
+    step2 = function(){
+      ns <- NS(self$id)
+      
+      observeEvent(input$btn2, {cat('btn 2 clicked, selection = ', input$sel2, '\n')})
+      
+      tagList(
+        h4(paste0("Step", 2)),
+        selectInput(ns('sel2'), 'Select 2', choices=1:3),
+        actionButton(ns(paste0('btn',2)), paste0('btn ',2))
+      )
+      
+    },
+    
+    ### Step 3
+    step3 = function(){
+      ns <- NS(self$id)
+      
+      observeEvent(input$btn3, {cat('btn 3 clicked, selection = ', input$sel3, '\n')})
+      
+      tagList(
+        h4(paste0("Step", 3)),
+        selectInput(ns('sel3'), 'Select 3', choices=1:3),
+        actionButton(ns(paste0('btn',3)), paste0('btn ',3))
+      )
+    }
+  )
+)
+
+
+
+
+
+
+
 Process  <- R6Class(
   "Process",
   public = list(
     id = NULL,
     rv = reactiveValues(
-      toto = NULL
+      toto = NULL,
+      ll.screens = NULL
     ),
+    tl = NULL,
+    
     initialize = function(id){
       self$id <- id
     },
+    
+    
+
     
     
     ui = function(){
@@ -122,42 +177,30 @@ Process  <- R6Class(
     
     server = function(){
       ns <- NS(self$id)
-      
-      screens <- list('step1',
-                      'step2',
-                      'step3')
-      
-      ll.screens <- lapply(1:3, function(i) {
-        tagList(
-          h4(paste0("Step", i)),
-          actionButton(ns(paste0('btn',i)), paste0('btn ',i))
-        )
-      })
-          
-          
-      
-      tl <- Timeline$new(ns('App'))
-      self$rv$toto <- tl$server(ll.screens)
+
+      #self$Add_UIs()
+     # ll.screens <- lapply(1:3, function(x){do.call(paste0('self$step', x), list())})
+     
+      self$tl <- Timeline$new(ns('App'))
+      self$tl$server(self$rv$ll.screens)
       
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
         output$show_tl <- renderUI({
-          req(self$rv$toto)
-          tl$ui()
+          req(self$tl)
+          self$tl$ui()
         })
         
-        output$step1 <- renderUI({
-          p('step1')
-        })
         
-        output$step2 <- renderUI({
-          p('step2')
-        })
         
-        output$step3 <- renderUI({
-          p('step3')
-        })
+        
+       # self$rv$ll.screens <- list(step1(),
+       #                    step2(),
+       #                    step3()
+       # )
+        
+        self$rv$ll.screens <- lapply(1:3, function(x){do.call(paste0('step',x), list())})
         
       }
       )
@@ -165,7 +208,13 @@ Process  <- R6Class(
   )
 )
 
-proc <- Process$new('App')
-ui = fluidPage(proc$ui())
-server = function(input, output){proc$server()}
+#proc <- Process$new('App')
+#ui = fluidPage(proc$ui())
+#server = function(input, output){proc$server()}
+
+child <- Child$new('App')
+ui = fluidPage(child$ui())
+server = function(input, output){child$server()}
+
+
 shiny::shinyApp(ui, server)

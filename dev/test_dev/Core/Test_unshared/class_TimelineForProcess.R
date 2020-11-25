@@ -56,27 +56,12 @@ TimelineForProcess = R6Class(
       }
       
     },
-    Disable_Current_Step = function(){
-      # cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
-      # req(self$nbSteps)
-      # req(self$rv$current.pos)
-      # browser()
-      # lapply(1:self$nbSteps, function(x){
-      #   if (self$rv$isAllSkipped)
-      #     shinyjs::toggleState(paste0('div_screen', x), condition = FALSE)
-      #   
-      # })
-    },
-    
+
     Display_Current_Step = function(){
       cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
       req(self$nbSteps)
       req(self$rv$current.pos)
       browser()
-      # lapply(1:self$nbSteps, function(x){
-      #   shinyjs::toggle(paste0('div_screen', x),condition = x==self$rv$current.pos)
-      #   })
-      
       
       hide(selector = ".page")
       show(paste0('div_screen', self$rv$current.pos))

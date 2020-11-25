@@ -177,20 +177,49 @@ ProcessManager <- R6Class(
     },
     
     
-    CreateScreens = function(){
-      cat(paste0(class(self)[1], '::', 'CreateScreens() from - ', self$id, '\n'))
-      setNames(
-        lapply(1:self$length, 
-               function(x){
-                 div(
-                   class = "page",
-                   id = self$config$steps[x],
-                   do.call(uiOutput, list(outputId=NS(self$id)(self$config$steps[x])))
-                   )
-                 }),
-        self$config$steps)
+    # CreateScreens = function(){
+    #   cat(paste0(class(self)[1], '::', 'CreateScreens() from - ', self$id, '\n'))
+    #   setNames(
+    #     lapply(1:self$length, 
+    #            function(x){
+    #              div(
+    #                class = "page",
+    #                id = self$config$steps[x],
+    #                do.call(uiOutput, list(outputId=NS(self$id)(self$config$steps[x])))
+    #                )
+    #              }),
+    #     self$config$steps)
+    # },
+    
+    Description = function(){
+      ns <- NS(self$id)
+      
+      
+      tagList(
+        actionButton(ns('btn_validate_Description'), 
+                     paste0('Start ', self$config$name),
+                     class = btn_success_color),
+        selectInput(ns('selectStep'), 'Test', choices=1:4),
+        mod_insert_md_ui(ns(paste0(self$config$name, "_md")))
+      )
+      
+      observe({
+        mod_insert_md_server(paste0(self$config$name, "_md"), 
+                             paste0('./md/', self$config$name, '.md'))
+      })
+      
+      observeEvent(input$btn_validate_Description, {
+        self$InitializeDataIn()
+        self$ValidateCurrentPos()
+      })
     },
     
+    CreateScreens = function(){
+      browser()
+      lapply(1:self$length, function(x){do.call(paste0(self$config$steps[x]), list())})
+
+      
+    },
     
     Initialize_Status_Process = function(){
       cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n'))

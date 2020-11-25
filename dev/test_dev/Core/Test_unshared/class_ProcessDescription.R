@@ -12,9 +12,12 @@ ProcessDescription = R6Class(
   
   public = list(
 
-    Add_RenderUIs_Definitions = function(input, output){
-      ns <- NS(self$id)
-      output$Description <- renderUI({
+    #Add_RenderUIs_Definitions = function(input, output){
+    #  ns <- NS(self$id)
+      Description = function(){
+        ns <- NS(self$id)
+        
+        
         tagList(
           actionButton(ns('btn_validate_Description'), 
                        paste0('Start ', self$config$name),
@@ -22,8 +25,7 @@ ProcessDescription = R6Class(
           selectInput(ns('selectStep'), 'Test', choices=1:4),
           mod_insert_md_ui(ns(paste0(self$config$name, "_md")))
         )
-      })
-      
+
       observe({
         mod_insert_md_server(paste0(self$config$name, "_md"), 
                              paste0('./md/', self$config$name, '.md'))

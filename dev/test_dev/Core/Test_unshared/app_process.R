@@ -43,8 +43,8 @@ Pipeline <- R6Class(
       skipped = NULL
       ),
     ll.process = list(
-      #ProcessDescription = NULL
-      ProcessA = NULL
+      ProcessDescription = NULL
+      #ProcessA = NULL
     ),
     initialize = function(id){
       self$id <- id
