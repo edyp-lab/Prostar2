@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(shinydashboardPlus)
 library(magrittr)
 library(shinyjqui)
 library(shinyBS)
@@ -44,24 +45,31 @@ source(file.path("../../R/Plots", "mod_plots_var_dist.R"), local = TRUE)$value
 source(file.path("../../R/Plots", "mod_plots_pca.R"), local = TRUE)$value
 
 
-ui <- dashboardPage(
-  skin="purple",
+ui <- dashboardPagePlus(
+  skin="blue",
   
   
-  dashboardHeader(title="Prostar",
-                  tags$li(class="dropdown",
-                          checkboxInput(inputId = 'data', label = 'Data Loaded?', value = FALSE)
-                  ),
-                  tags$li(class="dropdown",
-                          a(href="http://www.prostar-proteomics.org/",
-                            img(src="logo.png",
-                                title="Prostar website",
-                                # Absolute size!
-                                height="17px"))),
-                  tags$li(class="dropdown",
-                          a(href="https://github.com/samWieczorek/Prostar2",
-                            icon("github"),
-                            title="GitHub"))),
+  dashboardHeaderPlus(#title="Prostar",
+    title = tagList(
+      tags$span(
+        class = "logo-mini", style =  "font-size : 14px","Prostar"),
+      tags$span(
+        class = "logo-lg", "Prostar")
+    ),
+    
+    tags$li(class="dropdown",
+            checkboxInput(inputId = 'data', label = 'Data Loaded?', value = FALSE)
+    ),
+    tags$li(class="dropdown",
+            a(href="http://www.prostar-proteomics.org/",
+              img(src="logo.png",
+                  title="Prostar website",
+                  # Absolute size!
+                  height="17px"))),
+    tags$li(class="dropdown",
+            a(href="https://github.com/samWieczorek/Prostar2",
+              icon("github"),
+              title="GitHub"))),
   
   dashboardSidebar(
     sidebarMenu(
