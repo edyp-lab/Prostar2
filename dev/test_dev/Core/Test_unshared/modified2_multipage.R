@@ -94,7 +94,7 @@ Child <- R6Class(
   public = list(
     
     ### Step 1
-    step1 = function(input){
+    step1 = function(){
       ns <- NS(self$id)
       
       select1 <- function(){
@@ -104,7 +104,7 @@ Child <- R6Class(
         })
       }
       
-      observeEvent(input$btn1, {cat('btn 1 clicked, selection = ', input$sel1, '\n')})
+      observeEvent(self$input$btn1, {cat('btn 1 clicked, selection = ', self$input$sel1, '\n')})
       
       tagList(
         h4(paste0("Step", 1)),
@@ -120,7 +120,7 @@ Child <- R6Class(
     step2 = function(input){
       ns <- NS(self$id)
       
-      observeEvent(input$btn2, {cat('btn 2 clicked, selection = ', input$sel2, '\n')})
+      observeEvent(self$input$btn2, {cat('btn 2 clicked, selection = ', self$input$sel2, '\n')})
       
       tagList(
         h4(paste0("Step", 2)),
@@ -131,10 +131,10 @@ Child <- R6Class(
     },
     
     ### Step 3
-    step3 = function(input){
+    step3 = function(){
       ns <- NS(self$id)
       
-      observeEvent(input$btn3, {cat('btn 3 clicked, selection = ', input$sel3, '\n')})
+      observeEvent(self$input$btn3, {cat('btn 3 clicked, selection = ', self$input$sel3, '\n')})
       
       tagList(
         h4(paste0("Step", 3)),
@@ -157,6 +157,7 @@ Process  <- R6Class(
   "Process",
   public = list(
     id = NULL,
+    input = NULL,
     rv = "<reactiveValues>",
     tl = NULL,
     length= 3,
@@ -171,7 +172,7 @@ Process  <- R6Class(
     
     GetScreensDefinition = function(input){
       lapply(1:self$length, function(x){
-        eval(parse(text = paste0("self$step", x, '(input)')))
+        eval(parse(text = paste0("self$step", x, '()')))
       })
       },
     
@@ -195,12 +196,15 @@ Process  <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
+        observe({ self$input <- input })
+        
+        
         output$show_tl <- renderUI({
           req(self$tl)
           self$tl$ui()
         })
 
-        self$rv$ll.screens <- self$GetScreensDefinition(input)
+        self$rv$ll.screens <- self$GetScreensDefinition()
 
       }
       )
