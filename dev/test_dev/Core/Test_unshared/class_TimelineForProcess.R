@@ -26,11 +26,12 @@ TimelineForProcess = R6Class(
     },
     
     ui = function() {
+      ns <- NS(self$id)
       fluidPage(
         shinyjs::useShinyjs(),
         wellPanel(
           style="background: white; border-width: 2px; border-color: blue;",
-          self$Main_UI()
+          uiOutput(ns('toto'))
         )
       )
     },
@@ -40,7 +41,8 @@ TimelineForProcess = R6Class(
     
     Force_ToggleState_Steps = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
-      if (verbose==T) browser()
+      #if (verbose==T) 
+        browser()
       req(self$nbSteps)
       if (self$rv$isAllUndone){
         # Enable all steps and buttons at the initialization of a process or after a reset
@@ -59,12 +61,11 @@ TimelineForProcess = R6Class(
 
     Display_Current_Step = function(){
       cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
-      req(self$nbSteps)
-      req(self$rv$current.pos)
-      browser()
+      req(c(self$nbSteps, self$rv$current.pos))
       
-      hide(selector = ".page")
-      show(paste0('div_screen', self$rv$current.pos))
+      
+      shinyjs::hide(selector = paste0(".page_", self$id))
+      shinyjs::show(self$config$steps[self$rv$current.pos])
     }
   )
 )

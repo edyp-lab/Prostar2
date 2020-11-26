@@ -105,18 +105,19 @@ TimelineManager <- R6Class(
     GetScreens = function(){
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       ns <- NS(self$id)
-      req(self$config$screens)
+      #browser()
+      #req(self$config$screens)
       
       lapply(1:self$nbSteps, function(i) {
         if (i==1) div(
-          class = "page",
-          id = ns(paste0("div_screen", i)),
+          class = paste0("page_", self$id),
+          id = ns(names(self$config$screens)[i]),
           self$config$screens[[i]]
         )
         else 
-          hidden(div(
-            class = "page",
-            id = ns(paste0("div_screen", i)),
+          shinyjs::hidden(div(
+            class = paste0("page_", self$id),
+            id = ns(names(self$config$screens)[i]),
             self$config$screens[[i]]
           )
           )
@@ -132,14 +133,10 @@ TimelineManager <- R6Class(
     ToggleState_Steps = function(cond, i){
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      if (verbose==T) browser()
+      #if (verbose==T)  browser()
       lapply(1:i, function(x){
-        shinyjs::toggleState(paste0('div_screen', x),condition = cond)
-        # if (cond)
-        #   shinyjs::enable(paste0('div_screen', x))
-        # else
-        #   shinyjs::disable(paste0('div_screen', x))
-        
+        shinyjs::toggleState(names(self$config$screens)[x],
+                             condition = cond)
         })
     },
     
@@ -150,6 +147,7 @@ TimelineManager <- R6Class(
     },
     
     Main_UI = function(){
+      cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       ns <- NS(self$id)
       tagList(
         uiOutput(ns('show_currentPos')),
@@ -172,6 +170,7 @@ TimelineManager <- R6Class(
             ),
             uiOutput(ns('SkippedInfoPanel')),
             #uiOutput(ns('show_screens'))
+
             self$GetScreens()
         )
       )
@@ -203,7 +202,7 @@ TimelineManager <- R6Class(
         #self$rv$current.pos <- 1
         req(self$nbSteps>0)
         
-        self$EncapsulateScreens()
+        #self$EncapsulateScreens()
         self$Update_Buttons_Status()
       })
       
@@ -286,6 +285,10 @@ TimelineManager <- R6Class(
         observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
         observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
+        output$toto <- renderUI({
+          req(self$config$screens)
+          self$Main_UI()
+        })
         
         output$SkippedInfoPanel <- renderUI({
           req(!isTRUE(sum(self$config$status) == self$global$SKIPPED * self$nbSteps))
@@ -300,31 +303,11 @@ TimelineManager <- R6Class(
           )
         })
         
-        # output$show_screens <- renderUI({
-        #   cat(paste0(class(self)[1], '::output$show_screens from - ', self$id, '\n'))
-        #   # tagList(
-        #   #   shinyjs::useShinyjs(),
-        #   #   self$config$screens
-        #   #   )
-        #   
-        #   # hidden(
-        #   #   lapply(1:length(self$config$screens), function(i) {
-        #   #     div(
-        #   #       class = "page",
-        #   #       id = ns(self$config$screens[i]),
-        #   #       uiOutput(ns(self$config$screens[i]))
-        #   #     )
-        #   #   })
-        #   # )
-        #   
-        #   })
-        
-        
         # Catch a new position
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
           if (verbose==T) browser()
-          self$Force_ToggleState_Steps()
+          #self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
           self$Display_Current_Step()
 

@@ -6,7 +6,7 @@ ProcessManager <- R6Class(
   "ProcessManager",
   private = list(),
   public = list(
-    
+    input = NULL,
     id = NULL,
     timeline = NULL,
     timeline.res = NULL,
@@ -117,16 +117,18 @@ ProcessManager <- R6Class(
     
     InitializeModule = function(){
       #self$config$screens <- self$CreateScreens()
-      self$rv$ll.screens <- self$GetScreensDefinition(self$input)
+      self$config$screens <- self$GetScreensDefinition()
       self$rv$current.pos <- 1
     },
     
     ActionsOnNewPosition = function(){},
     
     GetScreensDefinition = function(){
-      lapply(self$config$steps, function(x){
-        eval(parse(text = paste0("self$", x, '(self$input)')))
-      })
+     #browser()
+      setNames(lapply(self$config$steps, function(x){
+        eval(parse(text = paste0("self$", x, '()')))
+      }),
+      self$config$steps)
     },
     
     
@@ -198,35 +200,12 @@ ProcessManager <- R6Class(
     #     self$config$steps)
     # },
     
-    Description = function(){
-      ns <- NS(self$id)
-      
-      
-      tagList(
-        actionButton(ns('btn_validate_Description'), 
-                     paste0('Start ', self$config$name),
-                     class = btn_success_color),
-        selectInput(ns('selectStep'), 'Test', choices=1:4),
-        mod_insert_md_ui(ns(paste0(self$config$name, "_md")))
-      )
-      
-      observe({
-        mod_insert_md_server(paste0(self$config$name, "_md"), 
-                             paste0('./md/', self$config$name, '.md'))
-      })
-      
-      observeEvent(input$btn_validate_Description, {
-        self$InitializeDataIn()
-        self$ValidateCurrentPos()
-      })
-    },
+ 
     
-    CreateScreens = function(){
-      browser()
-      lapply(1:self$length, function(x){do.call(paste0(self$config$steps[x]), list())})
-
-      
-    },
+    #CreateScreens = function(){
+    #  browser()
+     # lapply(1:self$length, function(x){do.call(paste0(self$config$steps[x]), list())})
+    #},
     
     Initialize_Status_Process = function(){
       cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n'))
@@ -381,6 +360,7 @@ ProcessManager <- R6Class(
         self$config$type = class(self)[2]
         self$config$status <- setNames(rep(0, self$length), config$steps)
         #self$config$screens <- self$CreateScreens()
+        self$config$screens <- self$GetScreensDefinition()
         self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
 
         self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
@@ -475,6 +455,8 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer() from - ', self$id, '\n'))
         # TODO In a script for dev, write a test function to check the validity of the logics for the new processLogics
+        
+        observe({ self$input <- input })
         
         self$Additional_Funcs_In_ModuleServer()
         

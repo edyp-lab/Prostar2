@@ -73,12 +73,10 @@ GetScreens = function(){
         
         observeEvent(input$prevBtn, navPage(-1))
         observeEvent(input$nextBtn, navPage(1))
+        
         observeEvent(input$toggle,{
-          shinyjs::toggleState('step1', condition=input$toggle%%2 == 0)
-          shinyjs::toggleState('step2', condition=input$toggle%%2 == 0)
-          shinyjs::toggleState('step3', condition=input$toggle%%2 == 0)
-
-        })
+          lapply(1:3, function(x){shinyjs::toggleState(paste0('step', x), condition=input$toggle%%2 == 0)})
+          })
         
       }
       )
@@ -170,7 +168,7 @@ Process  <- R6Class(
       )
     },
     
-    GetScreensDefinition = function(input){
+    GetScreensDefinition = function(){
       lapply(1:self$length, function(x){
         eval(parse(text = paste0("self$step", x, '()')))
       })
