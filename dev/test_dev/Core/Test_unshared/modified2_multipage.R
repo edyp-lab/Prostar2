@@ -93,7 +93,7 @@ Child <- R6Class(
   public = list(
     
     ### Step 1
-    step1 = function(){
+    step1 = function(input){
       ns <- NS(self$id)
       
       select1 <- function(){
@@ -116,7 +116,7 @@ Child <- R6Class(
     
     
     ### Step 2
-    step2 = function(){
+    step2 = function(input){
       ns <- NS(self$id)
       
       observeEvent(input$btn2, {cat('btn 2 clicked, selection = ', input$sel2, '\n')})
@@ -130,7 +130,7 @@ Child <- R6Class(
     },
     
     ### Step 3
-    step3 = function(){
+    step3 = function(input){
       ns <- NS(self$id)
       
       observeEvent(input$btn3, {cat('btn 3 clicked, selection = ', input$sel3, '\n')})
@@ -141,6 +141,8 @@ Child <- R6Class(
         actionButton(ns(paste0('btn',3)), paste0('btn ',3))
       )
     }
+
+    
   )
 )
 
@@ -159,13 +161,17 @@ Process  <- R6Class(
       ll.screens = NULL
     ),
     tl = NULL,
+    length= 3,
     
     initialize = function(id){
       self$id <- id
     },
     
-    
-
+    GetScreensDefinition = function(input){
+      lapply(1:self$length, function(x){
+        eval(parse(text = paste0("self$step", x, '(input)')))
+      })
+      },
     
     
     ui = function(){
@@ -191,17 +197,9 @@ Process  <- R6Class(
           req(self$tl)
           self$tl$ui()
         })
-        
-        
-        
-        
-       # self$rv$ll.screens <- list(step1(),
-       #                    step2(),
-       #                    step3()
-       # )
-        
-        self$rv$ll.screens <- lapply(1:3, function(x){do.call(paste0('step',x), list())})
-        
+
+        self$rv$ll.screens <- self$GetScreensDefinition(input)
+
       }
       )
     }
