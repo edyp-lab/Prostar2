@@ -18,7 +18,7 @@ ui <- fluidPage(
   #          p('Aggregation'))
   
   
-  # second
+  # second and fourth
   # tags$ul(class="timeline",
   #         tags$li(class="event",
   #                 p('Filtration')),
@@ -29,18 +29,7 @@ ui <- fluidPage(
   #         tags$li(class="event",
   #                 p('Aggregation')
   #         ))
-  
- 
-  tags$ul(class="timeline",
-                  tags$li(class="event",
-                          p('Filtration')),
-                  tags$li(class="event",
-                          p('Normalization')),
-                  tags$li(class="event",
-                          p('Imputation')),
-                  tags$li(class="event",
-                          p('Aggregation')
-                  ))
+
   
   
   

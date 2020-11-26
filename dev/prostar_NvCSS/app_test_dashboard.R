@@ -45,6 +45,7 @@ source(file.path("../../R/Plots", "mod_plots_pca.R"), local = TRUE)$value
 
 
 ui <- dashboardPage(
+  skin="purple",
   
   
   dashboardHeader(title="Prostar",
@@ -65,9 +66,10 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       br(),
-      menuItem("Home", tabName = "ProstarHome", icon = icon("home"), selected = TRUE),
+      menuItem("Home", tabName = "ProstarHome", icon = icon("home"),selected = TRUE
+      ),
       hr(),
-      menuItem("Data Manager", icon = icon("folder"), #startExpanded = TRUE,
+      menuItem("Data Manager", icon = icon("folder"), startExpanded = TRUE,
                menuSubItem("Open QFeature file", tabName = "openFile"),
                menuSubItem("Convert Data", tabName = "convert"),
                menuSubItem("Demo data", tabName = "demoData"),
@@ -89,7 +91,7 @@ ui <- dashboardPage(
       tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
     ),
     
-    uiOutput('body')
+    uiOutput('contenu_dashboardBody')
     
   )
 )
@@ -99,62 +101,62 @@ ui <- dashboardPage(
 
 server <- function(input, output,session) {
   
+  mod_homepage_server('home')
   
-  output$body <- renderUI({
+  output$contenu_dashboardBody <- renderUI({
     
-    print(input$data)
     
     if (isFALSE(input$data)){
       col_left <- 1
       col_right <- 12
       display <- "none"
-      print(paste0('col : ... and ', col_right,'; display : ', display))
     } else{
       col_left <- 2
       col_right <- 10
       display <- "block"
-      print(paste0('col :', col_left, ' and ', col_right,'; display : ', display))
     }
+    print(paste(display,col_left,col_right,sep=" "))
     
-    fluidPage(tags$div(style=paste0("display: ",display," ;"),
-                       column(col_left, id = "v_timeline",
-                              br(),
-                              h4('Statistic Descriptive'),
-                              mod_bsmodal_ui('statsDescriptive'),
-                              br(),
-                              h4('Timeline'),
-                              tags$img(src="timeline_v.PNG",
-                                       title="General timeline",
-                                       style="display:block ; height: 500px; margin: auto;")
-                       )
-    ),
-    
-    column(col_right, tabItems(
-      tabItem(tabName = "ProstarHome", h2("Home Prostar"),mod_homepage_ui('home')
+    fluidPage(
+      
+      column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
+             br(),
+             h4('Statistic Descriptive'),
+             #mod_bsmodal_ui('statsDescriptive'),
+             br(),
+             h4('Timeline'),
+             tags$img(src="timeline_v.PNG",
+                      title="General timeline",
+                      style="display:block ; height: 500px; margin: auto;")
+             
       ),
-      tabItem(tabName = "openFile", h2("Open QFeature file")),
-      tabItem(tabName = "convert", h2("Convert Data")),
-      tabItem(tabName = "demoData", h2("Demo data")),
-      tabItem(tabName = "export", h2("Export")),
-      tabItem(tabName = "globalSettings", h2("Global settings")),
-      tabItem(tabName = "releaseNotes", h2("Release notes")),
-      tabItem(tabName = "updates", h2("Check for updates")),
-      tabItem(tabName = "usefulLinks", h2("Useful links")),
-      tabItem(tabName = "faq", h2("FAQ")),
-      tabItem(tabName = "bugReport", h2("Bug report"))
+      column(col_right, tabItems(
+        tabItem(tabName = "ProstarHome", class="active", h2("Home Prostar"),mod_homepage_ui('home')
+        ),
+        tabItem(tabName = "openFile", h2("Open QFeature file")),
+        tabItem(tabName = "convert", h2("Convert Data")),
+        tabItem(tabName = "demoData", h2("Demo data")),
+        tabItem(tabName = "export", h2("Export")),
+        tabItem(tabName = "globalSettings", h2("Global settings")),
+        tabItem(tabName = "releaseNotes", h2("Release notes")),
+        tabItem(tabName = "updates", h2("Check for updates")),
+        tabItem(tabName = "usefulLinks", h2("Useful links")),
+        tabItem(tabName = "faq", h2("FAQ")),
+        tabItem(tabName = "bugReport", h2("Bug report"))
+      )
+      )
     )
     
-    )
-    )
+    
   })
   
   
   
-  mod_homepage_server('home')
+  
   
   #------------------------------------------------------------------------------#
-  # 
-  # utils::data(Exp1_R25_prot, package="DAPARdata2")
+  
+  utils::data(Exp1_R25_prot, package="DAPARdata2")
   # 
   # mod_import_file_from_server("openFile")
   # mod_convert_ms_file_server("convert")
