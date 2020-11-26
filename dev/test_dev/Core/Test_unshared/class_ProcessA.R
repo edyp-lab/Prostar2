@@ -5,7 +5,7 @@ ProcessA = R6Class(
   private = list(
     .config = list(name = 'ProcessA',
                    steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                   mandatory = c(F,F,F,F)
+                   mandatory = c(T,F,F,F)
                    )
   ),
   

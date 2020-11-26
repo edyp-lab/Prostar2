@@ -85,13 +85,13 @@ Pipeline = R6Class(
             self$rv$dataIn <- NULL
           else
             self$rv$dataIn <- self$rv$dataIn[ , , 1:self$GetMaxValidated_BeforeCurrentPos()]
+          }
+        else{
+          # process has been validated
+          self$config$status[processHasChanged] <- self$global$VALIDATED
+          self$Set_Skipped_Status()
+          self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
         }
-      else{
-        #process has been validated
-        self$config$status[processHasChanged] <- self$global$VALIDATED
-        self$Set_Skipped_Status()
-        self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
-      }
       
   }
       

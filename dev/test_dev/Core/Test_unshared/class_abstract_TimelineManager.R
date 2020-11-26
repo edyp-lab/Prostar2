@@ -58,7 +58,6 @@ TimelineManager <- R6Class(
       cat(paste0(class(self)[1], '::PrevBtn_logics() from - ', self$id, '\n'))
       # Compute status for the Previous button
       start_of_tl <- self$rv$current.pos == 1
-      #entireProcessSkipped <- sum(self$config$status) == self$global$SKIPPED * length(self$nbSteps)
       PrevBtn_logics <- !start_of_tl 
       PrevBtn_logics
     },
@@ -76,37 +75,19 @@ TimelineManager <- R6Class(
      # else if (self$config$status[self$nbSteps] == self$global$UNDONE)
      #   self$rv$current.pos <- self$default_pos$UNDONE
     },
+ 
+    Display_Current_Step = function(){
+      cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
+      req(c(self$nbSteps, self$rv$current.pos))
+      
+      shinyjs::hide(selector = paste0(".page_", self$id))
+      shinyjs::show(names(self$config$screens)[self$rv$current.pos])
+    },
     
-    Display_Current_Step = function(){},
-    
-    
-    # Initialization of the screens by integrating them into a div specific
-    # to this module (name prefixed with the ns() function
-    # Those div englobs the div of the caller where screens are defined
-    # EncapsulateScreens = function(){
-    #   cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
-    #   req(self$config$screens)
-    #   #browser()
-    #   ns <- NS(self$id)
-    #   self$Init_Default_Positions() 
-    #   self$config$screens <- lapply(1:self$nbSteps,
-    #                                 function(x){
-    #                                   self$config$screens[[x]] <- div(id = ns(paste0("div_screen", x)),  
-    #                                         self$config$screens[[x]]
-    #                                           )
-    #                                   # else 
-    #                                   #   shinyjs::hidden(div(id = ns(paste0("div_screen", x)),
-    #                                   #                       self$config$screens[[x]]
-    #                                   #                         )
-    #                                   #                       )
-    #                                 })
-    # },
-    
+
     GetScreens = function(){
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       ns <- NS(self$id)
-      #browser()
-      #req(self$config$screens)
       
       lapply(1:self$nbSteps, function(i) {
         if (i==1) div(
@@ -123,12 +104,7 @@ TimelineManager <- R6Class(
           )
       }
       )
-      
     },
-    
-    
-    
-    GetStatus = function(){self$config$status},
     
     ToggleState_Steps = function(cond, i){
       ns <- NS(self$id)
@@ -169,8 +145,6 @@ TimelineManager <- R6Class(
               )
             ),
             uiOutput(ns('SkippedInfoPanel')),
-            #uiOutput(ns('show_screens'))
-
             self$GetScreens()
         )
       )
@@ -195,20 +169,17 @@ TimelineManager <- R6Class(
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::server() from - ', self$id, '\n'))
       #browser()
-      observeEvent(config(),{
+      
+      observeEvent(config(), {
         cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
         if (verbose=='skip') browser()
         self$config <- config()
-        #self$rv$current.pos <- 1
         req(self$nbSteps>0)
-        
-        #self$EncapsulateScreens()
         self$Update_Buttons_Status()
       })
       
-
-
       cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
+
       self$timelineDraw$server(
         status = reactive({self$config$status}),
         position = reactive({self$rv$current.pos})
@@ -233,19 +204,34 @@ TimelineManager <- R6Class(
         })
         
         output$showPrevBtn <- renderUI({
-          shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
+          cond <- self$PrevBtn_logics()
+          if(!cond)
+            shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
                                          class = PrevNextBtnClass,
                                          style='padding:4px; font-size:80%'))
+          else
+            actionButton(ns("prevBtn"), "<<",
+                         class = PrevNextBtnClass,
+                         style='padding:4px; font-size:80%')
         })
 
+        
         output$showNextBtn <- renderUI({
-          shinyjs::disabled(actionButton(ns("nextBtn"), "next",
-                                         class = PrevNextBtnClass,
-                                         style='padding:4px; font-size:80%')
-          )
+           cond <- self$NextBtn_logics()
+            if(!cond)
+            shinyjs::disabled(
+            actionButton(ns("nextBtn"), 
+                         "next",
+                         class = PrevNextBtnClass,
+                         style='padding:4px; font-size:80%')
+            )
+          else
+            actionButton(ns("nextBtn"),
+                         "next",
+                         class = PrevNextBtnClass,
+                         style='padding:4px; font-size:80%')
         })
         
-        #output$title <- renderUI({ h3(paste0('self$id = ',self$id)) })
         
         #-------------------------------------------------------
         # Return the UI for a modal dialog with data selection input. If 'failed' is
@@ -307,10 +293,9 @@ TimelineManager <- R6Class(
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
           if (verbose==T) browser()
-          #self$Force_ToggleState_Steps()
+          
           self$Update_Buttons_Status()
           self$Display_Current_Step()
-
         })
         
         observeEvent(req(self$config$status), {
@@ -319,7 +304,6 @@ TimelineManager <- R6Class(
           self$rv$isAllSkipped <- sum(rep(self$global$SKIPPED, self$nbSteps)==self$config$status)==self$nbSteps
           self$rv$isAllUndone <- sum(rep(self$global$UNDONE, self$nbSteps)==self$config$status)==self$nbSteps
           
-          #self$Update_Cursor_position()
           self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
         })

@@ -185,27 +185,7 @@ ProcessManager <- R6Class(
       self$rv$dataIn <- self$rv$temp.dataIn
     },
     
-    
-    # CreateScreens = function(){
-    #   cat(paste0(class(self)[1], '::', 'CreateScreens() from - ', self$id, '\n'))
-    #   setNames(
-    #     lapply(1:self$length, 
-    #            function(x){
-    #              div(
-    #                class = "page",
-    #                id = self$config$steps[x],
-    #                do.call(uiOutput, list(outputId=NS(self$id)(self$config$steps[x])))
-    #                )
-    #              }),
-    #     self$config$steps)
-    # },
-    
- 
-    
-    #CreateScreens = function(){
-    #  browser()
-     # lapply(1:self$length, function(x){do.call(paste0(self$config$steps[x]), list())})
-    #},
+
     
     Initialize_Status_Process = function(){
       cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n'))
@@ -290,9 +270,7 @@ ProcessManager <- R6Class(
         if (verbose==T) browser()
         self$rv$current.pos <- self$timeline.res$current.pos()
       })
-      
-     
-      
+
       observeEvent(self$timeline.res$tl.reset(), ignoreInit = T,  ignoreNULL=T,{
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$tl.reset()) from - ', self$id, '\n'))
        # browser()
@@ -460,7 +438,7 @@ ProcessManager <- R6Class(
         
         self$Additional_Funcs_In_ModuleServer()
         
-        self$Add_RenderUIs_Definitions( input, output)
+        #self$Add_RenderUIs_Definitions( input, output)
         
         output$show_timeline_ui <- renderUI({
           cat(paste0(class(self)[1], '::output$show_timeline_ui() from - ', self$id, '\n'))
@@ -493,10 +471,7 @@ ProcessManager <- R6Class(
             lapply(names(self$dataOut$value), function(x){tags$p(x)})
           )
         })
-        
-       
-        #GetValidationBtnIds <- reactive({validated.btns <- grep('_validate_btn', names(input))})
-        
+
       }
       )
       reactive({self$dataOut})

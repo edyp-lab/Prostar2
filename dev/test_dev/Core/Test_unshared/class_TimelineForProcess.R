@@ -35,6 +35,8 @@ TimelineForProcess = R6Class(
         )
       )
     },
+    
+    
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
     
@@ -42,7 +44,7 @@ TimelineForProcess = R6Class(
     Force_ToggleState_Steps = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
-        browser()
+       # browser()
       req(self$nbSteps)
       if (self$rv$isAllUndone){
         # Enable all steps and buttons at the initialization of a process or after a reset
@@ -57,15 +59,6 @@ TimelineForProcess = R6Class(
           self$ToggleState_Steps(cond = FALSE, i = ind.max)
       }
       
-    },
-
-    Display_Current_Step = function(){
-      cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
-      req(c(self$nbSteps, self$rv$current.pos))
-      
-      
-      shinyjs::hide(selector = paste0(".page_", self$id))
-      shinyjs::show(self$config$steps[self$rv$current.pos])
     }
   )
 )
