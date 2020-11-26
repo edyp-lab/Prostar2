@@ -14,7 +14,7 @@ ProcessDescription = R6Class(
 
     #Add_RenderUIs_Definitions = function(input, output){
     #  ns <- NS(self$id)
-      Description = function(){
+      Description = function(input){
         ns <- NS(self$id)
         
         

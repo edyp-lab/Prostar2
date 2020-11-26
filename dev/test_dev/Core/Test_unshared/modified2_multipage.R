@@ -9,10 +9,11 @@ Timeline  <- R6Class(
   "Timeline",
   public = list(
     id = NULL,
-    rv =reactiveValues(page=1,
-                        ll.screens=NULL),
+    rv = "<reactiveValues>",
     initialize = function(id){
       self$id <- id
+      self$rv =reactiveValues(page=1,
+                              ll.screens=NULL)
     },
     
 GetScreens = function(){
@@ -20,13 +21,13 @@ GetScreens = function(){
   
     lapply(1:3, function(i) {
       if (i==1) div(
-    class = "page",
+    class = paste0("page_", self$id),
     id = ns(paste0("step", i)),
     self$rv$ll.screens[[i]]
   )
       else 
         hidden(div(
-        class = "page",
+        class = paste0("page_", self$id),
         id = ns(paste0("step", i)),
         self$rv$ll.screens[[i]]
       )
@@ -61,7 +62,7 @@ GetScreens = function(){
         observe({
           toggleState(id = "prevBtn", condition = self$rv$page > 1)
           toggleState(id = "nextBtn", condition = self$rv$page < NUM_PAGES)
-          shinyjs::hide(selector = ".page")
+          shinyjs::hide(selector = paste0(".page_", self$id))
           shinyjs::show(paste0("step", self$rv$page))
         })
 
@@ -156,15 +157,16 @@ Process  <- R6Class(
   "Process",
   public = list(
     id = NULL,
-    rv = reactiveValues(
-      toto = NULL,
-      ll.screens = NULL
-    ),
+    rv = "<reactiveValues>",
     tl = NULL,
     length= 3,
     
     initialize = function(id){
       self$id <- id
+      self$rv = reactiveValues(
+        toto = NULL,
+        ll.screens = NULL
+      )
     },
     
     GetScreensDefinition = function(input){
@@ -210,9 +212,18 @@ Process  <- R6Class(
 #ui = fluidPage(proc$ui())
 #server = function(input, output){proc$server()}
 
-child <- Child$new('App')
-ui = fluidPage(child$ui())
-server = function(input, output){child$server()}
+child1 <- Child$new('App1')
+child2 <- Child$new('App2')
+ui = fluidPage(
+  tagList(
+    child1$ui(),
+    child2$ui()
+    )
+)
+server = function(input, output){
+  child1$server()
+  child2$server()
+  }
 
 
 shiny::shinyApp(ui, server)

@@ -116,11 +116,18 @@ ProcessManager <- R6Class(
     },
     
     InitializeModule = function(){
-      self$config$screens <- self$CreateScreens()
+      #self$config$screens <- self$CreateScreens()
+      self$rv$ll.screens <- self$GetScreensDefinition(self$input)
       self$rv$current.pos <- 1
     },
     
     ActionsOnNewPosition = function(){},
+    
+    GetScreensDefinition = function(){
+      lapply(self$config$steps, function(x){
+        eval(parse(text = paste0("self$", x, '(self$input)')))
+      })
+    },
     
     
     
@@ -373,7 +380,7 @@ ProcessManager <- R6Class(
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
         self$config$type = class(self)[2]
         self$config$status <- setNames(rep(0, self$length), config$steps)
-        self$config$screens <- self$CreateScreens()
+        #self$config$screens <- self$CreateScreens()
         self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
 
         self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
