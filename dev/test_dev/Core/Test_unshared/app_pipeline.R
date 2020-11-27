@@ -37,6 +37,8 @@ source(file.path('.', 'class_WF1_Normalization.R'), local=TRUE)$value
 source(file.path('.', 'class_WF1_Imputation.R'), local=TRUE)$value
 source(file.path('.', 'class_WF1_HypothesisTest.R'), local=TRUE)$value
 
+
+
 #----------------------------------------------------------------------------
 
 
@@ -48,7 +50,8 @@ AddItemToDataset <- function(dataset, name){
 
 ## Main app
 rv <- reactiveValues()
-pipeline <- Pipeline_WF1$new('App')
+#pipeline <- Pipeline_WF1$new('App')
+pipeline <- Pipeline1$new('App')
 
 ui = fluidPage(
   tagList(
@@ -64,11 +67,7 @@ server = function(input, output){
   
   
   observeEvent(input$changeDataset,{
-    
-    if (input$changeDataset%%2 ==0)
-      rv$dataIn <- Exp1_R25_prot[1:10, , -1]
-    else
-      rv$dataIn <- NULL
+    rv$dataIn <- Exp1_R25_prot[1:10, , -1]
   })
 }
 

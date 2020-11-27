@@ -4,10 +4,21 @@ Pipeline1 = R6Class(
   inherit = Pipeline,
   private = list(
     .config = list(name = 'Pipeline',
-                   steps = c('ProcessDescription', 'ProcessA', 'ProcessB'),
-                   mandatory = c(T, F, F)
+                   steps = c('ProcessDescription', 'ProcessA'),
+                   mandatory = c(T, F)
     )
   ),
   
-  public = list()
+  public = list(
+    ProcessDescription = function(){
+      ns <- NS(self$id)
+      p('toto')
+    },
+    
+    ProcessA = function(){
+      ns <- NS(self$id)
+      p('toto')
+    }
+    
+  )
 )

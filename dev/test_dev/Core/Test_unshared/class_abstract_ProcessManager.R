@@ -117,21 +117,13 @@ ProcessManager <- R6Class(
     
     InitializeModule = function(){
       #self$config$screens <- self$CreateScreens()
-      self$config$screens <- self$GetScreensDefinition()
+      #self$config$screens <- self$GetScreensDefinition()
       self$rv$current.pos <- 1
     },
     
     ActionsOnNewPosition = function(){},
     
-    GetScreensDefinition = function(){
-     #browser()
-      setNames(lapply(self$config$steps, function(x){
-        eval(parse(text = paste0("self$", x, '()')))
-      }),
-      self$config$steps)
-    },
-    
-    
+    GetScreensDefinition = function(){},
     
     ActionsOnIsSkipped = function(){},
     
@@ -287,14 +279,14 @@ ProcessManager <- R6Class(
     # One just have to call them by setting the variable logics (which is the name of the function
     # containing the renderUIs
     # In the pipeline child class, these functions are dynamically created 
-    Add_RenderUIs_Definitions = function(input, output){},
-    
+    # Add_RenderUIs_Definitions = function(input, output){},
+    # 
     TimelineUI = function(){
       cat(paste0(class(self)[1], '::', 'TimelineUI() from - ', self$id, '\n'))
       self$timeline$ui()
     },
-    
-    
+    # 
+    # 
     CheckConfig = function(conf){
       cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n'))
       passed <- T
@@ -337,7 +329,6 @@ ProcessManager <- R6Class(
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
         self$config$type = class(self)[2]
         self$config$status <- setNames(rep(0, self$length), config$steps)
-        #self$config$screens <- self$CreateScreens()
         self$config$screens <- self$GetScreensDefinition()
         self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
 
@@ -358,6 +349,8 @@ ProcessManager <- R6Class(
           #style="background-color: yellow;",
                  # uiOutput(ns('show_currentPos')),
                   uiOutput(ns('show_timeline_ui')),
+                  #self$TimelineUI(),
+                  #self$timeline$ui(),
                   hr(),
                   fluidRow(
                     column(width=2,
@@ -414,13 +407,7 @@ ProcessManager <- R6Class(
         self$Actions_On_Reset()
         })
       
-      #--- Catch a reset from timeline or caller
-      
-      # observeEvent(self$config$status, {
-      #   #browser()
-      #   cat(paste0(class(self)[1], '::observeEvent(self$config$status)\n'))
-      #   print(paste0(self$config$status, collapse=' '))
-      # })
+
 
       observeEvent(req(isSkipped()), { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
@@ -438,13 +425,12 @@ ProcessManager <- R6Class(
         
         self$Additional_Funcs_In_ModuleServer()
         
-        #self$Add_RenderUIs_Definitions( input, output)
-        
         output$show_timeline_ui <- renderUI({
           cat(paste0(class(self)[1], '::output$show_timeline_ui() from - ', self$id, '\n'))
-          self$TimelineUI() 
+          req(self$timeline)
+          self$TimelineUI()
           })
-        
+        # 
         
         ###########---------------------------#################
         output$show_dataIn <- renderUI({

@@ -23,6 +23,8 @@ Pipeline = R6Class(
 
       self$rv$data2send <- setNames(lapply(1:self$length,  function(x){NULL}), self$config$steps)
       self$Launch_Module_Server()
+      self$config$screens <- self$GetScreensDefinition()
+      
       self$InitializeModule()
       self$InitializeTimeline()
       
@@ -114,21 +116,21 @@ Pipeline = R6Class(
     Launch_Module_Server = function(){
       ns <- NS(self$id)
 
-      self$ll.process <- setNames(lapply(names(self$ll.process),
+      self$ll.process <- setNames(lapply(self$config$steps,
                                          function(x){
                                            assign(x, get(x))$new(ns(x))
                                          }),
-                                  names(self$ll.process)
+                                  self$config$steps
       )
 
-      lapply(names(self$ll.process), function(x){
+      lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
                                                             reset = reactive({self$rv$reset}),
                                                             isSkipped = reactive({self$config$status[x] == self$global$SKIPPED})
                                                             )
       })
                                                                      
-                                                                            
+      browser()                                                                      
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
         self$Actions_On_Data_Trigger()
@@ -168,24 +170,63 @@ Pipeline = R6Class(
         self$rv$data2send[[x]] <- update(x)})
     },
   
+  InitConfig = function(config){
+    cat(paste0(class(self)[1], '::', 'InitConfig() from - ', self$id, '\n'))
+    check <- self$CheckConfig(config)
+    if (!check$passed)
+      stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
+    
+    self$length <- length(config$steps)
+    
+    observeEvent(config, {
+      cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config) from - ', self$id, '\n'))
+      lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
+      self$config$type = class(self)[2]
+      self$config$status <- setNames(rep(0, self$length), config$steps)
+      
+      #self$config$screens <- self$GetScreensDefinition()
+      self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
+      
+      self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
+                                  self$config$steps)
+      self$CreateTimeline()
+    })
+    
+  },
   
-  Add_RenderUIs_Definitions = function(input, output){
-    cat(paste0(class(self)[1], '::', 'Add_RenderUIs_Definitions()\n'))
-    ns <- NS(self$id)
-    
-    
-    lapply(names(self$ll.process), function(x){
-      output[[x]] <- renderUI({
-        tagList(
-          div(id=NS(self$id)(x),
-              self$ll.process[[x]]$ui()
-          )
-        )
-      })
-    }
-    )
+  
+  GetScreensDefinition = function(){
+    browser()
+    setNames(lapply(self$config$steps, function(x){
+      self$ll.process[[x]]$ui()
+    }),
+    self$config$steps)
+
+    # setNames(lapply(self$config$steps, function(x){
+    #   eval(parse(text = paste0("self$", x, '()')))
+    # }),
+    # self$config$steps)
     
   }
+  
+  # 
+  # Add_RenderUIs_Definitions = function(input, output){
+  #   cat(paste0(class(self)[1], '::', 'Add_RenderUIs_Definitions()\n'))
+  #   ns <- NS(self$id)
+  #   
+  #   
+  #   lapply(names(self$ll.process), function(x){
+  #     output[[x]] <- renderUI({
+  #       tagList(
+  #         div(id=NS(self$id)(x),
+  #             self$ll.process[[x]]$ui()
+  #         )
+  #       )
+  #     })
+  #   }
+  #   )
+  #   
+  # }
 
     
   )

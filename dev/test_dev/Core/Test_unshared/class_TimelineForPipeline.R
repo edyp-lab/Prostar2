@@ -28,8 +28,10 @@ TimelineForPipeline = R6Class(
                       validated process and all further datasets will be removed",
     
     ui = function() {
+      ns <- NS(self$id)
       fluidPage(
-        self$Main_UI()
+        #self$Main_UI()
+        uiOutput(ns('toto'))
       )
     },
     

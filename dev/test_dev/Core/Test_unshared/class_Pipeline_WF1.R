@@ -9,5 +9,28 @@ Pipeline_WF1 = R6Class(
     )
   ),
   
-  public = list()
+  public = list(
+    
+    WF1_Original = function(){
+      ns <- NS(self$id)
+      p('toto')
+    },
+    
+    WF1_Filtering = function(){
+      ns <- NS(self$id)
+      p('toto')
+    },
+    WF1_Normalization = function(){
+      ns <- NS(self$id)
+      p('toto')
+    },
+    WF1_Imputation = function(){
+      ns <- NS(self$id)
+      p('toto')
+    },
+    WF1_HypothesisTest = function(){
+      ns <- NS(self$id)
+      p('toto')
+    }
+  )
 )
