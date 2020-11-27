@@ -42,7 +42,8 @@ ProcessManager <- R6Class(
         dataIn = NULL,
         current.pos = NULL,
         reset = NULL,
-        isSkipped = FALSE)
+        isSkipped = FALSE,
+        dataLoaded = FALSE)
       
       
       self$InitConfig(private$.config)
@@ -162,7 +163,7 @@ ProcessManager <- R6Class(
       if(verbose=='skip') browser()
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
-      browser()
+     # browser()
       if (self$rv$current.pos == self$length)
         # Either the process has been validated, one can prepare data to be sent to caller
         # Or the module has been reseted
@@ -212,11 +213,14 @@ ProcessManager <- R6Class(
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T)  browser()
-      browser()
-      lapply(1:i, function(x){
-        shinyjs::toggleState(names(self$config$screens)[x],
+      
+      lapply(self$config$steps, function(x){
+        shinyjs::toggleState(paste0(ns('timeline'), '-', x),
                              condition = cond)
       })
+      
+      
+      
     },
     
     Actions_On_New_DataIn = function(data){
@@ -264,7 +268,8 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::', 'InitializeTimeline() from - ', self$id, '\n'))
       
       self$timeline.res <- self$timeline$server(
-        config = reactive({self$config})
+        config = reactive({self$config}),
+        dataLoaded = reactive({self$rv$dataLoaded})
         )
 
       
@@ -335,11 +340,6 @@ ProcessManager <- R6Class(
       
       self$length <- length(config$steps)
       
-      
-      
-      
-      
-      
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config) from - ', self$id, '\n'))
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
@@ -354,6 +354,7 @@ ProcessManager <- R6Class(
         self$InitializeTimeline()
         self$InitializeModule()
       })
+
 
     },
     
@@ -394,25 +395,13 @@ ProcessManager <- R6Class(
       
       
       self$Additional_Funcs_In_Server()
-      
-      # Catch the new values of the temporary dataOut (instanciated by the last validation button of screens
-      # and set the variable which will be read by the caller
-      # observeEvent(self$dataOut$trigger, {
-      #   cat(paste0(class(self)[1], '::observeEvent(self$dataOut$trigger)\n'))
-      #   
-      #   #self$Actions_On_Data_Trigger()
-      # })
-      
-      
-      
-      
-      observeEvent(dataIn(), ignoreNULL=F, ignoreInit = F, { 
+     
+      observeEvent(dataIn(),ignoreNULL=F,{
         cat(paste0(class(self)[1], '::observeEvent(req(dataIn()) from - ', self$id, '\n'))
-        browser()
-        if (is.null(dataIn()))
-          self$ToggleState_Steps(FALSE, 1:self$length)
-        else
-        self$Actions_On_New_DataIn(dataIn())
+        #browser()
+         self$ToggleState_Steps(!is.null(dataIn()), 1:self$length)
+
+
       })
       
       observeEvent(req(self$rv$current.pos), ignoreInit=T, {

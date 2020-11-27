@@ -47,10 +47,11 @@ TimelineManager <- R6Class(
       cat(paste0(class(self)[1], '::NextBtn_logics() from - ', self$id, '\n'))
       # Compute status for the Next button
       end_of_tl <- self$rv$current.pos == self$nbSteps
-      mandatory_step <- isTRUE(self$config$mandatory[self$rv$current.pos])
+      #mandatory_step <- isTRUE(self$config$mandatory[self$rv$current.pos])
       validated <- self$config$status[self$rv$current.pos] == self$global$VALIDATED
       skipped <- self$config$status[self$rv$current.pos] == self$global$SKIPPED
-      NextBtn_logics <- !end_of_tl && (!mandatory_step || (mandatory_step && (validated || skipped)))
+      #NextBtn_logics <- !end_of_tl && (!mandatory_step || (mandatory_step && (validated || skipped)))
+      NextBtn_logics <- !end_of_tl
       NextBtn_logics
     },
     
@@ -106,11 +107,11 @@ TimelineManager <- R6Class(
       )
     },
     
-    ToggleState_Steps = function(cond, i){
+    ToggleState_Steps = function(cond, range){
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T)  browser()
-      lapply(1:i, function(x){
+      lapply(range, function(x){
         shinyjs::toggleState(names(self$config$screens)[x],
                              condition = cond)
         })
@@ -145,7 +146,7 @@ TimelineManager <- R6Class(
               )
             ),
             uiOutput(ns('SkippedInfoPanel')),
-            self$GetScreens()
+            shinyjs::disabled(self$GetScreens())
         )
       )
     },
@@ -165,10 +166,16 @@ TimelineManager <- R6Class(
     SetModalTxt = function(txt){self$modal_txt <- txt},
     
     # SERVER
-    server = function(config) {
+    server = function(config, dataLoaded = FALSE) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::server() from - ', self$id, '\n'))
       #browser()
+      
+      
+      observeEvent(dataLoaded(),{
+        
+      })
+      
       
       observeEvent(config(), {
         cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
@@ -204,29 +211,14 @@ TimelineManager <- R6Class(
         })
         
         output$showPrevBtn <- renderUI({
-          cond <- self$PrevBtn_logics()
-          if(!cond)
-            shinyjs::disabled(actionButton(ns("prevBtn"), "<<",
-                                         class = PrevNextBtnClass,
-                                         style='padding:4px; font-size:80%'))
-          else
-            actionButton(ns("prevBtn"), "<<",
+           actionButton(ns("prevBtn"), "<<",
                          class = PrevNextBtnClass,
                          style='padding:4px; font-size:80%')
         })
 
         
         output$showNextBtn <- renderUI({
-           cond <- self$NextBtn_logics()
-            if(!cond)
-            shinyjs::disabled(
-            actionButton(ns("nextBtn"), 
-                         "next",
-                         class = PrevNextBtnClass,
-                         style='padding:4px; font-size:80%')
-            )
-          else
-            actionButton(ns("nextBtn"),
+           actionButton(ns("nextBtn"),
                          "next",
                          class = PrevNextBtnClass,
                          style='padding:4px; font-size:80%')
@@ -293,7 +285,7 @@ TimelineManager <- R6Class(
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
           if (verbose==T) browser()
-          
+          #self$Force_ToggleState_Steps()
           self$Update_Buttons_Status()
           self$Display_Current_Step()
         })

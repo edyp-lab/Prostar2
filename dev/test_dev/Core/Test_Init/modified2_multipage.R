@@ -4,7 +4,7 @@ library(R6)
 
 NUM_PAGES <- 3
 
-
+#----------------------------------------------------------
 Timeline  <- R6Class(
   "Timeline",
   public = list(
@@ -57,7 +57,9 @@ GetScreens = function(){
        moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
-        observeEvent(ll.screens,{self$rv$ll.screens <- ll.screens})
+        observeEvent(ll.screens,{
+          self$rv$ll.screens <- ll.screens
+          })
         
         observe({
           toggleState(id = "prevBtn", condition = self$rv$page > 1)
@@ -76,6 +78,8 @@ GetScreens = function(){
         
         observeEvent(input$toggle,{
           lapply(1:3, function(x){shinyjs::toggleState(paste0('step', x), condition=input$toggle%%2 == 0)})
+          
+          
           })
         
       }
@@ -85,7 +89,7 @@ GetScreens = function(){
 )
 
 
-
+#----------------------------------------------------------
 Child <- R6Class(
   "Child",
   inherit = Process,
@@ -150,7 +154,7 @@ Child <- R6Class(
 
 
 
-
+#----------------------------------------------------------
 Process  <- R6Class(
   "Process",
   public = list(
@@ -187,12 +191,15 @@ Process  <- R6Class(
 
       observe({
         dataIn()
-        paste0(print('value of dataIn() = ', dataIn()))
+        print(paste0('value of dataIn() = ', dataIn()))
+        lapply(1:3, function(x){shinyjs::toggleState(paste0(ns('App'),'-step', x), condition=dataIn()==FALSE || is.null(dataIn()))})
+
+          
       })
       
-      observeEvent(dataIn(), {
-        paste0(print('value of dataIn() = ', dataIn()))
-      })
+      # observeEvent(dataIn(), {
+      #   print(paste0('value of dataIn() = ', dataIn()))
+      # })
       
       #self$Add_UIs()
      # ll.screens <- lapply(1:3, function(x){do.call(paste0('self$step', x), list())})
@@ -219,6 +226,11 @@ Process  <- R6Class(
   )
 )
 
+
+
+
+
+#----------------------------------------------------------
 #proc <- Process$new('App')
 #ui = fluidPage(proc$ui())
 #server = function(input, output){proc$server()}
@@ -237,7 +249,7 @@ server = function(input, output){
   rv <- reactiveValues(
     data = NULL)
   
-  child1$server(dataIn = reactive({input$sendData%%2 == 0}))
+  child1$server(dataIn = reactive({rv$data}))
   child2$server(dataIn = reactive({rv$data}))
   
   output$show_data <- renderUI({p(rv$data)})

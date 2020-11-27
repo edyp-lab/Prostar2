@@ -23,6 +23,7 @@ TimelineForProcess = R6Class(
       self$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'), 
                                                mandatory = mandatory,
                                                style = style)
+      
     },
     
     ui = function() {
@@ -48,15 +49,19 @@ TimelineForProcess = R6Class(
       req(self$nbSteps)
       if (self$rv$isAllUndone){
         # Enable all steps and buttons at the initialization of a process or after a reset
-        self$ToggleState_Steps(cond = TRUE, i = self$nbSteps)
+        self$ToggleState_Steps(cond = TRUE, range = 1:self$nbSteps)
       } else if (self$rv$isAllSkipped){
         # Disable all steps if all steps are skipped
-        self$ToggleState_Steps(cond = FALSE, i = self$nbSteps)
+        self$ToggleState_Steps(cond = FALSE, range = 1:self$nbSteps)
+      } else if (self$config$status[self$rv$current.pos]==self$global$UNDONE &&
+                 self$config$mandatory[self$rv$current.pos]==TRUE) {
+        # Disable all further screens
+        self$ToggleState_Steps(cond = FALSE, range = (1+self$rv$current.pos):self$nbSteps)
       } else {
         # Disable all previous steps from each VALIDATED step
         ind.max <- self$GetMaxValidated_AllSteps()
         if (ind.max > 0)
-          self$ToggleState_Steps(cond = FALSE, i = ind.max)
+          self$ToggleState_Steps(cond = FALSE, range = 1:ind.max)
       }
       
     }

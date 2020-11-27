@@ -43,8 +43,8 @@ Pipeline <- R6Class(
       skipped = NULL
       ),
     ll.process = list(
-      ProcessDescription = NULL
-      #ProcessA = NULL
+      #ProcessDescription = NULL
+      ProcessA = NULL
     ),
     initialize = function(id){
       self$id <- id
@@ -161,7 +161,10 @@ server = function(input, output){
   Pipeline$server(dataIn = reactive({rv$dataIn}))
   
   observeEvent(input$changeDataset,{
+    if (input$changeDataset%%2 == 0)
   rv$dataIn <- Exp1_R25_prot[1:10, , -1]
+    else
+      NULL
   })
   
   }
