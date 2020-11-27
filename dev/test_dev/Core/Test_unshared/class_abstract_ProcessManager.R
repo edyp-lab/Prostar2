@@ -329,7 +329,7 @@ ProcessManager <- R6Class(
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
         self$config$type = class(self)[2]
         self$config$status <- setNames(rep(0, self$length), config$steps)
-        self$config$screens <- self$GetScreensDefinition()
+        #self$config$screens <- self$GetScreensDefinition()
         self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
 
         self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),

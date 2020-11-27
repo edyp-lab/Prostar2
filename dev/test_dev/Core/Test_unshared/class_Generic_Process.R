@@ -8,6 +8,8 @@ Process = R6Class(
 
     ActionsOn_NoTmp_Input = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOn_NoTmp_Input() from - ', self$id, '\n'))
+      self$config$screens <- self$GetScreensDefinition()
+      
       self$InitializeModule()
       self$InitializeTimeline()
     },
