@@ -161,10 +161,11 @@ server = function(input, output){
   Pipeline$server(dataIn = reactive({rv$dataIn}))
   
   observeEvent(input$changeDataset,{
-    if (input$changeDataset%%2 == 0)
-  rv$dataIn <- Exp1_R25_prot[1:10, , -1]
+    print(input$changeDataset)
+    if (input$changeDataset%%2 != 0)
+  rv$dataIn <- 1
     else
-      NULL
+      rv$dataIn <- NULL
   })
   
   }

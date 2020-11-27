@@ -43,7 +43,7 @@ ProcessManager <- R6Class(
         current.pos = NULL,
         reset = NULL,
         isSkipped = FALSE,
-        dataLoaded = FALSE)
+        dataLoaded = NULL)
       
       
       self$InitConfig(private$.config)
@@ -163,7 +163,7 @@ ProcessManager <- R6Class(
       if(verbose=='skip') browser()
       self$config$status[self$rv$current.pos] <- self$global$VALIDATED
       self$Set_Skipped_Status()
-     # browser()
+      browser()
       if (self$rv$current.pos == self$length)
         # Either the process has been validated, one can prepare data to be sent to caller
         # Or the module has been reseted
@@ -213,9 +213,10 @@ ProcessManager <- R6Class(
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T)  browser()
-      
-      lapply(self$config$steps, function(x){
-        shinyjs::toggleState(paste0(ns('timeline'), '-', x),
+      browser()
+     
+      lapply(1:i, function(x){
+        shinyjs::toggleState(paste0(ns('timeline'), '-', names(self$config$screens)[x]),
                              condition = cond)
       })
       
@@ -396,13 +397,7 @@ ProcessManager <- R6Class(
       
       self$Additional_Funcs_In_Server()
      
-      observeEvent(dataIn(),ignoreNULL=F,{
-        cat(paste0(class(self)[1], '::observeEvent(req(dataIn()) from - ', self$id, '\n'))
-        #browser()
-         self$ToggleState_Steps(!is.null(dataIn()), 1:self$length)
-
-
-      })
+      
       
       observeEvent(req(self$rv$current.pos), ignoreInit=T, {
         cat(paste0(class(self)[1], '::', 'observeEvent(req(self$rv$current.pos) from - ', self$id, '\n'))
@@ -431,6 +426,26 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer() from - ', self$id, '\n'))
         # TODO In a script for dev, write a test function to check the validity of the logics for the new processLogics
+        
+        
+        observeEvent(dataIn(), ignoreNULL = F,{
+          dataIn() 
+          cat(paste0(class(self)[1], '::observeEvent(req(dataIn()) from - ', self$id, '\n'))
+          print(paste0('value of dataIn() = ', names(dataIn())))
+          #browser()
+          #self$ToggleState_Steps(!is.null(dataIn()), 1:self$length)
+          # lapply(1:self$length, function(x){
+          #   shinyjs::toggleState(paste0(ns('timeline'), '-', names(self$config$screens)[x]),
+          #                        condition = !is.null(dataIn()))
+          # })
+          # 
+          self$rv$dataLoaded <- !is.null(dataIn()) || dataIn() == TRUE
+          print(paste0('self$rv$dataLoaded = ',self$rv$dataLoaded ))
+          #if (!is.null(dataIn()))
+          #  self$timeline$Force_ToggleState_Steps()
+          
+        })
+        
         
         observe({ self$input <- input })
         

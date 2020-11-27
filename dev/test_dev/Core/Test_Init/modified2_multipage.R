@@ -13,7 +13,8 @@ Timeline  <- R6Class(
     initialize = function(id){
       self$id <- id
       self$rv =reactiveValues(page=1,
-                              ll.screens=NULL)
+                              ll.screens=NULL,
+                              dataLoaded = NULL)
     },
     
 GetScreens = function(){
@@ -49,10 +50,14 @@ GetScreens = function(){
       )
     },
     
-    server = function(ll.screens){
+    server = function(ll.screens, dataLoaded){
       ns <- NS(self$id)
       
-      
+      observe({
+        dataLoaded()
+        lapply(1:3, function(x){shinyjs::toggleState(paste0('step', x), condition=!is.null(dataLoaded()))})
+        
+        })
       
        moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
@@ -168,7 +173,8 @@ Process  <- R6Class(
       self$id <- id
       self$rv = reactiveValues(
         toto = NULL,
-        ll.screens = NULL
+        ll.screens = NULL,
+        dataLoaded = NULL
       )
     },
     
@@ -193,19 +199,13 @@ Process  <- R6Class(
         dataIn()
         print(paste0('value of dataIn() = ', dataIn()))
         lapply(1:3, function(x){shinyjs::toggleState(paste0(ns('App'),'-step', x), condition=dataIn()==FALSE || is.null(dataIn()))})
-
+        self$rv$dataLoaded <- !is.null(dataIn())
           
       })
-      
-      # observeEvent(dataIn(), {
-      #   print(paste0('value of dataIn() = ', dataIn()))
-      # })
-      
-      #self$Add_UIs()
-     # ll.screens <- lapply(1:3, function(x){do.call(paste0('self$step', x), list())})
      
       self$tl <- Timeline$new(ns('App'))
-      self$tl$server(self$rv$ll.screens)
+      self$tl$server(ll.screens = self$rv$ll.screens,
+                     dataLoaded = reactive({self$rv$dataLoaded}))
       
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)

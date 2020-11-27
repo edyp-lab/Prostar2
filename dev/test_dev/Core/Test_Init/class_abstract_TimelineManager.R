@@ -166,16 +166,16 @@ TimelineManager <- R6Class(
     SetModalTxt = function(txt){self$modal_txt <- txt},
     
     # SERVER
-    server = function(config, dataLoaded = FALSE) {
+    server = function(config, dataLoaded) {
       ns <- NS(self$id)
       cat(paste0(class(self)[1], '::server() from - ', self$id, '\n'))
       #browser()
       
       
-      observeEvent(dataLoaded(),{
-        
+      observeEvent(dataLoaded(),ignoreNULL=F,{
+        browser()
+        self$ToggleState_Steps(dataLoaded(), 1:self$nbSteps)  
       })
-      
       
       observeEvent(config(), {
         cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
@@ -285,7 +285,7 @@ TimelineManager <- R6Class(
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {
            cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
           if (verbose==T) browser()
-          #self$Force_ToggleState_Steps()
+          
           self$Update_Buttons_Status()
           self$Display_Current_Step()
         })
