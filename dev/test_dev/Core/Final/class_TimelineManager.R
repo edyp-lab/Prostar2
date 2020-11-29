@@ -96,13 +96,14 @@ TimelineManager <- R6Class(
       )
     },
     
-    Display_Current_Step = function(){
-      cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
-      req(self$rv$current.pos)
-      
-      shinyjs::hide(selector = paste0(".page_", self$id))
-      shinyjs::show(self$steps[self$rv$current.pos])
-    },
+    # Display_Current_Step = function(){
+    #   cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
+    #   req(self$rv$current.pos)
+    #   toggleState(id = "prevBtn", condition = self$rv$page > 1)
+    #   toggleState(id = "nextBtn", condition = self$rv$page < NUM_PAGES)
+    #   shinyjs::hide(selector = paste0(".page_", self$id))
+    #   shinyjs::show(self$steps[self$rv$current.pos])
+    # },
     
     
     NavPage = function(direction) {
@@ -151,9 +152,10 @@ TimelineManager <- R6Class(
         })
         
         output$showPrevBtn <- renderUI({
-          actionButton(self$ns("prevBtn"), "<<",
+          shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
                        class = PrevNextBtnClass,
                        style='padding:4px; font-size:80%')
+          )
         })
         
         
@@ -192,7 +194,11 @@ TimelineManager <- R6Class(
           if (verbose==T) browser()
           
           #self$Update_Buttons_Status()
-          self$Display_Current_Step()
+          #self$Display_Current_Step()
+          shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
+          shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
+          shinyjs::hide(selector = paste0(".page_", self$id))
+          shinyjs::show(self$steps[self$rv$current.pos])
         })
         
           list(current.pos = reactive({self$rv$current.pos}),
