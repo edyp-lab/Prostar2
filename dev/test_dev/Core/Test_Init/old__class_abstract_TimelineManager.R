@@ -65,12 +65,7 @@ TimelineManager <- R6Class(
         })
     },
     
-    Update_Buttons_Status = function(){
-      if (verbose==T) browser()
-      shinyjs::toggleState('prevBtn', cond = self$PrevBtn_logics())
-      shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
-    },
-    
+   
     
     
     GetMaxValidated_AllSteps = function(){
@@ -103,10 +98,7 @@ TimelineManager <- R6Class(
       
       cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
 
-      self$timelineDraw$server(
-        status = reactive({self$config$status}),
-        position = reactive({self$rv$current.pos})
-      )
+      
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {

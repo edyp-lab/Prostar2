@@ -37,7 +37,7 @@ TimelineDraw <- R6Class(
                 
                 BuildTimeline2 = function(status, pos){
                   cat(paste0(class(self)[1], '::BuildTimeline2())\n'))
-                  
+                  browser()
                   tl_status <- rep('', self$length)
                   tl_status[which(self$mandatory)] <- 'mandatory'
                   tl_status[which(unlist(status) == self$global$VALIDATED)] <- 'complete'

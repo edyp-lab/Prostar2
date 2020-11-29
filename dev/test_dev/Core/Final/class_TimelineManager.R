@@ -34,7 +34,8 @@ TimelineManager <- R6Class(
       self$length <- length(mandatory)
       self$name <- name
       self$steps <- steps
-      self$screens <- self$EncapsulateScreens(screens)
+      self$mandatory <- setNames(mandatory, steps)
+      self$screens <- setNames(self$EncapsulateScreens(screens), steps)
       self$rv <- reactiveValues(
         current.pos = 1,
         status = NULL,
@@ -132,7 +133,10 @@ TimelineManager <- R6Class(
       })
       
       
-      
+      self$timelineDraw$server(
+        status = reactive({self$rv$status}),
+        position = reactive({self$rv$current.pos})
+      )
       
       
       
