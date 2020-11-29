@@ -11,6 +11,7 @@ source(file.path('.', 'class_TimelineDraw.R'), local=TRUE)$value
 
 source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
+source(file.path('.', 'class_global.R'), local=TRUE)$value
 
 # ------------- Class TimelineDataManager  --------------------------------------
 source(file.path('.', 'class_abstract_TimelineManager.R'), local=TRUE)$value
@@ -119,10 +120,9 @@ Step3 = function(){
   
 }
 
-timeline <- TimelineForProcess$new('App')
 ui = fluidPage(
   tagList(
-    timeline$ui()
+    uiOutput('show_TL')
   )
 )
 
@@ -139,10 +139,15 @@ server = function(input, output){
   
   timeline <- TimelineForProcess$new(
     id = 'timeline',
-    mandatory = config$mandatory)
+    mandatory = reactive({config$mandatory}))
     
   timeline$server(config = reactive({config}),
                   dataLoaded =reactive({NULL}))
+  
+  output$show_TL <- renderUI({ 
+    req(timeline)
+    timeline$ui()
+    })
 
 }
 shiny::shinyApp(ui, server)
