@@ -6,7 +6,15 @@ TimelineForProcess = R6Class(
   
   public = list(
     
-    
+    ui = function(){
+      fluidPage(
+      shinyjs::useShinyjs(),
+      wellPanel(
+        style="background: white; border-width: 2px; border-color: blue;",
+        uiOutput(self$ns('showUI'))
+      )
+    )
+    }
     
   )
 )

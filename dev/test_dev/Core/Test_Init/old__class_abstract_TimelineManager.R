@@ -1,36 +1,9 @@
-redBtnClass <- "btn-danger"
-PrevNextBtnClass <- "btn-info"
-btn_success_color <- "btn-success"
-optionsBtnClass <- "info"
-
-btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
 TimelineManager <- R6Class(
   "TimelineManager",
   private=list( ),
   
   public = list(
-    initialize = function(){
-      stop(" TimelineManager is an abstract class that can't be initialized.")
-    },
-    
-    id = NULL,
-    style = 2,
-    config = "<reactiveValues>",
-    rv = "<reactiveValues>",
-    
-    global = list(VALIDATED = 1,
-                  SKIPPED = -1,
-                  UNDONE = 0
-    ),
-    default_pos =list(VALIDATED = 1,
-                      SKIPPED = 1,
-                      UNDONE = 1
-    ), 
-    nbSteps = 0,
-    modal_txt = NULL,
-    btn_style = "display:inline-block; vertical-align: middle; padding: 7px",
-    timelineDraw  = NULL,
     
     
     Force_ToggleState_Steps = function(){},
@@ -123,33 +96,7 @@ TimelineManager <- R6Class(
       shinyjs::toggleState('nextBtn', cond = self$NextBtn_logics())
     },
     
-    Main_UI = function(){
-      cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
-      ns <- NS(self$id)
-      tagList(
-        uiOutput(ns('show_currentPos')),
-        shinyjs::useShinyjs(),
-        div(id = ns('GlobalTL'),
-            fluidRow(
-              align= 'center',
-              column(width=2, div(style = self$btn_style,
-                                  uiOutput(ns('showPrevBtn')),
-                                  uiOutput(ns('showResetBtn'))
-              )
-              ),
-              column(width=8, div( style = self$btn_style,
-                                   self$timelineDraw$ui())),
-              column(width=2, div(style = self$btn_style,
-                                  uiOutput(ns('showNextBtn')),
-                                  uiOutput(ns('showSaveExitBtn'))
-              )
-              )
-            ),
-            uiOutput(ns('SkippedInfoPanel')),
-            shinyjs::disabled(self$GetScreens())
-        )
-      )
-    },
+    
     
     GetMaxValidated_AllSteps = function(){
       cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
@@ -204,25 +151,7 @@ TimelineManager <- R6Class(
           })
         
         ###############################
-        output$showResetBtn <- renderUI({
-          actionButton(ns("rstBtn"), paste0("Reset entire ", self$config$type),
-                       class = redBtnClass,
-                       style='padding:4px; font-size:80%')
-        })
         
-        output$showPrevBtn <- renderUI({
-           actionButton(ns("prevBtn"), "<<",
-                         class = PrevNextBtnClass,
-                         style='padding:4px; font-size:80%')
-        })
-
-        
-        output$showNextBtn <- renderUI({
-           actionButton(ns("nextBtn"),
-                         "next",
-                         class = PrevNextBtnClass,
-                         style='padding:4px; font-size:80%')
-        })
         
         
         #-------------------------------------------------------
@@ -263,23 +192,7 @@ TimelineManager <- R6Class(
         observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
         observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
-        output$toto <- renderUI({
-          req(self$config$screens)
-          self$Main_UI()
-        })
         
-        output$SkippedInfoPanel <- renderUI({
-          req(!isTRUE(sum(self$config$status) == self$global$SKIPPED * self$nbSteps))
-          req(self$config$status[self$rv$current.pos] == self$global$SKIPPED)
-          wellPanel(
-            style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
-            height = 100,
-            width=300,
-            align="center",
-            p(style = "color: black;",
-              'Info: you skipped this step.')
-          )
-        })
         
         # Catch a new position
         observeEvent(req(self$rv$current.pos), ignoreInit=T, {

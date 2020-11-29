@@ -6,38 +6,7 @@ TimelineForProcess = R6Class(
   
   public = list(
     
-    initialize = function(id, mandatory, style=2 ) {
-      cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
-      #browser()
-      self$id <- id
-      self$nbSteps <- length(mandatory)
-      
-      self$config <- reactiveValues()
-      self$rv <- reactiveValues(
-        current.pos = 1,
-        reset_OK = NULL,
-        isAllSkipped = FALSE
-      )
-      
-      
-      self$timelineDraw <- TimelineDraw$new(NS(id)('tl_draw'), 
-                                               mandatory = mandatory,
-                                               style = style)
-      
-    },
-    
-    ui = function() {
-      ns <- NS(self$id)
-      fluidPage(
-        shinyjs::useShinyjs(),
-        wellPanel(
-          style="background: white; border-width: 2px; border-color: blue;",
-          uiOutput(ns('toto'))
-        )
-      )
-    },
-    
-    
+ 
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
     
