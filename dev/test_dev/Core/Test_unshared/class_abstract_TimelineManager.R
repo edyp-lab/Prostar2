@@ -176,6 +176,7 @@ TimelineManager <- R6Class(
         self$config <- config()
         req(self$nbSteps>0)
         self$Update_Buttons_Status()
+        browser()
       })
       
       cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))

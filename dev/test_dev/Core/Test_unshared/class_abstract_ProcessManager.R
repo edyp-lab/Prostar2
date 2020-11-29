@@ -251,7 +251,7 @@ ProcessManager <- R6Class(
     
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline() from - ', self$id, '\n'))
-      
+      browser()
       self$timeline.res <- self$timeline$server(
         config = reactive({self$config})
         )

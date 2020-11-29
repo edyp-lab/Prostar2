@@ -50,35 +50,10 @@ TimelineManager <- R6Class(
      #   self$rv$current.pos <- self$default_pos$UNDONE
     },
  
-    Display_Current_Step = function(){
-      cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
-      req(c(self$nbSteps, self$rv$current.pos))
-      
-      shinyjs::hide(selector = paste0(".page_", self$id))
-      shinyjs::show(names(self$config$screens)[self$rv$current.pos])
-    },
+    
     
 
-    GetScreens = function(){
-      cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
-      ns <- NS(self$id)
-      
-      lapply(1:self$nbSteps, function(i) {
-        if (i==1) div(
-          class = paste0("page_", self$id),
-          id = ns(names(self$config$screens)[i]),
-          self$config$screens[[i]]
-        )
-        else 
-          shinyjs::hidden(div(
-            class = paste0("page_", self$id),
-            id = ns(names(self$config$screens)[i]),
-            self$config$screens[[i]]
-          )
-          )
-      }
-      )
-    },
+    
     
     ToggleState_Steps = function(cond, range){
       ns <- NS(self$id)
@@ -124,13 +99,7 @@ TimelineManager <- R6Class(
         self$ToggleState_Steps(dataLoaded(), 1:self$nbSteps)  
       })
       
-      observeEvent(config(), {
-        cat(paste0(class(self)[1], '::observeEvent(config) from - ', self$id, '\n'))
-        if (verbose=='skip') browser()
-        self$config <- config()
-        req(self$nbSteps>0)
-        self$Update_Buttons_Status()
-      })
+      
       
       cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
 
@@ -178,30 +147,10 @@ TimelineManager <- R6Class(
           removeModal()
         })
         
-        navPage <- function(direction) {
-          newval <- self$rv$current.pos + direction 
-          newval <- max(1, newval)
-          newval <- min(newval, self$nbSteps)
-          if(newval == 0)
-            browser()
-          
-          self$rv$current.pos <- newval
-        }
-        
-        
-        observeEvent(input$prevBtn, ignoreInit = TRUE, {navPage(-1)})
-        observeEvent(input$nextBtn, ignoreInit = TRUE, {navPage(1)})
         
         
         
-        # Catch a new position
-        observeEvent(req(self$rv$current.pos), ignoreInit=T, {
-           cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
-          if (verbose==T) browser()
-          
-          self$Update_Buttons_Status()
-          self$Display_Current_Step()
-        })
+        
         
         observeEvent(req(self$config$status), {
           cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))

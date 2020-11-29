@@ -22,7 +22,28 @@ source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
 ## Main app
 ##
 
-
+TestTL <- R6Class(
+  'TestTL',
+  public = list(
+    id = NULL,
+    rv = "<reactiveValues>",
+    config = "<reactiveValues>",
+    timeline = NULL,
+    
+    initialize = function(id){
+      self$id <- id
+      self$rv <- reactiveValues()
+      self$config <- reactiveValues(
+        name = 'ProcessA',
+        steps = c('Description', 'Step1', 'Step2', 'Step3'),
+        mandatory = c(T,F,F,F),
+        status = c(0,0,0,0),
+        screens = NULL
+      )
+      
+      
+    },
+    
 Description = function(){
   ns <- NS(self$id)
   
@@ -42,7 +63,7 @@ Description = function(){
                  class = btn_success_color),
     mod_insert_md_ui(ns(paste0(self$config$name, "_md")))
   )
-}
+},
 
 ############### SCREEN 2 ######################################
 
@@ -69,7 +90,7 @@ Step1 = function(){
     )
   )
   
-}
+},
 
 ############### SCREEN 3 ######################################
 Step2 = function(){
@@ -97,7 +118,7 @@ Step2 = function(){
             actionButton(ns(paste0('btn_validate_', name)), 'Perform'))
     )
   )
-}
+},
 
 ############### SCREEN 4 ######################################
 Step3 = function(){
@@ -118,36 +139,72 @@ Step3 = function(){
     )
   )
   
-}
+},
 
+
+ui = function(){
+  ns <- NS(self$id)
+  fluidPage(
+  tagList(
+    uiOutput(ns('show_TL'))
+  )
+)
+  },
+
+server = function(){
+  utils::data(Exp1_R25_prot, package='DAPARdata2')
+  
+  observe({
+    self$config$screens <- 
+      setNames(lapply(self$config$steps, function(x){
+        eval(parse(text = paste0('self$', x, '()')))
+      }),
+      self$config$steps)
+    
+    self$timeline <- TimelineForProcess$new(
+      id = 'timeline',
+      name = self$config$name,
+      steps = self$config$steps,
+      mandatory = self$config$mandatory,
+      screens = self$config$screens
+      )
+    
+    self$timeline$server(status = reactive({self$config$status}))
+    
+    
+  })
+  
+  
+  
+  moduleServer(self$id, function(input, output, session) {
+
+  output$show_TL <- renderUI({ 
+    req(self$timeline)
+    self$timeline$ui()
+    })
+  })
+
+}
+)
+)
+
+
+
+### Main App
+
+test <- TestTL$new('test')
 ui = fluidPage(
   tagList(
-    uiOutput('show_TL')
+    test$ui()
   )
 )
 
 server = function(input, output){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
-  rv <- reactiveValues()
-  config <- reactiveValues(
-    name = 'ProcessA',
-    steps = c('Description', 'Step1', 'Step2', 'Step3'),
-    mandatory = c(T,F,F,F),
-    status = c(0,0,0,0),
-    screens = NULL
-  )
   
-  timeline <- TimelineForProcess$new(
-    id = 'timeline',
-    mandatory = reactive({config$mandatory}))
-    
-  timeline$server(config = reactive({config}),
-                  dataLoaded =reactive({NULL}))
-  
-  output$show_TL <- renderUI({ 
-    req(timeline)
-    timeline$ui()
-    })
-
+  test$server()
 }
+
+
+
 shiny::shinyApp(ui, server)

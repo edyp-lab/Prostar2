@@ -11,7 +11,7 @@ TimelineForProcess = R6Class(
       shinyjs::useShinyjs(),
       wellPanel(
         style="background: white; border-width: 2px; border-color: blue;",
-        uiOutput(self$ns('showUI'))
+        self$Main_UI()
       )
     )
     }

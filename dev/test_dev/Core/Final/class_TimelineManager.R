@@ -14,7 +14,11 @@ TimelineManager <- R6Class(
     id = NULL,
     ns = NULL,
     style = NULL,
-    config = "<reactiveValues>",
+    name = NULL,
+    mandatory = NULL,
+    screens = NULL,
+    type = NULL,
+    steps = NULL,
     rv = "<reactiveValues>",
     length = 0,
     modal_txt = NULL,
@@ -22,29 +26,30 @@ TimelineManager <- R6Class(
     timelineDraw  = NULL,
     
     #-- Initialize class
-    initialize = function(id, mandatory, style = 2) {
+    initialize = function(id, name, steps, mandatory, screens, style = 2) {
       cat(paste0(class(self)[1], '::initialize() from - ', id, '\n'))
       #browser()
       self$id <- id
       self$ns <- NS(id)
       self$length <- length(mandatory)
-      
-      self$config <- reactiveValues()
+      self$name <- name
+      self$steps <- steps
+      self$screens <- self$EncapsulateScreens(screens)
       self$rv <- reactiveValues(
         current.pos = 1,
+        status = NULL,
         reset_OK = NULL,
         isAllSkipped = FALSE
       )
       
       self$timelineDraw <- TimelineDraw$new(self$ns('TL_draw'), 
-                                            mandatory = mandatory,
+                                            mandatory = self$mandatory,
                                             style = style)
     },
     
     Main_UI = function(){
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       tagList(
-        uiOutput(ns('show_currentPos')),
         shinyjs::useShinyjs(),
         div(id = self$ns('GlobalTL'),
             fluidRow(
@@ -63,23 +68,84 @@ TimelineManager <- R6Class(
               )
             ),
             uiOutput(self$ns('SkippedInfoPanel')),
-            shinyjs::disabled(self$GetScreens())
+            uiOutput(self$ns('show_screens'))
+            
         )
       )
     },
+    
+    #--- Get the ui definitions from the config parameter and put them
+    #--- in a div to be able to enable/disable all widgets in each screen
+    EncapsulateScreens = function(screens){
+      #req(self$config)
+      cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
+      lapply(1:self$length, function(i) {
+        if (i==1) div(
+          class = paste0("page_", self$id),
+          id = self$ns(self$steps[i]),
+          screens[[i]]
+        )
+        else 
+          shinyjs::hidden(div(
+            class = paste0("page_", self$id),
+            id = self$ns(self$steps[i]),
+            screens[[i]]
+          )
+          )
+      }
+      )
+    },
+    
+    Display_Current_Step = function(){
+      cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
+      req(self$rv$current.pos)
+      
+      shinyjs::hide(selector = paste0(".page_", self$id))
+      shinyjs::show(self$steps[self$rv$current.pos])
+    },
+    
+    
+    NavPage = function(direction) {
+      newval <- self$rv$current.pos + direction 
+      newval <- max(1, newval)
+      newval <- min(newval, self$length)
+      if(newval == 0)
+        browser()
+      
+      self$rv$current.pos <- newval
+      cat(paste0('new position = ', self$rv$current.pos, '\n'))
+    },
+    
     
     # UI
     ui = function() {},
     
     # SERVER
-    server = function(config, dataLoaded) {
+    server = function(status) {
+      
+      observe({
+        #config()
+        cat(paste0(class(self)[1], '::observeEvent(status) from - ', self$id, '\n'))
+       # if (verbose=='skip') 
+         self$rv$status <- status()
+      })
+      
+      
+      
+      
+      
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
-        ns <- NS(self$id)
+        
+        
+        output$show_screens <- renderUI({
+          req(self$screens)
+          tagList(self$screens)
+        })
         
         output$showResetBtn <- renderUI({
-          actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$config$type),
+          actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
                        class = redBtnClass,
                        style='padding:4px; font-size:80%')
         })
@@ -93,19 +159,19 @@ TimelineManager <- R6Class(
         
         output$showNextBtn <- renderUI({
           actionButton(self$ns("nextBtn"),
-                       "next",
+                       ">>",
                        class = PrevNextBtnClass,
                        style='padding:4px; font-size:80%')
         })
         
         output$showUI <- renderUI({
-          req(self$config$screens)
+          req(self$screens)
           self$Main_UI()
         })
         
         output$SkippedInfoPanel <- renderUI({
-          req(!isTRUE(sum(self$config$status) == self$global$SKIPPED * self$nbSteps))
-          req(self$config$status[self$rv$current.pos] == self$global$SKIPPED)
+          req(!isTRUE(sum(self$status) == self$global$SKIPPED * self$length))
+          req(self$status[self$rv$current.pos] == self$global$SKIPPED)
           wellPanel(
             style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
             height = 100,
@@ -114,6 +180,19 @@ TimelineManager <- R6Class(
             p(style = "color: black;",
               'Info: you skipped this step.')
           )
+        })
+        
+        observeEvent(input$prevBtn, ignoreInit = TRUE, {self$NavPage(-1)})
+        observeEvent(input$nextBtn, ignoreInit = TRUE, {self$NavPage(1)})
+        
+        # Catch a new position
+        observe({
+          #self$rv$current.pos
+          cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
+          if (verbose==T) browser()
+          
+          #self$Update_Buttons_Status()
+          self$Display_Current_Step()
         })
         
           list(current.pos = reactive({self$rv$current.pos}),
