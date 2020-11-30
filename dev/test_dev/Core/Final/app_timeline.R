@@ -147,6 +147,7 @@ ui = function(){
   fluidPage(
   tagList(
     actionButton(ns('changeStatus'), 'Simulate status change'),
+    actionButton(ns('dataLoaded'), 'Simulate loading data'),
     uiOutput(ns('show_TL'))
   )
 )
@@ -170,15 +171,19 @@ server = function(){
       screens = self$config$screens
       )
     
-    self$timeline$server(status = reactive({self$config$status}))
-    
-    
+    self$timeline$server(status = reactive({self$config$status}),
+                         dataLoaded = reactive({self$rv$dataLoaded%%2==0})
+    )
   })
   
   
   
   moduleServer(self$id, function(input, output, session) {
-
+    observe({
+      input$dataLoaded
+     self$rv$dataLoaded <- input$dataLoaded
+    })
+    
   output$show_TL <- renderUI({ 
     req(self$timeline)
     self$timeline$ui()

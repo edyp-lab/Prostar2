@@ -23,28 +23,33 @@ TimelineForProcess = R6Class(
       #if (verbose==T) 
       # browser()
       req(self$length)
-      if (self$rv$isAllUndone){
-        # Enable all steps and buttons at the initialization of a process or after a reset
-        self$ToggleState_Screens(cond = TRUE, range = 1:self$length)
-      } else if (self$rv$isAllSkipped){
-        # Disable all steps if all steps are skipped
+      
+      if (!self$rv$dataLoaded){
         self$ToggleState_Screens(cond = FALSE, range = 1:self$length)
-      }
-      
-      firstM <- self$GetFirstMandatoryNotValidated()
-      if (!is.null(firstM)) {
-        offset <- if (firstM==self$length) 0 else 1
-        # Disable all further screens
-        self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+      } else {
+        if (self$rv$isAllUndone){
+          # Enable all steps and buttons at the initialization of a process or after a reset
+          self$ToggleState_Screens(cond = TRUE, range = 1:self$length)
+          } else if (self$rv$isAllSkipped){
+            # Disable all steps if all steps are skipped
+            self$ToggleState_Screens(cond = FALSE, range = 1:self$length)
+            }
+        
+        firstM <- self$GetFirstMandatoryNotValidated()
+        if (!is.null(firstM)) {
+          offset <- if (firstM==self$length) 0 else 1
+          # Disable all further screens
+          self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+          }
+        
+        if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
+          # Disable all previous steps from each VALIDATED step
+          ind.max <- self$GetMaxValidated_AllSteps()
+          if (!is.null(ind.max))
+            self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
         }
-      
-      if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
-        # Disable all previous steps from each VALIDATED step
-        ind.max <- self$GetMaxValidated_AllSteps()
-        if (!is.null(ind.max))
-          self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
         }
-      }
+    }
       
   )
 )

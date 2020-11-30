@@ -110,10 +110,10 @@ TimelineManager <- R6Class(
     
     GetFirstMandatoryNotValidated = function(){
       first <- NULL
-      first <- unlist((lapply(1:4, 
+      first <- unlist((lapply(1:self$length, 
                       function(x){self$mandatory[x]&&!self$rv$status[x]})))
       if (sum(first) > 0)
-        min(which(first == 0))
+        min(which(first == TRUE))
       else
         NULL
     },
@@ -126,6 +126,8 @@ TimelineManager <- R6Class(
       val
     },
     
+    SetModalTxt = function(txt){self$modal_txt <- txt},
+    
     # Display_Current_Step = function(){
     #   cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
     #   req(self$rv$current.pos)
@@ -135,6 +137,18 @@ TimelineManager <- R6Class(
     #   shinyjs::show(self$steps[self$rv$current.pos])
     # },
     
+    #-------------------------------------------------------
+    # Return the UI for a modal dialog with data selection input. If 'failed' is
+    # TRUE, then display a message that the previous value was invalid.
+    dataModal = function() {
+      modalDialog(
+        span(self$modal_txt),
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(self$ns("modal_ok"), "OK")
+        )
+      )
+    },
     
     NavPage = function(direction) {
       newval <- self$rv$current.pos + direction 
@@ -152,19 +166,7 @@ TimelineManager <- R6Class(
     ui = function() {},
     
     # SERVER
-    server = function(status) {
-      
-      
-      
-      # observeEvent(req(self$config$status), {
-      #   cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
-      #   if (verbose==TRUE) browser()
-      #   self$rv$isAllSkipped <- sum(rep(self$global$SKIPPED, self$nbSteps)==self$config$status)==self$nbSteps
-      #   self$rv$isAllUndone <- sum(rep(self$global$UNDONE, self$nbSteps)==self$config$status)==self$nbSteps
-      #   
-      #   self$Force_ToggleState_Steps()
-      #   self$Update_Buttons_Status()
-      # })
+    server = function(status, dataLoaded) {
       
       
       self$timelineDraw$server(
@@ -176,16 +178,37 @@ TimelineManager <- R6Class(
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
+        
         observe({
           #config()
           cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
           # if (verbose=='skip') 
           #browser()
           self$rv$status <- status()
+          self$rv$dataLoaded <- dataLoaded()
           self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
           self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
           
           self$Force_ToggleState_Screens()
+        })
+        
+        observeEvent(req(self$rv$status[self$length] == global$VALIDATED), {
+          self$rv$current.pos <- self$length
+        })
+        
+        
+        observeEvent(input$rstBtn, {
+          cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
+          showModal(self$dataModal())
+        })
+        
+        # When OK button is pressed, update the reactive value which will be sent
+        # to the caller
+        observeEvent(req(input$modal_ok), ignoreInit=T,{
+          cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n'))
+          self$rv$reset_OK <- input$rstBtn
+          self$rv$current.pos <- 1
+          removeModal()
         })
         
         output$show_screens <- renderUI({
