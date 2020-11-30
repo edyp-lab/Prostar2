@@ -236,38 +236,9 @@ ProcessManager <- R6Class(
         self$ActionsOn_NoTmp_NoInput()
       }
     },
-    
-    CreateTimeline = function(){ },
-    
-    Additional_Funcs_In_Server = function(){},
-    Additional_Funcs_In_ModuleServer = function(){},
+  
     
     
-    
-    InitializeTimeline = function(){
-      cat(paste0(class(self)[1], '::', 'InitializeTimeline() from - ', self$id, '\n'))
-      
-      self$timeline.res <- self$timeline$server(
-        config = reactive({self$config}),
-        dataLoaded = reactive({self$rv$dataLoaded})
-        )
-
-      
-      observeEvent(req(self$timeline.res$current.pos()), ignoreInit=T, {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos()) from - ', self$id, '\n'))
-        if (verbose==T) browser()
-        self$rv$current.pos <- self$timeline.res$current.pos()
-      })
-
-      observeEvent(self$timeline.res$tl.reset(), ignoreInit = T,  ignoreNULL=T,{
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$tl.reset()) from - ', self$id, '\n'))
-       # browser()
-        self$rv$reset <-  self$timeline.res$tl.reset()
-        self$Actions_On_Reset()
-      })
-      
-      
-    },
     
     
     # This function adds the renderUI functions of the screens.
@@ -284,55 +255,13 @@ ProcessManager <- R6Class(
     # 
     # 
     
-    
-    
-    
-    InitConfig = function(config){
-      
-      observeEvent(config, {
-        cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config) from - ', self$id, '\n'))
-        lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
-        self$config$type = class(self)[2]
-        self$config$status <- setNames(rep(0, self$length), config$steps)
-        
-        self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
 
-        self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
-                                    self$config$steps)
-        self$CreateTimeline()
-        self$InitializeTimeline()
-        self$InitializeModule()
-      })
-
-
-    },
-    
     
     
     # UI
     ui = function() {
       ns <- NS(self$id)
-      fluidPage(
-        #wellPanel(
-          #style="background-color: yellow;",
-                 # uiOutput(ns('show_currentPos')),
-                  uiOutput(ns('show_timeline_ui')),
-                  #self$TimelineUI(),
-                  #self$timeline$ui(),
-                  hr(),
-                  fluidRow(
-                    column(width=2,
-                           tags$b(h4(style = 'color: blue;', "Input")),
-                           uiOutput(ns('show_dataIn'))),
-                    column(width=2,
-                           tags$b(h4(style = 'color: blue;', "Output")),
-                           uiOutput(ns('show_rv_dataOut'))),
-                    column(width=4,
-                           tags$b(h4(style = 'color: blue;', "status")),
-                           uiOutput(ns('show_status')))
-                  )
-       # )
-      )
+      
     },
     
     # SERVER
@@ -406,31 +335,7 @@ ProcessManager <- R6Class(
           })
         # 
         
-        ###########---------------------------#################
-        output$show_dataIn <- renderUI({
-          cat(paste0(class(self)[1], '::output$show_dataIn from - ', self$id, '\n'))
-          req(dataIn())
-          tagList(
-           # h4('show dataIn()'),
-            lapply(names(dataIn()), function(x){tags$p(x)})
-            )
-        })
-        
-        output$show_rv_dataIn <- renderUI({
-          tagList(
-            #h4('show self$rv$dataIn)'),
-            lapply(names(self$rv$dataIn), function(x){tags$p(x)})
-            )
-        })
-        
-        output$show_rv_dataOut <- renderUI({
-          req(self$dataOut$trigger)
-          self$dataOut$value
-          tagList(
-            #h4('show self$dataOut$value'),
-            lapply(names(self$dataOut$value), function(x){tags$p(x)})
-          )
-        })
+       
 
       }
       )

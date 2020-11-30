@@ -30,12 +30,14 @@ ProcessManager <- R6Class(
         stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
       else
         self$config <- private$.config
-      
-      
-      
-      
-      self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
       self$length <- length(self$config$mandatory)
+      
+      self$config$type = class(self)[2]
+      self$config$status <- setNames(rep(0, self$length), self$config$steps)
+      self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
+      
+      self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
+                                  self$config$steps)
       
       self$dataOut = reactiveValues(
         value = NULL,
@@ -57,8 +59,33 @@ ProcessManager <- R6Class(
                                             screens = self$screens,
                                             style = style)
 
+      self$InitializeTimeline()
       },
 
+    InitializeTimeline = function(){
+      cat(paste0(class(self)[1], '::', 'InitializeTimeline() from - ', self$id, '\n'))
+      
+      self$timeline.res <- self$timeline$server(
+        status = reactive({self$rv$status}),
+        dataLoaded = reactive({self$rv$dataLoaded})
+      )
+      
+      
+      observeEvent(req(self$timeline.res$current.pos()), ignoreInit=T, {
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos()) from - ', self$id, '\n'))
+        if (verbose==T) browser()
+        self$rv$current.pos <- self$timeline.res$current.pos()
+      })
+      
+      observeEvent(self$timeline.res$tl.reset(), ignoreInit = T,  ignoreNULL=T,{
+        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$tl.reset()) from - ', self$id, '\n'))
+        # browser()
+        self$rv$reset <-  self$timeline.res$tl.reset()
+        self$Actions_On_Reset()
+      })
+      
+      
+    },
     
     CheckConfig = function(conf){
       cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n'))
@@ -90,6 +117,23 @@ ProcessManager <- R6Class(
     
     # UI
     ui = function() {
+      fluidPage(
+        #uiOutput(self$ns('show_timeline_ui')),
+        #self$TimelineUI(),
+        self$timeline$ui(),
+        hr(),
+        fluidRow(
+          column(width=2,
+                 tags$b(h4(style = 'color: blue;', "Input")),
+                 uiOutput(self$ns('show_dataIn'))),
+          column(width=2,
+                 tags$b(h4(style = 'color: blue;', "Output")),
+                 uiOutput(self$ns('show_rv_dataOut'))),
+          column(width=4,
+                 tags$b(h4(style = 'color: blue;', "status")),
+                 uiOutput(self$ns('show_status')))
+        )
+      )
 
     },
     
@@ -108,6 +152,32 @@ ProcessManager <- R6Class(
           self$input <- input
         })
         
+        
+        ###########---------------------------#################
+        output$show_dataIn <- renderUI({
+          cat(paste0(class(self)[1], '::output$show_dataIn from - ', self$id, '\n'))
+          req(dataIn())
+          tagList(
+            # h4('show dataIn()'),
+            lapply(names(dataIn()), function(x){tags$p(x)})
+          )
+        })
+        
+        output$show_rv_dataIn <- renderUI({
+          tagList(
+            #h4('show self$rv$dataIn)'),
+            lapply(names(self$rv$dataIn), function(x){tags$p(x)})
+          )
+        })
+        
+        output$show_rv_dataOut <- renderUI({
+          req(self$dataOut$trigger)
+          self$dataOut$value
+          tagList(
+            #h4('show self$dataOut$value'),
+            lapply(names(self$dataOut$value), function(x){tags$p(x)})
+          )
+        })
         
         
       reactive({self$dataOut})
