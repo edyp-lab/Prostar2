@@ -51,38 +51,13 @@ ProcessManager <- R6Class(
         reset = NULL,
         isSkipped = FALSE,
         dataLoaded = FALSE)
-      browser()
-      self$screens <- self$GetScreensDefinition()
+      #browser()
       
-      self$timeline <- TimelineForProcess$new(self$ns('TL_draw'), 
-                                            config = self$config,
-                                            screens = self$screens,
-                                            style = style)
-
-      self$InitializeTimeline()
+      
       },
 
     InitializeTimeline = function(){
       cat(paste0(class(self)[1], '::', 'InitializeTimeline() from - ', self$id, '\n'))
-      
-      self$timeline.res <- self$timeline$server(
-        status = reactive({self$rv$status}),
-        dataLoaded = reactive({self$rv$dataLoaded})
-      )
-      
-      
-      observeEvent(req(self$timeline.res$current.pos()), ignoreInit=T, {
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$current.pos()) from - ', self$id, '\n'))
-        if (verbose==T) browser()
-        self$rv$current.pos <- self$timeline.res$current.pos()
-      })
-      
-      observeEvent(self$timeline.res$tl.reset(), ignoreInit = T,  ignoreNULL=T,{
-        cat(paste0(class(self)[1], '::', 'observeEvent(req(self$timeline.res$tl.reset()) from - ', self$id, '\n'))
-        # browser()
-        self$rv$reset <-  self$timeline.res$tl.reset()
-        self$Actions_On_Reset()
-      })
       
       
     },
@@ -140,9 +115,28 @@ ProcessManager <- R6Class(
     # SERVER
     server = function(dataIn, reset, isSkipped) {
      
-      self$timeline$server(status = reactive({self$rv$status}),
-                           dataLoaded = reactive({FALSE})
-                           )
+      self$InitializeTimeline()
+      
+      
+     observe({
+       self$screens <- self$GetScreensDefinition()
+       
+       self$timeline <- TimelineForProcess$new(self$ns('TL_draw'), 
+                                               config = self$config,
+                                               screens = self$screens,
+                                               style = style)
+       
+       self$timeline.res <- self$timeline$server(
+         status = reactive({self$rv$status}),
+         dataLoaded = reactive({FALSE})
+       )
+     })
+      
+      
+      
+      # self$timeline$server(status = reactive({self$rv$status}),
+      #                      dataLoaded = reactive({FALSE})
+      #                      )
       
       
       # MODULE SERVER

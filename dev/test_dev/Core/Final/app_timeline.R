@@ -28,18 +28,19 @@ TestTL <- R6Class(
     id = NULL,
     rv = "<reactiveValues>",
     config = "<reactiveValues>",
+    screens = NULL,
     timeline = NULL,
-    timeline.res = NULL,
     
     initialize = function(id){
       self$id <- id
-      self$rv <- reactiveValues()
-      self$config <- reactiveValues(
+      self$rv <- reactiveValues(
+        status = c(0,0,0,0),
+        dataLoaded = FALSE
+      )
+      self$config <- list(
         name = 'ProcessA',
         steps = c('Description', 'Step1', 'Step2', 'Step3'),
-        mandatory = c(T,F,F,F),
-        status = c(0,0,0,0),
-        screens = NULL
+        mandatory = c(T,F,F,F)
       )
       
       
@@ -157,21 +158,22 @@ ui = function(){
 server = function(){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  observe({
-    self$config$screens <- 
+  observeEvent(self$config$steps,{
+    self$screens <- 
       setNames(lapply(self$config$steps, function(x){
         eval(parse(text = paste0('self$', x, '()')))
       }),
       self$config$steps)
     
+  
     self$timeline <- TimelineForProcess$new(
       id = 'timeline',
       config = self$config,
-      screens = self$config$screens
+      screens = self$screens
       )
     
-    self$timeline.res <- self$timeline$server(status = reactive({self$config$status}),
-                         dataLoaded = reactive({self$rv$dataLoaded%%2==0})
+    self$timeline$server(status = reactive({self$rv$status}),
+                         dataLoaded = reactive({self$rv$dataLoaded%%2!=0})
     )
   })
   
@@ -191,7 +193,7 @@ server = function(){
   
   observeEvent(input$changeStatus,{
     samp <- sample(1:4, 1)
-    self$config$status[samp] <- !self$config$status[samp]
+    self$rv$status[samp] <- !self$rv$status[samp]
   })
   
   

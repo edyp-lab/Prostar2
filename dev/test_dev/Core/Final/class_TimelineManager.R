@@ -53,20 +53,31 @@ TimelineManager <- R6Class(
             fluidRow(
               align= 'center',
               column(width=2, div(style = self$btn_style,
-                                  uiOutput(self$ns('showPrevBtn')),
-                                  uiOutput(self$ns('showResetBtn'))
+                                  #uiOutput(self$ns('showPrevBtn')),
+                                  shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
+                                                                 class = PrevNextBtnClass,
+                                                                 style='padding:4px; font-size:80%')),
+                                  actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
+                                               class = redBtnClass,
+                                               style='padding:4px; font-size:80%')
+                                  #uiOutput(self$ns('showResetBtn'))
               )
               ),
               column(width=8, div( style = self$btn_style,
                                    self$timelineDraw$ui())),
               column(width=2, div(style = self$btn_style,
-                                  uiOutput(self$ns('showNextBtn')),
-                                  uiOutput(self$ns('showSaveExitBtn'))
+                                  actionButton(self$ns("nextBtn"),
+                                               ">>",
+                                               class = PrevNextBtnClass,
+                                               style='padding:4px; font-size:80%')
+                                  #uiOutput(self$ns('showNextBtn')),
+                                  #uiOutput(self$ns('showSaveExitBtn'))
               )
               )
             ),
             uiOutput(self$ns('SkippedInfoPanel')),
-            uiOutput(self$ns('show_screens'))
+            self$screens
+            
             
         )
       )
@@ -75,19 +86,19 @@ TimelineManager <- R6Class(
     #--- Get the ui definitions from the config parameter and put them
     #--- in a div to be able to enable/disable all widgets in each screen
     EncapsulateScreens = function(screens){
-      #req(self$config)
+      req(screens)
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       lapply(1:self$length, function(i) {
         if (i==1) div(
           class = paste0("page_", self$id),
           id = self$ns(self$config$steps[i]),
-          screens[[i]]
+          shinyjs::disabled(screens[[i]])
         )
         else 
           shinyjs::hidden(div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
-            screens[[i]]
+            shinyjs::disabled(screens[[i]])
           )
           )
       }
@@ -176,17 +187,22 @@ TimelineManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         
         observe({
-          #config()
           cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
           # if (verbose=='skip') 
-          #browser()
           self$rv$status <- status()
           self$rv$dataLoaded <- dataLoaded()
+          browser()
           self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
           self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
           
           self$Force_ToggleState_Screens()
+          
+          shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
+          shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
+          shinyjs::hide(selector = paste0(".page_", self$id))
+          shinyjs::show(self$config$steps[self$rv$current.pos])
         })
+
         
         observeEvent(req(self$rv$status[self$length] == global$VALIDATED), {
           self$rv$current.pos <- self$length
@@ -206,38 +222,7 @@ TimelineManager <- R6Class(
           self$rv$current.pos <- 1
           removeModal()
         })
-        
-        output$show_screens <- renderUI({
-          req(self$screens)
-          tagList(self$screens)
-        })
-        
-        output$showResetBtn <- renderUI({
-          actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
-                       class = redBtnClass,
-                       style='padding:4px; font-size:80%')
-        })
-        
-        output$showPrevBtn <- renderUI({
-          shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
-                       class = PrevNextBtnClass,
-                       style='padding:4px; font-size:80%')
-          )
-        })
-        
-        
-        output$showNextBtn <- renderUI({
-          actionButton(self$ns("nextBtn"),
-                       ">>",
-                       class = PrevNextBtnClass,
-                       style='padding:4px; font-size:80%')
-        })
-        
-        output$showUI <- renderUI({
-          req(self$screens)
-          self$Main_UI()
-        })
-        
+
         output$SkippedInfoPanel <- renderUI({
           req(!isTRUE(sum(self$status) == self$global$SKIPPED * self$length))
           req(self$status[self$rv$current.pos] == self$global$SKIPPED)
@@ -254,19 +239,7 @@ TimelineManager <- R6Class(
         observeEvent(input$prevBtn, ignoreInit = TRUE, {self$NavPage(-1)})
         observeEvent(input$nextBtn, ignoreInit = TRUE, {self$NavPage(1)})
         
-        # Catch a new position
-        observe({
-          #self$rv$current.pos
-          cat(paste0(class(self)[1], '::observeEvent(req(self$rv$current.pos)) from - ', self$id, '\n'))
-          if (verbose==T) browser()
-          
-          #self$Update_Buttons_Status()
-          #self$Display_Current_Step()
-          shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
-          shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
-          shinyjs::hide(selector = paste0(".page_", self$id))
-          shinyjs::show(self$config$steps[self$rv$current.pos])
-        })
+        
         
           list(current.pos = reactive({self$rv$current.pos}),
                tl.reset = reactive({self$rv$reset_OK})

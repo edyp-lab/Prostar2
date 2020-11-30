@@ -335,7 +335,31 @@ ProcessManager <- R6Class(
           })
         # 
         
-       
+        ###########---------------------------#################
+        output$show_dataIn <- renderUI({
+          cat(paste0(class(self)[1], '::output$show_dataIn from - ', self$id, '\n'))
+          req(dataIn())
+          tagList(
+           # h4('show dataIn()'),
+            lapply(names(dataIn()), function(x){tags$p(x)})
+            )
+        })
+        
+        output$show_rv_dataIn <- renderUI({
+          tagList(
+            #h4('show self$rv$dataIn)'),
+            lapply(names(self$rv$dataIn), function(x){tags$p(x)})
+            )
+        })
+        
+        output$show_rv_dataOut <- renderUI({
+          req(self$dataOut$trigger)
+          self$dataOut$value
+          tagList(
+            #h4('show self$dataOut$value'),
+            lapply(names(self$dataOut$value), function(x){tags$p(x)})
+          )
+        })
 
       }
       )
