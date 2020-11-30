@@ -3,7 +3,7 @@ TimelineDraw <- R6Class(
   private=list(),
   public = list(id = NULL,
                 
-                initialize = function(id, mandatory, style) {
+                initialize = function(id, mandatory, style=2) {
                   #browser()
                   self$id <- id
                   self$style <- style

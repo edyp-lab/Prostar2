@@ -29,6 +29,7 @@ TestTL <- R6Class(
     rv = "<reactiveValues>",
     config = "<reactiveValues>",
     timeline = NULL,
+    timeline.res = NULL,
     
     initialize = function(id){
       self$id <- id
@@ -165,13 +166,11 @@ server = function(){
     
     self$timeline <- TimelineForProcess$new(
       id = 'timeline',
-      name = self$config$name,
-      steps = self$config$steps,
-      mandatory = self$config$mandatory,
+      config = self$config,
       screens = self$config$screens
       )
     
-    self$timeline$server(status = reactive({self$config$status}),
+    self$timeline.res <- self$timeline$server(status = reactive({self$config$status}),
                          dataLoaded = reactive({self$rv$dataLoaded%%2==0})
     )
   })

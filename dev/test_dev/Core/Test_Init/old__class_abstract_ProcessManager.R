@@ -23,28 +23,7 @@ ProcessManager <- R6Class(
     
     initialize = function(id, config = NULL) {
       cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
-      self$id <- id
-      
-      self$config = reactiveValues(
-        name = NULL,
-        mandatory = NULL,
-        steps = NULL,
-        screens = NULL,
-        status = NULL
-      )
-      
-      self$dataOut = reactiveValues(
-        value = NULL,
-        trigger = NULL
-      )
-      
-      self$rv = reactiveValues(
-        dataIn = NULL,
-        current.pos = NULL,
-        reset = NULL,
-        isSkipped = FALSE,
-        dataLoaded = NULL)
-      
+     
       
       self$InitConfig(private$.config)
       self$Additional_Initialize_Class()
@@ -304,49 +283,18 @@ ProcessManager <- R6Class(
     },
     # 
     # 
-    CheckConfig = function(conf){
-      cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n'))
-      passed <- T
-      msg <- ""
-      if (!is.list(conf)){
-        passed <- F
-        msg <- c(msg, "'config' is not a list")
-      }
-      if (length(conf)!=3){
-        passed <- F
-        msg <- c(msg, "The length of 'config' is not equal to 4")
-      }
-      names.conf <- c("name", "steps", "mandatory")
-      if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
-        passed <- F
-        msg <- c(msg, "The names of elements in 'config' must be the following: 'name', 'steps', 'mandatory'")
-      }
-      if (length(conf$steps) != length(conf$mandatory)){
-        passed <- F
-        msg <- c(msg, "The length of 'steps' and 'mandatory' must be equal.")
-      }
-      
-      passed <- T
-      list(passed=passed,
-           msg = msg)
-    },
+    
     
     
     
     InitConfig = function(config){
-      cat(paste0(class(self)[1], '::', 'InitConfig() from - ', self$id, '\n'))
-      check <- self$CheckConfig(config)
-      if (!check$passed)
-        stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
-      
-      self$length <- length(config$steps)
       
       observeEvent(config, {
         cat(paste0(class(self)[1], '::', 'observe() in InitConfig(config) from - ', self$id, '\n'))
         lapply(names(config), function(x){self$config[[x]] <- config[[x]]})
         self$config$type = class(self)[2]
         self$config$status <- setNames(rep(0, self$length), config$steps)
-        self$config$screens <- self$GetScreensDefinition()
+        
         self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
 
         self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),

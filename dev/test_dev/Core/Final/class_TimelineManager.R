@@ -14,11 +14,9 @@ TimelineManager <- R6Class(
     id = NULL,
     ns = NULL,
     style = NULL,
-    name = NULL,
-    mandatory = NULL,
+    config = NULL,
     screens = NULL,
     type = NULL,
-    steps = NULL,
     rv = "<reactiveValues>",
     length = 0,
     modal_txt = NULL,
@@ -26,16 +24,15 @@ TimelineManager <- R6Class(
     timelineDraw  = NULL,
     
     #-- Initialize class
-    initialize = function(id, name, steps, mandatory, screens, style = 2) {
+    initialize = function(id, config, screens, style = 2) {
       cat(paste0(class(self)[1], '::initialize() from - ', id, '\n'))
       #browser()
       self$id <- id
       self$ns <- NS(id)
-      self$length <- length(mandatory)
-      self$name <- name
-      self$steps <- steps
-      self$mandatory <- setNames(mandatory, steps)
-      self$screens <- setNames(self$EncapsulateScreens(screens), steps)
+      self$config <- config
+      self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
+      self$length <- length(self$config$mandatory)
+      self$screens <- setNames(self$EncapsulateScreens(screens), self$config$steps)
       self$rv <- reactiveValues(
         current.pos = 1,
         status = c(0,0,0,0),
@@ -45,8 +42,7 @@ TimelineManager <- R6Class(
       )
       
       self$timelineDraw <- TimelineDraw$new(self$ns('TL_draw'), 
-                                            mandatory = self$mandatory,
-                                            style = style)
+                                            mandatory = self$config$mandatory)
     },
     
     Main_UI = function(){
@@ -84,13 +80,13 @@ TimelineManager <- R6Class(
       lapply(1:self$length, function(i) {
         if (i==1) div(
           class = paste0("page_", self$id),
-          id = self$ns(self$steps[i]),
+          id = self$ns(self$config$steps[i]),
           screens[[i]]
         )
         else 
           shinyjs::hidden(div(
             class = paste0("page_", self$id),
-            id = self$ns(self$steps[i]),
+            id = self$ns(self$config$steps[i]),
             screens[[i]]
           )
           )
@@ -111,7 +107,7 @@ TimelineManager <- R6Class(
     GetFirstMandatoryNotValidated = function(){
       first <- NULL
       first <- unlist((lapply(1:self$length, 
-                      function(x){self$mandatory[x]&&!self$rv$status[x]})))
+                      function(x){self$config$mandatory[x]&&!self$rv$status[x]})))
       if (sum(first) > 0)
         min(which(first == TRUE))
       else
@@ -134,7 +130,7 @@ TimelineManager <- R6Class(
     #   toggleState(id = "prevBtn", condition = self$rv$page > 1)
     #   toggleState(id = "nextBtn", condition = self$rv$page < NUM_PAGES)
     #   shinyjs::hide(selector = paste0(".page_", self$id))
-    #   shinyjs::show(self$steps[self$rv$current.pos])
+    #   shinyjs::show(self$config$steps[self$rv$current.pos])
     # },
     
     #-------------------------------------------------------
@@ -269,7 +265,7 @@ TimelineManager <- R6Class(
           shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
           shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
           shinyjs::hide(selector = paste0(".page_", self$id))
-          shinyjs::show(self$steps[self$rv$current.pos])
+          shinyjs::show(self$config$steps[self$rv$current.pos])
         })
         
           list(current.pos = reactive({self$rv$current.pos}),
