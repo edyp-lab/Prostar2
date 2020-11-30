@@ -38,10 +38,10 @@ TimelineManager <- R6Class(
       self$screens <- setNames(self$EncapsulateScreens(screens), steps)
       self$rv <- reactiveValues(
         current.pos = 1,
-        status = NULL,
+        status = c(0,0,0,0),
         reset_OK = NULL,
-        isAllSkipped = NULL,
-        isAllUndone = NULL
+        isAllSkipped = FALSE,
+        isAllUndone = TRUE
       )
       
       self$timelineDraw <- TimelineDraw$new(self$ns('TL_draw'), 
@@ -110,12 +110,20 @@ TimelineManager <- R6Class(
     
     GetFirstMandatoryNotValidated = function(){
       first <- NULL
-      first <- which(lapply(1:4, 
-                      function(x){self$mandatory[x]&&!self$rv$status[x]})==TRUE)
-      if (!is.null(first))
-        min(first)
+      first <- unlist((lapply(1:4, 
+                      function(x){self$mandatory[x]&&!self$rv$status[x]})))
+      if (sum(first) > 0)
+        min(which(first == 0))
       else
-        first
+        NULL
+    },
+    
+    GetMaxValidated_AllSteps = function(){
+      cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
+      val <- NULL
+      ind <- grep(global$VALIDATED, self$rv$status)
+      val <- if (length(ind) > 0) max(ind) else NULL
+      val
     },
     
     # Display_Current_Step = function(){

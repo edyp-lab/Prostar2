@@ -146,6 +146,7 @@ ui = function(){
   ns <- NS(self$id)
   fluidPage(
   tagList(
+    actionButton(ns('changeStatus'), 'Simulate status change'),
     uiOutput(ns('show_TL'))
   )
 )
@@ -182,7 +183,18 @@ server = function(){
     req(self$timeline)
     self$timeline$ui()
     })
+  
+  
+  observeEvent(input$changeStatus,{
+    samp <- sample(1:4, 1)
+    self$config$status[samp] <- !self$config$status[samp]
   })
+  
+  
+  
+  })
+  
+  
 
 }
 )
@@ -203,6 +215,8 @@ server = function(input, output){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
   test$server()
+  
+  
 }
 
 

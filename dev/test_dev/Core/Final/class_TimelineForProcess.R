@@ -33,15 +33,16 @@ TimelineForProcess = R6Class(
       
       firstM <- self$GetFirstMandatoryNotValidated()
       if (!is.null(firstM)) {
-          # Disable all further screens
-          self$ToggleState_Screens(cond = FALSE, range = (1 + firstM):self$length)
-          }
-        
-        if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
-          # Disable all previous steps from each VALIDATED step
-          ind.max <- self$GetMaxValidated_AllSteps()
-          if (ind.max > 0)
-            self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+        offset <- if (firstM==self$length) 0 else 1
+        # Disable all further screens
+        self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+        }
+      
+      if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
+        # Disable all previous steps from each VALIDATED step
+        ind.max <- self$GetMaxValidated_AllSteps()
+        if (!is.null(ind.max))
+          self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
         }
       }
       

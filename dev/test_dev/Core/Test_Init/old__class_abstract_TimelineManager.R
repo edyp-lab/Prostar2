@@ -51,14 +51,7 @@
    
     
     
-    GetMaxValidated_AllSteps = function(){
-      cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
-      val <- 0
-      ind <- which(self$config$status == self$global$VALIDATED)
-      if (length(ind) > 0)
-        val <- max(ind)
-      val
-    },
+   
     
     # UI
     ui = function() {},
