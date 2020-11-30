@@ -1,13 +1,4 @@
 
-TimelineManager <- R6Class(
-  "TimelineManager",
-  private=list( ),
-  
-  public = list(
-    
-    
-    Force_ToggleState_Steps = function(){},
-    
     Init_Default_Positions = function(){
       cat(paste0(class(self)[1], '::Init_Default_Positions() from - ', self$id, '\n'))
       self$default_pos <- list(VALIDATED = self$nbSteps,
@@ -55,15 +46,7 @@ TimelineManager <- R6Class(
 
     
     
-    ToggleState_Steps = function(cond, range){
-      ns <- NS(self$id)
-      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      #if (verbose==T)  browser()
-      lapply(range, function(x){
-        shinyjs::toggleState(names(self$config$screens)[x],
-                             condition = cond)
-        })
-    },
+    
     
    
     
@@ -84,28 +67,17 @@ TimelineManager <- R6Class(
     
     # SERVER
     server = function(config, dataLoaded) {
-      ns <- NS(self$id)
-      cat(paste0(class(self)[1], '::server() from - ', self$id, '\n'))
-      #browser()
-      
-      
+     
       observeEvent(dataLoaded(),ignoreNULL=F,{
         browser()
         self$ToggleState_Steps(dataLoaded(), 1:self$nbSteps)  
       })
       
       
-      
-      cat(paste0(class(self)[1], '::self$timelineDraw$server() from - ', self$id, '\n'))
-
-      
-      
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
         ns <- NS(self$id)
         
-        cat(paste0(class(self)[1], '::moduleServer() from - ', self$id, '\n'))
-        # Show modal when button reset is clicked
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
           showModal(dataModal())
@@ -144,15 +116,7 @@ TimelineManager <- R6Class(
         
         
         
-        observeEvent(req(self$config$status), {
-          cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
-          if (verbose==TRUE) browser()
-          self$rv$isAllSkipped <- sum(rep(self$global$SKIPPED, self$nbSteps)==self$config$status)==self$nbSteps
-          self$rv$isAllUndone <- sum(rep(self$global$UNDONE, self$nbSteps)==self$config$status)==self$nbSteps
-          
-          self$Force_ToggleState_Steps()
-          self$Update_Buttons_Status()
-        })
+        
         
 
           list(current.pos = reactive({self$rv$current.pos}),

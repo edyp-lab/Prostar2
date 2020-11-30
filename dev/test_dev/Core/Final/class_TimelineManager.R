@@ -40,7 +40,8 @@ TimelineManager <- R6Class(
         current.pos = 1,
         status = NULL,
         reset_OK = NULL,
-        isAllSkipped = FALSE
+        isAllSkipped = NULL,
+        isAllUndone = NULL
       )
       
       self$timelineDraw <- TimelineDraw$new(self$ns('TL_draw'), 
@@ -97,6 +98,26 @@ TimelineManager <- R6Class(
       )
     },
     
+    ToggleState_Screens = function(cond, range){
+      ns <- NS(self$id)
+      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      #if (verbose==T)  browser()
+      lapply(range, function(x){
+        shinyjs::toggleState(names(self$screens)[x],
+                             condition = cond)
+      })
+    },
+    
+    GetFirstMandatoryNotValidated = function(){
+      first <- NULL
+      first <- which(lapply(1:4, 
+                      function(x){self$mandatory[x]&&!self$rv$status[x]})==TRUE)
+      if (!is.null(first))
+        min(first)
+      else
+        first
+    },
+    
     # Display_Current_Step = function(){
     #   cat(paste0(class(self)[1], '::Display_Current_Step() from - ', self$id, '\n'))
     #   req(self$rv$current.pos)
@@ -125,12 +146,17 @@ TimelineManager <- R6Class(
     # SERVER
     server = function(status) {
       
-      observe({
-        #config()
-        cat(paste0(class(self)[1], '::observeEvent(status) from - ', self$id, '\n'))
-       # if (verbose=='skip') 
-         self$rv$status <- status()
-      })
+      
+      
+      # observeEvent(req(self$config$status), {
+      #   cat(paste0(class(self)[1], '::observeEvent(req(self$config$status)) from - ', self$id, '\n'))
+      #   if (verbose==TRUE) browser()
+      #   self$rv$isAllSkipped <- sum(rep(self$global$SKIPPED, self$nbSteps)==self$config$status)==self$nbSteps
+      #   self$rv$isAllUndone <- sum(rep(self$global$UNDONE, self$nbSteps)==self$config$status)==self$nbSteps
+      #   
+      #   self$Force_ToggleState_Steps()
+      #   self$Update_Buttons_Status()
+      # })
       
       
       self$timelineDraw$server(
@@ -142,7 +168,17 @@ TimelineManager <- R6Class(
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
-        
+        observe({
+          #config()
+          cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
+          # if (verbose=='skip') 
+          #browser()
+          self$rv$status <- status()
+          self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
+          self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
+          
+          self$Force_ToggleState_Screens()
+        })
         
         output$show_screens <- renderUI({
           req(self$screens)
