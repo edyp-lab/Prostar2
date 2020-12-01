@@ -60,36 +60,12 @@
       cat(paste0(class(self)[1], '::GetStatusPosition() from - ', self$id, '\n'))
       self$config$status[pos]
     },
-    
-    # This function cannot be implemented in the timeline module because 
-    # the id of the screens to reset are not known elsewhere.
-    # Trying to reset the global 'div_screens' in the timeline module
-    # does not work
-    ResetScreens = function(){
-      cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n'))
-      
-      lapply(1:self$length, function(x){
-        shinyjs::reset(NS(self$id)(self$config$steps[x]))
-      })
-    },
 
-    
-    
    
     
     
     
 
-    
-    Actions_On_Reset = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      #browser()
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-      self$InitializeDataIn()
-    },
     
 
     
@@ -129,32 +105,3 @@
   
     
     
-
-    
-    # SERVER
-    server = function(dataIn = NULL, 
-                      reset = reactive({NULL}),
-                      isSkipped = reactive({NULL})) {
-
-      
-      observeEvent(reset(), ignoreInit = F, { 
-        cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset()) from - ', self$id, '\n'))
-        print("remote reset activated")
-        
-        # Used to transmit info of local Reset to child processes
-        self$rv$reset <- reset()
-        self$Actions_On_Reset()
-        })
-      
-
-
-      
-      
-      # MODULE SERVER
-      moduleServer(self$id, function(input, output, session) {
-        
-
-      reactive({self$dataOut})
-      }
-  )
-)

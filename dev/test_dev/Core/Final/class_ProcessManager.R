@@ -24,6 +24,21 @@ ProcessManager <- R6Class(
       self$id <- id
       self$ns <- NS(id)
       
+      self$dataOut = reactiveValues(
+        value = NULL,
+        trigger = NULL
+      )
+      
+      self$rv = reactiveValues(
+        dataIn = NULL,
+        temp.dataIn = NULL,
+        current.pos = 1,
+        status = NULL,
+        reset = NULL,
+        isSkipped = FALSE,
+        dataLoaded = FALSE)
+      #browser()
+      
       check <- self$CheckConfig(private$.config)
       if (!check$passed)
         stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
@@ -34,35 +49,16 @@ ProcessManager <- R6Class(
       self$config$type = class(self)[2]
       self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
       
-      self$rv$status <- setNames(rep(0, self$length), self$config$steps)
+      self$rv$status <- setNames(rep(global$UNDONE, self$length), self$config$steps)
       
       self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
                                   self$config$steps)
       
-      self$dataOut = reactiveValues(
-        value = NULL,
-        trigger = NULL
-      )
       
-      self$rv = reactiveValues(
-        dataIn = NULL,
-        temp.dataIn = NULL,
-        current.pos = 1,
-        status = rep(global$UNDONE, self$length),
-        reset = NULL,
-        isSkipped = FALSE,
-        dataLoaded = FALSE)
-      #browser()
       
       
       },
 
-    InitializeTimeline = function(){
-      cat(paste0(class(self)[1], '::', 'InitializeTimeline() from - ', self$id, '\n'))
-      
-      
-    },
-    
     CheckConfig = function(conf){
       cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n'))
       passed <- T
@@ -126,12 +122,39 @@ ProcessManager <- R6Class(
           self$rv$status[i] <- global$SKIPPED
     },
     
+    Initialize_Status_Process = function(){
+      cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n'))
+      self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
+    },
+    
+    ActionOn_Reset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      #browser()
+      self$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+      self$InitializeDataIn()
+    },
+    
+    # This function cannot be implemented in the timeline module because 
+    # the id of the screens to reset are not known elsewhere.
+    # Trying to reset the global 'div_screens' in the timeline module
+    # does not work
+    ResetScreens = function(){
+      cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n'))
+      
+      lapply(1:self$length, function(x){
+        shinyjs::reset(self$ns(self$config$steps[x]))
+      })
+    },
+    
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
       if(verbose=='skip') browser()
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       self$Set_Skipped_Status()
-      browser()
+      #browser()
       # Either the process has been validated, one can prepare data to be sent to caller
       # Or the module has been reseted
       if (self$rv$current.pos == self$length)
@@ -159,11 +182,8 @@ ProcessManager <- R6Class(
     },
     
     # SERVER
-    server = function(dataIn, reset, isSkipped) {
+    server = function(dataIn, remoteReset, isSkipped) {
      
-      self$InitializeTimeline()
-
-      
      observe({
        self$screens <- self$GetScreensDefinition()
        
@@ -173,19 +193,35 @@ ProcessManager <- R6Class(
                                                style = style)
        self$timeline.res <- self$timeline$server(
          status = reactive({self$rv$status}),
-         dataLoaded = reactive({!is.null(dataIn()) && !is.na(dataIn()) })
+         dataLoaded = reactive({!is.null(dataIn()) }),
+         remoteReset = reactive({remoteReset()})
        )
      })
       
       observeEvent(dataIn(),{self$rv$temp.dataIn <- dataIn()})
+      
       observeEvent(self$timeline.res$current.pos(), {
         self$rv$current.pos <- self$timeline.res$current.pos()
         })
 
       observeEvent(self$timeline.res$tl.reset(),{
+        print('local reset')
         self$rv$reset <- self$timeline.res$tl.reset()
+        self$ActionOn_Reset()
         })
 
+      
+      observeEvent(remoteReset(), ignoreInit = F, { 
+        cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset()) from - ', self$id, '\n'))
+        print("remote resetd")
+        
+        # Used to transmit info of local Reset to child processes
+        self$rv$reset <- remoteReset()
+        self$ActionOn_Reset()
+      })
+      
+      
+      
       observeEvent(isSkipped(), { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
         if(verbose=='skip') browser()

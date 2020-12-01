@@ -94,7 +94,7 @@ server = function(dataIn ) {
 
   lapply(names(self$ll.process), function(x){
     self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
-                                                        reset = reactive({self$rv$reset}),
+                                                        remoteReset = reactive({self$rv$reset}),
                                                         isSkipped = reactive({self$rv$skipped}))
   })
   

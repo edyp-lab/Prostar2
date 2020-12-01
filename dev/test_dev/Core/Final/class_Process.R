@@ -18,8 +18,7 @@ Process = R6Class(
       cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped() from - ', self$id, '\n'))
       #if(verbose=='skip') 
       value <- if (self$rv$isSkipped) global$SKIPPED else global$UNDONE
-      self$rv$status <- setNames(rep(value, self$length),
-                                     self$config$steps)
+      self$rv$status <- setNames(rep(value, self$length), self$config$steps)
     }
   )
 )
