@@ -44,7 +44,7 @@ TimelineForProcess = R6Class(
           self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
           }
         
-        if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
+        #if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
           # Disable all previous steps from each VALIDATED step
           # and enable all further steps (in case of current.pos is mandatory)
           ind.max <- self$GetMaxValidated_AllSteps()
@@ -55,9 +55,7 @@ TimelineForProcess = R6Class(
               self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
             }
           }
-        }
-      
-
+        #}
     }
   )
 )

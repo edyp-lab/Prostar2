@@ -163,15 +163,14 @@ TimelineManager <- R6Class(
       
       tags$div(id="modal1", 
                modalDialog(
-        span(self$modal_txt),
-        footer = tagList(
-          #modalButton("Cancel"),
-          actionButton(self$ns("close"), "Cancel", class='btn-info'),
-          actionButton(self$ns("modal_ok"), "OK")
-        )
-      )
-      )
-    },
+                 span(self$modal_txt),
+                 footer = tagList(
+                   actionButton(self$ns("close"), "Cancel", class='btn-info'),
+                   actionButton(self$ns("modal_ok"), "OK")
+                   )
+                 )
+               )
+      },
     
     NavPage = function(direction) {
       newval <- self$rv$current.pos + direction 
@@ -231,7 +230,7 @@ TimelineManager <- R6Class(
         
         observeEvent(remoteReset(), {self$rv$current.pos <- 1 })
         
-        observeEvent(req(input$rstBtn >0), {
+        observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
           showModal(self$dataModal())
         })
@@ -240,7 +239,7 @@ TimelineManager <- R6Class(
         
         # When OK button is pressed, update the reactive value which will be sent
         # to the caller
-        observeEvent(req(input$modal_ok), ignoreInit=T,{
+        observeEvent(req(input$modal_ok > 0), ignoreInit=F,{
           cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n'))
           self$rv$reset_OK <- input$rstBtn
           self$rv$current.pos <- 1
