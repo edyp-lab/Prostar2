@@ -21,7 +21,7 @@ TimelineForProcess = R6Class(
     Force_ToggleState_Screens = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
-      # browser()
+     #  browser()
       req(self$length)
       
       if (!self$rv$dataLoaded){
@@ -37,16 +37,20 @@ TimelineForProcess = R6Class(
         
         firstM <- self$GetFirstMandatoryNotValidated()
         if (!is.null(firstM)) {
-          offset <- if (firstM==self$length) 0 else 1
+          offset <- as.numeric(firstM == self$length)
           # Disable all further screens
           self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
           }
         
         if (self$rv$status[self$rv$current.pos] == global$VALIDATED) {
           # Disable all previous steps from each VALIDATED step
+          # and enable all further steps (in case of current.pos is mandatory)
           ind.max <- self$GetMaxValidated_AllSteps()
-          if (!is.null(ind.max))
+          if (!is.null(ind.max)){
             self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+            offset <- as.numeric(ind.max == self$length)
+            self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
+          }
         }
         }
     }

@@ -93,7 +93,7 @@ server = function(dataIn ) {
   )
 
   lapply(names(self$ll.process), function(x){
-    self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({NULL}),
+    self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
                                                         reset = reactive({self$rv$reset}),
                                                         isSkipped = reactive({self$rv$skipped}))
   })
@@ -109,7 +109,7 @@ server = function(dataIn ) {
     
   
   observeEvent(input$reset,{self$rv$reset <- input$reset})
-  observeEvent(input$skip,{self$rv$skipped <- input$skip})
+  observeEvent(input$skip,{self$rv$skipped <- input$skip%%2==0})
   
   output$show_ui <- renderUI({
     tagList(
@@ -122,7 +122,6 @@ server = function(dataIn ) {
   output$show_dataIn <- renderUI({
     req(dataIn())
     tagList(
-      h4('show data sent to processes'),
       lapply(names(dataIn()), function(x){tags$p(x)})
     )
   })
@@ -132,7 +131,6 @@ server = function(dataIn ) {
 
     req(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}))
     tagList(
-      h4('show return of processes'),
       lapply(names(self$ll.process),function(x){
          tags$p(paste0(x, ' -> ',paste0(names(self$tmp.return[[x]]()$value), collapse=' ')))
         
@@ -165,7 +163,7 @@ server = function(input, output){
   observeEvent(input$changeDataset,{
     print(input$changeDataset)
     if (input$changeDataset%%2 != 0)
-  rv$dataIn <- 1
+      rv$dataIn <- Exp1_R25_prot
     else
       rv$dataIn <- NULL
   })

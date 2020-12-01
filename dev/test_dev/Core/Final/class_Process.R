@@ -12,6 +12,14 @@ Process = R6Class(
         eval(parse(text = paste0("self$", x, '()')))
       }),
       self$config$steps)
+    },
+    
+    ActionOn_isSkipped = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped() from - ', self$id, '\n'))
+      #if(verbose=='skip') 
+      value <- if (self$rv$isSkipped) global$SKIPPED else global$UNDONE
+      self$rv$status <- setNames(rep(value, self$length),
+                                     self$config$steps)
     }
   )
 )

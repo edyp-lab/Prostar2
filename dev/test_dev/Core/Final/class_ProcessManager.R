@@ -15,7 +15,6 @@ ProcessManager <- R6Class(
     length = NULL,
     config = NULL,
     screens = NULL,
-    status = NULL,
     
     dataOut = "<reactiveValues>",
     rv = "<reactiveValues>",
@@ -30,11 +29,12 @@ ProcessManager <- R6Class(
         stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
       else
         self$config <- private$.config
-      self$length <- length(self$config$mandatory)
       
+      self$length <- length(self$config$mandatory)
       self$config$type = class(self)[2]
-      self$config$status <- setNames(rep(0, self$length), self$config$steps)
       self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
+      
+      self$rv$status <- setNames(rep(0, self$length), self$config$steps)
       
       self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
                                   self$config$steps)
@@ -46,8 +46,9 @@ ProcessManager <- R6Class(
       
       self$rv = reactiveValues(
         dataIn = NULL,
-        current.pos = NULL,
-        status = NULL,
+        temp.dataIn = NULL,
+        current.pos = 1,
+        status = rep(global$UNDONE, self$length),
         reset = NULL,
         isSkipped = FALSE,
         dataLoaded = FALSE)
@@ -88,13 +89,58 @@ ProcessManager <- R6Class(
       list(passed=passed,
            msg = msg)
     },
+    
     GetScreensDefinition = function(){},
+    
+    Wake = function(){ 
+      cat(paste0(class(self)[1], '::Wake() from - ', self$id, '\n'))
+      runif(1,0,1)
+    },
+    
+    Send_Result_to_Caller = function(){
+      cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n'))
+      self$dataOut$value <- self$rv$dataIn
+      self$dataOut$trigger <- self$Wake()
+    },
+    
+    InitializeDataIn = function(){ 
+      cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
+      if (verbose==T) browser()
+      self$rv$dataIn <- self$rv$temp.dataIn
+    },
+    
+    GetMaxValidated_AllSteps = function(){
+      cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
+      val <- 0
+      ind <- which(self$rv$status == global$VALIDATED)
+      if (length(ind) > 0)
+        val <- max(ind)
+      val
+    },
+    
+    Set_Skipped_Status = function(){
+      cat(paste0(class(self)[1], '::Set_Skipped_Status() from - ', self$id, '\n'))
+      if(verbose=='skip') browser()
+      for (i in 1:self$length)
+        if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i)
+          self$rv$status[i] <- global$SKIPPED
+    },
+    
+    ValidateCurrentPos = function(){
+      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+      if(verbose=='skip') browser()
+      self$rv$status[self$rv$current.pos] <- global$VALIDATED
+      self$Set_Skipped_Status()
+      browser()
+      # Either the process has been validated, one can prepare data to be sent to caller
+      # Or the module has been reseted
+      if (self$rv$current.pos == self$length)
+        self$Send_Result_to_Caller()
+    },
     
     # UI
     ui = function() {
       fluidPage(
-        #uiOutput(self$ns('show_timeline_ui')),
-        #self$TimelineUI(),
         self$timeline$ui(),
         hr(),
         fluidRow(
@@ -116,7 +162,7 @@ ProcessManager <- R6Class(
     server = function(dataIn, reset, isSkipped) {
      
       self$InitializeTimeline()
-      
+
       
      observe({
        self$screens <- self$GetScreensDefinition()
@@ -125,19 +171,27 @@ ProcessManager <- R6Class(
                                                config = self$config,
                                                screens = self$screens,
                                                style = style)
-       
        self$timeline.res <- self$timeline$server(
          status = reactive({self$rv$status}),
-         dataLoaded = reactive({FALSE})
+         dataLoaded = reactive({!is.null(dataIn()) && !is.na(dataIn()) })
        )
      })
       
-      
-      
-      # self$timeline$server(status = reactive({self$rv$status}),
-      #                      dataLoaded = reactive({FALSE})
-      #                      )
-      
+      observeEvent(dataIn(),{self$rv$temp.dataIn <- dataIn()})
+      observeEvent(self$timeline.res$current.pos(), {
+        self$rv$current.pos <- self$timeline.res$current.pos()
+        })
+
+      observeEvent(self$timeline.res$tl.reset(),{
+        self$rv$reset <- self$timeline.res$tl.reset()
+        })
+
+      observeEvent(isSkipped(), { 
+        cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
+        if(verbose=='skip') browser()
+        self$rv$isSkipped <- isSkipped()
+        self$ActionOn_isSkipped()
+      })
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
@@ -154,13 +208,6 @@ ProcessManager <- R6Class(
           tagList(
             # h4('show dataIn()'),
             lapply(names(dataIn()), function(x){tags$p(x)})
-          )
-        })
-        
-        output$show_rv_dataIn <- renderUI({
-          tagList(
-            #h4('show self$rv$dataIn)'),
-            lapply(names(self$rv$dataIn), function(x){tags$p(x)})
           )
         })
         

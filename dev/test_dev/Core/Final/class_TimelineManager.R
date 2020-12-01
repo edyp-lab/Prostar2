@@ -35,7 +35,7 @@ TimelineManager <- R6Class(
       self$screens <- setNames(self$EncapsulateScreens(screens), self$config$steps)
       self$rv <- reactiveValues(
         current.pos = 1,
-        status = c(0,0,0,0),
+        status = setNames(rep(global$UNDONE, self$length), self$config$steps),
         reset_OK = NULL,
         isAllSkipped = FALSE,
         isAllUndone = TRUE
@@ -106,7 +106,6 @@ TimelineManager <- R6Class(
     },
     
     ToggleState_Screens = function(cond, range){
-      ns <- NS(self$id)
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T)  browser()
       lapply(range, function(x){
@@ -191,7 +190,6 @@ TimelineManager <- R6Class(
           # if (verbose=='skip') 
           self$rv$status <- status()
           self$rv$dataLoaded <- dataLoaded()
-          browser()
           self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
           self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
           
