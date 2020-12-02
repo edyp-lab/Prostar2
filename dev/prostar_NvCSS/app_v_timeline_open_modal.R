@@ -8,9 +8,17 @@ setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 ui <- fluidPage(
   
   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl5.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl6.css")
   ),
   
+  # title = tagList(
+  #   tags$span(
+  #     class = "logo-mini", style =  "font-size : 14px","Prostar"),
+  #   tags$span(
+  #     class = "logo-lg", "Prostar")
+  # )
+  
+  # https://codepen.io/xram/pen/thLsk
 
   tags$div(class="box",
            p('Filtration'),
