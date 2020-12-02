@@ -1,0 +1,51 @@
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0 4em;
+  counter-reset: section;
+}
+
+.box {
+  min-width: 300px;
+  max-width: 500px;
+  margin: auto;
+  border: double purple;
+  border-width: 7px;
+}
+
+
+p {
+  font-size: 2em;
+  border-top: 3px solid;
+  border-image: linear-gradient(to right, #743ad5 0%, #d53a9d 100%);
+  border-image-slice: 1;
+  border-width: 3px;
+  margin: auto;
+  text-align: center;
+  padding: 40px;
+  color: black;
+}
+
+
+p:nth-child(odd) {
+  border-right: 3px solid;
+  left: 100%; 
+}
+
+
+p:nth-child(even) {
+  border-left: 3px solid;
+  right: 100%; 
+}
+
+p:first-child {
+  border-top: 0;
+  border-top-right-radius:0;
+  border-top-left-radius:0;
+}
+p:last-child {
+  border-bottom-right-radius:0;
+  border-bottom-left-radius:0;
+}
+
