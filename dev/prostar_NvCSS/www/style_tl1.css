@@ -1,5 +1,17 @@
 
 
+.box {
+  width: 200px;
+  margin: auto;
+  border-top: 2px solid ;
+  border-bottom: 2px solid ;
+  border-color: orange;
+  position: absolute;
+  top: 100px;
+  left: 100px;
+}
+
+
 .box:before{
   background-color: orange; 
   content: '';
@@ -12,15 +24,6 @@
   left: 0;
   top: 0;
   
-}
-
-.box {
-  width: 200px;
-  margin: auto;
-  border-top: 2px solid ;
-  border-bottom: 2px solid ;
-  border-color: orange;
-  position: relative;
 }
 
 
@@ -77,4 +80,3 @@ p:last-child {
   border-bottom-left-radius:0;
   border-bottom: 0;
 }
-*/

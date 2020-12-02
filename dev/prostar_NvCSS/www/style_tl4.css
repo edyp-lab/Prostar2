@@ -1,25 +1,28 @@
 
+
 .box {
   border : 1px dashed black;
   width:300px;
-  list-style: none;
-  position: relative;
+  position: absolute;
+  top: 100px;
+  left: 100px;
 }
 
 .box:before {
   position: absolute;
   display: block;
   top: 0;
-  left: 17px;
+  left: 53px;
   content: "";
   height: 100%;
-  width: 20px;
+  width: 23px;
   border : purple 2px solid;
   border-radius: 10px 0 0 10px;
 }
 
 
 p {
+  margin: auto;
   text-align: center;
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
@@ -34,7 +37,7 @@ p:after {
   top: 0;
   
   box-shadow: 0 0 0 2px purple;
-  left: -24px;        
+  left: -22px;        
   background: orange;    
   border-radius: 50%;  
   height: 16px;
@@ -43,7 +46,4 @@ p:after {
   top: 5px;
 }
 
-p{
-  margin:auto;
-}
 

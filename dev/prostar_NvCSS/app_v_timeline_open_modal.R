@@ -8,7 +8,7 @@ setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 ui <- fluidPage(
   
   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl4.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl5.css")
   ),
   
 
@@ -16,7 +16,8 @@ ui <- fluidPage(
            p('Filtration'),
            p('Normalization'),
            p('Imputation'),
-           p('Aggregation'))
+           p('Aggregation')
+           )
   
   
 )
