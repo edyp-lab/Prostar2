@@ -187,9 +187,9 @@ ProcessManager <- R6Class(
     },
     
     # SERVER
-    server = function(dataIn, 
-                      remoteReset=reactive({FALSE}), 
-                      isSkipped=reactive({FALSE})) {
+    server = function(dataIn = reactive({FALSE}), 
+                      remoteReset = reactive({FALSE}), 
+                      isSkipped = reactive({FALSE})) {
       cat(paste0(class(self)[1], '::server(dataIn, remoteReset, isSkipped) from - ', self$id, '\n'))
       
       
@@ -208,15 +208,16 @@ ProcessManager <- R6Class(
        })
        self$timeline.res <- self$timeline$server(
          status = reactive({self$rv$status}),
-         dataLoaded = reactive({!is.null(dataIn()) }),
+         dataLoaded = reactive({self$rv$dataLoaded }),
          remoteReset = reactive({remoteReset()})
        )
       
      })
       
-      observeEvent(dataIn(),{
+      observeEvent(dataIn(), ignoreNULL = F, {
         cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
         self$rv$temp.dataIn <- dataIn()
+        self$rv$dataLoaded <- !is.null(dataIn())
         self$ActionOn_New_DataIn()
         })
       

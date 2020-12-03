@@ -191,6 +191,7 @@ Pipeline = R6Class(
         return(data)
       }
       #browser()
+      cat(paste0('toto = ', self$rv$dataLoaded, '\n'))
       lapply(names(self$ll.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
     }

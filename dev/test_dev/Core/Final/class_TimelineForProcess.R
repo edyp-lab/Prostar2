@@ -9,10 +9,11 @@ TimelineForProcess = R6Class(
                       validated process and all further datasets will be removed",
     
     ui = function(){
+      color <- if (isTRUE(self$rv$dataLoaded )) '#068FD4' else '#068FD490'
       fluidPage(
       shinyjs::useShinyjs(),
       wellPanel(
-        style="background: white; border-width: 2px; border-color: blue;",
+        style=paste0("background: white; border-width: 2px; border-color: ", color, ";"),
         self$Main_UI()
       )
     )

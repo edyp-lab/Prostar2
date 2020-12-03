@@ -225,7 +225,8 @@ TimelineManager <- R6Class(
 
       self$timelineDraw$server(
         status = reactive({self$rv$status}),
-        position = reactive({self$rv$current.pos})
+        position = reactive({self$rv$current.pos}),
+        dataLoaded = reactive({self$rv$dataLoaded})
       )
 
       
