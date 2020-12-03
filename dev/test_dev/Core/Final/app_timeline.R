@@ -173,7 +173,8 @@ server = function(){
       )
     
     self$timeline$server(status = reactive({self$rv$status}),
-                         dataLoaded = reactive({self$rv$dataLoaded%%2!=0})
+                         dataLoaded = reactive({self$rv$dataLoaded%%2!=0}),
+                         remoteReset = reactive({FALSE})
     )
   })
   

@@ -1,9 +1,15 @@
 $test: test;
+$colCompletedDisabled: #07910A80;
 $colCompleted: #07910A;
+$colSkippedDisabled: #ECF4F880;
 $colSkipped: #ECF4F8;
-  $colMandatory: #D30505;
-  $colDefault: #B3AFAB;
-  $radius: 20px;
+$colMandatory: #D30505;
+$colMandatoryDisabled: #D3050570;
+
+$colDefault: #B3AFAB;
+$colDefaultDisabled: #B3AFAB70;
+
+$radius: 20px;
 $lineWidth: 3px;
 .timeline{
   list-style-type: none;
@@ -47,6 +53,36 @@ $lineWidth: 3px;
     transition: all 200ms ease-in;
   }
 }
+
+.li.default{
+  .status{
+    border-top: $lineWidth solid $colDefault;
+    &:before{
+      background-color: white;
+      border: $lineWidth solid $colDefault;
+      transition: all 200ms ease-in;
+    }
+    h4{
+      color: $colDefault;
+      border-bottom: 3px solid white;
+    }
+  }
+}
+
+.li.defaultDisabled{
+  .status{
+    border-top: $lineWidth solid $colDefaultDisabled;
+    &:before{
+      background-color: $colDefaultDisabled;
+      border: $lineWidth solid $colDefaultDisabled;
+      transition: all 200ms ease-in;
+    }
+    h4{
+      color: $colDefaultDisabled;
+      border-bottom: 3px solid white;
+    }
+  }
+}
 .li.complete{
   .status{
     border-top: $lineWidth solid $colDefault;
@@ -61,6 +97,23 @@ $lineWidth: 3px;
     }
   }
 }
+
+.li.completeDisabled{
+  .status{
+    border-top: $lineWidth solid $colDefault;
+    &:before{
+      background-color: $colCompletedDisabled;
+      border: $lineWidth solid $colCompletedDisabled;
+      transition: all 200ms ease-in;
+    }
+    h4{
+      color: $colCompletedDisabled;
+      border-bottom: 3px solid white;
+    }
+  }
+}
+
+
 .li.skipped{
   .status{
     border-top: $lineWidth dashed  $colDefault;
@@ -75,6 +128,23 @@ $lineWidth: 3px;
     }
   }
 }
+
+.li.skippedDisabled{
+  .status{
+    border-top: $lineWidth dashed  $colDefault;
+    &:before{
+      background-color: $colSkippedDisabled;
+      border: $lineWidth dashed  $colSkippedDisabled;
+      transition: all 200ms ease-in;
+    }
+    h4{
+      color: $colSkippedDisabled;
+      border-bottom: 3px dashed  white;
+    }
+  }
+}
+
+
 .li.mandatory{
   .status{
     border-top: $lineWidth solid $colDefault;
@@ -85,6 +155,21 @@ $lineWidth: 3px;
     }
     h4{
       color: $colMandatory;
+      border-bottom: 3px solid white;
+    }
+  }
+}
+
+.li.mandatoryDisabled{
+  .status{
+    border-top: $lineWidth solid $colDefault;
+    &:before{
+      background-color: white;
+      border: $lineWidth solid $colMandatoryDisabled;
+      transition: all 200ms ease-in;
+    }
+    h4{
+      color: $colMandatoryDisabled;
       border-bottom: 3px solid white;
     }
   }
@@ -104,6 +189,7 @@ $lineWidth: 3px;
     }
   }
 }
+
 .li.skipped.active{
   .status{
     h4{
@@ -112,6 +198,29 @@ $lineWidth: 3px;
   }
 }
 .li.mandatory.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor;
+    }
+  }
+}
+
+.li.completeDisabled.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor ;
+    }
+  }
+}
+
+.li.skippedDisabled.active{
+  .status{
+    h4{
+      border-bottom: 3px dashed currentColor ;
+    }
+  }
+}
+.li.mandatoryDisabled.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;

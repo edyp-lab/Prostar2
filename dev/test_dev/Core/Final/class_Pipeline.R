@@ -94,7 +94,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
-      browser()
+     # browser()
       cat("----- self$old.tmp.return ------\n")
       print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$ll.process))

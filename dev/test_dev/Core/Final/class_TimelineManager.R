@@ -219,7 +219,9 @@ TimelineManager <- R6Class(
     ui = function() {},
     
     # SERVER
-    server = function(status, dataLoaded, remoteReset) {
+    server = function(status, 
+                      dataLoaded=reactive({FALSE}), 
+                      remoteReset=reactive({FALSE})) {
 
       self$timelineDraw$server(
         status = reactive({self$rv$status}),
