@@ -1,4 +1,3 @@
-#Timeline_R6.R
 Process = R6Class(
   "Process",
   inherit = ProcessManager,
@@ -7,11 +6,21 @@ Process = R6Class(
   public = list(
     
     GetScreensDefinition = function(){
+      cat(paste0(class(self)[1], '::GetScreensDefinition() from - ', self$id, '\n'))
       #browser()
       setNames(lapply(self$config$steps, function(x){
         eval(parse(text = paste0("self$", x, '()')))
       }),
       self$config$steps)
+    },
+    
+    
+    CreateTimeline = function(){
+      cat(paste0(class(self)[1], '::CreateTimeline() from - ', self$id, '\n'))
+      self$timeline <- TimelineForProcess$new(self$ns('TL_draw'), 
+                                              config = self$config,
+                                              screens = self$screens,
+                                              style = style)
     },
     
     ActionOn_isSkipped = function(){

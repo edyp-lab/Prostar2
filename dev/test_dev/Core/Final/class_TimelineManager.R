@@ -102,17 +102,18 @@ TimelineManager <- R6Class(
     EncapsulateScreens = function(screens){
       req(screens)
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
+      #browser()
       lapply(1:self$length, function(i) {
         if (i==1) div(
           class = paste0("page_", self$id),
           id = self$ns(self$config$steps[i]),
-          shinyjs::disabled(screens[[i]])
+          shinyjs::disabled(div(id=paste0('screen_',self$id),screens[[i]]))
         )
         else 
           shinyjs::hidden(div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
-            shinyjs::disabled(screens[[i]])
+            shinyjs::disabled(div(id=paste0('screen_',self$id),screens[[i]]))
           )
           )
       }

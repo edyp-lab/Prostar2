@@ -12,21 +12,7 @@
     
     
     
-    GetMaxValidated_BeforeCurrentPos = function(){
-      cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n'))
-      ind.max <- NULL
-      indices.validated <- which(self$config$status == self$global$VALIDATED)
-      if (length(indices.validated) > 0){
-        ind <- which(indices.validated < self$rv$current.pos)
-        if(length(ind) > 0)
-          ind.max <- max(ind)
-      }
-      
-      # if (ind.max == 0)
-      #   ind.max <- 1
-       
-      ind.max
-    },
+    
     
     
     # Test if a process module (identified by its name) has been skipped.
@@ -39,17 +25,9 @@
       pos <- which(name == self$config$steps)
       return(self$GetStatusPosition(pos) == self$global$SKIPPED)
     },
-    
-    InitializeModule = function(){
-      #self$config$screens <- self$CreateScreens()
-      #self$config$screens <- self$GetScreensDefinition()
-      self$rv$current.pos <- 1
-    },
+ },
 
-    GetCurrentStepName = function(){
-      cat(paste0(class(self)[1], '::GetCurrentStepName() from - ', self$id, '\n'))
-      self$config$steps[self$rv$current.pos]
-    },
+    
     
     Unskip = function(pos){
       cat(paste0(class(self)[1], '::Unskip() from - ', self$id, '\n'))

@@ -19,26 +19,7 @@ TimelineForPipeline = R6Class(
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
       # browser()
-      req(self$length)
       
-      if (!self$rv$dataLoaded){
-        self$ToggleState_Screens(cond = FALSE, range = 1:self$length)
-      } else {
-        if (self$rv$isAllUndone){
-          # Enable all steps and buttons at the initialization of a process or after a reset
-          self$ToggleState_Screens(cond = TRUE, range = 1:self$length)
-        } else if (self$rv$isAllSkipped){
-          # Disable all steps if all steps are skipped
-          self$ToggleState_Screens(cond = FALSE, range = 1:self$length)
-        }
-        
-        firstM <- self$GetFirstMandatoryNotValidated()
-        if (!is.null(firstM)) {
-          offset <- if (firstM==self$length) 0 else 1
-          # Disable all further screens
-          self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-        }
-      }
     }
     
   )

@@ -37,7 +37,6 @@ ProcessManager <- R6Class(
         reset = NULL,
         isSkipped = FALSE,
         dataLoaded = FALSE)
-      #browser()
       
       check <- self$CheckConfig(private$.config)
       if (!check$passed)
@@ -54,11 +53,12 @@ ProcessManager <- R6Class(
       self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
                                   self$config$steps)
       
+      self$Additional_Initialize_Class()
       
-      
-      
-      },
-
+     },
+    
+    Additional_Initialize_Class = function(){},
+    
     CheckConfig = function(conf){
       cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n'))
       passed <- T
@@ -86,7 +86,7 @@ ProcessManager <- R6Class(
            msg = msg)
     },
     
-    GetScreensDefinition = function(){},
+    #GetScreensDefinition = function(){},
     
     Wake = function(){ 
       cat(paste0(class(self)[1], '::Wake() from - ', self$id, '\n'))
@@ -160,11 +160,14 @@ ProcessManager <- R6Class(
       if (self$rv$current.pos == self$length)
         self$Send_Result_to_Caller()
     },
+    Additional_Server_Funcs = function(){},
     
     # UI
     ui = function() {
+      cat(paste0(class(self)[1], '::ui() from - ', self$id, '\n'))
+      #browser()
       fluidPage(
-        self$timeline$ui(),
+        uiOutput(self$ns('show_tl')),
         hr(),
         fluidRow(
           column(width=2,
@@ -182,15 +185,20 @@ ProcessManager <- R6Class(
     },
     
     # SERVER
-    server = function(dataIn, remoteReset, isSkipped) {
-     
+    server = function(dataIn, 
+                      remoteReset=reactive({FALSE}), 
+                      isSkipped=reactive({FALSE})) {
+      cat(paste0(class(self)[1], '::server(dataIn, remoteReset, isSkippe) from - ', self$id, '\n'))
+      self$Additional_Server_Funcs()
+      
      observe({
+       # This function get the UI definition of the screens for the steps
+       # It differs between process class (which screens are given in details in their
+       # corresponding source code file) and pipeline class in which the UI is
+       # the ui() function from the entire process class
        self$screens <- self$GetScreensDefinition()
-       
-       self$timeline <- TimelineForProcess$new(self$ns('TL_draw'), 
-                                               config = self$config,
-                                               screens = self$screens,
-                                               style = style)
+       #browser()
+       self$timeline.res <-self$CreateTimeline()
        self$timeline.res <- self$timeline$server(
          status = reactive({self$rv$status}),
          dataLoaded = reactive({!is.null(dataIn()) }),
@@ -201,6 +209,7 @@ ProcessManager <- R6Class(
       observeEvent(dataIn(),{self$rv$temp.dataIn <- dataIn()})
       
       observeEvent(self$timeline.res$current.pos(), {
+       # browser()
         self$rv$current.pos <- self$timeline.res$current.pos()
         })
 
@@ -231,11 +240,16 @@ ProcessManager <- R6Class(
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {
-       
+        cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
+        
         observe({
           self$input <- input
         })
         
+        output$show_tl <- renderUI({
+          req(self$timeline)
+          self$timeline$ui()
+        })
         
         ###########---------------------------#################
         output$show_dataIn <- renderUI({
@@ -248,6 +262,7 @@ ProcessManager <- R6Class(
         })
         
         output$show_rv_dataOut <- renderUI({
+          cat(paste0(class(self)[1], '::output$show_rv_dataOut from - ', self$id, '\n'))
           req(self$dataOut$trigger)
           self$dataOut$value
           tagList(
