@@ -99,42 +99,72 @@ TimelineManager <- R6Class(
     
     #--- Get the ui definitions from the config parameter and put them
     #--- in a div to be able to enable/disable all widgets in each screen
+    # EncapsulateScreens = function(screens){
+    #   req(screens)
+    #   cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
+    #   #browser()
+    #   lapply(1:self$length, function(i) {
+    #     if (i==1) div(
+    #       class = paste0("page_", self$id),
+    #       id = self$ns(self$config$steps[i]),
+    #       shinyjs::disabled(div(id=paste0('screen_', self$id),screens[[i]]))
+    #     )
+    #     else 
+    #       shinyjs::hidden(div(
+    #         class = paste0("page_", self$id),
+    #         id = self$ns(self$config$steps[i]),
+    #         shinyjs::disabled(div(id=paste0('screen_', self$id),screens[[i]]))
+    #       )
+    #       )
+    #   }
+    #   )
+    # },
+    
+    
+    
+    
+    
     EncapsulateScreens = function(screens){
       req(screens)
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
-      #browser()
       lapply(1:self$length, function(i) {
-        if (i==1) div(
-          class = paste0("page_", self$id),
-          id = self$ns(self$config$steps[i]),
-          shinyjs::disabled(div(id=paste0('screen_',self$id),screens[[i]]))
-        )
-        else 
-          shinyjs::hidden(div(
+        if (i==1) shinyjs::disabled(
+          div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
-            shinyjs::disabled(div(id=paste0('screen_',self$id),screens[[i]]))
-          )
+            screens[[i]])
+        )
+        else 
+          shinyjs::hidden(
+            shinyjs::disabled(
+              div(
+            class = paste0("page_", self$id),
+            id = self$ns(self$config$steps[i]),
+            screens[[i]])
+            )
           )
       }
       )
     },
+    
 
+
+    ToggleState_Screens = function(cond, range){
+      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      #if (verbose==T)  
+      #browser()
+      lapply(range, function(x){
+        shinyjs::toggleState(self$config$steps[x],
+                             condition = cond)
+      })
+    },
+    
     Update_Cursor_Position = function(){
       cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n'))
       if (verbose==T) browser()
       req(self$rv$status)
       if (self$rv$status[self$length] == global$VALIDATED)
         self$rv$current.pos <- self$default_pos$VALIDATED
-    },
-    
-    ToggleState_Screens = function(cond, range){
-      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      #if (verbose==T)  browser()
-      lapply(range, function(x){
-        shinyjs::toggleState(names(self$screens)[x],
-                             condition = cond)
-      })
     },
     
     GetFirstMandatoryNotValidated = function(){
@@ -190,14 +220,12 @@ TimelineManager <- R6Class(
     
     # SERVER
     server = function(status, dataLoaded, remoteReset) {
-      
-      
+
       self$timelineDraw$server(
         status = reactive({self$rv$status}),
         position = reactive({self$rv$current.pos})
       )
-      
-      
+
       
       # MODULE SERVER
       moduleServer(self$id, function(input, output, session) {

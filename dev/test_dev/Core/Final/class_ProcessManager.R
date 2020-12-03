@@ -127,6 +127,8 @@ ProcessManager <- R6Class(
       self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
     },
     
+    ActionOn_New_DataIn = function(){},
+    
     ActionOn_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
       #browser()
@@ -188,10 +190,14 @@ ProcessManager <- R6Class(
     server = function(dataIn, 
                       remoteReset=reactive({FALSE}), 
                       isSkipped=reactive({FALSE})) {
-      cat(paste0(class(self)[1], '::server(dataIn, remoteReset, isSkippe) from - ', self$id, '\n'))
-      self$Additional_Server_Funcs()
+      cat(paste0(class(self)[1], '::server(dataIn, remoteReset, isSkipped) from - ', self$id, '\n'))
+      
+      
       
      observe({
+       isolate({
+         self$Additional_Server_Funcs()
+       
        # This function get the UI definition of the screens for the steps
        # It differs between process class (which screens are given in details in their
        # corresponding source code file) and pipeline class in which the UI is
@@ -199,14 +205,20 @@ ProcessManager <- R6Class(
        self$screens <- self$GetScreensDefinition()
        #browser()
        self$timeline.res <-self$CreateTimeline()
+       })
        self$timeline.res <- self$timeline$server(
          status = reactive({self$rv$status}),
          dataLoaded = reactive({!is.null(dataIn()) }),
          remoteReset = reactive({remoteReset()})
        )
+      
      })
       
-      observeEvent(dataIn(),{self$rv$temp.dataIn <- dataIn()})
+      observeEvent(dataIn(),{
+        cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
+        self$rv$temp.dataIn <- dataIn()
+        self$ActionOn_New_DataIn()
+        })
       
       observeEvent(self$timeline.res$current.pos(), {
        # browser()

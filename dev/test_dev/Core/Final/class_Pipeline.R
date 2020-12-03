@@ -16,6 +16,7 @@ Pipeline = R6Class(
     Additional_Server_Funcs = function(){
       self$Launch_Module_Server()
     },
+    
     ActionOn_NewPosition = function(){
       cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
       self$PrepareData2Send()
@@ -47,6 +48,9 @@ Pipeline = R6Class(
       self$config$steps)
        },
     
+    ActionOn_New_DataIn = function(){
+      self$PrepareData2Send()
+    },
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
@@ -59,6 +63,9 @@ Pipeline = R6Class(
                                   self$config$steps
       )
 
+      #browser()
+      self$PrepareData2Send()
+      
       lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
                                                             remoteReset = reactive({self$rv$reset}),
@@ -66,11 +73,12 @@ Pipeline = R6Class(
         )
       })
       
+      
       #browser()                                                                      
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
         cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
-        
+        #browser()
         self$ActionOn_Data_Trigger()
       })
     },
@@ -86,10 +94,12 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
-      #browser()
+      browser()
+      cat("----- self$old.tmp.return ------\n")
       print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$ll.process))
       )
+      cat("----- self$tmp.return ------\n")
       print(setNames(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}),
                      names(self$ll.process))
       )
@@ -113,7 +123,7 @@ Pipeline = R6Class(
         if (length(processHasChanged)==1)
           if (is.null(self$tmp.return[[processHasChanged]]()$value)){
             # process has been reseted
-            self$config$status[processHasChanged] <- self$global$UNDONE
+            self$rv$status[processHasChanged] <- global$UNDONE
             # browser()
             # One take the last dataset not NULL
             last.validated <- self$GetMaxValidated_BeforeCurrentPos()
@@ -126,7 +136,7 @@ Pipeline = R6Class(
           }
         else{
           # process has been validated
-          self$config$status[processHasChanged] <- self$global$VALIDATED
+          self$rv$status[processHasChanged] <- global$VALIDATED
           self$Set_Skipped_Status()
           self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
         }
@@ -144,6 +154,7 @@ Pipeline = R6Class(
     
     GetCurrentStepName = function(){
       cat(paste0(class(self)[1], '::GetCurrentStepName() from - ', self$id, '\n'))
+      #browser()
       self$config$steps[self$rv$current.pos]
     },
     
@@ -161,7 +172,7 @@ Pipeline = R6Class(
     
     PrepareData2Send = function(){
       cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n'))
-      
+      #browser()
       # Returns NULL to all modules except the one pointed by the current position
       # Initialization of the pipeline : one send dataIn() to the
       # original module

@@ -21,7 +21,7 @@ TimelineForProcess = R6Class(
     Force_ToggleState_Screens = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
-       #browser()
+      # browser()
       self$ToggleState_Screens(cond = self$rv$dataLoaded, range = 1:self$length)
      
       if (self$rv$isAllSkipped){
@@ -30,7 +30,7 @@ TimelineForProcess = R6Class(
       }
       
       firstM <- self$GetFirstMandatoryNotValidated()
-      if (!is.null(firstM)) {
+      if (!is.null(firstM) && self$length > 1) {
         offset <- as.numeric(firstM != self$length)
         # Disable all further screens
         self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
