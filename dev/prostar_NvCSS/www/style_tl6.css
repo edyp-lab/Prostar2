@@ -1,0 +1,19 @@
+.box{
+  padding: 50px 50px ;
+}
+
+
+p {
+  text-align: center;
+  padding-top: 20px;
+  border: 3px solid lightblue;
+  border-radius: 50%;
+  height: 70px;
+  width: 70px;
+}
+
+
+p:nth-child(2){
+  border-right: 3px solid blue;
+  border-left: 0;
+}

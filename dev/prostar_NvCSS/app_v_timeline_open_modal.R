@@ -1,36 +1,31 @@
 library(shiny)
 library(shinyWidgets)
 library(shinyjs)
-setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
+#setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
+setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 
 
 ui <- fluidPage(
   
   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl6.css")
   ),
   
-  # first and third
-  # tags$div(class="box",
-  #          p('Filtration'),
-  #          p('Normalization'),
-  #          p('Imputation'),
-  #          p('Aggregation'))
+  # title = tagList(
+  #   tags$span(
+  #     class = "logo-mini", style =  "font-size : 14px","Prostar"),
+  #   tags$span(
+  #     class = "logo-lg", "Prostar")
+  # )
   
-  
-  # second and fourth
-  # tags$ul(class="timeline",
-  #         tags$li(class="event",
-  #                 p('Filtration')),
-  #         tags$li(class="event",
-  #                 p('Normalization')),
-  #         tags$li(class="event",
-  #                 p('Imputation')),
-  #         tags$li(class="event",
-  #                 p('Aggregation')
-  #         ))
+  # https://codepen.io/xram/pen/thLsk
 
-  
+  tags$div(class="box",
+           p('Filtration'),
+           p('Normalization'),
+           p('Imputation'),
+           p('Aggregation')
+           )
   
   
 )
