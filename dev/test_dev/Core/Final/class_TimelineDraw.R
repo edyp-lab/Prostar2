@@ -45,17 +45,18 @@ TimelineDraw <- R6Class(
     BuildTimeline2 = function(status, pos, dataLoaded){
       cat(paste0(class(self)[1], '::BuildTimeline2())\n'))
       
-      tl_status <- rep('default', self$length)
-      
-      tl_status[which(self$mandatory)] <- 'mandatory'
-      tl_status[which(unlist(status) == global$VALIDATED)] <- 'complete'
-      tl_status[which(unlist(status) == global$SKIPPED)] <- 'skipped'
-      #browser()
+     # browser()
+      suffix <- ""
       if (!isTRUE(dataLoaded))
-        tl_status[1:self$length] <- paste0(tl_status[1:self$length], 'Disabled')
-      else {
-        
-        tl_status <- gsub("Disabled", "", tl_status)
+        suffix <- "Disabled"
+      
+      tl_status <- rep(paste0('undone', suffix), self$length)
+      tl_status[which(self$mandatory)] <- paste0('mandatory', suffix)
+      tl_status[which(unlist(status) == global$VALIDATED)] <- paste0('completed', suffix)
+      tl_status[which(unlist(status) == global$SKIPPED)] <- paste0('skipped', suffix)
+      #browser()
+      
+      if (isTRUE(dataLoaded)) {
         firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
         if (!is.null(firstM)) {
           if (self$length > 1) {
@@ -66,7 +67,8 @@ TimelineDraw <- R6Class(
           }
         }
       }
-
+       cat(paste0(paste0(tl_status,collapse=', '), '\n'))
+       
       active  <- rep('', self$length)
       active[pos] <- 'active'
       

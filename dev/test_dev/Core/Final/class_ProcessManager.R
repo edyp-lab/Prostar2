@@ -187,7 +187,7 @@ ProcessManager <- R6Class(
     },
     
     # SERVER
-    server = function(dataIn = reactive({FALSE}), 
+    server = function(dataIn = reactive({NULL}), 
                       remoteReset = reactive({FALSE}), 
                       isSkipped = reactive({FALSE})) {
       cat(paste0(class(self)[1], '::server(dataIn, remoteReset, isSkipped) from - ', self$id, '\n'))
@@ -227,7 +227,6 @@ ProcessManager <- R6Class(
         })
 
       observeEvent(self$timeline.res$tl.reset(),{
-        print('local reset')
         self$rv$reset <- self$timeline.res$tl.reset()
         self$ActionOn_Reset()
         })
@@ -235,7 +234,6 @@ ProcessManager <- R6Class(
       
       observeEvent(remoteReset(), ignoreInit = F, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset()) from - ', self$id, '\n'))
-        print("remote resetd")
         
         # Used to transmit info of local Reset to child processes
         self$rv$reset <- remoteReset()

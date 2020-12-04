@@ -193,8 +193,11 @@ server = function(){
   
   
   observeEvent(input$changeStatus,{
-    samp <- sample(1:4, 1)
-    self$rv$status[samp] <- !self$rv$status[samp]
+    val <- input$changeStatus%%5
+    if (val == 0)
+      self$rv$status[1:4] <- FALSE
+    else
+      self$rv$status[1:val] <- TRUE
   })
   
   

@@ -57,12 +57,12 @@ TimelineManager <- R6Class(
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       tagList(
         shinyjs::useShinyjs(),
-        tags$head(tags$style("#modal1 .modal-body {padding: 10px}
-                       #modal1 .modal-content  {-webkit-border-radius: 6px !important;-moz-border-radius: 6px !important;border-radius: 6px !important;}
-                       #modal1 .modal-dialog { width: 240px; display: inline-block; text-align: left; vertical-align: top;}
-                       #modal1 .modal-header {background-color: #339FFF; border-top-left-radius: 6px; border-top-right-radius: 6px}
-                       #modal1 .modal { text-align: right; padding-right:10px; padding-top: 24px;}
-                       #moda1 .close { font-size: 16px}")),
+        # tags$head(tags$style("#modal1 .modal-body {padding: 10px}
+        #                #modal1 .modal-content  {-webkit-border-radius: 6px !important;-moz-border-radius: 6px !important;border-radius: 6px !important;}
+        #                #modal1 .modal-dialog { width: 50%; display: inline-block; text-align: left; vertical-align: top;}
+        #                #modal1 .modal-header {background-color: #339FFF; border-top-left-radius: 6px; border-top-right-radius: 6px}
+        #                #modal1 .modal { text-align: right; padding-right:10px; padding-top: 24px;}
+        #                #moda1 .close { font-size: 16px}")),
         div(id = self$ns('GlobalTL'),
             fluidRow(
               align= 'center',
@@ -189,7 +189,7 @@ TimelineManager <- R6Class(
     
     # SERVER
     server = function(status, 
-                      dataLoaded=reactive({FALSE}), 
+                      dataLoaded=reactive({NULL}), 
                       remoteReset=reactive({FALSE})) {
 
       self$timelineDraw$server(
@@ -208,6 +208,7 @@ TimelineManager <- R6Class(
           #browser()
           self$rv$status <- status()
           self$rv$dataLoaded <- dataLoaded()
+          cat(paste0(class(self)[1], '::observe() from - ', self$id, ', self$rv$dataLoaded = ', self$rv$dataLoaded, '\n'))
           self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
           self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
           

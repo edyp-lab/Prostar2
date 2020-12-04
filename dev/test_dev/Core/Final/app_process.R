@@ -76,7 +76,7 @@ server = function(dataIn ) {
   ns <- NS(self$id)
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  observeEvent(dataIn(),{
+  observeEvent(dataIn(), ignoreNULL=F, {
     cat(paste0(class(self)[1], '::observeEvent(dataIn())\n'))
     self$rv$dataIn <- dataIn()
     })
@@ -158,7 +158,6 @@ server = function(input, output){
   Pipeline$server(dataIn = reactive({rv$dataIn}))
   
   observeEvent(input$changeDataset,{
-    print(input$changeDataset)
     if (input$changeDataset%%2 != 0)
       rv$dataIn <- Exp1_R25_prot
     else

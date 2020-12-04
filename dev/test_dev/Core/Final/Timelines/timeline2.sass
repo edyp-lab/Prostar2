@@ -1,5 +1,5 @@
 $test: test;
-$colCompletedDisabled: #07910A80;
+$colCompletedDisabled: #ABDBAC;
 $colCompleted: #07910A;
 
 $colSkippedDisabled: #ECF4F880;
@@ -8,8 +8,8 @@ $colSkipped: #ECF4F8;
 $colMandatory: #D30505;
 $colMandatoryDisabled: #D3050570;
 
-$colDefault: #B3AFAB;
-$colDefaultDisabled: #B3AFAB70;
+$colUndone: #B3AFAB;
+$colUndoneDisabled: #B3AFAB70;
 
 $radius: 20px;
 $lineWidth: 3px;
@@ -34,7 +34,7 @@ $lineWidth: 3px;
   padding: 0px 40px;
   display: flex;
   justify-content: center;
-  border-top: $lineWidth solid $colDefault;
+  border-top: $lineWidth solid $colUndone;
   position: relative;
   transition: all 200ms ease-in;
   h4{
@@ -48,7 +48,7 @@ $lineWidth: 3px;
     height: $radius;
     background-color: white;
     border-radius: 55px;
-    border: $lineWidth solid $colDefault;
+    border: $lineWidth solid $colUndone;
     position: absolute;
     top: -12px;
     left: 50%;
@@ -56,38 +56,40 @@ $lineWidth: 3px;
   }
 }
 
-.li.default{
+.li.undone{
   .status{
-    border-top: $lineWidth solid $colDefault;
+    border-top: $lineWidth solid $colUndone;
     &:before{
       background-color: white;
-      border: $lineWidth solid $colDefault;
+      border: $lineWidth solid $colUndone;
       transition: all 200ms ease-in;
     }
     h4{
-      color: $colDefault;
+      color: $colUndone;
       border-bottom: 3px solid white;
     }
   }
 }
 
-.li.defaultDisabled{
+.li.undoneDisabled{
   .status{
-    border-top: $lineWidth solid $colDefault;
+    border-top: $lineWidth solid $colUndoneDisabled;
     &:before{
       background-color: white;
-      border: $lineWidth solid $colDefaultDisabled;
+      border: $lineWidth solid $colUndoneDisabled;
       transition: all 200ms ease-in;
     }
     h4{
-      color: $colDefaultDisabled;
+      color: $colUndoneDisabled;
       border-bottom: 3px solid white;
     }
   }
 }
-.li.complete{
+
+
+.li.completed{
   .status{
-    border-top: $lineWidth solid $colDefault;
+    border-top: $lineWidth solid $colCompleted;
     &:before{
       background-color: $colCompleted;
       border: $lineWidth solid $colCompleted;
@@ -100,9 +102,9 @@ $lineWidth: 3px;
   }
 }
 
-.li.completeDisabled{
+.li.completedDisabled{
   .status{
-    border-top: $lineWidth solid $colDefault;
+    border-top: $lineWidth solid $colCompletedDisabled;
     &:before{
       background-color: $colCompletedDisabled;
       border: $lineWidth solid $colCompletedDisabled;
@@ -118,7 +120,7 @@ $lineWidth: 3px;
 
 .li.skipped{
   .status{
-    border-top: $lineWidth dashed  $colDefault;
+    border-top: $lineWidth dashed  $colUndone;
     &:before{
       background-color: $colSkipped;
       border: $lineWidth dashed  $colSkipped;
@@ -133,7 +135,7 @@ $lineWidth: 3px;
 
 .li.skippedDisabled{
   .status{
-    border-top: $lineWidth dashed  $colDefault;
+    border-top: $lineWidth dashed  $colUndone;
     &:before{
       background-color: $colSkippedDisabled;
       border: $lineWidth dashed  $colSkippedDisabled;
@@ -149,7 +151,7 @@ $lineWidth: 3px;
 
 .li.mandatory{
   .status{
-    border-top: $lineWidth solid $colDefault;
+    border-top: $lineWidth solid $colUndone;
     &:before{
       background-color: white;
       border: $lineWidth solid $colMandatory;
@@ -164,7 +166,7 @@ $lineWidth: 3px;
 
 .li.mandatoryDisabled{
   .status{
-    border-top: $lineWidth solid $colDefault;
+    border-top: $lineWidth solid $colUndone;
     &:before{
       background-color: white;
       border: $lineWidth solid $colMandatoryDisabled;
@@ -177,7 +179,7 @@ $lineWidth: 3px;
   }
 }
 
-.li.default.active{
+.li.undone.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;
@@ -207,7 +209,7 @@ $lineWidth: 3px;
   }
 }
 
-.li.defaultDisabled.active{
+.li.undoneDisabled.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;
