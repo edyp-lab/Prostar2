@@ -78,10 +78,10 @@ TimelineManager <- R6Class(
               column(width=8, div( style = self$btn_style,
                                    self$timelineDraw$ui())),
               column(width=2, div(style = self$btn_style,
-                                  shinyjs::disabled(actionButton(self$ns("nextBtn"),
+                                  actionButton(self$ns("nextBtn"),
                                                ">>",
                                                class = PrevNextBtnClass,
-                                               style='padding:4px; font-size:80%'))
+                                               style='padding:4px; font-size:80%')
               )
               )
             ),
@@ -215,8 +215,8 @@ TimelineManager <- R6Class(
           self$Force_ToggleState_Screens()
           
           shinyjs::toggleState(id = "rstBtn", condition = self$rv$dataLoaded)
-          shinyjs::toggleState(id = "prevBtn", condition = self$rv$dataLoaded && self$rv$current.pos > 1)
-          shinyjs::toggleState(id = "nextBtn", condition = self$rv$dataLoaded && self$rv$current.pos < self$length)
+          shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
+          shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
           shinyjs::hide(selector = paste0(".page_", self$id))
           shinyjs::show(self$config$steps[self$rv$current.pos])
         })
