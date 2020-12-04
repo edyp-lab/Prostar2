@@ -66,7 +66,7 @@ TimelineDraw <- R6Class(
           }
         }
       }
-      
+
       active  <- rep('', self$length)
       active[pos] <- 'active'
       
@@ -100,11 +100,14 @@ TimelineDraw <- R6Class(
       cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
+        
         cat(paste0(class(self)[1], '::moduleServer()\n'))
+        
         output$load_CSS <- renderUI({
           cat(paste0(class(self)[1], '::output$load_CSS\n'))
           shinyjs::inlineCSS(sass::sass(self$GetCSSCode()))
           })
+        
         output$show_TL <- renderUI({
           cat(paste0(class(self)[1], '::output$show_TLS\n'))
           HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), dataLoaded()))

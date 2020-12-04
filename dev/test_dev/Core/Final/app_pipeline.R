@@ -65,7 +65,6 @@ server = function(input, output){
   pipeline$server(dataIn = reactive({rv$dataIn}))
   
   observeEvent(input$changeDataset,{
-    print(input$changeDataset)
     if (input$changeDataset%%2 != 0)
       rv$dataIn <- Exp1_R25_prot
     else
