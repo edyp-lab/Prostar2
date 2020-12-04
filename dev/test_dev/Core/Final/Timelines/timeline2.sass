@@ -71,9 +71,9 @@ $lineWidth: 3px;
 
 .li.defaultDisabled{
   .status{
-    border-top: $lineWidth solid $colDefaultDisabled;
+    border-top: $lineWidth solid $colDefault;
     &:before{
-      background-color: $colDefaultDisabled;
+      background-color: white;
       border: $lineWidth solid $colDefaultDisabled;
       transition: all 200ms ease-in;
     }
@@ -175,7 +175,7 @@ $lineWidth: 3px;
   }
 }
 
-.li.active{
+.li.default.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;
@@ -198,6 +198,14 @@ $lineWidth: 3px;
   }
 }
 .li.mandatory.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor;
+    }
+  }
+}
+
+.li.defaultDisabled.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;

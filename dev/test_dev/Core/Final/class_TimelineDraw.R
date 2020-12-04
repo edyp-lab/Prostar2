@@ -42,7 +42,7 @@ TimelineDraw <- R6Class(
         NULL
     },
     
-    BuildTimeline2 = function(status, pos){
+    BuildTimeline2 = function(status, pos, dataLoaded){
       cat(paste0(class(self)[1], '::BuildTimeline2())\n'))
       
       tl_status <- rep('default', self$length)
@@ -51,10 +51,20 @@ TimelineDraw <- R6Class(
       tl_status[which(unlist(status) == global$VALIDATED)] <- 'complete'
       tl_status[which(unlist(status) == global$SKIPPED)] <- 'skipped'
       #browser()
-      firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
-      if (!is.null(firstM) && self$length > 1) {
-        offset <- as.numeric(firstM != self$length)
-        tl_status[(firstM + offset):self$length] <- paste0(tl_status[(firstM + offset):self$length], 'Disabled')
+      if (!isTRUE(dataLoaded))
+        tl_status[1:self$length] <- paste0(tl_status[1:self$length], 'Disabled')
+      else {
+        
+        tl_status <- gsub("Disabled", "", tl_status)
+        firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
+        if (!is.null(firstM)) {
+          if (self$length > 1) {
+            offset <- as.numeric(firstM != self$length)
+            tl_status[(firstM + offset):self$length] <- paste0(tl_status[(firstM + offset):self$length], 'Disabled')
+          } else if (self$length == 1){
+            #tl_status[self$length] <- paste0(tl_status[self$length], 'Disabled') 
+          }
+        }
       }
       
       active  <- rep('', self$length)
@@ -86,7 +96,7 @@ TimelineDraw <- R6Class(
       #)
       },
     
-    server = function(status, position) {
+    server = function(status, position, dataLoaded) {
       cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
@@ -97,7 +107,7 @@ TimelineDraw <- R6Class(
           })
         output$show_TL <- renderUI({
           cat(paste0(class(self)[1], '::output$show_TLS\n'))
-          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position()))
+          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), dataLoaded()))
         })
         }
       )
