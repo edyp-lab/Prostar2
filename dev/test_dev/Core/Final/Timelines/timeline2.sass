@@ -11,6 +11,8 @@ $colMandatoryDisabled: #D3050570;
 $colUndone: #B3AFAB;
 $colUndoneDisabled: #B3AFAB70;
 
+$colLine: #C6C8C6;
+
 $radius: 20px;
 $lineWidth: 3px;
 .timeline{
@@ -58,7 +60,7 @@ $lineWidth: 3px;
 
 .li.undone{
   .status{
-    border-top: $lineWidth solid $colUndone;
+    border-top: $lineWidth solid $colLine;
     &:before{
       background-color: white;
       border: $lineWidth solid $colUndone;
@@ -73,7 +75,7 @@ $lineWidth: 3px;
 
 .li.undoneDisabled{
   .status{
-    border-top: $lineWidth solid $colUndoneDisabled;
+    border-top: $lineWidth solid $colLine;
     &:before{
       background-color: white;
       border: $lineWidth solid $colUndoneDisabled;
@@ -89,7 +91,7 @@ $lineWidth: 3px;
 
 .li.completed{
   .status{
-    border-top: $lineWidth solid $colCompleted;
+    border-top: $lineWidth solid $colLine;
     &:before{
       background-color: $colCompleted;
       border: $lineWidth solid $colCompleted;
@@ -104,7 +106,7 @@ $lineWidth: 3px;
 
 .li.completedDisabled{
   .status{
-    border-top: $lineWidth solid $colCompletedDisabled;
+    border-top: $lineWidth solid $colLine;
     &:before{
       background-color: $colCompletedDisabled;
       border: $lineWidth solid $colCompletedDisabled;
@@ -120,7 +122,7 @@ $lineWidth: 3px;
 
 .li.skipped{
   .status{
-    border-top: $lineWidth dashed  $colUndone;
+    border-top: $lineWidth dashed  $colLine;
     &:before{
       background-color: $colSkipped;
       border: $lineWidth dashed  $colSkipped;
@@ -135,7 +137,7 @@ $lineWidth: 3px;
 
 .li.skippedDisabled{
   .status{
-    border-top: $lineWidth dashed  $colUndone;
+    border-top: $lineWidth dashed  $colLine;
     &:before{
       background-color: $colSkippedDisabled;
       border: $lineWidth dashed  $colSkippedDisabled;
@@ -151,7 +153,7 @@ $lineWidth: 3px;
 
 .li.mandatory{
   .status{
-    border-top: $lineWidth solid $colUndone;
+    border-top: $lineWidth solid $colLine;
     &:before{
       background-color: white;
       border: $lineWidth solid $colMandatory;
@@ -166,7 +168,7 @@ $lineWidth: 3px;
 
 .li.mandatoryDisabled{
   .status{
-    border-top: $lineWidth solid $colUndone;
+    border-top: $lineWidth solid $colLine;
     &:before{
       background-color: white;
       border: $lineWidth solid $colMandatoryDisabled;
