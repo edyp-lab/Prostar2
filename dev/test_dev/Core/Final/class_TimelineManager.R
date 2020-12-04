@@ -250,15 +250,24 @@ TimelineManager <- R6Class(
         })
 
         output$SkippedInfoPanel <- renderUI({
-          req(!isTRUE(sum(self$status) == self$global$SKIPPED * self$length))
-          req(self$status[self$rv$current.pos] == self$global$SKIPPED)
+          cat(paste0(class(self)[1], '::output$SkippedInfoPanel from - ', self$id, '\n'))
+          #browser()
+          current_step_skipped <- self$rv$status[self$rv$current.pos] == global$SKIPPED
+          entire_process_skipped <- isTRUE(sum(self$rv$status) == global$SKIPPED * self$length)
+          req(current_step_skipped || entire_process_skipped)
+          
+
+          if (entire_process_skipped)
+            txt <- "this step is disabled because it has been skipped."
+          else if (current_step_skipped)
+            txt <- "this step is disabled because it has been skipped."
+            
           wellPanel(
             style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
             height = 100,
             width=300,
             align="center",
-            p(style = "color: black;",
-              'Info: you skipped this step.')
+            p(style = "color: black;", paste0('Info: ',txt))
           )
         })
         

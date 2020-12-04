@@ -99,7 +99,7 @@ $lineWidth: 3px;
     }
     h4{
       color: $colCompleted;
-      border-bottom: 3px solid white;
+      border-bottom: 3px solid $colCompleted;
     }
   }
 }
@@ -114,7 +114,7 @@ $lineWidth: 3px;
     }
     h4{
       color: $colCompletedDisabled;
-      border-bottom: 3px solid white;
+      border-bottom: 3px solid $colCompletedDisabled;
     }
   }
 }
@@ -124,7 +124,7 @@ $lineWidth: 3px;
   .status{
     border-top: $lineWidth dashed  $colLine;
     &:before{
-      background-color: $colSkipped;
+      background-color: white;
       border: $lineWidth dashed  $colSkipped;
       transition: all 200ms ease-in;
     }
@@ -139,7 +139,7 @@ $lineWidth: 3px;
   .status{
     border-top: $lineWidth dashed  $colLine;
     &:before{
-      background-color: $colSkippedDisabled;
+      background-color: white;
       border: $lineWidth dashed  $colSkippedDisabled;
       transition: all 200ms ease-in;
     }
