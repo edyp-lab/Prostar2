@@ -53,20 +53,20 @@ TimelineDraw <- R6Class(
       #browser()
       if (!isTRUE(dataLoaded))
         tl_status[1:self$length] <- paste0(tl_status[1:self$length], 'Disabled')
-     else {
-       
-       tl_status <- gsub("Disabled", "", tl_status)
-      firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
-      if (!is.null(firstM)) {
-        if (self$length > 1) {
-        offset <- as.numeric(firstM != self$length)
-        tl_status[(firstM + offset):self$length] <- paste0(tl_status[(firstM + offset):self$length], 'Disabled')
-        } else if (self$length == 1){
-          #tl_status[self$length] <- paste0(tl_status[self$length], 'Disabled') 
+      else {
+        
+        tl_status <- gsub("Disabled", "", tl_status)
+        firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
+        if (!is.null(firstM)) {
+          if (self$length > 1) {
+            offset <- as.numeric(firstM != self$length)
+            tl_status[(firstM + offset):self$length] <- paste0(tl_status[(firstM + offset):self$length], 'Disabled')
+          } else if (self$length == 1){
+            #tl_status[self$length] <- paste0(tl_status[self$length], 'Disabled') 
+          }
         }
       }
-     }
-      
+
       active  <- rep('', self$length)
       active[pos] <- 'active'
       

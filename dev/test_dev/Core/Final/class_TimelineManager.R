@@ -85,13 +85,13 @@ TimelineManager <- R6Class(
               )
               )
             ),
+
             uiOutput(self$ns('SkippedInfoPanel')),
             self$screens
-            
-            
         )
       )
     },
+
 
     EncapsulateScreens = function(screens){
       req(screens)

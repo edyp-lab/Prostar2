@@ -1,8 +1,10 @@
 $test: test;
 $colCompletedDisabled: #07910A80;
 $colCompleted: #07910A;
+
 $colSkippedDisabled: #ECF4F880;
 $colSkipped: #ECF4F8;
+
 $colMandatory: #D30505;
 $colMandatoryDisabled: #D3050570;
 
@@ -175,7 +177,7 @@ $lineWidth: 3px;
   }
 }
 
-.li.active{
+.li.default.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;
@@ -198,6 +200,14 @@ $lineWidth: 3px;
   }
 }
 .li.mandatory.active{
+  .status{
+    h4{
+      border-bottom: 3px solid currentColor;
+    }
+  }
+}
+
+.li.defaultDisabled.active{
   .status{
     h4{
       border-bottom: 3px solid currentColor;
