@@ -1,19 +1,48 @@
+/*
+https://codepen.io/xram/pen/thLsk
+https://jsfiddle.net/lmgonzalves/ew90tyoq/2/
+*/
+
 .box{
-  padding: 50px 50px ;
-}
-
-
-p {
+  background-color: lightgrey;
+  width: 75%;
+  height: 400px;
   text-align: center;
-  padding-top: 20px;
-  border: 3px solid lightblue;
-  border-radius: 50%;
-  height: 70px;
-  width: 70px;
+  position: absolute;
+  top: 20px;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 
-p:nth-child(2){
-  border-right: 3px solid blue;
-  border-left: 0;
+p{
+  margin: -3px auto;
+  padding-top: 35px;
+  border: 6px solid purple;
+  border-radius: 50%;
+  height: 100px;
+  width: 100px;
+
+}
+
+p:nth-child(odd){
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  transform: rotate(45deg);
+}
+
+
+p:nth-child(even){
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  transform: rotate(225deg);
+}
+
+p:nth-child(3) {
+  border: 6px solid purple;
+  border-radius: 50%;
+  background-color: lightblue ;
 }
