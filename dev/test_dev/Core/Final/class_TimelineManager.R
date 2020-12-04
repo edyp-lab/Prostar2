@@ -67,25 +67,21 @@ TimelineManager <- R6Class(
             fluidRow(
               align= 'center',
               column(width=2, div(style = self$btn_style,
-                                  #uiOutput(self$ns('showPrevBtn')),
                                   shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
                                                                  class = PrevNextBtnClass,
                                                                  style='padding:4px; font-size:80%')),
-                                  actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
+                                  shinyjs::disabled(actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
                                                class = redBtnClass,
-                                               style='padding:4px; font-size:80%')
-                                  #uiOutput(self$ns('showResetBtn'))
+                                               style='padding:4px; font-size:80%'))
               )
               ),
               column(width=8, div( style = self$btn_style,
                                    self$timelineDraw$ui())),
               column(width=2, div(style = self$btn_style,
-                                  actionButton(self$ns("nextBtn"),
+                                  shinyjs::disabled(actionButton(self$ns("nextBtn"),
                                                ">>",
                                                class = PrevNextBtnClass,
-                                               style='padding:4px; font-size:80%')
-                                  #uiOutput(self$ns('showNextBtn')),
-                                  #uiOutput(self$ns('showSaveExitBtn'))
+                                               style='padding:4px; font-size:80%'))
               )
               )
             ),
@@ -96,34 +92,7 @@ TimelineManager <- R6Class(
         )
       )
     },
-    
-    #--- Get the ui definitions from the config parameter and put them
-    #--- in a div to be able to enable/disable all widgets in each screen
-    # EncapsulateScreens = function(screens){
-    #   req(screens)
-    #   cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
-    #   #browser()
-    #   lapply(1:self$length, function(i) {
-    #     if (i==1) div(
-    #       class = paste0("page_", self$id),
-    #       id = self$ns(self$config$steps[i]),
-    #       shinyjs::disabled(div(id=paste0('screen_', self$id),screens[[i]]))
-    #     )
-    #     else 
-    #       shinyjs::hidden(div(
-    #         class = paste0("page_", self$id),
-    #         id = self$ns(self$config$steps[i]),
-    #         shinyjs::disabled(div(id=paste0('screen_', self$id),screens[[i]]))
-    #       )
-    #       )
-    #   }
-    #   )
-    # },
-    
-    
-    
-    
-    
+
     EncapsulateScreens = function(screens){
       req(screens)
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
@@ -244,8 +213,9 @@ TimelineManager <- R6Class(
           
           self$Force_ToggleState_Screens()
           
-          shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
-          shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
+          shinyjs::toggleState(id = "rstBtn", condition = self$rv$dataLoaded)
+          shinyjs::toggleState(id = "prevBtn", condition = self$rv$dataLoaded && self$rv$current.pos > 1)
+          shinyjs::toggleState(id = "nextBtn", condition = self$rv$dataLoaded && self$rv$current.pos < self$length)
           shinyjs::hide(selector = paste0(".page_", self$id))
           shinyjs::show(self$config$steps[self$rv$current.pos])
         })
