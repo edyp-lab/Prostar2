@@ -1,8 +1,8 @@
 library(shiny)
 library(shinyWidgets)
 library(shinyjs)
-#setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
-setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
+setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
+#setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 
 
 ui <- fluidPage(
@@ -18,15 +18,13 @@ ui <- fluidPage(
   #     class = "logo-lg", "Prostar")
   # )
   
-  # https://codepen.io/xram/pen/thLsk
-
   tags$div(class="box",
            p('Filtration'),
            p('Normalization'),
            p('Imputation'),
            p('Aggregation')
-           )
-  
+           
+  )
   
 )
 
