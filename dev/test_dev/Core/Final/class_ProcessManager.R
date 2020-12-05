@@ -11,7 +11,7 @@ ProcessManager <- R6Class(
     ns = NULL,
     timeline = NULL,
     timeline.res = NULL,
-    ll.process = NULL,
+    child.process = NULL,
     length = NULL,
     config = NULL,
     screens = NULL,
@@ -35,7 +35,7 @@ ProcessManager <- R6Class(
         current.pos = 1,
         status = NULL,
         isReseted = NULL,
-        isSkipped = FALSE)
+        isSkipped = NULL)
       
       check <- self$CheckConfig(private$.config)
       if (!check$passed)
@@ -48,9 +48,6 @@ ProcessManager <- R6Class(
       self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
       
       self$rv$status <- setNames(rep(global$UNDONE, self$length), self$config$steps)
-      
-      self$ll.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
-                                  self$config$steps)
       
       self$Additional_Initialize_Class()
       
@@ -124,6 +121,7 @@ ProcessManager <- R6Class(
     ActionOn_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
       browser()
+      
       self$ResetScreens()
       self$rv$dataIn <- NULL
       self$Initialize_Status_Process()
@@ -202,7 +200,7 @@ ProcessManager <- R6Class(
        # the ui() function from the entire process class
        self$screens <- self$GetScreensDefinition()
        #browser()
-       self$timeline.res <-self$CreateTimeline()
+       self$CreateTimeline()
        })
        
        self$timeline.res <- self$timeline$server(
@@ -223,15 +221,33 @@ ProcessManager <- R6Class(
         })
 
 
-      observeEvent(c(self$rv$isReseted, self$timeline.res$tl.reset()), ignoreInit = F, { 
-        cat(paste0(class(self)[1], '::', 'observeEvent(c(self$rv$isReseted, self$timeline.res$tl.reset()) from - ', self$id, '\n'))
+      observeEvent(self$rv$isReseted, ignoreInit = F, { 
+        cat(paste0(class(self)[1], '::', 'observeEvent(c(self$rv$isReseted) from -- ', self$id, ' --\n'))
         browser()
+        
+        if (!is.null(self$child.process))
+          lapply(self$config$steps, function(x){
+            self$child.process[[x]]$SetReseted(self$rv$isReseted)
+          })
+        
+        self$ActionOn_Reset()
+      })
+      
+      observeEvent(req(!is.null(self$timeline.res$tl.reset())), ignoreInit = F, { 
+        cat(paste0(class(self)[1], '::', 'observeEvent(self$timeline.res$tl.reset() from - ', self$id, '\n'))
+        browser()
+        
+        if (!is.null(self$child.process))
+          lapply(self$config$steps, function(x){
+            self$child.process[[x]]$SetReseted(self$timeline.res$tl.reset())
+          })
+        
         self$ActionOn_Reset()
       })
       
       
       
-      observeEvent(self$rv$isSkipped, ignoreNULL=F, { 
+      observeEvent(req(!is.null(self$rv$isSkipped)), ignoreNULL=F, { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
         #if(verbose=='skip') 
         

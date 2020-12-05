@@ -40,7 +40,7 @@ Pipeline <- R6Class(
       isReseted = FALSE,
       isSkipped = FALSE
       ),
-    ll.process = list(
+    child.process = list(
       #ProcessOriginal = NULL
       ProcessA = NULL
     ),
@@ -76,20 +76,20 @@ server = function(dataIn ) {
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
 
-  self$ll.process <- setNames(lapply(names(self$ll.process),
+  self$child.process <- setNames(lapply(names(self$child.process),
                                      function(x){
                                        assign(x, get(x))$new(x)
                                        }),
-                              names(self$ll.process)
+                              names(self$child.process)
   )
 
-  lapply(names(self$ll.process), function(x){
-    self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({Exp1_R25_prot}))
+  lapply(names(self$child.process), function(x){
+    self$tmp.return[[x]] <- self$child.process[[x]]$server(dataIn = reactive({Exp1_R25_prot}))
   })
   
 
-  observeEvent(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}), {
-    print(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$value}))
+  observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
+    print(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}))
   })
   
 
@@ -97,12 +97,12 @@ server = function(dataIn ) {
     ns <- NS(self$id)
     
     observe({ 
-      lapply(names(self$ll.process), function(x){
-      self$ll.process[[x]]$SetSkipped(self$rv$isSkipped )
+      lapply(names(self$child.process), function(x){
+      self$child.process[[x]]$SetSkipped(self$rv$isSkipped )
         })
       
-      lapply(names(self$ll.process), function(x){
-        self$ll.process[[x]]$SetReseted(self$rv$isReseted )
+      lapply(names(self$child.process), function(x){
+        self$child.process[[x]]$SetReseted(self$rv$isReseted )
       })
     })
     
@@ -111,8 +111,8 @@ server = function(dataIn ) {
   
   output$show_ui <- renderUI({
     tagList(
-     lapply(names(self$ll.process), function(x){
-        wellPanel(h3(x), self$ll.process[[x]]$ui())
+     lapply(names(self$child.process), function(x){
+        wellPanel(h3(x), self$child.process[[x]]$ui())
       })
     )
   })
@@ -127,9 +127,9 @@ server = function(dataIn ) {
   
   output$show_rv_dataOut <- renderUI({
 
-    req(lapply(names(self$ll.process), function(x){self$tmp.return[[x]]()$trigger}))
+    req(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}))
     tagList(
-      lapply(names(self$ll.process),function(x){
+      lapply(names(self$child.process),function(x){
          tags$p(paste0(x, ' -> ',paste0(names(self$tmp.return[[x]]()$value), collapse=' ')))
         
       })
