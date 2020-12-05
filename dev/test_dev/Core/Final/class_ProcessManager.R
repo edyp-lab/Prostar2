@@ -34,9 +34,8 @@ ProcessManager <- R6Class(
         temp.dataIn = NULL,
         current.pos = 1,
         status = NULL,
-        reset = NULL,
-        isSkipped = FALSE,
-        dataLoaded = FALSE)
+        isReseted = NULL,
+        isSkipped = FALSE)
       
       check <- self$CheckConfig(private$.config)
       if (!check$passed)
@@ -114,14 +113,7 @@ ProcessManager <- R6Class(
       val
     },
     
-    Set_Skipped_Status = function(){
-      cat(paste0(class(self)[1], '::Set_Skipped_Status() from - ', self$id, '\n'))
-      if(verbose=='skip') browser()
-      for (i in 1:self$length)
-        if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i)
-          self$rv$status[i] <- global$SKIPPED
-    },
-    
+   
     Initialize_Status_Process = function(){
       cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n'))
       self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
@@ -131,7 +123,7 @@ ProcessManager <- R6Class(
     
     ActionOn_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      #browser()
+      browser()
       self$ResetScreens()
       self$rv$dataIn <- NULL
       self$Initialize_Status_Process()
@@ -151,17 +143,25 @@ ProcessManager <- R6Class(
       })
     },
     
+
+    ActionOn_isSkipped = function(){},
+    
+    SetSkipped = function(skip){self$rv$isSkipped <- skip},
+    SetReseted = function(reset){self$rv$isReseted <- reset},
+    
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-      if(verbose=='skip') browser()
+      #if(verbose=='skip')
+       # browser()
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
-      self$Set_Skipped_Status()
+      self$Discover_Skipped_Status()
       #browser()
       # Either the process has been validated, one can prepare data to be sent to caller
       # Or the module has been reseted
       if (self$rv$current.pos == self$length)
         self$Send_Result_to_Caller()
     },
+    
     Additional_Server_Funcs = function(){},
     
     # UI
@@ -187,14 +187,12 @@ ProcessManager <- R6Class(
     },
     
     # SERVER
-    server = function(dataIn = reactive({NULL}), 
-                      remoteReset = reactive({FALSE}), 
-                      isSkipped = reactive({FALSE})) {
-      cat(paste0(class(self)[1], '::server(dataIn, remoteReset, isSkipped) from - ', self$id, '\n'))
-      
-      
+    server = function(dataIn = reactive({NULL})) {
+      cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n'))
       
      observe({
+       cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
+       #browser()
        isolate({
          self$Additional_Server_Funcs()
        
@@ -206,18 +204,16 @@ ProcessManager <- R6Class(
        #browser()
        self$timeline.res <-self$CreateTimeline()
        })
+       
        self$timeline.res <- self$timeline$server(
-         status = reactive({self$rv$status}),
-         dataLoaded = reactive({self$rv$dataLoaded }),
-         remoteReset = reactive({remoteReset()})
-       )
-      
+         status = reactive({self$rv$status}))
      })
       
       observeEvent(dataIn(), ignoreNULL = F, {
         cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
+        #self$rv$current.pos <- 1
+        self$timeline$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
-        self$rv$dataLoaded <- !is.null(dataIn())
         self$ActionOn_New_DataIn()
         })
       
@@ -226,26 +222,21 @@ ProcessManager <- R6Class(
         self$rv$current.pos <- self$timeline.res$current.pos()
         })
 
-      observeEvent(self$timeline.res$tl.reset(),{
-        self$rv$reset <- self$timeline.res$tl.reset()
-        self$ActionOn_Reset()
-        })
 
-      
-      observeEvent(remoteReset(), ignoreInit = F, { 
-        cat(paste0(class(self)[1], '::', 'observeEvent(remoteReset()) from - ', self$id, '\n'))
-        
-        # Used to transmit info of local Reset to child processes
-        self$rv$reset <- remoteReset()
+      observeEvent(c(self$rv$isReseted, self$timeline.res$tl.reset()), ignoreInit = F, { 
+        cat(paste0(class(self)[1], '::', 'observeEvent(c(self$rv$isReseted, self$timeline.res$tl.reset()) from - ', self$id, '\n'))
+        browser()
         self$ActionOn_Reset()
       })
       
       
       
-      observeEvent(isSkipped(), { 
+      observeEvent(self$rv$isSkipped, ignoreNULL=F, { 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
-        if(verbose=='skip') browser()
-        self$rv$isSkipped <- isSkipped()
+        #if(verbose=='skip') 
+        
+        print(self$rv$isSkipped)
+         # browser()
         self$ActionOn_isSkipped()
       })
       
@@ -253,9 +244,7 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
-        observe({
-          self$input <- input
-        })
+        observe({self$input <- input})
         
         output$show_tl <- renderUI({
           req(self$timeline)

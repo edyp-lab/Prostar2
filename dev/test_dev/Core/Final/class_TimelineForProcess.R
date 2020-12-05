@@ -9,7 +9,6 @@ TimelineForProcess = R6Class(
                       validated process and all further datasets will be removed",
     
     ui = function(){
-      #color <- if (isTRUE(self$rv$dataLoaded )) '#068FD4' else '#068FD490'
       color <- "blue"
       fluidPage(
       shinyjs::useShinyjs(),
@@ -24,8 +23,9 @@ TimelineForProcess = R6Class(
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
       # browser()
-      self$ToggleState_Screens(cond = self$rv$dataLoaded, range = 1:self$length)
-     
+      
+      self$ToggleState_Screens(cond = TRUE, range = 1:self$length)
+      
       if (self$rv$isAllSkipped){
         # Disable all steps if all steps are skipped
         self$ToggleState_Screens(cond = FALSE, range = 1:self$length)

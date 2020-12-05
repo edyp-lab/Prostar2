@@ -18,11 +18,7 @@ TimelineForPipeline = R6Class(
     Force_ToggleState_Screens = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
-      # browser()
-      cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
-      #if (verbose==T) 
-      # browser()
-      self$ToggleState_Screens(cond = self$rv$dataLoaded, range = 1:self$length)
+       #browser()
       
       if (self$rv$isAllSkipped){
         # Disable all steps if all steps are skipped

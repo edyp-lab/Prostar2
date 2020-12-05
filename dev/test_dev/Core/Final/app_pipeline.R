@@ -3,6 +3,8 @@ library(R6)
 library(tibble)
 
 options(shiny.fullstacktrace = T)
+options(shiny.reactlog=TRUE) 
+
 #verbose <-'skip'
 verbose = F
 
@@ -48,7 +50,7 @@ AddItemToDataset <- function(dataset, name){
 }
 
 ## Main app
-rv <- reactiveValues()
+
 #pipeline <- Pipeline_WF1$new('App')
 pipeline <- PipelineSimple$new('App')
 
@@ -62,14 +64,8 @@ ui = fluidPage(
 server = function(input, output){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  pipeline$server(dataIn = reactive({rv$dataIn}))
+  pipeline$server(dataIn = reactive({Exp1_R25_prot}))
   
-  observeEvent(input$changeDataset,{
-    if (input$changeDataset%%2 != 0)
-      rv$dataIn <- Exp1_R25_prot
-    else
-      rv$dataIn <- NULL
-  })
 }
 
 shiny::shinyApp(ui, server)

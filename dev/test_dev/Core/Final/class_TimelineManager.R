@@ -70,10 +70,9 @@ TimelineManager <- R6Class(
                                   shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
                                                                  class = PrevNextBtnClass,
                                                                  style='padding:4px; font-size:80%')),
-                                  shinyjs::disabled(actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
+                                  actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
                                                class = redBtnClass,
                                                style='padding:4px; font-size:80%'))
-              )
               ),
               column(width=8, div( style = self$btn_style,
                                    self$timelineDraw$ui())),
@@ -97,21 +96,19 @@ TimelineManager <- R6Class(
       req(screens)
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       lapply(1:self$length, function(i) {
-        if (i==1) shinyjs::disabled(
+        if (i==1) 
           div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
-            screens[[i]])
+            screens[[i]]
         )
         else 
           shinyjs::hidden(
-            shinyjs::disabled(
               div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
             screens[[i]])
             )
-          )
       }
       )
     },
@@ -139,7 +136,7 @@ TimelineManager <- R6Class(
     GetFirstMandatoryNotValidated = function(){
       first <- NULL
       first <- unlist((lapply(1:self$length, 
-                      function(x){self$config$mandatory[x]&&!self$rv$status[x]})))
+                      function(x){self$config$mandatory[x] && !self$rv$status[x]})))
       if (sum(first) > 0)
         min(which(first == TRUE))
       else
@@ -156,6 +153,7 @@ TimelineManager <- R6Class(
     
     SetModalTxt = function(txt){self$modal_txt <- txt},
 
+    Change_Current_Pos = function(i){ self$rv$current.pos <- 1},
     #-------------------------------------------------------
     # Return the UI for a modal dialog with data selection input. If 'failed' is
     # TRUE, then display a message that the previous value was invalid.
@@ -188,14 +186,11 @@ TimelineManager <- R6Class(
     ui = function() {},
     
     # SERVER
-    server = function(status, 
-                      dataLoaded=reactive({NULL}), 
-                      remoteReset=reactive({FALSE})) {
+    server = function(status) {
 
       self$timelineDraw$server(
         status = reactive({self$rv$status}),
-        position = reactive({self$rv$current.pos}),
-        dataLoaded = reactive({self$rv$dataLoaded})
+        position = reactive({self$rv$current.pos})
       )
 
       
@@ -207,14 +202,11 @@ TimelineManager <- R6Class(
           # if (verbose=='skip') 
           #browser()
           self$rv$status <- status()
-          self$rv$dataLoaded <- dataLoaded()
-          cat(paste0(class(self)[1], '::observe() from - ', self$id, ', self$rv$dataLoaded = ', self$rv$dataLoaded, '\n'))
           self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
           self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
           
           self$Force_ToggleState_Screens()
           
-          shinyjs::toggleState(id = "rstBtn", condition = self$rv$dataLoaded)
           shinyjs::toggleState(id = "prevBtn", condition = self$rv$current.pos > 1)
           shinyjs::toggleState(id = "nextBtn", condition = self$rv$current.pos < self$length)
           shinyjs::hide(selector = paste0(".page_", self$id))
@@ -231,7 +223,7 @@ TimelineManager <- R6Class(
         #   
         # })
         
-        observeEvent(remoteReset(), {self$rv$current.pos <- 1 })
+        observeEvent(self$rv$isReseted, {self$rv$current.pos <- 1 })
         
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))

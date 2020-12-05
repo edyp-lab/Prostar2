@@ -13,6 +13,17 @@ Pipeline = R6Class(
       self$tmp.return <- reactiveValues()
            },
     
+    Discover_Skipped_Status = function(){
+      cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
+      if(verbose=='skip') browser()
+      for (i in 1:self$length)
+        if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
+          self$rv$status[i] <- global$SKIPPED
+          self$ll.process[[i]]$SetSkipped(global$SKIPPED)
+        }
+    },
+    
+    
     Additional_Server_Funcs = function(){
       self$Launch_Module_Server()
     },
@@ -24,20 +35,13 @@ Pipeline = R6Class(
     
     CreateTimeline = function(){
       cat(paste0(class(self)[1], '::', 'CreateTimeline() from - ', self$id, '\n'))
-      self$timeline <- TimelineForPipeline$new(self$ns('TL_draw'), 
+      self$timeline <- TimelineForPipeline$new(self$ns('TL'), 
                                                config = self$config,
                                                screens = self$screens,
                                                style = style
                                                )
     },
 
-    ActionOn_isSkipped = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped() from - ', self$id, '\n'))
-      #if(verbose=='skip') 
-      value <- if (self$rv$isSkipped) global$SKIPPED else global$UNDONE
-      self$rv$status <- setNames(rep(value, self$length), self$config$steps)
-    },
-    
     GetScreensDefinition = function(){
       cat(paste0(class(self)[1], '::', 'GetScreensDefinition() from - ', self$id, '\n'))
       req(self$ll.process)
@@ -67,10 +71,9 @@ Pipeline = R6Class(
       self$PrepareData2Send()
       
       lapply(self$config$steps, function(x){
-        self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$data2send[[x]]}),
-                                                            remoteReset = reactive({self$rv$reset}),
-                                                            isSkipped = reactive({self$rv$status[x] == global$SKIPPED})
-        )
+        self$tmp.return[[x]] <- self$ll.process[[x]]$server(
+          dataIn = reactive({ self$rv$data2send[[x]] })
+          )
       })
       
       
@@ -94,7 +97,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
-     # browser()
+      #browser()
       cat("----- self$old.tmp.return ------\n")
       print(setNames(lapply(names(self$ll.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$ll.process))
@@ -137,7 +140,7 @@ Pipeline = R6Class(
         else{
           # process has been validated
           self$rv$status[processHasChanged] <- global$VALIDATED
-          self$Set_Skipped_Status()
+          self$Discover_Skipped_Status()
           self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
         }
         
@@ -191,7 +194,6 @@ Pipeline = R6Class(
         return(data)
       }
       #browser()
-      cat(paste0('toto = ', self$rv$dataLoaded, '\n'))
       lapply(names(self$ll.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
     }

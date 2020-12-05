@@ -35,11 +35,10 @@ Pipeline <- R6Class(
   public = list(
     id = NULL,
     tmp.return = reactiveValues(),
-    reset = NULL,
     rv = reactiveValues(
       dataIn = NULL,
-      reset = NULL,
-      skipped = NULL
+      isReseted = FALSE,
+      isSkipped = FALSE
       ),
     ll.process = list(
       #ProcessOriginal = NULL
@@ -55,7 +54,7 @@ ui = function() {
     #wellPanel(style="background-color: green;",
               h3('Prostar'),
               actionButton(ns('reset'), 'Simulate remote reset'),
-              actionButton(ns('skip'), 'Simulate skip entire process'),
+              actionButton(ns('skip'), 'Simulate skip process'),
               uiOutput(ns('show_ui')),
               fluidRow(
                 column(width=2,
@@ -76,11 +75,6 @@ server = function(dataIn ) {
   ns <- NS(self$id)
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  observeEvent(dataIn(), ignoreNULL=F, {
-    cat(paste0(class(self)[1], '::observeEvent(dataIn())\n'))
-    self$rv$dataIn <- dataIn()
-    })
-  
 
   self$ll.process <- setNames(lapply(names(self$ll.process),
                                      function(x){
@@ -90,9 +84,7 @@ server = function(dataIn ) {
   )
 
   lapply(names(self$ll.process), function(x){
-    self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({self$rv$dataIn}),
-                                                        remoteReset = reactive({self$rv$reset}),
-                                                        isSkipped = reactive({self$rv$skipped}))
+    self$tmp.return[[x]] <- self$ll.process[[x]]$server(dataIn = reactive({Exp1_R25_prot}))
   })
   
 
@@ -104,9 +96,18 @@ server = function(dataIn ) {
   moduleServer(self$id, function(input, output, session) {
     ns <- NS(self$id)
     
-  
-  observeEvent(input$reset,{self$rv$reset <- input$reset})
-  observeEvent(input$skip,{self$rv$skipped <- input$skip%%2==0})
+    observe({ 
+      lapply(names(self$ll.process), function(x){
+      self$ll.process[[x]]$SetSkipped(self$rv$isSkipped )
+        })
+      
+      lapply(names(self$ll.process), function(x){
+        self$ll.process[[x]]$SetReseted(self$rv$isReseted )
+      })
+    })
+    
+  observeEvent(input$reset,{self$rv$isReseted <- input$reset})
+  observeEvent(input$skip,{self$rv$isSkipped <- input$skip%%2!=0})
   
   output$show_ui <- renderUI({
     tagList(
@@ -146,10 +147,7 @@ server = function(dataIn ) {
 rv <- reactiveValues()
 Pipeline <- Pipeline$new('App')
 ui = fluidPage(
-  tagList(
-    actionButton('changeDataset','Simulate new dataset'),
-    Pipeline$ui()
-    )
+  Pipeline$ui()
 )
   
 server = function(input, output){

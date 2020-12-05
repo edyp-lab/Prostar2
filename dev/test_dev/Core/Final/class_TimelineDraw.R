@@ -42,21 +42,18 @@ TimelineDraw <- R6Class(
         NULL
     },
     
-    BuildTimeline2 = function(status, pos, dataLoaded){
-      cat(paste0(class(self)[1], '::BuildTimeline2())\n'))
+    BuildTimeline2 = function(status, pos){
+      cat(paste0(class(self)[1], '::BuildTimeline2()) from ', self$id, '\n'))
       
-     # browser()
-      suffix <- ""
-      if (!isTRUE(dataLoaded))
-        suffix <- "Disabled"
-      
-      tl_status <- rep(paste0('undone', suffix), self$length)
-      tl_status[which(self$mandatory)] <- paste0('mandatory', suffix)
-      tl_status[which(unlist(status) == global$VALIDATED)] <- paste0('completed', suffix)
-      tl_status[which(unlist(status) == global$SKIPPED)] <- paste0('skipped', suffix)
       #browser()
       
-      if (isTRUE(dataLoaded)) {
+      tl_status <- rep('undone', self$length)
+      tl_status[which(self$mandatory)] <- 'mandatory'
+      tl_status[which(unlist(status) == global$VALIDATED)] <- 'completed'
+      tl_status[which(unlist(status) == global$SKIPPED)] <- 'skipped'
+      #browser()
+      
+
         firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
         if (!is.null(firstM)) {
           if (self$length > 1) {
@@ -66,7 +63,6 @@ TimelineDraw <- R6Class(
             #tl_status[self$length] <- paste0(tl_status[self$length], 'Disabled') 
           }
         }
-      }
        cat(paste0(paste0(tl_status,collapse=', '), '\n'))
        
       active  <- rep('', self$length)
@@ -98,7 +94,7 @@ TimelineDraw <- R6Class(
       #)
       },
     
-    server = function(status, position, dataLoaded) {
+    server = function(status, position) {
       cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
@@ -112,7 +108,7 @@ TimelineDraw <- R6Class(
         
         output$show_TL <- renderUI({
           cat(paste0(class(self)[1], '::output$show_TLS\n'))
-          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), dataLoaded()))
+          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position()))
         })
         }
       )
