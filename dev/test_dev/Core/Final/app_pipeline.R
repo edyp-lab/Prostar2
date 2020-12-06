@@ -64,7 +64,7 @@ ui = fluidPage(
 server = function(input, output){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-  pipeline$server(dataIn = reactive({Exp1_R25_prot}))
+  pipeline$server(dataIn = reactive({Exp1_R25_prot[,,2]}))
   
 }
 

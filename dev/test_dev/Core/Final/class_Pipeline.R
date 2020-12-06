@@ -82,9 +82,9 @@ Pipeline = R6Class(
       
       #browser()                                                                      
       # Catch the returned values of the process                                                           
-      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
+      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}), {
         cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
-        #browser()
+        browser()
         self$ActionOn_Data_Trigger()
       })
     },
@@ -100,7 +100,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
-      #browser()
+      browser()
       cat("----- self$old.tmp.return ------\n")
       print(setNames(lapply(names(self$child.process), function(x){self$old.tmp.return[[x]]}),
                      names(self$child.process))
@@ -110,23 +110,26 @@ Pipeline = R6Class(
                      names(self$child.process))
       )
       
-      processHasChanged <- unlist(lapply(names(self$child.process), function(x){
-        if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]])) {x}
-      }
-      ))
+      # processHasChanged <- unlist(lapply(names(self$child.process), function(x){
+      #   if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]])) {x}
+      # }
+      # ))
       
-      if(is.null(processHasChanged)){
-        #No process have been modified
-        self$rv$dataIn <- NULL
-      } else if ( 
-        sum(unlist(lapply(names(self$child.process), function(x){is.null(self$tmp.return[[x]]()$value)}))) == length(self$child.process)){
-        # All the child processes have been reseted
-        self$rv$dataIn <- self$rv$temp.dataIn
-        self$rv$dataIn <- NULL
-        
-      } else{
+      ind <- which(!is.null(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value})))
+      processHasChanged <- names(self$child.process)[ind]
+      
+      # if(is.null(processHasChanged)){
+      #   #No process have been modified
+      #   self$rv$dataIn <- NULL
+      # } else if ( 
+      #   sum(unlist(lapply(names(self$child.process), function(x){is.null(self$tmp.return[[x]]()$value)}))) == length(self$child.process)){
+      #   # All the child processes have been reseted
+      #   self$rv$dataIn <- self$rv$temp.dataIn
+      #   self$rv$dataIn <- NULL
+      #   
+      # } else{
         # Update the status of process
-        if (length(processHasChanged)==1)
+      #  if (length(processHasChanged)==1)
           if (is.null(self$tmp.return[[processHasChanged]]()$value)){
             # process has been reseted
             self$rv$status[processHasChanged] <- global$UNDONE
@@ -147,7 +150,7 @@ Pipeline = R6Class(
           self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
         }
         
-      }
+      #}
       
       #update self$old.tmp.return
       self$old.tmp.return <- setNames(lapply(names(self$child.process), 

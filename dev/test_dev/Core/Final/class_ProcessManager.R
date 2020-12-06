@@ -93,6 +93,7 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n'))
       self$dataOut$value <- self$rv$dataIn
       self$dataOut$trigger <- self$Wake()
+      self$dataOut$name <- self$name
     },
     
     InitializeDataIn = function(){ 
