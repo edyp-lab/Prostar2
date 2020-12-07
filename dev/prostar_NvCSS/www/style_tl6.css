@@ -36,18 +36,18 @@ https://jsfiddle.net/lmgonzalves/ew90tyoq/2/
   
 }
 
-.sub_box:nth-child(odd) p{
+.sub_box:nth-child(odd) p {
   transform: rotate(-45deg);
 }
 
 
-.sub_box:nth-child(even){
+.sub_box:nth-child(even) {
   border-bottom-color: transparent;
   border-left-color: transparent;
   transform: rotate(225deg);
 }
 
-.sub_box:nth-child(even) p{
+.sub_box:nth-child(even) p {
   transform: rotate(-225deg);
 }
   
