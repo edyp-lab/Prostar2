@@ -25,8 +25,7 @@ ProcessManager <- R6Class(
       self$ns <- NS(id)
       
       self$dataOut = reactiveValues(
-        value = NULL,
-        trigger = NULL
+        trigger = 0
       )
       
       self$rv = reactiveValues(
@@ -84,16 +83,19 @@ ProcessManager <- R6Class(
     
     #GetScreensDefinition = function(){},
     
-    Wake = function(){ 
-      cat(paste0(class(self)[1], '::Wake() from - ', self$id, '\n'))
-      runif(1,0,1)
+    Timestamp = function(){ 
+      cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n'))
+      as.numeric(Sys.time())
     },
     
     Send_Result_to_Caller = function(){
       cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n'))
-      self$dataOut$value <- self$rv$dataIn
-      self$dataOut$trigger <- self$Wake()
-      self$dataOut$name <- self$name
+      #self$dataOut$value <- self$rv$dataIn
+      self$dataOut$trigger <- self$Timestamp()
+      #self$dataOut$name <- self$name
+    },
+    Get_Result = function(){
+      self$rv$dataIn
     },
     
     InitializeDataIn = function(){ 
@@ -118,6 +120,7 @@ ProcessManager <- R6Class(
     },
     
     ActionOn_New_DataIn = function(){},
+    ActionOn_NewPosition = function(){},
     
     ActionOn_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
@@ -127,7 +130,7 @@ ProcessManager <- R6Class(
       self$rv$dataIn <- NULL
       self$Initialize_Status_Process()
       self$Send_Result_to_Caller()
-      self$InitializeDataIn()
+      #self$InitializeDataIn()
     },
     
     # This function cannot be implemented in the timeline module because 
@@ -219,6 +222,7 @@ ProcessManager <- R6Class(
       observeEvent(self$timeline.res$current.pos(), {
        # browser()
         self$rv$current.pos <- self$timeline.res$current.pos()
+        self$ActionOn_NewPosition()
         })
 
 
@@ -280,11 +284,10 @@ ProcessManager <- R6Class(
         
         output$show_rv_dataOut <- renderUI({
           cat(paste0(class(self)[1], '::output$show_rv_dataOut from - ', self$id, '\n'))
-          req(self$dataOut$trigger)
-          self$dataOut$value
+          self$dataOut$trigger
           tagList(
             #h4('show self$dataOut$value'),
-            lapply(names(self$dataOut$value), function(x){tags$p(x)})
+            lapply(names(self$rv$dataIn), function(x){tags$p(x)})
           )
         })
         
