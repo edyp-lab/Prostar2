@@ -21,7 +21,7 @@
 }
 
 
-p {
+.sub_box {
   border-bottom: 2px dashed white;
   padding-bottom: 20px;
   margin-bottom: 40px;
@@ -30,7 +30,7 @@ p {
   font-size: 2em;
 }
 
-p:last-of-type { 
+.sub_box:last-of-type { 
   padding-bottom: 0;
   margin-bottom: 0; 
   border: none;      
@@ -39,7 +39,7 @@ p:last-of-type {
 
 
 
-p:after {
+.sub_box:after {
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px orange;

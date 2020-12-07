@@ -12,7 +12,7 @@
 }
   
 
-p {
+.sub_box {
   text-align: center;
   background-color:lightblue;
   width: 100px;
@@ -21,12 +21,12 @@ p {
 
 
 
-p:nth-child(odd) {
+.sub_box:nth-child(odd) {
   border: blue 1px dashed;
   transform:rotate(45deg);
 }
 
-p:nth-child(even) {
+.sub_box:nth-child(even) {
   border: purple 1px dashed;
   transform:rotate(-45deg);
 }
@@ -34,7 +34,7 @@ p:nth-child(even) {
 
 
 
-p:nth-child(odd):after {
+.sub_box:nth-child(odd):after {
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px orange;
@@ -48,7 +48,7 @@ p:nth-child(odd):after {
 }
 
 
-p:nth-child(even):after {
+.sub_box:nth-child(even):after {
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px orange;

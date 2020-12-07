@@ -18,7 +18,7 @@ https://jsfiddle.net/lmgonzalves/ew90tyoq/2/
 }
 
 
-p{
+.sub_box{
   margin: -3px auto;
   padding-top: 35px;
   border: 6px solid purple;
@@ -28,21 +28,36 @@ p{
 
 }
 
-p:nth-child(odd){
+
+.sub_box:nth-child(odd){
   border-bottom-color: transparent;
   border-left-color: transparent;
   transform: rotate(45deg);
+  
+}
+
+.sub_box:nth-child(odd) p{
+  transform: rotate(-45deg);
 }
 
 
-p:nth-child(even){
+.sub_box:nth-child(even){
   border-bottom-color: transparent;
   border-left-color: transparent;
   transform: rotate(225deg);
 }
 
-p:nth-child(3) {
+.sub_box:nth-child(even) p{
+  transform: rotate(-225deg);
+}
+  
+
+
+.sub_box:nth-child(3) {
   border: 6px solid purple;
   border-radius: 50%;
   background-color: lightblue ;
 }
+
+
+

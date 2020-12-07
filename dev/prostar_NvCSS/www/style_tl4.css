@@ -1,22 +1,24 @@
 
 
-.box {
+.box { /*cadre le plus externe*/
   border : 1px dashed black;
   width: 25%;
   height: 50%;
   position: absolute;
   top: 20px;
-  
+  left: 20px;
+  /*
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  */
 }
 
 
-.box:before {
+.box:before { /*cadre des ronds de gauche*/
   position: absolute;
-  left: 16%;
+  left: 51px;
   content: "";
   height: 90%;
   width: 23px;
@@ -25,17 +27,18 @@
 }
 
 
-p {
-  margin: auto;
+.sub_box { /*cadre du texte de droite*/
+  margin: auto ;
   text-align: center;
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
   width: 100px;
+  height: 20%;
   position: relative;
   padding: 5px 0 0 5px;
 }
 
-p:after {
+.sub_box:after { /*ronds*/
   position: absolute;
   display: block;
   top: 0;

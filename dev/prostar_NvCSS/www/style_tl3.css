@@ -13,7 +13,7 @@
 }
 
 
-p {
+.sub_box {
   font-size: 2em;
   border-top: 3px solid;
   border-image: linear-gradient(to right, #743ad5 0%, #d53a9d 100%);
@@ -26,23 +26,23 @@ p {
 }
 
 
-p:nth-child(odd) {
+.sub_box:nth-child(odd) {
   border-right: 3px solid;
   left: 100%; 
 }
 
 
-p:nth-child(even) {
+.sub_box:nth-child(even) {
   border-left: 3px solid;
   right: 100%; 
 }
 
-p:first-child {
+.sub_box:first-child {
   border-top: 0;
   border-top-right-radius:0;
   border-top-left-radius:0;
 }
-p:last-child {
+.sub_box:last-child {
   border-bottom-right-radius:0;
   border-bottom-left-radius:0;
 }

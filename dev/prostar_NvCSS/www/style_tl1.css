@@ -41,7 +41,7 @@
 }
 
 
-p {
+.sub_box {
   text-align: center;
   border-top: 2px solid;
   border-bottom: 2px solid;
@@ -50,7 +50,7 @@ p {
 }
 
 
-p:nth-child(odd) {
+.sub_box:nth-child(odd) {
   border-right: 2px orange solid;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
@@ -59,7 +59,7 @@ p:nth-child(odd) {
 }
 
 
-p:nth-child(even) {
+.sub_box:nth-child(even) {
   border-left: 2px orange solid;
   border-top-left-radius: 30px;
   border-bottom-left-radius: 30px;
@@ -69,13 +69,13 @@ p:nth-child(even) {
 
 
 
-p:first-child {
+.sub_box:first-child {
   border-top-right-radius:0;
   border-top-left-radius:0;
   border-top: 0;
 }
 
-p:last-child {
+.sub_box:last-child {
   border-bottom-right-radius:0;
   border-bottom-left-radius:0;
   border-bottom: 0;
