@@ -89,7 +89,7 @@ ProcessA = R6Class(
         name <- 'Step3'
 
       observeEvent(self$input$btn_validate_Step3, {
-        # rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$process.name)
+        self$rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)
         self$ValidateCurrentPos()
       })
       

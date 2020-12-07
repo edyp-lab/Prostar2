@@ -5,7 +5,6 @@ Pipeline = R6Class(
   
   public = list(
     tmp.return = "<reactiveValues>",
-    old.tmp.return = NULL,
     
     Additional_Initialize_Class = function(){
       cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
@@ -82,7 +81,7 @@ Pipeline = R6Class(
       
       #browser()                                                                      
       # Catch the returned values of the process                                                           
-      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}), {
+      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
         cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
         browser()
         self$ActionOn_Data_Trigger()
@@ -100,23 +99,27 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
+      # browser()
+      # cat("----- self$old.tmp.return ------\n")
+      # print(setNames(lapply(names(self$child.process), function(x){self$old.tmp.return[[x]]}),
+      #                names(self$child.process))
+      # )
+      # cat("----- self$tmp.return ------\n")
+      # print(setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}),
+      #                names(self$child.process))
+      # )
       browser()
-      cat("----- self$old.tmp.return ------\n")
-      print(setNames(lapply(names(self$child.process), function(x){self$old.tmp.return[[x]]}),
-                     names(self$child.process))
-      )
-      cat("----- self$tmp.return ------\n")
-      print(setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}),
-                     names(self$child.process))
-      )
+      processHasChanged <- newValue <- NULL
       
-      # processHasChanged <- unlist(lapply(names(self$child.process), function(x){
-      #   if (length(self$tmp.return[[x]]()$value) != length(self$old.tmp.return[[x]])) {x}
-      # }
-      # ))
+      toto <- unlist(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}))
+      if (sum(toto) != 0){
+        processHasChanged <- names(self$child.process)[which(max(toto)==toto)]
+        newValue <- self$child.process[[processHasChanged]]$Get_Result()
+      }
       
-      ind <- which(!is.null(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value})))
-      processHasChanged <- names(self$child.process)[ind]
+      
+      #ind <- which(!is.null(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value})))
+      #processHasChanged <- names(self$child.process)[ind]
       
       # if(is.null(processHasChanged)){
       #   #No process have been modified
@@ -130,7 +133,7 @@ Pipeline = R6Class(
       # } else{
         # Update the status of process
       #  if (length(processHasChanged)==1)
-          if (is.null(self$tmp.return[[processHasChanged]]()$value)){
+          if (is.null(newValue)){
             # process has been reseted
             self$rv$status[processHasChanged] <- global$UNDONE
             # browser()
@@ -147,16 +150,16 @@ Pipeline = R6Class(
           # process has been validated
           self$rv$status[processHasChanged] <- global$VALIDATED
           self$Discover_Skipped_Status()
-          self$rv$dataIn <- self$tmp.return[[processHasChanged]]()$value
+          self$rv$dataIn <- newValue
         }
         
       #}
       
       #update self$old.tmp.return
-      self$old.tmp.return <- setNames(lapply(names(self$child.process), 
-                                             function(x){self$tmp.return[[x]]()$value}),
-                                      names(self$child.process))
-      
+      # self$old.tmp.return <- setNames(lapply(names(self$child.process), 
+      #                                        function(x){self$tmp.return[[x]]()$value}),
+      #                                 names(self$child.process))
+      # 
       self$Send_Result_to_Caller()
       
     },
@@ -202,6 +205,10 @@ Pipeline = R6Class(
       #browser()
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
+      
+      browser()
+      lapply(names(self$child.process), function(x){
+        self$rv$data2send[[x]]})
     }
   )
 )

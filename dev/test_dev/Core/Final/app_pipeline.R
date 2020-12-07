@@ -56,7 +56,6 @@ pipeline <- PipelineSimple$new('App')
 
 ui = fluidPage(
   tagList(
-    actionButton('changeDataset','Simulate new dataset'),
     pipeline$ui()
   )
 )
