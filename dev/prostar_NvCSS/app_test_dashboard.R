@@ -48,7 +48,8 @@ source(file.path("../../R/Plots", "mod_plots_pca.R"), local = TRUE)$value
 
 ui <- dashboardPagePlus(
   skin="blue",
-  
+  #orangeProstar <- "#E97D5E"
+  #https://stackoverflow.com/questions/31711307/how-to-change-color-in-shiny-dashboard
   
   dashboardHeaderPlus(#title="Prostar",
     title = tagList(
@@ -59,7 +60,9 @@ ui <- dashboardPagePlus(
     ),
     
     tags$li(class="dropdown",
-            checkboxInput(inputId = 'data', label = 'Data Loaded?', value = FALSE)
+            checkboxInput(inputId = 'data', label = 'Data Loaded?', value = FALSE),
+            actionButton("hide","Hide toggle"),
+            actionButton("show","Show toggle")
     ),
     tags$li(class="dropdown",
             a(href="http://www.prostar-proteomics.org/",
@@ -70,7 +73,9 @@ ui <- dashboardPagePlus(
     tags$li(class="dropdown",
             a(href="https://github.com/samWieczorek/Prostar2",
               icon("github"),
-              title="GitHub"))),
+              title="GitHub"))
+  ),
+  
   
   dashboardSidebar(
     sidebarMenu(
@@ -100,6 +105,8 @@ ui <- dashboardPagePlus(
       tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
     ),
     
+    useShinyjs(),
+    
     uiOutput('contenu_dashboardBody')
     
   )
@@ -109,6 +116,22 @@ ui <- dashboardPagePlus(
 
 
 server <- function(input, output,session) {
+  
+  # show/hide "show/hide sidebar" button
+  # observeEvent(input$hide,{
+  #   shinyjs::runjs("document.getElementsByClassName('sidebar-toggle')[0].style.visibility = 'hidden';")
+  # })
+  # observeEvent(input$show,{
+  #   shinyjs::runjs("document.getElementsByClassName('sidebar-toggle')[0].style.visibility = 'visible';")
+  # })
+  #
+  # hide/show sidebar
+  # observeEvent(input$show, {
+  #   shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
+  # })
+  # observeEvent(input$hide, {
+  #   shinyjs::addClass(selector = "body", class = "sidebar-collapse")
+  # })
   
   mod_homepage_server('home')
   

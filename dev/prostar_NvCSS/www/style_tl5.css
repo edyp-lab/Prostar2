@@ -14,15 +14,14 @@
 
 .sub_box {
   text-align: center;
-  background-color:lightblue;
   width: 100px;
-  margin: 35px auto;
+  margin: 30px auto;
 }
 
 
 
 .sub_box:nth-child(odd) {
-  border: blue 1px dashed;
+  border: green 1px dashed;
   transform:rotate(45deg);
 }
 
@@ -38,13 +37,14 @@
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px orange;
-  left: -25px;
   background: white;    
   border-radius: 50%;  
   height: 16px;
   width: 16px;
   content: "";
-  bottom: 3px;
+  top: 8px;
+  left: -25px;
+  
 }
 
 
@@ -52,11 +52,15 @@
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px orange;
-  left: 105px;
   background: white;    
   border-radius: 50%;  
   height: 16px;
   width: 16px;
   content: "";
-  bottom: 3px;
+  top: 8px;
+  left: 108px;
+}
+
+p:hover{
+  
 }

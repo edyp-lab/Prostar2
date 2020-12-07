@@ -49,12 +49,13 @@
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
   width: 40%;
+  min-width: 100px;
   height: 40px;
   position: relative;
 }
 
 
-p {
+p { /*centered horizontaly and vertically*/
   margin: 0;
   position: absolute;
   top: 50%;
