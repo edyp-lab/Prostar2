@@ -13,7 +13,7 @@
   
 
 .sub_box {
-  text-align: center;
+  height: 30px;
   width: 100px;
   margin: 30px auto;
 }
@@ -21,7 +21,7 @@
 
 
 .sub_box:nth-child(odd) {
-  border: green 1px dashed;
+  border: purple 1px dashed;
   transform:rotate(45deg);
 }
 
@@ -37,6 +37,54 @@
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px orange;
+  background: lightgrey;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 8px;
+  left: -25px;
+}
+
+
+.sub_box:nth-child(even):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 4px orange;
+  background: lightgrey;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 8px;
+  left: 108px;
+}
+
+
+p{
+  text-align: center;
+  margin: auto;
+}
+
+
+.sub_box:hover:nth-child(even):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 6px orange;
+  background: white;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 8px;
+  left: 108px;
+}
+
+
+.sub_box:hover:nth-child(odd):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 6px orange;
   background: white;    
   border-radius: 50%;  
   height: 16px;
@@ -48,19 +96,8 @@
 }
 
 
-.sub_box:nth-child(even):after {
-  position: absolute;
-  display: block;
-  box-shadow: 0 0 0 4px orange;
-  background: white;    
-  border-radius: 50%;  
-  height: 16px;
-  width: 16px;
-  content: "";
-  top: 8px;
-  left: 108px;
-}
-
-p:hover{
-  
+.sub_box:hover{
+  background-color: lightblue;
+  border: purple 2px solid;
+  font-weight: bold;
 }

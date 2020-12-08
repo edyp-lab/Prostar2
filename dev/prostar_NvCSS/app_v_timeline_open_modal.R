@@ -8,15 +8,9 @@ setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
 ui <- fluidPage(
   
   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl5.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl1.css")
   ),
   
-  # title = tagList(
-  #   tags$span(
-  #     class = "logo-mini", style =  "font-size : 14px","Prostar"),
-  #   tags$span(
-  #     class = "logo-lg", "Prostar")
-  # )
   
   tags$div(class="box",
            tags$div(class="sub_box",
