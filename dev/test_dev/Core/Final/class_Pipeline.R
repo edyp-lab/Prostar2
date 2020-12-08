@@ -83,7 +83,7 @@ Pipeline = R6Class(
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
         cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
-        browser()
+        #browser()
         self$ActionOn_Data_Trigger()
       })
     },
@@ -108,7 +108,7 @@ Pipeline = R6Class(
       # print(setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}),
       #                names(self$child.process))
       # )
-      browser()
+      #browser()
       processHasChanged <- newValue <- NULL
       
       toto <- unlist(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}))
@@ -206,7 +206,7 @@ Pipeline = R6Class(
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
       
-      browser()
+      #browser()
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]]})
     }

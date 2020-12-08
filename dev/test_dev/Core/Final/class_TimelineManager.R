@@ -35,7 +35,7 @@ TimelineManager <- R6Class(
       self$config <- config
       self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
       self$length <- length(self$config$mandatory)
-      self$screens <- setNames(self$EncapsulateScreens(screens), self$config$steps)
+      self$screens <- screens
       
       self$default_pos$VALIDATED <- self$length
       self$default_pos$SKIPPED <- 1
@@ -86,28 +86,29 @@ TimelineManager <- R6Class(
             ),
 
             uiOutput(self$ns('SkippedInfoPanel')),
-            self$screens
+            self$EncapsulateScreens()
+            
         )
       )
     },
 
 
-    EncapsulateScreens = function(screens){
-      req(screens)
+    EncapsulateScreens = function(){
+      req(self$screens)
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       lapply(1:self$length, function(i) {
-        if (i==1) 
+        if (i==1)
           div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
-            screens[[i]]
+            self$screens[[i]]
         )
-        else 
+        else
           shinyjs::hidden(
               div(
             class = paste0("page_", self$id),
             id = self$ns(self$config$steps[i]),
-            screens[[i]])
+            self$screens[[i]])
             )
       }
       )

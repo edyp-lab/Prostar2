@@ -124,7 +124,7 @@ ProcessManager <- R6Class(
     
     ActionOn_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      browser()
+      #browser()
       
       self$ResetScreens()
       self$rv$dataIn <- NULL
@@ -228,7 +228,7 @@ ProcessManager <- R6Class(
 
       observeEvent(self$rv$isReseted, ignoreInit = F, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(c(self$rv$isReseted) from -- ', self$id, ' --\n'))
-        browser()
+        #browser()
         
         if (!is.null(self$child.process))
           lapply(self$config$steps, function(x){
@@ -240,7 +240,7 @@ ProcessManager <- R6Class(
       
       observeEvent(req(!is.null(self$timeline.res$tl.reset())), ignoreInit = F, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(self$timeline.res$tl.reset() from - ', self$id, '\n'))
-        browser()
+        #browser()
         
         if (!is.null(self$child.process))
           lapply(self$config$steps, function(x){
