@@ -68,6 +68,7 @@ ProcessManager <- R6Class(
         temp.dataIn = NULL,
         current.pos = 1,
         status = setNames(rep(global$UNDONE, self$length), self$config$steps),
+        tl.tags.disabled = setNames(rep(TRUE, self$length), self$config$steps),
         reset_OK = NULL,
         isAllSkipped = FALSE,
         isAllUndone = TRUE,
@@ -85,7 +86,7 @@ ProcessManager <- R6Class(
                                             mandatory = self$config$mandatory)
       self$timeline$server(status = reactive({self$rv$status}),
                            position = reactive({self$rv$current.pos}),
-                           disabled = reactive({self$rv$tagDisabled})
+                           disabled = reactive({self$rv$tl.tags.disabled})
                            )
 
     },
@@ -116,6 +117,7 @@ ProcessManager <- R6Class(
       list(passed=passed,
            msg = msg)
     },
+    
     Additional_Initialize_Class = function(){},
     
     
@@ -329,9 +331,11 @@ ProcessManager <- R6Class(
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
+          self$rv$tl.tags.disabled <- rep(TRUE, self$length)
         } else {
           self$ToggleState_Screens(TRUE, 1)
           self$ToggleState_ResetBtn(TRUE)
+          self$rv$tl.tags.disabled <- c(F, rep(TRUE, self$length-1))
         }
         
       })
