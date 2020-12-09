@@ -72,6 +72,12 @@ Pipeline = R6Class(
       #browser()
       self$PrepareData2Send()
       
+      
+      lapply(self$config$steps, function(x){
+        self$tmp.return[[x]] <- self$child.process[[x]]$ToggleState_Screens(F, 1, prefix=paste0(self$id, '-TL-'))
+      })
+      
+      
       lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$child.process[[x]]$server(
           dataIn = reactive({ self$rv$data2send[[x]] })

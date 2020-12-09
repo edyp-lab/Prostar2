@@ -13,10 +13,6 @@ source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'class_global.R'), local=TRUE)$value
 
-# ------------- Class TimelineDataManager  --------------------------------------
-source(file.path('.', 'class_TimelineManager.R'), local=TRUE)$value
-source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
-
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
@@ -55,6 +51,7 @@ ui = function() {
               h3('Prostar'),
               actionButton(ns('reset'), 'Simulate remote reset'),
               actionButton(ns('skip'), 'Simulate skip process'),
+              
               uiOutput(ns('show_ui')),
               fluidRow(
                 column(width=2,
@@ -84,10 +81,10 @@ server = function(dataIn ) {
   )
 
   lapply(names(self$child.process), function(x){
-    self$tmp.return[[x]] <- self$child.process[[x]]$server(dataIn = reactive({Exp1_R25_prot}))
+    self$tmp.return[[x]] <- self$child.process[[x]]$server(dataIn = reactive({dataIn()}))
   })
   
-
+#browser()
   observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
     print(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}))
   })
@@ -147,7 +144,10 @@ server = function(dataIn ) {
 rv <- reactiveValues()
 Pipeline <- Pipeline$new('App')
 ui = fluidPage(
-  Pipeline$ui()
+  tagList(
+    actionButton('send', 'Send dataset'),
+    Pipeline$ui()
+  )
 )
   
 server = function(input, output){
@@ -155,8 +155,8 @@ server = function(input, output){
   
   Pipeline$server(dataIn = reactive({rv$dataIn}))
   
-  observeEvent(input$changeDataset,{
-    if (input$changeDataset%%2 != 0)
+  observeEvent(input$send,{
+    if (input$send%%2 != 0)
       rv$dataIn <- Exp1_R25_prot
     else
       rv$dataIn <- NULL
