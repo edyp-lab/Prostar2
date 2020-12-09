@@ -42,7 +42,7 @@ TimelineDraw <- R6Class(
         NULL
     },
     
-    BuildTimeline2 = function(status, pos){
+    BuildTimeline2 = function(status, pos, disabled){
       cat(paste0(class(self)[1], '::BuildTimeline2()) from ', self$id, '\n'))
       
       #browser()
@@ -53,16 +53,10 @@ TimelineDraw <- R6Class(
       tl_status[which(unlist(status) == global$SKIPPED)] <- 'skipped'
       #browser()
       
+      for (i in 1:length(disabled))
+        if (disabled[i])
+          tl_status[i] <- paste0(tl_status[i], 'Disabled')
 
-        firstM <- self$GetFirstMandatoryNotValidated(status, self$mandatory)
-        if (!is.null(firstM)) {
-          if (self$length > 1) {
-            offset <- as.numeric(firstM != self$length)
-            tl_status[(firstM + offset):self$length] <- paste0(tl_status[(firstM + offset):self$length], 'Disabled')
-          } else if (self$length == 1){
-            #tl_status[self$length] <- paste0(tl_status[self$length], 'Disabled') 
-          }
-        }
        cat(paste0(paste0(tl_status,collapse=', '), '\n'))
        
       active  <- rep('', self$length)
@@ -94,7 +88,7 @@ TimelineDraw <- R6Class(
       #)
       },
     
-    server = function(status, position) {
+    server = function(status, position, disabled) {
       cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
@@ -108,7 +102,7 @@ TimelineDraw <- R6Class(
         
         output$show_TL <- renderUI({
           cat(paste0(class(self)[1], '::output$show_TLS\n'))
-          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position()))
+          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), disabled()))
         })
         }
       )

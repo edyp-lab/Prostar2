@@ -84,7 +84,9 @@ ProcessManager <- R6Class(
       self$timeline <- TimelineDraw$new(self$ns('TL_draw'), 
                                             mandatory = self$config$mandatory)
       self$timeline$server(status = reactive({self$rv$status}),
-                           position = reactive({self$rv$current.pos}))
+                           position = reactive({self$rv$current.pos}),
+                           disabled = reactive({self$rv$tagDisabled})
+                           )
 
     },
     
