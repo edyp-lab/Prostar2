@@ -15,8 +15,8 @@ Pipeline = R6Class(
       self$tmp.return <- reactiveValues()
            },
     
-    Discover_Skipped_Status = function(){
-      cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
+    Discover_Skipped_Steps = function(){
+      cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n'))
       if(verbose=='skip') browser()
       for (i in 1:self$length)
         if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
@@ -155,7 +155,7 @@ Pipeline = R6Class(
         else{
           # process has been validated
           self$rv$status[processHasChanged] <- global$VALIDATED
-          self$Discover_Skipped_Status()
+          self$Discover_Skipped_Steps()
           self$rv$dataIn <- newValue
         }
         

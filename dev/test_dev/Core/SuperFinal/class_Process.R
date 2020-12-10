@@ -41,6 +41,18 @@ Process = R6Class(
       )
     },
     
+    ValidateCurrentPos = function(){
+      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+      #if(verbose=='skip')
+      # browser()
+      self$rv$status[self$rv$current.pos] <- global$VALIDATED
+      
+      # Either the process has been validated, one can prepare data to be sent to caller
+      # Or the module has been reseted
+      if (self$rv$current.pos == self$length)
+        self$Send_Result_to_Caller()
+    },
+    
     Force_ToggleState_Screens = function(){
       cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
       #if (verbose==T) 
@@ -92,7 +104,7 @@ Process = R6Class(
     },
     
     
-    Discover_Skipped_Status = function(){
+    Discover_Skipped_Steps = function(){
       cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
       if(verbose=='skip') browser()
       for (i in 1:self$length)

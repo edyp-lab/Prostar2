@@ -42,7 +42,7 @@ TimelineDraw <- R6Class(
         NULL
     },
     
-    BuildTimeline2 = function(status, pos, disabled){
+    BuildTimeline2 = function(status, pos, enabled){
       cat(paste0(class(self)[1], '::BuildTimeline2()) from ', self$id, '\n'))
       
       #browser()
@@ -53,8 +53,8 @@ TimelineDraw <- R6Class(
       tl_status[which(unlist(status) == global$SKIPPED)] <- 'skipped'
       #browser()
       
-      for (i in 1:length(disabled))
-        if (disabled[i])
+      for (i in 1:length(enabled))
+        if (!enabled[i])
           tl_status[i] <- paste0(tl_status[i], 'Disabled')
 
        cat(paste0(paste0(tl_status,collapse=', '), '\n'))
@@ -88,7 +88,7 @@ TimelineDraw <- R6Class(
       #)
       },
     
-    server = function(status, position, disabled) {
+    server = function(status, position, enabled) {
       cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
@@ -102,7 +102,7 @@ TimelineDraw <- R6Class(
         
         output$show_TL <- renderUI({
           cat(paste0(class(self)[1], '::output$show_TLS\n'))
-          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), disabled()))
+          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), enabled()))
         })
         }
       )

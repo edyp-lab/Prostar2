@@ -55,10 +55,10 @@ ui = function() {
               uiOutput(ns('show_ui')),
               fluidRow(
                 column(width=2,
-                       tags$b(h4(style = 'color: blue;', "Input")),
+                       tags$b(h4(style = 'color: blue;', "Input of pipeline")),
                        uiOutput(ns('show_dataIn'))),
                 column(width=2,
-                       tags$b(h4(style = 'color: blue;', "Output")),
+                       tags$b(h4(style = 'color: blue;', "Output of pipeline")),
                        uiOutput(ns('show_rv_dataOut')))
                 # column(width=4,
                 #        tags$b(h4(style = 'color: blue;', "status")),
@@ -84,20 +84,21 @@ server = function(dataIn ) {
     self$tmp.return[[x]] <- self$child.process[[x]]$server(dataIn = reactive({dataIn()}))
   })
   
-#browser()
+
   observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
-    print(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}))
+    print(lapply(names(self$child.process), function(x){self$child.process[[x]]$Get_Result()}))
   })
   
 
   moduleServer(self$id, function(input, output, session) {
     ns <- NS(self$id)
     
-    observe({ 
+    observeEvent(self$rv$isSkipped , ignoreInit=T,{ 
       lapply(names(self$child.process), function(x){
       self$child.process[[x]]$SetSkipped(self$rv$isSkipped )
         })
-      
+    })
+    observeEvent(self$rv$isReseted , ignoreInit=T,{ 
       lapply(names(self$child.process), function(x){
         self$child.process[[x]]$SetReseted(self$rv$isReseted )
       })
@@ -127,7 +128,7 @@ server = function(dataIn ) {
     req(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}))
     tagList(
       lapply(names(self$child.process),function(x){
-         tags$p(paste0(x, ' -> ',paste0(names(self$tmp.return[[x]]()$value), collapse=' ')))
+         tags$p(paste0(x, ' -> ',paste0(names(self$child.process[[x]]$Get_Result()), collapse=' ')))
         
       })
     )
@@ -141,6 +142,12 @@ server = function(dataIn ) {
 
 
 ## Main app
+AddItemToDataset <- function(dataset, name){
+  addAssay(dataset, 
+           dataset[[length(dataset)]], 
+           name=name)
+}
+
 rv <- reactiveValues()
 Pipeline <- Pipeline$new('App')
 ui = fluidPage(
@@ -157,7 +164,7 @@ server = function(input, output){
   
   observeEvent(input$send,{
     if (input$send%%2 != 0)
-      rv$dataIn <- Exp1_R25_prot
+      rv$dataIn <- Exp1_R25_prot[,,2]
     else
       rv$dataIn <- NULL
   })

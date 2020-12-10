@@ -455,6 +455,8 @@ ProcessManager <- R6Class(
         })
         
         
+        
+        
       reactive({self$dataOut})
       })
     }

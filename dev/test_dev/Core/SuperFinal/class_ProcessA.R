@@ -5,29 +5,31 @@ ProcessA = R6Class(
   private = list(
     .config = list(name = 'ProcessA',
                    steps = c('Description', 'Step1', 'Step2', 'Step3'),
-                   mandatory = c(T,F,F,F)
+                   mandatory = c(T,F,T,F)
                    )
   ),
   
   public = list(
 
    Description = function(){
+     observe({
+       mod_insert_md_server(paste0(self$config$name, "_md"), 
+                            paste0('./md/', self$config$name, '.md'))
+       
+     })
      
-      observe({
-        mod_insert_md_server(paste0(self$name, "_md"), 
-                             paste0('./md/', self$name, '.md'))
-      })
+     observeEvent(self$input$btn_validate_Description, ignoreInit = T, {
+       cat(paste0(class(self)[1], '::observeEvent(self$input$btn_validate_Description from - ', self$id, '\n'))
+       self$InitializeDataIn()
+       self$ValidateCurrentPos()
+     })
       
-      observeEvent(self$input$btn_validate_Description, {
-        self$InitializeDataIn()
-        self$ValidateCurrentPos()
-      })
       
       tagList(
         actionButton(self$ns('btn_validate_Description'), 
-                     paste0('Start ', self$name),
+                     paste0('Start ', self$config$name),
                      class = btn_success_color),
-        mod_insert_md_ui(self$ns(paste0(self$name, "_md")))
+        mod_insert_md_ui(paste0(self$config$name, "_md"))
       )
   },
       
@@ -36,7 +38,7 @@ ProcessA = R6Class(
       Step1 = function(){
         name <- 'Step1'
         
-        observeEvent(self$input$btn_validate_Step1, {
+        observeEvent(self$input$btn_validate_Step1, ignoreInit = T, {
           self$ValidateCurrentPos()
         })
         
@@ -65,7 +67,7 @@ ProcessA = R6Class(
       ## Logics to implement: here, we must take the last data not null
       # in previous datas. The objective is to take account
       # of skipped steps
-      observeEvent(self$input$btn_validate_Step2, {
+      observeEvent(self$input$btn_validate_Step2, ignoreInit = T, {
         self$ValidateCurrentPos()
       })
       
@@ -88,7 +90,7 @@ ProcessA = R6Class(
       Step3 = function(){
         name <- 'Step3'
 
-      observeEvent(self$input$btn_validate_Step3, {
+      observeEvent(self$input$btn_validate_Step3, ignoreInit = T, {
         self$rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)
         self$ValidateCurrentPos()
       })

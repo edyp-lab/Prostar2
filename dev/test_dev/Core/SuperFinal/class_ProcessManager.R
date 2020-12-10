@@ -43,7 +43,8 @@ ProcessManager <- R6Class(
       self$ns <- NS(id)
       
       self$dataOut = reactiveValues(
-        trigger = 0
+        trigger = 0,
+        value = NULL
       )
       
       self$default_pos$VALIDATED <- self$length
@@ -68,8 +69,8 @@ ProcessManager <- R6Class(
         temp.dataIn = NULL,
         current.pos = 1,
         status = setNames(rep(global$UNDONE, self$length), self$config$steps),
-        tl.tags.disabled = setNames(rep(TRUE, self$length), self$config$steps),
-        reset_OK = NULL,
+        tl.tags.enabled = setNames(rep(FALSE, self$length), self$config$steps),
+        local.reset = NULL,
         isAllSkipped = FALSE,
         isAllUndone = TRUE,
         isReseted = NULL,
@@ -78,15 +79,13 @@ ProcessManager <- R6Class(
       
       self$rv$status <- setNames(rep(global$UNDONE, self$length), self$config$steps)
       
-      self$screens <- self$GetScreensDefinition()
-      
       self$Additional_Initialize_Class()
       
       self$timeline <- TimelineDraw$new(self$ns('TL_draw'), 
                                             mandatory = self$config$mandatory)
       self$timeline$server(status = reactive({self$rv$status}),
                            position = reactive({self$rv$current.pos}),
-                           disabled = reactive({self$rv$tl.tags.disabled})
+                           enabled = reactive({self$rv$tl.tags.enabled})
                            )
 
     },
@@ -119,7 +118,11 @@ ProcessManager <- R6Class(
     },
     
     Additional_Initialize_Class = function(){},
-    
+    GetStringStatus = function(name){
+      if (name==global$VALIDATED) "Validated"
+      else if (name==global$UNDONE) "Undone"
+      else if (name==global$SKIPPED) 'Skipped'
+    },
     
     Timestamp = function(){ 
       cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n'))
@@ -130,12 +133,11 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n'))
       #self$dataOut$value <- self$rv$dataIn
       self$dataOut$trigger <- self$Timestamp()
-      #self$dataOut$name <- self$name
+      self$dataOut$value <- self$rv$dataIn
+
     },
     
-    Get_Result = function(){
-      self$rv$dataIn
-    },
+    Get_Result = function(){self$dataOut$value},
     
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
@@ -203,7 +205,18 @@ ProcessManager <- R6Class(
       self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
     },
     
-    ActionOn_Reset = function(){
+    ActionOn_LocalReset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      #browser()
+      
+      self$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$rv$current.pos <- 1
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+    },
+    
+    ActionOn_RemoteReset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
       #browser()
       
@@ -213,21 +226,12 @@ ProcessManager <- R6Class(
       self$Send_Result_to_Caller()
       #self$InitializeDataIn()
     },
+    
+    
     SetSkipped = function(skip){self$rv$isSkipped <- skip},
     SetReseted = function(reset){self$rv$isReseted <- reset},
     
-    ValidateCurrentPos = function(){
-      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-      #if(verbose=='skip')
-      # browser()
-      self$rv$status[self$rv$current.pos] <- global$VALIDATED
-      self$Discover_Skipped_Status()
-      #browser()
-      # Either the process has been validated, one can prepare data to be sent to caller
-      # Or the module has been reseted
-      if (self$rv$current.pos == self$length)
-        self$Send_Result_to_Caller()
-    },
+    ValidateCurrentPos = function(){},
     
     
     Update_Cursor_Position = function(){
@@ -292,7 +296,22 @@ ProcessManager <- R6Class(
             ),
             
             uiOutput(self$ns('SkippedInfoPanel')),
-            self$EncapsulateScreens()
+            self$EncapsulateScreens(),
+            
+            fluidRow(
+              column(width=2,
+                     tags$b(h4(style = 'color: blue;', "Input of process")),
+                     uiOutput(self$ns('show_dataIn'))),
+              column(width=2,
+                     tags$b(h4(style = 'color: blue;', "Input of process")),
+                     uiOutput(self$ns('show_rv_dataIn'))),
+              column(width=2,
+                     tags$b(h4(style = 'color: blue;', "Output of process")),
+                     uiOutput(self$ns('show_rv_dataOut'))),
+              column(width=4,
+                     tags$b(h4(style = 'color: blue;', "status")),
+                     uiOutput(self$ns('show_status')))
+            )
             
         )
       )
@@ -327,47 +346,105 @@ ProcessManager <- R6Class(
         self$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
         self$ActionOn_New_DataIn()
+        self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
+        self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
         
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
-          self$rv$tl.tags.disabled <- rep(TRUE, self$length)
+          self$rv$tl.tags.enabled[1:self$length] <- FALSE
         } else {
-          self$ToggleState_Screens(TRUE, 1)
+          self$ToggleState_Screens(TRUE, 1:self$length)
           self$ToggleState_ResetBtn(TRUE)
-          self$rv$tl.tags.disabled <- c(F, rep(TRUE, self$length-1))
+          self$rv$tl.tags.enabled[1:self$length] <- TRUE
+          
+          # Disable all screens after the first mandatory not validated
+          firstM <- self$GetFirstMandatoryNotValidated()
+          if (!is.null(firstM) && self$length > 1) {
+            offset <- as.numeric(firstM != self$length)
+            self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+            self$rv$tl.tags.enabled[(firstM + offset):self$length] <- FALSE
+          }
         }
         
       })
       
+      
+      
+      
+      # Catch new status event
+      observeEvent(self$rv$status, ignoreInit = T, {
+        cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
+        
+        self$Discover_Skipped_Steps()
+        self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
+        self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
+        
+        # Disable all steps if all steps are skipped
+        if (self$rv$isAllSkipped){
+          self$ToggleState_Screens(FALSE, 1:self$length)
+          self$ToggleState_ResetBtn(FALSE)
+          self$rv$tl.tags.enabled <- rep(FALSE, self$length)
+           }
+        # Disable all steps if all steps are undone (such as after a reset)
+        # Same action as for new dataIn() value
+        if (self$rv$isAllUndone){
+          self$ToggleState_Screens(TRUE, 1:self$length)
+          self$ToggleState_ResetBtn(TRUE)
+          self$rv$tl.tags.enabled[1:self$length] <- TRUE
+          
+          # Disable all screens after the first mandatory not validated
+          firstM <- self$GetFirstMandatoryNotValidated()
+          if (!is.null(firstM) && self$length > 1) {
+            offset <- as.numeric(firstM != self$length)
+            self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+            self$rv$tl.tags.enabled[(firstM + offset):self$length] <- FALSE
+          }
+        }
+        
+         # Disable all previous steps from each VALIDATED step
+         # and enable all further steps 
+         ind.max <- self$GetMaxValidated_AllSteps()
+         if (!is.null(ind.max)){
+           self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+           self$rv$tl.tags.enabled[1:ind.max] <- FALSE
+           if (ind.max < self$length){
+                 offset <- 1
+                 self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
+                 self$rv$tl.tags.enabled[(offset + ind.max):self$length] <- TRUE
+               }
+         }
+         
+         # Disable all screens after the first mandatory not validated
+         firstM <- self$GetFirstMandatoryNotValidated()
+          if (!is.null(firstM) && self$length > 1) {
+            offset <- as.numeric(firstM != self$length)
+            self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+            self$rv$tl.tags.enabled[(firstM + offset):self$length] <- FALSE
+            }
+      })
+      
+      
+      
+      
       observeEvent(self$rv$current.pos, ignoreInit = T,{
         cat(paste0(class(self)[1], '::observe(self$rv$current.pos) from - ', self$id, '\n'))
         
-        #self$Force_ToggleState_Screens()
-       # browser()
         shinyjs::toggleState(id = self$ns("prevBtn"), condition = self$rv$current.pos > 1)
         shinyjs::toggleState(id = self$ns("nextBtn"), condition = self$rv$current.pos < self$length)
-        #browser()
         shinyjs::hide(selector = paste0(".page_", self$id))
         shinyjs::show(self$ns(self$config$steps[self$rv$current.pos]))
       })
       
-      observeEvent(self$rv$status, ignoreInit = T, {
-        cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
-        self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
-        self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
-        
-        #self$Force_ToggleState_Screens()
-      })
       
       
       
-      observeEvent(req(self$rv$status[self$length] == global$VALIDATED), {
-        self$rv$current.pos <- self$length
-      })
+      # observeEvent(req(self$rv$status[self$length] == global$VALIDATED), {
+      #   self$rv$current.pos <- self$length
+      # })
       
       
-      observeEvent(self$rv$isReseted, ignoreInit = F, { 
+      observeEvent(self$rv$isReseted, ignoreInit = T, { 
         cat(paste0(class(self)[1], '::', 'observeEvent(c(self$rv$isReseted) from -- ', self$id, ' --\n'))
         #browser()
         
@@ -381,7 +458,7 @@ ProcessManager <- R6Class(
       })
       
       
-      observeEvent(req(!is.null(self$rv$isSkipped)), ignoreNULL=F, { 
+      observeEvent(req(!is.null(self$rv$isSkipped)), ignoreNULL=F, ignoreInit = T,{ 
         cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
         #if(verbose=='skip') 
         
@@ -396,8 +473,12 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
-        observe({self$input <- input})
+        observe({
+          cat(paste0(class(self)[1], '::self$input <- input from - ', self$id, '\n'))
+          self$input <- input
+          })
         
+        self$screens <- self$GetScreensDefinition()
         
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
@@ -411,10 +492,10 @@ ProcessManager <- R6Class(
         
         
         
-        observeEvent(req(input$modal_ok > 0), ignoreInit=F,{
+        observeEvent(req(input$modal_ok > 0), ignoreInit=F, {
           cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n'))
-          self$rv$reset_OK <- input$rstBtn
-          self$rv$current.pos <- 1
+          self$rv$local.reset <- input$rstBtn
+          self$ActionOn_LocalReset()
           removeModal()
         })
         
@@ -454,15 +535,38 @@ ProcessManager <- R6Class(
           )
         })
         
-        output$show_rv_dataOut <- renderUI({
-          cat(paste0(class(self)[1], '::output$show_rv_dataOut from - ', self$id, '\n'))
-          self$dataOut$trigger
+        output$show_rv_dataIn <- renderUI({
+          cat(paste0(class(self)[1], '::output$show_rv_dataIn from - ', self$id, '\n'))
+          req(self$rv$dataIn)
           tagList(
-            #h4('show self$dataOut$value'),
+            # h4('show dataIn()'),
             lapply(names(self$rv$dataIn), function(x){tags$p(x)})
           )
         })
         
+        output$show_rv_dataOut <- renderUI({
+          cat(paste0(class(self)[1], '::output$show_rv_dataOut from - ', self$id, '\n'))
+          #self$dataOut$trigger
+          tagList(
+            #h4('show self$dataOut$value'),
+            lapply(names(self$dataOut$value), function(x){tags$p(x)})
+          )
+        })
+        
+        
+        output$show_status <- renderUI({
+          #req(self$rv$status, self$rv$current.pos, self$rv$tl.tags.enabled)
+          tagList(lapply(1:self$length, 
+                         function(x){
+                           color <- if(self$rv$tl.tags.enabled[x]) 'black' else 'lightgrey'
+                           if (x == self$rv$current.pos)
+                             tags$p(style = paste0('color: ', color, ';'),
+                                    tags$b(paste0('---> ', self$config$steps[x], ' - ', self$GetStringStatus(self$rv$status[[x]])), ' <---'))
+                           else 
+                             tags$p(style = paste0('color: ', color, ';'),
+                                    paste0(self$config$steps[x], ' - ', self$GetStringStatus(self$rv$status[[x]])))
+                         }))
+        })
         
         reactive({self$dataOut})
       })
