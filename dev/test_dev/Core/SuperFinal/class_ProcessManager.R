@@ -205,31 +205,8 @@ ProcessManager <- R6Class(
       self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
     },
     
-    ActionOn_LocalReset = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      #browser()
-      
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$rv$current.pos <- 1
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-    },
-    
-    ActionOn_RemoteReset = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      #browser()
-      
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-      #self$InitializeDataIn()
-    },
-    
-    
-    SetSkipped = function(skip){self$rv$isSkipped <- skip},
-    SetReseted = function(reset){self$rv$isReseted <- reset},
+    Set_Skipped = function(){},
+    Set_Reseted = function(){},
     
     ValidateCurrentPos = function(){},
     
@@ -436,37 +413,7 @@ ProcessManager <- R6Class(
         shinyjs::show(self$ns(self$config$steps[self$rv$current.pos]))
       })
       
-      
-      
-      
-      # observeEvent(req(self$rv$status[self$length] == global$VALIDATED), {
-      #   self$rv$current.pos <- self$length
-      # })
-      
-      
-      observeEvent(self$rv$isReseted, ignoreInit = T, { 
-        cat(paste0(class(self)[1], '::', 'observeEvent(c(self$rv$isReseted) from -- ', self$id, ' --\n'))
-        #browser()
-        
-        if (!is.null(self$child.process))
-          lapply(self$config$steps, function(x){
-            self$child.process[[x]]$SetReseted(self$rv$isReseted)
-          })
-        
-        self$ActionOn_Reset()
-        self$rv$current.pos <- 1 
-      })
-      
-      
-      observeEvent(req(!is.null(self$rv$isSkipped)), ignoreNULL=F, ignoreInit = T,{ 
-        cat(paste0(class(self)[1], '::observeEvent(isSkipped()) from - ', self$id, '\n'))
-        #if(verbose=='skip') 
-        
-        print(self$rv$isSkipped)
-        # browser()
-        self$ActionOn_isSkipped()
-      })
-      
+
       ###############################################################
       ###                    MODULE SERVER                        ###
       ###############################################################
@@ -487,15 +434,10 @@ ProcessManager <- R6Class(
         
         observeEvent(input$close, {removeModal() })
         
-        
-        
-        
-        
-        
         observeEvent(req(input$modal_ok > 0), ignoreInit=F, {
           cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n'))
           self$rv$local.reset <- input$rstBtn
-          self$ActionOn_LocalReset()
+          self$Set_All_Reset()
           removeModal()
         })
         

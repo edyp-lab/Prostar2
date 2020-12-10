@@ -18,6 +18,17 @@ Process = R6Class(
       )
     },
     
+    Set_All_Reset = function(){
+      cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n'))
+      #browser()
+      
+      self$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$rv$current.pos <- 1
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+    },
+    
     EncapsulateScreens = function(){
       req(self$screens)
       cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
@@ -96,11 +107,9 @@ Process = R6Class(
       self$config$steps)
     },
     
-    ActionOn_isSkipped = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnIsSkipped() from - ', self$id, '\n'))
-      #if(verbose=='skip') 
-      value <- if (self$rv$isSkipped) global$SKIPPED else global$UNDONE
-      self$rv$status <- setNames(rep(value, self$length), self$config$steps)
+    Set_All_Skipped = function(){
+      cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n'))
+      self$rv$status <- setNames(rep(global$SKIPPED, self$length), self$config$steps)
     },
     
     

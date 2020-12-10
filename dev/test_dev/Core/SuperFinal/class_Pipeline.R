@@ -26,6 +26,27 @@ Pipeline = R6Class(
     },
     
     
+    ActionOn_Reset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      #browser()
+      
+      self$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$rv$current.pos <- 1
+      self$Initialize_Status_Process()
+      
+      
+      # Say to all child processes to reset themselves
+      if (!is.null(self$child.process))
+             lapply(self$config$steps, function(x){
+               self$child.process[[x]]$ActionOn_Reset()
+             })
+      
+      
+      self$Send_Result_to_Caller()
+    },
+    
+    
     Additional_Server_Funcs = function(){
       self$Launch_Module_Server()
     },

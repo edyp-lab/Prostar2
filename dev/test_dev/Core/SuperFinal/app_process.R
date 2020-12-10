@@ -44,6 +44,31 @@ Pipeline <- R6Class(
       self$id <- id
     },
     
+    
+    ActionOn_Reset = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      #browser()
+      #browser()
+      # Say to all child processes to reset themselves
+      if (!is.null(self$child.process))
+        lapply(names(self$child.process), function(x){
+          self$child.process[[x]]$Set_All_Reset()
+        })
+
+    },
+    
+    ActionOn_Skipped = function(){
+      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      #browser()
+      #browser()
+      # Say to all child processes to reset themselves
+      if (!is.null(self$child.process))
+        lapply(names(self$child.process), function(x){
+          self$child.process[[x]]$Set_All_Skipped()
+        })
+      
+    },
+    
 ui = function() {
   ns <- NS(self$id)
   fluidPage(
@@ -98,14 +123,10 @@ server = function(dataIn ) {
       self$child.process[[x]]$SetSkipped(self$rv$isSkipped )
         })
     })
-    observeEvent(self$rv$isReseted , ignoreInit=T,{ 
-      lapply(names(self$child.process), function(x){
-        self$child.process[[x]]$SetReseted(self$rv$isReseted )
-      })
-    })
-    
-  observeEvent(input$reset,{self$rv$isReseted <- input$reset})
-  observeEvent(input$skip,{self$rv$isSkipped <- input$skip%%2!=0})
+
+  observeEvent(input$reset,{self$ActionOn_Reset()})
+  
+  observeEvent(input$skip,{self$ActionOn_Skipped()})
   
   output$show_ui <- renderUI({
     tagList(
