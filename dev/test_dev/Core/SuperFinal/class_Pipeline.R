@@ -74,7 +74,7 @@ Pipeline = R6Class(
     GetScreensDefinition = function(){
       cat(paste0(class(self)[1], '::', 'GetScreensDefinition() from - ', self$id, '\n'))
       req(self$child.process)
-      browser()
+     # browser()
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()
       }),

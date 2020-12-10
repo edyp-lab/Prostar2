@@ -349,7 +349,6 @@ ProcessManager <- R6Class(
      # })
       
       self$Additional_Server_Funcs()
-      self$screens <- self$GetScreensDefinition()
       
       
       observeEvent(dataIn(), ignoreNULL = F, ignoreInit = T,{
@@ -461,7 +460,7 @@ ProcessManager <- R6Class(
           })
         
         #self$Additional_Server_Funcs()
-        #self$screens <- self$GetScreensDefinition()
+        self$screens <- self$GetScreensDefinition()
         
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
