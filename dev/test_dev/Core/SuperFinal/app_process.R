@@ -17,7 +17,7 @@ source(file.path('.', 'class_global.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
-source(file.path('.', 'class_ProcessOriginal.R'), local=TRUE)$value
+source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 
 
 #----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ Pipeline <- R6Class(
       isSkipped = FALSE
       ),
     child.process = list(
-      #ProcessOriginal = NULL
+      ProcessDescription = NULL,
       ProcessA = NULL
     ),
     initialize = function(id){

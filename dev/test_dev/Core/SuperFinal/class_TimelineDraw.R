@@ -89,12 +89,13 @@ TimelineDraw <- R6Class(
       },
     
     server = function(status, position, enabled) {
+      
       cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
         
         cat(paste0(class(self)[1], '::moduleServer()\n'))
-        
+
         output$load_CSS <- renderUI({
           cat(paste0(class(self)[1], '::output$load_CSS\n'))
           shinyjs::inlineCSS(sass::sass(self$GetCSSCode()))

@@ -15,28 +15,21 @@ source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'class_global.R'), local=TRUE)$value
 
-# ------------- Class TimelineDataManager  --------------------------------------
-source(file.path('.', 'class_TimelineManager.R'), local=TRUE)$value
-source(file.path('.', 'class_TimelineForProcess.R'), local=TRUE)$value
-source(file.path('.', 'class_TimelineForPipeline.R'), local=TRUE)$value
-
-
-
 #----------------------- Class ProcessManager ----------------------------------
 source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessB.R'), local=TRUE)$value
-source(file.path('.', 'class_ProcessOriginal.R'), local=TRUE)$value
+source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 
 source(file.path('.', 'class_Pipeline.R'), local=TRUE)$value
 source(file.path('.', 'class_PipelineSimple.R'), local=TRUE)$value
 
-source(file.path('.', 'class_WF1_Original.R'), local=TRUE)$value
-source(file.path('.', 'class_WF1_Filtering.R'), local=TRUE)$value
-source(file.path('.', 'class_WF1_Normalization.R'), local=TRUE)$value
-source(file.path('.', 'class_WF1_Imputation.R'), local=TRUE)$value
-source(file.path('.', 'class_WF1_HypothesisTest.R'), local=TRUE)$value
+# source(file.path('.', 'class_WF1_Original.R'), local=TRUE)$value
+# source(file.path('.', 'class_WF1_Filtering.R'), local=TRUE)$value
+# source(file.path('.', 'class_WF1_Normalization.R'), local=TRUE)$value
+# source(file.path('.', 'class_WF1_Imputation.R'), local=TRUE)$value
+# source(file.path('.', 'class_WF1_HypothesisTest.R'), local=TRUE)$value
 
 
 
@@ -51,19 +44,35 @@ AddItemToDataset <- function(dataset, name){
 
 ## Main app
 
-#pipeline <- Pipeline_WF1$new('App')
-pipeline <- PipelineSimple$new('App')
-
 ui = fluidPage(
   tagList(
-    pipeline$ui()
+    actionButton('send', 'Send dataset'),
+    uiOutput('show_ui')
   )
 )
 
-server = function(input, output){
+server = function(input, output, session){
   utils::data(Exp1_R25_prot, package='DAPARdata2')
+  rv <- reactiveValues()
+  pipeline <- NULL
+  #pipeline <- Pipeline_WF1$new('App')
   
-  pipeline$server(dataIn = reactive({Exp1_R25_prot[,,2]}))
+    pipeline <- PipelineSimple$new('App')
+    observe({
+  pipeline$server(dataIn = reactive({rv$dataIn}))
+  })
+  output$show_ui <- renderUI({
+    cat('::output$show \n')
+    req(pipeline)
+    pipeline$ui()
+  })
+  
+  observeEvent(input$send,{
+    if (input$send%%2 != 0)
+      rv$dataIn <- Exp1_R25_prot[,,2]
+    else
+      rv$dataIn <- NULL
+  })
   
 }
 

@@ -8,15 +8,7 @@ Pipeline = R6Class(
     
     
     #---------------------------------------------------------------------------------
-    modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
-                      validated process and all further datasets will be removed.",
     
-    ui = function(){
-      fluidPage(
-        shinyjs::useShinyjs(),
-        self$Main_UI()
-      )
-    },
     
     EncapsulateScreens = function(){
       req(self$screens)

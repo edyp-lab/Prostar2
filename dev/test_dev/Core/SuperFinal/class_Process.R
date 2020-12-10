@@ -8,6 +8,7 @@ Process = R6Class(
                       validated process and all further datasets will be removed",
     
     ui = function(){
+      #browser()
       color <- "blue"
       fluidPage(
         shinyjs::useShinyjs(),
@@ -17,96 +18,7 @@ Process = R6Class(
         )
       )
     },
-    
-    Set_All_Reset = function(){
-      cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n'))
-      #browser()
-      
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$rv$current.pos <- 1
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-    },
-    
-    EncapsulateScreens = function(){
-      req(self$screens)
-      cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
-      lapply(1:self$length, function(i) {
-        shinyjs::disabled(
-          if (i==1)
-          div(
-              class = paste0("page_", self$id),
-              id = self$ns(self$config$steps[i]),
-              self$screens[[i]]
-            )
-        else
-          shinyjs::hidden(
-              div(
-                class = paste0("page_", self$id),
-                id = self$ns(self$config$steps[i]),
-                self$screens[[i]])
-            )
-        )
-      }
-      )
-    },
-    
-    ValidateCurrentPos = function(){
-      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-      #if(verbose=='skip')
-      # browser()
-      self$rv$status[self$rv$current.pos] <- global$VALIDATED
-      
-      # Either the process has been validated, one can prepare data to be sent to caller
-      # Or the module has been reseted
-      if (self$rv$current.pos == self$length)
-        self$Send_Result_to_Caller()
-    },
-    
-    Force_ToggleState_Screens = function(){
-      cat(paste0(class(self)[1], '::Force_ToggleState_Steps() from - ', self$id, '\n'))
-      #if (verbose==T) 
-      # browser()
-      
-      # self$ToggleState_Screens(cond = TRUE, range = 1:self$length)
-      # 
-      # if (self$rv$isAllSkipped){
-      #   # Disable all steps if all steps are skipped
-      #   self$ToggleState_Screens(cond = FALSE, range = 1:self$length)
-      # }
-      # 
-      # firstM <- self$GetFirstMandatoryNotValidated()
-      # if (!is.null(firstM) && self$length > 1) {
-      #   offset <- as.numeric(firstM != self$length)
-      #   # Disable all further screens
-      #   self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-      #   }
-      # 
-      # # Disable all previous steps from each VALIDATED step
-      # # and enable all further steps (in case of current.pos is mandatory)
-      # ind.max <- self$GetMaxValidated_AllSteps()
-      # if (!is.null(ind.max)){
-      #   self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-      #   if (ind.max < self$length){
-      #         offset <- 1
-      #         self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
-      #       }
-      #     }
-    },
-    
-    
-    
-    #---------------------------------------------------------------------
-    GetScreensDefinition = function(){
-      cat(paste0(class(self)[1], '::GetScreensDefinition() from - ', self$id, '\n'))
-      #browser()
-      setNames(lapply(self$config$steps, function(x){
-        eval(parse(text = paste0("self$", x, '()')))
-      }),
-      self$config$steps)
-    },
-    
+
     Set_All_Skipped = function(){
       cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n'))
       self$rv$status <- setNames(rep(global$SKIPPED, self$length), self$config$steps)
@@ -120,6 +32,41 @@ Process = R6Class(
         if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
           self$rv$status[i] <- global$SKIPPED
         }
+    },
+    
+    Set_All_Reset = function(){
+      cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n'))
+      #browser()
+      
+      self$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$rv$current.pos <- 1
+      self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
+    },
+    
+    
+    
+    ValidateCurrentPos = function(){
+      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+      #if(verbose=='skip')
+      # browser()
+      self$rv$status[self$rv$current.pos] <- global$VALIDATED
+      
+      # Either the process has been validated, one can prepare data to be sent to caller
+      # Or the module has been reseted
+      if (self$rv$current.pos == self$length)
+        self$Send_Result_to_Caller()
+    },
+    
+    #---------------------------------------------------------------------
+    GetScreensDefinition = function(){
+      cat(paste0(class(self)[1], '::GetScreensDefinition() from - ', self$id, '\n'))
+      #browser()
+      setNames(lapply(self$config$steps, function(x){
+        eval(parse(text = paste0("self$", x, '()')))
+      }),
+      self$config$steps)
     }
   )
 )

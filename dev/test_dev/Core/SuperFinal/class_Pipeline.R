@@ -6,11 +6,20 @@ Pipeline = R6Class(
   public = list(
     tmp.return = "<reactiveValues>",
     
+    modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
+                      validated process and all further datasets will be removed.",
+    
+    ui = function(){
+      cat(paste0(class(self)[1], '::ui() from - ', self$id, '\n'))
+      
+      fluidPage(
+        self$Main_UI()
+      )
+    },
+    
     Additional_Initialize_Class = function(){
       cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
       
-      self$child.process <- setNames(lapply(self$config$steps, function(x){x <- NULL}),
-                                     self$config$steps)
       self$rv$data2send <- NULL
       self$tmp.return <- reactiveValues()
            },
@@ -26,7 +35,7 @@ Pipeline = R6Class(
     },
     
     
-    ActionOn_Reset = function(){
+    Set_All_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
       #browser()
       
@@ -34,20 +43,25 @@ Pipeline = R6Class(
       self$rv$dataIn <- NULL
       self$rv$current.pos <- 1
       self$Initialize_Status_Process()
-      
-      
+
       # Say to all child processes to reset themselves
       if (!is.null(self$child.process))
              lapply(self$config$steps, function(x){
                self$child.process[[x]]$ActionOn_Reset()
              })
-      
-      
       self$Send_Result_to_Caller()
     },
     
     
+    ValidateCurrentPos = function(){
+      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+
+      self$rv$status[self$rv$current.pos] <- global$VALIDATED
+      self$Send_Result_to_Caller()
+    },
+    
     Additional_Server_Funcs = function(){
+      cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n'))
       self$Launch_Module_Server()
     },
     
@@ -56,19 +70,11 @@ Pipeline = R6Class(
       self$PrepareData2Send()
       },
     
-    CreateTimeline = function(){
-      cat(paste0(class(self)[1], '::', 'CreateTimeline() from - ', self$id, '\n'))
-      self$timeline <- TimelineForPipeline$new(self$ns('TL'), 
-                                               config = self$config,
-                                               screens = self$screens,
-                                               style = style
-                                               )
-    },
 
     GetScreensDefinition = function(){
       cat(paste0(class(self)[1], '::', 'GetScreensDefinition() from - ', self$id, '\n'))
       req(self$child.process)
-      #browser()
+      browser()
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()
       }),
@@ -95,7 +101,7 @@ Pipeline = R6Class(
       
       
       lapply(self$config$steps, function(x){
-        self$tmp.return[[x]] <- self$child.process[[x]]$ToggleState_Screens(F, 1, prefix=paste0(self$id, '-TL-'))
+        self$tmp.return[[x]] <- self$child.process[[x]]$ToggleState_Screens(F, 1)
       })
       
       
@@ -127,15 +133,6 @@ Pipeline = R6Class(
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
       # browser()
-      # cat("----- self$old.tmp.return ------\n")
-      # print(setNames(lapply(names(self$child.process), function(x){self$old.tmp.return[[x]]}),
-      #                names(self$child.process))
-      # )
-      # cat("----- self$tmp.return ------\n")
-      # print(setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value}),
-      #                names(self$child.process))
-      # )
-      #browser()
       processHasChanged <- newValue <- NULL
       
       toto <- unlist(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}))
@@ -144,22 +141,6 @@ Pipeline = R6Class(
         newValue <- self$child.process[[processHasChanged]]$Get_Result()
       }
       
-      
-      #ind <- which(!is.null(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$value})))
-      #processHasChanged <- names(self$child.process)[ind]
-      
-      # if(is.null(processHasChanged)){
-      #   #No process have been modified
-      #   self$rv$dataIn <- NULL
-      # } else if ( 
-      #   sum(unlist(lapply(names(self$child.process), function(x){is.null(self$tmp.return[[x]]()$value)}))) == length(self$child.process)){
-      #   # All the child processes have been reseted
-      #   self$rv$dataIn <- self$rv$temp.dataIn
-      #   self$rv$dataIn <- NULL
-      #   
-      # } else{
-        # Update the status of process
-      #  if (length(processHasChanged)==1)
           if (is.null(newValue)){
             # process has been reseted
             self$rv$status[processHasChanged] <- global$UNDONE
@@ -180,13 +161,6 @@ Pipeline = R6Class(
           self$rv$dataIn <- newValue
         }
         
-      #}
-      
-      #update self$old.tmp.return
-      # self$old.tmp.return <- setNames(lapply(names(self$child.process), 
-      #                                        function(x){self$tmp.return[[x]]()$value}),
-      #                                 names(self$child.process))
-      # 
       self$Send_Result_to_Caller()
       
     },

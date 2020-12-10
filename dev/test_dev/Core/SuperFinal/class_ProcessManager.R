@@ -76,10 +76,8 @@ ProcessManager <- R6Class(
         isReseted = NULL,
         isSkipped = NULL)
       
-      
+   
       self$rv$status <- setNames(rep(global$UNDONE, self$length), self$config$steps)
-      
-      self$Additional_Initialize_Class()
       
       self$timeline <- TimelineDraw$new(self$ns('TL_draw'), 
                                             mandatory = self$config$mandatory)
@@ -87,6 +85,7 @@ ProcessManager <- R6Class(
                            position = reactive({self$rv$current.pos}),
                            enabled = reactive({self$rv$tl.tags.enabled})
                            )
+      self$Additional_Initialize_Class()
 
     },
     
@@ -139,6 +138,30 @@ ProcessManager <- R6Class(
     
     Get_Result = function(){self$dataOut$value},
     
+    
+    EncapsulateScreens = function(){
+     # browser()
+      req(self$screens)
+      #cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+      lapply(1:self$length, function(i) {
+        shinyjs::disabled(
+          if (i==1)
+            div(
+              class = paste0("page_", self$id),
+              id = self$ns(self$config$steps[i]),
+              self$screens[[i]]
+            )
+          else
+            shinyjs::hidden(
+              div(
+                class = paste0("page_", self$id),
+                id = self$ns(self$config$steps[i]),
+                self$screens[[i]])
+            )
+        )
+      }
+      )
+    },
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
       if (verbose==T) browser()
@@ -240,7 +263,8 @@ ProcessManager <- R6Class(
     },
     
     Main_UI = function(){
-      cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
+      #cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
+      #browser()
       tagList(
         shinyjs::useShinyjs(),
         # tags$head(tags$style("#modal1 .modal-body {padding: 10px}
@@ -316,6 +340,17 @@ ProcessManager <- R6Class(
       #   })
       #   
       # })
+   
+      #observe({
+      #  cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
+       # self$screens <- self$GetScreensDefinition()
+      #  self$Additional_Server_Funcs()
+        
+     # })
+      
+      self$Additional_Server_Funcs()
+      self$screens <- self$GetScreensDefinition()
+      
       
       observeEvent(dataIn(), ignoreNULL = F, ignoreInit = T,{
         cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
@@ -425,7 +460,8 @@ ProcessManager <- R6Class(
           self$input <- input
           })
         
-        self$screens <- self$GetScreensDefinition()
+        #self$Additional_Server_Funcs()
+        #self$screens <- self$GetScreensDefinition()
         
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
