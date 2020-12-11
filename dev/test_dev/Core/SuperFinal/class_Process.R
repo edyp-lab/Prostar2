@@ -18,6 +18,16 @@ Process = R6Class(
         )
       )
     },
+    
+    ToggleState_Screens = function(cond, range){
+      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      #browser()
+      lapply(range, function(x){
+        shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
+        #Send to TL the enabled/disabled tags
+        self$rv$tl.tags.enabled[x] <- cond
+      })
+    },
 
     Set_All_Skipped = function(){
       cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n'))

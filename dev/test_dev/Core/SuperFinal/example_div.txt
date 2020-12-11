@@ -1,0 +1,227 @@
+$ProcessA
+<div class="container-fluid">
+  <div class="well" style="background: white; border-width: 2px; border-color: blue;">
+    <div id="App-ProcessA-GlobalTL">
+      <div class="row" align="center">
+        <div class="col-sm-2">
+          <div>
+            <button class="btn btn-default action-button btn-info shinyjs-disabled" id="App-ProcessA-prevBtn" style="padding:4px; font-size:80%" type="button">&lt;&lt;</button>
+            <button class="btn btn-default action-button btn-danger shinyjs-disabled" id="App-ProcessA-rstBtn" style="padding:4px; font-size:80%" type="button">Reset entire </button>
+          </div>
+        </div>
+        <div class="col-sm-8">
+          <div>
+            <div id="App-ProcessA-TL_draw-load_CSS" class="shiny-html-output"></div>
+            <div id="App-ProcessA-TL_draw-show_TL" class="shiny-html-output"></div>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div>
+            <button class="btn btn-default action-button btn-info" id="App-ProcessA-nextBtn" style="padding:4px; font-size:80%" type="button">&gt;&gt;</button>
+          </div>
+        </div>
+      </div>
+      <div id="App-ProcessA-SkippedInfoPanel" class="shiny-html-output"></div>
+      <div class="page_App-ProcessA shinyjs-disabled" id="App-ProcessA-Description">
+        <button class="btn btn-default action-button btn-success" id="App-ProcessA-btn_validate_Description" type="button">Start ProcessA</button>
+        <div id="ProcessA_md-insertMD" class="shiny-html-output"></div>
+      </div>
+      <div class="page_App-ProcessA shinyjs-disabled" id="App-ProcessA-Step1">
+        <div id="App-ProcessA-Step1">
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <h2>Step1</h2>
+          </div>
+          <div style="display:inline-block; vertical-align: middle; padding-right: 40px;">
+            <div class="form-group shiny-input-container" style="width: 150px;">
+              <label class="control-label" for="App-ProcessA-select1">Select step 1</label>
+              <div>
+                <select id="App-ProcessA-select1"><option value="1" selected>1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option></select>
+                <script type="application/json" data-for="App-ProcessA-select1" data-nonempty="">{}</script>
+              </div>
+            </div>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <button id="App-ProcessA-btn_validate_Step1" type="button" class="btn btn-default action-button">Perform</button>
+          </div>
+        </div>
+      </div>
+      <div class="page_App-ProcessA shinyjs-disabled" id="App-ProcessA-Step2">
+        <div id="App-ProcessA-Step2">
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <h3>Step2</h3>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 40px;">
+            <div class="form-group shiny-input-container" style="width: 150px;">
+              <label class="control-label" for="App-ProcessA-select2">Select step 2</label>
+              <div>
+                <select id="App-ProcessA-select2"><option value="1" selected>1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option></select>
+                <script type="application/json" data-for="App-ProcessA-select2" data-nonempty="">{}</script>
+              </div>
+            </div>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <button id="App-ProcessA-btn_validate_Step2" type="button" class="btn btn-default action-button">Perform</button>
+          </div>
+        </div>
+      </div>
+      <div class="page_App-ProcessA shinyjs-disabled" id="App-ProcessA-Step3">
+        <div id="App-ProcessA-Step3">
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <h3>Step3</h3>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <button id="App-ProcessA-btn_validate_Step3" type="button" class="btn btn-default action-button">Validate</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-2">
+          <b>
+            <h4 style="color: blue;">Input of process</h4>
+          </b>
+          <div id="App-ProcessA-show_dataIn" class="shiny-html-output"></div>
+        </div>
+        <div class="col-sm-2">
+          <b>
+            <h4 style="color: blue;">Input of process</h4>
+          </b>
+          <div id="App-ProcessA-show_rv_dataIn" class="shiny-html-output"></div>
+        </div>
+        <div class="col-sm-2">
+          <b>
+            <h4 style="color: blue;">Output of process</h4>
+          </b>
+          <div id="App-ProcessA-show_rv_dataOut" class="shiny-html-output"></div>
+        </div>
+        <div class="col-sm-4">
+          <b>
+            <h4 style="color: blue;">status</h4>
+          </b>
+          <div id="App-ProcessA-show_status" class="shiny-html-output"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+$ProcessB
+<div class="container-fluid">
+  <div class="well" style="background: white; border-width: 2px; border-color: blue;">
+    <div id="App-ProcessB-GlobalTL">
+      <div class="row" align="center">
+        <div class="col-sm-2">
+          <div>
+            <button class="btn btn-default action-button btn-info shinyjs-disabled" id="App-ProcessB-prevBtn" style="padding:4px; font-size:80%" type="button">&lt;&lt;</button>
+            <button class="btn btn-default action-button btn-danger shinyjs-disabled" id="App-ProcessB-rstBtn" style="padding:4px; font-size:80%" type="button">Reset entire </button>
+          </div>
+        </div>
+        <div class="col-sm-8">
+          <div>
+            <div id="App-ProcessB-TL_draw-load_CSS" class="shiny-html-output"></div>
+            <div id="App-ProcessB-TL_draw-show_TL" class="shiny-html-output"></div>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div>
+            <button class="btn btn-default action-button btn-info" id="App-ProcessB-nextBtn" style="padding:4px; font-size:80%" type="button">&gt;&gt;</button>
+          </div>
+        </div>
+      </div>
+      <div id="App-ProcessB-SkippedInfoPanel" class="shiny-html-output"></div>
+      <div class="page_App-ProcessB shinyjs-disabled" id="App-ProcessB-Description">
+        <button class="btn btn-default action-button btn-success" id="App-ProcessB-btn_validate_Description" type="button">Start ProcessB</button>
+        <div id="ProcessB_md-insertMD" class="shiny-html-output"></div>
+      </div>
+      <div class="page_App-ProcessB shinyjs-disabled" id="App-ProcessB-Step1">
+        <div id="App-ProcessB-Step1">
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <h2>Step1</h2>
+          </div>
+          <div style="display:inline-block; vertical-align: middle; padding-right: 40px;">
+            <div class="form-group shiny-input-container" style="width: 150px;">
+              <label class="control-label" for="App-ProcessB-select1">Select step 1</label>
+              <div>
+                <select id="App-ProcessB-select1"><option value="1" selected>1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option></select>
+                <script type="application/json" data-for="App-ProcessB-select1" data-nonempty="">{}</script>
+              </div>
+            </div>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <button id="App-ProcessB-btn_validate_Step1" type="button" class="btn btn-default action-button">Perform</button>
+          </div>
+        </div>
+      </div>
+      <div class="page_App-ProcessB shinyjs-disabled" id="App-ProcessB-Step2">
+        <div id="App-ProcessB-Step2">
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <h3>Step2</h3>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 40px;">
+            <div class="form-group shiny-input-container" style="width: 150px;">
+              <label class="control-label" for="App-ProcessB-select2">Select step 2</label>
+              <div>
+                <select id="App-ProcessB-select2"><option value="1" selected>1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option></select>
+                <script type="application/json" data-for="App-ProcessB-select2" data-nonempty="">{}</script>
+              </div>
+            </div>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <button id="App-ProcessB-btn_validate_Step2" type="button" class="btn btn-default action-button">Perform</button>
+          </div>
+        </div>
+      </div>
+      <div class="page_App-ProcessB shinyjs-disabled" id="App-ProcessB-Step3">
+        <div id="App-ProcessB-Step3">
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <h3>Step3</h3>
+          </div>
+          <div style="display:inline-block; vertical-align: middle;padding-right: 20px;">
+            <button id="App-ProcessB-btn_validate_Step3" type="button" class="btn btn-default action-button">Validate</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-2">
+          <b>
+            <h4 style="color: blue;">Input of process</h4>
+          </b>
+          <div id="App-ProcessB-show_dataIn" class="shiny-html-output"></div>
+        </div>
+        <div class="col-sm-2">
+          <b>
+            <h4 style="color: blue;">Input of process</h4>
+          </b>
+          <div id="App-ProcessB-show_rv_dataIn" class="shiny-html-output"></div>
+        </div>
+        <div class="col-sm-2">
+          <b>
+            <h4 style="color: blue;">Output of process</h4>
+          </b>
+          <div id="App-ProcessB-show_rv_dataOut" class="shiny-html-output"></div>
+        </div>
+        <div class="col-sm-4">
+          <b>
+            <h4 style="color: blue;">status</h4>
+          </b>
+          <div id="App-ProcessB-show_status" class="shiny-html-output"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

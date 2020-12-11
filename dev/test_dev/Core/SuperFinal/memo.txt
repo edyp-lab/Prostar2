@@ -1,0 +1,8 @@
+Send dataset - > doit declencher une action sur observeEvent(dataIn())
+
+Quand on recoit un nouveau dataset :
+* enable le bouton reset
+* enable le 1er screen uniquement
+
+
+Pour disabler un screen (toogleState_Screens), on ne peut pas disabler completement. Il faut garder les boutons de navigation. Donc, appeler une fonction qui desactive uniquement l'écran. Le ToggleState_Screen doit etre specifique aux classes process et pipeline

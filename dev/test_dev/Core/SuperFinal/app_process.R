@@ -37,7 +37,7 @@ Pipeline <- R6Class(
       isSkipped = FALSE
       ),
     child.process = list(
-      ProcessDescription = NULL,
+      #ProcessDescription = NULL,
       ProcessA = NULL
     ),
     initialize = function(id){

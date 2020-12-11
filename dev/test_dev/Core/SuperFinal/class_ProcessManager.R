@@ -152,12 +152,12 @@ ProcessManager <- R6Class(
               self$screens[[i]]
             )
           else
-            shinyjs::hidden(
+            #shinyjs::hidden(
               div(
                 class = paste0("page_", self$id),
                 id = self$ns(self$config$steps[i]),
                 self$screens[[i]])
-            )
+           # )
         )
       }
       )
@@ -199,14 +199,7 @@ ProcessManager <- R6Class(
     Change_Current_Pos = function(i){ self$rv$current.pos <- 1},
     
     #-------------------------------------------------------
-    ToggleState_Screens = function(cond, range){
-      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      #if (verbose==T)  
-      #browser()
-      lapply(range, function(x){
-        shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
-      })
-    },
+    ToggleState_Screens = function(cond, range){},
     
     ToggleState_ResetBtn = function(cond){
       shinyjs::toggleState(self$ns('rstBtn'), condition = cond)
@@ -273,10 +266,11 @@ ProcessManager <- R6Class(
         #                #modal1 .modal-header {background-color: #339FFF; border-top-left-radius: 6px; border-top-right-radius: 6px}
         #                #modal1 .modal { text-align: right; padding-right:10px; padding-top: 24px;}
         #                #moda1 .close { font-size: 16px}")),
-        div(id = self$ns('GlobalTL'),
+        #div(id = self$ns('GlobalTL'),
             fluidRow(
               align= 'center',
-              column(width=2, div(style = self$btn_style,
+              column(width=2, div(id = self$ns('TL_LeftSide'),
+                                  style = self$btn_style,
                                   shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
                                                                  class = PrevNextBtnClass,
                                                                  style='padding:4px; font-size:80%')),
@@ -285,9 +279,11 @@ ProcessManager <- R6Class(
                                                style='padding:4px; font-size:80%'))
               )
               ),
-              column(width=8, div( style = self$btn_style,
+              column(width=8, div(id = self$ns('TL_Center'),
+                                  style = self$btn_style,
                                    self$timeline$ui())),
-              column(width=2, div(style = self$btn_style,
+              column(width=2, div(id = self$ns('TL_RightSide'),
+                                  style = self$btn_style,
                                   actionButton(self$ns("nextBtn"),
                                                ">>",
                                                class = PrevNextBtnClass,
@@ -296,26 +292,27 @@ ProcessManager <- R6Class(
               )
             ),
             
+        div(id = self$ns('Screens'),
             uiOutput(self$ns('SkippedInfoPanel')),
-            self$EncapsulateScreens(),
-            
-            fluidRow(
-              column(width=2,
-                     tags$b(h4(style = 'color: blue;', "Input of process")),
-                     uiOutput(self$ns('show_dataIn'))),
-              column(width=2,
-                     tags$b(h4(style = 'color: blue;', "Input of process")),
-                     uiOutput(self$ns('show_rv_dataIn'))),
-              column(width=2,
-                     tags$b(h4(style = 'color: blue;', "Output of process")),
-                     uiOutput(self$ns('show_rv_dataOut'))),
-              column(width=4,
-                     tags$b(h4(style = 'color: blue;', "status")),
-                     uiOutput(self$ns('show_status')))
-            )
+            self$EncapsulateScreens()
+            ),
+        fluidRow(
+          column(width=2,
+                 tags$b(h4(style = 'color: blue;', "Input of process")),
+                 uiOutput(self$ns('show_dataIn'))),
+          column(width=2,
+                 tags$b(h4(style = 'color: blue;', "Input of process")),
+                 uiOutput(self$ns('show_rv_dataIn'))),
+          column(width=2,
+                 tags$b(h4(style = 'color: blue;', "Output of process")),
+                 uiOutput(self$ns('show_rv_dataOut'))),
+          column(width=4,
+                 tags$b(h4(style = 'color: blue;', "status")),
+                 uiOutput(self$ns('show_status')))
+          )
             
         )
-      )
+      #)
     },
     
 
@@ -324,57 +321,31 @@ ProcessManager <- R6Class(
     ###############################################################
     server = function(dataIn = reactive({NULL})) {
       cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n'))
-      # 
-      # observe({
-      #   cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
-      #   #browser()
-      #   isolate({
-      #     self$Additional_Server_Funcs()
-      #     
-      #     # This function get the UI definition of the screens for the steps
-      #     # It differs between process class (which screens are given in details in their
-      #     # corresponding source code file) and pipeline class in which the UI is
-      #     # the ui() function from the entire process class
-      #     
-      #     #self$screens <- self$GetScreensDefinition()
-      #   })
-      #   
-      # })
-   
-      #observe({
-      #  cat(paste0(class(self)[1], '::observe() from - ', self$id, '\n'))
-       # self$screens <- self$GetScreensDefinition()
-      #  self$Additional_Server_Funcs()
-        
-     # })
       
       self$Additional_Server_Funcs()
       
-      
+      #
+      # Catch a new dataset sent by the caller
+      #
       observeEvent(dataIn(), ignoreNULL = F, ignoreInit = T,{
         cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
         
         self$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
-        self$ActionOn_New_DataIn()
-        self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
-        self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
-        
+        self$ActionOn_New_DataIn() # Used by class pipeline
+        browser()
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
-          self$rv$tl.tags.enabled[1:self$length] <- FALSE
         } else {
-          self$ToggleState_Screens(TRUE, 1:self$length)
-          self$ToggleState_ResetBtn(TRUE)
-          self$rv$tl.tags.enabled[1:self$length] <- TRUE
+          self$ToggleState_ResetBtn(TRUE) #Enable the reset button
+          self$ToggleState_Screens(TRUE, 1:self$length) #Enable the first screen
           
           # Disable all screens after the first mandatory not validated
           firstM <- self$GetFirstMandatoryNotValidated()
           if (!is.null(firstM) && self$length > 1) {
             offset <- as.numeric(firstM != self$length)
             self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-            self$rv$tl.tags.enabled[(firstM + offset):self$length] <- FALSE
           }
         }
         
@@ -395,21 +366,18 @@ ProcessManager <- R6Class(
         if (self$rv$isAllSkipped){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
-          self$rv$tl.tags.enabled <- rep(FALSE, self$length)
            }
         # Disable all steps if all steps are undone (such as after a reset)
         # Same action as for new dataIn() value
         if (self$rv$isAllUndone){
           self$ToggleState_Screens(TRUE, 1:self$length)
           self$ToggleState_ResetBtn(TRUE)
-          self$rv$tl.tags.enabled[1:self$length] <- TRUE
           
           # Disable all screens after the first mandatory not validated
           firstM <- self$GetFirstMandatoryNotValidated()
           if (!is.null(firstM) && self$length > 1) {
             offset <- as.numeric(firstM != self$length)
             self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-            self$rv$tl.tags.enabled[(firstM + offset):self$length] <- FALSE
           }
         }
         
@@ -418,11 +386,9 @@ ProcessManager <- R6Class(
          ind.max <- self$GetMaxValidated_AllSteps()
          if (!is.null(ind.max)){
            self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-           self$rv$tl.tags.enabled[1:ind.max] <- FALSE
            if (ind.max < self$length){
                  offset <- 1
                  self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
-                 self$rv$tl.tags.enabled[(offset + ind.max):self$length] <- TRUE
                }
          }
          
@@ -431,7 +397,6 @@ ProcessManager <- R6Class(
           if (!is.null(firstM) && self$length > 1) {
             offset <- as.numeric(firstM != self$length)
             self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-            self$rv$tl.tags.enabled[(firstM + offset):self$length] <- FALSE
             }
       })
       
