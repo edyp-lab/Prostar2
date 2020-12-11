@@ -13,12 +13,12 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
 
 
-ProcessManager <- R6Class(
-  "ProcessManager",
+ScreenManager <- R6Class(
+  "ScreenManager",
   private = list(),
   public = list(
     # Declaration of variables
-    input = NULL,
+    #input = NULL,
     id = NULL,
     ns = NULL,
     style = NULL,
@@ -139,29 +139,7 @@ ProcessManager <- R6Class(
     Get_Result = function(){self$dataOut$value},
     
     
-    EncapsulateScreens = function(){
-     # browser()
-      req(self$screens)
-      #cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
-      lapply(1:self$length, function(i) {
-        shinyjs::disabled(
-          if (i==1)
-            div(
-              class = paste0("page_", self$id),
-              id = self$ns(self$config$steps[i]),
-              self$screens[[i]]
-            )
-          else
-            #shinyjs::hidden(
-              div(
-                class = paste0("page_", self$id),
-                id = self$ns(self$config$steps[i]),
-                self$screens[[i]])
-           # )
-        )
-      }
-      )
-    },
+    EncapsulateScreens = function(){},
     InitializeDataIn = function(){ 
       cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
       if (verbose==T) browser()
@@ -200,10 +178,37 @@ ProcessManager <- R6Class(
     
     #-------------------------------------------------------
     ToggleState_Screens = function(cond, range){},
-    
+
     ToggleState_ResetBtn = function(cond){
+      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      #browser()
       shinyjs::toggleState(self$ns('rstBtn'), condition = cond)
+      # lapply(range, function(x){
+      #   shinyjs::toggleState(paste0(self$ns(self$config$steps[x]), '-div_TL_ResetBtn'), condition = cond)
+      #   #Send to TL the enabled/disabled tags
+      #   self$rv$tl.tags.enabled[x] <- cond
+      # })
     },
+    
+    # ToggleState_Child_Screens = function(cond, range){
+    #   cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+    #   #browser()
+    #   lapply(range, function(x){
+    #     shinyjs::toggleState(paste0(self$ns(self$config$steps[x]), '-div_Screens'), condition = cond)
+    #     #Send to TL the enabled/disabled tags
+    #     self$rv$tl.tags.enabled[x] <- cond
+    #   })
+    # },
+    # 
+    # ToggleState_Child_ResetBtn = function(cond, range){
+    #   cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+    #   #browser()
+    #   lapply(range, function(x){
+    #     shinyjs::toggleState(paste0(self$ns(self$config$steps[x]), '-div_TL_ResetBtn'), condition = cond)
+    #     #Send to TL the enabled/disabled tags
+    #     self$rv$tl.tags.enabled[x] <- cond
+    #   })
+    # },
     
     
     ResetScreens = function(){
@@ -269,30 +274,39 @@ ProcessManager <- R6Class(
         #div(id = self$ns('GlobalTL'),
             fluidRow(
               align= 'center',
-              column(width=2, div(id = self$ns('TL_LeftSide'),
-                                  style = self$btn_style,
-                                  shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
-                                                                 class = PrevNextBtnClass,
-                                                                 style='padding:4px; font-size:80%')),
-                                  shinyjs::disabled(actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
-                                               class = redBtnClass,
-                                               style='padding:4px; font-size:80%'))
-              )
+              column(width=2, 
+                     div(id = self$ns('div_TL_LeftSide'),
+                         style = self$btn_style,
+                         shinyjs::disabled(
+                           actionButton(self$ns("prevBtn"), "<<",
+                                        class = PrevNextBtnClass,
+                                        style = 'padding:4px; font-size:80%')
+                           )
+                         ),
+                     div(id = self$ns('div_TL_ResetBtn'),
+                         shinyjs::disabled(
+                           actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
+                                        class = redBtnClass,
+                                        style = 'padding:4px; font-size:80%'))
+                     )
               ),
-              column(width=8, div(id = self$ns('TL_Center'),
-                                  style = self$btn_style,
-                                   self$timeline$ui())),
-              column(width=2, div(id = self$ns('TL_RightSide'),
-                                  style = self$btn_style,
-                                  actionButton(self$ns("nextBtn"),
-                                               ">>",
-                                               class = PrevNextBtnClass,
-                                               style='padding:4px; font-size:80%')
-              )
-              )
-            ),
+              column(width=8, 
+                     div(id = self$ns('div_TL'),
+                         style = self$btn_style,
+                         self$timeline$ui())
+                     ),
+              column(width=2,
+                     div(id = self$ns('div_TL_RightSide'),
+                         style = self$btn_style,
+                         actionButton(self$ns("nextBtn"),
+                                      ">>",
+                                      class = PrevNextBtnClass,
+                                      style='padding:4px; font-size:80%')
+                         )
+                     )
+              ),
             
-        div(id = self$ns('Screens'),
+        div(id = self$ns('div_Screens'),
             uiOutput(self$ns('SkippedInfoPanel')),
             self$EncapsulateScreens()
             ),
@@ -322,7 +336,7 @@ ProcessManager <- R6Class(
     server = function(dataIn = reactive({NULL})) {
       cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n'))
       
-      self$Additional_Server_Funcs()
+     # self$Additional_Server_Funcs()
       
       #
       # Catch a new dataset sent by the caller
@@ -334,13 +348,14 @@ ProcessManager <- R6Class(
         self$rv$temp.dataIn <- dataIn()
         self$ActionOn_New_DataIn() # Used by class pipeline
         browser()
+        
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
-          self$ToggleState_ResetBtn(FALSE)
+           self$ToggleState_ResetBtn(FALSE)
+
         } else {
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
-          self$ToggleState_Screens(TRUE, 1:self$length) #Enable the first screen
-          
+          self$ToggleState_Screens(TRUE, 1) #Enable the first screen
           # Disable all screens after the first mandatory not validated
           firstM <- self$GetFirstMandatoryNotValidated()
           if (!is.null(firstM) && self$length > 1) {
@@ -370,7 +385,9 @@ ProcessManager <- R6Class(
         # Disable all steps if all steps are undone (such as after a reset)
         # Same action as for new dataIn() value
         if (self$rv$isAllUndone){
-          self$ToggleState_Screens(TRUE, 1:self$length)
+          self$ToggleState_Screens(TRUE, 1)
+          if(self$length > 1)
+            self$ToggleState_Screens(TRUE, 2:self$length)
           self$ToggleState_ResetBtn(TRUE)
           
           # Disable all screens after the first mandatory not validated
@@ -419,13 +436,15 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
-        observe({
-          cat(paste0(class(self)[1], '::self$input <- input from - ', self$id, '\n'))
-          self$input <- input
-          })
+        # observe({
+        #   cat(paste0(class(self)[1], '::self$input <- input from - ', self$id, '\n'))
+        #   self$input <- input
+        #   })
         
-        #self$Additional_Server_Funcs()
-        self$screens <- self$GetScreensDefinition()
+
+          self$Additional_Server_Funcs()
+        self$screens <- self$GetScreensDefinition(input, output)
+
         
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))

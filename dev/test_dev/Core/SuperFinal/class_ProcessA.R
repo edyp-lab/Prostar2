@@ -11,14 +11,14 @@ ProcessA = R6Class(
   
   public = list(
 
-   Description = function(){
+   Description = function(input, output){
      observe({
        mod_insert_md_server(paste0(self$config$name, "_md"), 
                             paste0('./md/', self$config$name, '.md'))
        
      })
-     
-     observeEvent(self$input$btn_validate_Description, ignoreInit = T, {
+     browser()
+     observeEvent(input[[self$ns(btn_validate_Description) ]], ignoreInit = T, {
        cat(paste0(class(self)[1], '::observeEvent(self$input$btn_validate_Description from - ', self$id, '\n'))
        self$InitializeDataIn()
        self$ValidateCurrentPos()
@@ -35,10 +35,10 @@ ProcessA = R6Class(
       
       ############### SCREEN 2 ######################################
       
-      Step1 = function(){
+      Step1 = function(input, output){
         name <- 'Step1'
         
-        observeEvent(self$input$btn_validate_Step1, ignoreInit = T, {
+        observeEvent(input$btn_validate_Step1, ignoreInit = T, {
           self$ValidateCurrentPos()
         })
         
@@ -60,14 +60,14 @@ ProcessA = R6Class(
       },
       
       ############### SCREEN 3 ######################################
-      Step2 = function(){
+      Step2 = function(input, output){
         name <- 'Step2'
         
       
       ## Logics to implement: here, we must take the last data not null
       # in previous datas. The objective is to take account
       # of skipped steps
-      observeEvent(self$input$btn_validate_Step2, ignoreInit = T, {
+      observeEvent(input$btn_validate_Step2, ignoreInit = T, {
         self$ValidateCurrentPos()
       })
       
@@ -87,10 +87,10 @@ ProcessA = R6Class(
       },
       
       ############### SCREEN 4 ######################################
-      Step3 = function(){
+      Step3 = function(input, output){
         name <- 'Step3'
 
-      observeEvent(self$input$btn_validate_Step3, ignoreInit = T, {
+      observeEvent(input$btn_validate_Step3, ignoreInit = T, {
         self$rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)
         self$ValidateCurrentPos()
       })

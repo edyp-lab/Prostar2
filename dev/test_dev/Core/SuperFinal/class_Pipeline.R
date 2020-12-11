@@ -1,6 +1,6 @@
 Pipeline = R6Class(
   "Pipeline",
-  inherit = ProcessManager,
+  inherit = ScreenManager,
   private = list(),
   
   public = list(
@@ -17,17 +17,40 @@ Pipeline = R6Class(
       )
     },
     
-    
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #browser()
       lapply(range, function(x){
-        shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
+        #shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
+        self$child.process[[x]]$ToggleState_Screens(cond, range)
         #Send to TL the enabled/disabled tags
         self$rv$tl.tags.enabled[x] <- cond
       })
     },
     
+    EncapsulateScreens = function(){
+      #browser()
+      req(self$screens)
+      #cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+      lapply(1:self$length, function(i) {
+       # shinyjs::disabled(
+          if (i==1)
+            div(
+              class = paste0("page_", self$id),
+              id = self$ns(self$config$steps[i]),
+              self$screens[[i]]
+            )
+          else
+            #shinyjs::hidden(
+            div(
+              class = paste0("page_", self$id),
+              id = self$ns(self$config$steps[i]),
+              self$screens[[i]])
+          # )
+       # )
+      }
+      )
+    },
     
     Additional_Initialize_Class = function(){
       cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
@@ -83,7 +106,7 @@ Pipeline = R6Class(
       },
     
 
-    GetScreensDefinition = function(){
+    GetScreensDefinition = function(input, output){
       cat(paste0(class(self)[1], '::', 'GetScreensDefinition() from - ', self$id, '\n'))
       req(self$child.process)
      # browser()
@@ -109,7 +132,7 @@ Pipeline = R6Class(
       )
 
       #browser()
-      self$PrepareData2Send()
+      #self$PrepareData2Send()
       
       
       lapply(self$config$steps, function(x){
@@ -126,9 +149,14 @@ Pipeline = R6Class(
       
       #browser()                                                                      
       # Catch the returned values of the process                                                           
-      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
+      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), ignoreInit = T, {
         cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
         #browser()
+        
+        lapply(names(self$child.process), function(x){
+          print(self$tmp.return[[x]]()$trigger)
+          print(self$tmp.return[[x]]()$value)
+          })
         self$ActionOn_Data_Trigger()
       })
     },
@@ -219,7 +247,8 @@ Pipeline = R6Class(
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
       
-      #browser()
+      browser()
+      cat('Tab of data to be sent\n')
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]]})
     }

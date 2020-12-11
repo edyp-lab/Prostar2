@@ -105,6 +105,8 @@ TimelineDraw <- R6Class(
           cat(paste0(class(self)[1], '::output$show_TLS\n'))
           HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), enabled()))
         })
+        
+       # observeEvent(status(),{browser()})
         }
       )
       }

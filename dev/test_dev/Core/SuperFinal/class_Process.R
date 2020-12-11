@@ -1,6 +1,6 @@
 Process = R6Class(
   "Process",
-  inherit = ProcessManager,
+  inherit = ScreenManager,
   private = list(),
   
   public = list(
@@ -28,6 +28,33 @@ Process = R6Class(
         self$rv$tl.tags.enabled[x] <- cond
       })
     },
+    
+    
+    EncapsulateScreens = function(){
+      #browser()
+      req(self$screens)
+      #cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+      lapply(1:self$length, function(i) {
+        shinyjs::disabled(
+          if (i==1)
+            div(
+              class = paste0("page_", self$id),
+              id = self$ns(self$config$steps[i]),
+              self$screens[[i]]
+            )
+          else
+            #shinyjs::hidden(
+            div(
+              class = paste0("page_", self$id),
+              id = self$ns(self$config$steps[i]),
+              self$screens[[i]])
+          # )
+        )
+      }
+      )
+    },
+    
+    
 
     Set_All_Skipped = function(){
       cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n'))
@@ -60,7 +87,7 @@ Process = R6Class(
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
       #if(verbose=='skip')
-      # browser()
+       browser()
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       
       # Either the process has been validated, one can prepare data to be sent to caller
@@ -70,11 +97,11 @@ Process = R6Class(
     },
     
     #---------------------------------------------------------------------
-    GetScreensDefinition = function(){
+    GetScreensDefinition = function(input, output){
       cat(paste0(class(self)[1], '::GetScreensDefinition() from - ', self$id, '\n'))
       #browser()
       setNames(lapply(self$config$steps, function(x){
-        eval(parse(text = paste0("self$", x, '()')))
+        eval(parse(text = paste0("self$", x, '(input, output)')))
       }),
       self$config$steps)
     }
