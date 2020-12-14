@@ -10,9 +10,6 @@ optionsBtnClass <- "info"
 
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
-
-
-
 ProcessManager <- R6Class(
   "ProcessManager",
   private = list(),
@@ -57,6 +54,7 @@ ProcessManager <- R6Class(
     
     Additional_Initialize_Class = function(){},
     Additional_Server_Funcs = function(){},
+    GetScreens_listeners = function(){},
     
     
     EncapsulateScreens = function(){
@@ -69,13 +67,10 @@ ProcessManager <- R6Class(
       )
     },
     
-    GetScreens_listeners = function(){},
     
     ui = function(){
-      #self$screens <- self$GetScreens()
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
-      #browser()
-      tagList(
+       tagList(
         shinyjs::useShinyjs(),
         self$timeline$ui(),
         div(id = self$ns('Screens'),
@@ -88,8 +83,7 @@ ProcessManager <- R6Class(
     ###############################################################
     server = function(dataIn = reactive({NULL})) {
       cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n'))
-      
-      
+
       self$timeline$server(status = reactive({self$rv$status}),
                            position = reactive({self$rv$current.pos}),
                            enabled = reactive({self$rv$tl.tags.enabled})
@@ -103,12 +97,10 @@ ProcessManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
-        observe({self$input <- input})
+        self$input <- input
         
         #Used to get the observeEvent functions
-        #self$screens <- self$GetScreens()
         self$GetScreens_listeners()
-
       })
     }
 )

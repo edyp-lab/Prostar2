@@ -95,10 +95,8 @@ Pipeline = R6Class(
       },
     
 
-    GetScreens = function(){
+    GetScreens_ui = function(){
       cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
-      #browser()
-      #req(self$child.process)
       
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()

@@ -1,6 +1,6 @@
 Pipeline = R6Class(
   "Pipeline",
-  inherit = ScreenManager,
+  inherit = ProcessManager,
   private = list(),
   
   public = list(
