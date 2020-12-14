@@ -34,12 +34,6 @@ server = function(input, output, session){
   rv <- reactiveValues()
   
   pipeline$server(dataIn = reactive({rv$dataIn}))
-    
-  output$show_ui <- renderUI({
-    req(pipeline)
-    pipeline$ui()
-  })
-
   
 }
 

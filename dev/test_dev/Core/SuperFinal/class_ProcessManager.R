@@ -37,7 +37,7 @@ ProcessManager <- R6Class(
     
     
     # Initialize class
-    initialize = function(id, ll.process) {
+    initialize = function(id) {
       cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
       self$id <- id
       self$ns <- NS(id)
@@ -302,8 +302,8 @@ ProcessManager <- R6Class(
             
         div(id = self$ns('Screens'),
             uiOutput(self$ns('SkippedInfoPanel')),
-            #self$EncapsulateScreens()
-            uiOutput(self$ns('show_screens'))
+            self$EncapsulateScreens()
+            #uiOutput(self$ns('show_screens'))
             ),
         fluidRow(
           column(width=2,

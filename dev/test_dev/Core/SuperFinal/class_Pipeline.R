@@ -41,8 +41,7 @@ Pipeline = R6Class(
       self$tmp.return <- reactiveValues()
       self$child.process <- setNames(lapply(self$config$steps,
                                             function(x){
-                                              assign(x, get(x))$new(id = self$ns(x),
-                                                                    ll.process = xxxx)
+                                              assign(x, get(x))$new(id = self$ns(x))
                                             }),
                                      self$config$steps
       )
