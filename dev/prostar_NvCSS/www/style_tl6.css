@@ -1,20 +1,25 @@
 /*
 https://codepen.io/xram/pen/thLsk
 https://jsfiddle.net/lmgonzalves/ew90tyoq/2/
+
+https://stackoverflow.com/questions/19058421/how-to-change-content-on-hover
+https://developer.mozilla.org/en-US/docs/Web/CSS/::after#Tooltips
 */
 
 .box{
-  background-color: lightgrey;
+  /*background-color: lightgrey;
   width: 75%;
-  height: 400px;
-  text-align: center;
+  height: 400px;*/
   position: absolute;
   top: 20px;
-  
+  left: 50px;
+  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  /*font-size: 1.6em abbr*/
+  color: lightgrey;
 }
 
 
@@ -23,10 +28,10 @@ https://jsfiddle.net/lmgonzalves/ew90tyoq/2/
   padding-top: 35px;
   border: 6px solid purple;
   border-radius: 50%;
-  height: 100px;
-  width: 100px;
-
+  height: 110px;
+  width: 110px;
 }
+
 
 
 .sub_box:nth-child(odd){
@@ -47,17 +52,41 @@ https://jsfiddle.net/lmgonzalves/ew90tyoq/2/
   transform: rotate(225deg);
 }
 
+
 .sub_box:nth-child(even) p {
   transform: rotate(-225deg);
 }
   
 
 
-.sub_box:nth-child(3) {
-  border: 6px solid purple;
-  border-radius: 50%;
-  background-color: lightblue ;
-}
 
 
-
+/* 1 Filtration */
+  .sub_box:nth-child(1) {
+    border: 6px solid purple;
+    border-radius: 50%;
+    background-color: lightblue ;
+    color: black;
+    font-weight: bold;
+  }
+/* 2 Normalization */
+  .sub_box:nth-child(2) {
+    border: 6px solid purple;
+    border-radius: 50%;
+    background-color: lightblue ;
+    font-weight: bold;
+  }
+/* 3 Imputation */
+  .sub_box:nth-child(3) {
+    border: 6px solid purple;
+    border-radius: 50%;
+    background-color: lightblue ;
+    font-weight: bold;
+  }
+/* 4 Agregation */
+  .sub_box:nth-child(4) {
+    border: 6px solid purple;
+    border-radius: 50%;
+    background-color: lightblue ;
+    font-weight: bold;
+  }
