@@ -7,19 +7,19 @@ Process = R6Class(
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
     
-    ui = function(){
-      #browser()
-      self$screens <- self$GetScreens()
-      
-      color <- "blue"
-      fluidPage(
-        shinyjs::useShinyjs(),
-        wellPanel(
-          style=paste0("background: white; border-width: 2px; border-color: ", color, ";"),
-          self$Main_UI()
-        )
-      )
-    },
+    #ui = function(){
+    #  #browser()
+    #  self$screens <- self$GetScreens()
+    #  
+    #  color <- "blue"
+    #  fluidPage(
+    #    shinyjs::useShinyjs(),
+    #    wellPanel(
+    #      style=paste0("background: white; border-width: 2px; border-color: ", color, ";"),
+    #      self$Main_UI()
+    #    )
+    #  )
+    #},
     
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))

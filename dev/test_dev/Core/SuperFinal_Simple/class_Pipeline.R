@@ -25,14 +25,13 @@ Pipeline = R6Class(
       self$Launch_Module_Server()
     },
 
-    GetScreens = function(){
+    GetScreens_ui = function(){
       cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
       
       lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()
       })
        },
-    
 
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){

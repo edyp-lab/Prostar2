@@ -83,6 +83,7 @@ ScreenManager <- R6Class(
                                             mandatory = self$config$mandatory)
       
       self$Additional_Initialize_Class()
+      self$screens <- self$GetScreens()
 
     },
     
@@ -193,7 +194,7 @@ ScreenManager <- R6Class(
     },
 
     ActionOn_New_DataIn = function(){},
-    
+    GetListeners = function(){},
     Additional_Server_Funcs = function(){},
     
     SetModalTxt = function(txt){self$modal_txt <- txt},
@@ -264,7 +265,7 @@ ScreenManager <- R6Class(
       cat(paste0('new position = ', self$rv$current.pos, '\n'))
     },
     
-    Main_UI = function(){
+    ui = function(){
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       #browser()
       tagList(
@@ -429,11 +430,11 @@ ScreenManager <- R6Class(
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
-        observe({
+        #observe({
           cat(paste0(class(self)[1], '::self$input <- input from - ', self$id, '\n'))
           self$input <- input
-          })
-        
+        #  })
+        self$GetListeners()
         self$Additional_Server_Funcs()
         
         output$show_screens <- renderUI({
