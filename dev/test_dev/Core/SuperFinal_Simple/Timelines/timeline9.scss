@@ -1,0 +1,63 @@
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background-color: #775253;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+$inactiveColor: #d0ccd0;
+$activeColor: #f4989c;
+$barHeight: 15px;
+$ballRadius: 30px;
+
+.timeline {
+  border-radius: 25px;
+  width: 80%;
+  margin: auto;
+  position: relative;
+  background-color: $inactiveColor;
+  height: $barHeight;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 0;
+}
+
+.timeline__progress {
+  min-width: 15px;
+  z-index: 1;
+  border-radius: 500px;
+  position: absolute;
+  background-color: $activeColor;
+  height: $barHeight;
+  -o-transition: all 0.5s ease;
+  -ms-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -webkit-transition: all 0.5s ease;
+  transition: all 0.2s ease;
+}
+
+.timeline__ball {
+  z-index: 2;
+  background-color: $inactiveColor;
+  height: $ballRadius;
+  width: $ballRadius;
+  border: 10px solid $inactiveColor;
+  background-color: white;
+  border-radius: 100px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  
+  &.active {
+    border-color: $activeColor;
+  }
+}

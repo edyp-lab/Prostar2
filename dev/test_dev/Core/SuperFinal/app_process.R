@@ -14,7 +14,7 @@ source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'class_global.R'), local=TRUE)$value
 
 #----------------------- Class ProcessManager ----------------------------------
-source(file.path('.', 'class_ScreenManager.R'), local=TRUE)$value
+source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
@@ -42,6 +42,12 @@ Pipeline <- R6Class(
     ),
     initialize = function(id){
       self$id <- id
+      self$child.process <- setNames(lapply(names(self$child.process),
+                                            function(x){
+                                              assign(x, get(x))$new(x)
+                                            }),
+                                     names(self$child.process)
+      )
     },
     
     
@@ -67,6 +73,17 @@ Pipeline <- R6Class(
           self$child.process[[x]]$Set_All_Skipped()
         })
       
+    },
+    
+    Launch_Servers = function(data){
+
+      lapply(names(self$child.process), function(x){
+        self$tmp.return[[x]] <- self$child.process[[x]]$server(dataIn = reactive({data()}))
+      })
+      
+      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
+        print(lapply(names(self$child.process), function(x){self$child.process[[x]]$Get_Result()}))
+      })
     },
     
 ui = function() {
@@ -97,24 +114,8 @@ server = function(dataIn ) {
   ns <- NS(self$id)
   utils::data(Exp1_R25_prot, package='DAPARdata2')
   
-
-  self$child.process <- setNames(lapply(names(self$child.process),
-                                     function(x){
-                                       assign(x, get(x))$new(x)
-                                       }),
-                              names(self$child.process)
-  )
-
-  lapply(names(self$child.process), function(x){
-    self$tmp.return[[x]] <- self$child.process[[x]]$server(dataIn = reactive({dataIn()}))
-  })
+  self$Launch_Servers(data = reactive({dataIn()}))
   
-
-  observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
-    print(lapply(names(self$child.process), function(x){self$child.process[[x]]$Get_Result()}))
-  })
-  
-
   moduleServer(self$id, function(input, output, session) {
     ns <- NS(self$id)
     

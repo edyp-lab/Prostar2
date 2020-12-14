@@ -1,6 +1,6 @@
 Pipeline = R6Class(
   "Pipeline",
-  inherit = ScreenManager,
+  inherit = ProcessManager,
   private = list(),
   
   public = list(
@@ -11,52 +11,41 @@ Pipeline = R6Class(
     
     ui = function(){
       cat(paste0(class(self)[1], '::ui() from - ', self$id, '\n'))
+      self$screens <- self$GetScreens()
       
       fluidPage(
         self$Main_UI()
       )
     },
     
+    
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #browser()
       lapply(range, function(x){
-        #shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
-        self$child.process[[x]]$ToggleState_Screens(cond, range)
+        shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
         #Send to TL the enabled/disabled tags
         self$rv$tl.tags.enabled[x] <- cond
       })
+      
+      #shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_LeftSide'), T)
+      #shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_RightSide'), T)
+      #shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-Screens'), T)
     },
     
-    EncapsulateScreens = function(){
-      #browser()
-      req(self$screens)
-      #cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
-      lapply(1:self$length, function(i) {
-       # shinyjs::disabled(
-          if (i==1)
-            div(
-              class = paste0("page_", self$id),
-              id = self$ns(self$config$steps[i]),
-              self$screens[[i]]
-            )
-          else
-            #shinyjs::hidden(
-            div(
-              class = paste0("page_", self$id),
-              id = self$ns(self$config$steps[i]),
-              self$screens[[i]])
-          # )
-       # )
-      }
-      )
-    },
     
     Additional_Initialize_Class = function(){
       cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
       
       self$rv$data2send <- NULL
       self$tmp.return <- reactiveValues()
+      self$child.process <- setNames(lapply(self$config$steps,
+                                            function(x){
+                                              assign(x, get(x))$new(id = self$ns(x),
+                                                                    ll.process = xxxx)
+                                            }),
+                                     self$config$steps
+      )
            },
     
     Discover_Skipped_Steps = function(){
@@ -97,6 +86,7 @@ Pipeline = R6Class(
     
     Additional_Server_Funcs = function(){
       cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n'))
+      #self$GetScreens()
       self$Launch_Module_Server()
     },
     
@@ -106,10 +96,11 @@ Pipeline = R6Class(
       },
     
 
-    GetScreensDefinition = function(input, output){
-      cat(paste0(class(self)[1], '::', 'GetScreensDefinition() from - ', self$id, '\n'))
+    GetScreens = function(){
+      cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
+      browser()
       req(self$child.process)
-     # browser()
+      
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()
       }),
@@ -123,22 +114,8 @@ Pipeline = R6Class(
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
       cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n'))
-      #browser()
-      self$child.process <- setNames(lapply(self$config$steps,
-                                         function(x){
-                                           assign(x, get(x))$new(self$ns(x))
-                                         }),
-                                  self$config$steps
-      )
-
-      #browser()
+     # browser()
       #self$PrepareData2Send()
-      
-      
-      lapply(self$config$steps, function(x){
-        self$tmp.return[[x]] <- self$child.process[[x]]$ToggleState_Screens(F, 1)
-      })
-      
       
       lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$child.process[[x]]$server(
@@ -146,17 +123,10 @@ Pipeline = R6Class(
           )
       })
       
-      
-      #browser()                                                                      
       # Catch the returned values of the process                                                           
-      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), ignoreInit = T, {
+      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
         cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
         #browser()
-        
-        lapply(names(self$child.process), function(x){
-          print(self$tmp.return[[x]]()$trigger)
-          print(self$tmp.return[[x]]()$value)
-          })
         self$ActionOn_Data_Trigger()
       })
     },
@@ -247,8 +217,7 @@ Pipeline = R6Class(
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]] <- update(x)})
       
-      browser()
-      cat('Tab of data to be sent\n')
+      #browser()
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]]})
     }
