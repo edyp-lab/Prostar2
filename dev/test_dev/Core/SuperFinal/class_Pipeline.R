@@ -9,14 +9,14 @@ Pipeline = R6Class(
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed.",
     
-    ui = function(){
-      cat(paste0(class(self)[1], '::ui() from - ', self$id, '\n'))
-      self$screens <- self$GetScreens()
-      
-      fluidPage(
-        self$Main_UI()
-      )
-    },
+    #ui = function(){
+    #  cat(paste0(class(self)[1], '::ui() from - ', self$id, '\n'))
+    #  self$screens <- self$GetScreens()
+    #  
+    #  fluidPage(
+    #    self$Main_UI()
+    #  )
+    #},
     
     
     ToggleState_Screens = function(cond, range){

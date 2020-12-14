@@ -11,13 +11,17 @@ ProcessA = R6Class(
   
   public = list(
 
+    GetListeners = function(){
+      
+      observeEvent(self$input$btn_validate_Description, ignoreInit = T, {
+        cat(paste0(class(self)[1], '::observeEvent(self$input$btn_validate_Description from - ', self$id, '\n'))
+        self$InitializeDataIn()
+        self$ValidateCurrentPos()
+      })
+      
+    },
+    
    Description = function(){
-     
-     observeEvent(self$input$btn_validate_Description, ignoreInit = T, {
-       cat(paste0(class(self)[1], '::observeEvent(self$input$btn_validate_Description from - ', self$id, '\n'))
-       self$InitializeDataIn()
-       self$ValidateCurrentPos()
-     })
      
       tagList(
         actionButton(self$ns('btn_validate_Description'), 

@@ -52,7 +52,7 @@ ProcessManager <- R6Class(
       self$timeline <- TimelineDraw$new(self$ns('TL_draw'), mandatory = self$config$mandatory)
       
       self$Additional_Initialize_Class()
-      self$screens <- self$GetScreens()
+      self$screens <- self$GetScreens_ui()
     },
     
     Additional_Initialize_Class = function(){},
@@ -60,7 +60,6 @@ ProcessManager <- R6Class(
     
     
     EncapsulateScreens = function(){
-      #self$screens <- self$GetScreens()
       lapply(1:self$length, function(i) {
           div(id = self$ns(self$config$steps[i]),
               class = paste0("page_", self$id),
@@ -70,6 +69,7 @@ ProcessManager <- R6Class(
       )
     },
     
+    GetScreens_listeners = function(){},
     
     ui = function(){
       #self$screens <- self$GetScreens()
@@ -82,7 +82,6 @@ ProcessManager <- R6Class(
             self$EncapsulateScreens() )
         )
     },
-    
 
     ###############################################################
     ###                          SERVER                         ###
@@ -105,11 +104,11 @@ ProcessManager <- R6Class(
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
         observe({self$input <- input})
-        self$screens <- self$GetScreens()
         
-        #observeEvent(self$input[['ProcessA-btn_validate_Description']], ignoreInit = F, {
-        #  cat(paste0(class(self)[1], '::observeEvent(self$input$ProcessA-btn_validate_Description from - ', self$id, '\n'))
-        #})
+        #Used to get the observeEvent functions
+        #self$screens <- self$GetScreens()
+        self$GetScreens_listeners()
+
       })
     }
 )
