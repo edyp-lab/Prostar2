@@ -18,7 +18,7 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/::after#Tooltips
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  /*font-size: 1.6em abbr*/
+  font-size: 1.6em ;/*abbr*/
   color: lightgrey;
 }
 
@@ -55,6 +55,8 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/::after#Tooltips
 
 .sub_box:nth-child(even) p {
   transform: rotate(-225deg);
+  position: relative;
+  top: 4px;
 }
   
 
@@ -62,31 +64,52 @@ https://developer.mozilla.org/en-US/docs/Web/CSS/::after#Tooltips
 
 
 /* 1 Filtration */
-  .sub_box:nth-child(1) {
+/*  .sub_box:nth-child(1) {
     border: 6px solid purple;
     border-radius: 50%;
     background-color: lightblue ;
     color: black;
     font-weight: bold;
+    font-size: 1em ;
   }
 /* 2 Normalization */
-  .sub_box:nth-child(2) {
+/*  .sub_box:nth-child(2) {
     border: 6px solid purple;
     border-radius: 50%;
     background-color: lightblue ;
+    color: black;
     font-weight: bold;
+    font-size: 0.65em ;
   }
 /* 3 Imputation */
-  .sub_box:nth-child(3) {
+/*  .sub_box:nth-child(3) {
     border: 6px solid purple;
     border-radius: 50%;
     background-color: lightblue ;
+    color: black;
     font-weight: bold;
+    font-size: 0.85em ;
   }
 /* 4 Agregation */
   .sub_box:nth-child(4) {
     border: 6px solid purple;
     border-radius: 50%;
     background-color: lightblue ;
+    color: black;
     font-weight: bold;
+    font-size: 0.7em ;
   }
+
+
+.sub_box:nth-child(-n+3):before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 0;
+  border: 4px solid green;
+  background: lightgreen;
+  opacity: 0.7;
+  border-radius: 50%;
+  height: 95px;
+  width: 95px;
+}
