@@ -15,8 +15,8 @@ source(file.path('../../../../R', 'mod_insert_md.R'), local=TRUE)$value
 source(file.path('../../../../R', 'global.R'), local=TRUE)$value
 source(file.path('.', 'class_global.R'), local=TRUE)$value
 
-#----------------------- Class ProcessManager ----------------------------------
-source(file.path('.', 'class_ProcessManager.R'), local=TRUE)$value
+#----------------------- Class ScreenManager ----------------------------------
+source(file.path('.', 'class_ScreenManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessB.R'), local=TRUE)$value

@@ -26,13 +26,8 @@ ProcessManager <- R6Class(
     length = NULL,
     config = NULL,
     screens = NULL,
-    modal_txt = NULL,
     timeline  = NULL,
-    default_pos = list(VALIDATED = 1,
-                       SKIPPED = 1,
-                       UNDONE = 1),
-    
-    dataOut = "<reactiveValues>",
+
     rv = "<reactiveValues>",
     
     
@@ -41,26 +36,15 @@ ProcessManager <- R6Class(
       cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
       self$id <- id
       self$ns <- NS(id)
-      
-      
-        self$config <- private$.config
-      
+      self$config <- private$.config
       self$length <- length(self$config$mandatory)
       self$config$type = class(self)[2]
       self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
-      
-      
       self$rv = reactiveValues(
         dataIn = NULL,
-        temp.dataIn = NULL,
-        current.pos = 1,
         status = setNames(rep(global$UNDONE, self$length), self$config$steps),
-        tl.tags.enabled = setNames(rep(FALSE, self$length), self$config$steps),
-        local.reset = NULL,
-        isAllSkipped = FALSE,
-        isAllUndone = TRUE,
-        isReseted = NULL,
-        isSkipped = NULL)
+        tl.tags.enabled = setNames(rep(FALSE, self$length), self$config$steps)
+        )
       
    
       self$rv$status <- setNames(rep(global$UNDONE, self$length), self$config$steps)
@@ -68,36 +52,34 @@ ProcessManager <- R6Class(
       self$timeline <- TimelineDraw$new(self$ns('TL_draw'), mandatory = self$config$mandatory)
       
       self$Additional_Initialize_Class()
-
+      self$screens <- self$GetScreens()
     },
     
     Additional_Initialize_Class = function(){},
+    Additional_Server_Funcs = function(){},
     
     
     EncapsulateScreens = function(){
-      req(self$screens)
+      #self$screens <- self$GetScreens()
       lapply(1:self$length, function(i) {
-        shinyjs::disabled(
           div(id = self$ns(self$config$steps[i]),
               class = paste0("page_", self$id),
               self$screens[[i]]
             )
-        )
       }
       )
     },
     
-    Additional_Server_Funcs = function(){},
     
-    Main_UI = function(){
+    ui = function(){
+      #self$screens <- self$GetScreens()
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       #browser()
       tagList(
         shinyjs::useShinyjs(),
         self$timeline$ui(),
         div(id = self$ns('Screens'),
-            self$EncapsulateScreens()
-            )
+            self$EncapsulateScreens() )
         )
     },
     
@@ -113,16 +95,21 @@ ProcessManager <- R6Class(
                            position = reactive({self$rv$current.pos}),
                            enabled = reactive({self$rv$tl.tags.enabled})
       )
-     
-
+      
+      self$Additional_Server_Funcs()
+      
       ###############################################################
       ###                    MODULE SERVER                        ###
       ###############################################################
       moduleServer(self$id, function(input, output, session) {
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
-        self$Additional_Server_Funcs()
-
+        observe({self$input <- input})
+        self$screens <- self$GetScreens()
+        
+        #observeEvent(self$input[['ProcessA-btn_validate_Description']], ignoreInit = F, {
+        #  cat(paste0(class(self)[1], '::observeEvent(self$input$ProcessA-btn_validate_Description from - ', self$id, '\n'))
+        #})
       })
     }
 )

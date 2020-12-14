@@ -18,8 +18,7 @@ ProcessA = R6Class(
        self$InitializeDataIn()
        self$ValidateCurrentPos()
      })
-      
-      
+     
       tagList(
         actionButton(self$ns('btn_validate_Description'), 
                      paste0('Start ', self$config$name),

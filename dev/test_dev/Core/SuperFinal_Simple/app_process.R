@@ -2,8 +2,6 @@ library(shiny)
 library(R6)
 library(tibble)
 
-verbose = F
-
 options(shiny.fullstacktrace = T)
 
 #------------------------ Class TimelineDraw --------------------------------------
@@ -41,7 +39,7 @@ Pipeline <- R6Class(
       self$ns <- NS(id)
       self$child.process <- setNames(lapply(names(self$child.process),
                                             function(x){
-                                              assign(x, get(x))$new(x)
+                                              assign(x, get(x))$new(self$ns(x))
                                             }),
                                      names(self$child.process)
       )
@@ -55,13 +53,16 @@ Pipeline <- R6Class(
     },
     
 ui = function() {
-  uiOutput(self$ns('show_ui'))
+  tagList(
+    lapply(names(self$child.process), function(x){
+      wellPanel(h3(x), self$child.process[[x]]$ui())
+    })
+  )
 },
 server = function(dataIn ) {
   
   self$Launch_Servers(data = reactive({dataIn()}))
   
-
   moduleServer(self$id, function(input, output, session) {
     
     output$show_ui <- renderUI({

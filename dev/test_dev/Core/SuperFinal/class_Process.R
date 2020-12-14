@@ -1,6 +1,6 @@
 Process = R6Class(
   "Process",
-  inherit = ProcessManager,
+  inherit = ScreenManager,
   private = list(),
   
   public = list(

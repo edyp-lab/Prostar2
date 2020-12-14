@@ -1,6 +1,6 @@
 Pipeline = R6Class(
   "Pipeline",
-  inherit = ProcessManager,
+  inherit = ScreenManager,
   private = list(),
   
   public = list(
@@ -28,9 +28,9 @@ Pipeline = R6Class(
         self$rv$tl.tags.enabled[x] <- cond
       })
       
-      #shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_LeftSide'), T)
-      #shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_RightSide'), T)
-      #shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-Screens'), T)
+      shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_LeftSide'), T)
+      shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_RightSide'), T)
+      shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-Screens'), T)
     },
     
     
@@ -97,8 +97,8 @@ Pipeline = R6Class(
 
     GetScreens = function(){
       cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
-      browser()
-      req(self$child.process)
+      #browser()
+      #req(self$child.process)
       
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()

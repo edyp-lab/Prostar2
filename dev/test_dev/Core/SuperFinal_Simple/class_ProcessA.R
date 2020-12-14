@@ -13,11 +13,10 @@ ProcessA = R6Class(
 
    Description = function(){
      
-     observeEvent(self$input$btn_validate_Description, ignoreInit = T, {
-       cat(paste0(class(self)[1], '::observeEvent(self$input$btn_validate_Description from - ', self$id, '\n'))
-       self$InitializeDataIn()
-       self$ValidateCurrentPos()
+     observeEvent(self$input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
+       cat(paste0(class(self)[1], "::observeEvent(self$input$btn_validate_Description from - ", self$id, '\n'))
      })
+
       
       tagList(
         actionButton(self$ns('btn_validate_Description'), 
@@ -33,7 +32,7 @@ ProcessA = R6Class(
         name <- 'Step1'
         
         observeEvent(self$input$btn_validate_Step1, ignoreInit = T, {
-          self$ValidateCurrentPos()
+          print("Action on btn_validate_Step1")
         })
         
         tagList(

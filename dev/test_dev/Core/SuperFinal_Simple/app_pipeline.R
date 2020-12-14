@@ -34,7 +34,7 @@ server = function(input, output, session){
   rv <- reactiveValues()
   
   pipeline$server(dataIn = reactive({rv$dataIn}))
-  
+ # browser()
 }
 
 shiny::shinyApp(ui, server)
