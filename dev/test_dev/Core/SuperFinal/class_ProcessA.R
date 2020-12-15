@@ -14,6 +14,8 @@ ProcessA = R6Class(
     Description_listeners = function(){
       observeEvent(self$input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
         cat(paste0(class(self)[1], "::observeEvent(self$input$btn_validate_Description from - ", self$id, '\n'))
+        self$InitializeDataIn()
+        self$ValidateCurrentPos()
       })
     },
     
@@ -32,6 +34,7 @@ ProcessA = R6Class(
   Step1_listeners = function(){
     observeEvent(self$input$btn_validate_Step1, ignoreInit = T, {
       print("Action on btn_validate_Step1")
+      self$ValidateCurrentPos()
     })
   },
   

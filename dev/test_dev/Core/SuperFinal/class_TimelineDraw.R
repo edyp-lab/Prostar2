@@ -4,7 +4,6 @@ TimelineDraw <- R6Class(
   public = list(
     id = NULL,
     ns = NULL,
-    verbose = T,
     length = NULL,
     style = NULL,
     mandatory = NULL,
