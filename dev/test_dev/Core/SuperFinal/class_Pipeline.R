@@ -12,13 +12,20 @@ Pipeline = R6Class(
     
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      #browser()
-      lapply(range, function(x){
-        shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-Screens'), condition = cond)
-        #Send to TL the enabled/disabled tags
-        self$rv$tl.tags.enabled[x] <- cond
-      })
+      browser()
+      # lapply(range, function(x){
+      #   shinyjs::toggleState(paste0(self$ns(self$config$steps[x]), '-Screens'), condition = cond)
+      #   #Send to TL the enabled/disabled tags
+      #   self$rv$tl.tags.enabled[x] <- cond
+      # })
       
+      lapply(range, function(x){
+        name <- self$config$steps[x]
+        self$child.process[[name]]$ToggleState_Screens(cond, 1:self$child.process[[name]]$length)
+          #Send to TL the enabled/disabled tags
+          self$rv$tl.tags.enabled[x] <- cond
+        })
+        
       # shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_LeftSide'), T)
       # shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_RightSide'), T)
       # shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-Screens'), T)
@@ -51,7 +58,7 @@ Pipeline = R6Class(
     
     Set_All_Reset = function(){
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      #browser()
+      browser()
       
       self$ResetScreens()
       self$rv$dataIn <- NULL
@@ -59,10 +66,11 @@ Pipeline = R6Class(
       self$Initialize_Status_Process()
       
       # Say to all child processes to reset themselves
-      if (!is.null(self$child.process))
+      #if (!is.null(self$child.process))
         lapply(self$config$steps, function(x){
           self$child.process[[x]]$Set_All_Reset()
         })
+      
       self$Send_Result_to_Caller()
     },
     
@@ -103,52 +111,7 @@ Pipeline = R6Class(
       )
     },
     
-    Status_Listener = function(){observeEvent(self$rv$status, ignoreInit = T, {
-      cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
-      
-      self$Discover_Skipped_Steps()
-      self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
-      self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
-      browser()
-      # Disable all steps if all steps are skipped
-      if (self$rv$isAllSkipped){
-        self$ToggleState_Screens(FALSE, 1:self$length)
-        self$ToggleState_ResetBtn(FALSE)
-      }
-      # Disable all steps if all steps are undone (such as after a reset)
-      # Same action as for new dataIn() value
-      if (self$rv$isAllUndone){
-        self$ToggleState_Screens(TRUE, 1:self$length)
-        self$ToggleState_ResetBtn(TRUE)
-        
-        # # Disable all screens after the first mandatory not validated
-        # firstM <- self$GetFirstMandatoryNotValidated()
-        # if (!is.null(firstM) && self$length > 1) {
-        #   offset <- as.numeric(firstM != self$length)
-        #   self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-        # }
-      }
-      
-      # Disable all previous steps from each VALIDATED step
-      # and enable all further steps 
-      ind.max <- self$GetMaxValidated_AllSteps()
-      if (!is.null(ind.max)){
-        self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-        if (ind.max < self$length){
-          offset <- 1
-          self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
-        }
-      }
-      
-      # Disable all screens after the first mandatory not validated
-      firstM <- self$GetFirstMandatoryNotValidated()
-      if (!is.null(firstM) && self$length > 1) {
-        offset <- as.numeric(firstM != self$length)
-        self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-      }
-    })
-      },
-    
+   
     
     GetScreens_ui = function(){
       cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))

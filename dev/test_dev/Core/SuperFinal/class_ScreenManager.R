@@ -170,7 +170,8 @@ ScreenManager <- R6Class(
       cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
       val <- NULL
       ind <- grep(global$VALIDATED, self$rv$status)
-      val <- if (length(ind) > 0) max(ind) else 0
+      if (length(ind) > 0) 
+        val <-max(ind)
       val
     },
     
@@ -326,11 +327,13 @@ ScreenManager <- R6Class(
         self$ActionOn_New_DataIn() # Used by class pipeline
         #browser()
         if(is.null(dataIn())){
+          browser()
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
         } else {
+          browser()
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
-          self$ToggleState_Screens(TRUE, 1:self$length) #Enable the first screen
+          self$ToggleState_Screens(TRUE, 1) #Enable the first screen
           
           # Disable all screens after the first mandatory not validated
           firstM <- self$GetFirstMandatoryNotValidated(1:self$length)
@@ -343,8 +346,56 @@ ScreenManager <- R6Class(
       })
       
       # Catch new status event
-      self$Status_Listener()
       
+      observeEvent(self$rv$status, ignoreInit = T, {
+        cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
+        #browser()
+        #self$Status_Listener()
+        
+        self$Discover_Skipped_Steps()
+        self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
+        self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
+        browser()
+        # Disable all steps if all steps are skipped
+        if (self$rv$isAllSkipped){
+          self$ToggleState_Screens(FALSE, 1:self$length)
+          self$ToggleState_ResetBtn(FALSE)
+        }
+        # Disable all steps if all steps are undone (such as after a reset)
+        # Same action as for new dataIn() value
+        if (self$rv$isAllUndone){
+          self$ToggleState_Screens(TRUE, 1:self$length)
+          self$ToggleState_ResetBtn(TRUE)
+          
+          # # Disable all screens after the first mandatory not validated
+          # firstM <- self$GetFirstMandatoryNotValidated()
+          # if (!is.null(firstM) && self$length > 1) {
+          #   offset <- as.numeric(firstM != self$length)
+          #   self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+          # }
+        }
+        
+        # Disable all previous steps from each VALIDATED step
+        # and enable all further steps 
+        ind.max <- self$GetMaxValidated_AllSteps()
+        if (!is.null(ind.max)){
+          self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+          
+          if (ind.max < self$length){
+            # Enable all steps after the current one but the ones
+            # after the first mandatory not validated
+            firstM <- self$GetFirstMandatoryNotValidated((ind.max+1):self$length)
+            if (is.null(firstM)){
+              self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(self$length))
+            } else {
+              self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(ind.max + firstM))
+              if (ind.max + firstM < self$length)
+                self$ToggleState_Screens(cond = FALSE, range = (ind.max + firstM + 1):self$length)
+            }
+          }
+        }
+        
+      })
       
       observeEvent(self$rv$current.pos, ignoreInit = T,{
         cat(paste0(class(self)[1], '::observe(self$rv$current.pos) from - ', self$id, '\n'))

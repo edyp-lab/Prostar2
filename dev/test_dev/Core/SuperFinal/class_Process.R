@@ -12,7 +12,6 @@ Process = R6Class(
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #browser()
       lapply(range, function(x){
-        #shinyjs::toggleState(paste0(self$ns(self$config$steps[x]), '-Screens'), condition = cond)
         shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
         #Send to TL the enabled/disabled tags
         self$rv$tl.tags.enabled[x] <- cond
@@ -28,14 +27,16 @@ Process = R6Class(
     Discover_Skipped_Steps = function(){
       cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
       for (i in 1:self$length)
-        if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
+        if (self$rv$status[i] != global$VALIDATED && 
+            !is.null(self$GetMaxValidated_AllSteps()) && 
+            self$GetMaxValidated_AllSteps() > i){
           self$rv$status[i] <- global$SKIPPED
         }
     },
     
     Set_All_Reset = function(){
       cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n'))
-      #browser()
+      browser()
       
       self$ResetScreens()
       self$rv$dataIn <- NULL
@@ -60,7 +61,7 @@ Process = R6Class(
     Status_Listener = function(){
       observeEvent(self$rv$status, ignoreInit = T, {
         cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
-        
+        browser()
         self$Discover_Skipped_Steps()
         self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
         self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
