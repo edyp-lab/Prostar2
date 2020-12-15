@@ -10,6 +10,9 @@ optionsBtnClass <- "info"
 
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
+
+
+
 ScreenManager <- R6Class(
   "ScreenManager",
   private = list(),
@@ -38,6 +41,7 @@ ScreenManager <- R6Class(
       cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
       self$id <- id
       self$ns <- NS(id)
+      
       self$dataOut = reactiveValues(
         trigger = 0,
         value = NULL
@@ -55,10 +59,11 @@ ScreenManager <- R6Class(
       else
         self$config <- private$.config
       
-      
       self$length <- length(self$config$mandatory)
       self$config$type = class(self)[2]
       self$config$mandatory <- setNames(self$config$mandatory, self$config$steps)
+      
+      
       self$rv = reactiveValues(
         dataIn = NULL,
         temp.dataIn = NULL,
@@ -69,16 +74,17 @@ ScreenManager <- R6Class(
         isAllSkipped = FALSE,
         isAllUndone = TRUE,
         isReseted = NULL,
-        isSkipped = NULL
-        )
+        isSkipped = NULL)
       
    
       self$rv$status <- setNames(rep(global$UNDONE, self$length), self$config$steps)
       
-      self$timeline <- TimelineDraw$new(self$ns('TL_draw'), mandatory = self$config$mandatory)
+      self$timeline <- TimelineDraw$new(self$ns('TL_draw'), 
+                                            mandatory = self$config$mandatory)
       
       self$Additional_Initialize_Class()
       self$screens <- self$GetScreens_ui()
+
     },
     
     # Check if the config is correct
@@ -117,7 +123,6 @@ ScreenManager <- R6Class(
     Set_Reseted = function(){},
     ValidateCurrentPos = function(){},
     
-    
     GetStringStatus = function(name){
       if (name==global$VALIDATED) "Validated"
       else if (name==global$UNDONE) "Undone"
@@ -134,39 +139,30 @@ ScreenManager <- R6Class(
       #self$dataOut$value <- self$rv$dataIn
       self$dataOut$trigger <- self$Timestamp()
       self$dataOut$value <- self$rv$dataIn
-      
+
     },
     
     Get_Result = function(){self$dataOut$value},
     
     
-    # EncapsulateScreens = function(){
-    #   lapply(1:self$length, function(i) {
-    #       div(id = self$ns(self$config$steps[i]),
-    #           class = paste0("page_", self$id),
-    #           self$screens[[i]]
-    #         )
-    #   }
-    #   )
-    # },
-    
     EncapsulateScreens = function(){
       cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
       lapply(1:self$length, function(i) {
-       # shinyjs::disabled(
-          # if (i==1)
-          #   div(id = self$ns(self$config$steps[i]),
-          #       class = paste0("page_", self$id),
-          #       self$screens[[i]]
-          #       )
-          # else
-          #  shinyjs::hidden(
-              div(id = self$ns(self$config$steps[i]),
-                  class = paste0("page_", self$id),
-                  self$screens[[i]]
-                  )
-         #   )
-       # )
+        # shinyjs::disabled(
+        #   if (i==1)
+        #     div(
+        #       class = paste0("page_", self$id),
+        #       id = self$ns(self$config$steps[i]),
+        #       self$screens[[i]]
+        #     )
+        #   else
+        #     shinyjs::hidden(
+              div(
+                class = paste0("page_", self$id),
+                id = self$ns(self$config$steps[i]),
+                self$screens[[i]])
+        #     )
+        # )
       }
       )
     },
@@ -199,7 +195,7 @@ ScreenManager <- R6Class(
       val <- if (length(ind) > 0) max(ind) else 0
       val
     },
-    
+
     
     SetModalTxt = function(txt){self$modal_txt <- txt},
     
@@ -265,15 +261,6 @@ ScreenManager <- R6Class(
       cat(paste0('new position = ', self$rv$current.pos, '\n'))
     },
     
-    # ui = function(){
-    #   cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
-    #    tagList(
-    #     shinyjs::useShinyjs(),
-    #     self$timeline$ui(),
-    #     div(id = self$ns('Screens'),
-    #         self$EncapsulateScreens() )
-    #     )
-    # },
     ui = function(){
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       #browser()
@@ -286,35 +273,35 @@ ScreenManager <- R6Class(
         #                #modal1 .modal { text-align: right; padding-right:10px; padding-top: 24px;}
         #                #moda1 .close { font-size: 16px}")),
         #div(id = self$ns('GlobalTL'),
-        fluidRow(
-          align= 'center',
-          column(width=2, div(id = self$ns('TL_LeftSide'),
-                              style = self$btn_style,
-                              shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
-                                                             class = PrevNextBtnClass,
-                                                             style='padding:4px; font-size:80%')),
-                              shinyjs::disabled(actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
-                                                             class = redBtnClass,
-                                                             style='padding:4px; font-size:80%'))
-          )
-          ),
-          column(width=8, div(id = self$ns('TL_Center'),
-                              style = self$btn_style,
-                              self$timeline$ui())),
-          column(width=2, div(id = self$ns('TL_RightSide'),
-                              style = self$btn_style,
-                              actionButton(self$ns("nextBtn"),
-                                           ">>",
-                                           class = PrevNextBtnClass,
-                                           style='padding:4px; font-size:80%')
-          )
-          )
-        ),
-        
+            fluidRow(
+              align= 'center',
+              column(width=2, div(id = self$ns('TL_LeftSide'),
+                                  style = self$btn_style,
+                                  shinyjs::disabled(actionButton(self$ns("prevBtn"), "<<",
+                                                                 class = PrevNextBtnClass,
+                                                                 style='padding:4px; font-size:80%')),
+                                  shinyjs::disabled(actionButton(self$ns("rstBtn"), paste0("Reset entire ", self$type),
+                                               class = redBtnClass,
+                                               style='padding:4px; font-size:80%'))
+              )
+              ),
+              column(width=8, div(id = self$ns('TL_Center'),
+                                  style = self$btn_style,
+                                   self$timeline$ui())),
+              column(width=2, div(id = self$ns('TL_RightSide'),
+                                  style = self$btn_style,
+                                  actionButton(self$ns("nextBtn"),
+                                               ">>",
+                                               class = PrevNextBtnClass,
+                                               style='padding:4px; font-size:80%')
+              )
+              )
+            ),
+            
         div(id = self$ns('Screens'),
             uiOutput(self$ns('SkippedInfoPanel')),
             self$EncapsulateScreens()
-        ),
+            ),
         fluidRow(
           column(width=2,
                  tags$b(h4(style = 'color: blue;', "Input of process")),
@@ -328,24 +315,24 @@ ScreenManager <- R6Class(
           column(width=4,
                  tags$b(h4(style = 'color: blue;', "status")),
                  uiOutput(self$ns('show_status')))
+          )
+            
         )
-        
-      )
       #)
     },
     
-    
+
     ###############################################################
     ###                          SERVER                         ###
     ###############################################################
     server = function(dataIn = reactive({NULL})) {
       cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n'))
-
+      
+      
       self$timeline$server(status = reactive({self$rv$status}),
                            position = reactive({self$rv$current.pos}),
                            enabled = reactive({self$rv$tl.tags.enabled})
       )
-      
       #
       # Catch a new dataset sent by the caller
       #
@@ -357,7 +344,7 @@ ScreenManager <- R6Class(
         self$ActionOn_New_DataIn() # Used by class pipeline
         #browser()
         if(is.null(dataIn())){
-          self$ToggleState_Screens(FALSE, 1:self$length)
+        self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
         } else {
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
@@ -372,7 +359,7 @@ ScreenManager <- R6Class(
         }
         
       })
-      
+
       # Catch new status event
       observeEvent(self$rv$status, ignoreInit = T, {
         cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
@@ -385,7 +372,7 @@ ScreenManager <- R6Class(
         if (self$rv$isAllSkipped){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
-        }
+           }
         # Disable all steps if all steps are undone (such as after a reset)
         # Same action as for new dataIn() value
         if (self$rv$isAllUndone){
@@ -400,23 +387,23 @@ ScreenManager <- R6Class(
           }
         }
         
-        # Disable all previous steps from each VALIDATED step
-        # and enable all further steps 
-        ind.max <- self$GetMaxValidated_AllSteps()
-        if (!is.null(ind.max)){
-          self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-          if (ind.max < self$length){
-            offset <- 1
-            self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
-          }
-        }
-        
-        # Disable all screens after the first mandatory not validated
-        firstM <- self$GetFirstMandatoryNotValidated()
-        if (!is.null(firstM) && self$length > 1) {
-          offset <- as.numeric(firstM != self$length)
-          self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-        }
+         # Disable all previous steps from each VALIDATED step
+         # and enable all further steps 
+         ind.max <- self$GetMaxValidated_AllSteps()
+         if (!is.null(ind.max)){
+           self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+           if (ind.max < self$length){
+                 offset <- 1
+                 self$ToggleState_Screens(cond = TRUE, range = (offset + ind.max):self$length)
+               }
+         }
+         
+         # Disable all screens after the first mandatory not validated
+         firstM <- self$GetFirstMandatoryNotValidated()
+          if (!is.null(firstM) && self$length > 1) {
+            offset <- as.numeric(firstM != self$length)
+            self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
+            }
       })
       
       
@@ -431,8 +418,7 @@ ScreenManager <- R6Class(
         shinyjs::show(self$ns(self$config$steps[self$rv$current.pos]))
       })
       
-      self$Additional_Server_Funcs()
-      
+
       ###############################################################
       ###                    MODULE SERVER                        ###
       ###############################################################
@@ -440,10 +426,7 @@ ScreenManager <- R6Class(
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
         self$input <- input
-        
-        #Used to get the observeEvent functions
         self$GetScreens_listeners()
-        
         
         observeEvent(input$rstBtn, {
           cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))

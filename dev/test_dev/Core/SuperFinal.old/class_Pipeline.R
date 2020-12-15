@@ -9,6 +9,15 @@ Pipeline = R6Class(
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed.",
     
+    #ui = function(){
+    #  cat(paste0(class(self)[1], '::ui() from - ', self$id, '\n'))
+    #  self$screens <- self$GetScreens()
+    #  
+    #  fluidPage(
+    #    self$Main_UI()
+    #  )
+    #},
+    
     
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
@@ -32,12 +41,12 @@ Pipeline = R6Class(
       self$tmp.return <- reactiveValues()
       self$child.process <- setNames(lapply(self$config$steps,
                                             function(x){
-                                              assign(x, get(x))$new(self$ns(x))
+                                              assign(x, get(x))$new(id = self$ns(x))
                                             }),
                                      self$config$steps
       )
            },
-
+    
     Discover_Skipped_Steps = function(){
       cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n'))
       if(verbose=='skip') browser()
@@ -57,33 +66,35 @@ Pipeline = R6Class(
       self$rv$dataIn <- NULL
       self$rv$current.pos <- 1
       self$Initialize_Status_Process()
-      
+
       # Say to all child processes to reset themselves
       if (!is.null(self$child.process))
-        lapply(self$config$steps, function(x){
-          self$child.process[[x]]$ActionOn_Reset()
-        })
+             lapply(self$config$steps, function(x){
+               self$child.process[[x]]$ActionOn_Reset()
+             })
       self$Send_Result_to_Caller()
     },
     
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-      
+
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       self$Send_Result_to_Caller()
     },
     
     Additional_Server_Funcs = function(){
       cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n'))
+      #self$GetScreens()
       self$Launch_Module_Server()
     },
-
+    
     ActionOn_NewPosition = function(){
       cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
       self$PrepareData2Send()
-    },
+      },
     
+
     GetScreens_ui = function(){
       cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
       
@@ -92,7 +103,7 @@ Pipeline = R6Class(
       }),
       self$config$steps)
        },
-
+    
     ActionOn_New_DataIn = function(){
       self$PrepareData2Send()
     },
@@ -100,6 +111,8 @@ Pipeline = R6Class(
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
       cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n'))
+     # browser()
+      #self$PrepareData2Send()
       
       lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$child.process[[x]]$server(
@@ -113,7 +126,6 @@ Pipeline = R6Class(
         #browser()
         self$ActionOn_Data_Trigger()
       })
-
     },
     
     # Catch the return value of a module and update the list of isDone modules
@@ -136,26 +148,26 @@ Pipeline = R6Class(
         newValue <- self$child.process[[processHasChanged]]$Get_Result()
       }
       
-      if (is.null(newValue)){
-        # process has been reseted
-        self$rv$status[processHasChanged] <- global$UNDONE
-        # browser()
-        # One take the last dataset not NULL
-        last.validated <- self$GetMaxValidated_BeforeCurrentPos()
+          if (is.null(newValue)){
+            # process has been reseted
+            self$rv$status[processHasChanged] <- global$UNDONE
+            # browser()
+            # One take the last dataset not NULL
+            last.validated <- self$GetMaxValidated_BeforeCurrentPos()
+            
+            #There is no validated step (the first step has been reseted)
+            if(is.null(last.validated))
+              self$rv$dataIn <- NULL
+            else
+              self$rv$dataIn <- self$rv$dataIn[ , , 1:self$GetMaxValidated_BeforeCurrentPos()]
+          }
+        else{
+          # process has been validated
+          self$rv$status[processHasChanged] <- global$VALIDATED
+          self$Discover_Skipped_Steps()
+          self$rv$dataIn <- newValue
+        }
         
-        #There is no validated step (the first step has been reseted)
-        if(is.null(last.validated))
-          self$rv$dataIn <- NULL
-        else
-          self$rv$dataIn <- self$rv$dataIn[ , , 1:self$GetMaxValidated_BeforeCurrentPos()]
-      }
-      else{
-        # process has been validated
-        self$rv$status[processHasChanged] <- global$VALIDATED
-        self$Discover_Skipped_Steps()
-        self$rv$dataIn <- newValue
-      }
-      
       self$Send_Result_to_Caller()
       
     },
@@ -206,6 +218,5 @@ Pipeline = R6Class(
       lapply(names(self$child.process), function(x){
         self$rv$data2send[[x]]})
     }
-    
   )
 )
