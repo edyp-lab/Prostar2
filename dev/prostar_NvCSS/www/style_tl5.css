@@ -30,14 +30,26 @@
   transform:rotate(-45deg);
 }
 
+.sub_box:nth-child(odd) p {
+  position: absolute;
+  top: 2px;
+  left: 15px;
+  /*left: 30px;*/
+}
 
+.sub_box:nth-child(even) p {
+  position: absolute;
+  top: 2px;
+  left: 10px;
+  /*left: 30px;*/
+}
 
 
 .sub_box:nth-child(odd):after {
   position: absolute;
   display: block;
-  box-shadow: 0 0 0 4px orange;
-  background: lightgrey;    
+  box-shadow: 0 0 0 4px purple;
+  background: white;    
   border-radius: 50%;  
   height: 16px;
   width: 16px;
@@ -50,8 +62,8 @@
 .sub_box:nth-child(even):after {
   position: absolute;
   display: block;
-  box-shadow: 0 0 0 4px orange;
-  background: lightgrey;    
+  box-shadow: 0 0 0 4px purple;
+  background: white;    
   border-radius: 50%;  
   height: 16px;
   width: 16px;
@@ -61,16 +73,95 @@
 }
 
 
-p{
-  text-align: center;
-  margin: auto;
+
+/* 1 Filtration */
+.sub_box:nth-child(1){
+  background-color: lightblue;
+  border: purple 2px solid;
+  font-weight: bold;
+  transform:rotate(90deg);
+}
+.sub_box:nth-child(1):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 6px purple;
+  background: ligtgreen;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 5px;
+  left: -10px;
+}
+
+/* 2 Normalization */
+.sub_box:nth-child(2){
+  background-color: lightblue;
+  border: purple 2px solid;
+  font-weight: bold;
+  transform:rotate(90deg);
+}
+
+.sub_box:nth-child(2):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 6px purple;
+  background: white;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 5px;
+  left: -15px;
 }
 
 
+/* 3 Imputation */
+.sub_box:nth-child(3){
+  background-color: lightblue;
+  border: purple 2px solid;
+  font-weight: bold;
+  transform:rotate(90deg);
+}
+.sub_box:nth-child(3):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 6px purple;
+  background: white;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 5px;
+  left: -10px;
+}
+
+/* 4 Agregation */
+.sub_box:nth-child(4){
+  background-color: lightblue;
+  border: purple 2px solid;
+  font-weight: bold;
+  transform:rotate(90deg);
+}
+.sub_box:nth-child(4):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 6px purple;
+  background: white;    
+  border-radius: 50%;  
+  height: 16px;
+  width: 16px;
+  content: "";
+  top: 5px;
+  left: -15px;
+}
+
+
+/*
 .sub_box:hover:nth-child(even):after {
   position: absolute;
   display: block;
-  box-shadow: 0 0 0 6px orange;
+  box-shadow: 0 0 0 6px purple;
   background: white;    
   border-radius: 50%;  
   height: 16px;
@@ -84,7 +175,7 @@ p{
 .sub_box:hover:nth-child(odd):after {
   position: absolute;
   display: block;
-  box-shadow: 0 0 0 6px orange;
+  box-shadow: 0 0 0 6px purple;
   background: white;    
   border-radius: 50%;  
   height: 16px;

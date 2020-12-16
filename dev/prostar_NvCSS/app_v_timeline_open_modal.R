@@ -37,9 +37,9 @@ ui <- fluidPage(
                     p('Imp.')
            ),
            tags$div(class="sub_box",
-                    p('Aggregation')
+                    p('Aggr.')
            )
-           
+
   )
   
 )
