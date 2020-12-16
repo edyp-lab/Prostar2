@@ -332,13 +332,12 @@ ScreenManager <- R6Class(
         self$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
         self$ActionOn_New_DataIn() # Used by class pipeline
-        #browser()
+        
+        browser()
         if(is.null(dataIn())){
-          browser()
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
         } else {
-          browser()
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
           self$ToggleState_Screens(TRUE, 1) #Enable the first screen
           
