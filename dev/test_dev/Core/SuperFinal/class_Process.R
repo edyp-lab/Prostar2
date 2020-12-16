@@ -12,7 +12,8 @@ Process = R6Class(
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #browser()
       lapply(range, function(x){
-        shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond)
+        cond <- cond && !(self$rv$status[x] == global$SKIPPED)
+        shinyjs::toggleState(self$ns(self$config$steps[x]), condition = cond  )
         #Send to TL the enabled/disabled tags
         self$rv$tl.tags.enabled[x] <- cond
       })
@@ -26,10 +27,9 @@ Process = R6Class(
     
     Discover_Skipped_Steps = function(){
       cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
-      for (i in 1:self$length)
-        if (self$rv$status[i] != global$VALIDATED && 
-            !is.null(self$GetMaxValidated_AllSteps()) && 
-            self$GetMaxValidated_AllSteps() > i){
+      for (i in 1:self$length){
+        max.val <- self$GetMaxValidated_AllSteps()
+        if (self$rv$status[i] != global$VALIDATED && !is.null(max.val) && max.val > i)
           self$rv$status[i] <- global$SKIPPED
         }
     },
@@ -38,11 +38,7 @@ Process = R6Class(
       cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n'))
       browser()
       
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$rv$current.pos <- 1
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
+      self$BasicReset()
     },
     
     
@@ -56,56 +52,6 @@ Process = R6Class(
       # Or the module has been reseted
       if (self$rv$current.pos == self$length)
         self$Send_Result_to_Caller()
-    },
-    
-    Status_Listener = function(){
-      observeEvent(self$rv$status, ignoreInit = T, {
-        cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
-        browser()
-        self$Discover_Skipped_Steps()
-        self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
-        self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
-        browser()
-        # Disable all steps if all steps are skipped
-        if (self$rv$isAllSkipped){
-          self$ToggleState_Screens(FALSE, 1:self$length)
-          self$ToggleState_ResetBtn(FALSE)
-        }
-        # Disable all steps if all steps are undone (such as after a reset)
-        # Same action as for new dataIn() value
-        if (self$rv$isAllUndone){
-          self$ToggleState_Screens(TRUE, 1:self$length)
-          self$ToggleState_ResetBtn(TRUE)
-          
-          # # Disable all screens after the first mandatory not validated
-          # firstM <- self$GetFirstMandatoryNotValidated()
-          # if (!is.null(firstM) && self$length > 1) {
-          #   offset <- as.numeric(firstM != self$length)
-          #   self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-          # }
-        }
-        
-        # Disable all previous steps from each VALIDATED step
-        # and enable all further steps 
-        ind.max <- self$GetMaxValidated_AllSteps()
-        if (!is.null(ind.max)){
-          self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-          
-          if (ind.max < self$length){
-            # Enable all steps after the current one but the ones
-            # after the first mandatory not validated
-            firstM <- self$GetFirstMandatoryNotValidated((ind.max+1):self$length)
-            if (is.null(firstM)){
-              self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(self$length))
-            } else {
-              self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(ind.max + firstM))
-              if (ind.max + firstM < self$length)
-                self$ToggleState_Screens(cond = FALSE, range = (ind.max + firstM + 1):self$length)
-            }
-          }
-        }
- 
-      })
     },
     
     EncapsulateScreens = function(){
@@ -128,6 +74,7 @@ Process = R6Class(
       }
       )
     },
+    
     GetScreens_ui = function(){
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       setNames(lapply(self$config$steps, function(x){

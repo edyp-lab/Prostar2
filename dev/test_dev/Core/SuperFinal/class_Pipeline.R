@@ -13,17 +13,20 @@ Pipeline = R6Class(
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       browser()
-      # lapply(range, function(x){
-      #   shinyjs::toggleState(paste0(self$ns(self$config$steps[x]), '-Screens'), condition = cond)
-      #   #Send to TL the enabled/disabled tags
-      #   self$rv$tl.tags.enabled[x] <- cond
-      # })
       
+      #Send to local TL the enabled/disabled tags
+      lapply(range, function(x){
+        cond <- cond && !(self$rv$status[x] == global$SKIPPED)
+        self$rv$tl.tags.enabled[x] <- cond
+      })
+      
+      # Send to the child processes specified by 'range' what to do with their screens
       lapply(range, function(x){
         name <- self$config$steps[x]
-        self$child.process[[name]]$ToggleState_Screens(cond, 1:self$child.process[[name]]$length)
-          #Send to TL the enabled/disabled tags
-          self$rv$tl.tags.enabled[x] <- cond
+        child.length <- self$child.process[[name]]$length
+        self$child.process[[name]]$ToggleState_Screens(cond, 1:child.length)
+        #Send to TL the enabled/disabled tags
+        self$rv$tl.tags.enabled[x] <- cond
         })
         
       # shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_LeftSide'), T)
@@ -60,14 +63,10 @@ Pipeline = R6Class(
       cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
       browser()
       
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$rv$current.pos <- 1
-      self$Initialize_Status_Process()
+      self$BasicReset()
       
       # Say to all child processes to reset themselves
-      #if (!is.null(self$child.process))
-        lapply(self$config$steps, function(x){
+      lapply(self$config$steps, function(x){
           self$child.process[[x]]$Set_All_Reset()
         })
       
