@@ -19,6 +19,7 @@ Process = R6Class(
       })
     },
     
+    #Set to skipped all steps of the current object
     Set_All_Skipped = function(){
       cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n'))
       self$rv$status <- setNames(rep(global$SKIPPED, self$length), self$config$steps)
@@ -45,7 +46,7 @@ Process = R6Class(
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-
+browser()
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       
       # Either the process has been validated, one can prepare data to be sent to caller

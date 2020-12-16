@@ -12,7 +12,7 @@ Pipeline = R6Class(
     
     ToggleState_Screens = function(cond, range){
       cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
-      browser()
+      #browser()
       
       #Send to local TL the enabled/disabled tags
       lapply(range, function(x){
@@ -54,7 +54,7 @@ Pipeline = R6Class(
       for (i in 1:self$length)
         if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
           self$rv$status[i] <- global$SKIPPED
-          self$child.process[[i]]$SetSkipped(global$SKIPPED)
+          self$child.process[[i]]$Set_All_Skipped()
         }
     },
     
@@ -88,7 +88,10 @@ Pipeline = R6Class(
 
     ActionOn_NewPosition = function(){
       cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
-      self$PrepareData2Send()
+      
+      #Only send data if the current position is enabled
+      if(self$rv$tl.tags.enabled[self$rv$current.pos])
+        self$PrepareData2Send()
     },
     
     EncapsulateScreens = function(){
@@ -135,7 +138,7 @@ Pipeline = R6Class(
           )
       })
       
-      self$PrepareData2Send()
+     # self$PrepareData2Send()
       
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
@@ -158,10 +161,13 @@ Pipeline = R6Class(
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
       cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n'))
-      browser()
+      #browser()
       processHasChanged <- newValue <- NULL
       
-      toto <- unlist(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}))
+      return.trigger.values <- setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}),
+                                names(self$child.process))
+                                
+      toto <- unlist(return.trigger.values)
       if (sum(toto) != 0){
         processHasChanged <- names(self$child.process)[which(max(toto)==toto)]
         newValue <- self$child.process[[processHasChanged]]$Get_Result()
@@ -178,7 +184,7 @@ Pipeline = R6Class(
         if(is.null(last.validated))
           self$rv$dataIn <- NULL
         else
-          self$rv$dataIn <- self$rv$dataIn[ , , 1:self$GetMaxValidated_BeforeCurrentPos()]
+          self$rv$dataIn <- self$rv$dataIn[ , , 1:(self$original.offset + last.validated)]
       }
       else{
         # process has been validated
@@ -205,20 +211,21 @@ Pipeline = R6Class(
     
     PrepareData2Send = function(){
       cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n'))
-      #browser()
+     # browser()
       # Returns NULL to all modules except the one pointed by the current position
       # Initialization of the pipeline : one send dataIn() to the
       # original module
-      isolate({
+     #browser()
+
         update <- function(name){
         data <- NULL
-        if (name == isolate({self$currentStepName()})){
+        if (name == self$currentStepName()){
           # One treat the dataset for the current position
-          ind.last.validated <- isolate({self$GetMaxValidated_BeforeCurrentPos()})
+          ind.last.validated <- self$GetMaxValidated_BeforeCurrentPos()
           if (is.null(ind.last.validated)){
             data <- self$rv$temp.dataIn
           } else {
-            data <- self$rv$dataIn[,,c(1:ind.last.validated)]
+            data <- self$rv$dataIn[ , , 1:(self$original.offset + ind.last.validated)]
           }
         }
         return(data)
@@ -233,9 +240,10 @@ Pipeline = R6Class(
           lapply(names(self$child.process), function(x){update(x)}),
           names(self$child.process))
       
+      print("--- data2 send ---")
       print(self$rv$data2send)
       
-    })
+
 
     }
     

@@ -14,9 +14,10 @@ source(file.path('.', 'class_global.R'), local=TRUE)$value
 #----------------------- Class ScreenManager ----------------------------------
 source(file.path('.', 'class_ScreenManager.R'), local=TRUE)$value
 source(file.path('.', 'class_Process.R'), local=TRUE)$value
+source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessA.R'), local=TRUE)$value
 source(file.path('.', 'class_ProcessB.R'), local=TRUE)$value
-source(file.path('.', 'class_ProcessDescription.R'), local=TRUE)$value
+source(file.path('.', 'class_ProcessC.R'), local=TRUE)$value
 
 source(file.path('.', 'class_Pipeline.R'), local=TRUE)$value
 source(file.path('.', 'class_PipelineSimple.R'), local=TRUE)$value

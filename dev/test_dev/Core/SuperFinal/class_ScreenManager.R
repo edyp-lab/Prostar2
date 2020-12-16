@@ -22,6 +22,7 @@ ScreenManager <- R6Class(
     currentStepName = NULL,
     child.process = NULL,
     length = NULL,
+    original.offset = NULL,
     config = NULL,
     screens = NULL,
     modal_txt = NULL,
@@ -122,6 +123,7 @@ ScreenManager <- R6Class(
     Set_Reseted = function(){},
     ValidateCurrentPos = function(){},
     EncapsulateScreens = function(){},
+    ActionOn_NewPosition = function(){},
     
     GetStringStatus = function(name){
       if (name==global$VALIDATED) "Validated"
@@ -188,14 +190,7 @@ ScreenManager <- R6Class(
       
       shinyjs::toggleState(self$ns('rstBtn'), condition = cond)
     },
-    
-    # ToggleState_PrevBtn = function(cond){
-    #   shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-prevBtn'), F)
-    # },
-    # ToggleState_NextBtn = function(cond){
-    #   shinyjs::toggleState(self$ns('nextBtn'), condition = cond)
-    # },
-    # 
+
     
     ResetScreens = function(){
       cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n'))
@@ -251,6 +246,36 @@ ScreenManager <- R6Class(
     },
     
 
+    Update_State_Screens = function(){
+      
+      ind.max <- self$GetMaxValidated_AllSteps()
+      
+      if (is.null(ind.max)) # No step validated: init or reset of timeline 
+        ind.max <- 0
+      else
+        self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+        
+        
+      if (ind.max < self$length){
+        # Enable all steps after the current one but the ones
+        # after the first mandatory not validated
+        firstM <- self$GetFirstMandatoryNotValidated((ind.max+1):self$length)
+        if (is.null(firstM)){
+          self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(self$length))
+        } else {
+          self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(ind.max + firstM))
+          if (ind.max + firstM < self$length)
+            self$ToggleState_Screens(cond = FALSE, range = (ind.max + firstM + 1):self$length)
+        }
+      }
+    },
+    # 
+    # Init_State_Screens = function(){
+    #   self$ToggleState_Screens(cond = TRUE, range = 1)
+    #   if (self$length > 1)
+    #     self$ToggleState_Screens(cond = FALSE, range = 2:self$length)
+    # },
+
     ui = function(){
       cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
       #browser()
@@ -294,13 +319,13 @@ ScreenManager <- R6Class(
         ),
         fluidRow(
           column(width=2,
-                 tags$b(h4(style = 'color: blue;', "Input of process")),
+                 tags$b(h4(style = 'color: blue;', paste0("Global input of ", self$config$type))),
                  uiOutput(self$ns('show_dataIn'))),
           column(width=2,
-                 tags$b(h4(style = 'color: blue;', "Input of process")),
+                 tags$b(h4(style = 'color: blue;', paste0("Temp input of ", self$config$type))),
                  uiOutput(self$ns('show_rv_dataIn'))),
           column(width=2,
-                 tags$b(h4(style = 'color: blue;', "Output of process")),
+                 tags$b(h4(style = 'color: blue;', paste0("Output of ", self$config$type))),
                  uiOutput(self$ns('show_rv_dataOut'))),
           column(width=4,
                  tags$b(h4(style = 'color: blue;', "status")),
@@ -328,27 +353,22 @@ ScreenManager <- R6Class(
       #
       observeEvent(dataIn(), ignoreNULL = F, ignoreInit = T,{
         cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
-        
+       # browser()
         self$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
         self$ActionOn_New_DataIn() # Used by class pipeline
         
-        browser()
+        
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
-        } else {
+          self$original.offset <- 0
+        } else { # A new dataset has been loaded
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
-          self$ToggleState_Screens(TRUE, 1) #Enable the first screen
+          self$original.offset <- length(dataIn())
           
-          # Disable all screens after the first mandatory not validated
-          firstM <- self$GetFirstMandatoryNotValidated(1:self$length)
-          if (!is.null(firstM) && self$length > 1) {
-            offset <- as.numeric(firstM != self$length)
-            self$ToggleState_Screens(cond = FALSE, range = (firstM + offset):self$length)
-          }
+          self$Update_State_Screens()
         }
-        
       })
       
       # Catch new status event
@@ -356,31 +376,11 @@ ScreenManager <- R6Class(
       observeEvent(self$rv$status, ignoreInit = T, {
         cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
         #browser()
-        #self$Status_Listener()
         
         self$Discover_Skipped_Steps()
-        # self$rv$isAllSkipped <- sum(rep(global$SKIPPED, self$length)==self$rv$status)==self$length
-        # self$rv$isAllUndone <- sum(rep(global$UNDONE, self$length)==self$rv$status)==self$length
-        # browser()
-        # Disable all previous steps from each VALIDATED step
-        # and enable all further steps 
-        ind.max <- self$GetMaxValidated_AllSteps()
-        if (!is.null(ind.max)){
-          self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-          if (ind.max < self$length){
-            # Enable all steps after the current one but the ones
-            # after the first mandatory not validated
-            firstM <- self$GetFirstMandatoryNotValidated((ind.max+1):self$length)
-            if (is.null(firstM)){
-              self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(self$length))
-              } else {
-                self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(ind.max + firstM))
-                if (ind.max + firstM < self$length)
-                  self$ToggleState_Screens(cond = FALSE, range = (ind.max + firstM + 1):self$length)
-                }
-              }
-            }
-        })
+        self$Update_State_Screens()
+      })
+      
       
       observeEvent(self$rv$current.pos, ignoreInit = T,{
         cat(paste0(class(self)[1], '::observe(self$rv$current.pos) from - ', self$id, '\n'))
@@ -389,9 +389,12 @@ ScreenManager <- R6Class(
         shinyjs::toggleState(id = self$ns("nextBtn"), condition = self$rv$current.pos < self$length)
         shinyjs::hide(selector = paste0(".page_", self$id))
         shinyjs::show(self$ns(self$config$steps[self$rv$current.pos]))
+        
+        self$ActionOn_NewPosition()
+        
       })
       
-      self$Additional_Server_Funcs()
+     self$Additional_Server_Funcs()
       
       ###############################################################
       ###                    MODULE SERVER                        ###
@@ -400,6 +403,7 @@ ScreenManager <- R6Class(
         cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
         
         self$input <- input
+        #self$Additional_Server_Funcs()
         
         #Used to get the observeEvent functions
         self$GetScreens_listeners()

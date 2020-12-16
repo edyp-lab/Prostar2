@@ -1,0 +1,36 @@
+---
+title: "Prostar navigation tutorial"
+subtitle: "or how to use workflow UI"
+author: "Samuel Wieczorek"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  BiocStyle::html_document:
+    toc: true
+    theme: united
+    keep_md: true
+    papersize: a4
+vignette: >
+  %\VignetteIndexEntry{Prostar core}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      collapse = TRUE,
+                      comment = "#>")
+```
+
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+
+# Introduction
+
+This vignette aims to describe how to use the workflow ui to process a dataset. The goal is not to describe the different data processing tools available in prostar but to explain the behaviour of the user interface of what we call 'Prostar core'.
+
+As explained in xxx, Prostar implements two different levels of data processing tools:
+* the upper level correspond to a 'pipeline' and it deals with the type of data and the level of analysis (peptide, protein, peptidomic, etc..). The description of that can be found here (xxx).
+* the xxx level correspond to the data processing tools (Filtering, Normalization, etc..)
