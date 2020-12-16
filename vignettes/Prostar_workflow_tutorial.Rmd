@@ -34,3 +34,17 @@ This vignette aims to describe how to use the workflow ui to process a dataset. 
 As explained in xxx, Prostar implements two different levels of data processing tools:
 * the upper level correspond to a 'pipeline' and it deals with the type of data and the level of analysis (peptide, protein, peptidomic, etc..). The description of that can be found here (xxx).
 * the xxx level correspond to the data processing tools (Filtering, Normalization, etc..)
+
+
+
+Color code :
+* Grey with solid line: 
+* Grey with dashed line:
+* Green: the step is validated (the result of the process has been saved)
+* Red: the step is mandatory. All further steps are disabled until the user validate the mandatory one
+
+
+Plain green circle indicates a validated step.
+When the colors are transparent, it means that the corresponding step is disabled: all inputs and the reset button are disabled.
+
+By default, when no dataset has been loaded yet, all the steps are disabled
