@@ -7,7 +7,7 @@
 \usage{
 mod_check_updates_ui(id)
 
-mod_check_updates_server(input, output, session)
+mod_check_updates_server(id)
 }
 \arguments{
 \item{id}{shiny id}

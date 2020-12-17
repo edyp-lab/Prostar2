@@ -5,7 +5,7 @@ PipelineSimple = R6Class(
   private = list(
     .config = list(name = 'PipelineSimple',
                    steps = c('ProcessDescription', 'ProcessA', 'ProcessB', 'ProcessC'),
-                   mandatory = c(T, F, F, F)
+                   mandatory = c(T, F, T, F)
     )
   ),
   

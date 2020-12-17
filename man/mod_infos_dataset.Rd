@@ -7,18 +7,18 @@
 \usage{
 mod_infos_dataset_ui(id)
 
-mod_infos_dataset_server(input, output, session, obj)
+mod_infos_dataset_server(id, obj)
 }
 \arguments{
 \item{id}{shiny id}
+
+\item{obj}{object mae}
 
 \item{input}{internal}
 
 \item{output}{internal}
 
 \item{session}{internal}
-
-\item{obj}{object mae}
 }
 \description{
 A shiny Module.

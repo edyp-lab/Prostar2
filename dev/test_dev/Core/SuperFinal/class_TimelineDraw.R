@@ -1,35 +1,23 @@
 TimelineDraw <- R6Class(
   "TimelineDraw",
-  private=list(),
-  public = list(
-    id = NULL,
+  private=list(
     ns = NULL,
     length = NULL,
     style = NULL,
     mandatory = NULL,
     
-    
-    initialize = function(id, mandatory, style=2) {
-      #browser()
-      self$id <- id
-      self$style <- style
-      self$ns <- NS(self$id)
-      self$mandatory <- mandatory
-      self$length <- length(self$mandatory)
-      },
-    
     GetCSSCode = function(){
-      cat(paste0(class(self)[1], '::GetCSSCode()\n'))
-      file <- paste0('./Timelines/timeline',self$style, '.sass')
+      if (verbose) cat(paste0(class(self)[1], '::GetCSSCode()\n'))
+      file <- paste0('./Timelines/timeline', private$style, '.sass')
       #code <- code_sass_timeline[[paste0('self$style',self$style)]],"\n")
       code <- strsplit(readLines(file),"\n")
       firstLine <- code[[1]][1]
       prefix <- substr(firstLine, 1, unlist(gregexpr(pattern =':',firstLine)))
       suffix <- substr(firstLine, unlist(gregexpr(pattern =';',firstLine)), nchar(firstLine))
-      code[[1]][1] <- paste0(prefix, self$length, suffix, collapse='')
+      code[[1]][1] <- paste0(prefix, private$length, suffix, collapse='')
       code <- paste(unlist(code), collapse = '')
       code
-      },
+    },
     
     GetFirstMandatoryNotValidated = function(status, mandatory){
       first <- NULL
@@ -42,67 +30,71 @@ TimelineDraw <- R6Class(
     },
     
     BuildTimeline2 = function(status, pos, enabled){
-      cat(paste0(class(self)[1], '::BuildTimeline2()) from ', self$id, '\n'))
+      if (verbose) cat(paste0(class(self)[1], '::BuildTimeline2()) from ', self$id, '\n'))
       
-      #browser()
-      
-      tl_status <- rep('undone', self$length)
-      tl_status[which(self$mandatory)] <- 'mandatory'
+      tl_status <- rep('undone', private$length)
+      tl_status[which(private$mandatory)] <- 'mandatory'
       tl_status[which(unlist(status) == global$VALIDATED)] <- 'completed'
       tl_status[which(unlist(status) == global$SKIPPED)] <- 'skipped'
-      #browser()
       
       for (i in 1:length(enabled))
         if (!enabled[i])
           tl_status[i] <- paste0(tl_status[i], 'Disabled')
-
-       cat(paste0(paste0(tl_status,collapse=', '), '\n'))
-       
-      active  <- rep('', self$length)
+      
+      active  <- rep('', private$length)
       active[pos] <- 'active'
       
       txt <- "<ul class='timeline' id='timeline'>"
-      for (i in 1:self$length){
+      for (i in 1:private$length){
         txt <- paste0(txt,
                       "<li class='li ",
                       tl_status[i],
                       " ",
                       active[i],
                       "'><div class='timestamp'></div><div class='status'><h4>", 
-                      names(self$mandatory)[i],
+                      names(private$mandatory)[i],
                       "</h4></div></li>")
-        }
+      }
       
       txt <- paste0(txt,"</ul>")
       txt
+    }
+  ),
+  public = list(
+    id = NULL,
+
+    initialize = function(id, mandatory, style=2) {
+      self$id <- id
+      private$style <- style
+      private$ns <- NS(self$id)
+      private$mandatory <- mandatory
+      private$length <- length(private$mandatory)
       },
+
     
     ui = function() {
-      #wellPanel(
-      #style="background-color: orange;",
       tagList(
-        uiOutput(self$ns('load_CSS')),
-        uiOutput(self$ns('show_TL'))
+        uiOutput(private$ns('load_CSS')),
+        uiOutput(private$ns('show_TL'))
         )
-      #)
       },
     
     server = function(status, position, enabled) {
       
-      cat(paste0(class(self)[1], '::server()\n'))
+      if (verbose) cat(paste0(class(self)[1], '::server()\n'))
       
       moduleServer(self$id, function(input, output, session) {
         
-        cat(paste0(class(self)[1], '::moduleServer()\n'))
+        if (verbose) cat(paste0(class(self)[1], '::moduleServer()\n'))
 
         output$load_CSS <- renderUI({
-          cat(paste0(class(self)[1], '::output$load_CSS\n'))
-          shinyjs::inlineCSS(sass::sass(self$GetCSSCode()))
+          if (verbose) cat(paste0(class(self)[1], '::output$load_CSS\n'))
+          shinyjs::inlineCSS(sass::sass(private$GetCSSCode()))
           })
         
         output$show_TL <- renderUI({
-          cat(paste0(class(self)[1], '::output$show_TLS\n'))
-          HTML(self[[paste0('BuildTimeline', self$style)]](status(), position(), enabled()))
+          if (verbose) cat(paste0(class(self)[1], '::output$show_TLS\n'))
+          HTML(private[[paste0('BuildTimeline', private$style)]](status(), position(), enabled()))
         })
         }
       )

@@ -11,7 +11,7 @@ Pipeline = R6Class(
     
     
     ToggleState_Screens = function(cond, range){
-      cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
       #browser()
       
       #Send to local TL the enabled/disabled tags
@@ -36,7 +36,7 @@ Pipeline = R6Class(
     
     
     Additional_Initialize_Class = function(){
-      cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
       
       self$rv$data2send <- NULL
       self$tmp.return <- reactiveValues()
@@ -49,7 +49,7 @@ Pipeline = R6Class(
            },
 
     Discover_Skipped_Steps = function(){
-      cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n'))
 
       for (i in 1:self$length)
         if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
@@ -60,8 +60,8 @@ Pipeline = R6Class(
     
     
     Set_All_Reset = function(){
-      cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
-      browser()
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      #browser()
       
       self$BasicReset()
       
@@ -75,31 +75,31 @@ Pipeline = R6Class(
     
     
     ValidateCurrentPos = function(){
-      cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
       
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       self$Send_Result_to_Caller()
     },
     
     Additional_Server_Funcs = function(){
-      cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n'))
       self$Launch_Module_Server()
     },
 
     ActionOn_NewPosition = function(){
-      cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
       
       # Send dataset to child process only if the current position is enabled
       if(self$rv$tl.tags.enabled[self$rv$current.pos])
         self$PrepareData2Send()
-      
+      #browser()
       # If the current step is validated, set the child current position to the last step
       if (self$rv$status[self$rv$current.pos] == global$VALIDATED)
         self$child.process[[self$rv$current.pos]]$Change_Current_Pos(self$child.process[[self$rv$current.pos]]$length)
     },
     
     EncapsulateScreens = function(){
-      cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
       lapply(1:self$length, function(i) {
          if (i==1)
             div(id = self$ns(self$config$steps[i]),
@@ -120,7 +120,7 @@ Pipeline = R6Class(
    
     
     GetScreens_ui = function(){
-      cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
       
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()
@@ -129,12 +129,13 @@ Pipeline = R6Class(
       },
 
     ActionOn_New_DataIn = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_New_DataIn() from - ', self$id, '\n'))
       self$PrepareData2Send()
     },
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
-      cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n'))
       
       lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$child.process[[x]]$server(
@@ -146,7 +147,7 @@ Pipeline = R6Class(
       
       # Catch the returned values of the process                                                           
       observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
-        cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
+        if(verbose) cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
         #browser()
         self$ActionOn_Data_Trigger()
       })
@@ -164,7 +165,7 @@ Pipeline = R6Class(
     # pointed by the current position
     # This function also updates the list isDone
     ActionOn_Data_Trigger = function(){
-      cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n'))
       #browser()
       processHasChanged <- newValue <- NULL
       
@@ -202,7 +203,7 @@ Pipeline = R6Class(
     },
     
     GetMaxValidated_BeforeCurrentPos = function(){
-      cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n'))
       ind.max <- NULL
       indices.validated <- which(self$rv$status == global$VALIDATED)
       if (length(indices.validated) > 0){
@@ -214,12 +215,12 @@ Pipeline = R6Class(
     },
     
     PrepareData2Send = function(){
-      cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n'))
      # browser()
       # Returns NULL to all modules except the one pointed by the current position
       # Initialization of the pipeline : one send dataIn() to the
       # original module
-     browser()
+     #browser()
 
         update <- function(name){
         data <- NULL

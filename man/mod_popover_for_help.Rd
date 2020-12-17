@@ -7,20 +7,22 @@
 \usage{
 mod_popover_for_help_ui(id)
 
-mod_popover_for_help_server(input, output, session, data)
+mod_popover_for_help_server(id, data)
 }
 \arguments{
 \item{id}{shiny id}
+
+\item{data}{A list of two items:
+\itemize{
+\item title: xxxx
+\item content: xxxx
+}}
 
 \item{input}{internal}
 
 \item{output}{internal}
 
 \item{session}{internal}
-
-\item{data}{A list of two items:
-* title: xxxx
-* content: xxxx}
 }
 \description{
 A shiny Module.

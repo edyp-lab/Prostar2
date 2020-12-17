@@ -7,7 +7,7 @@
 \usage{
 mod_insert_md_ui(id)
 
-mod_insert_md_server(input, output, session, url)
+mod_insert_md_server(id, url)
 }
 \arguments{
 \item{id}{shiny id}

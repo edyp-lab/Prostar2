@@ -7,7 +7,7 @@
 \usage{
 mod_navbar_menu_ui(id)
 
-mod_navbar_menu_server(input, output, session)
+mod_navbar_menu_server(id)
 }
 \arguments{
 \item{id}{shiny id}

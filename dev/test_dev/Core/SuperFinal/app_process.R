@@ -2,6 +2,7 @@ library(shiny)
 library(R6)
 library(tibble)
 
+verbose <- T
 options(shiny.fullstacktrace = T)
 
 #------------------------ Class TimelineDraw --------------------------------------

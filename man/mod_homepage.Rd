@@ -7,7 +7,7 @@
 \usage{
 mod_homepage_ui(id)
 
-mod_homepage_server(input, output, session)
+mod_homepage_server(id)
 }
 \arguments{
 \item{id}{shiny id}

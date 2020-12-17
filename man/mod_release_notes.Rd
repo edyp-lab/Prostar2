@@ -7,7 +7,7 @@
 \usage{
 mod_release_notes_ui(id)
 
-mod_release_notes_server(input, output, session)
+mod_release_notes_server(id)
 }
 \arguments{
 \item{id}{shiny id}

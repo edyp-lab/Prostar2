@@ -12,8 +12,8 @@ ProcessA = R6Class(
   public = list(
 
     Description_server = function(input, output){
-      observeEvent(self$input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
-        cat(paste0(class(self)[1], "::observeEvent(self$input$btn_validate_Description from - ", self$id, '\n'))
+      observeEvent(input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
+        cat(paste0(class(self)[1], "::observeEvent(input$btn_validate_Description from - ", self$id, '\n'))
         self$InitializeDataIn()
         self$ValidateCurrentPos()
       })
@@ -29,7 +29,7 @@ ProcessA = R6Class(
    Description_ui = function(){
      
      
-     
+     wellPanel(
      tagList(
         actionButton(self$ns('btn_validate_Description'), 
                      paste0('Start ', self$config$name),
@@ -37,12 +37,13 @@ ProcessA = R6Class(
         includeMarkdown(paste0('./md/',self$config$name, ".md")),
         uiOutput(self$ns('datasetDescription'))
       )
+     )
   },
       
       ############### SCREEN 2 ######################################
       
   Step1_server = function(input, output){
-    observeEvent(self$input$btn_validate_Step1, ignoreInit = T, {
+    observeEvent(input$btn_validate_Step1, ignoreInit = T, {
       print("Action on btn_validate_Step1")
       self$ValidateCurrentPos()
     })
@@ -50,7 +51,7 @@ ProcessA = R6Class(
   
   Step1_ui = function(){
         name <- 'Step1'
-        
+        wellPanel(
         tagList(
           div(id=self$ns(name),
               div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
@@ -65,20 +66,22 @@ ProcessA = R6Class(
                   actionButton(self$ns(paste0('btn_validate_', name)), 'Perform'))
           )
         )
+        )
       },
   
   Step2_server = function(input, output){
     ## Logics to implement: here, we must take the last data not null
     # in previous datas. The objective is to take account
     # of skipped steps
-    observeEvent(self$input$btn_validate_Step2, ignoreInit = T, {
+    observeEvent(input$btn_validate_Step2, ignoreInit = T, {
       self$ValidateCurrentPos()
     })
         },
   
   Step2_ui = function(){
     name <- 'Step2'
-     tagList(
+    wellPanel(
+      tagList(
         div(id=self$ns(name),
             div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
                 tags$h3(name)),
@@ -91,11 +94,12 @@ ProcessA = R6Class(
                 actionButton(self$ns(paste0('btn_validate_', name)), 'Perform'))
         )
       )
+    )
       },
   
   Step3_server = function(input, output){
     
-    observeEvent(self$input$btn_validate_Step3, ignoreInit = T, {
+    observeEvent(input$btn_validate_Step3, ignoreInit = T, {
       self$rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)
       self$ValidateCurrentPos()
     })
@@ -103,7 +107,8 @@ ProcessA = R6Class(
   
   Step3_ui = function(){
     name <- 'Step3'
-    tagList(
+    wellPanel(
+      tagList(
         div(id = self$ns(name),
             div(style="display:inline-block; vertical-align: middle;padding-right: 20px;",
                 tags$h3(name)),
@@ -111,7 +116,7 @@ ProcessA = R6Class(
                 actionButton(self$ns(paste0('btn_validate_', name)), 'Validate'))
         )
       )
-
+)
     }
   )
 )

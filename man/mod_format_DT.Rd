@@ -8,9 +8,7 @@
 mod_format_DT_ui(id)
 
 mod_format_DT_server(
-  input,
-  output,
-  session,
+  id,
   table2show,
   withBtns = NULL,
   showRownames = FALSE,
@@ -21,17 +19,17 @@ mod_format_DT_server(
 \arguments{
 \item{id}{shiny id}
 
-\item{input}{internal}
-
-\item{output}{internal}
-
-\item{session}{internal}
-
 \item{withBtns}{xxx}
 
 \item{showRownames}{xxxx}
 
 \item{dom}{xxx}
+
+\item{input}{internal}
+
+\item{output}{internal}
+
+\item{session}{internal}
 }
 \description{
 A shiny Module.

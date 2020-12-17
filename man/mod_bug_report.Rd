@@ -7,7 +7,7 @@
 \usage{
 mod_bug_report_ui(id)
 
-mod_bug_report_server(input, output, session)
+mod_bug_report_server(id)
 }
 \arguments{
 \item{id}{shiny id}
