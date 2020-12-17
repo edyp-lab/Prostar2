@@ -11,22 +11,30 @@ ProcessDescription = R6Class(
   
   public = list(
     
-    Description_listeners = function(){
-      observeEvent(self$input$btn_validate_Description, ignoreInit = T, {
-        cat(paste0(class(self)[1], '::observeEvent(self$input$btn_validate_Description from - ', self$id, '\n'))
+    Description_server = function(input, output){
+      observeEvent(self$input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
+        cat(paste0(class(self)[1], "::observeEvent(self$input$btn_validate_Description from - ", self$id, '\n'))
         self$InitializeDataIn()
         self$ValidateCurrentPos()
       })
+      
+      output$datasetDescription <- renderUI({
+        tagList(
+          p(paste0('Dataset description: ', paste0(names(self$rv$temp.dataIn), collapse=", ")))
+        )
+      })
     },
     
+    
     Description_ui = function(){
+
       tagList(
         actionButton(self$ns('btn_validate_Description'), 
                      paste0('Start ', self$config$name),
                      class = btn_success_color),
-        includeMarkdown(paste0('./md/',self$config$name, ".md"))
+        includeMarkdown(paste0('./md/',self$config$name, ".md")),
+        uiOutput(self$ns('datasetDescription'))
       )
     }
-    
   )
 )

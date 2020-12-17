@@ -89,9 +89,13 @@ Pipeline = R6Class(
     ActionOn_NewPosition = function(){
       cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
       
-      #Only send data if the current position is enabled
+      # Send dataset to child process only if the current position is enabled
       if(self$rv$tl.tags.enabled[self$rv$current.pos])
         self$PrepareData2Send()
+      
+      # If the current step is validated, set the child current position to the last step
+      if (self$rv$status[self$rv$current.pos] == global$VALIDATED)
+        self$child.process[[self$rv$current.pos]]$Change_Current_Pos(self$child.process[[self$rv$current.pos]]$length)
     },
     
     EncapsulateScreens = function(){

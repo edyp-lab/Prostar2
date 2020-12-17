@@ -116,7 +116,7 @@ ScreenManager <- R6Class(
     },
     
     Additional_Initialize_Class = function(){},
-    GetScreens_listeners = function(){},
+    GetScreens_server = function(input, output){},
     ActionOn_New_DataIn = function(){},
     Additional_Server_Funcs = function(){},
     Set_Skipped = function(){},
@@ -406,7 +406,7 @@ ScreenManager <- R6Class(
         #self$Additional_Server_Funcs()
         
         #Used to get the observeEvent functions
-        self$GetScreens_listeners()
+        self$GetScreens_server(input, output)
         
         
         observeEvent(input$rstBtn, {

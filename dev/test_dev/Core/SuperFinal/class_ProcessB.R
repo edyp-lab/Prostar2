@@ -11,27 +11,37 @@ ProcessB = R6Class(
   
   public = list(
     
-    Description_listeners = function(){
+    Description_server = function(input, output){
       observeEvent(self$input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
         cat(paste0(class(self)[1], "::observeEvent(self$input$btn_validate_Description from - ", self$id, '\n'))
         self$InitializeDataIn()
         self$ValidateCurrentPos()
       })
+      
+      output$datasetDescription <- renderUI({
+        tagList(
+          p(paste0('Dataset description: ', paste0(names(self$rv$temp.dataIn), collapse=", ")))
+        )
+      })
     },
     
     
     Description_ui = function(){
+      
+      
+      
       tagList(
         actionButton(self$ns('btn_validate_Description'), 
                      paste0('Start ', self$config$name),
                      class = btn_success_color),
-        includeMarkdown(paste0('./md/',self$config$name, ".md"))
+        includeMarkdown(paste0('./md/',self$config$name, ".md")),
+        uiOutput(self$ns('datasetDescription'))
       )
     },
     
     ############### SCREEN 2 ######################################
     
-    Step1_listeners = function(){
+    Step1_server = function(input, output){
       observeEvent(self$input$btn_validate_Step1, ignoreInit = T, {
         print("Action on btn_validate_Step1")
         self$ValidateCurrentPos()
@@ -57,7 +67,7 @@ ProcessB = R6Class(
       )
     },
     
-    Step2_listeners = function(){
+    Step2_server = function(input, output){
       ## Logics to implement: here, we must take the last data not null
       # in previous datas. The objective is to take account
       # of skipped steps
@@ -83,7 +93,7 @@ ProcessB = R6Class(
       )
     },
     
-    Step3_listeners = function(){
+    Step3_server = function(input, output){
       
       observeEvent(self$input$btn_validate_Step3, ignoreInit = T, {
         self$rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)

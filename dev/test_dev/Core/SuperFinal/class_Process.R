@@ -46,7 +46,7 @@ Process = R6Class(
     
     ValidateCurrentPos = function(){
       cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
-browser()
+      #browser()
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       
       # Either the process has been validated, one can prepare data to be sent to caller
@@ -84,10 +84,10 @@ browser()
       self$config$steps)
     },
     
-    GetScreens_listeners = function(){
+    GetScreens_server = function(input, output){
       cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
       setNames(lapply(self$config$steps, function(x){
-        eval(parse(text = paste0("self$", x, '_listeners()')))
+        eval(parse(text = paste0("self$", x, '_server(input, output)')))
       }),
       self$config$steps)
     }
