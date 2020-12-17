@@ -1,61 +1,71 @@
 
 
-.box { /*cadre le plus externe*/
+.box { 
   border : 1px dashed black;
-  width: 25%;
-  height: 50%;
+  width: 500px;
+  height: 600px;
   position: absolute;
   top: 20px;
-  left: 20px;
+  left: 100px;
   text-align: center;
-  /*
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  */
 }
 
-
-.sub_box:before { /*cadre des ronds a gauche*/
+/*------------------------------*/
+.sub_box:before { 
   position: absolute;
   top: -7px;
-  left: -25px;
+  left: -30px;
   content: "";
   height: 50px;
-  width: 23px;
+  width: 28px;
   border : purple 2px solid;
   border-top: 0;
   border-bottom: 0;
 }
 
-
-.sub_box:first-child:before { 
+.sub_box:first-child:before {
+  position: absolute;
+  top: -3px;
   border : purple 2px solid;
-  border-radius: 10px 0 0 0 ;
+  border-radius: 18px 0 0 0 ;
   border-bottom: 0;
 }
 
-.sub_box:last-child:before { 
+.sub_box:last-child:before {
+  position: absolute;
+  top: -12px;
   height: 50px;
   border : purple 2px solid;
-  border-radius: 0 0 0 10px;
+  border-radius: 0 0 0 18px;
   border-top: 0;
 }
+/*------------------------------*/
 
-
-.sub_box { /*cadre du texte de droite*/
+.sub_box { 
   margin: 10px auto;
-  border-radius: 0 50px 50px 0;
-  border: orange solid 3px;
-  width: 40%;
+  width: 130px;
   min-width: 100px;
   height: 40px;
   position: relative;
 }
 
 
-p { /*centered horizontaly and vertically*/
+.sub_box:after { 
+  position: absolute;
+  display: block;
+  top: 0;
+  
+  box-shadow: 0 0 0 2px purple;
+  left: -26px;        
+  background: #e6eaf0;    
+  border-radius: 50%;  
+  height: 20px;
+  width: 20px;
+  content: "";
+  top: 5px;
+}
+
+p { /*text centered horizontaly and vertically*/
   margin: 0;
   position: absolute;
   top: 50%;
@@ -64,20 +74,61 @@ p { /*centered horizontaly and vertically*/
   transform: translate(-50%, -50%);
 }
 
-
-.sub_box:after { /*ronds*/
-  position: absolute;
-  display: block;
-  top: 0;
+/* 1 Filtration */
+.sub_box:nth-child(1) { 
+  font-weight: bold;
+  font-size: 1.2em;
   
-  box-shadow: 0 0 0 2px purple;
-  left: -22px;        
-  background: orange;    
-  border-radius: 50%;  
-  height: 16px;
-  width: 16px;
-  content: "";
-  top: 5px;
+  position: relative;
+  top: -3px;
+  left: -3px;
+  border-radius: 0 50px 50px 0;
+  border: orange solid 3px;
 }
+/* 2 Normalization */
+/*.sub_box:nth-child(2) {
+  font-weight: bold;
+  font-size: 1.2em;
+  
+  position: relative;
+  top: -3px;
+  left: -3px;
+  border-radius: 0 50px 50px 0;
+  border: orange solid 3px;
+  
+  
+}
+/* 3 Imputation */
+/*.sub_box:nth-child(3) { 
+  font-weight: bold;
+  font-size: 1.2em;
+  
+  position: relative;
+  top: -3px;
+  left: -3px;
+  border-radius: 0 50px 50px 0;
+  border: orange solid 3px;
+}
+/* 4 Agregation */
+/*.sub_box:nth-child(4) { 
+  font-weight: bold;
+  font-size: 1.2em;
+  
+  position: relative;
+  top: -3px;
+  left: -3px;
+  border-radius: 0 50px 50px 0;
+  border: orange solid 3px;
+}
+
+
+
+
+
+
+
+
+
+
 
 

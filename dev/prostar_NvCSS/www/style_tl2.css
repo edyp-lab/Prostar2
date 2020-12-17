@@ -37,7 +37,7 @@
   display: block;
   box-shadow: 0 0 0 4px purple;
   left: -42px;        
-  background: lightgrey;    
+  background: #e6eaf0;    
   border-radius: 50%;  
   height: 16px;
   width: 16px;
@@ -45,8 +45,79 @@
   top: 0;
 }
 
-
-.sub_box:hover:after {
+/* 1 Filtration */
+/*.sub_box:nth-child(1){
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
+.sub_box:nth-child(1):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 7px purple;
+  left: -45px;        
+  background: white;    
+  border-radius: 50%;  
+  height: 20px;
+  width: 20px;
+  content: "";
+  top: 0;
+}*/
+.sub_box:nth-child(1):after {
+  background: lightgreen;
+}
+/* 2 Normalization */
+/*.sub_box:nth-child(2){
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
+.sub_box:nth-child(2):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 7px purple;
+  left: -45px;        
+  background: #E97D5E;    
+  border-radius: 50%;  
+  height: 20px;
+  width: 20px;
+  content: "";
+  top: 0;
+}*/
+.sub_box:nth-child(2):after {
+  background: lightgreen;
+}
+/* 3 Imputation */
+/*.sub_box:nth-child(3){
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
+.sub_box:nth-child(3):after {
+  position: absolute;
+  display: block;
+  box-shadow: 0 0 0 7px purple;
+  left: -45px;        
+  background: white;    
+  border-radius: 50%;  
+  height: 20px;
+  width: 20px;
+  content: "";
+  top: 0;
+}*/
+.sub_box:nth-child(3):after {
+  background: lightgreen;
+}
+/* 4 Agregation */
+.sub_box:nth-child(4):after {
+  background: lightgreen;
+}
+/*.sub_box:nth-child(4){
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
+.sub_box:nth-child(4):after {
   position: absolute;
   display: block;
   box-shadow: 0 0 0 7px purple;
@@ -59,9 +130,3 @@
   top: 0;
 }
 
-
-.sub_box:hover{
-  text-align: center;
-  font-size: large;
-  font-weight: bold;
-}
