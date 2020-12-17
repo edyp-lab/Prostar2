@@ -22,7 +22,7 @@ ScreenManager <- R6Class(
     currentStepName = NULL,
     child.process = NULL,
     length = NULL,
-    original.offset = NULL,
+    original.length = NULL,
     config = NULL,
     screens = NULL,
     modal_txt = NULL,
@@ -362,10 +362,10 @@ ScreenManager <- R6Class(
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
           self$ToggleState_ResetBtn(FALSE)
-          self$original.offset <- 0
+          self$original.length <- 0
         } else { # A new dataset has been loaded
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
-          self$original.offset <- length(dataIn())
+          self$original.length <- length(dataIn())
           
           self$Update_State_Screens()
         }

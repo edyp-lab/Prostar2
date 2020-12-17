@@ -219,17 +219,20 @@ Pipeline = R6Class(
       # Returns NULL to all modules except the one pointed by the current position
       # Initialization of the pipeline : one send dataIn() to the
       # original module
-     #browser()
+     browser()
 
         update <- function(name){
         data <- NULL
         if (name == self$currentStepName()){
           # One treat the dataset for the current position
-          ind.last.validated <- self$GetMaxValidated_BeforeCurrentPos()
+          #ind.last.validated <- self$GetMaxValidated_BeforeCurrentPos()
+          name.last.validated <- names(self$rv$dataIn)[length(self$rv$dataIn)]
+          ind.last.validated <- which(names(self$rv$dataIn)== name.last.validated)
+          
           if (is.null(ind.last.validated)){
             data <- self$rv$temp.dataIn
           } else {
-            data <- self$rv$dataIn[ , , 1:(self$original.offset + ind.last.validated)]
+            data <- self$rv$dataIn[ , , 1:ind.last.validated]
           }
         }
         return(data)
@@ -239,9 +242,11 @@ Pipeline = R6Class(
           lapply(names(self$child.process), function(x){NULL}),
           names(self$child.process))
         
-        #browser()
-        self$rv$data2send <- setNames(
-          lapply(names(self$child.process), function(x){update(x)}),
+        if (is.null(self$rv$dataIn)) # Init of core engine
+          self$rv$data2send[[1]] <- self$rv$temp.dataIn
+        else
+          self$rv$data2send <- setNames(
+            lapply(names(self$child.process), function(x){update(x)}),
           names(self$child.process))
       
       print("--- data2 send ---")

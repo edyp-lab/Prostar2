@@ -45,7 +45,7 @@ server = function(input, output, session){
   pipeline$server(dataIn = reactive({rv$dataIn}))
   observeEvent(input$send,{
     if (input$send%%2 != 0)
-      rv$dataIn <- Exp1_R25_prot[,,2]
+      rv$dataIn <- Exp1_R25_prot
     else
       rv$dataIn <- NULL
   })
