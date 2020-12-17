@@ -30,7 +30,7 @@ Process = R6Class(
       if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
       for (i in 1:self$length){
         max.val <- self$GetMaxValidated_AllSteps()
-        if (self$rv$status[i] != global$VALIDATED && !is.null(max.val) && max.val > i)
+        if (self$rv$status[i] != global$VALIDATED && max.val > i)
           self$rv$status[i] <- global$SKIPPED
         }
     },

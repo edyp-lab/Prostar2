@@ -177,7 +177,7 @@ ScreenManager <- R6Class(
     
     GetMaxValidated_AllSteps = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
-      val <- NULL
+      val <- 0
       ind <- grep(global$VALIDATED, self$rv$status)
       if (length(ind) > 0) 
         val <-max(ind)
@@ -260,9 +260,7 @@ ScreenManager <- R6Class(
       
       ind.max <- self$GetMaxValidated_AllSteps()
       
-      if (is.null(ind.max)) # No step validated: init or reset of timeline 
-        ind.max <- 0
-      else
+      if (ind.max > 0) # No step validated: init or reset of timeline 
         self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
         
         
@@ -441,7 +439,7 @@ ScreenManager <- R6Class(
             # pipleine. Thus, it is not necessary to show the info box because
             # it is shown below the timeline of the pipeline
           } else {
-            txt <- paste0("This ", xxx, " is skipped so it has been disabled.")
+            txt <- paste0("This ", self$config$type, " is skipped so it has been disabled.")
             wellPanel(
             style = "background-color: #7CC9F0; opacity: 0.72; padding: 0px; align: center; vertical-align: center;",
             height = 100,
