@@ -2,8 +2,9 @@
 
 
 .box {
-  min-width: 300px;
-  max-width: 500px;
+  /*min-width: 300px;*/
+  width: 260px;
+  /*max-width: 500px;*/
   margin: auto;
   border: double purple;
   border-width: 7px;
@@ -25,6 +26,10 @@
   color: black;
 }
 
+.sub_box p {
+  position: relative;
+  left: 10px;
+}
 
 .sub_box:nth-child(odd) {
   border-right: 3px solid;
@@ -47,3 +52,55 @@
   border-bottom-left-radius:0;
 }
 
+/* 1 Filtration */
+.sub_box:nth-child(1):after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  background: lightgreen;
+  border: purple 2px solid;
+  border-bottom-width: 1px;
+  width: 50px;
+  height: 25%;
+}
+/* 2 Normalization */
+.sub_box:nth-child(2) p {
+  text-decoration: underline;
+  font-weight: bold;
+}
+.sub_box:nth-child(2):after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  left: -1px;
+  background: #E97D5E;
+  border: purple 2px solid;
+  border-top-width: 1px;
+  width: 50px;
+  height: 25%;
+}
+/* 3 Imputation */
+.sub_box:nth-child(3):after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -1px;
+  background: #E97D5E;
+  border: purple 2px solid;
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  width: 50px;
+  height: 25%;
+}
+/* 4 Agregation */
+.sub_box:nth-child(4):after {
+  content: "";
+  position: absolute;
+  top: 75%;
+  left: -1px;
+  background: #E97D5E;
+  border: purple 2px solid;
+  width: 50px;
+  height: 25%;
+}

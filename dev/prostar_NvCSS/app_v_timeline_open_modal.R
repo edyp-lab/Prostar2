@@ -8,39 +8,38 @@ setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
 ui <- fluidPage(
   
   tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl5.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "style_tl4.css")
   ),
   
   
-  # tags$div(class="box",
-  #          tags$div(class="sub_box",
-  #                   p('Filtration')
-  #          ),
-  #          tags$div(class="sub_box",
-  #                   p('Normalization')
-  #          ),
-  #          tags$div(class="sub_box",
-  #                   p('Imputation')
-  #          ),
-  #          tags$div(class="sub_box",
-  #                   p('Aggregation')
-  #          )
-  # )
   tags$div(class="box",
            tags$div(class="sub_box",
-                    p('Filt.')
+                    p('Filtration')
            ),
            tags$div(class="sub_box",
-                    p('Norm.')
+                    p('Normalization')
            ),
            tags$div(class="sub_box",
-                    p('Imp.')
+                    p('Imputation')
            ),
            tags$div(class="sub_box",
-                    p('Aggr.')
+                    p('Aggregation')
            )
-
   )
+  # tags$div(class="box",
+  #          tags$div(class="sub_box",
+  #                   p('Filt.')
+  #          ),
+  #          tags$div(class="sub_box",
+  #                   p('Norm.')
+  #          ),
+  #          tags$div(class="sub_box",
+  #                   p('Imp.')
+  #          ),
+  #          tags$div(class="sub_box",
+  #                   p('Aggr.')
+  #          )
+  # )
   
 )
 
