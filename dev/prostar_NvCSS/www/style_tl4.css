@@ -75,7 +75,7 @@ p { /*text centered horizontaly and vertically*/
 }
 
 /* 1 Filtration */
-.sub_box:nth-child(1) { 
+/*.sub_box:nth-child(1) { 
   font-weight: bold;
   font-size: 1.2em;
   
@@ -84,6 +84,9 @@ p { /*text centered horizontaly and vertically*/
   left: -3px;
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
+}*/
+.sub_box:nth-child(1):after{
+  background: lightgreen;
 }
 /* 2 Normalization */
 /*.sub_box:nth-child(2) {
@@ -95,11 +98,12 @@ p { /*text centered horizontaly and vertically*/
   left: -3px;
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
-  
-  
+}*/
+.sub_box:nth-child(2):after{
+  background: lightgreen;
 }
 /* 3 Imputation */
-/*.sub_box:nth-child(3) { 
+.sub_box:nth-child(3) { 
   font-weight: bold;
   font-size: 1.2em;
   
@@ -108,6 +112,9 @@ p { /*text centered horizontaly and vertically*/
   left: -3px;
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
+}
+/*.sub_box:nth-child(3):after{
+  background: lightgreen;
 }
 /* 4 Agregation */
 /*.sub_box:nth-child(4) { 
@@ -120,7 +127,10 @@ p { /*text centered horizontaly and vertically*/
   border-radius: 0 50px 50px 0;
   border: orange solid 3px;
 }
-
+/*
+.sub_box:nth-child(4):after{
+  background: lightgreen;
+}
 
 
 
