@@ -44,7 +44,7 @@ ScreenManager <- R6Class(
     
     # Initialize class
     initialize = function(id) {
-      if(verbose) cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n\n'))
       self$id <- id
       self$ns <- NS(id)
       self$dataOut = reactiveValues(
@@ -96,7 +96,7 @@ ScreenManager <- R6Class(
     
     # Check if the config is correct
     CheckConfig = function(conf){
-      if(verbose) cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n\n'))
       passed <- T
       msg <- ""
       if (!is.list(conf)){
@@ -139,12 +139,12 @@ ScreenManager <- R6Class(
     },
     
     Timestamp = function(){ 
-      if(verbose) cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n\n'))
       as.numeric(Sys.time())
     },
     
     Send_Result_to_Caller = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n\n'))
       #self$dataOut$value <- self$rv$dataIn
       self$dataOut$trigger <- self$Timestamp()
       self$dataOut$value <- self$rv$dataIn
@@ -156,7 +156,7 @@ ScreenManager <- R6Class(
     
     
     InitializeDataIn = function(){ 
-      if(verbose) cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n\n'))
       self$rv$dataIn <- self$rv$temp.dataIn
     },
     
@@ -176,7 +176,7 @@ ScreenManager <- R6Class(
     },
     
     GetMaxValidated_AllSteps = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n\n'))
       val <- 0
       ind <- grep(global$VALIDATED, self$rv$status)
       if (length(ind) > 0) 
@@ -193,14 +193,14 @@ ScreenManager <- R6Class(
     ToggleState_Screens = function(cond, range){},
     
     ToggleState_ResetBtn = function(cond){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ToggleState_ResetBtn(', cond, ')) from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ToggleState_ResetBtn(', cond, ')) from - ', self$id, '\n\n'))
       
       shinyjs::toggleState(self$ns('rstBtn'), condition = cond)
     },
 
     
     ResetScreens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n\n'))
       
       lapply(1:self$length, function(x){
         shinyjs::reset(self$config$steps[x])
@@ -210,14 +210,14 @@ ScreenManager <- R6Class(
     
     
     Initialize_Status_Process = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n\n'))
       self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
     },
     
     
     
     Update_Cursor_Position = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n\n'))
 
       req(self$rv$status)
       if (self$rv$status[self$length] == global$VALIDATED)
@@ -225,7 +225,7 @@ ScreenManager <- R6Class(
     },
     
     GetFirstMandatoryNotValidated = function(range){
-      if(verbose) cat(paste0(class(self)[1], '::', 'GetFirstMandatoryNotValidated() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetFirstMandatoryNotValidated() from - ', self$id, '\n\n'))
       first <- NULL
       first <- unlist((lapply(range, 
                               function(x){self$config$mandatory[x] && !self$rv$status[x]})))
@@ -236,11 +236,12 @@ ScreenManager <- R6Class(
     },
     
     BasicReset = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'BasicReset() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'BasicReset() from - ', self$id, '\n\n'))
       self$ResetScreens()
       self$rv$dataIn <- NULL
       self$rv$current.pos <- 1
       self$Initialize_Status_Process()
+      self$Send_Result_to_Caller()
     },
     
     NavPage = function(direction) {
@@ -256,7 +257,7 @@ ScreenManager <- R6Class(
     
 
     Update_State_Screens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Update_State_Screens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'Update_State_Screens() from - ', self$id, '\n\n'))
       
       ind.max <- self$GetMaxValidated_AllSteps()
       
@@ -285,7 +286,7 @@ ScreenManager <- R6Class(
     # },
 
     ui = function(){
-      if (verbose) cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n'))
+      if (verbose) cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n\n'))
       #browser()
       tagList(
         shinyjs::useShinyjs(),
@@ -349,7 +350,7 @@ ScreenManager <- R6Class(
     ###                          SERVER                         ###
     ###############################################################
     server = function(dataIn = reactive({NULL})) {
-      if (verbose) cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n'))
+      if (verbose) cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n\n'))
 
       self$timeline$server(status = reactive({self$rv$status}),
                            position = reactive({self$rv$current.pos}),
@@ -360,7 +361,7 @@ ScreenManager <- R6Class(
       # Catch a new dataset sent by the caller
       #
       observeEvent(dataIn(), ignoreNULL = F, ignoreInit = T,{
-        if (verbose) cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n'))
+        if (verbose) cat(paste0(class(self)[1], '::observeEvent(dataIn()) from --- ', self$id, '\n\n'))
        # browser()
         self$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
@@ -369,7 +370,7 @@ ScreenManager <- R6Class(
         
         if(is.null(dataIn())){
           self$ToggleState_Screens(FALSE, 1:self$length)
-          self$ToggleState_ResetBtn(FALSE)
+         # self$ToggleState_ResetBtn(FALSE)
           self$original.length <- 0
         } else { # A new dataset has been loaded
           self$ToggleState_ResetBtn(TRUE) #Enable the reset button
@@ -382,14 +383,15 @@ ScreenManager <- R6Class(
       # Catch new status event
       
       observeEvent(self$rv$status, ignoreInit = T, {
-        if (verbose) cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n'))
+        if (verbose) cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n\n'))
         self$Discover_Skipped_Steps()
         self$Update_State_Screens()
+
       })
       
       
       observeEvent(self$rv$current.pos, ignoreInit = T,{
-        if (verbose) cat(paste0(class(self)[1], '::observe(self$rv$current.pos) from - ', self$id, '\n'))
+        if (verbose) cat(paste0(class(self)[1], '::observe(self$rv$current.pos) from - ', self$id, '\n\n'))
         
         shinyjs::toggleState(id = self$ns("prevBtn"), condition = self$rv$current.pos > 1)
         shinyjs::toggleState(id = self$ns("nextBtn"), condition = self$rv$current.pos < self$length)
@@ -406,27 +408,27 @@ ScreenManager <- R6Class(
       ###                    MODULE SERVER                        ###
       ###############################################################
       moduleServer(self$id, function(input, output, session) {
-        if (verbose) cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n'))
+        if (verbose) cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n\n'))
         
         #Used to get the observeEvent functions
         self$GetScreens_server(input, output)
         
         observeEvent(input$rstBtn, {
-          if (verbose) cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n'))
+          if (verbose) cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n\n'))
           showModal(self$dataModal())
         })
         
         observeEvent(input$close, {removeModal() })
         
         observeEvent(req(input$modal_ok > 0), ignoreInit=F, {
-          if (verbose) cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n'))
+          if (verbose) cat(paste0(class(self)[1], '::observeEvent(req(c(input$modal_ok))) from - ', self$id, '\n\n'))
           self$rv$local.reset <- input$rstBtn
           self$Set_All_Reset()
           removeModal()
         })
         
         output$SkippedInfoPanel <- renderUI({
-          if (verbose) cat(paste0(class(self)[1], '::output$SkippedInfoPanel from - ', self$id, '\n'))
+          if (verbose) cat(paste0(class(self)[1], '::output$SkippedInfoPanel from - ', self$id, '\n\n'))
           #browser()
           
           current_step_skipped <- self$rv$status[self$rv$current.pos] == global$SKIPPED
@@ -456,7 +458,7 @@ ScreenManager <- R6Class(
         
         ###########---------------------------#################
         output$show_dataIn <- renderUI({
-          if (verbose) cat(paste0(class(self)[1], '::output$show_dataIn from - ', self$id, '\n'))
+          if (verbose) cat(paste0(class(self)[1], '::output$show_dataIn from - ', self$id, '\n\n'))
           req(dataIn())
           tagList(
             # h4('show dataIn()'),
@@ -465,7 +467,7 @@ ScreenManager <- R6Class(
         })
         
         output$show_rv_dataIn <- renderUI({
-          if (verbose) cat(paste0(class(self)[1], '::output$show_rv_dataIn from - ', self$id, '\n'))
+          if (verbose) cat(paste0(class(self)[1], '::output$show_rv_dataIn from - ', self$id, '\n\n'))
           req(self$rv$dataIn)
           tagList(
             # h4('show dataIn()'),
@@ -474,7 +476,7 @@ ScreenManager <- R6Class(
         })
         
         output$show_rv_dataOut <- renderUI({
-          if (verbose) cat(paste0(class(self)[1], '::output$show_rv_dataOut from - ', self$id, '\n'))
+          if (verbose) cat(paste0(class(self)[1], '::output$show_rv_dataOut from - ', self$id, '\n\n'))
           tagList(
             #h4('show self$dataOut$value'),
             lapply(names(self$dataOut$value), function(x){tags$p(x)})

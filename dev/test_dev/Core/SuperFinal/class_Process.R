@@ -9,7 +9,7 @@ Process = R6Class(
     
     
     ToggleState_Screens = function(cond, range){
-      if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n\n'))
       #browser()
       lapply(range, function(x){
         cond <- cond && !(self$rv$status[x] == global$SKIPPED)
@@ -21,13 +21,13 @@ Process = R6Class(
     
     #Set to skipped all steps of the current object
     Set_All_Skipped = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n\n'))
       self$rv$status <- setNames(rep(global$SKIPPED, self$length), self$config$steps)
     },
     
     
     Discover_Skipped_Steps = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n\n'))
       for (i in 1:self$length){
         max.val <- self$GetMaxValidated_AllSteps()
         if (self$rv$status[i] != global$VALIDATED && max.val > i)
@@ -36,7 +36,7 @@ Process = R6Class(
     },
     
     Set_All_Reset = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n\n'))
       
       self$BasicReset()
     },
@@ -44,7 +44,7 @@ Process = R6Class(
     
     
     ValidateCurrentPos = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
       #browser()
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       
@@ -55,7 +55,7 @@ Process = R6Class(
     },
     
     EncapsulateScreens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n\n'))
       lapply(1:self$length, function(i) {
         shinyjs::disabled(
           if (i==1)
@@ -76,7 +76,7 @@ Process = R6Class(
     },
     
     GetScreens_ui = function(){
-      if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n\n'))
       #wellPanel(
         setNames(lapply(self$config$steps, function(x){
         eval(parse(text = paste0("self$", x, '_ui()')))
@@ -86,7 +86,7 @@ Process = R6Class(
     },
     
     GetScreens_server = function(input, output){
-      if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n\n'))
       setNames(lapply(self$config$steps, function(x){
         eval(parse(text = paste0("self$", x, '_server(input, output)')))
       }),

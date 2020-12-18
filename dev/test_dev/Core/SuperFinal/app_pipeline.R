@@ -2,7 +2,8 @@ library(shiny)
 library(R6)
 library(tibble)
 
-verbose <- F
+verbose <- T
+
 options(shiny.fullstacktrace = T)
 options(shiny.reactlog=TRUE) 
 

@@ -11,7 +11,7 @@ Pipeline = R6Class(
     
     
     ToggleState_Screens = function(cond, range){
-      if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n\n'))
       #browser()
       
       #Send to local TL the enabled/disabled tags
@@ -36,7 +36,7 @@ Pipeline = R6Class(
     
     
     Additional_Initialize_Class = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n\n'))
       
       self$rv$data2send <- NULL
       self$tmp.return <- reactiveValues()
@@ -49,7 +49,7 @@ Pipeline = R6Class(
            },
 
     Discover_Skipped_Steps = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n\n'))
 
       for (i in 1:self$length)
         if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
@@ -60,7 +60,7 @@ Pipeline = R6Class(
     
     
     Set_All_Reset = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n\n'))
       #browser()
       
       self$BasicReset()
@@ -70,24 +70,24 @@ Pipeline = R6Class(
           self$child.process[[x]]$Set_All_Reset()
         })
       
-      self$Send_Result_to_Caller()
+      
     },
     
     
     ValidateCurrentPos = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
       
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
       self$Send_Result_to_Caller()
     },
     
     Additional_Server_Funcs = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n\n'))
       self$Launch_Module_Server()
     },
 
     ActionOn_NewPosition = function(){
-      if(verbose) cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n\n'))
       
       # Send dataset to child process only if the current position is enabled
       if(self$rv$tl.tags.enabled[self$rv$current.pos])
@@ -99,7 +99,7 @@ Pipeline = R6Class(
     },
     
     EncapsulateScreens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n\n'))
       lapply(1:self$length, function(i) {
          if (i==1)
             div(id = self$ns(self$config$steps[i]),
@@ -120,7 +120,7 @@ Pipeline = R6Class(
    
     
     GetScreens_ui = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n\n'))
       
       setNames(lapply(self$config$steps, function(x){
         self$child.process[[x]]$ui()
@@ -129,13 +129,13 @@ Pipeline = R6Class(
       },
 
     ActionOn_New_DataIn = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_New_DataIn() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_New_DataIn() from - ', self$id, '\n\n'))
       self$PrepareData2Send()
     },
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n\n'))
       
       lapply(self$config$steps, function(x){
         self$tmp.return[[x]] <- self$child.process[[x]]$server(
@@ -146,8 +146,8 @@ Pipeline = R6Class(
      # self$PrepareData2Send()
       
       # Catch the returned values of the process                                                           
-      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), {
-        if(verbose) cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n'))
+      observeEvent(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}), ignoreInit=T,{
+        if(verbose) cat(paste0(class(self)[1], '::', 'observeEvent(trigger) from - ', self$id, '\n\n'))
         #browser()
         self$ActionOn_Data_Trigger()
       })
@@ -164,46 +164,62 @@ Pipeline = R6Class(
     # If a value (not NULL) is received, then it corresponds to the module
     # pointed by the current position
     # This function also updates the list isDone
+    # This function updates the current dataset (self$rv$dataIn)
     ActionOn_Data_Trigger = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n'))
-      #browser()
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n\n'))
+      browser()
       processHasChanged <- newValue <- NULL
       
       return.trigger.values <- setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}),
                                 names(self$child.process))
                                 
-      toto <- unlist(return.trigger.values)
-      if (sum(toto) != 0){
-        processHasChanged <- names(self$child.process)[which(max(toto)==toto)]
+      triggerValues <- unlist(return.trigger.values)
+      if (sum(triggerValues)==0){ # Init of core engine
+        
+      } else {
+        processHasChanged <- self$config$steps[which(max(triggerValues)==triggerValues)]
+        ind.processHasChanged <- which(self$config$steps==processHasChanged)
         newValue <- self$child.process[[processHasChanged]]$Get_Result()
-      }
       
-      if (is.null(newValue)){
-        # process has been reseted
-        self$rv$status[processHasChanged] <- global$UNDONE
+      
+      if (is.null(newValue)){ # process has been reseted
+        self$rv$status[ind.processHasChanged:self$length] <- global$UNDONE
         # browser()
-        # One take the last dataset not NULL
-        last.validated <- self$GetMaxValidated_BeforeCurrentPos()
+        # One take the last validated step (before the one corresponding to processHasChanges
+        # but it is straightforward because we juste updates self$rv$status
+        ind.last.validated <- NULL
+        validated.steps <- which(self$rv$status == global$VALIDATED)
+        if (length(validated.steps) !=0)
+          ind.last.validated <- max(validated.steps)
         
         #There is no validated step (the first step has been reseted)
-        if(is.null(last.validated))
-          self$rv$dataIn <- NULL
-        else
-          self$rv$dataIn <- self$rv$dataIn[ , , 1:(self$original.offset + last.validated)]
-      }
-      else{
+        if(is.null(ind.last.validated) || ind.last.validated == 1)
+          self$rv$dataIn <- self$rv$temp.dataIn
+        else{
+          name.last.validated <- self$config$steps[ind.last.validated]
+          dataIn.ind.last.validated <- which(names(self$rv$dataIn) == name.last.validated)
+          self$rv$dataIn <- self$rv$dataIn[ , , 1:dataIn.ind.last.validated]
+        }
+        
+        # In this case, one force the update of the input dataset
+        self$PrepareData2Send()
+      } else {
         # process has been validated
         self$rv$status[processHasChanged] <- global$VALIDATED
+        if (ind.processHasChanged < self$length)
+          self$rv$status[(ind.processHasChanged+1):self$length] <- global$UNDONE
+        
         self$Discover_Skipped_Steps()
         self$rv$dataIn <- newValue
       }
-      
-      self$Send_Result_to_Caller()
-      
+        self$Send_Result_to_Caller()
+        #self$PrepareData2Send()
+      }
+     
     },
     
     GetMaxValidated_BeforeCurrentPos = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n\n'))
       ind.max <- NULL
       indices.validated <- which(self$rv$status == global$VALIDATED)
       if (length(indices.validated) > 0){
@@ -214,8 +230,20 @@ Pipeline = R6Class(
       ind.max
     },
     
+    GetMaxValidated_BeforePos = function(pos){
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n\n'))
+      ind.max <- NULL
+      indices.validated <- which(self$rv$status == global$VALIDATED)
+      if (length(indices.validated) > 0){
+        ind <- which(indices.validated < pos)
+        if(length(ind) > 0)
+          ind.max <- max(ind)
+      }
+      ind.max
+    },
+    
     PrepareData2Send = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n'))
+      if(verbose) cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n\n'))
      # browser()
       # Returns NULL to all modules except the one pointed by the current position
       # Initialization of the pipeline : one send dataIn() to the
