@@ -15,6 +15,7 @@ biocViews: MassSpectrometry, Normalization, Preprocessing, R.utils, Proteomics,G
 Imports: 
     shiny,
     golem,
+    R6,
     processx,
     attempt,
     shinyalert,

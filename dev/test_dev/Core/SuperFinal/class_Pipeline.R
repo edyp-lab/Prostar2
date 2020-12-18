@@ -1,19 +1,33 @@
+#' Add together two numbers
+#'
+#' @param x A number
+#' @param y A number
+#' @return The sum of \code{x} and \code{y}
+#' 
+#' @import R6
+#' 
+#' @export
+#' 
+#' @examples
+#' add(1, 1)
 Pipeline = R6Class(
   "Pipeline",
   inherit = ScreenManager,
   private = list(
     
+    #' @field A text which appears in the popup modal when the reset button is clicked.
     modal_txt = "This action will reset this pipeline (and all the subsequent processes). The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed.",
     
     
-    #' Add together two numbers
-    #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @description
+    #' Contains specific functions that must be integrated in the
+    #' initialize function of the parent class. Using this tip avoids writing
+    #' the full `initialize()` method which most part is common for all children
+    #' classes.
+    #' 
+    #' @return Nothing.
+    #' 
     Additional_Initialize_Class = function(){
       if(verbose) cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n\n'))
       
@@ -27,37 +41,34 @@ Pipeline = R6Class(
       )
     },
     
-    #' Add together two numbers
+    #' @description
+    #' Functions that are executed when a new dataset is received.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return Nothing.
+    #' 
     ActionOn_New_DataIn = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_New_DataIn() from - ', self$id, '\n\n'))
       self$PrepareData2Send()
     },
     
-    #' Add together two numbers
+    #' @description
+    #' Contains specific functions that must be integrated in the
+    #' `server()` function of the parent class. Using this tip avoids rewriting
+    #' the full `server()` method which most part is common for all children
+    #' classes.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return Nothing.
+    #' 
     Additional_Server_Funcs = function(){
       if(verbose) cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n\n'))
       self$Launch_Module_Server()
     },
     
-    #' Add together two numbers
-    #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @description
+    #' Actions run when a step (from either a pipeline or a process) is validated.
+    #' 
+    #' @return Nothing.
+    #' 
     ValidateCurrentPos = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
       
@@ -65,13 +76,12 @@ Pipeline = R6Class(
       private$Send_Result_to_Caller()
     },
     
-    #' Add together two numbers
+    #' @description
+    #' Encapsulates each screen definition in a <div> with the namespace of the 
+    #' current instance to be able to show/hide the entire screen when needed.
+    #' 
+    #' @return Nothing.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     EncapsulateScreens = function(){
       if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n\n'))
       lapply(1:self$length, function(i) {
@@ -91,13 +101,12 @@ Pipeline = R6Class(
       )
     },
     
-    #' Add together two numbers
+    #' @description
+    #' Functions run when a new position is observed in the timeline (the current screen
+    #' has changed).
+    #' 
+    #' @return Nothing.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     ActionOn_NewPosition = function(){
       if(verbose) cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n\n'))
       
@@ -111,13 +120,11 @@ Pipeline = R6Class(
     },
     
     
-    #' Add together two numbers
+    #' @description
+    #' After a change in the status vector, checks if there are new skipped steps.
+    #' 
+    #' @return Nothing.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     Discover_Skipped_Steps = function(){
       if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n\n'))
       
@@ -129,13 +136,21 @@ Pipeline = R6Class(
         }
       }
     }
-    
   ),
   
   public = list(
+    
+    #' @field xxx
     tmp.return = "<reactiveValues>",
     
-   
+    #' @description
+    #' 
+    #' @param cond xxx
+    #' 
+    #' @param range xxx
+    #' 
+    #' @return Nothing.
+    #'
     ToggleState_Screens = function(cond, range){
       if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n\n'))
       #browser()
@@ -161,6 +176,11 @@ Pipeline = R6Class(
     },
 
     
+    #' @description
+    #' xxx
+    #' 
+    #' @return Nothing.
+    #'
     Set_All_Reset = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n\n'))
       #browser()
@@ -171,11 +191,13 @@ Pipeline = R6Class(
       lapply(self$config$steps, function(x){
           self$child.process[[x]]$Set_All_Reset()
         })
-      
-      
     },
     
-    
+    #' @description
+    #' xxx
+    #' 
+    #' @return Nothing.
+    #'
     GetScreens_ui = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n\n'))
       
@@ -186,8 +208,11 @@ Pipeline = R6Class(
       },
 
     
-    
-    # This function calls the server part of each module composing the pipeline
+    #' @description
+    #' This function calls the server part of each module composing the pipeline
+    #' 
+    #' @return Nothing.
+    #'
     Launch_Module_Server = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'Launch_Module_Server() from - ', self$id, '\n\n'))
       
@@ -208,17 +233,22 @@ Pipeline = R6Class(
 
     },
     
-    # Catch the return value of a module and update the list of isDone modules
-    # This list is updated with the names of datasets present in the rv$tmp
-    # variable. One set to TRUE all the elements in isDone which have a corresponding
-    # element in names(rv$tmp).
-    # One cannot simply set to TRUE the last element of rv$tmp because it will does
-    # not work in case of a reseted module (it is not in the names(rv$tmp) list
-    # anymore)
-    # If a value (not NULL) is received, then it corresponds to the module
-    # pointed by the current position
-    # This function also updates the list isDone
-    # This function updates the current dataset (self$rv$dataIn)
+
+    #' @description
+    #' Catch the return value of a module and update the list of isDone modules
+    #' This list is updated with the names of datasets present in the rv$tmp
+    #' variable. One set to TRUE all the elements in isDone which have a corresponding
+    #' element in names(rv$tmp).
+    #' One cannot simply set to TRUE the last element of rv$tmp because it will does
+    #' not work in case of a reseted module (it is not in the names(rv$tmp) list
+    #' anymore)
+    #' If a value (not NULL) is received, then it corresponds to the module
+    #' pointed by the current position
+    #' This function also updates the list isDone
+    #' This function updates the current dataset (self$rv$dataIn)
+    #' 
+    #' @return Nothing.
+    #'
     ActionOn_Data_Trigger = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n\n'))
       #browser()
@@ -271,6 +301,11 @@ Pipeline = R6Class(
      
     },
     
+    #' @description 
+    #' xxx
+    #' 
+    #' @return Nothing.
+    #' 
     GetMaxValidated_BeforeCurrentPos = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n\n'))
       ind.max <- NULL
@@ -283,6 +318,12 @@ Pipeline = R6Class(
       ind.max
     },
     
+    #' @description 
+    #' 
+    #' @param pos xxx
+    #' 
+    #' @return Nothing.
+    #'
     GetMaxValidated_BeforePos = function(pos){
       if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_BeforeCurrentPos() from - ', self$id, '\n\n'))
       ind.max <- NULL
@@ -295,13 +336,16 @@ Pipeline = R6Class(
       ind.max
     },
     
+    #' @description 
+    #' Returns NULL to all modules except the one pointed by the current position
+    #' Initialization of the pipeline : one send dataIn() to the
+    #' original module
+    #' 
+    #' @return Nothing.
+    #'
     PrepareData2Send = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'PrepareData2Send() from - ', self$id, '\n\n'))
      # browser()
-      # Returns NULL to all modules except the one pointed by the current position
-      # Initialization of the pipeline : one send dataIn() to the
-      # original module
-     #browser()
 
         update <- function(name){
         data <- NULL
@@ -333,9 +377,6 @@ Pipeline = R6Class(
       
       print("--- data2 send ---")
       print(self$rv$data2send)
-      
-
-
     }
     
   )

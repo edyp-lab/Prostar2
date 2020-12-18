@@ -1,19 +1,34 @@
+#' Add together two numbers
+#'
+#' @param x A number
+#' @param y A number
+#' @return The sum of \code{x} and \code{y}
+#' 
+#' @import R6
+#' 
+#' @export
+#' 
+#' @examples
+#' add(1, 1)
 Process = R6Class(
   "Process",
   inherit = ScreenManager,
   private = list(
     
+    #' @field modal_txt
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
                       validated process and all further datasets will be removed",
     
     
-    #' Add together two numbers
-    #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @description
+    #' Actions run when a step (from either a pipeline or a process) is validated.
+    #' 
+    #' @param input xxxx
+    #' 
+    #' @param output xxx
+    #' 
+    #' @return Nothing.
+    #' 
     GetScreens_server = function(input, output){
       if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n\n'))
       setNames(lapply(self$config$steps, function(x){
@@ -22,13 +37,11 @@ Process = R6Class(
       self$config$steps)
     },
     
-    #' Add together two numbers
+    #' @description
+    #' Actions run when a step (from either a pipeline or a process) is validated.
+    #' 
+    #' @return Nothing.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     ValidateCurrentPos = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
       #browser()
@@ -41,13 +54,11 @@ Process = R6Class(
     },
     
     
-    #' Add together two numbers
+    #' @description
+    #' Actions run when a step (from either a pipeline or a process) is validated.
+    #' 
+    #' @return Nothing.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     EncapsulateScreens = function(){
       if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n\n'))
       lapply(1:self$length, function(i) {
@@ -69,13 +80,11 @@ Process = R6Class(
       )
     },
     
-    #' Add together two numbers
+    #' @description
+    #' Actions run when a step (from either a pipeline or a process) is validated.
+    #' 
+    #' @return Nothing.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     Discover_Skipped_Steps = function(){
       if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n\n'))
       for (i in 1:self$length){
@@ -88,6 +97,11 @@ Process = R6Class(
   
   public = list(
     
+    #' @description
+    #' xx.
+    #' 
+    #' @return Nothing.
+    #'
     ToggleState_Screens = function(cond, range){
       if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n\n'))
       #browser()
@@ -99,27 +113,34 @@ Process = R6Class(
       })
     },
     
-    #Set to skipped all steps of the current object
+
+    #' @description
+    #' Set to skipped all steps of the current object.
+    #' 
+    #' @return Nothing.
+    #'
     Set_All_Skipped = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Skipped() from - ', self$id, '\n\n'))
       self$rv$status <- setNames(rep(global$SKIPPED, self$length), self$config$steps)
     },
     
-    
-    
-    
+
+    #' @description
+    #' Set to skipped all steps of the current object.
+    #' 
+    #' @return Nothing.
+    #'
     Set_All_Reset = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n\n'))
       
       private$BasicReset()
     },
     
-    
-    
-    
-    
-   
-    
+    #' @description
+    #' Set to skipped all steps of the current object.
+    #' 
+    #' @return Nothing.
+    #'
     GetScreens_ui = function(){
       if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n\n'))
       #wellPanel(

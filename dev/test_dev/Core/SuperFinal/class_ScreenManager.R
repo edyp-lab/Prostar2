@@ -11,11 +11,24 @@ optionsBtnClass <- "info"
 btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 
 
-#' Add together two numbers
+#' @title Add together two numbers
+#' 
+#' @description 
+#' 
+#' @details 
+#' 
+#' 
 #'
 #' @param x A number
 #' @param y A number
 #' @return The sum of \code{x} and \code{y}
+#' 
+#' @docType class
+#' 
+#' @import R6
+#' 
+#' @export
+#' 
 #' @examples
 #' add(1, 1)
 ScreenManager <- R6Class(
@@ -32,13 +45,13 @@ ScreenManager <- R6Class(
       cat(paste0('new position = ', self$rv$current.pos, '\n'))
     },
     
-    #' Add together two numbers
+    #' @title Default reset actions
+    #' 
+    #' @description `BasicReset()` execute some functions common to all
+    #' child classes.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return nothing.
+    #' 
     BasicReset = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'BasicReset() from - ', self$id, '\n\n'))
       private$ResetScreens()
@@ -48,13 +61,12 @@ ScreenManager <- R6Class(
       private$Send_Result_to_Caller()
     },
     
-    #' Add together two numbers
+    #' @title Reset screens
+    #' 
+    #' @description Set the input widgets of all screens to their default value.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return nothing.
+    #' 
     ResetScreens = function(){
       if(verbose) cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n\n'))
       
@@ -63,14 +75,17 @@ ScreenManager <- R6Class(
       })
     },
     
-    # Check if the config is correct
-    #' Add together two numbers
+    #' @title Check process/pipeline configuration data.
+    #' 
+    #' @description `CheckConfig()` checks if the .config property of the children classes is correct.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @param conf A list of three items (named 'name', 'steps', 'mandatory') which are a private property
+    #' of children classes
+    #' 
+    #' @return A list of two items:
+    #' * passed: a boolean indicating whether the config is correct or not,
+    #' * msg: a message accompanying the result.
+    #' 
     CheckConfig = function(conf){
       if(verbose) cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n\n'))
       passed <- T
@@ -98,38 +113,36 @@ ScreenManager <- R6Class(
            msg = msg)
     },
     
-    #' Add together two numbers
+    #' Converts process/pipeline status code to a string.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @description `GetStringStatus` converts the different values for the status to a string.
+    #' 
+    #' @param name A number
+    #' 
+    #' @return A string
+    #' 
     GetStringStatus = function(name){
       if (name==global$VALIDATED) "Validated"
       else if (name==global$UNDONE) "Undone"
       else if (name==global$SKIPPED) 'Skipped'
     },
     
-    #' Add together two numbers
+    #' Converts the current time to a UNIX format.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return A integer
+    #' 
     Timestamp = function(){ 
       if(verbose) cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n\n'))
       as.numeric(Sys.time())
     },
     
-    #' Add together two numbers
+    #' @title Send the current dataset to the program which has created this instance of the class.
+    #' 
+    #' @description `Send_Result_to_Caller` updates the return value of the class with the value of the current dataset.
+    #' As this return value is stored in a reactive variable, the caller automatically receives the new dataset.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return nothing
+    #' 
     Send_Result_to_Caller = function(){
       if(verbose) cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n\n'))
       #self$dataOut$value <- self$rv$dataIn
@@ -137,26 +150,26 @@ ScreenManager <- R6Class(
       self$dataOut$value <- self$rv$dataIn
     },
     
-    #' Add together two numbers
+    #' @title Initialize the inner store dataset with the temporary dataset send to the instance.
+    #' 
+    #' @description `InitializeDataIn` instantiates the variable which is the working variable of 
+    #' the current dataset which is to be processed
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return Nothing.
+    #' 
     InitializeDataIn = function(){ 
       if(verbose) cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n\n'))
       self$rv$dataIn <- self$rv$temp.dataIn
     },
     
     
-    #' Add together two numbers
+    #' @title Enable/disable screens of the class.
+    #' 
+    #' @description Update_State_Screens()` checks which screens must be enabled or disabled w.r.t the state 
+    #' of the status vector.
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
+    #' @return Nothing.
+    #' 
     Update_State_Screens = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'Update_State_Screens() from - ', self$id, '\n\n'))
       
@@ -328,27 +341,59 @@ ScreenManager <- R6Class(
     
   ),
   public = list(
-    # Declaration of variables
+    
+    #' @field id The internal id of the instance.
     id = NULL,
+    
+    #' @field ns The function NS().
     ns = NULL,
+    
+    #' @field style A integer coding for the style of timeline.
     style = NULL,
+    
+    #' @field
     currentStepName = NULL,
+    
+    #' @field child.process is a list in which each item is an instance of pipeline/process class.
     child.process = NULL,
+    
+    #' @field length The number of steps in the process/pipeline.
     length = NULL,
+    
+    #' @field original.length xxxx
     original.length = NULL,
+    
+    #' @field config xxx
     config = NULL,
+    
+    #' @field screens xxx
     screens = NULL,
+    
+    #' @field modal_txt xxx
     modal_txt = NULL,
+    
+    #' @field timeline xxx
     timeline  = NULL,
+    
+    #' @field default_pos
     default_pos = list(VALIDATED = 1,
                        SKIPPED = 1,
                        UNDONE = 1),
     
+    #' @field dataOut xxx
     dataOut = "<reactiveValues>",
+    
+    #' @field rv xxx
     rv = "<reactiveValues>",
     
     
-    # Initialize class
+    #' @description
+    #' xxxx
+    #' 
+    #' @param id xxx
+    #' 
+    #' @return xxxx
+    #'
     initialize = function(id) {
       if(verbose) cat(paste0(class(self)[1], '::initialize() from - ', self$id, '\n\n'))
       self$id <- id
@@ -402,45 +447,39 @@ ScreenManager <- R6Class(
     
    
     
-    
-     
-    #' Add together two numbers
+    #' @description
+    #' xxxx
+    #' 
+    #' @return xxxx
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     Get_Result = function(){self$dataOut$value},
     
      
-    #' Add together two numbers
+    #' @description
+    #' 
+    #' @param i xxx
+    #' 
+    #' @return xxxx
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     Change_Current_Pos = function(i){ self$rv$current.pos <- i},
     
-    #' Add together two numbers
+    #' @description
+    #' 
+    #' @param cond xxxx
+    #' 
+    #' @param range xxx
+    #' 
+    #' @return xxxx
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
     ToggleState_Screens = function(cond, range){},
     
    
 
-    #' Add together two numbers
+    #' @description
+    #' xxxx
+    #' 
+    #' @return xxxx
     #'
-    #' @param x A number
-    #' @param y A number
-    #' @return The sum of \code{x} and \code{y}
-    #' @examples
-    #' add(1, 1)
    ui = function(){
       if (verbose) cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n\n'))
       #browser()
@@ -505,7 +544,13 @@ ScreenManager <- R6Class(
     ###############################################################
     ###                          SERVER                         ###
     ###############################################################
-    server = function(dataIn = reactive({NULL})) {
+   #' @description
+   #' 
+   #' @param dataIn xxx
+   #' 
+   #' @return xxxx
+   #'
+   server = function(dataIn = reactive({NULL})) {
       if (verbose) cat(paste0(class(self)[1], '::server(dataIn) from - ', self$id, '\n\n'))
 
       self$timeline$server(status = reactive({self$rv$status}),
