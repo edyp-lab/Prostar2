@@ -1,7 +1,30 @@
 Pipeline = R6Class(
   "Pipeline",
   inherit = ScreenManager,
-  private = list(),
+  private = list(
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Additional_Initialize_Class = function(){
+      if(verbose) cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n\n'))
+      
+      self$rv$data2send <- NULL
+      self$tmp.return <- reactiveValues()
+      self$child.process <- setNames(lapply(self$config$steps,
+                                            function(x){
+                                              assign(x, get(x))$new(self$ns(x))
+                                            }),
+                                     self$config$steps
+      )
+    },
+    
+    
+  ),
   
   public = list(
     tmp.return = "<reactiveValues>",
@@ -35,24 +58,13 @@ Pipeline = R6Class(
     },
     
     
-    Additional_Initialize_Class = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Additional_Initialize_Class() from - ', self$id, '\n\n'))
-      
-      self$rv$data2send <- NULL
-      self$tmp.return <- reactiveValues()
-      self$child.process <- setNames(lapply(self$config$steps,
-                                            function(x){
-                                              assign(x, get(x))$new(self$ns(x))
-                                            }),
-                                     self$config$steps
-      )
-           },
+    
 
     Discover_Skipped_Steps = function(){
       if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n\n'))
 
       for (i in 1:self$length)
-        if (self$rv$status[i] != global$VALIDATED && self$GetMaxValidated_AllSteps() > i){
+        if (self$rv$status[i] != global$VALIDATED && private$GetMaxValidated_AllSteps() > i){
           self$rv$status[i] <- global$SKIPPED
           self$child.process[[i]]$Set_All_Skipped()
         }
@@ -63,7 +75,7 @@ Pipeline = R6Class(
       if(verbose) cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n\n'))
       #browser()
       
-      self$BasicReset()
+      private$BasicReset()
       
       # Say to all child processes to reset themselves
       lapply(self$config$steps, function(x){
@@ -78,7 +90,7 @@ Pipeline = R6Class(
       if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
       
       self$rv$status[self$rv$current.pos] <- global$VALIDATED
-      self$Send_Result_to_Caller()
+      private$Send_Result_to_Caller()
     },
     
     Additional_Server_Funcs = function(){
@@ -167,7 +179,7 @@ Pipeline = R6Class(
     # This function updates the current dataset (self$rv$dataIn)
     ActionOn_Data_Trigger = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_Data_Trigger from - ', self$id, '\n\n'))
-      browser()
+      #browser()
       processHasChanged <- newValue <- NULL
       
       return.trigger.values <- setNames(lapply(names(self$child.process), function(x){self$tmp.return[[x]]()$trigger}),
@@ -212,8 +224,7 @@ Pipeline = R6Class(
         self$Discover_Skipped_Steps()
         self$rv$dataIn <- newValue
       }
-        self$Send_Result_to_Caller()
-        #self$PrepareData2Send()
+        private$Send_Result_to_Caller()
       }
      
     },

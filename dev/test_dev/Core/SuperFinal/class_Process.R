@@ -1,7 +1,22 @@
 Process = R6Class(
   "Process",
   inherit = ScreenManager,
-  private = list(),
+  private = list(
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    GetScreens_server = function(input, output){
+      if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n\n'))
+      setNames(lapply(self$config$steps, function(x){
+        eval(parse(text = paste0("self$", x, '_server(input, output)')))
+      }),
+      self$config$steps)
+    }
+  ),
   
   public = list(
     modal_txt = "This action will reset this process. The input dataset will be the output of the last previous
@@ -29,7 +44,7 @@ Process = R6Class(
     Discover_Skipped_Steps = function(){
       if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Status() from - ', self$id, '\n\n'))
       for (i in 1:self$length){
-        max.val <- self$GetMaxValidated_AllSteps()
+        max.val <- private$GetMaxValidated_AllSteps()
         if (self$rv$status[i] != global$VALIDATED && max.val > i)
           self$rv$status[i] <- global$SKIPPED
         }
@@ -38,7 +53,7 @@ Process = R6Class(
     Set_All_Reset = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'Set_All_Reset() from - ', self$id, '\n\n'))
       
-      self$BasicReset()
+      private$BasicReset()
     },
     
     
@@ -51,7 +66,7 @@ Process = R6Class(
       # Either the process has been validated, one can prepare data to be sent to caller
       # Or the module has been reseted
       if (self$rv$current.pos == self$length)
-        self$Send_Result_to_Caller()
+        private$Send_Result_to_Caller()
     },
     
     EncapsulateScreens = function(){
@@ -83,14 +98,6 @@ Process = R6Class(
       }),
       self$config$steps)
      # )
-    },
-    
-    GetScreens_server = function(input, output){
-      if(verbose) cat(paste0(class(self)[1], '::GetScreens() from - ', self$id, '\n\n'))
-      setNames(lapply(self$config$steps, function(x){
-        eval(parse(text = paste0("self$", x, '_server(input, output)')))
-      }),
-      self$config$steps)
     }
   )
 )

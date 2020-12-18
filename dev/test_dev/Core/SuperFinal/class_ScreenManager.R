@@ -20,7 +20,267 @@ btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
 #' add(1, 1)
 ScreenManager <- R6Class(
   "ScreenManager",
-  private = list(),
+  private = list(
+    NavPage = function(direction) {
+      newval <- self$rv$current.pos + direction 
+      newval <- max(1, newval)
+      newval <- min(newval, self$length)
+      if(newval == 0)
+        browser()
+      
+      self$rv$current.pos <- newval
+      cat(paste0('new position = ', self$rv$current.pos, '\n'))
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    BasicReset = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'BasicReset() from - ', self$id, '\n\n'))
+      private$ResetScreens()
+      self$rv$dataIn <- NULL
+      self$rv$current.pos <- 1
+      private$Initialize_Status_Process()
+      private$Send_Result_to_Caller()
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ResetScreens = function(){
+      if(verbose) cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n\n'))
+      
+      lapply(1:self$length, function(x){
+        shinyjs::reset(self$config$steps[x])
+      })
+    },
+    
+    # Check if the config is correct
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    CheckConfig = function(conf){
+      if(verbose) cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n\n'))
+      passed <- T
+      msg <- ""
+      if (!is.list(conf)){
+        passed <- F
+        msg <- c(msg, "'config' is not a list")
+      }
+      if (length(conf)!=3){
+        passed <- F
+        msg <- c(msg, "The length of 'config' is not equal to 4")
+      }
+      names.conf <- c("name", "steps", "mandatory")
+      if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
+        passed <- F
+        msg <- c(msg, "The names of elements in 'config' must be the following: 'name', 'steps', 'mandatory'")
+      }
+      if (length(conf$steps) != length(conf$mandatory)){
+        passed <- F
+        msg <- c(msg, "The length of 'steps' and 'mandatory' must be equal.")
+      }
+      
+      passed <- T
+      list(passed=passed,
+           msg = msg)
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    GetStringStatus = function(name){
+      if (name==global$VALIDATED) "Validated"
+      else if (name==global$UNDONE) "Undone"
+      else if (name==global$SKIPPED) 'Skipped'
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Timestamp = function(){ 
+      if(verbose) cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n\n'))
+      as.numeric(Sys.time())
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Send_Result_to_Caller = function(){
+      if(verbose) cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n\n'))
+      #self$dataOut$value <- self$rv$dataIn
+      self$dataOut$trigger <- private$Timestamp()
+      self$dataOut$value <- self$rv$dataIn
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    InitializeDataIn = function(){ 
+      if(verbose) cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n\n'))
+      self$rv$dataIn <- self$rv$temp.dataIn
+    },
+    
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Update_State_Screens = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'Update_State_Screens() from - ', self$id, '\n\n'))
+      
+      ind.max <- private$GetMaxValidated_AllSteps()
+      
+      if (ind.max > 0) # No step validated: init or reset of timeline 
+        self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
+      
+      
+      if (ind.max < self$length){
+        # Enable all steps after the current one but the ones
+        # after the first mandatory not validated
+        firstM <- private$GetFirstMandatoryNotValidated((ind.max+1):self$length)
+        if (is.null(firstM)){
+          self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(self$length))
+        } else {
+          self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(ind.max + firstM))
+          if (ind.max + firstM < self$length)
+            self$ToggleState_Screens(cond = FALSE, range = (ind.max + firstM + 1):self$length)
+        }
+      }
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    GetMaxValidated_AllSteps = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n\n'))
+      val <- 0
+      ind <- grep(global$VALIDATED, self$rv$status)
+      if (length(ind) > 0) 
+        val <-max(ind)
+      val
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ToggleState_ResetBtn = function(cond){
+      if(verbose) cat(paste0(class(self)[1], '::', 'ToggleState_ResetBtn(', cond, ')) from - ', self$id, '\n\n'))
+      
+      shinyjs::toggleState(self$ns('rstBtn'), condition = cond)
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    GetFirstMandatoryNotValidated = function(range){
+      if(verbose) cat(paste0(class(self)[1], '::', 'GetFirstMandatoryNotValidated() from - ', self$id, '\n\n'))
+      first <- NULL
+      first <- unlist((lapply(range, 
+                              function(x){self$config$mandatory[x] && !self$rv$status[x]})))
+      if (sum(first) > 0)
+        min(which(first == TRUE))
+      else
+        NULL
+    },
+    
+    #' Return the UI for a modal dialog with data selection input. If 'failed' is
+    #' TRUE, then display a message that the previous value was invalid.
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    dataModal = function() {
+      
+      tags$div(id="modal1", 
+               modalDialog(
+                 span(self$modal_txt),
+                 footer = tagList(
+                   actionButton(self$ns("close"), "Cancel", class='btn-info'),
+                   actionButton(self$ns("modal_ok"), "OK")
+                 )
+               )
+      )
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Initialize_Status_Process = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n\n'))
+      self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
+    },
+    
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Additional_Initialize_Class = function(){},
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    GetScreens_server = function(input, output){},
+    
+  ),
   public = list(
     # Declaration of variables
     id = NULL,
@@ -58,7 +318,7 @@ ScreenManager <- R6Class(
       
       
       
-      check <- self$CheckConfig(private$.config)
+      check <- private$CheckConfig(private$.config)
       if (!check$passed)
         stop(paste0("Errors in 'config'", paste0(check$msg, collapse=' ')))
       else
@@ -90,40 +350,13 @@ ScreenManager <- R6Class(
       
       self$timeline <- TimelineDraw$new(self$ns('TL_draw'), mandatory = self$config$mandatory)
       
-      self$Additional_Initialize_Class()
+      private$Additional_Initialize_Class()
       self$screens <- self$GetScreens_ui()
     },
     
-    # Check if the config is correct
-    CheckConfig = function(conf){
-      if(verbose) cat(paste0(class(self)[1], '::CheckConfig() from - ', self$id, '\n\n'))
-      passed <- T
-      msg <- ""
-      if (!is.list(conf)){
-        passed <- F
-        msg <- c(msg, "'config' is not a list")
-      }
-      if (length(conf)!=3){
-        passed <- F
-        msg <- c(msg, "The length of 'config' is not equal to 4")
-      }
-      names.conf <- c("name", "steps", "mandatory")
-      if (!all(sapply(names.conf, function(x){x %in% names(conf)}))){
-        passed <- F
-        msg <- c(msg, "The names of elements in 'config' must be the following: 'name', 'steps', 'mandatory'")
-      }
-      if (length(conf$steps) != length(conf$mandatory)){
-        passed <- F
-        msg <- c(msg, "The length of 'steps' and 'mandatory' must be equal.")
-      }
-      
-      passed <- T
-      list(passed=passed,
-           msg = msg)
-    },
+   
     
-    Additional_Initialize_Class = function(){},
-    GetScreens_server = function(input, output){},
+    
     ActionOn_New_DataIn = function(){},
     Additional_Server_Funcs = function(){},
     Set_Skipped = function(){},
@@ -132,160 +365,44 @@ ScreenManager <- R6Class(
     EncapsulateScreens = function(){},
     ActionOn_NewPosition = function(){},
     
-    GetStringStatus = function(name){
-      if (name==global$VALIDATED) "Validated"
-      else if (name==global$UNDONE) "Undone"
-      else if (name==global$SKIPPED) 'Skipped'
-    },
-    
-    Timestamp = function(){ 
-      if(verbose) cat(paste0(class(self)[1], '::Timestamp() from - ', self$id, '\n\n'))
-      as.numeric(Sys.time())
-    },
-    
-    Send_Result_to_Caller = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Send_Result_to_Caller() from - ', self$id, '\n\n'))
-      #self$dataOut$value <- self$rv$dataIn
-      self$dataOut$trigger <- self$Timestamp()
-      self$dataOut$value <- self$rv$dataIn
-      
-    },
-    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
     Get_Result = function(){self$dataOut$value},
-
     
-    
-    InitializeDataIn = function(){ 
-      if(verbose) cat(paste0(class(self)[1], '::', 'InitializeDataIn() from - ', self$id, '\n\n'))
-      self$rv$dataIn <- self$rv$temp.dataIn
-    },
-    
-    # Return the UI for a modal dialog with data selection input. If 'failed' is
-    # TRUE, then display a message that the previous value was invalid.
-    dataModal = function() {
-      
-      tags$div(id="modal1", 
-               modalDialog(
-                 span(self$modal_txt),
-                 footer = tagList(
-                   actionButton(self$ns("close"), "Cancel", class='btn-info'),
-                   actionButton(self$ns("modal_ok"), "OK")
-                 )
-               )
-      )
-    },
-    
-    GetMaxValidated_AllSteps = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'GetMaxValidated_AllSteps() from - ', self$id, '\n\n'))
-      val <- 0
-      ind <- grep(global$VALIDATED, self$rv$status)
-      if (length(ind) > 0) 
-        val <-max(ind)
-      val
-    },
-    
-    
-    SetModalTxt = function(txt){self$modal_txt <- txt},
-    
+     
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
     Change_Current_Pos = function(i){ self$rv$current.pos <- i},
     
-    #-------------------------------------------------------
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
     ToggleState_Screens = function(cond, range){},
     
-    ToggleState_ResetBtn = function(cond){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ToggleState_ResetBtn(', cond, ')) from - ', self$id, '\n\n'))
-      
-      shinyjs::toggleState(self$ns('rstBtn'), condition = cond)
-    },
+   
 
-    
-    ResetScreens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::ResetScreens() from - ', self$id, '\n\n'))
-      
-      lapply(1:self$length, function(x){
-        shinyjs::reset(self$config$steps[x])
-      })
-    },
-    
-    
-    
-    Initialize_Status_Process = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Initialize_Status_Process() from - ', self$id, '\n\n'))
-      self$rv$status <- setNames(rep(global$UNDONE, self$length),self$config$steps)
-    },
-    
-    
-    
-    Update_Cursor_Position = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Update_Cursor_position() from - ', self$id, '\n\n'))
-
-      req(self$rv$status)
-      if (self$rv$status[self$length] == global$VALIDATED)
-        self$rv$current.pos <- self$default_pos$VALIDATED
-    },
-    
-    GetFirstMandatoryNotValidated = function(range){
-      if(verbose) cat(paste0(class(self)[1], '::', 'GetFirstMandatoryNotValidated() from - ', self$id, '\n\n'))
-      first <- NULL
-      first <- unlist((lapply(range, 
-                              function(x){self$config$mandatory[x] && !self$rv$status[x]})))
-      if (sum(first) > 0)
-        min(which(first == TRUE))
-      else
-        NULL
-    },
-    
-    BasicReset = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'BasicReset() from - ', self$id, '\n\n'))
-      self$ResetScreens()
-      self$rv$dataIn <- NULL
-      self$rv$current.pos <- 1
-      self$Initialize_Status_Process()
-      self$Send_Result_to_Caller()
-    },
-    
-    NavPage = function(direction) {
-      newval <- self$rv$current.pos + direction 
-      newval <- max(1, newval)
-      newval <- min(newval, self$length)
-      if(newval == 0)
-        browser()
-      
-      self$rv$current.pos <- newval
-      cat(paste0('new position = ', self$rv$current.pos, '\n'))
-    },
-    
-
-    Update_State_Screens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'Update_State_Screens() from - ', self$id, '\n\n'))
-      
-      ind.max <- self$GetMaxValidated_AllSteps()
-      
-      if (ind.max > 0) # No step validated: init or reset of timeline 
-        self$ToggleState_Screens(cond = FALSE, range = 1:ind.max)
-        
-        
-      if (ind.max < self$length){
-        # Enable all steps after the current one but the ones
-        # after the first mandatory not validated
-        firstM <- self$GetFirstMandatoryNotValidated((ind.max+1):self$length)
-        if (is.null(firstM)){
-          self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(self$length))
-        } else {
-          self$ToggleState_Screens(cond = TRUE, range = (1 + ind.max):(ind.max + firstM))
-          if (ind.max + firstM < self$length)
-            self$ToggleState_Screens(cond = FALSE, range = (ind.max + firstM + 1):self$length)
-        }
-      }
-    },
-    # 
-    # Init_State_Screens = function(){
-    #   self$ToggleState_Screens(cond = TRUE, range = 1)
-    #   if (self$length > 1)
-    #     self$ToggleState_Screens(cond = FALSE, range = 2:self$length)
-    # },
-
-    ui = function(){
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+   ui = function(){
       if (verbose) cat(paste0(class(self)[1], '::', 'Main_UI() from - ', self$id, '\n\n'))
       #browser()
       tagList(
@@ -373,10 +490,10 @@ ScreenManager <- R6Class(
          # self$ToggleState_ResetBtn(FALSE)
           self$original.length <- 0
         } else { # A new dataset has been loaded
-          self$ToggleState_ResetBtn(TRUE) #Enable the reset button
+          private$ToggleState_ResetBtn(TRUE) #Enable the reset button
           self$original.length <- length(dataIn())
           
-          self$Update_State_Screens()
+          private$Update_State_Screens()
         }
       })
       
@@ -385,7 +502,7 @@ ScreenManager <- R6Class(
       observeEvent(self$rv$status, ignoreInit = T, {
         if (verbose) cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n\n'))
         self$Discover_Skipped_Steps()
-        self$Update_State_Screens()
+        private$Update_State_Screens()
 
       })
       
@@ -411,11 +528,11 @@ ScreenManager <- R6Class(
         if (verbose) cat(paste0(class(self)[1], '::moduleServer(input, output, session) from - ', self$id, '\n\n'))
         
         #Used to get the observeEvent functions
-        self$GetScreens_server(input, output)
+        private$GetScreens_server(input, output)
         
         observeEvent(input$rstBtn, {
           if (verbose) cat(paste0(class(self)[1], '::observeEvent(input$rstBtn) from - ', self$id, '\n\n'))
-          showModal(self$dataModal())
+          showModal(private$dataModal())
         })
         
         observeEvent(input$close, {removeModal() })
@@ -452,8 +569,8 @@ ScreenManager <- R6Class(
           }
         })
         
-        observeEvent(input$prevBtn, ignoreInit = TRUE, {self$NavPage(-1)})
-        observeEvent(input$nextBtn, ignoreInit = TRUE, {self$NavPage(1)})
+        observeEvent(input$prevBtn, ignoreInit = TRUE, {private$NavPage(-1)})
+        observeEvent(input$nextBtn, ignoreInit = TRUE, {private$NavPage(1)})
         
         
         ###########---------------------------#################
@@ -490,10 +607,10 @@ ScreenManager <- R6Class(
                            color <- if(self$rv$tl.tags.enabled[x]) 'black' else 'lightgrey'
                            if (x == self$rv$current.pos)
                              tags$p(style = paste0('color: ', color, ';'),
-                                    tags$b(paste0('---> ', self$config$steps[x], ' - ', self$GetStringStatus(self$rv$status[[x]])), ' <---'))
+                                    tags$b(paste0('---> ', self$config$steps[x], ' - ', private$GetStringStatus(self$rv$status[[x]])), ' <---'))
                            else 
                              tags$p(style = paste0('color: ', color, ';'),
-                                    paste0(self$config$steps[x], ' - ', self$GetStringStatus(self$rv$status[[x]])))
+                                    paste0(self$config$steps[x], ' - ', private$GetStringStatus(self$rv$status[[x]])))
                          }))
         })
         
