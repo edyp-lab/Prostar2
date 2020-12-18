@@ -15,7 +15,7 @@ ProcessDescription = R6Class(
       observeEvent(input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
         cat(paste0(class(self)[1], "::observeEvent(input$btn_validate_Description from - ", self$id, '\n'))
         private$InitializeDataIn()
-        self$ValidateCurrentPos()
+        private$ValidateCurrentPos()
       })
       
       output$datasetDescription <- renderUI({

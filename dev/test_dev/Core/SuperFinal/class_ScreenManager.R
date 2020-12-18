@@ -240,7 +240,7 @@ ScreenManager <- R6Class(
       
       tags$div(id="modal1", 
                modalDialog(
-                 span(self$modal_txt),
+                 span(private$modal_txt),
                  footer = tagList(
                    actionButton(self$ns("close"), "Cancel", class='btn-info'),
                    actionButton(self$ns("modal_ok"), "OK")
@@ -279,6 +279,52 @@ ScreenManager <- R6Class(
     #' @examples
     #' add(1, 1)
     GetScreens_server = function(input, output){},
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ActionOn_New_DataIn = function(){},
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Additional_Server_Funcs = function(){},
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ValidateCurrentPos = function(){},
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    EncapsulateScreens = function(){},
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ActionOn_NewPosition = function(){}
+    
     
   ),
   public = list(
@@ -357,14 +403,7 @@ ScreenManager <- R6Class(
    
     
     
-    ActionOn_New_DataIn = function(){},
-    Additional_Server_Funcs = function(){},
-    Set_Skipped = function(){},
-    Set_Reseted = function(){},
-    ValidateCurrentPos = function(){},
-    EncapsulateScreens = function(){},
-    ActionOn_NewPosition = function(){},
-    
+     
     #' Add together two numbers
     #'
     #' @param x A number
@@ -441,7 +480,7 @@ ScreenManager <- R6Class(
         
         div(id = self$ns('Screens'),
             uiOutput(self$ns('SkippedInfoPanel')),
-            self$EncapsulateScreens()
+            private$EncapsulateScreens()
         ),
         fluidRow(
           column(width=2,
@@ -482,7 +521,7 @@ ScreenManager <- R6Class(
        # browser()
         self$Change_Current_Pos(1)
         self$rv$temp.dataIn <- dataIn()
-        self$ActionOn_New_DataIn() # Used by class pipeline
+        private$ActionOn_New_DataIn() # Used by class pipeline
         
         
         if(is.null(dataIn())){
@@ -501,7 +540,7 @@ ScreenManager <- R6Class(
       
       observeEvent(self$rv$status, ignoreInit = T, {
         if (verbose) cat(paste0(class(self)[1], '::observe((self$rv$status) from - ', self$id, '\n\n'))
-        self$Discover_Skipped_Steps()
+        private$Discover_Skipped_Steps()
         private$Update_State_Screens()
 
       })
@@ -515,11 +554,11 @@ ScreenManager <- R6Class(
         shinyjs::hide(selector = paste0(".page_", self$id))
         shinyjs::show(self$ns(self$config$steps[self$rv$current.pos]))
         
-        self$ActionOn_NewPosition()
+        private$ActionOn_NewPosition()
         
       })
       
-     self$Additional_Server_Funcs()
+     private$Additional_Server_Funcs()
       
       ###############################################################
       ###                    MODULE SERVER                        ###

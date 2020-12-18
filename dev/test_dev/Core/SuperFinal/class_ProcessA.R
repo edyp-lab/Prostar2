@@ -15,7 +15,7 @@ ProcessA = R6Class(
       observeEvent(input$btn_validate_Description, ignoreInit = T, ignoreNULL=T, {
         cat(paste0(class(self)[1], "::observeEvent(input$btn_validate_Description from - ", self$id, '\n'))
         private$InitializeDataIn()
-        self$ValidateCurrentPos()
+        private$ValidateCurrentPos()
       })
       
       output$datasetDescription <- renderUI({
@@ -45,7 +45,7 @@ ProcessA = R6Class(
   Step1_server = function(input, output){
     observeEvent(input$btn_validate_Step1, ignoreInit = T, {
       print("Action on btn_validate_Step1")
-      self$ValidateCurrentPos()
+      private$ValidateCurrentPos()
     })
   },
   
@@ -74,7 +74,7 @@ ProcessA = R6Class(
     # in previous datas. The objective is to take account
     # of skipped steps
     observeEvent(input$btn_validate_Step2, ignoreInit = T, {
-      self$ValidateCurrentPos()
+      private$ValidateCurrentPos()
     })
         },
   
@@ -101,7 +101,7 @@ ProcessA = R6Class(
     
     observeEvent(input$btn_validate_Step3, ignoreInit = T, {
       self$rv$dataIn <- AddItemToDataset(self$rv$dataIn, self$config$name)
-      self$ValidateCurrentPos()
+      private$ValidateCurrentPos()
     })
     },
   

@@ -3,6 +3,10 @@ Pipeline = R6Class(
   inherit = ScreenManager,
   private = list(
     
+    modal_txt = "This action will reset this pipeline (and all the subsequent processes). The input dataset will be the output of the last previous
+                      validated process and all further datasets will be removed.",
+    
+    
     #' Add together two numbers
     #'
     #' @param x A number
@@ -23,16 +27,115 @@ Pipeline = R6Class(
       )
     },
     
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ActionOn_New_DataIn = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_New_DataIn() from - ', self$id, '\n\n'))
+      self$PrepareData2Send()
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Additional_Server_Funcs = function(){
+      if(verbose) cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n\n'))
+      self$Launch_Module_Server()
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ValidateCurrentPos = function(){
+      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
+      
+      self$rv$status[self$rv$current.pos] <- global$VALIDATED
+      private$Send_Result_to_Caller()
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    EncapsulateScreens = function(){
+      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n\n'))
+      lapply(1:self$length, function(i) {
+        if (i==1)
+          div(id = self$ns(self$config$steps[i]),
+              class = paste0("page_", self$id),
+              self$screens[[i]]
+          )
+        else
+          shinyjs::hidden(
+            div(id = self$ns(self$config$steps[i]),
+                class = paste0("page_", self$id),
+                self$screens[[i]]
+            )
+          )
+      }
+      )
+    },
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    ActionOn_NewPosition = function(){
+      if(verbose) cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n\n'))
+      
+      # Send dataset to child process only if the current position is enabled
+      if(self$rv$tl.tags.enabled[self$rv$current.pos])
+        self$PrepareData2Send()
+      #browser()
+      # If the current step is validated, set the child current position to the last step
+      if (self$rv$status[self$rv$current.pos] == global$VALIDATED)
+        self$child.process[[self$rv$current.pos]]$Change_Current_Pos(self$child.process[[self$rv$current.pos]]$length)
+    },
+    
+    
+    #' Add together two numbers
+    #'
+    #' @param x A number
+    #' @param y A number
+    #' @return The sum of \code{x} and \code{y}
+    #' @examples
+    #' add(1, 1)
+    Discover_Skipped_Steps = function(){
+      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n\n'))
+      
+      for (i in 1:self$length){
+        max.val <- private$GetMaxValidated_AllSteps()
+        if (self$rv$status[i] != global$VALIDATED && max.val > i){
+          self$rv$status[i] <- global$SKIPPED
+          self$child.process[[i]]$Set_All_Skipped()
+        }
+      }
+    }
     
   ),
   
   public = list(
     tmp.return = "<reactiveValues>",
     
-    modal_txt = "This action will reset this pipeline (and all the subsequent processes). The input dataset will be the output of the last previous
-                      validated process and all further datasets will be removed.",
-    
-    
+   
     ToggleState_Screens = function(cond, range){
       if(verbose) cat(paste0(class(self)[1], '::ToggleState_Steps() from - ', self$id, '\n\n'))
       #browser()
@@ -56,20 +159,7 @@ Pipeline = R6Class(
       # shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-TL_RightSide'), T)
       # shinyjs::toggleState(paste0(self$ns(self$config$steps[1]), '-Screens'), T)
     },
-    
-    
-    
 
-    Discover_Skipped_Steps = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Discover_Skipped_Steps() from - ', self$id, '\n\n'))
-
-      for (i in 1:self$length)
-        if (self$rv$status[i] != global$VALIDATED && private$GetMaxValidated_AllSteps() > i){
-          self$rv$status[i] <- global$SKIPPED
-          self$child.process[[i]]$Set_All_Skipped()
-        }
-    },
-    
     
     Set_All_Reset = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'ActionsOnReset() from - ', self$id, '\n\n'))
@@ -86,51 +176,6 @@ Pipeline = R6Class(
     },
     
     
-    ValidateCurrentPos = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ValidateCurrentPos() from - ', self$id, '\n\n'))
-      
-      self$rv$status[self$rv$current.pos] <- global$VALIDATED
-      private$Send_Result_to_Caller()
-    },
-    
-    Additional_Server_Funcs = function(){
-      if(verbose) cat(paste0(class(self)[1], '::Additional_Server_Funcs() from - ', self$id, '\n\n'))
-      self$Launch_Module_Server()
-    },
-
-    ActionOn_NewPosition = function(){
-      if(verbose) cat(paste0(class(self)[1], '::ActionOn_NewPosition() from - ', self$id, '\n\n'))
-      
-      # Send dataset to child process only if the current position is enabled
-      if(self$rv$tl.tags.enabled[self$rv$current.pos])
-        self$PrepareData2Send()
-      #browser()
-      # If the current step is validated, set the child current position to the last step
-      if (self$rv$status[self$rv$current.pos] == global$VALIDATED)
-        self$child.process[[self$rv$current.pos]]$Change_Current_Pos(self$child.process[[self$rv$current.pos]]$length)
-    },
-    
-    EncapsulateScreens = function(){
-      if(verbose) cat(paste0(class(self)[1], '::EncapsulateScreens() from - ', self$id, '\n\n'))
-      lapply(1:self$length, function(i) {
-         if (i==1)
-            div(id = self$ns(self$config$steps[i]),
-                class = paste0("page_", self$id),
-                self$screens[[i]]
-            )
-          else
-            shinyjs::hidden(
-              div(id = self$ns(self$config$steps[i]),
-                  class = paste0("page_", self$id),
-                  self$screens[[i]]
-              )
-            )
-      }
-      )
-    },
-    
-   
-    
     GetScreens_ui = function(){
       if(verbose) cat(paste0(class(self)[1], '::', 'GetScreens() from - ', self$id, '\n\n'))
       
@@ -140,10 +185,7 @@ Pipeline = R6Class(
       self$config$steps)
       },
 
-    ActionOn_New_DataIn = function(){
-      if(verbose) cat(paste0(class(self)[1], '::', 'ActionOn_New_DataIn() from - ', self$id, '\n\n'))
-      self$PrepareData2Send()
-    },
+    
     
     # This function calls the server part of each module composing the pipeline
     Launch_Module_Server = function(){
@@ -221,7 +263,7 @@ Pipeline = R6Class(
         if (ind.processHasChanged < self$length)
           self$rv$status[(ind.processHasChanged+1):self$length] <- global$UNDONE
         
-        self$Discover_Skipped_Steps()
+        private$Discover_Skipped_Steps()
         self$rv$dataIn <- newValue
       }
         private$Send_Result_to_Caller()
