@@ -22,11 +22,13 @@
 
 .sub_box:nth-child(odd) {
   border: purple 1px dashed;
+  border-radius: 10px;
   transform:rotate(45deg);
 }
 
 .sub_box:nth-child(even) {
   border: purple 1px dashed;
+  border-radius: 10px;
   transform:rotate(-45deg);
 }
 
@@ -34,18 +36,16 @@
   position: absolute;
   top: 2px;
   left: 15px;
-  /*left: 30px;*/
 }
 
 .sub_box:nth-child(even) p {
   position: absolute;
   top: 2px;
   left: 10px;
-  /*left: 30px;*/
 }
 
 
-.sub_box:nth-child(odd):after {
+/*.sub_box:nth-child(odd):after {
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px purple;
@@ -57,9 +57,9 @@
   top: 8px;
   left: -25px;
 }
+*/
 
-
-.sub_box:nth-child(even):after {
+/*.sub_box:nth-child(even):after {
   position: absolute;
   display: block;
   box-shadow: 0 0 0 4px purple;
@@ -71,11 +71,11 @@
   top: 8px;
   left: 108px;
 }
-
+*/
 
 
 /* 1 Filtration */
-.sub_box:nth-child(1){
+/*.sub_box:nth-child(1){
   background-color: lightblue;
   border: purple 2px solid;
   font-weight: bold;
@@ -95,7 +95,7 @@
 }
 
 /* 2 Normalization */
-.sub_box:nth-child(2){
+/*.sub_box:nth-child(2){
   background-color: lightblue;
   border: purple 2px solid;
   font-weight: bold;
@@ -117,7 +117,7 @@
 
 
 /* 3 Imputation */
-.sub_box:nth-child(3){
+/*.sub_box:nth-child(3){
   background-color: lightblue;
   border: purple 2px solid;
   font-weight: bold;
@@ -137,7 +137,7 @@
 }
 
 /* 4 Agregation */
-.sub_box:nth-child(4){
+/*.sub_box:nth-child(4){
   background-color: lightblue;
   border: purple 2px solid;
   font-weight: bold;
