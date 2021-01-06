@@ -8,8 +8,8 @@ library(highcharter)
 library(DT)
 library(shinyjs)
 
-setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
-#setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
+#setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
+setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 
 source(file.path('../../R', 'mod_check_updates.R'), local=TRUE)$value
 source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value

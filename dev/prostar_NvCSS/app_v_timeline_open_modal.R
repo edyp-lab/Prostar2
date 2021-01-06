@@ -16,23 +16,15 @@ ui <- fluidPage(
   
   
   tags$div(class="box",
-           #span(HTML("&#10558")),
-           #img(src='fleche.PNG', height='20px', width='20px'),
            tags$div(class="sub_box",
                     p('Filtration')
            ),
-           #span(HTML("&#10558")),
-           #img(src='fleche.PNG', height='20px', width='20px'),
            tags$div(class="sub_box",
                     p('Normalization')
            ),
-           #span(HTML("&#10558")),
-           #img(src='fleche.PNG', height='20px', width='20px'),
            tags$div(class="sub_box",
                     p('Imputation')
            ),
-           #span(HTML("&#10558")),
-           #img(src='fleche.PNG', height='20px', width='20px'),
            tags$div(class="sub_box",
                     p('Aggregation')
            )
