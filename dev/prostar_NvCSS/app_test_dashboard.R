@@ -7,50 +7,68 @@ library(shinyBS)
 library(highcharter)
 library(DT)
 library(shinyjs)
+library(shinythemes)
+
+
 
 #.libPaths("C:/Users/EF249002/Documents/R/win-library/4.0.3/")
-#setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/dev/prostar_NvCSS/")
-setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
+setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2")
+#setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 
-source(file.path('../../R', 'mod_check_updates.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_release_notes.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_insert_md.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_homepage.R'), local=TRUE)$value
-source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
-source(file.path('../../R', 'global.R'), local=TRUE)$value
-source(file.path('../../R', 'config.R'), local=TRUE)$value
+source(file.path('R', 'mod_check_updates.R'), local=TRUE)$value
+source(file.path('R', 'mod_format_DT.R'), local=TRUE)$value
+source(file.path('R', 'mod_release_notes.R'), local=TRUE)$value
+source(file.path('R', 'mod_insert_md.R'), local=TRUE)$value
+source(file.path('R', 'mod_bug_report.R'), local=TRUE)$value
+source(file.path('R', 'mod_settings.R'), local=TRUE)$value
+source(file.path('R', 'mod_popover_for_help.R'), local=TRUE)$value
+source(file.path('R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
+source(file.path('R', 'mod_homepage.R'), local=TRUE)$value
+source(file.path('R', 'mod_navigation.R'), local=TRUE)$value
+source(file.path('R', 'global.R'), local=TRUE)$value
+source(file.path('R', 'config.R'), local=TRUE)$value
 
-source(file.path('../../R/DataManager', 'mod_import_file_from.R'), local=TRUE)$value
-source(file.path('../../R/DataManager', 'mod_convert_ms_file.R'), local=TRUE)$value
-source(file.path('../../R/DataManager', 'mod_select_keyID.R'), local=TRUE)$value
-source(file.path('../../R/DataManager', 'mod_build_design.R'), local=TRUE)$value
-source(file.path('../../R/DataManager', 'mod_build_design_example.R'), local=TRUE)$value
-source(file.path('../../R/DataManager', 'mod_choose_pipeline.R'), local=TRUE)$value
-source(file.path('../../R/DataManager', 'mod_open_demo_dataset.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_import_file_from.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_convert_ms_file.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_select_keyID.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_build_design.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_build_design_example.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_choose_pipeline.R'), local=TRUE)$value
+source(file.path('R/DataManager', 'mod_open_demo_dataset.R'), local=TRUE)$value
 
-source(file.path('../../R', 'mod_bsmodal.R'), local=TRUE)$value
-source(file.path('../../R/Plots', 'mod_all_plots.R'), local=TRUE)$value
-source(file.path("../../R/Plots", "mod_all_plots.R"), local=TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_intensity.R"), local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_tracking.R"), local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_legend_colored_exprs.R"), local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_corr_matrix.R"), local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_heatmap.R"), local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_group_mv.R"),  local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_se_explorer.R"),  local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_var_dist.R"), local = TRUE)$value
-source(file.path("../../R/Plots", "mod_plots_pca.R"), local = TRUE)$value
+source(file.path('R', 'mod_bsmodal.R'), local=TRUE)$value
+source(file.path('R/Plots', 'mod_all_plots.R'), local=TRUE)$value
+source(file.path("R/Plots", "mod_all_plots.R"), local=TRUE)$value
+source(file.path("R/Plots", "mod_plots_intensity.R"), local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_tracking.R"), local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_legend_colored_exprs.R"), local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_corr_matrix.R"), local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_heatmap.R"), local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_group_mv.R"),  local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_se_explorer.R"),  local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_var_dist.R"), local = TRUE)$value
+source(file.path("R/Plots", "mod_plots_pca.R"), local = TRUE)$value
 
 
 ui <- dashboardPagePlus(
-  skin="blue",
-  #orangeProstar <- "#E97D5E"
-  #https://stackoverflow.com/questions/31711307/how-to-change-color-in-shiny-dashboard
+  #skin="blue",
+  
+  # https://stackoverflow.com/questions/31711307/how-to-change-color-in-shiny-dashboard
+  # orangeProstar <- "#E97D5E"
+  # gradient greenblue header
+  # greenblue links <- #2fa4e7
+  # darker greenblue hover links <- #157ab5
+  # darker greenblue titles <- #317eac
+  # small titles <- #9999
+  # darkest greenblue button reset+next+selected menu
+  # color background arrow : #88b7d5 (bleu gris clair)
+  # lightgrey #dddd
+  # grey #ccc
+  # bleu ceruleen #2EA8B1
+  # jaune clair 'mark' #FCF8E3
+  # green #468847
+  # darker green #356635
+  
   
   dashboardHeaderPlus(
     title = tagList(
@@ -77,6 +95,10 @@ ui <- dashboardPagePlus(
   
   dashboardSidebar(
     sidebarMenu(
+      tags$head(tags$style(".inactiveLink {
+                            pointer-events: none;
+                           cursor: default;
+                           }")),
       br(),
       menuItem("Home", tabName = "ProstarHome", icon = icon("home"),selected = TRUE
       ),
@@ -114,21 +136,7 @@ ui <- dashboardPagePlus(
 
 
 server <- function(input, output,session) {
-  
 
-  # hide/show sidebar/button sidebar
-  observeEvent(input$data, {
-    print(input$data)
-    if(isFALSE(input$data)){
-      shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
-      shinyjs::runjs("document.getElementsByClassName('sidebar-toggle')[0].style.visibility = 'visible';")}
-    else{
-      shinyjs::addClass(selector = "body", class = "sidebar-collapse")
-      shinyjs::runjs("document.getElementsByClassName('sidebar-toggle')[0].style.visibility = 'hidden';")}
-  })
-  
-  
-  mod_homepage_server('home')
   
   output$contenu_dashboardBody <- renderUI({
     
@@ -144,6 +152,7 @@ server <- function(input, output,session) {
     }
     
     fluidPage(
+      theme = shinythemes::shinytheme("cerulean"),
       
       column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
              br(),
@@ -187,13 +196,41 @@ server <- function(input, output,session) {
   })
   
   
+  observeEvent(input$data, { #https://stackoverflow.com/questions/48278111/disable-enable-click-on-dashboard-sidebar-in-shiny
+    cat(input$data)
+    if(isFALSE(input$data)){
+      # show sidebar and button sidebar
+      shinyjs::removeClass(selector = "body", class = "sidebar-collapse")
+      shinyjs::runjs("document.getElementsByClassName('sidebar-toggle')[0].style.visibility = 'visible';")
+      
+      # enable import menus
+      shinyjs::removeCssClass(selector = "a[data-value='openFile']", class = "inactiveLink")
+      shinyjs::removeCssClass(selector = "a[data-value='convert']", class = "inactiveLink")
+      shinyjs::removeCssClass(selector = "a[data-value='demoData']", class = "inactiveLink")
+    }
+    else{ #after data loaded
+      # hide sidebar/button sidebar
+      shinyjs::addClass(selector = "body", class = "sidebar-collapse")
+      shinyjs::runjs("document.getElementsByClassName('sidebar-toggle')[0].style.visibility = 'hidden';")
+      
+      # disable import menus 
+      shinyjs::addCssClass(selector = "a[data-value='openFile']", class = "inactiveLink")
+      shinyjs::addCssClass(selector = "a[data-value='convert']", class = "inactiveLink")
+      shinyjs::addCssClass(selector = "a[data-value='demoData']", class = "inactiveLink")
+    }
+  })
+  
+  
   
   
   
   #------------------------------------------------------------------------------#
   
   utils::data(Exp1_R25_prot, package="DAPARdata2")
-
+  
+  
+  mod_homepage_server('home')
+  
   mod_import_file_from_server("openFile")
   mod_convert_ms_file_server("convert")
   mod_open_demo_dataset_server("demoData", pipeline.def=reactive({pipeline.defs}))
@@ -209,7 +246,7 @@ server <- function(input, output,session) {
   mod_insert_md_server("FAQ_MD", URL_FAQ)
 
   mod_bug_report_server("bugReport")
-  warning("Test warning message")
+  # warning("Test warning message")
 
   # #------------------------------------------------------------------------------#
   r <- reactiveValues(
