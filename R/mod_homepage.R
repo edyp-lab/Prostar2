@@ -20,7 +20,7 @@ mod_homepage_ui <- function(id){
     tags$hr(),
     tags$div(
       style="padding: 0 50px; float: left;",
-      tags$img(src='www/images/LogoProstarComplet.png', width='150px', height='150px')
+      img(src='www/images/LogoProstarComplet.png', width='150px', height='150px')
     ),
     tags$div(
       style="margin-top: 50px;",
