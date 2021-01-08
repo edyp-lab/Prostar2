@@ -12,42 +12,42 @@ library(shinythemes)
 
 
 #.libPaths("C:/Users/EF249002/Documents/R/win-library/4.0.3/")
-setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2")
+setwd("~/TELETRAVAIL/github_DAPARforFeatures/Prostar2/inst/app/")
 #setwd("~/Github/AdaptedForFeatures/Prostar2/dev/prostar_NvCSS/")
 
-source(file.path('R', 'mod_check_updates.R'), local=TRUE)$value
-source(file.path('R', 'mod_format_DT.R'), local=TRUE)$value
-source(file.path('R', 'mod_release_notes.R'), local=TRUE)$value
-source(file.path('R', 'mod_insert_md.R'), local=TRUE)$value
-source(file.path('R', 'mod_bug_report.R'), local=TRUE)$value
-source(file.path('R', 'mod_settings.R'), local=TRUE)$value
-source(file.path('R', 'mod_popover_for_help.R'), local=TRUE)$value
-source(file.path('R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
-source(file.path('R', 'mod_homepage.R'), local=TRUE)$value
-source(file.path('R', 'mod_navigation.R'), local=TRUE)$value
-source(file.path('R', 'global.R'), local=TRUE)$value
-source(file.path('R', 'config.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_check_updates.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_format_DT.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_release_notes.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_insert_md.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_bug_report.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_settings.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_popover_for_help.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_observe_dynamic_colourPicker_input.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_homepage.R'), local=TRUE)$value
+source(file.path('../../R', 'mod_navigation.R'), local=TRUE)$value
+source(file.path('../../R', 'global.R'), local=TRUE)$value
+source(file.path('../../R', 'config.R'), local=TRUE)$value
 
-source(file.path('R/DataManager', 'mod_import_file_from.R'), local=TRUE)$value
-source(file.path('R/DataManager', 'mod_convert_ms_file.R'), local=TRUE)$value
-source(file.path('R/DataManager', 'mod_select_keyID.R'), local=TRUE)$value
-source(file.path('R/DataManager', 'mod_build_design.R'), local=TRUE)$value
-source(file.path('R/DataManager', 'mod_build_design_example.R'), local=TRUE)$value
-source(file.path('R/DataManager', 'mod_choose_pipeline.R'), local=TRUE)$value
-source(file.path('R/DataManager', 'mod_open_demo_dataset.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_import_file_from.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_convert_ms_file.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_select_keyID.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_build_design.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_build_design_example.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_choose_pipeline.R'), local=TRUE)$value
+source(file.path('../../R/DataManager', 'mod_open_demo_dataset.R'), local=TRUE)$value
 
-source(file.path('R', 'mod_bsmodal.R'), local=TRUE)$value
-source(file.path('R/Plots', 'mod_all_plots.R'), local=TRUE)$value
-source(file.path("R/Plots", "mod_all_plots.R"), local=TRUE)$value
-source(file.path("R/Plots", "mod_plots_intensity.R"), local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_tracking.R"), local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_legend_colored_exprs.R"), local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_corr_matrix.R"), local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_heatmap.R"), local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_group_mv.R"),  local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_se_explorer.R"),  local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_var_dist.R"), local = TRUE)$value
-source(file.path("R/Plots", "mod_plots_pca.R"), local = TRUE)$value
+source(file.path('../../R', 'mod_bsmodal.R'), local=TRUE)$value
+source(file.path('../../R/Plots', 'mod_all_plots.R'), local=TRUE)$value
+source(file.path('../../R/Plots', "mod_all_plots.R"), local=TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_intensity.R'), local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_tracking.R'), local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_legend_colored_exprs.R'), local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_corr_matrix.R'), local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_heatmap.R'), local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_group_mv.R'),  local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_se_explorer.R'),  local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_var_dist.R'), local = TRUE)$value
+source(file.path('../../R/Plots', 'mod_plots_pca.R'), local = TRUE)$value
 
 
 ui <- dashboardPagePlus(
@@ -95,9 +95,9 @@ ui <- dashboardPagePlus(
   
   dashboardSidebar(
     sidebarMenu(
+      # for incativeClass of import tabitem inactivation 
       tags$head(tags$style(".inactiveLink {
-                            pointer-events: none;
-                           cursor: default;
+                           cursor: not-allowed ;
                            }")),
       br(),
       menuItem("Home", tabName = "ProstarHome", icon = icon("home"),selected = TRUE
@@ -165,6 +165,7 @@ server <- function(input, output,session) {
                       style="display:block ; height: 500px; margin: auto;")
              
       ),
+      
       column(col_right, tabItems(
         tabItem(tabName = "ProstarHome", class="active", h2("Home Prostar"),mod_homepage_ui('home')
         ),
@@ -176,15 +177,15 @@ server <- function(input, output,session) {
                 ),
         tabItem(tabName = "export", h2("Export")
                 ),
-        tabItem(tabName = "globalSettings", h2("Global settings")
+        tabItem(tabName = "settingsOptions", h2("Global settings")
                 ),
         tabItem(tabName = "releaseNotes", h2("Release notes")
                 ),
-        tabItem(tabName = "updates", h2("Check for updates")
+        tabItem(tabName = "test_check", h2("Check for updates")
                 ),
         tabItem(tabName = "usefulLinks", h2("Useful links")
                 ),
-        tabItem(tabName = "faq", h2("FAQ")
+        tabItem(tabName = "FAQ_MD", h2("FAQ")
                 ),
         tabItem(tabName = "bugReport", h2("Bug report"), mod_bug_report_ui("bugReport")
                 )
