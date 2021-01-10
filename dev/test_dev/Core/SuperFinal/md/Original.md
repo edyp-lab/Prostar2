@@ -1,3 +1,0 @@
-## Pipeline description
-
-blablabla

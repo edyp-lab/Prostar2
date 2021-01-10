@@ -1,3 +1,0 @@
-## Normalization module
-
-blablabla
