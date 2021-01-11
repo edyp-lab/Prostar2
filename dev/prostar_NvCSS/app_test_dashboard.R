@@ -31,18 +31,18 @@ source(file.path('../../R/DataManager', 'mod_build_design_example.R'), local=TRU
 source(file.path('../../R/DataManager', 'mod_choose_pipeline.R'), local=TRUE)$value
 source(file.path('../../R/DataManager', 'mod_open_demo_dataset.R'), local=TRUE)$value
 
-source(file.path('../../R', 'mod_bsmodal.R'), local=TRUE)$value
-source(file.path('../../R/Plots', 'mod_all_plots.R'), local=TRUE)$value
-source(file.path('../../R/Plots', "mod_all_plots.R"), local=TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_intensity.R'), local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_tracking.R'), local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_legend_colored_exprs.R'), local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_corr_matrix.R'), local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_heatmap.R'), local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_group_mv.R'),  local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_se_explorer.R'),  local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_var_dist.R'), local = TRUE)$value
-source(file.path('../../R/Plots', 'mod_plots_pca.R'), local = TRUE)$value
+# source(file.path('../../R', 'mod_bsmodal.R'), local=TRUE)$value
+# source(file.path('../../R/Plots', 'mod_all_plots.R'), local=TRUE)$value
+# source(file.path('../../R/Plots', "mod_all_plots.R"), local=TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_intensity.R'), local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_tracking.R'), local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_legend_colored_exprs.R'), local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_corr_matrix.R'), local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_heatmap.R'), local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_group_mv.R'),  local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_se_explorer.R'),  local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_var_dist.R'), local = TRUE)$value
+# source(file.path('../../R/Plots', 'mod_plots_pca.R'), local = TRUE)$value
 
 
 ui <- dashboardPagePlus(
@@ -156,7 +156,7 @@ server <- function(input, output,session) {
       column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
              br(),
              h4('Statistic Descriptive'),
-             mod_bsmodal_ui('statsDescriptive'),
+             #mod_bsmodal_ui('statsDescriptive'),
              br(),
              # h4('Timeline')
              # , tags$img(src="timeline_v.PNG",
@@ -233,24 +233,24 @@ server <- function(input, output,session) {
   mod_bug_report_server("bug_report")
   
   
-  #---------------------------Modules for Stats Desc in Modal---------------------------------------------------#
-  r <- reactiveValues(
-    settings = NULL
-  )
-  
-  r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
-  
-  mod_all_plots_server("exemple_plot",
-                       dataIn = reactive({Exp1_R25_prot}),
-                       indice = reactive({2}),
-                       settings = reactive({r$settings()}) )
-  
-  mod_UI <- mod_all_plots_ui("exemple_plot")
-  mod_bsmodal_server("statsDescriptive",
-                     title = "Plots",
-                     mod_UI = mod_UI,
-                     width="75%"
-  )
+  # #---------------------------Modules for Stats Desc in Modal---------------------------------------------------#
+  # r <- reactiveValues(
+  #   settings = NULL
+  # )
+  # 
+  # r$settings <- mod_settings_server("settings", obj=reactive({Exp1_R25_prot}))
+  # 
+  # mod_all_plots_server("exemple_plot",
+  #                      dataIn = reactive({Exp1_R25_prot}),
+  #                      indice = reactive({2}),
+  #                      settings = reactive({r$settings()}) )
+  # 
+  # mod_UI <- mod_all_plots_ui("exemple_plot")
+  # mod_bsmodal_server("statsDescriptive",
+  #                    title = "Plots",
+  #                    mod_UI = mod_UI,
+  #                    width="75%"
+  # )
   
   
 }
