@@ -10,13 +10,6 @@ shinyValue <- function(id,num) {
 }
 
 
-
-
-
-
-
-
-
 #' @export
 shinyOutput <- function(FUN,id,num,...) {
   inputs <- character(num)

@@ -16,7 +16,7 @@
 mod_convert_ms_file_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_navigation_ui(ns('nav_convert'))
+
   )
 }
 
@@ -97,9 +97,7 @@ mod_convert_ms_file_server <- function(id, pipeline.def){
     })
     
     
-    mod_navigation_server('nav_convert',style=2,pages=r.nav)
-    
-    
+   
     
     
     
