@@ -30,10 +30,6 @@ lapply(list.files('R/Tools/', pattern='.R'),
 lapply(list.files('R/DataManager/', pattern='.R'), 
        function(x) {source(file.path('R/DataManager',x), local=TRUE)$value })
 
-lapply(list.files('R/Plots/', pattern='.R'), 
-       function(x) {source(file.path('R/Plots', x), local=TRUE)$value })
-
-
 
 #' @import shiny
 #' @importFrom shinyjs hide show

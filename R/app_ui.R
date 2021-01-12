@@ -1,3 +1,18 @@
+library(fresh)
+library(DAPAR2)
+library(QFeatures)
+library(shiny)
+library(shinydashboard)
+library(shinydashboardPlus)
+library(magrittr)
+library(shinyjqui)
+library(shinyBS)
+library(highcharter)
+library(DT)
+library(shinyjs)
+library(shinythemes)
+
+
 #---------------------------------------------------------------------------------------------------------
 timeoutSeconds <- 30*60
 
@@ -115,7 +130,7 @@ tagList(
                       menuItem("Home", tabName = "ProstarHome", icon = icon("home"),selected = TRUE
                       ),
                       hr(),
-                      menuItem("Data Manager", icon = icon("folder"), startExpanded = TRUE,
+                      menuItem("Data Manager", icon = icon("folder", lib = "font-awesome"), startExpanded = TRUE,
                                menuSubItem("Open QFeature file", tabName = "openFile"),
                                menuSubItem("Convert Data", tabName = "convert"),
                                menuSubItem("Demo data", tabName = "demoData"),

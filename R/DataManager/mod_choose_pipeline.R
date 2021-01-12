@@ -14,10 +14,15 @@
 #' @keywords internal
 #' @export 
 #' @importFrom shiny NS tagList 
+#' @import sos
+#' 
+#' 
 mod_choose_pipeline_ui <- function(id){
   ns <- NS(id)
   tagList(
-    uiOutput(ns("selectWidgetPipeline"))
+    selectInput(ns('dataType'), 'Data type', choices = c('None', 'protein', 'peptide')),
+    uiOutput(ns("selectWidgetPipeline")),
+    uiOutput(ns('describePipeline'))
   )
 }
     
@@ -26,33 +31,32 @@ mod_choose_pipeline_ui <- function(id){
 #' @rdname mod_choose_pipeline
 #' @export
 #' @keywords internal
+#' 
+#' 
     
-mod_choose_pipeline_server <- function(id, pipeline.def=NULL, dataType=NULL){
+mod_choose_pipeline_server <- function(id, dataType = NULL, package = NULL){
   
   
   moduleServer(id, function(input, output, session){
     ns <- session$ns
     
-    rv.choosePipeline <- reactiveValues(
-      choice = NULL )
-    
-    
-    
-    observeEvent( req(input$pipelineChoice), {
-      rv.choosePipeline$choice <- input$pipelineChoice
-    })
-    
     output$selectWidgetPipeline <- renderUI({
-      req(pipeline.def())
-      
+      library(package, character.only = TRUE)
+      req(input$dataType != 'None')
       selectizeInput(ns("pipelineChoice"),
                      "Choose the pipeline",
                      multiple = T,
                      options = list(maxItems = 1),
-                     choices = names(pipeline.def()))
+                     choices = names(Pipelines()[grep(input$dataType, Pipelines())])
+      )
     })
     
-    return( reactive({rv.choosePipeline$choice }))
+    output$describePipeline <- renderUI({
+      req(input$pipelineChoice)
+      includeMarkdown(system.file('md', paste0(input$pipelineChoice, '.md'), package=package))
+    })
+    
+    return( reactive({input$pipelineChoice}))
     
     
   })

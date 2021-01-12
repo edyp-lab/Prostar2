@@ -32,8 +32,7 @@ server <- function(input, output, session) {
   mod_infos_dataset_server('infos', 
                            obj = reactive({rv$openData() })
   )
-  
-  
+
 }
 
 
