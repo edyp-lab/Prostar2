@@ -29,13 +29,20 @@ mod_open_demo_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    mod_choose_pipeline_ui(ns("choosePipe")),
     div(
       div(
         style="display:inline-block; vertical-align: middle; padding-right: 20px;",
         uiOutput(ns("chooseDemoDataset")),
         uiOutput(ns("linktoDemoPdf"))
-        )
+        ),
+      div(
+        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+        selectInput(ns("dataType"), 'Data type', choices = c('None', 'protein', 'peptide'), width='150px')
+      ),
+      div(
+        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+        mod_choose_pipeline_ui(ns("pipe"))
+      )
       ),
    shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass)),
    hr(),
@@ -70,16 +77,17 @@ mod_open_demo_dataset_server <- function(id){
       dataOut = NULL
     )
     
-    rv.openDemo$pipe <- mod_choose_pipeline_server("choosePipe", 
-                                                   dataType = 'Protein',
+    rv.openDemo$pipe <- mod_choose_pipeline_server('pipe', 
+                                                   dataType = reactive({input$dataType}), 
                                                    package = 'MSPipelines')
     
     
     observe({
       shinyjs::toggle('loadDemoDataset', condition= (!is.null(rv.openDemo$pipe())) && rv.openDemo$pipe() != '' && length(input$demoDataset) >0)
+      shinyjs::toggle('div_choose_pipeline', condition = !is.null(input$dataType))
     })
     
-    
+
     ### function for demo mode
     output$chooseDemoDataset <- renderUI({
       print("DAPARdata is loaded correctly")
@@ -105,11 +113,12 @@ mod_open_demo_dataset_server <- function(id){
         }
         
         MultiAssayExperiment::metadata(rv.openDemo$dataRead)$pipelineType <- rv.openDemo$pipe()
-        rv.openDemo$dataOut <- rv.openDemo$dataRead
+        rv.openDemo$dataOut <- list(pipeline.name = rv.openDemo$pipe(),
+                                    dataset = rv.openDemo$dataRead
+        )
         
       }) # End withProgress
-      
-      return(reactive({rv.openDemo$dataOut }))
+
     }) # End observeEvent
     
     
@@ -126,10 +135,10 @@ mod_open_demo_dataset_server <- function(id){
     })
     
     mod_infos_dataset_server('infos', 
-                             obj = reactive({rv.openDemo$dataOut})
+                             obj = reactive({rv.openDemo$dataRead})
     )
                              
-    return(reactive({rv.openDemo$dataOut}))
+    reactive({rv.openDemo$dataOut})
     
     
   })

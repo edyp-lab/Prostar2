@@ -103,7 +103,7 @@ tagList(
                     ),
                     # button to mimic data loaded
                     tags$li(class="dropdown",
-                            checkboxInput(inputId = 'data', label = 'Data Loaded?', value = FALSE)
+                            actionButton('browser', 'Browser()')
                     ),
                     # links Prostar website and github
                     tags$li(class="dropdown",

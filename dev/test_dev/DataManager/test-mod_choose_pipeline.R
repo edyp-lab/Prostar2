@@ -15,7 +15,7 @@ server <- function(input, output, session) {
     res = NULL
    )
   
-  rv$res <- mod_choose_pipeline_server('pipe', package = 'MSPipelines')
+  rv$res <- mod_choose_pipeline_server('pipe', dataType = 'protein', package = 'MSPipelines')
 
 }
 

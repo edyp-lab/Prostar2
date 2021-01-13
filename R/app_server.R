@@ -68,32 +68,43 @@ app_server <- function(input, output,session) {
                                   openDemo = mod_open_demo_dataset_server('mod_OpenDemoDataset')
                                   )
 
-  observeEvent(rv.core$tmp_dataManager$openFile(),{
-    rv.core$current.obj <- rv.core$tmp_dataManager$openFile()
-    setCoreRV()
-  })
-
-  observeEvent(rv.core$tmp_dataManager$convert(),{
-    rv.core$current.obj <- rv.core$tmp_dataManager$convert()
-    setCoreRV()
-    })
-
-
-  observeEvent(rv.core$tmp_dataManager$openDemo(),{
-    rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()
-    setCoreRV()
-    })
+  # observeEvent(rv.core$tmp_dataManager$openFile(),{
+  #   rv.core$current.obj <- rv.core$tmp_dataManager$openFile()$dataset
+  #   rv.core$current.pipeline <- rv.core$tmp_dataManager$openFile()$pipeline
+  # })
   # 
-  # # # Update several reactive variable once a dataset is loaded
-  setCoreRV <- reactive({
-    # We begins with the last SE in the QFeatures dataset
-    rv.core$current.indice <- length(rv.core$current.obj)
-    rv.core$current.pipeline <- MultiAssayExperiment::metadata(rv.core$current.obj)$pipelineType
-  })
+  # observeEvent(rv.core$tmp_dataManager$convert(),{
+  #   rv.core$current.obj <- rv.core$tmp_dataManager$convert()
+  #   rv.core$current.pipeline <- rv.core$tmp_dataManager$convert()$pipeline
+  #   })
+
+
+  observeEvent(input$browser,{browser()})
+  
+  observeEvent(rv.core$tmp_dataManager$openDemo(),{
+    print('demo dataset loaded')
+    rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()$dataset
+    rv.core$current.pipeline <- rv.core$tmp_dataManager$openDemo()$pipeline
+    })
+
+  
+  #  #Once the type of pipeline is known (ie a dataset has been loaded),
+  #  #call the server parts of the processing modules that belongs
+  #  # to this pipeline
+   observeEvent(req(rv.core$current.pipeline), {
+     browser()
+     pipeline <- Protein$new('Pipeline')
+     pipeline$server(dataIn = reactive({rv.core$current.obj}))
+     shinyjs::show('div_pipeline')
+   })
   
   
-  #observeEvent(input$ReloadProstar, { js$reset()})
+  observeEvent(input$ReloadProstar, { js$reset()})
   
+  output$show_pipeline <- renderUI({ 
+    req(pipeline)
+    pipeline$ui()
+    })
   
   output$contenu_dashboardBody <- renderUI({
     
@@ -113,30 +124,35 @@ app_server <- function(input, output,session) {
       theme = shinythemes::shinytheme("cerulean"),
       
       # first column, showed if "data loaded"
-      # column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
-      #        br(),
-      #        h4('Statistic Descriptive'),
-      #        #mod_bsmodal_ui('statsDescriptive'),
-      #        br(),
-      #        # h4('Timeline')
-      #        # , tags$img(src="timeline_v.PNG",
-      #        #            title="General timeline",
-      #        #            style="display:block ; height: 500px; margin: auto;")
-      # ),
+      column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
+             br(),
+             div(id = 'div_pipeline', uiOutput('show_pipeline')
+             )
+      ),
       
       column(col_right,
              tabItems(
-               tabItem(tabName = "ProstarHome", class="active", mod_homepage_ui('home')),
-               tabItem(tabName = "openFile", h3("Open QFeature file"), mod_import_file_from_ui("open_file")),
-               tabItem(tabName = "convert", h3("Convert data"), mod_convert_ms_file_ui("convert_data")),
-               tabItem(tabName = "demoData", h3("Charge a demo dataset"), mod_open_demo_dataset_ui("demo_data")),
+               tabItem(tabName = "ProstarHome", class="active", 
+                       mod_homepage_ui('home')),
+               tabItem(tabName = "openFile", h3("Open QFeature file"), 
+                       mod_import_file_from_ui("open_file")),
+               tabItem(tabName = "convert", h3("Convert data"), 
+                       mod_convert_ms_file_ui("convert_data")),
+               tabItem(tabName = "demoData", h3("Charge a demo dataset"), 
+                       mod_open_demo_dataset_ui("demo_data")),
                tabItem(tabName = "export", h3("Export")), # export module not yet
-               tabItem(tabName = "globalSettings", h3('Global settings'), mod_settings_ui('global_settings')),
-               tabItem(tabName = "releaseNotes", h3('Release notes'), mod_release_notes_ui('rl')),
-               tabItem(tabName = "checkUpdates", h3('Check for updates'), mod_check_updates_ui('check_updates')),
-               tabItem(tabName = "usefulLinks", mod_insert_md_ui('links_MD')),
-               tabItem(tabName = "faq", mod_insert_md_ui('FAQ_MD')),
-               tabItem(tabName = "bugReport", h3('Bug report'), mod_bug_report_ui("bug_report"))
+               tabItem(tabName = "globalSettings", h3('Global settings'), 
+                       mod_settings_ui('global_settings')),
+               tabItem(tabName = "releaseNotes", h3('Release notes'), 
+                       mod_release_notes_ui('rl')),
+               tabItem(tabName = "checkUpdates", h3('Check for updates'), 
+                       mod_check_updates_ui('check_updates')),
+               tabItem(tabName = "usefulLinks", 
+                       mod_insert_md_ui('links_MD')),
+               tabItem(tabName = "faq", 
+                       mod_insert_md_ui('FAQ_MD')),
+               tabItem(tabName = "bugReport", h3('Bug report'), 
+                       mod_bug_report_ui("bug_report"))
              )
       )
     )
@@ -169,9 +185,6 @@ app_server <- function(input, output,session) {
   })
   
   
-  
-  utils::data(Exp1_R25_prot, package="DAPARdata2")
-  
   #---------------------------Server modules calls---------------------------------------------------#
   
   mod_homepage_server('home')
@@ -180,7 +193,7 @@ app_server <- function(input, output,session) {
   mod_convert_ms_file_server("convert_data")
   mod_open_demo_dataset_server("demo_data")
   
-  mod_settings_server("global_settings", obj = reactive({Exp1_R25_prot}))
+  #mod_settings_server("global_settings", obj = reactive({Exp1_R25_prot}))
   
   mod_release_notes_server("rl")
   
@@ -223,16 +236,7 @@ app_server <- function(input, output,session) {
   #              rv.core$current.obj
   #            })
   # )
-  # 
-  # rv.core$tmp_indice <- mod_change_assay_server('change_assay', 
-  #            ll.se = reactive({names(rv.core$current.obj)}),
-  #            indice = reactive({rv.core$current.indice})
-  # )
-  # 
-  # observeEvent(rv.core$tmp_indice(),{
-  #   rv.core$current.indice <- rv.core$tmp_indice()
-  # })
-  # 
+
   #  
   # mod_homepage_server("homepage")
   # mod_release_notes_server("modReleaseNotes")
@@ -243,14 +247,7 @@ app_server <- function(input, output,session) {
   # mod_insert_md_server("FAQ_MD", URL_FAQ)
   #  
   # 
-  #  #Once the type of pipeline is known (ie a dataset has been loaded),
-  #  #call the server parts of the processing modules that belongs
-  #  # to this pipeline
-  #  observeEvent(req(rv.core$current.pipeline), {
-  #    
-  #    Build_DataMining_Menu()
-  #    Build_DataProcessing_Menu()
-  #  })
+ 
   #  
   #  
   # 

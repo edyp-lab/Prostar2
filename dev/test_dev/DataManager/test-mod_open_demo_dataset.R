@@ -30,11 +30,13 @@ server <- function(input, output, session) {
   )
   
   rv$demoData <- mod_open_demo_dataset_server("rl")
-  # 
-  # mod_infos_dataset_server('infos', 
-  #                          obj = reactive({rv$demoData() })
-  # )
-  # 
+  
+  observeEvent(rv$demoData(),{
+    print('demo dataset loaded')
+
+    print(rv$demoData()$dataset)
+    print(rv$demoData()$pipeline.name)
+  })
   
 }
 

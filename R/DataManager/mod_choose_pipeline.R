@@ -21,17 +21,8 @@
 mod_choose_pipeline_ui <- function(id){
   ns <- NS(id)
   tagList(
-    div(
-      div(
-        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-        selectInput(ns('dataType'), 'Data type', choices = c('None', 'protein', 'peptide'), width='150px')
-        ),
-      div(
-        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-        uiOutput(ns("selectWidgetPipeline"))
-      )
-      ),
-    uiOutput(ns('describePipeline'))
+     uiOutput(ns("selectWidgetPipeline")),
+     uiOutput(ns('describePipeline'))
   )
 }
     
@@ -51,12 +42,13 @@ mod_choose_pipeline_server <- function(id, dataType = NULL, package = NULL){
     
     output$selectWidgetPipeline <- renderUI({
       library(package, character.only = TRUE)
-      req(input$dataType != 'None')
+
+      req(dataType() != 'None')
       selectizeInput(ns("pipelineChoice"),
                      "Choose the pipeline",
                      multiple = T,
                      options = list(maxItems = 1),
-                     choices = names(Pipelines()[grep(input$dataType, Pipelines())]), 
+                     choices = names(Pipelines()[grep(dataType(), Pipelines())]), 
                      width='150px'
       )
     })
