@@ -1,5 +1,5 @@
 ---
-title: "Inside Prostar core"
+title: "Inside Prostar core 2"
 subtitle: "A developer's guidelines"
 author: "Samuel Wieczorek"
 date: "`r format(Sys.time(), '%B %d, %Y')`"

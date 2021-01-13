@@ -130,7 +130,7 @@ tagList(
                       menuItem("Home", tabName = "ProstarHome", icon = icon("home"),selected = TRUE
                       ),
                       hr(),
-                      menuItem("Data Manager", icon = icon("folder", lib = "font-awesome"), startExpanded = TRUE,
+                      menuItem("Data Manager", icon = icon("folder"), startExpanded = TRUE,
                                menuSubItem("Open QFeature file", tabName = "openFile"),
                                menuSubItem("Convert Data", tabName = "convert"),
                                menuSubItem("Demo data", tabName = "demoData"),

@@ -32,7 +32,7 @@ mod_convert_ms_file_ui <- function(id){
 #' @importFrom shinyjs hidden toggle
 #' @importFrom htmlwidgets JS
 #' 
-mod_convert_ms_file_server <- function(id, pipeline.def){
+mod_convert_ms_file_server <- function(id){
   
   
   moduleServer(id, function(input, output, session){
@@ -412,7 +412,7 @@ mod_convert_ms_file_server <- function(id, pipeline.def){
     
     
     
-    rv.convert$pipeline <- mod_choose_pipeline_server('choose_pipeline_ui', pipeline.def=reactive({pipeline.def()}), dataType = input$typeOfData)
+    rv.convert$pipeline <- mod_choose_pipeline_server('choose_pipeline_ui', dataType = input$typeOfData, package='MSPipelines')
     
     output$conversionDone <- renderUI({
       

@@ -29,10 +29,17 @@ mod_open_demo_dataset_ui <- function(id){
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    uiOutput(ns("chooseDemoDataset")),
-    uiOutput(ns("linktoDemoPdf")),
     mod_choose_pipeline_ui(ns("choosePipe")),
-    shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass))
+    div(
+      div(
+        style="display:inline-block; vertical-align: middle; padding-right: 20px;",
+        uiOutput(ns("chooseDemoDataset")),
+        uiOutput(ns("linktoDemoPdf"))
+        )
+      ),
+   shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass)),
+   hr(),
+   mod_infos_dataset_ui(ns("infos"))
   )
 }
 
@@ -51,7 +58,7 @@ mod_open_demo_dataset_ui <- function(id){
 #' @importFrom shinyjs info
 #' @import QFeatures
 #' 
-mod_open_demo_dataset_server <- function(id, pipeline.def){
+mod_open_demo_dataset_server <- function(id){
   
   moduleServer(id, function(input, output, session){
     ns <- session$ns
@@ -64,7 +71,8 @@ mod_open_demo_dataset_server <- function(id, pipeline.def){
     )
     
     rv.openDemo$pipe <- mod_choose_pipeline_server("choosePipe", 
-                                                   pipeline.def = reactive({pipeline.defs}))
+                                                   dataType = 'Protein',
+                                                   package = 'MSPipelines')
     
     
     observe({
@@ -117,7 +125,10 @@ mod_open_demo_dataset_server <- function(id, pipeline.def){
       # 
     })
     
-    
+    mod_infos_dataset_server('infos', 
+                             obj = reactive({rv.openDemo$dataOut})
+    )
+                             
     return(reactive({rv.openDemo$dataOut}))
     
     

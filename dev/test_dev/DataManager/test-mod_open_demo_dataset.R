@@ -16,9 +16,9 @@ actionBtnClass <- "btn-primary"
 
 ui <- fluidPage(
   tagList(
-    mod_open_demo_dataset_ui('rl'),
-    hr(),
-    mod_infos_dataset_ui("infos")
+    mod_open_demo_dataset_ui('rl')
+    #hr(),
+   # mod_infos_dataset_ui("infos")
   )
 )
 
@@ -29,12 +29,12 @@ server <- function(input, output, session) {
     demoData = NULL
   )
   
-  rv$demoData <- mod_open_demo_dataset_server("rl", pipeline.def=reactive({pipeline.defs}))
-  
-  mod_infos_dataset_server('infos', 
-                           obj = reactive({rv$demoData() })
-  )
-  
+  rv$demoData <- mod_open_demo_dataset_server("rl")
+  # 
+  # mod_infos_dataset_server('infos', 
+  #                          obj = reactive({rv$demoData() })
+  # )
+  # 
   
 }
 

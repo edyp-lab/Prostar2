@@ -67,7 +67,7 @@ mod_open_dataset_server <- function(id, pipeline.def){
     )
     
     
-    rv.openDataset$pipe <- mod_choose_pipeline_server("choosePipe", pipeline.def=reactive({pipeline.def()}))
+    rv.openDataset$pipe <- mod_choose_pipeline_server("choosePipe", dataType = 'Protein', package='MSPipelines')
     
     
     DeleteExtension <- function(name){

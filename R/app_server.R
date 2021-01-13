@@ -36,6 +36,64 @@ lapply(list.files('R/DataManager/', pattern='.R'),
 #' 
 app_server <- function(input, output,session) {
   
+  rv.core <- reactiveValues(
+
+    # Current QFeatures object in Prostar
+    current.obj = NULL,
+  
+    # pipeline choosen by the user for its dataset
+    current.pipeline = NULL,
+       
+   
+    # objects returned by demode, openmode and convertmode
+    tmp_dataManager = list(convert = NULL,
+                           openFile = NULL,
+                           openDemo = NULL)
+    #   
+    #   # return value of the settings module
+    #   settings = NULL,
+    #   
+    #   #
+    #   tempplot = NULL,
+    #   
+    #   #
+    #   loadData = NULL
+ )
+  
+  
+
+  ## Get the return values of modules in charge of loading datasets
+  rv.core$tmp_dataManager <- list(openFile = mod_open_dataset_server('moduleOpenDataset'),
+                                  convert = mod_convert_ms_file_server('moduleProcess_Convert'),
+                                  openDemo = mod_open_demo_dataset_server('mod_OpenDemoDataset')
+                                  )
+
+  observeEvent(rv.core$tmp_dataManager$openFile(),{
+    rv.core$current.obj <- rv.core$tmp_dataManager$openFile()
+    setCoreRV()
+  })
+
+  observeEvent(rv.core$tmp_dataManager$convert(),{
+    rv.core$current.obj <- rv.core$tmp_dataManager$convert()
+    setCoreRV()
+    })
+
+
+  observeEvent(rv.core$tmp_dataManager$openDemo(),{
+    rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()
+    setCoreRV()
+    })
+  # 
+  # # # Update several reactive variable once a dataset is loaded
+  setCoreRV <- reactive({
+    # We begins with the last SE in the QFeatures dataset
+    rv.core$current.indice <- length(rv.core$current.obj)
+    rv.core$current.pipeline <- MultiAssayExperiment::metadata(rv.core$current.obj)$pipelineType
+  })
+  
+  
+  #observeEvent(input$ReloadProstar, { js$reset()})
+  
   
   output$contenu_dashboardBody <- renderUI({
     
@@ -55,16 +113,16 @@ app_server <- function(input, output,session) {
       theme = shinythemes::shinytheme("cerulean"),
       
       # first column, showed if "data loaded"
-      column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
-             br(),
-             h4('Statistic Descriptive'),
-             #mod_bsmodal_ui('statsDescriptive'),
-             br(),
-             # h4('Timeline')
-             # , tags$img(src="timeline_v.PNG",
-             #            title="General timeline",
-             #            style="display:block ; height: 500px; margin: auto;")
-      ),
+      # column(col_left, id = "v_timeline", style=paste0("display: ",display," ;"),
+      #        br(),
+      #        h4('Statistic Descriptive'),
+      #        #mod_bsmodal_ui('statsDescriptive'),
+      #        br(),
+      #        # h4('Timeline')
+      #        # , tags$img(src="timeline_v.PNG",
+      #        #            title="General timeline",
+      #        #            style="display:block ; height: 500px; margin: auto;")
+      # ),
       
       column(col_right,
              tabItems(
@@ -120,7 +178,7 @@ app_server <- function(input, output,session) {
   
   mod_import_file_from_server("open_file")
   mod_convert_ms_file_server("convert_data")
-  mod_open_demo_dataset_server("demo_data", pipeline.def=reactive({pipeline.defs}))
+  mod_open_demo_dataset_server("demo_data")
   
   mod_settings_server("global_settings", obj = reactive({Exp1_R25_prot}))
   
@@ -142,77 +200,7 @@ app_server <- function(input, output,session) {
   # #callModule(mod_navbar_menu_server,'mainMenu')
   # 
   # 
-  # 
-  # 
-  # ## definition des variables globales liees a un pipeline
-  # rv.core <- reactiveValues(
-  #   # current working data from current pipeline
-  #   type = NULL,
-  #   
-  #   # Current QFeatures object in Prostar
-  #   current.obj = NULL,
-  #   
-  #   ## indice of the current assay in current.obj, corresponding to a step in the pipeline
-  #   current.indice = 1,
-  #   
-  #   # pipeline choosen by the user for its dataset
-  #   current.pipeline = NULL,
-  #   
-  #   
-  #   # objects returned by demode, openmode and convertmode
-  #   tmp_dataManager = list(convert = NULL,
-  #                             openFile = NULL,
-  #                             openDemo = NULL),
-  #   
-  #   # return value of the settings module
-  #   settings = NULL,
-  #   
-  #   #
-  #   tempplot = NULL,
-  #   
-  #   #
-  #   loadData = NULL
-  #   
-  # )
-  # 
-  # observeEvent(input$ReloadProstar, { js$reset()})
-  # 
-  # observeEvent(input$browser,{browser() })
-  # 
-  # 
-  # ## Get the return values of modules in charge of loading datasets
-  # rv.core$tmp_dataManager <- list(openFile = mod_open_dataset_server('moduleOpenDataset', 
-  #                                                       pipeline.def=reactive({pipeline.defs})),
-  #                                 convert = mod_convert_ms_file_server('moduleProcess_Convert', 
-  #                                                      pipeline.def=reactive({pipeline.defs})),
-  #                                 openDemo = mod_open_demo_dataset_server('mod_OpenDemoDataset', 
-  #                                                       pipeline.def=reactive({pipeline.defs}))
-  #                                 )
-  # 
-  # observeEvent(rv.core$tmp_dataManager$openFile(),{ 
-  #   rv.core$current.obj <- rv.core$tmp_dataManager$openFile()
-  #   setCoreRV()
-  # })
-  # 
-  # observeEvent(rv.core$tmp_dataManager$convert(),{ 
-  #   rv.core$current.obj <- rv.core$tmp_dataManager$convert()
-  #   setCoreRV()
-  #   })
-  # 
-  # 
-  # observeEvent(rv.core$tmp_dataManager$openDemo(),{
-  #   rv.core$current.obj <- rv.core$tmp_dataManager$openDemo()
-  #   setCoreRV()
-  #   })
-  # 
-  # 
-  # 
-  # # Update several reactive variable once a dataset is loaded
-  # setCoreRV <- reactive({
-  #   # We begins with the last SE in the QFeatures dataset
-  #   rv.core$current.indice <- length(rv.core$current.obj)
-  #   rv.core$current.pipeline <- MultiAssayExperiment::metadata(rv.core$current.obj)$pipelineType
-  # })
+  
   # 
   # 
   # # Store the return value of the module settings
