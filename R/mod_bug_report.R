@@ -40,7 +40,8 @@ mod_bug_report_server <- function(id){
     
     logfile <- tempfile(fileext=".log")
     
-    if (isTRUE(getOption('golem.app.prod'))==FALSE){
+    if (isTRUE(getOption('golem.app.prod'))){
+      print(logfile)
       con <- file(logfile, open="wt")
       sink(con, append=TRUE)
       sink(con, append=TRUE, type="message")

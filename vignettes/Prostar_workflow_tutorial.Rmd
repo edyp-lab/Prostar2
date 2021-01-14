@@ -10,7 +10,7 @@ output:
     keep_md: true
     papersize: a4
 vignette: >
-  %\VignetteIndexEntry{Prostar core}
+  %\VignetteIndexEntry{Prostar navigation tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

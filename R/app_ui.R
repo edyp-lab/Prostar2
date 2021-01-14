@@ -136,6 +136,8 @@ tagList(
                                menuSubItem("Demo data", tabName = "demoData"),
                                menuSubItem("Export Results", tabName = "export")),
                       hr(),
+                      menuItem("Pipeline", tabName = "pipeline", icon = icon("cogs")),
+                      hr(),
                       menuItem("Global Settings", tabName = "globalSettings", icon = icon("cogs")),
                       menuItem("Release Notes", tabName = "releaseNotes", icon = icon("clipboard")),
                       menuItem("Check for Updates", tabName = "checkUpdates", icon = icon("wrench")),

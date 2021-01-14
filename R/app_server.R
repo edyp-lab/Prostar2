@@ -36,6 +36,7 @@ lapply(list.files('R/DataManager/', pattern='.R'),
 #' 
 app_server <- function(input, output,session) {
   
+  pipeline <- NULL
   rv.core <- reactiveValues(
 
     # Current QFeatures object in Prostar
@@ -152,7 +153,9 @@ app_server <- function(input, output,session) {
                tabItem(tabName = "faq", 
                        mod_insert_md_ui('FAQ_MD')),
                tabItem(tabName = "bugReport", h3('Bug report'), 
-                       mod_bug_report_ui("bug_report"))
+                       mod_bug_report_ui("bug_report")),
+               tabItem(tabName = "pipeline", h3('Pipeline'), 
+                       uiOutput('show_pipeline'))
              )
       )
     )
