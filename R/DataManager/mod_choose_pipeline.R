@@ -21,6 +21,7 @@
 mod_choose_pipeline_ui <- function(id){
   ns <- NS(id)
   tagList(
+    h3('mod_choose_pipeline'),
      uiOutput(ns("selectWidgetPipeline")),
      uiOutput(ns('describePipeline'))
   )
@@ -41,9 +42,12 @@ mod_choose_pipeline_server <- function(id, dataType = NULL, package = NULL){
     ns <- session$ns
     
     output$selectWidgetPipeline <- renderUI({
+      #browser()
+      req(dataType()!= 'None')
+      #if (dataType() == 'None') return(NULL)
+      #print('inside selectWidgetPipeline')
+      #print(paste0('dataType received = ', dataType()))
       library(package, character.only = TRUE)
-
-      req(dataType() != 'None')
       selectizeInput(ns("pipelineChoice"),
                      "Choose the pipeline",
                      multiple = T,
@@ -54,6 +58,7 @@ mod_choose_pipeline_server <- function(id, dataType = NULL, package = NULL){
     })
     
     output$describePipeline <- renderUI({
+      print('inside selectWidgetPipeline')
       req(input$pipelineChoice)
       includeMarkdown(system.file('md', paste0(input$pipelineChoice, '.md'), package=package))
     })

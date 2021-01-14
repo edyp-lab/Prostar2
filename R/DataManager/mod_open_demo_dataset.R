@@ -37,13 +37,14 @@ mod_open_demo_dataset_ui <- function(id){
         ),
       div(
         style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-        selectInput(ns("dataType"), 'Data type', choices = c('None', 'protein', 'peptide'), width='150px')
+        selectInput(ns("dataType"), 'Data type', 
+                    choices = c('None'='None', 'protein'='protein', 'peptide'='peptide'), 
+                    width='150px')
       ),
       div(
         style="display:inline-block; vertical-align: middle; padding-right: 20px;",
-        mod_choose_pipeline_ui(ns("pipe"))
-      )
-      ),
+        mod_choose_pipeline_ui(ns("pipe") )
+      )),
    shinyjs::hidden(actionButton(ns("loadDemoDataset"), "Load demo dataset",class = actionBtnClass)),
    hr(),
    mod_infos_dataset_ui(ns("infos"))
@@ -82,12 +83,11 @@ mod_open_demo_dataset_server <- function(id){
                                                    package = 'MSPipelines')
     
     
-    observe({
-      shinyjs::toggle('loadDemoDataset', condition= (!is.null(rv.openDemo$pipe())) && rv.openDemo$pipe() != '' && length(input$demoDataset) >0)
-      shinyjs::toggle('div_choose_pipeline', condition = !is.null(input$dataType))
+    observeEvent(req(rv.openDemo$pipe()),{
+      shinyjs::toggle('loadDemoDataset', condition=  rv.openDemo$pipe() != '' && length(input$demoDataset) >0)
     })
-    
 
+    
     ### function for demo mode
     output$chooseDemoDataset <- renderUI({
       print("DAPARdata is loaded correctly")

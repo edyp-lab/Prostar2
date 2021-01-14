@@ -139,7 +139,7 @@ app_server <- function(input, output,session) {
                        mod_import_file_from_ui("open_file")),
                tabItem(tabName = "convert", h3("Convert data"), 
                        mod_convert_ms_file_ui("convert_data")),
-               tabItem(tabName = "demoData", h3("Charge a demo dataset"), 
+               tabItem(tabName = "demoData", h3("Load a demo dataset"), 
                        mod_open_demo_dataset_ui("demo_data")),
                tabItem(tabName = "export", h3("Export")), # export module not yet
                tabItem(tabName = "globalSettings", h3('Global settings'), 
@@ -206,7 +206,7 @@ app_server <- function(input, output,session) {
   
   mod_insert_md_server("FAQ_MD", URL_FAQ)
   
-  mod_bug_report_server("bug_report")
+  #mod_bug_report_server("bug_report")
   
   
   
