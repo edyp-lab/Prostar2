@@ -8,8 +8,8 @@
 #' 
 #' @name module_PiplelineProtein
 #' @examplesIf interactive()
-#' source("~/GitHub/DaparToolshed/inst/extdata/workflow/PipelineProtein/R/PipelineProtein.R")
-#' path <- system.file('extdata/workflow/PipelineProtein', package = 'DaparToolshed')
+#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelineProtein/R/PipelineProtein.R")
+#' path <- system.file('extdata/workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(MagellanNTK::workflowApp("PipelineProtein")
 #' 
 #' @name PipelineProtein

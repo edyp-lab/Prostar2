@@ -5,8 +5,8 @@
 #' @name mod_convert
 #' @author Samuel Wieczorek 
 #' @examplesIf interactive()
-#' source("~/GitHub/DaparToolshed/inst/extdata/workflow/WorkflowConvert/R/Workflowconvert_Convert.R")
-#' path <- system.file('extdata/workflow/WorkflowConvert', package = 'DaparToolshed')
+#' source("~/GitHub/Prostar2/inst/extdata/workflow/WorkflowConvert/R/Workflowconvert_Convert.R")
+#' path <- system.file('extdata/workflow/WorkflowConvert', package = 'Prostar2')
 #' shiny::runApp(MagellanNTK::workflowApp("Convert")
 #' 
 #' 

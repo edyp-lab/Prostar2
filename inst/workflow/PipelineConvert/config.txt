@@ -3,7 +3,7 @@
 
 # Customizable functions
 
-convert_dataset: DaparToolshed
+convert_dataset: Prostar2
 open_dataset: MagellanNTK
 open_demoDataset: MagellanNTK
 view_dataset: omXplore

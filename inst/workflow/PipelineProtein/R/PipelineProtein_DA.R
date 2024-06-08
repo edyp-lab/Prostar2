@@ -47,7 +47,7 @@
 #' obj <- DaparToolshed::addDatasets(obj, new.dataset, 'HypothesisTest')
 #' 
 #' 
-#' path <- system.file('workflow/PipelineProtein', package = 'DaparToolshed')
+#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_DA", path, dataIn = obj))
 #' 
 #' 

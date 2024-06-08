@@ -18,7 +18,7 @@
 #' @examplesIf interactive()
 #' library(MagellanNTK)
 #' data(ft_na)
-#' path <- system.file('workflow/PipelineProtein', package = 'DaparToolshed')
+#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_Imputation", path, dataIn = ft_na))
 #' 
 #' 
