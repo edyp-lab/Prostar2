@@ -160,7 +160,9 @@ mod_Variable_Filtering_server <- function(id,
         req(is.enabled())
         rv.custom$funFilter <- mod_VariableFilter_Generator_server(
           id = "query",
-          obj = reactive({obj()[[i()]]})
+          obj = reactive({obj()[[i()]]}),
+          is.enabled = reactive({is.enabled()}),
+          remoteReset = reactive({remoteReset()})
         )
       })
       widget <- mod_VariableFilter_Generator_ui(ns("query"))
