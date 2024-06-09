@@ -33,7 +33,12 @@ mod_designExample_ui <- function(id) {
 #' @import shiny
 #' @export
 #' 
-mod_designExample_server <- function(id, n){
+mod_designExample_server <- function(
+    id, 
+    n,
+  remoteReset = reactive({FALSE}),
+    is.enabled = reactive({TRUE})
+    ){
   
   pkgs.require("rhandsontable")
   

@@ -197,14 +197,14 @@ PipelineProtein_Normalization_server <- function(id,
                 shinyjs::hidden(uiOutput(ns('Normalization_type_ui')))
             ),
             div(style = .style,
-              hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
+              shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
               #module_Not_a_numericUI(ns("test_spanLOESS")),
               uiOutput(ns("Normalization_quantile_ui")),
               uiOutput(ns("Normalization_varReduction_ui"))
             ),
             div(style = .style,
               plots_tracking_ui(ns("tracker")),
-                hidden(uiOutput(ns("Normalization_sync_ui"))
+              shinyjs::hidden(uiOutput(ns("Normalization_sync_ui"))
               )
             ),
             div(style = .style,
@@ -341,13 +341,17 @@ PipelineProtein_Normalization_server <- function(id,
     
     selectProt <- omXplore::plots_tracking_server("tracker",
       obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)})
+      i = reactive({length(rv$dataIn)}),
+      remoteReset = reactive({remoteReset()}),
+      is.enabled = reactive({is.enabled('Normalization')})
     )
     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
-      track.indices = reactive({selectProt()})
+      track.indices = reactive({selectProt()}),
+      remoteReset = reactive({remoteReset()}),
+      is.enabled = reactive({is.enabled('Normalization')})
     )
     
 

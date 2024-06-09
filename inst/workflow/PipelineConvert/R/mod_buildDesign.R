@@ -63,9 +63,12 @@ mod_buildDesign_ui <- function(id) {
 #' @importFrom magrittr "%>%"
 #' @export
 mod_buildDesign_server <- function(id,
-                                   quantCols) {
-  pkgs.require("shinyBS")
+  quantCols,
+  remoteReset = reactive({FALSE}),
+  is.enabled = reactive({TRUE})
+  ) {
   
+  pkgs.require("shinyBS")
   requireNamespace('magrittr')
   
   moduleServer(id, function(input, output, session) {
@@ -307,15 +310,15 @@ mod_buildDesign_server <- function(id,
              twoLevelsDesign = {
                tagList(
                  h4("Example for a 2-levels design"),
-                 DaparToolshed::mod_designExample_server("buildDesignExampleTwo", 2),
-                 DaparToolshed::mod_designExample_ui(ns("buildDesignExampleTwo"))
+                 Prostar2::mod_designExample_server("buildDesignExampleTwo", 2),
+                 Prostar2::mod_designExample_ui(ns("buildDesignExampleTwo"))
                )
              },
              threeLevelsDesign = {
                tagList(
                  h4("Example for a 3-levels design"),
-                 DaparToolshed::mod_designExample_server("buildDesignExampleThree", 3),
-                 DaparToolshed::mod_designExample_ui(ns("buildDesignExampleThree"))
+                 Prostar2::mod_designExample_server("buildDesignExampleThree", 3),
+                 Prostar2::mod_designExample_ui(ns("buildDesignExampleThree"))
                )
              }
       )

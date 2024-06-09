@@ -190,7 +190,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     # >>> START: Definition of the widgets
-    rv.custom$tmp1 <- DaparToolshed::mod_Prot_Imputation_POV_server(
+    rv.custom$tmp1 <- Prostar2::mod_Prot_Imputation_POV_server(
       id = 'pov',
       obj = reactive({rv.custom$dataIn1}),
       i = reactive({length(rv.custom$dataIn1)}),
@@ -216,7 +216,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$POVImputation_btn_validate, {
       # Do some stuff
-      rv$dataIn <- DaparToolshed::addDatasets(
+      rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,
         rv.custom$tmp1()$value,
         'POVImputation')
@@ -253,10 +253,10 @@ PipelineProtein_Imputation_server <- function(id,
       #if (rv$steps.status["Cellmetadatafiltering"] == stepStatus$VALIDATED)
      # browser()
       # if (!is.null(rv.custom$tmp1()$value))
-      #   dataIn <- DaparToolshed::addDatasets(rv$dataIn, 
+      #   dataIn <- Prostar2::addDatasets(rv$dataIn, 
       #     rv.custom$tmp1()$value, 'POVImputation')
       
-    rv.custom$tmp2 <- DaparToolshed::mod_Prot_Imputation_MEC_server(
+    rv.custom$tmp2 <- Prostar2::mod_Prot_Imputation_MEC_server(
       id = 'mec',
       obj = reactive({rv.custom$dataIn2}),
       i = reactive({length(rv.custom$dataIn2)}),
@@ -265,7 +265,7 @@ PipelineProtein_Imputation_server <- function(id,
     #})
     
     output$MECImputation_ui <- renderUI({
-      widget <- DaparToolshed::mod_Prot_Imputation_MEC_ui(ns('mec'))
+      widget <- Prostar2::mod_Prot_Imputation_MEC_ui(ns('mec'))
       toggleWidget(widget, rv$steps.enabled['MECImputation'] )
     })
     
@@ -278,7 +278,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$MECImputation_btn_validate, {
       # Do some stuff
-      rv$dataIn <- DaparToolshed::addDatasets(
+      rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,
         rv.custom$tmp2()$value,
         'MECImputation')

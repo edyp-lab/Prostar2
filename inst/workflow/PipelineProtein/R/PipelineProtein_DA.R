@@ -44,7 +44,7 @@
 #' 
 #' new.dataset <- obj[[length(obj)]]
 #' HypothesisTest(new.dataset) <- limma
-#' obj <- DaparToolshed::addDatasets(obj, new.dataset, 'HypothesisTest')
+#' obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
 #' 
 #' 
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
@@ -305,14 +305,14 @@ PipelineProtein_DA_server <- function(id,
     )
     
     
-    DaparToolshed::mod_volcanoplot_server(
+    Prostar2::mod_volcanoplot_server(
       id = "Pairwisecomparison_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({GetComparisons()}),
       group = reactive({omXplore::get_group(dataIn())}),
       thlogfc = reactive({rv.custom$thlogfc}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
-      reset = reactive({NULL}),
+      remoteReset = reactive({NULL}),
       is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
     )
     
@@ -464,14 +464,14 @@ PipelineProtein_DA_server <- function(id,
       req(rv$dataIn)
       req(is.validated(rv$steps.status["Description"]))
       req(Get_Dataset_to_Analyze())
-      rv.custom$AnaDiff_indices <- DaparToolshed::mod_qMetacell_FunctionFilter_Generator_server(
+      rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
         obj = reactive({Get_Dataset_to_Analyze()}),
         conds = reactive({rv.custom$conds}),
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
-        reset = reactive({NULL}),
+        remoteReset = reactive({NULL}),
         is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
       )
     })
@@ -1004,7 +1004,7 @@ PipelineProtein_DA_server <- function(id,
     
     #-------------------------------------------------------------------
     #
-    DaparToolshed::mod_volcanoplot_server(
+    Prostar2::mod_volcanoplot_server(
       id = "FDR_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({GetComparisons()}),
@@ -1012,7 +1012,7 @@ PipelineProtein_DA_server <- function(id,
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
-      reset = reactive({NULL}),
+      remoteReset = reactive({NULL}),
       is.enabled = reactive({rv$steps.enabled["FDR"]})
     )
     
@@ -1091,10 +1091,10 @@ PipelineProtein_DA_server <- function(id,
     ###### Set code for widgets managment
     ################################################################
     
-    logpval <- DaparToolshed::mod_set_pval_threshold_server(id = "Title",
+    logpval <- Prostar2::mod_set_pval_threshold_server(id = "Title",
       pval_init = reactive({10^(-rv.custom$thpval)}),
       fdr = reactive({Get_FDR()}),
-      reset = reactive({NULL}),
+      remoteReset = reactive({NULL}),
       is.enabled = reactive({rv$steps.enabled["FDR"]}))
     
     

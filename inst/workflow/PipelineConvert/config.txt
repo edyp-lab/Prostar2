@@ -8,8 +8,8 @@ open_dataset: MagellanNTK
 open_demoDataset: MagellanNTK
 view_dataset: omXplore
 infos_dataset: MagellanNTK
-addDatasets: DaparToolshed
-keepDatasets: DaparToolshed
+addDatasets: Prostar2
+keepDatasets: Prostar2
 
 # Other
 

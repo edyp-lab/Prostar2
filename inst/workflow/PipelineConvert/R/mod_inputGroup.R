@@ -37,7 +37,13 @@ mod_inputGroup_ui <- function(id) {
 #'
 #' @export
 #'
-mod_inputGroup_server <- function(id, df, quantCols) {
+mod_inputGroup_server <- function(
+    id, 
+  df, 
+  quantCols,
+  remoteReset = reactive({FALSE}),
+  is.enabled = reactive({TRUE})
+) {
   pkgs.require("shinyBS")
 
   moduleServer(id, function(input, output, session) {
@@ -189,7 +195,7 @@ server <- function(input, output, session) {
   file <- system.file('extdata/Exp1_R25_prot.txt', package='DaparToolshedData')
   df <- read.csv(file, header = TRUE, sep = "\t", as.is = T)
   
-  toto <- DaparToolshed::mod_inputGroup_server("inputGroup", df, colnames(df)[49:54])
+  toto <- Prostar2::mod_inputGroup_server("inputGroup", df, colnames(df)[49:54])
     
   observeEvent(toto(), ignoreNULL=FALSE,{
     print(toto())

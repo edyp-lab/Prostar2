@@ -207,7 +207,7 @@ PipelineB_Process1_server <- function(id,
     
     rv.custom$foo <- foo_server('foo',
       obj = reactive({rv$dataIn}),
-      reset = reactive({NULL}),
+      remoteReset = reactive({NULL}),
       is.enabled = reactive({rv$steps.enabled['Step1']})
     )
 
