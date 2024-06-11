@@ -114,6 +114,7 @@ PipelineProtein_DA_server <- function(id,
     resAnaDiff = NULL,
     Pairwisecomparison_tooltipInfo = NULL,
     thpval = 0,
+    thlogfc = 0,
     comps = NULL,
     nbTotalAnaDiff = NULL,
     nbSelectedAnaDiff = NULL,
@@ -141,17 +142,18 @@ PipelineProtein_DA_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    core.code <- Get_Workflow_Core_Code(
+    eval(
+      str2expression(
+        Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
       w.names = names(widgets.default.values),
       rv.custom.names = names(rv.custom.default.values)
     )
+      )
+    )
     
-    eval(str2expression(core.code))
-    
-    
-    
+
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -416,7 +418,7 @@ PipelineProtein_DA_server <- function(id,
       datasetToAnalyze <- NULL
       if (rv.widgets$Pairwisecomparison_Comparison == "None" || is.null(rv$dataIn))
         return(NULL)
-      
+  
       if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
         .conds <- rv.custom$conds
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]

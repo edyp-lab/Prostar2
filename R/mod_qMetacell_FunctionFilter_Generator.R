@@ -127,9 +127,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         )
 
 
-observeEvent(req(remoteReset()), {
-  print('toto')
-})
         output$Add_btn_UI <- renderUI({
           widget <- actionButton(ns("BuildFilter_btn"), "Add filter")
           

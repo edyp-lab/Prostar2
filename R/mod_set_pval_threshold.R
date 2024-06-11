@@ -67,8 +67,29 @@ mod_set_pval_threshold_server <- function(id,
   remoteReset = reactive({NULL}),
   is.enabled = reactive({TRUE})) {
   
+  
+  widgets.default.values <- list(
+    thresholdType = NULL
+  )
+  
+  rv.custom.default.values <- list()
+  
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    eval(
+      str2expression(
+        MagellanNTK::Get_AdditionalModule_Core_Code(
+          w.names = names(widgets.default.values),
+          rv.custom.names = names(rv.custom.default.values)
+        )
+      )
+    )
+    
+    observeEvent(req(threshold.type()), {
+      rv.widgets$thresholdType <- threshold.type()
+    })
     
     dataOut <- reactiveVal()
     threshold_type <- reactiveVal('pval')
@@ -102,11 +123,11 @@ mod_set_pval_threshold_server <- function(id,
 
       radioButtons(ns('thresholdType'), NULL, 
         choices = c('-log10(p-value)' = 'logpval', 'p-value' = 'pval'),
-        selected = threshold.type())
+        selected = rv.widgets$thresholdType)
     })
     
     
-    observeEvent(input$thresholdType, {threshold_type(input$thresholdType)})
+   # observeEvent(input$thresholdType, {threshold_type(input$thresholdType)})
     
     output$showFDR_UI <- renderUI({
       req(fdr())

@@ -428,14 +428,6 @@ mod_volcanoplot_server <- function(
       req(rv$dataIn)
 
           withProgress(message = "Building plot...", detail = "", value = 0, {
-          m <- match.metacell(omXplore::get_metacell(rv$dataIn),
-            pattern = c("Missing", "Missing POV", "Missing MEC"),
-            level = omXplore::get_type(rv$dataIn)
-          )
-          if (length(which(m)) > 0) {
-            return(NULL)
-          }
-          
           ht <- HypothesisTest(rv$dataIn)
           prefix <- paste0(comparison()[1], '_vs_', comparison()[2])
 
@@ -464,8 +456,6 @@ mod_volcanoplot_server <- function(
               ns("eventPointClicked"),
               "', [this.index]+'_'+ [this.series.name]);}"
             ))
-          
-          
 
           widget <- diffAnaVolcanoplot_rCharts(
             df,
