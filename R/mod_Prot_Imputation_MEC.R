@@ -103,6 +103,10 @@ mod_Prot_Imputation_MEC_server <- function(id,
     )
     
     
+    .localStyle <- "display:inline-block; vertical-align: top;
+                  padding-right: 20px;"
+    
+    
     observeEvent(obj(), ignoreNULL = TRUE,{
       req(obj())
       
@@ -200,7 +204,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
       
       widget <- switch(rv.widgets$MEC_algorithm,
           detQuantile = {
-            tagList(
+            div(
               numericInput(ns("MEC_detQuant_quantile"), "Quantile",
                   value = rv.widgets$MEC_detQuant_quantile,
                   step = 0.5,

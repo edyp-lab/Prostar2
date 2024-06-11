@@ -109,6 +109,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
     eval(str2expression(core.code))
   
     
+    # Add a new observer to remoteReset to complete the default behaviour
+    observeEvent(remoteReset(), {
+      
+    })
+    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 

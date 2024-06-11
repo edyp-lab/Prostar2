@@ -380,17 +380,14 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(input$Normalization_btn_validate, {
       # Do some stuff 
-      
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
-      
 
       .tmp <- NULL
       .tmp <- try({
         .conds <- colData(rv$dataIn)[, "Condition"]
         qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
-        type <- metadata(rv$dataIn[[length(rv$dataIn)]])$typeDataset
-
+        
         switch(rv.widgets$Normalization_method,
           
           G_noneStr = rv$dataIn[[length(rv$dataIn)]],
@@ -408,7 +405,7 @@ PipelineProtein_Normalization_server <- function(id,
             DaparToolshed::QuantileCentering(
               qData = qdata, 
               conds = .conds, 
-              type = type, 
+              type = rv.widgets$Normalization_type, 
               subset.norm = selectProt(), 
               quantile = quant)
           },

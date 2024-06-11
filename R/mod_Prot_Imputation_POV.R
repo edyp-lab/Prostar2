@@ -45,8 +45,9 @@ mod_Prot_Imputation_POV_ui <- function(id) {
     # For more details, please refer to the dev document.
     
     tags$div(
-      tags$div(style = .localStyle, uiOutput(ns("POV_algorithm_ui"))),
-      tags$div(style = .localStyle, uiOutput(ns("POV_Params"))),
+      tags$div(style = .localStyle, uiOutput(ns("POV_algorithm_UI"))),
+      tags$div(style = .localStyle, uiOutput(ns("POV_KNN_nbNeighbors_UI"))),
+      tags$div(style = .localStyle, uiOutput(ns("POV_detQuant_UI"))),
       tags$div(style = .localStyle, uiOutput(ns("POV_showDetQuantValues")))
     ),
     # Insert validation button
@@ -102,20 +103,21 @@ mod_Prot_Imputation_POV_server <- function(id,
       )
     )
     
+    .localStyle <- "display:inline-block; vertical-align: top;
+                  padding-right: 20px;"
+    
     
     observeEvent(obj(), ignoreNULL = TRUE,{
       req(obj())
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
-      
-      
     }, priority = 1000)
     
     
 
     output$mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("mvplots"))
-      toggleWidget(widget, is.enabled())
+      MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
     
@@ -130,13 +132,9 @@ mod_Prot_Imputation_POV_server <- function(id,
       )
     })
     
-    imputationAlgorithmsProteins_MEC <- list(
-      "None" = "None",
-      "Det quantile" = "detQuantile",
-      "Fixed value" = "fixedValue"
-    )
-    
-    output$POV_algorithm_ui <- renderUI({
+
+    output$POV_algorithm_UI <- renderUI({
+
       widget <- selectInput(ns("POV_algorithm"), "Algorithm for POV",
         choices = list(
           "None" = "None",
@@ -145,7 +143,6 @@ mod_Prot_Imputation_POV_server <- function(id,
           "KNN" = "KNN"
         ),
         selected = rv.widgets$POV_algorithm,
-        
         width = "150px"
       )
       MagellanNTK::toggleWidget(widget, is.enabled())
@@ -169,44 +166,47 @@ mod_Prot_Imputation_POV_server <- function(id,
     
     
     
-    output$POV_Params_ui <- renderUI({
-      req(rv.widgets$POV_algorithm)
+    output$POV_KNN_nbNeighbors_UI <- renderUI({
+      req(rv.widgets$POV_algorithm == 'KNN')
+     
+      widget <- numericInput(ns("POV_KNN_nbNeighbors"), "Neighbors",
+        value = rv.widgets$POV_KNN_n, step = 1, min = 0,
+        max = max(nrow(rv$dataIn), rv.widgets$POV_KNN_n),
+        width = "100px"
+      )
       
-      isolate({
-        switch(rv$widgets$POV_algorithm,
-          detQuantile = {
-            tagList(
-              tags$div(style = .localStyle,
-                numericInput(ns("POV_detQuant_quantile"), "Quantile",
-                  value = rv.widgets$POV_detQuant_quantile,
-                  step = 0.5, min = 0, max = 100, width = "100px"
-                )
-              ),
-              tags$div(style = .localStyle,
-                numericInput(ns("POV_detQuant_factor"), "Factor",
-                  value = rv.widgets$POV_detQuant_factor,
-                  step = 0.1, min = 0, max = 10, width = "100px"
-                )
-              )
-            )
-          },
-          KNN = {
-            numericInput(ns("KNN_nbNeighbors"), "Neighbors",
-              value = rv.widgets$POV_KNN_n, step = 1, min = 0,
-              max = max(nrow(rv$dataIn), rv.widgets$POV_KNN_n),
-              width = "100px"
-            )
-          }
-        )
-      })
+      MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
     
     
-    output$mod_Prot_Imputation_POV_btn_validate_ui <- renderUI({
-      #browser()
-      #req(xxx)
+    output$POV_detQuant_UI <- renderUI({
+      req(rv.widgets$POV_algorithm == 'detQuantile')
       
+      widget <- tagList(
+        tags$div(style = .localStyle,
+        numericInput(ns("POV_detQuant_quantile"), "Quantile",
+          value = rv.widgets$POV_detQuant_quantile,
+          step = 0.5, min = 0, max = 100, width = "100px"
+        )
+      ),
+      tags$div(style = .localStyle,
+        numericInput(ns("POV_detQuant_factor"), "Factor",
+          value = rv.widgets$POV_detQuant_factor,
+          step = 0.1, min = 0, max = 10, width = "100px"
+        )
+      )
+      )
+      
+      MagellanNTK::toggleWidget(widget, is.enabled())
+
+    })
+    
+
+
+    
+    output$mod_Prot_Imputation_POV_btn_validate_ui <- renderUI({
+
       widget <- actionButton(ns("mod_Prot_Imputation_POV_btn_validate"),
         "Perform POV imputation", class = "btn-success")
       

@@ -194,12 +194,13 @@ PipelineProtein_Imputation_server <- function(id,
       id = 'pov',
       obj = reactive({rv.custom$dataIn1}),
       i = reactive({length(rv.custom$dataIn1)}),
-      is.enabled = reactive({rv$steps.enabled["POVImputation"]})
+      is.enabled = reactive({rv$steps.enabled["POVImputation"]}),
+      remoteReset = reactive({remoteReset()})
       )
     
     output$POVImputation_ui <- renderUI({
-      widget <- DaparToolshed::mod_Prot_Imputation_POV_ui(ns('pov'))
-      toggleWidget(widget, rv$steps.enabled['POVImputation'] )
+      widget <- Prostar2::mod_Prot_Imputation_POV_ui(ns('pov'))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] )
     })
     
     output$POVImputation_btn_validate_ui <- renderUI({
@@ -207,7 +208,7 @@ PipelineProtein_Imputation_server <- function(id,
       widget <-  actionButton(
         ns("POVImputation_btn_validate"),
         "Validate step", class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['POVImputation'] &&
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] &&
           !is.null(rv.custom$tmp1()$value))
       
     })
@@ -260,20 +261,21 @@ PipelineProtein_Imputation_server <- function(id,
       id = 'mec',
       obj = reactive({rv.custom$dataIn2}),
       i = reactive({length(rv.custom$dataIn2)}),
-      is.enabled = reactive({rv$steps.enabled["MECImputation"]})
+      is.enabled = reactive({rv$steps.enabled["MECImputation"]}),
+      remoteReset = reactive({remoteReset()})
     )
     #})
     
     output$MECImputation_ui <- renderUI({
       widget <- Prostar2::mod_Prot_Imputation_MEC_ui(ns('mec'))
-      toggleWidget(widget, rv$steps.enabled['MECImputation'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
     })
     
     output$MECImputation_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("MECImputation_btn_validate"),
                              "Perform",
                              class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['MECImputation'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
     })
     
     observeEvent(input$MECImputation_btn_validate, {
