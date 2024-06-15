@@ -37,7 +37,7 @@ mod_Metacell_Filtering_ui <- function(id) {
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
-    # The renderUI() function of each widget is managed by MagellanNTK
+    # The renderUlength(rv$dataIn) function of each widget is managed by MagellanNTK
     # The dev only have to define a reactive() function for each
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
@@ -70,7 +70,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 #'
 mod_Metacell_Filtering_server <- function(id,
   obj = reactive({NULL}),
-  i = reactive({NULL}),
+  i = reactive({1}),
   remoteReset = reactive({NULL}),
   is.enabled = reactive({TRUE})) {
   
@@ -113,14 +113,17 @@ mod_Metacell_Filtering_server <- function(id,
         stringsAsFactors = FALSE
       )
       
-      
+      observe({
+        req(rv$dataIn)
+        #req(length(rv$dataIn))
+
       mod_ds_metacell_Histos_server(
         id = "plots",
-        obj = reactive({rv$dataIn[[i()]]}),
+        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({"Missing"}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
-      
+      })
       
       
     }, priority = 1000)
@@ -164,7 +167,7 @@ mod_Metacell_Filtering_server <- function(id,
       req(rv$dataIn)
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
-        obj = reactive({rv$dataIn[[i()]]}),
+        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         conds = reactive({omXplore::get_group(rv$dataIn)}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
@@ -195,10 +198,11 @@ mod_Metacell_Filtering_server <- function(id,
     
     
     observeEvent(input$Quantimetadatafiltering_btn_validate, {
-
+      req(rv$dataIn)
+ 
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
-        i = i(),
+        i = length(rv$dataIn),
         name = "qMetacellFiltered",
         filters = rv.custom$funFilter()$value$ll.fun
       )
@@ -213,7 +217,7 @@ mod_Metacell_Filtering_server <- function(id,
       rv.custom$qMetacell_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
       
       par <- rv.custom$funFilter()$value$ll.widgets.value
-      params(tmp[[i()]], length(tmp[[i()]])) <- par
+      params(tmp[[length(rv$dataIn)]], length(tmp[[length(rv$dataIn)]])) <- par
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- tmp
     })

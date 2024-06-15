@@ -63,7 +63,7 @@ NULL
 #'
 mod_volcanoplot_ui <- function(id) {
   ns <- NS(id)
-  fluidPage(
+  tagList(
     highcharter::highchartOutput(ns("volcanoPlot_UI"), 
       width = "600px", height = "600px")
     #uiOutput(ns("quantiDT"))
@@ -78,12 +78,12 @@ mod_volcanoplot_ui <- function(id) {
 mod_volcanoplot_server <- function(
     id,
     dataIn = reactive({NULL}),
-  comparison = reactive({NULL}),
+    comparison = reactive({NULL}),
     group = reactive({NULL}),
-  thlogfc = reactive({0}),
+    thlogfc = reactive({0}),
     thpval = reactive({0}),
     tooltip = reactive({NULL}),
-  remoteReset = reactive({NULL}),
+    remoteReset = reactive({NULL}),
     is.enabled = reactive({TRUE})
     ) {
   
@@ -116,9 +116,12 @@ mod_volcanoplot_server <- function(
       )
     )
     
-    observeEvent(dataIn(), ignoreNULL = TRUE, {
+
+    observeEvent(dataIn(), {
       rv$dataIn <- dataIn()
       rv.custom$data <- HypothesisTest(dataIn())
+print('titi')
+print(rv$dataIn)
     })
     
     
@@ -425,7 +428,9 @@ mod_volcanoplot_server <- function(
     
     ## ---------------------------------------------------------------------
     output$volcanoPlot_UI <- highcharter::renderHighchart({
+      print('eering volcanoPlot_UI')
       req(rv$dataIn)
+      req(comparison())
 
           withProgress(message = "Building plot...", detail = "", value = 0, {
           ht <- HypothesisTest(rv$dataIn)
@@ -457,7 +462,7 @@ mod_volcanoplot_server <- function(
               "', [this.index]+'_'+ [this.series.name]);}"
             ))
 
-          widget <- diffAnaVolcanoplot_rCharts(
+          diffAnaVolcanoplot_rCharts(
             df,
             th_logfc = as.numeric(thlogfc()),
             th_pval = as.numeric(thpval()),
@@ -466,7 +471,6 @@ mod_volcanoplot_server <- function(
             pal = rv.custom$colorsVolcanoplot
           )
           })
-        widget
         #MagellanNTK::toggleWidget(widget, is.enabled())
       })
   })

@@ -189,7 +189,8 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
     
-    # >>> START: Definition of the widgets
+    observe({
+      # >>> START: Definition of the widgets
     rv.custom$tmp1 <- Prostar2::mod_Prot_Imputation_POV_server(
       id = 'pov',
       obj = reactive({rv.custom$dataIn1}),
@@ -197,19 +198,19 @@ PipelineProtein_Imputation_server <- function(id,
       is.enabled = reactive({rv$steps.enabled["POVImputation"]}),
       remoteReset = reactive({remoteReset()})
       )
-    
+    })
+
     output$POVImputation_ui <- renderUI({
       widget <- Prostar2::mod_Prot_Imputation_POV_ui(ns('pov'))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] )
     })
     
     output$POVImputation_btn_validate_ui <- renderUI({
-      
+
       widget <-  actionButton(
         ns("POVImputation_btn_validate"),
         "Validate step", class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] &&
-          !is.null(rv.custom$tmp1()$value))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
       
     })
     # >>> END: Definition of the widgets
@@ -257,6 +258,7 @@ PipelineProtein_Imputation_server <- function(id,
       #   dataIn <- Prostar2::addDatasets(rv$dataIn, 
       #     rv.custom$tmp1()$value, 'POVImputation')
       
+    observe({
     rv.custom$tmp2 <- Prostar2::mod_Prot_Imputation_MEC_server(
       id = 'mec',
       obj = reactive({rv.custom$dataIn2}),
@@ -264,7 +266,7 @@ PipelineProtein_Imputation_server <- function(id,
       is.enabled = reactive({rv$steps.enabled["MECImputation"]}),
       remoteReset = reactive({remoteReset()})
     )
-    #})
+    })
     
     output$MECImputation_ui <- renderUI({
       widget <- Prostar2::mod_Prot_Imputation_MEC_ui(ns('mec'))

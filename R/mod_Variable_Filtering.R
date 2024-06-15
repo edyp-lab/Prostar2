@@ -47,7 +47,7 @@ mod_Variable_Filtering_ui <- function(id) {
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
-    # The renderUI() function of each widget is managed by MagellanNTK
+    # The renderUlength(obj()) function of each widget is managed by MagellanNTK
     # The dev only have to define a reactive() function for each
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
@@ -117,9 +117,10 @@ mod_Variable_Filtering_server <- function(id,
     
     observe({
       req(is.enabled())
+      req(obj())
       mod_ds_metacell_Histos_server(
         id = "plots",
-        obj = reactive({obj()[[i()]]}),
+        obj = reactive({obj()[[length(obj())]]}),
         pattern = reactive({"Missing"}),
         group = reactive({omXplore::get_group(obj())})
       )
@@ -158,9 +159,10 @@ mod_Variable_Filtering_server <- function(id,
     output$variable_buildQuery_ui <- renderUI({
       observe({
         req(is.enabled())
+        req(obj())
         rv.custom$funFilter <- mod_VariableFilter_Generator_server(
           id = "query",
-          obj = reactive({obj()[[i()]]}),
+          obj = reactive({obj()[[length(obj())]]}),
           is.enabled = reactive({is.enabled()}),
           remoteReset = reactive({remoteReset()})
         )
@@ -186,10 +188,10 @@ mod_Variable_Filtering_server <- function(id,
     
     
     observeEvent(input$variable_btn_validate, {
-     # req(is.enabled())
+     req(obj())
       tmp <- filterFeaturesOneSE(
         object = obj(),
-        i = i(),
+        i = length(obj()),
         name = "variableFiltered",
         filters = rv.custom$funFilter()$value$ll.var
       )
@@ -203,7 +205,7 @@ mod_Variable_Filtering_server <- function(id,
       rv.custom$variable_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
       
       par <- rv.custom$funFilter()$value$ll.widgets.value
-      params(tmp[[i()]], length(tmp[[i()]])) <- par
+      params(tmp[[length(obj())]], length(tmp[[length(obj())]])) <- par
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- tmp
     })

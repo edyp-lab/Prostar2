@@ -59,18 +59,14 @@ mod_ds_metacell_Histos_server <- function(id,
             
             addResourcePath(prefix = "img_ds_metacell", 
                             directoryPath = system.file('images', package='DaparToolshed'))
-            
-            
-            
-            
-            
+
             rv <- reactiveValues(
                 chooseTag = pattern(),
                 showSelect = if(is.null(pattern())) TRUE else showSelect(),
                 type = NULL
             )
             
-            observeEvent(obj(), {
+            observeEvent(req(obj()), {
               #rv$type <- omXplore::get_type(obj())
               rv$type <- metadata(obj())$typeDataset
             })
@@ -93,6 +89,8 @@ mod_ds_metacell_Histos_server <- function(id,
              })
 
             output$histo <- renderHighchart({
+              req(obj())
+              req(group())
                tmp <- NULL
                tmp <- metacellHisto_HC(obj(),
                  group = group(),
@@ -104,12 +102,14 @@ mod_ds_metacell_Histos_server <- function(id,
 
 
             output$histo_per_lines <- renderHighchart({
+              req(obj())
+              req(group())
               tmp <- NULL
                tmp <-
                   metacellPerLinesHisto_HC(obj(),
                     group = group(),
                     pattern = rv$chooseTag,
-                    indLegend = seq.int(from = 2, to = length(group))
+                    indLegend = seq.int(from = 2, to = length(group()))
                     )
                 # future(createPNGFromWidget(tmp,pattern))
                 # })
@@ -120,7 +120,9 @@ mod_ds_metacell_Histos_server <- function(id,
 
             output$histo_per_lines_per_conds <- renderHighchart({
                tmp <- NULL
-                # isolate({
+               req(group())
+               req(obj())
+               # isolate({
                 # pattern <- paste0(GetCurrentObjName(),".MVplot2")
                 tmp <- metacellPerLinesHistoPerCondition_HC(obj(),
                   group = group(),

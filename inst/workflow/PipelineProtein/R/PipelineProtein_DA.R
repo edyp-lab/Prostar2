@@ -101,21 +101,19 @@ PipelineProtein_DA_server <- function(id,
   widgets.default.values <- list(
     Pairwisecomparison_Comparison = "None",
     Pairwisecomparison_tooltipInfo = NULL,
-    
     Pvaluecalibration_numericValCalibration = "None",
     Pvaluecalibration_calibrationMethod = "Benjamini-Hochberg",
     Pvaluecalibration_nBinsHistpval = 80,
-    
     FDR_viewAdjPval = FALSE
   )
   
   
   rv.custom.default.values <- list(
+    tmp.dataIn = NULL,
     resAnaDiff = NULL,
-    Pairwisecomparison_tooltipInfo = NULL,
+    res_AllPairwiseComparisons = NULL,
     thpval = 0,
     thlogfc = 0,
-    comps = NULL,
     nbTotalAnaDiff = NULL,
     nbSelectedAnaDiff = NULL,
     nbSelectedTotal_FDR = NULL,
@@ -126,7 +124,10 @@ PipelineProtein_DA_server <- function(id,
     errMsgcalibrationPlotALL = NULL,
     pi0 = NULL,
     filename = NULL,
-    AnaDiff_indices = reactive({NULL})
+    AnaDiff_indices = reactive({NULL}),
+    dataToAnalyze = NULL,
+    Condition1 = NULL,
+    Condition2 = NULL
   )
   
   grey <- "#FFFFFF"
@@ -145,15 +146,15 @@ PipelineProtein_DA_server <- function(id,
     eval(
       str2expression(
         Get_Workflow_Core_Code(
-      mode = 'process',
-      name = id,
-      w.names = names(widgets.default.values),
-      rv.custom.names = names(rv.custom.default.values)
-    )
+          mode = 'process',
+          name = id,
+          w.names = names(widgets.default.values),
+          rv.custom.names = names(rv.custom.default.values)
+        )
       )
     )
     
-
+    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -200,25 +201,29 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       
+      req(dataIn())
+      
       # Find the assay containing the hypothesis tests comparisons
-      
-      rv.custom$res_AllPairwiseComparisons <- unlist(lapply(seq(length(dataIn())), function(x){
+      .ind <- unlist(lapply(seq(length(dataIn())), function(x){
         if(!is.null(HypothesisTest(dataIn()[[x]])))
-          HypothesisTest(dataIn()[[x]])
+          x
       }))
+      #rv$dataIn <- dataIn()[[.ind]]
+      rv$dataIn <- dataIn()
       
+      # Adds an assay to work on
+      rv$dataIn <- QFeatures::addAssay(
+        rv$dataIn, 
+        rv$dataIn[[length(rv$dataIn)]], 
+        'DA')
       
-      
-      rv$dataIn <- dataIn()[[length(dataIn())]]
-      rv.custom$conds <- omXplore::get_group(dataIn())
-      
-      rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn)
-      rv.custom$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn)
+      rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+      rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
       
       
       # Get logfc threshold from Hypothesis test dataset
-      if(!is.null(params(rv$dataIn)$thlogfc))
-        rv.custom$thlogfc <- params(rv$dataIn)$thlogfc
+      if(!is.null(params(rv$dataIn[[length(rv$dataIn)]])$thlogfc))
+        rv.custom$thlogfc <- params(rv$dataIn[[length(rv$dataIn)]])$thlogfc
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -276,47 +281,50 @@ PipelineProtein_DA_server <- function(id,
       req(rv.custom$res_AllPairwiseComparisons)
       
       widget <- selectInput(ns("Pairwisecomparison_Comparison"), "Select a comparison",
-        choices = Get_Pairwisecomparison_Names(),
+        choices = c('None', Get_Pairwisecomparison_Names()),
         selected = rv.widgets$Pairwisecomparison_Comparison,
         width = "300px")
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
     })
     
     
-    # Fill the variable 'rv.custom$resAnaDiff' with informations relatives to
-    # the comparison choosen by the user.
-    # Concertely, it extracts data from the variable rv.custom$res_AllPairwiseComparisons
-    # which contains all info (logFC and pValue) for all comparisons.
-    UpdateCompList <- reactive({
-      req(rv.widgets$Pairwisecomparison_Comparison)
+    # # Fill the variable 'rv.custom$resAnaDiff' with informations relatives to
+    # # the comparison choosen by the user.
+    # # Concertely, it extracts data from the variable rv.custom$res_AllPairwiseComparisons
+    # # which contains all info (logFC and pValue) for all comparisons.
+    # UpdateCompList <- reactive({
+    #   req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+    #   
+    #   
+    #   .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
+    #   .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
+    #   
+    #   rv.custom$resAnaDiff <- list(
+    #     logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
+    #     P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
+    #     condition1 = rv.custom$Condition1,
+    #     condition2 = rv.custom$Condition2,
+    #     pushed = NULL
+    #   )
+    # }
+    # )
+    
+    
+    #observe({
+    #  req(GetComparisons())
+     # req(rv.custom$dataToAnalyze)
       
-      # Update of the list rv.custom$resAnaDiff
-      GetComparisons()
-      
-      .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
-      .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
-      
-      rv.custom$resAnaDiff <- list(
-        logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
-        P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
-        condition1 = rv.custom$Condition1,
-        condition2 = rv.custom$Condition2,
-        pushed = NULL
+      Prostar2::mod_volcanoplot_server(
+        id = "Pairwisecomparison_volcano",
+        dataIn = reactive({Get_Dataset_to_Analyze()}),
+        comparison = reactive({GetComparisons()}),
+        group = reactive({omXplore::get_group(rv$dataIn)}),
+        thlogfc = reactive({rv.custom$thlogfc}),
+        tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
+        remoteReset = reactive({remoteReset()})
+        #is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
       )
-    }
-    )
-    
-    
-    Prostar2::mod_volcanoplot_server(
-      id = "Pairwisecomparison_volcano",
-      dataIn = reactive({Get_Dataset_to_Analyze()}),
-      comparison = reactive({GetComparisons()}),
-      group = reactive({omXplore::get_group(dataIn())}),
-      thlogfc = reactive({rv.custom$thlogfc}),
-      tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
-      remoteReset = reactive({NULL}),
-      is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
-    )
+   # })
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
       widget <- div(
@@ -327,19 +335,14 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$Pairwisecomparison_tooltipInfo_UI <- renderUI({
-      # req(rv.widgets$Pairwisecomparison_Comparison != "None")
-      
-      # if (is.null(rv.widgets$Pairwisecomparison_tooltipInfo)) {
-      #   rv.widgets$Pairwisecomparison_tooltipInfo <- parentProtId(rv$dataIn)
-      # }
-      
+      req(rv$dataIn)
       
       widget <- tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
         selectInput(ns("Pairwisecomparison_tooltipInfo"),
           label = NULL,
-          choices = colnames(SummarizedExperiment::rowData(rv$dataIn)),
-          selected = parentProtId(rv$dataIn),
+          choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
+          selected = rv.widgets$Pairwisecomparison_tooltipInfo,
           multiple = TRUE,
           selectize = FALSE,
           width = "300px", size = 5
@@ -352,36 +355,16 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    observeEvent(input$Pairwisecomparison_validTooltipInfo, {
-      rv.custom$Pairwisecomparison_tooltipInfo <- rv.widgets$Pairwisecomparison_tooltipInfo
-    })
     
     MagellanNTK::mod_popover_for_help_server("modulePopover_volcanoTooltip",
       title = "Tooltip",
       content = "Infos to be displayed in the tooltip of volcanoplot"
     )
     
-    
-    
-    
-    GetComparisons <- reactive({
-      rv.widgets$Pairwisecomparison_Comparison
-      .comp <- as.character(rv.widgets$Pairwisecomparison_Comparison)
-      rv.custom$Condition1 <- strsplit(.comp, "_vs_")[[1]][1]
-      rv.custom$Condition2 <- strsplit(.comp, "_vs_")[[1]][2]
-      c(rv.custom$Condition1, rv.custom$Condition2)
-    })
-    
-    
-    
-    
-    
-    output$pushpval_UI <- renderUI({
-      req(rv.widgets$Pairwisecomparison_Comparison != "None")
-      
-      MagellanNTK::mod_popover_for_help_server("modulePopover_pushPVal",
-        title = h3("Push p-value"),
-        content = "This functionality is useful in case of multiple pairwise comparisons 
+
+    MagellanNTK::mod_popover_for_help_server("modulePopover_pushPVal",
+      title = h3("Push p-value"),
+      content = "This functionality is useful in case of multiple pairwise comparisons 
               (more than 2 conditions): At the filtering step, a given analyte X
               (either peptide or protein) may have been kept because it contains
               very few missing values in a given condition (say Cond. A), even
@@ -399,77 +382,42 @@ PipelineProtein_DA_server <- function(id,
               comparison, and which assigns a p-value of 1 to analytes that, for
               the considered comparison are assumed meaningless due to too many
               missing values (before imputation)."
-      )
+    )
+    
+    
+    output$pushpval_UI <- renderUI({
+      req(rv.widgets$Pairwisecomparison_Comparison != "None")
       
-      wellPanel(
+      widget <- tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
         div(
-          mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query")))
+          mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
+        )
       )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
     })
     
-    #---------------------------
     
-    # Extract conditions of the current dataset to represent the
-    # selected comparison. It returns a subset of the current dataset that will 
-    # be used to filter the data within the 'Push p-value' feature
-    Get_Dataset_to_Analyze <- reactive({
-      
-      datasetToAnalyze <- NULL
-      if (rv.widgets$Pairwisecomparison_Comparison == "None" || is.null(rv$dataIn))
-        return(NULL)
-  
-      if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
-        .conds <- rv.custom$conds
-        condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
-        ind_virtual_cond2 <- which(.conds != condition1)
-        datasetToAnalyze <- rv$dataIn
-        Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
-      } else {
-        condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
-        condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
-        
-        if (substr(condition1, 1, 1) == "(" &&
-            substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
-          condition1 <- sub("^.(.*).$", "\\1", condition1)
-        }
-        
-        if (substr(condition2, 1, 1) == "(" &&
-            substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
-          condition2 <- sub("^.(.*).$", "\\1", condition2)
-        }
-        
-        ind <- c(
-          which(rv.custom$conds == condition1),
-          which(rv.custom$conds == condition2)
-        )
-        
-        datasetToAnalyze <- rv$dataIn[, ind]
-      }
-      
-      datasetToAnalyze
-    }) %>% bindCache(rv$dataIn, rv.widgets$Pairwisecomparison_Comparison)
     
-
     
-    GetFiltersScope <- function()
+    GetFiltersScope <- function(){
       c("Whole Line" = "WholeLine",
         "Whole matrix" = "WholeMatrix",
         "For every condition" = "AllCond",
         "At least one condition" = "AtLeastOneCond"
       )
+    }
     
     
     
     
     observe({
       req(rv$dataIn)
-      req(is.validated(rv$steps.status["Description"]))
       req(Get_Dataset_to_Analyze())
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
         obj = reactive({Get_Dataset_to_Analyze()}),
-        conds = reactive({rv.custom$conds}),
+        conds = reactive({omXplore::get_group(rv$dataIn)}),
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
@@ -480,13 +428,12 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(rv.custom$AnaDiff_indices()$trigger),{
-      UpdateCompList()
-      
+      #UpdateCompList()
+      print('received infos from AnaDiff indices')
       .ind <- rv.custom$AnaDiff_indices()$value$ll.indices
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
-      .protId <- parentProtId(rv$dataIn)
       
-      rv.widgets$Pairwisecomparison_tooltipInfo <- .protId
+      
       
       if (length(.ind) > 1 && length(.ind) < nrow(Get_Dataset_to_Analyze())) {
         
@@ -498,7 +445,9 @@ PipelineProtein_DA_server <- function(id,
         
         .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
         
-        HypothesisTest(rv$dataIn)[indices_to_push, .pval] <- 1
+        HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
+        rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+        
         n <- length(rv.custom$resAnaDiff$P_Value)
         rv.custom$pushed <- seq(n)[indices_to_push]
         
@@ -507,10 +456,12 @@ PipelineProtein_DA_server <- function(id,
     
     
     
-    observeEvent(rv.widgets$Pairwisecomparison_Comparison, 
-      ignoreInit = TRUE, ignoreNULL = TRUE, {
-
-        rv.widgets$Pairwisecomparison_tooltipInfo <- parentProtId(rv$dataIn)
+    Get_Dataset_to_Analyze <- reactive({
+      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+        print('----------new data to analyze-------------')
+        datasetToAnalyze <- NULL
+        
+        #rv.widgets$Pairwisecomparison_tooltipInfo <- parentProtId(rv$dataIn[[length(rv$dataIn)]])
         #UpdateCompList()
         
         .split <- strsplit(
@@ -521,9 +472,57 @@ PipelineProtein_DA_server <- function(id,
         
         rv.custom$filename <- paste0("anaDiff_", rv.custom$Condition1,
           "_vs_", rv.custom$Condition2, ".xlsx")
+        
+        
+        if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
+          .conds <- omXplore::get_group(rv$dataIn)
+          condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
+          ind_virtual_cond2 <- which(.conds != condition1)
+          datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
+          Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
+        } else {
+          condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
+          condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
+          
+          if (substr(condition1, 1, 1) == "(" &&
+              substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
+            condition1 <- sub("^.(.*).$", "\\1", condition1)
+          }
+          
+          if (substr(condition2, 1, 1) == "(" &&
+              substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
+            condition2 <- sub("^.(.*).$", "\\1", condition2)
+          }
+          
+          ind <- c(
+            which(omXplore::get_group(rv$dataIn) == condition1),
+            which(omXplore::get_group(rv$dataIn) == condition2)
+          )
+          
+          datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]][, ind]
+        }
+        
+        
+        
+        .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
+        .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
+        
+        rv.custom$resAnaDiff <- list(
+          logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
+          P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
+          condition1 = rv.custom$Condition1,
+          condition2 = rv.custom$Condition2,
+          pushed = NULL
+        )
+        
+        datasetToAnalyze
       })
     
-
+    
+    GetComparisons <- reactive({
+      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+      c(rv.custom$Condition1, rv.custom$Condition2)
+    })
     
     MagellanNTK::mod_popover_for_help_server("modulePopover_keepLines",
       title = "n values",
@@ -538,7 +537,7 @@ PipelineProtein_DA_server <- function(id,
       }
     }
     
-
+    
     output$Pairwisecomparison_btn_validate_UI <- renderUI({
       widget <- actionButton(ns("Pairwisecomparison_btn_validate"),
         "Validate step",
@@ -551,7 +550,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(input$Pairwisecomparison_btn_validate, {
-      UpdateCompList()
+      #UpdateCompList()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -673,9 +672,9 @@ PipelineProtein_DA_server <- function(id,
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn),
+      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = get_type(rv$dataIn)
+        level = get_type(rv$dataIn[[length(rv$dataIn)]])
       )
       req(length(which(m)) == 0)
       
@@ -687,12 +686,12 @@ PipelineProtein_DA_server <- function(id,
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
-
+      
       histPValue_HC(t,
         bins = as.numeric(rv.widgets$Pvaluecalibration_nBinsHistpval),
         pi0 = rv.custom$pi0
       )
-
+      
     })
     
     output$histPValue <- renderHighchart({
@@ -731,7 +730,7 @@ PipelineProtein_DA_server <- function(id,
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn),
+      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide")
       req(length(which(m)) == 0)
@@ -773,7 +772,7 @@ PipelineProtein_DA_server <- function(id,
             rv.custom$errMsgCalibrationPlot <- .warns
           }
           rv.custom$pi0 <- ll$value$pi0
-
+          
         },
         warning = function(w) {
           shinyjs::info(paste("Calibration plot", ":",
@@ -856,7 +855,7 @@ PipelineProtein_DA_server <- function(id,
       req(!is.na(rv.custom$thlogfc))
       req(length(rv.custom$resAnaDiff$logFC) > 0) 
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn),
+      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide")
       req(length(which(m)) == 0)
@@ -1010,10 +1009,10 @@ PipelineProtein_DA_server <- function(id,
       id = "FDR_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({GetComparisons()}),
-      group = reactive({rv.custom$conds}),
+      group = reactive({omXplore::get_group(rv$dataIn)}),
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
-      tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
+      tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({NULL}),
       is.enabled = reactive({rv$steps.enabled["FDR"]})
     )
@@ -1032,7 +1031,7 @@ PipelineProtein_DA_server <- function(id,
       req(Build_pval_table())
       
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn),
+      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide"
       )
@@ -1048,7 +1047,7 @@ PipelineProtein_DA_server <- function(id,
         rv.custom$thpval
       ))
       
-      rv.custom$nbTotalAnaDiff <- nrow(SummarizedExperiment::assay(rv$dataIn))
+      rv.custom$nbTotalAnaDiff <- nrow(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]))
       rv.custom$nbSelectedAnaDiff <- NULL
       t <- NULL
       
@@ -1079,10 +1078,10 @@ PipelineProtein_DA_server <- function(id,
       
       div(id="bloc_page",
         style = "background-color: lightgrey; width: 300px",
-        p(paste("Total number of ", omXplore::get_type(rv$dataIn), "(s) = ", A, sep = '' )),
+        p(paste("Total number of ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
         tags$em(p(style = "padding:0 0 0 20px;", paste("Total remaining after push p-values = ", B, sep=''))),
-        p(paste("Number of selected ", omXplore::get_type(rv$dataIn), "(s) = ", C, sep = '')),
-        p(paste("Number of non selected ", omXplore::get_type(rv$dataIn), "(s) = ", D, sep = ''))
+        p(paste("Number of selected ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
+        p(paste("Number of non selected ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", D, sep = ''))
       )
       #HTML(txt)
     })
@@ -1108,8 +1107,8 @@ PipelineProtein_DA_server <- function(id,
       
       
       
-     # req(Get_FDR())
-     # req(Get_Nb_Significant())
+      # req(Get_FDR())
+      # req(Get_Nb_Significant())
       
       th <- Get_FDR() * Get_Nb_Significant()
       
@@ -1129,7 +1128,7 @@ PipelineProtein_DA_server <- function(id,
       
     })
     
-
+    
     
     output$FDR_selectedItems_UI <- DT::renderDT({
       req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
@@ -1172,7 +1171,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$FDR_download_SelectedItems_UI <- downloadHandler(
-     
+      
       filename = function() {rv.custom$filename},
       content = function(fname) {
         DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
@@ -1280,16 +1279,16 @@ PipelineProtein_DA_server <- function(id,
       req(GetCalibrationMethod())
       req(GetComparisons())
       
-    
+      
       rv.widgets$Pairwisecomparison_Comparison
-      ht <- HypothesisTest(rv$dataIn)
+      ht <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       .logfc <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')]
       .pval <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')]
       
       .digits <- 3
       
       pval_table <- data.frame(
-        id = rownames(SummarizedExperiment::assay(rv$dataIn)),
+        id = rownames(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])),
         logFC = round(.logfc, digits = .digits),
         P_Value = .pval,
         Log_PValue = -log10(.pval),
@@ -1322,7 +1321,7 @@ PipelineProtein_DA_server <- function(id,
       
       
       tmp <- as.data.frame(
-        SummarizedExperiment::rowData(rv$dataIn)[, rv.widgets$Pairwisecomparison_tooltipInfo]
+        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.widgets$Pairwisecomparison_tooltipInfo]
       )
       names(tmp) <- rv.widgets$Pairwisecomparison_tooltipInfo
       pval_table <- cbind(pval_table, tmp)

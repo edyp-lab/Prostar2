@@ -38,7 +38,7 @@ mod_Prot_Imputation_MEC_ui <- function(id) {
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
-    # The renderUI() function of each widget is managed by MagellanNTK
+    # The renderUlength(rv$dataIn) function of each widget is managed by MagellanNTK
     # The dev only have to define a reactive() function for each
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
@@ -113,7 +113,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
       
-      qdata <- SummarizedExperiment::assay(rv$dataIn[[i()]])
+      qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
       rv.custom$mv.present <- sum(is.na(qdata)) > 0
       
       # If there is no MV in the dataset, return it
@@ -162,7 +162,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
     observe({
       req(rv$dataIn)
       mod_mv_plots_server("mvplots",
-        data = reactive({rv$dataIn[[i()]]}),
+        data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         grp = reactive({get_group(rv$dataIn)}),
         mytitle = "MEC imputation",
         pal = reactive({NULL}),
@@ -248,9 +248,9 @@ mod_Prot_Imputation_MEC_server <- function(id,
         incProgress(0.25, detail = "Reintroduce MEC")
         
       m <- match.metacell(
-        omXplore::get_metacell(rv$dataIn[[i()]]),
+        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing MEC",
-        level = omXplore::get_type(rv$dataIn[[i()]])
+        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
       )
       nbMECBefore <- length(which(m))
       incProgress(0.75, detail = "MEC Imputation")
@@ -263,12 +263,12 @@ mod_Prot_Imputation_MEC_server <- function(id,
         .param <- list()
         try({
           switch(rv.widgets$MEC_algorithm,
-            None = .tmp <- rv$dataIn[[i()]],
+            None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
             
             detQuantile = {
               incProgress(0.5, detail = "det quantile Imputation")
               .tmp <- wrapper.impute.detQuant(
-                obj = rv$dataIn[[i()]],
+                obj = rv$dataIn[[length(rv$dataIn)]],
                 qval = rv.widgets$MEC_detQuant_quantile / 100,
                 factor = rv.widgets$MEC_detQuant_factor,
                 na.type = 'Missing MEC')
@@ -280,7 +280,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
             },
             fixedValue = {
               .tmp <- wrapper.impute.fixedValue(
-                obj = rv$dataIn[[i()]],
+                obj = rv$dataIn[[length(rv$dataIn)]],
                 fixVal = rv.widgets$MEC_fixedValue,
                 na.type = "Missing MEC"
               )
@@ -302,7 +302,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
           #   title = "Success",
           #   type = "success"
           # )
-          #rv$dataIn[[i()]] <- .tmp
+          #rv$dataIn[[length(rv$dataIn)]] <- .tmp
           # incProgress(0.75, detail = 'Reintroduce MEC blocks')
           incProgress(1, detail = "Finalize MEC imputation")
           

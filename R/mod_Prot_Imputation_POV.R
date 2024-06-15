@@ -38,7 +38,7 @@ mod_Prot_Imputation_POV_ui <- function(id) {
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
-    # The renderUI() function of each widget is managed by MagellanNTK
+    # The renderUlength(rv$dataIn) function of each widget is managed by MagellanNTK
     # The dev only have to define a reactive() function for each
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
@@ -124,7 +124,7 @@ mod_Prot_Imputation_POV_server <- function(id,
     observe({
       req(rv$dataIn)
     mod_mv_plots_server("mvplots",
-      data = reactive({rv$dataIn[[i()]]}),
+      data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
       grp = reactive({get_group(rv$dataIn)}),
       mytitle = "POV imputation",
       pal = reactive({NULL}),
@@ -219,9 +219,9 @@ mod_Prot_Imputation_POV_server <- function(id,
       
       req(rv$dataIn)
       m <- match.metacell(
-        omXplore::get_metacell(rv$dataIn[[i()]]),
+        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing POV",
-        level = omXplore::get_type(rv$dataIn[[i()]])
+        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
       )
       nbPOVBefore <- length(which(m))
       #browser()
@@ -230,13 +230,15 @@ mod_Prot_Imputation_POV_server <- function(id,
         
         .tmp <- NULL
         .param <- list()
+        
+      
         try({
           switch(rv.widgets$POV_algorithm,
-            None = .tmp <- rv$dataIn[[i()]],
+            None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
             slsa = {
               incProgress(0.5, detail = "slsa Imputation")
               .tmp <- wrapper.impute.slsa(
-                obj = rv$dataIn[[i()]],
+                obj = rv$dataIn[[length(rv$dataIn)]],
                 grp = omXplore::get_group(rv$dataIn),
                 coldata = MultiAssayExperiment::colData(rv$dataIn)
                 )
@@ -247,7 +249,7 @@ mod_Prot_Imputation_POV_server <- function(id,
             detQuantile = {
               incProgress(0.5, detail = "det quantile Imputation")
               .tmp <- wrapper.impute.detQuant(
-                  obj = rv$dataIn[[i()]],
+                  obj = rv$dataIn[[length(rv$dataIn)]],
                   qval = rv.widgets$POV_detQuant_quantile / 100,
                   factor = rv.widgets$POV_detQuant_factor,
                   na.type = 'Missing POV')
@@ -261,7 +263,7 @@ mod_Prot_Imputation_POV_server <- function(id,
               incProgress(0.5, detail = "KNN Imputation")
               
               .tmp <- wrapper.impute.KNN(
-                obj = rv$dataIn[[i()]],
+                obj = rv$dataIn[[length(rv$dataIn)]],
                 grp = omXplore::get_group(rv$dataIn),
                 K = rv.widgets$POV_KNN_n);
               .param <- list(
@@ -273,7 +275,7 @@ mod_Prot_Imputation_POV_server <- function(id,
           )
         })
         
-        if(inherits(.tmp, "try-error")) {
+        if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
           mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
             text = .tmp,
             type = 'error' )
@@ -283,7 +285,7 @@ mod_Prot_Imputation_POV_server <- function(id,
           #   title = "Success",
           #   type = "success"
           # )
-          #rv$dataIn[[i()]] <- .tmp
+          #rv$dataIn[[length(rv$dataIn)]] <- .tmp
           # incProgress(0.75, detail = 'Reintroduce MEC blocks')
           incProgress(1, detail = "Finalize POV imputation")
 
@@ -299,7 +301,6 @@ mod_Prot_Imputation_POV_server <- function(id,
       params(.tmp) <- .param
       
       dataOut$trigger <- MagellanNTK::Timestamp()
-      #dataOut$value <- Prostar2::addDatasets(rv$dataIn, .tmp, id)
       dataOut$value <- .tmp
     })
       

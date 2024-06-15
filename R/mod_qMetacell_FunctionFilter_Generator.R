@@ -220,6 +220,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
         output$qMetacellScope_widgets_set2_ui <- renderUI({
             req(!(rv.widgets$scope %in% c("None", "WholeLine")))
+          req(rv.widgets$tag != "None")
+          
           MagellanNTK::mod_popover_for_help_server("chooseValPercent_help",
                 title = paste("#/% of values to ", rv.widgets$keep_vs_remove),
                 content = "Define xxx"
