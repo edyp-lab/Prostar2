@@ -436,7 +436,7 @@ PipelineProtein_Normalization_server <- function(id,
             )
           },
           vsn = {
-            DaparToolshed::wrapper.normalizeD(
+            DaparToolshed::vsn(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type

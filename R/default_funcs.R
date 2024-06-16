@@ -90,5 +90,10 @@ keepDatasets <- function(object, range = seq(length(object))) {
     return()
   }
   
-  object[range]
+  toRemove <- setdiff.Vector(seq(length(object)), range)
+  if (length(toRemove) > 0){
+    object <- QFeatures::removeAssay(object, toRemove)
+  }
+  
+  object
 }
