@@ -120,8 +120,6 @@ mod_volcanoplot_server <- function(
     observeEvent(dataIn(), {
       rv$dataIn <- dataIn()
       rv.custom$data <- HypothesisTest(dataIn())
-print('titi')
-print(rv$dataIn)
     })
     
     

@@ -232,6 +232,79 @@ PipelineProtein_DA_server <- function(id,
     
     
     
+    
+    
+    Get_Dataset_to_Analyze <- reactive({
+      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+      datasetToAnalyze <- NULL
+      
+      #rv.widgets$Pairwisecomparison_tooltipInfo <- parentProtId(rv$dataIn[[length(rv$dataIn)]])
+      #UpdateCompList()
+      
+      .split <- strsplit(
+        as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
+      )
+      rv.custom$Condition1 <- .split[[1]][1]
+      rv.custom$Condition2 <- .split[[1]][2]
+      
+      rv.custom$filename <- paste0("anaDiff_", rv.custom$Condition1,
+        "_vs_", rv.custom$Condition2, ".xlsx")
+      
+      
+      if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
+        .conds <- omXplore::get_group(rv$dataIn)
+        condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
+        ind_virtual_cond2 <- which(.conds != condition1)
+        datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
+        Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
+      } else {
+        condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
+        condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
+        
+        if (substr(condition1, 1, 1) == "(" &&
+            substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
+          condition1 <- sub("^.(.*).$", "\\1", condition1)
+        }
+        
+        if (substr(condition2, 1, 1) == "(" &&
+            substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
+          condition2 <- sub("^.(.*).$", "\\1", condition2)
+        }
+        
+        ind <- c(
+          which(omXplore::get_group(rv$dataIn) == condition1),
+          which(omXplore::get_group(rv$dataIn) == condition2)
+        )
+        
+        datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]][, ind]
+      }
+      
+      
+      
+      .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
+      .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
+      
+      rv.custom$resAnaDiff <- list(
+        logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
+        P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
+        condition1 = rv.custom$Condition1,
+        condition2 = rv.custom$Condition2,
+        pushed = NULL
+      )
+    
+      datasetToAnalyze
+    })
+    
+    
+    GetComparisons <- reactive({
+      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+      req(rv.custom$Condition1)
+      req(rv.custom$Condition2)
+      c(rv.custom$Condition1, rv.custom$Condition2)
+    })
+    
+    
+    
     # >>>
     # >>> START ------------- Code for step 1 UI---------------
     # >>> 
@@ -310,7 +383,11 @@ PipelineProtein_DA_server <- function(id,
     # )
     
     
-    #observe({
+    observeEvent(rv.widgets$Pairwisecomparison_Comparison, {
+      print(rv.widgets$Pairwisecomparison_Comparison)
+    })
+    
+    
     #  req(GetComparisons())
      # req(rv.custom$dataToAnalyze)
       
@@ -322,9 +399,8 @@ PipelineProtein_DA_server <- function(id,
         thlogfc = reactive({rv.custom$thlogfc}),
         tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
         remoteReset = reactive({remoteReset()})
-        #is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
       )
-   # })
+    #})
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
       widget <- div(
@@ -345,7 +421,8 @@ PipelineProtein_DA_server <- function(id,
           selected = rv.widgets$Pairwisecomparison_tooltipInfo,
           multiple = TRUE,
           selectize = FALSE,
-          width = "300px", size = 5
+          width = "300px", 
+          size = 5
         ),
         actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
           class = actionBtnClass)
@@ -429,7 +506,7 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(req(rv.custom$AnaDiff_indices()$trigger),{
       #UpdateCompList()
-      print('received infos from AnaDiff indices')
+      #print('received infos from AnaDiff indices')
       .ind <- rv.custom$AnaDiff_indices()$value$ll.indices
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
       
@@ -455,74 +532,6 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    
-    Get_Dataset_to_Analyze <- reactive({
-      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
-        print('----------new data to analyze-------------')
-        datasetToAnalyze <- NULL
-        
-        #rv.widgets$Pairwisecomparison_tooltipInfo <- parentProtId(rv$dataIn[[length(rv$dataIn)]])
-        #UpdateCompList()
-        
-        .split <- strsplit(
-          as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
-        )
-        rv.custom$Condition1 <- .split[[1]][1]
-        rv.custom$Condition2 <- .split[[1]][2]
-        
-        rv.custom$filename <- paste0("anaDiff_", rv.custom$Condition1,
-          "_vs_", rv.custom$Condition2, ".xlsx")
-        
-        
-        if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
-          .conds <- omXplore::get_group(rv$dataIn)
-          condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
-          ind_virtual_cond2 <- which(.conds != condition1)
-          datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
-          Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
-        } else {
-          condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
-          condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
-          
-          if (substr(condition1, 1, 1) == "(" &&
-              substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
-            condition1 <- sub("^.(.*).$", "\\1", condition1)
-          }
-          
-          if (substr(condition2, 1, 1) == "(" &&
-              substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
-            condition2 <- sub("^.(.*).$", "\\1", condition2)
-          }
-          
-          ind <- c(
-            which(omXplore::get_group(rv$dataIn) == condition1),
-            which(omXplore::get_group(rv$dataIn) == condition2)
-          )
-          
-          datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]][, ind]
-        }
-        
-        
-        
-        .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
-        .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
-        
-        rv.custom$resAnaDiff <- list(
-          logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
-          P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
-          condition1 = rv.custom$Condition1,
-          condition2 = rv.custom$Condition2,
-          pushed = NULL
-        )
-        
-        datasetToAnalyze
-      })
-    
-    
-    GetComparisons <- reactive({
-      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
-      c(rv.custom$Condition1, rv.custom$Condition2)
-    })
     
     MagellanNTK::mod_popover_for_help_server("modulePopover_keepLines",
       title = "n values",

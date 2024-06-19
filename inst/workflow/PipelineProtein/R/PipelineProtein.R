@@ -24,10 +24,8 @@ PipelineProtein_conf <- function(){
 Config(
   mode = 'pipeline',
   fullname = 'PipelineProtein',
-  # steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest'),
-  # mandatory = c(FALSE, FALSE, FALSE, TRUE)
-  steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest'),
-  mandatory = c(FALSE, FALSE, FALSE, FALSE)
+  steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest', 'DA'),
+  mandatory = c(FALSE, FALSE, FALSE, FALSE, FALSE)
 )
 }
 
