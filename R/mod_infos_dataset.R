@@ -254,7 +254,6 @@ infos_dataset_server <- function(id,
       if (input$selectInputSE != "None") {
         
         data <- experiments(obj())[[input$selectInputSE]]
-        print(class(data))
         format_DT_server('dt2',
                              data = reactive({Get_SE_Summary()}),
                              full_style=reactive({NULL}))

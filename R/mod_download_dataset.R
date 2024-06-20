@@ -89,9 +89,9 @@ download_dataset_server <- function(id,
       )
       
       
-      print(rv$export_file_xlsx)
-      print(rv$export_file_RData)
-      print(rv$export_file_csv)
+      # print(rv$export_file_xlsx)
+      # print(rv$export_file_RData)
+      # print(rv$export_file_csv)
     })
     
     GetType <- reactive({

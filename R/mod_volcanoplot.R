@@ -426,7 +426,6 @@ mod_volcanoplot_server <- function(
     
     ## ---------------------------------------------------------------------
     output$volcanoPlot_UI <- highcharter::renderHighchart({
-      print('eering volcanoPlot_UI')
       req(rv$dataIn)
       req(comparison())
 

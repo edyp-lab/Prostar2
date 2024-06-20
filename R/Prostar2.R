@@ -16,7 +16,8 @@ Prostar2 <- function(){
   
   MagellanNTK(
     workflow.path = wf.path,
-    workflow.name = wf.name
+    workflow.name = wf.name,
+    usermod = 'user'
   )
   
 }

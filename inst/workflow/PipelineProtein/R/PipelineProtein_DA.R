@@ -383,9 +383,9 @@ PipelineProtein_DA_server <- function(id,
     # )
     
     
-    observeEvent(rv.widgets$Pairwisecomparison_Comparison, {
-      print(rv.widgets$Pairwisecomparison_Comparison)
-    })
+    # observeEvent(rv.widgets$Pairwisecomparison_Comparison, {
+    #   print(rv.widgets$Pairwisecomparison_Comparison)
+    # })
     
     
     #  req(GetComparisons())
