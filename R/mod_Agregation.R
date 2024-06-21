@@ -123,7 +123,7 @@ mod_Agregation_server <- function(id,
 
         # Insert necessary code which is hosted by MagellanNTK
         # DO NOT MODIFY THIS LINE
-        eval(str2expression(Get_Workflow_Core_Code(
+        eval(str2expression(MagellanNTK::Get_Workflow_Core_Code(
             w.names = names(widgets.default.values),
             rv.custom.names = names(rv.custom.default.values)
         )))

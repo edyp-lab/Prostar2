@@ -120,7 +120,7 @@ PipelineConvert_Convert_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    core.code <- Get_Workflow_Core_Code(
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
       w.names = names(widgets.default.values),
@@ -220,7 +220,7 @@ PipelineConvert_Convert_server <- function(id,
     output$SelectFile_software_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_software"), 
                              "Software to import from",
-                             choices = setNames(nm = GetSoftAvailables()),
+                             choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
                              selected = rv.widgets$SelectFile_software)
       
       toggleWidget(widget, rv$steps.enabled['SelectFile'] )
@@ -709,7 +709,7 @@ PipelineConvert_Convert_server <- function(id,
     output$mod_dl_ui <- renderUI({
       req(config@mode == 'process')
       req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      MagellanNTK::mod_download_dataset_ui(ns('createQuickLink'))
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
     output$Save_btn_validate_ui <- renderUI({
@@ -723,22 +723,23 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       # Create QFeatures dataset file
-      rv$dataIn <- createQFeatures(data = rv.convert$tab, 
-                                   sample = as.data.frame(rv.convert$design()$design),
-                                   indQData = rv.widgets$ExpandFeatData_quantCols,
-                                   keyId = rv.widgets$DataId_datasetId,
-                                   analysis = "analysis",
-                                   indexForMetacell = rv.widgets$ExpandFeatData_inputGroup,
-                                   typeDataset = rv.widgets$SelectFile_typeOfData,
-                                   parentProtId = rv.widgets$DataId_parentProteinID,
-                                   force.na = rv.widgets$SelectFile_replaceAllZeros,
-                                   software = rv.widgets$SelectFile_software)
+      rv$dataIn <- DaparToolshed::createQFeatures(
+        data = rv.convert$tab, 
+        sample = as.data.frame(rv.convert$design()$design),
+        indQData = rv.widgets$ExpandFeatData_quantCols,
+        keyId = rv.widgets$DataId_datasetId,
+        analysis = "analysis",
+        indexForMetacell = rv.widgets$ExpandFeatData_inputGroup,
+        typeDataset = rv.widgets$SelectFile_typeOfData,
+        parentProtId = rv.widgets$DataId_parentProteinID,
+        force.na = rv.widgets$SelectFile_replaceAllZeros,
+        software = rv.widgets$SelectFile_software)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      MagellanNTK::mod_download_dataset_server('createQuickLink', 
+      MagellanNTK::download_dataset_server('createQuickLink', 
                 dataIn = reactive({rv$dataIn}),
                 extension = c('csv', 'xlsx', 'RData'))
       

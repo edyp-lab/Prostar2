@@ -108,7 +108,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    core.code <- Get_Workflow_Core_Code(
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
       w.names = names(widgets.default.values),

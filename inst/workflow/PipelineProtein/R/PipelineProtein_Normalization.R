@@ -94,7 +94,7 @@ PipelineProtein_Normalization_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    core.code <- Get_Workflow_Core_Code(
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
       w.names = names(widgets.default.values),

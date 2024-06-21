@@ -4,14 +4,14 @@
 \alias{Prostar2}
 \title{xxx}
 \usage{
-Prostar2()
+Prostar2(wf.name)
 }
 \description{
-xxx
+xxxx
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-Prostar2()
+Prostar2('PipelineProtein')
 
 \dontshow{\}) # examplesIf}
 }

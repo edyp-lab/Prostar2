@@ -99,7 +99,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     requireNamespace('DaparToolshed')
     
-    core.code <- Get_Workflow_Core_Code(
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
       w.names = names(widgets.default.values),

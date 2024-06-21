@@ -10,7 +10,7 @@
 #' 
 #' @export
 #' 
-Prostar2.Protein <- function(wf.name){
+Prostar2 <- function(wf.name){
   #wf.name <- 'PipelineProtein'
   wf.path <- system.file(paste0('workflow/', wf.name), package = 'Prostar2')
   

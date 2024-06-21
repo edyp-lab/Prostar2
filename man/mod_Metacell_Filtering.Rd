@@ -14,7 +14,7 @@ mod_Metacell_Filtering_server(
      NULL
  }),
   i = reactive({
-     NULL
+     1
  }),
   remoteReset = reactive({
      NULL
