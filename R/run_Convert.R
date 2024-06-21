@@ -73,14 +73,28 @@ convert_dataset_server <- function(id,
 #' @export
 convert_dataset <- function() {
   
-  ui <- convert_dataset_ui('Convert')
+  ui <- fluidPage(
+    uiOutput('test')
+  )
   
   server <- function(input, output, session) {
     
-    res <- convert_dataset_server('Convert')
+    rv.core <- reactiveValues(
+      result_convert = reactive({NULL})
+    )
     
-    observeEvent(req(res()$dataOut()$trigger), {
-      print(res()$dataOut()$value)
+    
+    output$test <- renderUI({
+
+    rv.core$result_convert <- convert_dataset_server('Convert')
+    
+    convert_dataset_ui('Convert')
+  })
+    
+    
+    observeEvent(req(rv.core$result_convert()$dataOut()$trigger), {
+      print(rv.core$result_convert()$dataOut()$value$data)
+      print(rv.core$result_convert()$dataOut()$value$name)
     })
   }
 

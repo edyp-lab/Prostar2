@@ -107,7 +107,8 @@ PipelineConvert_Convert_server <- function(id,
   
   rv.custom.default.values <- list(
     tab = NULL,
-    design = NULL
+    design = NULL,
+    name = NULL
   )
   
   ### -------------------------------------------------------------###
@@ -262,7 +263,7 @@ PipelineConvert_Convert_server <- function(id,
       rv.widgets$SelectFile_XLSsheets
       
       ext <- GetExtension(rv.widgets$SelectFile_file$name)
-      
+      rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, split='.', fixed = TRUE))[1]
       if (((ext %in% c("xls", "xlsx"))) && 
           is.null(rv.widgets$SelectFile_XLSsheets))
         return(NULL)
@@ -737,7 +738,7 @@ PipelineConvert_Convert_server <- function(id,
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- list(data = rv$dataIn, name = rv.custom$name)
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       MagellanNTK::download_dataset_server('createQuickLink', 
                 dataIn = reactive({rv$dataIn}),
