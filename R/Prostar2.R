@@ -1,20 +1,20 @@
 #' @title xxx
-#' 
+#' @description xxxx
 #' @import DaparToolshed
 #' @import MagellanNTK
 #' 
 #' 
 #' @examplesIf interactive()
-#' Prostar2()
+#' Prostar2('PipelineProtein')
 #' 
 #' 
 #' @export
 #' 
-Prostar2 <- function(){
-  wf.name <- 'PipelineProtein'
-  wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
+Prostar2.Protein <- function(wf.name){
+  #wf.name <- 'PipelineProtein'
+  wf.path <- system.file(paste0('workflow/', wf.name), package = 'Prostar2')
   
-  MagellanNTK(
+  MagellanNTK::MagellanNTK(
     workflow.path = wf.path,
     workflow.name = wf.name,
     usermod = 'user'
