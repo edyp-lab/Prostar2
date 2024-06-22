@@ -89,7 +89,7 @@ PipelineProtein_Imputation_server <- function(id,
     tmp2 = reactive({NULL}),
     tmp = reactive({NULL}),
     params.tmp1 = list(),
-    params.tmp2 = list()
+    params.tmp2 = list(),
     params.tmp = list(),
     dataIn1 = NULL,
     dataIn2 = NULL

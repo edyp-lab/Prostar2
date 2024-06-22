@@ -338,7 +338,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv.custom$tmp)[length(rv.custom$tmp)] <- 'Filtering'
-      params((rv$dataIn)[length(rv$dataIn)] <- reactiveValuesToList(rv.widgets)
+      params((rv$dataIn)[length(rv$dataIn)]) <- reactiveValuesToList(rv.widgets)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
