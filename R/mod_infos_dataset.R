@@ -81,20 +81,26 @@ infos_dataset_server <- function(id,
       
       
       
-      MagellanNTK::format_DT_server('samples_tab',
-        obj = reactive({data.frame(colData(rv.infos$obj))}),
-        hc_style = reactive({
-          list(
-          cols = colnames(colData(rv.infos$obj)),
-          vals = colnames(colData(rv.infos$obj))[2],
-          unique = unique(colData(rv.infos$obj)$Condition),
-          pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
-        })
-      )
+      
       
       
       output$samples_tab_ui <- renderUI({
         req(rv.infos$obj)
+        
+        
+        MagellanNTK::format_DT_server('samples_tab',
+          obj = reactive({
+            req((rv.infos$obj))
+            data.frame(colData(rv.infos$obj))
+          }),
+          hc_style = reactive({
+            list(
+              cols = colnames(colData(rv.infos$obj)),
+              vals = colnames(colData(rv.infos$obj))[2],
+              unique = unique(colData(rv.infos$obj)$Condition),
+              pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
+          })
+        )
         
         tagList(
           h4("Samples"),
