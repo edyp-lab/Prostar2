@@ -88,6 +88,9 @@ PipelineProtein_Imputation_server <- function(id,
     tmp1 = reactive({NULL}),
     tmp2 = reactive({NULL}),
     tmp = reactive({NULL}),
+    params.tmp1 = list(),
+    params.tmp2 = list()
+    params.tmp = list(),
     dataIn1 = NULL,
     dataIn2 = NULL
   )
@@ -125,6 +128,9 @@ PipelineProtein_Imputation_server <- function(id,
         # but with a real app, it should be provided by the package which
         # contains the UI for the different steps of the process module.
         # system.file(xxx)
+
+        # Insert validation button
+        uiOutput(ns('Description_btn_validate_ui')),
         
         if (file.exists(file))
           includeMarkdown(file)
@@ -134,10 +140,7 @@ PipelineProtein_Imputation_server <- function(id,
         
         # Used to show some information about the dataset which is loaded
         # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui')),
-        
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui'))
+        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
@@ -182,9 +185,10 @@ PipelineProtein_Imputation_server <- function(id,
         # widget he want to insert
         # Be aware of the naming convention for ids in uiOutput()
         # For more details, please refer to the dev document.
-        uiOutput(ns("POVImputation_ui")),
+        
         # Insert validation button
-        uiOutput(ns("POVImputation_btn_validate_ui"))
+        uiOutput(ns("POVImputation_btn_validate_ui")),
+        uiOutput(ns("POVImputation_ui"))
       )
     })
     
@@ -238,11 +242,12 @@ PipelineProtein_Imputation_server <- function(id,
     
     output$MECImputation <- renderUI({
       wellPanel(
-        uiOutput(ns('MECImputation_ui')),
         
         # Insert validation button
         # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('MECImputation_btn_validate_ui'))
+        uiOutput(ns('MECImputation_btn_validate_ui')),
+        uiOutput(ns('MECImputation_ui'))
+        
       )
     })
     
@@ -335,7 +340,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       # rename last SE
       names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
-      
+      params((rv$dataIn)[length(rv$dataIn)]) <- reactiveValuesToList(rv.widgets)
       
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES

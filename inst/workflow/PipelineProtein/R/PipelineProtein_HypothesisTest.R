@@ -573,6 +573,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
       df <- cbind(rv.custom$AllPairwiseComp$logFC, 
         rv.custom$AllPairwiseComp$P_Value)
       DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
+      params(new.dataset) <- reactiveValuesToList(rv.widgets)
+      
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES

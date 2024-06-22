@@ -128,6 +128,9 @@ PipelineProtein_Filtering_server <- function(id,
       file <- normalizePath(file.path(session$userData$workflow.path, 
         'md', paste0(id, '.md')))
       tagList(
+        # Insert validation button
+        uiOutput(ns('Description_btn_validate_ui')),
+        
         ### In this example, the md file is found in the extdata/module_examples 
         ### directory but with a real app, it should be provided by the package 
         ### which contains the UI for the different steps of the process module.
@@ -141,10 +144,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         # Used to show some information about the dataset which is loaded
         # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui')),
-        
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui'))
+        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
@@ -188,9 +188,10 @@ PipelineProtein_Filtering_server <- function(id,
         # widget he want to insert
         # Be aware of the naming convention for ids in uiOutput()
         # For more details, please refer to the dev document.
-        uiOutput(ns("mod_metacell_filtering_ui")),
         # Insert validation button
-        uiOutput(ns("Cellmetadatafiltering_btn_validate_ui"))
+        uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
+        uiOutput(ns("mod_metacell_filtering_ui"))
+        
       )
     })
     
@@ -244,9 +245,9 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Variablefiltering <- renderUI({
       wellPanel(
-        uiOutput(ns("mod_variable_filtering_ui")),
         # Process the queries
-        uiOutput(ns("Variablefiltering_btn_validate_ui"))
+        uiOutput(ns("Variablefiltering_btn_validate_ui")),
+        uiOutput(ns("mod_variable_filtering_ui"))
       )
     })
     
@@ -337,7 +338,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv.custom$tmp)[length(rv.custom$tmp)] <- 'Filtering'
-      
+      params((rv$dataIn)[length(rv$dataIn)] <- reactiveValuesToList(rv.widgets)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()

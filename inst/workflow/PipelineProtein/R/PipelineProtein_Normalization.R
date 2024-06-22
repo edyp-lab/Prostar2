@@ -187,6 +187,10 @@ PipelineProtein_Normalization_server <- function(id,
         
         
         tagList(
+
+          div(style = .style,
+            uiOutput(ns("Normalization_btn_validate_ui"))
+          ),
           div(
             div(style = .style,
               uiOutput(ns('Normalization_method_ui'))
@@ -206,9 +210,6 @@ PipelineProtein_Normalization_server <- function(id,
               plots_tracking_ui(ns("tracker")),
               shinyjs::hidden(uiOutput(ns("Normalization_sync_ui"))
               )
-            ),
-            div(style = .style,
-              uiOutput(ns("Normalization_btn_validate_ui"))
             )
           ),
           tags$hr()
@@ -492,6 +493,9 @@ PipelineProtein_Normalization_server <- function(id,
       # Do some stuff
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
       assay(new.dataset) <- rv.norm$tmp.dataset
+      
+      params(new.dataset) <- reactiveValuesToList(rv.widgets)
+      
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       
       # rename last SE

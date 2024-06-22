@@ -169,6 +169,9 @@ PipelineProtein_DA_server <- function(id,
         ### which contains the UI for the different steps of the process module.
         ### system.file(xxx)
         
+        # Insert validation button
+        uiOutput(ns('Description_btn_validate_UI')),
+        
         if (file.exists(file))
           includeMarkdown(file)
         else
@@ -177,10 +180,7 @@ PipelineProtein_DA_server <- function(id,
         
         # Used to show some information about the dataset which is loaded
         # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_UI')),
-        
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_UI'))
+        uiOutput(ns('datasetDescription_UI'))
       )
     })
     
@@ -321,6 +321,8 @@ PipelineProtein_DA_server <- function(id,
         # Be aware of the naming convention for ids in uiOutput()
         # For more details, please refer to the dev document.
         tagList(
+          # Insert validation button
+          uiOutput(ns("Pairwisecomparison_btn_validate_UI")),
           tags$div(
             tags$div(style = .style, 
               uiOutput(ns('Pairwisecomparison_Comparison_UI')))
@@ -331,9 +333,7 @@ PipelineProtein_DA_server <- function(id,
             tags$div(style = .style, uiOutput(ns("Pairwisecomparison_volcano_UI"))),
             tags$div(style = .style, uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
           )
-        ),
-        # Insert validation button
-        uiOutput(ns("Pairwisecomparison_btn_validate_UI"))
+        )
       )
     })
     
@@ -586,6 +586,8 @@ PipelineProtein_DA_server <- function(id,
         # For more details, please refer to the dev document.
         
         tagList(
+          # Insert validation button
+          uiOutput(ns("Pvaluecalibration_btn_validate_UI")),
           tags$div(
             tags$div(style = .style,
               uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))
@@ -614,10 +616,7 @@ PipelineProtein_DA_server <- function(id,
                 highchartOutput(ns("histPValue")))
             )
           )
-        ),
-        
-        # Insert validation button
-        uiOutput(ns("Pvaluecalibration_btn_validate_UI"))
+        )
       )
     })
     
@@ -905,9 +904,7 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-    
-    
-    #--------------------------------------------------
+
     output$calibrationPlotAll <- renderImage(
       {
         outfile <- tempfile(fileext = ".png")
@@ -977,6 +974,8 @@ PipelineProtein_DA_server <- function(id,
         # Be aware of the naming convention for ids in uiOutput()
         # For more details, please refer to the dev document.
         tagList(
+          # Insert validation button
+          uiOutput(ns("FDR_btn_validate_UI")),
           fluidRow(
             column(width = 5,
               mod_set_pval_threshold_ui(ns("Title")),
@@ -1002,9 +1001,7 @@ PipelineProtein_DA_server <- function(id,
             )
           ),
           DT::DTOutput(ns("FDR_selectedItems_UI"))
-        ),
-        # Insert validation button
-        uiOutput(ns("FDR_btn_validate_UI"))
+        )
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
@@ -1346,7 +1343,6 @@ PipelineProtein_DA_server <- function(id,
       return(all(strA %in% strB))
     }
     
-    #-------------------------------------------------------------------
     
     output$FDR_btn_validate_UI <- renderUI({
       widget <- actionButton(ns("FDR_btn_validate"),
@@ -1398,6 +1394,7 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       
+      params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
