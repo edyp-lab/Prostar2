@@ -1,16 +1,30 @@
 # Configuration file to be used with MagellanNTK
+class: QFeatures
 
 
-# Customizable functions
+
+
+# Customizable core functions
 
 convert_dataset: Prostar2
 open_dataset: MagellanNTK
 open_demoDataset: MagellanNTK
 view_dataset: omXplore
 infos_dataset: Prostar2
-download_dataset: MagellanNTK
+download_dataset: Prostar2
 addDatasets: Prostar2
 keepDatasets: Prostar2
 
-# Other
+
+
+# UI options
+
+debugger: 'disabled'
+verbose: 'disabled'
+Open_pipeline: 'disabled'
+convert_dataset: 'disabled'
+change_Look_Feel: 'disabled'
+change_core_funcs: 'disabled'
+
+
 

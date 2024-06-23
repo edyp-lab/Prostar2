@@ -14,8 +14,8 @@
 #'
 #' @name download_dataset
 #' @examplesIf interactive()
-#' data(ft_na)
-#' shiny::runApp(download_dataset(ft_na))
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' shiny::runApp(download_dataset(Exp1_R25_prot))
 #'
 NULL
 
@@ -29,7 +29,6 @@ NULL
 download_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3('--- Default donwload dataset tool ---'),
     uiOutput(ns('dl_xl')),
     uiOutput(ns('dl_csv')),
     uiOutput(ns('dl_raw'))
@@ -42,9 +41,9 @@ download_dataset_ui <- function(id) {
 #'
 download_dataset_server <- function(id,
   dataIn = reactive({NULL}),
-  extension = c('csv', 'xlsx', 'RData'),
+  extension = c('xlsx', 'RData'),
   widget.type = 'Link',
-  name = 'foo', 
+  filename = 'myDataset', 
   excel.style = NULL,
   remoteReset = reactive({NULL}),
   is.enabled = reactive({TRUE})
@@ -55,27 +54,21 @@ download_dataset_server <- function(id,
     rv <- reactiveValues(
       UI_type = NULL,
       export_file_RData = NULL,
-      export_file_csv = NULL,
       export_file_xlsx = NULL
     )
     
-    observeEvent(dataIn(), ignoreNULL = TRUE,{
-      rv$export_file_csv <- tryCatch({
-        out.csv <- tempfile(fileext = ".csv")
-        write.csv(x = dataIn(), file = out.csv)
-        out.csv
-      },
-        warning = function(w) NULL,
-        error = function(e) NULL
-      )
+    observeEvent(req(dataIn()), ignoreNULL = TRUE,{
       
       rv$export_file_xlsx <- tryCatch({
+        browser()
+        
         out.xlsx <- tempfile(fileext = ".xlsx")
-        write.excel(obj = dataIn(), filename = out.xlsx)
+        DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
         out.xlsx
+        
       },
-        warning = function(w) NULL,
-        error = function(e) NULL
+        warning = function(w) w,
+        error = function(e) e
       )
       
       
@@ -88,10 +81,6 @@ download_dataset_server <- function(id,
         error = function(e) NULL
       )
       
-      
-      # print(rv$export_file_xlsx)
-      # print(rv$export_file_RData)
-      # print(rv$export_file_csv)
     })
     
     GetType <- reactive({
@@ -106,21 +95,7 @@ download_dataset_server <- function(id,
       rv$UI_type
     })
     
-    output$dl_csv <- renderUI({
-      req('csv' %in% extension)
-      req(rv$export_file_csv)
-      type <- GetType()[which(extension == 'csv')]
-      
-      do.call(paste0('download', type),
-        list(
-          ns("downloadDatacsv"),
-          "csv",
-          class = if (type=='Button') actionBtnClass else ''
-        )
-      )
-    })
-    
-    
+
     output$dl_xl <- renderUI({
       req('xlsx' %in% extension)
       req(rv$export_file_xlsx)
@@ -147,21 +122,12 @@ download_dataset_server <- function(id,
       )
     })
     
-    output$downloadDatacsv <- downloadHandler(
-      filename = function() {
-        paste("data-", Sys.Date(), ".csv", sep = "")
-      },
-      content = function(file) {
-        file.copy(
-          from = rv$export_file_csv,
-          to = file
-        )
-      }
-    )
+
     
     output$downloadDataRData <- downloadHandler(
       filename = function() {
-        paste ("data-", Sys.Date(), ".RData", sep = "")
+        #paste ("data-", Sys.Date(), ".RData", sep = "")
+        paste(filename, '.RData', sep = "")
       },
       content = function(file) {
         file.copy(
@@ -173,7 +139,8 @@ download_dataset_server <- function(id,
     
     output$downloadDataExcel <- downloadHandler(
       filename = function() {
-        paste("data-", Sys.Date(), ".xlsx", sep = "")
+        #paste("data-", Sys.Date(), ".xlsx", sep = "")
+        paste(filename, '.xlsx', sep = "")
       },
       content = function(file) {
         file.copy(
@@ -193,14 +160,15 @@ download_dataset_server <- function(id,
 #'
 #' @export
 #'
-download_dataset <- function(data){
+download_dataset <- function(data, filename = 'myDataset'){
   ui <- download_dataset_ui("dl")
   
   server <- function(input, output, session) {
     
     download_dataset_server("dl",
       dataIn = reactive({data}),
-      extension = c('csv', 'xlsx', 'RData')
+      extension = c('csv', 'xlsx', 'RData'),
+      filename = filename
     )
   }
   
