@@ -11,6 +11,7 @@ open_demoDataset: MagellanNTK
 view_dataset: omXplore
 infos_dataset: Prostar2
 download_dataset: Prostar2
+build_report: Prostar2
 addDatasets: Prostar2
 keepDatasets: Prostar2
 
