@@ -60,7 +60,6 @@ download_dataset_server <- function(id,
     observeEvent(req(dataIn()), ignoreNULL = TRUE,{
       
       rv$export_file_xlsx <- tryCatch({
-        browser()
         
         out.xlsx <- tempfile(fileext = ".xlsx")
         DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)

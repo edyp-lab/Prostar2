@@ -3,7 +3,6 @@ class: QFeatures
 
 
 
-
 # Customizable core functions
 
 convert_dataset: Prostar2
@@ -19,12 +18,12 @@ keepDatasets: Prostar2
 
 # UI options
 
-debugger: 'disabled'
+UI_view_debugger: 'disabled'
 verbose: 'disabled'
-Open_pipeline: 'disabled'
-convert_dataset: 'disabled'
-change_Look_Feel: 'disabled'
-change_core_funcs: 'disabled'
+UI_view_open_pipeline: 'disabled'
+UI_view_convert_dataset: 'disabled'
+UI_view_change_Look_Feel: 'disabled'
+UI_view_change_core_funcs: 'disabled'
 
 
 
