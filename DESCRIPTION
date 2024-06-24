@@ -23,6 +23,7 @@ Imports:
     shinyjs,
     shinyBS,
     highcharter,
+    MagellanNTK,
     DaparToolshed,
     DaparToolshedData,
     RColorBrewer,

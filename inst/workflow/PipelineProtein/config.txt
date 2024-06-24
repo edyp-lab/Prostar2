@@ -27,4 +27,4 @@ UI_view_change_Look_Feel: 'disabled'
 UI_view_change_core_funcs: 'disabled'
 
 
-
+URL_manual: https://www.bioconductor.org/packages/release/bioc/vignettes/Prostar/inst/doc/Prostar_UserManual.pdf
