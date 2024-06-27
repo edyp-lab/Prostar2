@@ -29,8 +29,8 @@
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
 #' @examplesIf interactive()
-#' data(ft_na)
-#' shiny::runApp(mod_Variable_Filtering(ft_na[[1]]))
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' shiny::runApp(mod_Variable_Filtering(Exp1_R25_prot, 1))
 #' 
 NULL
 

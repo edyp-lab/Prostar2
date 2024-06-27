@@ -19,8 +19,8 @@
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
 #' @examplesIf interactive()
-#' data(ft_na)
-#' obj <- ft_na[[1]]
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' obj <- Exp1_R25_prot[[1]]
 #' operator = setNames(nm = SymFilteringOperators())
 #' keep_vs_remove <- setNames(nm = c("delete", "keep"))
 #' value = 3
@@ -39,13 +39,17 @@ NULL
 #'
 mod_VariableFilter_Generator_ui <- function(id) {
   ns <- NS(id)
+  
+  .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
   wellPanel(
     DT::dataTableOutput(ns("VarFilter_DT")),
     # Build queries
-    uiOutput(ns("chooseKeepRemove_ui")),
-    uiOutput(ns("cname_ui")),
-    uiOutput(ns("value_ui")),
-    uiOutput(ns("operator_ui")),
+    div(
+      div(style = .style, uiOutput(ns("chooseKeepRemove_ui"))),
+      div(style = .style, uiOutput(ns("cname_ui"))),
+      div(style = .style, uiOutput(ns("value_ui"))),
+      div(style = .style, uiOutput(ns("operator_ui")))
+      ),
     uiOutput(ns("addFilter_btn_ui")),
     # Show example
     uiOutput(ns("example_ui")),
@@ -172,7 +176,7 @@ mod_VariableFilter_Generator_server <- function(id,
         "Column name",
         choices = stats::setNames(.choices, nm = .choices),
         selected = rv.widgets$cname,
-        width = "300px"
+        width = "200px"
       )
       
       MagellanNTK::toggleWidget(widget, is.enabled())
@@ -180,7 +184,7 @@ mod_VariableFilter_Generator_server <- function(id,
     
     
     output$operator_ui <- renderUI({
-      req(rv.widgets$value)
+      #req(rv.widgets$value)
       if (is.na(as.numeric(rv.widgets$value))) {
         .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
       } else {
@@ -290,9 +294,7 @@ mod_VariableFilter_Generator <- function(
       cname = reactive({cname}),
       value = reactive({value}),
       operator = reactive({operator}),
-      keep_vs_remove = reactive({keep_vs_remove}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({is.enabled()})
+      keep_vs_remove = reactive({keep_vs_remove})
       )
     
     observeEvent(res()$trigger, {

@@ -340,7 +340,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       # rename last SE
       names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
-      params((rv$dataIn)[length(rv$dataIn)]) <- reactiveValuesToList(rv.widgets)
+      params((rv$dataIn)[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
       
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
