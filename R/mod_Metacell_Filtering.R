@@ -19,8 +19,8 @@
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
 #' @examplesIf interactive()
-#' data(ft_na)
-#' shiny::runApp(mod_Metacell_Filtering(ft_na[[1]]))
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
 #' 
 NULL
 
@@ -120,7 +120,7 @@ mod_Metacell_Filtering_server <- function(id,
       mod_ds_metacell_Histos_server(
         id = "plots",
         obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        pattern = reactive({"Missing"}),
+        pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
       })
@@ -131,7 +131,8 @@ mod_Metacell_Filtering_server <- function(id,
     
     
     output$plots_ui <- renderUI({
-
+      
+      req(rv.custom$funFilter()$value$ll.pattern)
       widget <- mod_ds_metacell_Histos_ui(ns("plots"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
@@ -184,7 +185,7 @@ mod_Metacell_Filtering_server <- function(id,
     
 
     output$Quantimetadatafiltering_btn_validate_ui <- renderUI({
-      #browser()
+
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       
       widget <- actionButton(ns("Quantimetadatafiltering_btn_validate"),

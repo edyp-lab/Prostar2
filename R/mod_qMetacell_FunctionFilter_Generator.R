@@ -179,6 +179,12 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         observeEvent(tmp.tags()$values, 
           ignoreNULL = FALSE, ignoreInit = TRUE, {
             rv.widgets$tag <- tmp.tags()$values
+            
+            dataOut$trigger <- as.numeric(Sys.time())
+            dataOut$value <- list(
+              ll.pattern = rv.widgets$tag
+            )
+              
           }, priority = 900)
 
         
@@ -430,6 +436,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
               ll.fun = rv.custom$ll.fun,
               ll.query = rv.custom$ll.query,
               ll.widgets.value = rv.custom$ll.widgets.value,
+              ll.pattern = rv.widgets$tag,
               ll.indices = GetIndices_FunFiltering(
                 obj = obj(),
                 conds = conds(), 

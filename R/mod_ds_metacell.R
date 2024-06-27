@@ -15,10 +15,14 @@
 #' @return NA
 #'
 #' @examplesIf interactive()
-#' data(ft_na)
-#' grp <- omXplore::get_group(ft_na)
-#' shiny::runApp(mod_ds_metacell_Histos(ft_na[[1]], group = grp))
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' grp <- omXplore::get_group(Exp1_R25_prot)
+#' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))
 #'
+#' # Test with pattern already defined
+#' pat <- c('Missing MEC', 'Missing POV')
+#' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], pattern = pat, group = grp))
+#' 
 NULL
 
 #' @rdname metacell-plots
@@ -67,10 +71,9 @@ mod_ds_metacell_Histos_server <- function(id,
             )
             
             observeEvent(req(obj()), {
-              #rv$type <- omXplore::get_type(obj())
-              rv$type <- metadata(obj())$typeDataset
+              rv$type <- omXplore::get_type(obj())
             })
-              
+
               tmp.tags <- mod_metacell_tree_server('tree', 
                 obj = reactive({obj()}))
 
@@ -82,6 +85,7 @@ mod_ds_metacell_Histos_server <- function(id,
             
             output$chooseTagUI <- renderUI({
                 req(obj())
+              req(is.null(pattern()))
                 tagList(
                   p('Select one or several tag(s) to display statistics about'),
                   mod_metacell_tree_ui(ns('tree'))
@@ -145,7 +149,7 @@ mod_ds_metacell_Histos_server <- function(id,
 mod_ds_metacell_Histos <- function(obj,
   group,
   pal,
-  pattern,
+  pattern = NULL,
   showSelect){
 ui <- fluidPage(
   mod_ds_metacell_Histos_ui('test')
@@ -156,7 +160,6 @@ server <- function(input, output) {
   rv <- reactiveValues(
     tags = NULL
   )
-  pattern <- NULL
   
   observe({
     rv$tags <- mod_ds_metacell_Histos_server('test',
