@@ -165,7 +165,8 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       req(dataIn())
-      rv$dataIn <- rv.custom$tmp <- dataIn()
+      rv$dataIn <- dataIn()
+      rv.custom$tmp <- dataIn()
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -337,7 +338,7 @@ PipelineProtein_Filtering_server <- function(id,
           (nOriginal+1):(nTotal-1))
       
       # Rename the new dataset with the name of the process
-      names(rv.custom$tmp)[length(rv.custom$tmp)] <- 'Filtering'
+      names(rv.custom$tmp)[[length(rv.custom$tmp)]] <- 'Filtering'
       params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES

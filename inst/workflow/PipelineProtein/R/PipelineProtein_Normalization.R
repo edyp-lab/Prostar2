@@ -213,22 +213,18 @@ PipelineProtein_Normalization_server <- function(id,
             )
           ),
           tags$hr()
-          ,div(style = .style,
-            omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
-          )
-          # ,fluidRow(
-          #   column(width = 4,
-          #     omXplore::omXplore_density_ui(ns("density_plot"))),
-          #   column(width = 4,
-          #     omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
-          #   )
-          #   # ,column(width = 4,
-          #   #   withProgress(message = "Building plot",
-          #   #     detail = "", value = 0, {
-          #   #       highchartOutput(ns("viewComparisonNorm_hc"))
-          #   #     })
-          #   # )
+          # ,div(style = .style,
+          #   omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
           # )
+           ,fluidRow(
+             column(width = 5,
+               omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
+               ),
+             column(width = 5,
+               h4('test'),
+               highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
+            )
+          )
         )
         
       )
@@ -301,6 +297,73 @@ PipelineProtein_Normalization_server <- function(id,
       toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
+    
+    GetIndicesOfSelectedProteins_ForNorm <- reactive({
+      req(rv.norm$selectProt())
+      
+      ind <- NULL
+      .parent <- omXplore::get_parentProtId(rv$dataIn[[length(rv$dataIn)]])
+      ll <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, .parent]
+      tt <- rv.norm$selectProt()$type
+      switch(tt,
+        ProteinList = ind <- rv.norm$selectProt()$list.indices,
+        Random = ind <- rv.norm$selectProt()$rand.indices,
+        Column = ind <- rv.norm$selectProt()$col.indices
+      )
+      if (length(ind) == 0) {
+        ind <- NULL
+      }
+      ind
+    })
+    
+    GetIndicesOfSelectedProteins <- reactive({
+      req(rv.norm$trackFromBoxplot())
+      
+      ind <- NULL
+      .parent <- omXplore::get_parentProtId(rv$dataIn[[length(rv$dataIn)]])
+      ll <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, .parent]
+      tt <- rv.norm$trackFromBoxplot()$type
+      switch(tt,
+        ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
+        Random = ind <- rv.norm$trackFromBoxplot()$rand.indices,
+        Column = ind <- rv.norm$trackFromBoxplot()$col.indices
+      )
+      if (length(ind) == 0) {
+        ind <- NULL
+      }
+      
+      ind
+    })
+    
+    
+    
+    output$viewComparisonNorm_hc <- renderHighchart({
+      req(rv.norm$tmp.dataset)
+      obj1 <- rv$dataIn[[length(rv$dataIn)]]
+      obj2 <- rv.norm$tmp.dataset
+
+      protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
+      
+      browser()
+      DaparToolshed::compareNormalizationD_HC(
+        qDataBefore = SummarizedExperiment::assay(obj1),
+        qDataAfter = SummarizedExperiment::assay(obj2),
+        keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
+        conds = omXplore::get_group(rv$dataIn),
+        pal = NULL,
+        # Consider only 20% of the entire dataset
+        n = if (rv.norm$sync) {
+          NULL
+        } else {
+          floor(0.2 * nrow(SummarizedExperiment::assay(obj1)))
+        },
+        subset.view = if (rv.norm$sync) {
+          selectProt()
+        } else {
+          seq(nrow(obj1))
+        }
+      )
+    })
     
     
     
@@ -454,10 +517,11 @@ PipelineProtein_Normalization_server <- function(id,
           text = .tmp[[1]],
           type = 'error' )
       } else {
+        rv.norm$tmp.dataset <- .tmp
+        
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- Timestamp()
-        #dataOut$value <- rv$dataIn
-        rv.norm$tmp.dataset <- .tmp
+        #dataOut$value <- NULL
        rv$steps.status['Normalization'] <- stepStatus$VALIDATED
       }
       
