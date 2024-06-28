@@ -231,6 +231,30 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
+    
+    omXplore::omXplore_density_server("density_plot", 
+      obj = reactive({rv$dataIn}),
+      i = reactive({length(rv$dataIn)})
+    )
+    
+    
+    selectProt <- omXplore::plots_tracking_server("tracker",
+      obj = reactive({rv$dataIn}),
+      i = reactive({length(rv$dataIn)}),
+      remoteReset = reactive({remoteReset()}),
+      is.enabled = reactive({is.enabled('Normalization')})
+    )
+    
+    omXplore::omXplore_intensity_server("boxPlot_Norm",
+      obj = reactive({rv$dataIn}),
+      i = reactive({length(rv$dataIn)}),
+      track.indices = reactive({selectProt()}),
+      remoteReset = reactive({remoteReset()}),
+      is.enabled = reactive({is.enabled('Normalization')})
+    )
+    
+    
+    
     # >>> START: Definition of the widgets
     
     # This part must be customized by the developer of a new module
@@ -297,45 +321,7 @@ PipelineProtein_Normalization_server <- function(id,
       toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
-    
-    GetIndicesOfSelectedProteins_ForNorm <- reactive({
-      req(rv.norm$selectProt())
-      
-      ind <- NULL
-      .parent <- omXplore::get_parentProtId(rv$dataIn[[length(rv$dataIn)]])
-      ll <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, .parent]
-      tt <- rv.norm$selectProt()$type
-      switch(tt,
-        ProteinList = ind <- rv.norm$selectProt()$list.indices,
-        Random = ind <- rv.norm$selectProt()$rand.indices,
-        Column = ind <- rv.norm$selectProt()$col.indices
-      )
-      if (length(ind) == 0) {
-        ind <- NULL
-      }
-      ind
-    })
-    
-    GetIndicesOfSelectedProteins <- reactive({
-      req(rv.norm$trackFromBoxplot())
-      
-      ind <- NULL
-      .parent <- omXplore::get_parentProtId(rv$dataIn[[length(rv$dataIn)]])
-      ll <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, .parent]
-      tt <- rv.norm$trackFromBoxplot()$type
-      switch(tt,
-        ProteinList = ind <- rv.norm$trackFromBoxplot()$list.indices,
-        Random = ind <- rv.norm$trackFromBoxplot()$rand.indices,
-        Column = ind <- rv.norm$trackFromBoxplot()$col.indices
-      )
-      if (length(ind) == 0) {
-        ind <- NULL
-      }
-      
-      ind
-    })
-    
-    
+
     
     output$viewComparisonNorm_hc <- renderHighchart({
       req(rv.norm$tmp.dataset)
@@ -344,7 +330,6 @@ PipelineProtein_Normalization_server <- function(id,
 
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
       
-      browser()
       DaparToolshed::compareNormalizationD_HC(
         qDataBefore = SummarizedExperiment::assay(obj1),
         qDataAfter = SummarizedExperiment::assay(obj2),
@@ -352,12 +337,12 @@ PipelineProtein_Normalization_server <- function(id,
         conds = omXplore::get_group(rv$dataIn),
         pal = NULL,
         # Consider only 20% of the entire dataset
-        n = if (rv.norm$sync) {
-          NULL
+        n = if (!is.null(selectProt())) {
+          length(selectProt())
         } else {
           floor(0.2 * nrow(SummarizedExperiment::assay(obj1)))
         },
-        subset.view = if (rv.norm$sync) {
+        subset.view = if (!is.null(selectProt())) {
           selectProt()
         } else {
           seq(nrow(obj1))
@@ -395,28 +380,6 @@ PipelineProtein_Normalization_server <- function(id,
         condition = cond && trackAvailable)
       
     })
-    
-
-    omXplore::omXplore_density_server("density_plot", 
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)})
-    )
-    
-    
-    selectProt <- omXplore::plots_tracking_server("tracker",
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({is.enabled('Normalization')})
-    )
-    
-    omXplore::omXplore_intensity_server("boxPlot_Norm",
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
-      track.indices = reactive({selectProt()}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({is.enabled('Normalization')})
-    )
     
 
     
