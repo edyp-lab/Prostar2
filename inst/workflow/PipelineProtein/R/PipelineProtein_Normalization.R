@@ -221,7 +221,6 @@ PipelineProtein_Normalization_server <- function(id,
                omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
                ),
              column(width = 5,
-               h4('test'),
                highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
             )
           )
