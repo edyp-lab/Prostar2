@@ -88,7 +88,7 @@ mod_VariableFilter_Generator_server <- function(id,
     cname = "None",
     value = "None",
     keep_vs_remove = "delete",
-    operator = "<="
+    operator = character(0)
   )
   
   rv.custom.default.values <- list(
@@ -185,6 +185,7 @@ mod_VariableFilter_Generator_server <- function(id,
     
     output$operator_ui <- renderUI({
       #req(rv.widgets$value)
+
       if (is.na(as.numeric(rv.widgets$value))) {
         .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
       } else {
