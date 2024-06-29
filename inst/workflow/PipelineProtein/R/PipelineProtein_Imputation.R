@@ -216,7 +216,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observeEvent(input$POVImputation_btn_validate, {
-      req(inherits(rv.custom$tmp()$value, 'SummarizedExperiment'))
       
       # Do some stuff
       rv$dataIn <- Prostar2::addDatasets(
@@ -327,7 +326,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      browser()
+      #browser()
       
       len_start <- length(dataIn())
       len_end <- length(rv$dataIn)

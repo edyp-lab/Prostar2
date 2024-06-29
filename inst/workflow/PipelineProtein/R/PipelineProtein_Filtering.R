@@ -93,9 +93,8 @@ PipelineProtein_Filtering_server <- function(id,
     deleted.stringBased = NULL,
     deleted.metacell = NULL,
     deleted.numeric = NULL,
-    tmp1 = reactive({NULL}),
-    tmp2 = reactive({NULL}),
-    tmp = reactive({NULL})
+    tmp.filtering1 = reactive({NULL}),
+    tmp.filtering2 = reactive({NULL})
   )
   
   ###-------------------------------------------------------------###
@@ -166,7 +165,6 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(input$Description_btn_validate, {
       req(dataIn())
       rv$dataIn <- dataIn()
-      rv.custom$tmp <- dataIn()
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -199,7 +197,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     observe({
      # req(rv$dataIn)
-    rv.custom$tmp1 <- Prostar2::mod_Metacell_Filtering_server(
+    rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
       id = "metaFiltering",
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
@@ -231,7 +229,10 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(input$Cellmetadatafiltering_btn_validate, {
-      rv.custom$tmp <- rv.custom$tmp1()$value
+      #rv.custom$tmp <- rv.custom$tmp.filtering1()$value
+      #
+ 
+      rv$dataIn <- rv.custom$tmp.filtering1()$value
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -254,18 +255,13 @@ PipelineProtein_Filtering_server <- function(id,
     
 
     observe({
-      req(rv$dataIn)
-      dataIn <- rv$dataIn
       # # If the previous step has been run and validated,
       # # Update dataIn to its result
-      #if (rv$steps.status["Cellmetadatafiltering"] == stepStatus$VALIDATED)
-      if (!is.null(rv.custom$tmp1()$value))
-        dataIn <- rv.custom$tmp1()$value
       
-      rv.custom$tmp2 <- Prostar2::mod_Variable_Filtering_server(
+      rv.custom$tmp.filtering2 <- Prostar2::mod_Variable_Filtering_server(
         id = "varFiltering",
-        obj = reactive({dataIn}),
-        i = reactive({length(dataIn)}),
+        obj = reactive({rv$dataIn}),
+        i = reactive({length(rv$dataIn)}),
         is.enabled = reactive({rv$steps.enabled["Variablefiltering"]}),
         remoteReset = reactive({remoteReset()})
       )
@@ -292,7 +288,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(input$Variablefiltering_btn_validate, {
       
-      rv.custom$tmp <- rv.custom$tmp2()$value
+      rv$dataIn <- rv.custom$tmp.filtering2()$value
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -330,25 +326,27 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       # Clean the result
-      nTotal <- length(rv.custom$tmp)
-      nOriginal <- length(rv$dataIn)
-      if (nTotal- nOriginal > 1)
-        rv.custom$tmp <- QFeatures::removeAssay(
-          rv.custom$tmp, 
-          (nOriginal+1):(nTotal-1))
+      len_start <- length(dataIn())
+      len_end <- length(rv$dataIn)
+      len_diff <- len_end - len_start
+      if (len_diff == 2)
+        rv$dataIn <- QFeatures::removeAssay(rv$dataIn, length(rv$dataIn)-1)
+      
       
       # Rename the new dataset with the name of the process
-      names(rv.custom$tmp)[[length(rv.custom$tmp)]] <- 'Filtering'
-      params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      if (len_diff > 0){
+        names(rv$dataIn)[length(rv$dataIn)] <- 'Filtering'
+        DaparToolshed::params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      }
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv.custom$tmp
+      dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
       
       MagellanNTK::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv.custom$tmp}))
+        dataIn = reactive({rv$dataIn}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------

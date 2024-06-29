@@ -57,7 +57,6 @@ mod_Variable_Filtering_ui <- function(id) {
     # Insert validation button
     uiOutput(ns("variable_btn_validate_ui")),
       DT::dataTableOutput(ns("variable_Filter_DT"))
-      ,uiOutput(ns('plots_ui'))
     
   )
 }
@@ -125,13 +124,7 @@ mod_Variable_Filtering_server <- function(id,
         group = reactive({omXplore::get_group(obj())})
       )
     })
-    
-    output$plots_ui <- renderUI({
-      widget <- mod_ds_metacell_Histos_ui(ns("plots"))
-      MagellanNTK::toggleWidget(widget, is.enabled())
-    })
-    
-    
+
     
     showDT <- function(df) {
       DT::datatable(df,
