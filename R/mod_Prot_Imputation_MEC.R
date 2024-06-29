@@ -130,17 +130,20 @@ mod_Prot_Imputation_MEC_server <- function(id,
     output$mv_impute_MEC <- renderUI({
       req(rv$dataIn)
       widget <- NULL
+      .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
       if (!rv.custom$mv.present) {
         widget <- tags$p("Your dataset does not contain any missing values.")
       } else {
         
       widget <- tagList(
-        uiOutput(ns("warningMECImputation")),
-        uiOutput(ns("MEC_chooseImputationMethod_ui")),
-        uiOutput(ns("MEC_Params_ui")),
+        div(
+          div(style = .style, uiOutput(ns("warningMECImputation"))),
+          div(style = .style, uiOutput(ns("MEC_chooseImputationMethod_ui"))),
+          div(style = .style, uiOutput(ns("MEC_Params_ui"))),
+          div(style = .style, uiOutput(ns("mod_Prot_Imputation_MEC_btn_validate_ui")))
+          ),
         uiOutput(ns("MEC_showDetQuantValues_ui")),
-        uiOutput(ns("mod_Prot_Imputation_MEC_btn_validate_ui")),
         tags$hr(),
         withProgress(message = "", detail = "", value = 0, {
           incProgress(0.5, detail = "Building plots...")
@@ -201,18 +204,20 @@ mod_Prot_Imputation_MEC_server <- function(id,
     
     output$MEC_Params_ui <- renderUI({
       req(rv.widgets$MEC_algorithm)
+      .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
       widget <- switch(rv.widgets$MEC_algorithm,
           detQuantile = {
-            div(
+            div(style = .style,
               numericInput(ns("MEC_detQuant_quantile"), "Quantile",
                   value = rv.widgets$MEC_detQuant_quantile,
                   step = 0.5,
                   min = 0,
                   max = 100,
                   width = "100px"
-                ),
-              numericInput(ns("MEC_detQuant_factor"), "Factor",
+                ))
+              div(style = .style,
+                numericInput(ns("MEC_detQuant_factor"), "Factor",
                   value = rv.widgets$MEC_detQuant_factor,
                   step = 0.1, min = 0, max = 10,
                   width = "100px"
@@ -220,10 +225,12 @@ mod_Prot_Imputation_MEC_server <- function(id,
               )
           },
           fixedValue = {
-            numericInput(ns("MEC_fixedValue"), "Fixed value",
+            div(style = .style,
+              numericInput(ns("MEC_fixedValue"), "Fixed value",
               value = rv.widgets$MEC_fixedValue,
               step = 0.1, min = 0, max = 100,
               width = "100px"
+            )
             )
           }
         )

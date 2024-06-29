@@ -17,9 +17,9 @@
 #' 
 #' @examplesIf interactive()
 #' library(MagellanNTK)
-#' data(ft_na)
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelineProtein_Imputation", path, dataIn = ft_na))
+#' shiny::runApp(workflowApp("PipelineProtein_Imputation", path, dataIn = Exp1_R25_prot))
 #' 
 #' 
 
@@ -85,14 +85,11 @@ PipelineProtein_Imputation_server <- function(id,
   widgets.default.values <- list()
   
   rv.custom.default.values <- list(
-    tmp1 = reactive({NULL}),
-    tmp2 = reactive({NULL}),
-    tmp = reactive({NULL}),
+    tmp.mec = reactive({NULL}),
+    tmp.pov = reactive({NULL}),
     params.tmp1 = list(),
     params.tmp2 = list(),
-    params.tmp = list(),
-    dataIn1 = NULL,
-    dataIn2 = NULL
+    params.tmp = list()
   )
   
   ###-------------------------------------------------------------###
@@ -161,8 +158,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
-      rv.custom$dataIn1 <- dataIn()
-      rv.custom$dataIn2 <- dataIn()
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -195,10 +190,10 @@ PipelineProtein_Imputation_server <- function(id,
     
     observe({
       # >>> START: Definition of the widgets
-    rv.custom$tmp1 <- Prostar2::mod_Prot_Imputation_POV_server(
+    rv.custom$tmp.pov <- Prostar2::mod_Prot_Imputation_POV_server(
       id = 'pov',
-      obj = reactive({rv.custom$dataIn1}),
-      i = reactive({length(rv.custom$dataIn1)}),
+      obj = reactive({rv$dataIn}),
+      i = reactive({length(rv$dataIn)}),
       is.enabled = reactive({rv$steps.enabled["POVImputation"]}),
       remoteReset = reactive({remoteReset()})
       )
@@ -221,13 +216,15 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observeEvent(input$POVImputation_btn_validate, {
+      req(inherits(rv.custom$tmp()$value, 'SummarizedExperiment'))
+      
       # Do some stuff
       rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,
-        rv.custom$tmp1()$value,
+        rv.custom$tmp.pov()$value,
         'POVImputation')
       
-      rv.custom$dataIn2 <- rv$dataIn
+      #rv.custom$dataIn2 <- rv$dataIn
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- Timestamp()
@@ -264,10 +261,10 @@ PipelineProtein_Imputation_server <- function(id,
       #     rv.custom$tmp1()$value, 'POVImputation')
       
     observe({
-    rv.custom$tmp2 <- Prostar2::mod_Prot_Imputation_MEC_server(
+    rv.custom$tmp.mec <- Prostar2::mod_Prot_Imputation_MEC_server(
       id = 'mec',
-      obj = reactive({rv.custom$dataIn2}),
-      i = reactive({length(rv.custom$dataIn2)}),
+      obj = reactive({rv$dataIn}),
+      i = reactive({length(rv$dataIn)}),
       is.enabled = reactive({rv$steps.enabled["MECImputation"]}),
       remoteReset = reactive({remoteReset()})
     )
@@ -289,7 +286,7 @@ PipelineProtein_Imputation_server <- function(id,
       # Do some stuff
       rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,
-        rv.custom$tmp2()$value,
+        rv.custom$tmp.mec()$value,
         'MECImputation')
       
       
@@ -330,7 +327,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      #browser()
+      browser()
       
       len_start <- length(dataIn())
       len_end <- length(rv$dataIn)
@@ -339,9 +336,10 @@ PipelineProtein_Imputation_server <- function(id,
         rv$dataIn <- QFeatures::removeAssay(rv$dataIn, length(rv$dataIn)-1)
       
       # rename last SE
-      names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
-      params((rv$dataIn)[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
-      
+      if (len_diff > 0){
+        names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
+        DaparToolshed::params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      }
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- Timestamp()
