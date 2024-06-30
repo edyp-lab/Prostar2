@@ -338,7 +338,7 @@ PipelineProtein_Imputation_server <- function(id,
  
       if (len_diff == 2)
         rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
-          length(rv.custom$dataIn2)-1)
+          length(rv.custom$dataIn2) - 1)
       
       
       # Rename the new dataset with the name of the process
