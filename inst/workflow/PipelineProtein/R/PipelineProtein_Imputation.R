@@ -335,13 +335,14 @@ PipelineProtein_Imputation_server <- function(id,
       
       req(len_diff > 0)
       
+ 
       if (len_diff == 2)
         rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
           length(rv.custom$dataIn2)-1)
       
       
       # Rename the new dataset with the name of the process
-      names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
+      names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Imputation'
       DaparToolshed::params(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
       
       
