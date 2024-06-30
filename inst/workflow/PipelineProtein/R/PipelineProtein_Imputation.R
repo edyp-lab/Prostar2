@@ -85,6 +85,8 @@ PipelineProtein_Imputation_server <- function(id,
   widgets.default.values <- list()
   
   rv.custom.default.values <- list(
+    dataIn1 = NULL,
+    dataIn2 = NULL,
     tmp.mec = reactive({NULL}),
     tmp.pov = reactive({NULL}),
     params.tmp1 = list(),
@@ -157,7 +159,10 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observeEvent(input$Description_btn_validate, {
+      req(dataIn())
       rv$dataIn <- dataIn()
+      rv.custom$dataIn1 <- dataIn()
+      rv.custom$dataIn2 <- dataIn()
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -216,12 +221,11 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observeEvent(input$POVImputation_btn_validate, {
-      
+      req(rv.custom$tmp.pov()$value)
       # Do some stuff
-      rv$dataIn <- Prostar2::addDatasets(
-        rv$dataIn,
-        rv.custom$tmp.pov()$value,
-        'POVImputation')
+      rv.custom$dataIn1 <- rv.custom$tmp.pov()$value
+      rv.custom$dataIn2 <- rv.custom$tmp.pov()$value
+      
       
       #rv.custom$dataIn2 <- rv$dataIn
       
@@ -262,8 +266,8 @@ PipelineProtein_Imputation_server <- function(id,
     observe({
     rv.custom$tmp.mec <- Prostar2::mod_Prot_Imputation_MEC_server(
       id = 'mec',
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
+      obj = reactive({rv.custom$dataIn1}),
+      i = reactive({length(rv.custom$dataIn1)}),
       is.enabled = reactive({rv$steps.enabled["MECImputation"]}),
       remoteReset = reactive({remoteReset()})
     )
@@ -283,10 +287,9 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$MECImputation_btn_validate, {
       # Do some stuff
-      rv$dataIn <- Prostar2::addDatasets(
-        rv$dataIn,
-        rv.custom$tmp.mec()$value,
-        'MECImputation')
+      req(rv.custom$tmp.mec()$value)
+      rv.custom$dataIn2 <- rv.custom$tmp.mec()$value
+      
       
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
@@ -326,25 +329,27 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      #browser()
-      
-      len_start <- length(dataIn())
-      len_end <- length(rv$dataIn)
+      len_start <- length(rv$dataIn)
+      len_end <- length(rv.custom$dataIn2)
       len_diff <- len_end - len_start
-      if (len_diff == 2)
-        rv$dataIn <- QFeatures::removeAssay(rv$dataIn, length(rv$dataIn)-1)
       
-      # rename last SE
-      if (len_diff > 0){
-        names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
-        DaparToolshed::params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
-      }
+      req(len_diff > 0)
+      
+      if (len_diff == 2)
+        rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
+          length(rv.custom$dataIn2)-1)
+      
+      
+      # Rename the new dataset with the name of the process
+      names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
+      DaparToolshed::params(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
+      
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      download_dataset_server('createQuickLink', data = reactive({rv$dataIn}))
+      download_dataset_server('createQuickLink', data = reactive({rv.custom$dataIn2}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------

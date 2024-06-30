@@ -324,6 +324,13 @@ mod_Prot_Imputation_MEC_server <- function(id,
         }
         
         params(.tmp) <- .param
+        
+        rv$dataIn <- Prostar2::addDatasets(
+          rv$dataIn,
+          .tmp,
+          'MECImputation')
+        
+        
         # Check if POV imputation has already been procceded
         # if (xxx %in% names(rv$dataIn)){
         #   
@@ -331,8 +338,8 @@ mod_Prot_Imputation_MEC_server <- function(id,
         #   
         # }
         dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- .tmp
-        dataOut$value <- .tmp
+        dataOut$value <- rv$dataIn
+
       })
       })
     })
