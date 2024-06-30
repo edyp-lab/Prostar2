@@ -90,8 +90,8 @@ PipelineProtein_Filtering_server <- function(id,
   
   
   rv.custom.default.values <- list(
-    dataIn1 = reactive({NULL}),
-    dataIn2 = reactive({NULL}),
+    dataIn1 = NULL,
+    dataIn2 = NULL,
     deleted.stringBased = NULL,
     deleted.metacell = NULL,
     deleted.numeric = NULL,
@@ -167,8 +167,8 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(input$Description_btn_validate, {
       req(dataIn())
       rv$dataIn <- dataIn()
-      rv$dataIn1 <- dataIn()
-      rv$dataIn2 <- dataIn()
+      rv.custom$dataIn1 <- dataIn()
+      rv.custom$dataIn2 <- dataIn()
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -199,28 +199,19 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     
-    # observe({
-    #  # req(rv$dataIn)
-    # rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
-    #   id = "metaFiltering",
-    #   obj = reactive({rv$dataIn}),
-    #   i = reactive({length(rv$dataIn)}),
-    #   is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
-    #   remoteReset = reactive({remoteReset()})
-    # )
-    # })
+    observe({
+     # req(rv$dataIn)
+    rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
+      id = "metaFiltering",
+      obj = reactive({rv$dataIn}),
+      i = reactive({length(rv$dataIn)}),
+      is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
+      remoteReset = reactive({remoteReset()})
+    )
+    })
     
     # >>> START: Definition of the widgets
     output$mod_metacell_filtering_ui <- renderUI({
-
-        rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
-          id = "metaFiltering",
-          obj = reactive({rv$dataIn}),
-          i = reactive({length(rv$dataIn)}),
-          is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
-          remoteReset = reactive({remoteReset()})
-        )
-      
       widget <- Prostar2::mod_Metacell_Filtering_ui(ns("metaFiltering"))
       MagellanNTK::toggleWidget(widget, 
         rv$steps.enabled["Cellmetadatafiltering"])
@@ -241,11 +232,10 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(input$Cellmetadatafiltering_btn_validate, {
-      #rv.custom$tmp <- rv.custom$tmp.filtering1()$value
-      #
- 
-      rv$dataIn1 <- rv.custom$tmp.filtering1()$value
-      rv$dataIn2 <- rv$dataIn1
+      req(rv.custom$tmp.filtering1()$value)
+
+      rv.custom$dataIn1 <- rv.custom$tmp.filtering1()$value
+      rv.custom$dataIn2 <- rv.custom$tmp.filtering1()$value
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -267,29 +257,23 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
 
-    # observe({
-    #   # # If the previous step has been run and validated,
-    #   # # Update dataIn to its result
-    #   
-    #   rv.custom$tmp.filtering2 <- Prostar2::mod_Variable_Filtering_server(
-    #     id = "varFiltering",
-    #     obj = reactive({rv$dataIn1}),
-    #     i = reactive({length(rv$dataIn1)}),
-    #     is.enabled = reactive({rv$steps.enabled["Variablefiltering"]}),
-    #     remoteReset = reactive({remoteReset()})
-    #   )
-    #   
-    # })
-    
-    
-    output$mod_variable_filtering_ui <- renderUI({
+    observe({
+      # # If the previous step has been run and validated,
+      # # Update dataIn to its result
+
       rv.custom$tmp.filtering2 <- Prostar2::mod_Variable_Filtering_server(
         id = "varFiltering",
-        obj = reactive({rv$dataIn1}),
-        i = reactive({length(rv$dataIn1)}),
+        obj = reactive({rv.custom$dataIn1}),
+        i = reactive({length(rv.custom$dataIn1)}),
         is.enabled = reactive({rv$steps.enabled["Variablefiltering"]}),
         remoteReset = reactive({remoteReset()})
       )
+
+    })
+    
+    
+    output$mod_variable_filtering_ui <- renderUI({
+      
       
     widget <- Prostar2::mod_Variable_Filtering_ui(ns("varFiltering"))
     MagellanNTK::toggleWidget(widget, 
@@ -308,8 +292,8 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(input$Variablefiltering_btn_validate, {
-      
-      rv$dataIn2 <- rv.custom$tmp.filtering2()$value
+      req(rv.custom$tmp.filtering2()$value)
+      rv.custom$dataIn2 <- rv.custom$tmp.filtering2()$value
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -346,29 +330,29 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      # Clean the result
-      len_start <- length(dataIn())
-      len_end <- length(rv$dataIn2)
+       # Clean the result
+      len_start <- length(rv$dataIn)
+      len_end <- length(rv.custom$dataIn2)
       len_diff <- len_end - len_start
+      
+      req(len_diff > 0)
+      
       if (len_diff == 2)
-        rv$dataIn2 <- QFeatures::removeAssay(rv$dataIn2, length(rv$dataIn2)-1)
+        rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
+          length(rv.custom$dataIn2)-1)
       
       
       # Rename the new dataset with the name of the process
-      if (len_diff > 0){
-        names(rv$dataIn2)[length(rv$dataIn2)] <- 'Filtering'
-        DaparToolshed::params(rv$dataIn2[[length(rv$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
-      }
+        names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
+        DaparToolshed::params(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv$dataIn2
+      dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      
-      
+
       MagellanNTK::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv$dataIn}))
-      
+        dataIn = reactive({rv.custom$dataIn2}))
     })
     # <<< END ------------- Code for step 3 UI---------------
     

@@ -70,7 +70,7 @@ mod_Variable_Filtering_ui <- function(id) {
 #' @export
 #'
 mod_Variable_Filtering_server <- function(id,
-  obj,
+  obj = reactive({NULL}),
   i,
   remoteReset = reactive({NULL}),
   is.enabled = reactive({TRUE})) {
@@ -110,6 +110,7 @@ mod_Variable_Filtering_server <- function(id,
     
     observe({
       req(obj())
+      #browser()
       stopifnot(inherits(obj(), 'QFeatures'))
     })
     

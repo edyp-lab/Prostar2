@@ -74,7 +74,7 @@ mod_VariableFilter_Generator_ui <- function(id) {
 #' @export
 #'
 mod_VariableFilter_Generator_server <- function(id,
-  obj,
+  obj = reactive({NULL}),
   cname = reactive({NULL}),
   value = reactive({NULL}),
   operator = reactive({NULL}),
