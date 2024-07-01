@@ -103,7 +103,7 @@ mod_settings_server <- function(
   is.enabled = reactive({TRUE})) {
     
   
-  pkgs.require(c("colourpicker", "shinyBS"))    
+  requireNamespace(c("colourpicker", "shinyBS"))    
   
     moduleServer(id, function(input, output, session) {
         ns <- session$ns

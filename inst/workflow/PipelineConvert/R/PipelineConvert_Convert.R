@@ -85,7 +85,7 @@ PipelineConvert_Convert_server <- function(id,
                            current.pos = reactive({1})
 ) {
   
-  pkgs.require("openxlsx")
+  requireNamespace("openxlsx")
   
   
   

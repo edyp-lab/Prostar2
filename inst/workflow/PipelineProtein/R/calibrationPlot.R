@@ -34,7 +34,7 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
   if (is.null(vPVal)) {
     return(NULL)
   }
-  pkgs.require('cp4p')
+  requireNamespace('cp4p')
   
   p <- cp4p::calibration.plot(vPVal, pi0.method = pi0Method)
   
@@ -214,7 +214,7 @@ diffAnaComputeFDR <- function(adj.pvals) {
 #'
 diffAnaComputeAdjustedPValues <- function(pval, 
   pi0Method = 1) {
-  pkgs.require('cp4p')
+  requireNamespace('cp4p')
   
   padj <- cp4p::adjust.p(pval, pi0Method)
   return(padj$adjp[, 2])

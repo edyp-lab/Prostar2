@@ -68,7 +68,7 @@ mod_buildDesign_server <- function(id,
   is.enabled = reactive({TRUE})
   ) {
   
-  pkgs.require("shinyBS")
+  requireNamespace("shinyBS")
   requireNamespace('magrittr')
   
   moduleServer(id, function(input, output, session) {

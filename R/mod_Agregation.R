@@ -76,7 +76,7 @@ mod_Agregation_server <- function(id,
     current.pos = reactive({1}),
     verbose = FALSE) {
 
-  pkgs.require("DT")
+  requireNamespace("DT")
     
     
     # This list contains the basic configuration of the process

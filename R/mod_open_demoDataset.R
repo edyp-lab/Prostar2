@@ -64,7 +64,7 @@ open_demoDataset_server <- function(
     ### function for demo mode
     output$chooseDemoDataset <- renderUI({
       
-      pkgs.require(.package)
+      requireNamespace(.package)
       
       selectInput(ns("demoDataset"),
                   "Demo dataset",

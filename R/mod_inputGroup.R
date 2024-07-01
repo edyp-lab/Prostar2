@@ -44,7 +44,7 @@ mod_inputGroup_server <- function(
   remoteReset = reactive({FALSE}),
   is.enabled = reactive({TRUE})
 ) {
-  pkgs.require("shinyBS")
+  requireNamespace("shinyBS")
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
