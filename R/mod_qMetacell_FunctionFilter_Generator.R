@@ -18,9 +18,9 @@
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
 #' @examplesIf interactive()
-#' data(ft_na)
-#' obj <- ft_na[[1]]
-#' conds <- get_group(ft_na)
+#' data(Exp1_R25_prot, package ='DaparToolshedData')
+#' obj <- Exp1_R25_prot[[1]]
+#' conds <- get_group(Exp1_R25_prot)
 #' 
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))
@@ -79,8 +79,8 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
 mod_qMetacell_FunctionFilter_Generator_server <- function(id,
     obj,
     conds,
-    keep_vs_remove = reactive({setNames(nm =c("delete", "keep"))}),
-    val_vs_percent = reactive({c("Count", "Percentage")}),
+    keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
+    val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
     operator = reactive({setNames(nm = SymFilteringOperators())}),
   remoteReset = reactive({NULL}),
     is.enabled = reactive({TRUE})) {
@@ -196,9 +196,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         
         output$chooseKeepRemove_ui <- renderUI({
             req(rv.widgets$tag != "None")
-            widget <- radioButtons(ns("keepRemove"),
+            widget <- radioButtons(ns("keep_vs_remove"),
                 "Type of filter operation",
-                choices = setNames(nm = c('delete', 'keep')),
+                choices = keep_vs_remove(),
                 selected = rv.widgets$keep_vs_remove
             )
             MagellanNTK::toggleWidget(widget, is.enabled())
@@ -461,8 +461,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 mod_qMetacell_FunctionFilter_Generator <- function(
     obj,
     conds, 
-    keep_vs_remove = c("delete", "keep"),
-    val_vs_percent = c("Count", "Percentage"),
+    keep_vs_remove = setNames(nm = c("delete", "keep")),
+    val_vs_percent = setNames(nm = c("Count", "Percentage")),
     operator = setNames(nm = SymFilteringOperators()),
   remoteReset = FALSE,
   is.enabled = TRUE){
@@ -479,7 +479,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
       val_vs_percent = reactive({val_vs_percent}),
       operator = reactive({operator}),
       is.enabled = reactive({is.enabled}),
-      remoteReset = reactive({reset}))
+      remoteReset = reactive({remoteReset}))
     
     observeEvent(res()$trigger, {
       #browser()
