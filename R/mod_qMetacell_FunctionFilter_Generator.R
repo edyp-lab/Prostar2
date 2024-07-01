@@ -317,10 +317,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
             if (rv.widgets$scope == "None") {
                 txt_summary <- "No filtering is processed."
             } else if (rv.widgets$scope == "WholeLine") {
+
                 txt_summary <- paste(
                     rv.widgets$keep_vs_remove,
-                    "lines that contain only",
-                    rv.widgets$tag
+                    "lines that contain only (",
+                  toString(rv.widgets$tag), ")"
                 )
             } else {
                 text_method <- switch(rv.widgets$scope,
@@ -338,9 +339,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
                 txt_summary <- paste(
                     rv.widgets$keep_vs_remove,
-                    " lines where number of ",
-                    rv.widgets$tag,
-                    " data ",
+                    " lines where number of (",
+                  toString(rv.widgets$tag),
+                    ") data ",
                     rv.widgets$operator,
                     " ",
                     text_threshold,
