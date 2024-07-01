@@ -702,7 +702,7 @@ PipelineProtein_DA_server <- function(id,
       
     })
     
-    output$histPValue <- renderHighchart({
+    output$histPValue <- highcharter::renderHighchart({
       histPValue()
     })
     

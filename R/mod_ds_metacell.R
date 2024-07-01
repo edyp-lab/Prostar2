@@ -92,7 +92,7 @@ mod_ds_metacell_Histos_server <- function(id,
                 )
              })
 
-            output$histo <- renderHighchart({
+            output$histo <- highcharter::renderHighchart({
               req(obj())
               req(group())
                tmp <- NULL
@@ -105,7 +105,7 @@ mod_ds_metacell_Histos_server <- function(id,
 
 
 
-            output$histo_per_lines <- renderHighchart({
+            output$histo_per_lines <- highcharter::renderHighchart({
               req(obj())
               req(group())
               tmp <- NULL
@@ -122,7 +122,7 @@ mod_ds_metacell_Histos_server <- function(id,
 
 
 
-            output$histo_per_lines_per_conds <- renderHighchart({
+            output$histo_per_lines_per_conds <- highcharter::renderHighchart({
                tmp <- NULL
                req(group())
                req(obj())

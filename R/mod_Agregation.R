@@ -297,7 +297,7 @@ mod_Agregation_server <- function(id,
             MagellanNTK::toggleWidget(widget, rv$steps.enabled["Filterpeptides"])
         })
 
-        output$peptideBarplot <- renderHighchart({
+        output$peptideBarplot <- highcharter::renderHighchart({
             req(adjacencyMatrix(last_assay(rv$dataIn)))
             withProgress(message = "Rendering plot, pleast wait...", 
                 detail = "", value = 1, {

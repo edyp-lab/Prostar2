@@ -325,7 +325,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     })
     
     
-    output$FoldChangePlot <- renderHighchart({
+    output$FoldChangePlot <- highcharter::renderHighchart({
       req(rv.custom$AllPairwiseComp)
       withProgress(message = "Computing plot...", detail = "", value = 0.5, {
           tmp.df <- as.data.frame(rv.custom$AllPairwiseComp$logFC)

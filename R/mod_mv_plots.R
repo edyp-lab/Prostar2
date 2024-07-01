@@ -80,7 +80,7 @@ mod_mv_plots_server <- function(id,
         rv$palette <- GetColorsForConditions(rv$grp)
     })
     
-  output$plot_viewNAbyMean <- renderHighchart({
+  output$plot_viewNAbyMean <- highcharter::renderHighchart({
     req(data())
     
     hc_mvTypePlot2( obj = data(),
