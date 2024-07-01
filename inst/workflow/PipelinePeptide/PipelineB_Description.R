@@ -6,7 +6,7 @@
 #' @export
 #' 
 PipelineB_Description_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineB_Description',
     mode = 'process',
     steps = '',

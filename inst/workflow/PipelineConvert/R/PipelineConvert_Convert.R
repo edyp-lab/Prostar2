@@ -24,7 +24,7 @@ options(shiny.fullstacktrace = TRUE)
 #' 
 PipelineConvert_Convert_conf <- function(){
   # This list contains the basic configuration of the process
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineConvert_Convert',
     # Define the type of module
     mode = 'process',

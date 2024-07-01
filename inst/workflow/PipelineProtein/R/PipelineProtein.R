@@ -21,7 +21,7 @@ NULL
 #' @export
 #' 
 PipelineProtein_conf <- function(){
-Config(
+  MagellanNTK::Config(
   mode = 'pipeline',
   fullname = 'PipelineProtein',
   steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest', 'DA'),

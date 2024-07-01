@@ -61,7 +61,7 @@ NULL
 #' @export
 #' 
 PipelineProtein_DA_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineProtein_DA',
     mode = 'process',
     steps = c("Pairwise comparison", "P-value calibration", "FDR"),

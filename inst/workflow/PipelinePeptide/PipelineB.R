@@ -12,7 +12,7 @@
 #' @export
 #' 
 PipelineB_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     mode = 'pipeline',
     fullname = 'PipelineB',
     steps = c('Process1', 'Process2', 'Process3'),

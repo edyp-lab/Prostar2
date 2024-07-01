@@ -3,7 +3,7 @@
 #' @export
 #' 
 PipelineProtein_Save_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineProtein_Save',
     mode = 'process'
   )

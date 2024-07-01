@@ -27,7 +27,7 @@
 #' @export
 #' 
 PipelineProtein_Imputation_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineProtein_Imputation',
     mode = 'process',
     steps = c('POV Imputation', 'MEC Imputation'),

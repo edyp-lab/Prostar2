@@ -23,7 +23,7 @@ NULL
 #' @export
 #' 
 PipelineB_Process1_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineB_Process1',
     mode = 'process',
     steps = c('Step 1', 'Step 2'),

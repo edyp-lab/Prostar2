@@ -48,7 +48,7 @@ NULL
 #' @export
 #' 
 PipelineProtein_Filtering_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineProtein_Filtering',
     mode = 'process',
     steps = c("Cell metadata filtering", "Variable filtering"),

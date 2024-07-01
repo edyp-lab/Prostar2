@@ -20,7 +20,7 @@
 #' @export
 #' 
 PipelineProtein_HypothesisTest_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineProtein_HypothesisTest',
     mode = 'process',
     steps = c('HypothesisTest'),

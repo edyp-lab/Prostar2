@@ -20,7 +20,7 @@
 #' @export
 #' 
 PipelineProtein_Normalization_conf <- function(){
-  Config(
+  MagellanNTK::Config(
     fullname = 'PipelineProtein_Normalization',
     mode = 'process',
     steps = c('Normalization'),
