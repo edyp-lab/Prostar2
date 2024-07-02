@@ -323,7 +323,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
           
         }
         
-        params(.tmp) <- .param
+        paramshistory(.tmp) <- .param
         
         rv$dataIn <- Prostar2::addDatasets(
           rv$dataIn,

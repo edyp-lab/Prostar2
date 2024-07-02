@@ -222,8 +222,8 @@ PipelineProtein_DA_server <- function(id,
       
       
       # Get logfc threshold from Hypothesis test dataset
-      if(!is.null(params(rv$dataIn[[length(rv$dataIn)]])$thlogfc))
-        rv.custom$thlogfc <- params(rv$dataIn[[length(rv$dataIn)]])$thlogfc
+      if(!is.null(paramshistory(rv$dataIn[[length(rv$dataIn)]])$thlogfc))
+        rv.custom$thlogfc <- paramshistory(rv$dataIn[[length(rv$dataIn)]])$thlogfc
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -1394,7 +1394,7 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       
-      params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()

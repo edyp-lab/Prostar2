@@ -16,7 +16,7 @@ mod_qMetacell_FunctionFilter_Generator_server(
      setNames(nm = c("delete", "keep"))
  }),
   val_vs_percent = reactive({
-     c("Count", "Percentage")
+     setNames(nm = c("Count", "Percentage"))
  }),
   operator = reactive({
      setNames(nm = SymFilteringOperators())
@@ -32,8 +32,8 @@ mod_qMetacell_FunctionFilter_Generator_server(
 mod_qMetacell_FunctionFilter_Generator(
   obj,
   conds,
-  keep_vs_remove = c("delete", "keep"),
-  val_vs_percent = c("Count", "Percentage"),
+  keep_vs_remove = setNames(nm = c("delete", "keep")),
+  val_vs_percent = setNames(nm = c("Count", "Percentage")),
   operator = setNames(nm = SymFilteringOperators()),
   remoteReset = FALSE,
   is.enabled = TRUE
@@ -80,9 +80,9 @@ of the class \code{SummarizedExperiment})
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-data(ft_na)
-obj <- ft_na[[1]]
-conds <- get_group(ft_na)
+data(Exp1_R25_prot, package ='DaparToolshedData')
+obj <- Exp1_R25_prot[[1]]
+conds <- get_group(Exp1_R25_prot)
 
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))

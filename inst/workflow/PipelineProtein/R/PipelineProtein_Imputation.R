@@ -343,7 +343,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Imputation'
-      DaparToolshed::params(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
+      DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
       
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES

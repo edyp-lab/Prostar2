@@ -520,7 +520,7 @@ PipelineProtein_Normalization_server <- function(id,
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
       assay(new.dataset) <- rv.norm$tmp.dataset
       
-      params(new.dataset) <- reactiveValuesToList(rv.widgets)
+      paramshistory(new.dataset) <- reactiveValuesToList(rv.widgets)
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       

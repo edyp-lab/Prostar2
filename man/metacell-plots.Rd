@@ -35,7 +35,7 @@ mod_ds_metacell_Histos_server(
  })
 )
 
-mod_ds_metacell_Histos(obj, group, pal, pattern, showSelect)
+mod_ds_metacell_Histos(obj, group, pal, pattern = NULL, showSelect)
 }
 \arguments{
 \item{id}{xxx}
@@ -56,8 +56,12 @@ xxxx
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-data(ft_na)
-grp <- omXplore::get_group(ft_na)
-shiny::runApp(mod_ds_metacell_Histos(ft_na[[1]], group = grp))
+data(Exp1_R25_prot, package = 'DaparToolshedData')
+grp <- omXplore::get_group(Exp1_R25_prot)
+shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))
+
+# Test with pattern already defined
+pat <- c('Missing MEC', 'Missing POV')
+shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], pattern = pat, group = grp))
 \dontshow{\}) # examplesIf}
 }

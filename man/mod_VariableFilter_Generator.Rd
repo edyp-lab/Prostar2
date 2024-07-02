@@ -10,7 +10,9 @@ mod_VariableFilter_Generator_ui(id)
 
 mod_VariableFilter_Generator_server(
   id,
-  obj,
+  obj = reactive({
+     NULL
+ }),
   cname = reactive({
      NULL
  }),
@@ -76,8 +78,8 @@ as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-data(ft_na)
-obj <- ft_na[[1]]
+data(Exp1_R25_prot, package = 'DaparToolshedData')
+obj <- Exp1_R25_prot[[1]]
 operator = setNames(nm = SymFilteringOperators())
 keep_vs_remove <- setNames(nm = c("delete", "keep"))
 value = 3

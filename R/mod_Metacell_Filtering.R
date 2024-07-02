@@ -134,6 +134,7 @@ mod_Metacell_Filtering_server <- function(id,
     output$plots_ui <- renderUI({
       
       req(rv.custom$funFilter()$value$ll.pattern)
+      
       widget <- mod_ds_metacell_Histos_ui(ns("plots"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
@@ -226,7 +227,11 @@ mod_Metacell_Filtering_server <- function(id,
         c(.html, .nbDeleted, .nbRemaining))
       
       par <- rv.custom$funFilter()$value$ll.widgets.value
-      params(tmp[[length(tmp)]], length(tmp[[length(tmp)]])) <- par
+      query <- rv.custom$funFilter()$value$ll.query
+      obj <- tmp
+      i <- length(tmp)
+      browser()
+      paramshistory(obj, i) <- c(paramshistory(obj, i), query)
       
       
       # Keeps only the last filtered SE
@@ -243,9 +248,10 @@ mod_Metacell_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
-      #DaparToolshed::params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      #DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
       
       print(rv$dataIn)
+      print(paramshistory(rv$dataIn, length(rv$dataIn)))
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })

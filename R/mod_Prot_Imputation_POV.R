@@ -298,7 +298,7 @@ mod_Prot_Imputation_POV_server <- function(id,
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
         }
 
-      params(.tmp) <- .param
+        paramshistory(.tmp) <- .param
       
       rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,

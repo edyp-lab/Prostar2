@@ -10,7 +10,9 @@ mod_Variable_Filtering_ui(id)
 
 mod_Variable_Filtering_server(
   id,
-  obj,
+  obj = reactive({
+     NULL
+ }),
   i,
   remoteReset = reactive({
      NULL
@@ -60,7 +62,7 @@ as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-data(ft_na)
-shiny::runApp(mod_Variable_Filtering(ft_na[[1]]))
+data(Exp1_R25_prot, package = 'DaparToolshedData')
+shiny::runApp(mod_Variable_Filtering(Exp1_R25_prot, 1))
 \dontshow{\}) # examplesIf}
 }

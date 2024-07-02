@@ -199,7 +199,7 @@ mod_Variable_Filtering_server <- function(id,
       rv.custom$variable_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
       
       par <- rv.custom$funFilter()$value$ll.widgets.value
-      params(tmp[[length(obj())]], length(tmp[[length(obj())]])) <- par
+      paramshistory(tmp[[length(obj())]], length(tmp[[length(obj())]])) <- par
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- tmp
     })
