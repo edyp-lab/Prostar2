@@ -46,9 +46,9 @@ mod_Metacell_Filtering_ui <- function(id) {
     uiOutput(ns("Quantimetadatafiltering_buildQuery_ui")),
 
     DT::dataTableOutput(ns("qMetacell_Filter_DT"))
-    ,uiOutput(ns('plots_ui')),
+    ,uiOutput(ns('plots_ui'))
     # Insert validation button
-    uiOutput(ns("Quantimetadatafiltering_btn_validate_ui"))
+    # uiOutput(ns("Quantimetadatafiltering_btn_validate_ui"))
   )
 }
 
@@ -85,7 +85,8 @@ mod_Metacell_Filtering_server <- function(id,
     fun.list = list(),
     widgets.value = list(),
     funFilter = reactive({NULL}),
-    qMetacell_Filter_SummaryDT = NULL
+    qMetacell_Filter_SummaryDT = NULL, 
+    df = data.frame()
   )
   
   
@@ -108,8 +109,8 @@ mod_Metacell_Filtering_server <- function(id,
       rv$dataIn <- obj()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
-        nbDeleted = "-",
-        TotalMainAssay = "-",
+        nbDeleted = "0",
+        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
         stringsAsFactors = FALSE
       )
       
@@ -155,11 +156,11 @@ mod_Metacell_Filtering_server <- function(id,
     
     output$qMetacell_Filter_DT <- DT::renderDataTable(server = TRUE,{
         req(rv.custom$qMetacell_Filter_SummaryDT)
-        req(rv.custom$funFilter()$value$ll.query)
-        df <- rv.custom$qMetacell_Filter_SummaryDT
-        query <- rv.custom$funFilter()$value$ll.query
-        df[, "query"] <- ConvertListToHtml(query)
-        showDT(df)
+        #req(rv.custom$funFilter()$value$ll.query)
+        
+        #.html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
+        #qMetacell_Filter_SummaryDT[, "query"] <- .html
+        showDT(rv.custom$qMetacell_Filter_SummaryDT)
       })
     
     
@@ -184,27 +185,29 @@ mod_Metacell_Filtering_server <- function(id,
     })
     
 
-    output$Quantimetadatafiltering_btn_validate_ui <- renderUI({
-
-      req(length(rv.custom$funFilter()$value$ll.fun) > 0)
-      
-      widget <- actionButton(ns("Quantimetadatafiltering_btn_validate"),
-        "Perform qMetacell filtering",
-        class = "btn-success"
-      )
-      
-      MagellanNTK::toggleWidget(widget, is.enabled())
-    })
+    # output$Quantimetadatafiltering_btn_validate_ui <- renderUI({
+    # 
+    #   req(length(rv.custom$funFilter()$value$ll.fun) > 0)
+    #   
+    #   widget <- actionButton(ns("Quantimetadatafiltering_btn_validate"),
+    #     "Perform qMetacell filtering",
+    #     class = "btn-success"
+    #   )
+    #   
+    #   MagellanNTK::toggleWidget(widget, is.enabled())
+    # })
     # >>> END: Definition of the widgets
     
     
-    observeEvent(input$Quantimetadatafiltering_btn_validate, {
+   # observeEvent(input$Quantimetadatafiltering_btn_validate, {
+      observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), {
+      
       req(rv$dataIn)
  
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
-        name = "qMetacellFiltered",
+        name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$funFilter()$value$ll.fun
       )
       indices <- rv.custom$funFilter()$value$ll.indices
@@ -214,13 +217,37 @@ mod_Metacell_Filtering_server <- function(id,
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])
       
-      rv.custom$qMetacell_Filter_SummaryDT[, "nbDeleted"] <- nBefore - nAfter
-      rv.custom$qMetacell_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
+      .html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
+      .nbDeleted <- nBefore - nAfter
+      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+
+      rv.custom$qMetacell_Filter_SummaryDT <- rbind(
+        rv.custom$qMetacell_Filter_SummaryDT , 
+        c(.html, .nbDeleted, .nbRemaining))
       
       par <- rv.custom$funFilter()$value$ll.widgets.value
-      params(tmp[[length(rv$dataIn)]], length(tmp[[length(rv$dataIn)]])) <- par
+      params(tmp[[length(tmp)]], length(tmp[[length(tmp)]])) <- par
+      
+      
+      # Keeps only the last filtered SE
+      len_start <- length(obj())
+      len_end <- length(tmp)
+      len_diff <- len_end - len_start
+      #browser()
+      req(len_diff > 0)
+      
+      if (len_diff == 2)
+        rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
+      else 
+        rv$dataIn <- tmp
+      
+      # Rename the new dataset with the name of the process
+      names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
+      #DaparToolshed::params(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      
+      print(rv$dataIn)
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- tmp
+      dataOut$value <- rv$dataIn 
     })
     
     return(reactive({dataOut}))
