@@ -344,7 +344,10 @@ PipelineProtein_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
         names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
-        DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
+        DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
+          c(DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]), 
+            reactiveValuesToList(rv.widgets))
+        
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()

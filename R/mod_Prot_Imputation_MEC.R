@@ -323,14 +323,13 @@ mod_Prot_Imputation_MEC_server <- function(id,
           
         }
         
-        paramshistory(.tmp) <- .param
         
         rv$dataIn <- Prostar2::addDatasets(
           rv$dataIn,
           .tmp,
           'MECImputation')
         
-        
+        paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- .param
         # Check if POV imputation has already been procceded
         # if (xxx %in% names(rv$dataIn)){
         #   

@@ -89,8 +89,6 @@ PipelineProtein_Imputation_server <- function(id,
     dataIn2 = NULL,
     tmp.mec = reactive({NULL}),
     tmp.pov = reactive({NULL}),
-    params.tmp1 = list(),
-    params.tmp2 = list(),
     params.tmp = list()
   )
   
@@ -226,7 +224,8 @@ PipelineProtein_Imputation_server <- function(id,
       rv.custom$dataIn1 <- rv.custom$tmp.pov()$value
       rv.custom$dataIn2 <- rv.custom$tmp.pov()$value
       
-      
+     
+      rv.custom$params.tmp[['POVImputation']] <- paramshistory(rv.custom$tmp.pov()$value[[length(rv.custom$tmp.pov()$value)]])
       #rv.custom$dataIn2 <- rv$dataIn
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
@@ -291,6 +290,7 @@ PipelineProtein_Imputation_server <- function(id,
       rv.custom$dataIn2 <- rv.custom$tmp.mec()$value
       
       
+      rv.custom$params.tmp[['MECImputation']] <- paramshistory(rv.custom$tmp.mec()$value[[length(rv.custom$tmp.mec()$value)]])
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
@@ -343,7 +343,8 @@ PipelineProtein_Imputation_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Imputation'
-      DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- reactiveValuesToList(rv.widgets)
+      DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
+        rv.custom$params.tmp
       
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES

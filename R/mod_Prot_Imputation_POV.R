@@ -298,13 +298,13 @@ mod_Prot_Imputation_POV_server <- function(id,
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
         }
 
-        paramshistory(.tmp) <- .param
-      
+        
       rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,
         .tmp,
         'POVImputation')
       
+      paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- .param
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
