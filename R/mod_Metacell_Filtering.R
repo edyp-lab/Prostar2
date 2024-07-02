@@ -45,7 +45,7 @@ mod_Metacell_Filtering_ui <- function(id) {
     
     uiOutput(ns("Quantimetadatafiltering_buildQuery_ui")),
 
-    DT::dataTableOutput(ns("qMetacell_Filter_DT"))
+    uiOutput(ns("qMetacell_Filter_DT"))
     ,uiOutput(ns('plots_ui'))
     # Insert validation button
     # uiOutput(ns("Quantimetadatafiltering_btn_validate_ui"))
@@ -141,27 +141,29 @@ mod_Metacell_Filtering_server <- function(id,
     
     
     
-    showDT <- function(df) {
-      DT::datatable(df,
-        extensions = c("Scroller"),
-        escape = FALSE,
-        rownames = FALSE,
-        options = list(
-          dom = "rt",
-          initComplete = .initComplete(),
-          deferRender = TRUE,
-          bLengthChange = FALSE
-        )
-      )
-    }
+    # showDT <- function(df) {
+    #   DT::datatable(df,
+    #     extensions = c("Scroller"),
+    #     escape = FALSE,
+    #     rownames = FALSE,
+    #     options = list(
+    #       dom = "rt",
+    #       initComplete = .initComplete(),
+    #       deferRender = TRUE,
+    #       bLengthChange = FALSE
+    #     )
+    #   )
+    # }
     
-    output$qMetacell_Filter_DT <- DT::renderDataTable(server = TRUE,{
+    MagellanNTK::format_DT_server("dt", 
+      obj = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
+    
+    
+    output$qMetacell_Filter_DT <- renderUI({
         req(rv.custom$qMetacell_Filter_SummaryDT)
-        #req(rv.custom$funFilter()$value$ll.query)
-        
-        #.html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
-        #qMetacell_Filter_SummaryDT[, "query"] <- .html
-        showDT(rv.custom$qMetacell_Filter_SummaryDT)
+ 
+      
+      MagellanNTK::format_DT_ui(ns("dt"))
       })
     
     
@@ -226,12 +228,6 @@ mod_Metacell_Filtering_server <- function(id,
         rv.custom$qMetacell_Filter_SummaryDT , 
         c(.html, .nbDeleted, .nbRemaining))
       
-      par <- rv.custom$funFilter()$value$ll.widgets.value
-      query <- rv.custom$funFilter()$value$ll.query
-      obj <- tmp
-      i <- length(tmp)
-      browser()
-      paramshistory(obj, i) <- c(paramshistory(obj, i), query)
       
       
       # Keeps only the last filtered SE
@@ -248,10 +244,19 @@ mod_Metacell_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
+      
+      # Add params
+      par <- rv.custom$funFilter()$value$ll.widgets.value
+      query <- rv.custom$funFilter()$value$ll.query
+      i <- length(rv$dataIn)
+      #browser()
+      DaparToolshed::paramshistory(rv$dataIn[[i]]) <- c(DaparToolshed::paramshistory(rv$dataIn[[i]]), query)
+      
+      
       #DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
       
       print(rv$dataIn)
-      print(paramshistory(rv$dataIn, length(rv$dataIn)))
+      print(DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]))
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })
