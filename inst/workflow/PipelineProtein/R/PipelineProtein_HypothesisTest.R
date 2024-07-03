@@ -349,7 +349,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
             split = "_"
           )
         )
-        
+       
         div(
           div(style = .style, p(gsub("[()]", "", ll.conds[1]))),
           div(style = .style, p(gsub("[()]", "", ll.conds[3]))),
@@ -419,7 +419,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]))
       
       req(length(which(m)) == 0)
-      
+      browser()
       rv.custom$AllPairwiseComp <- NULL
       rv.custom$AllPairwiseComp <- switch(rv.widgets$HypothesisTest_method,
         Limma = {

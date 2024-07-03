@@ -232,11 +232,12 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(input$Cellmetadatafiltering_btn_validate, {
+      
       req(rv.custom$tmp.filtering1()$value)
 
       rv.custom$dataIn1 <- rv.custom$tmp.filtering1()$value
       rv.custom$dataIn2 <- rv.custom$tmp.filtering1()$value
-      
+    
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Cellmetadatafiltering"] <- stepStatus$VALIDATED
@@ -335,6 +336,7 @@ PipelineProtein_Filtering_server <- function(id,
       len_end <- length(rv.custom$dataIn2)
       len_diff <- len_end - len_start
       
+
       req(len_diff > 0)
       
       if (len_diff == 2)
