@@ -84,7 +84,9 @@ PipelineProtein_Normalization_server <- function(id,
     Normalization_sync = FALSE
   )
   
-  rv.custom.default.values <- list()
+  rv.custom.default.values <- list(
+    tmp.dataset = NULL
+  )
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -102,17 +104,6 @@ PipelineProtein_Normalization_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    
-    
-    # Additional reactive values
-    rv.norm <- reactiveValues(
-      trackFromBoxplot = NULL,
-      selectProt = NULL,
-      resetTracking = FALSE,
-      sync = FALSE,
-      tmp.dataset = NULL
-    )
-    
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -323,9 +314,9 @@ PipelineProtein_Normalization_server <- function(id,
 
     
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
-      req(rv.norm$tmp.dataset)
+      req(rv.custom$tmp.dataset)
       obj1 <- rv$dataIn[[length(rv$dataIn)]]
-      obj2 <- rv.norm$tmp.dataset
+      obj2 <- rv.custom$tmp.dataset
 
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
       
@@ -479,7 +470,7 @@ PipelineProtein_Normalization_server <- function(id,
           text = .tmp[[1]],
           type = 'error' )
       } else {
-        rv.norm$tmp.dataset <- .tmp
+        rv.custom$tmp.dataset <- .tmp
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- Timestamp()
@@ -518,7 +509,7 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-      assay(new.dataset) <- rv.norm$tmp.dataset
+      assay(new.dataset) <- rv.custom$tmp.dataset
       
       paramshistory(new.dataset) <- reactiveValuesToList(rv.widgets)
       
