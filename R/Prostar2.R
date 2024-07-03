@@ -10,13 +10,16 @@
 #' 
 #' @export
 #' 
-Prostar2 <- function(wf.name){
+Prostar2 <- function(wf.name, 
+  usermod = 'user',
+  verbose = FALSE){
   wf.path <- system.file(paste0('workflow/', wf.name), package = 'Prostar2')
   
   MagellanNTK::MagellanNTK(
     workflow.path = wf.path,
     workflow.name = wf.name,
-    usermod = 'user'
+    usermod = usermod,
+    verbose = verbose
   )
   
 }

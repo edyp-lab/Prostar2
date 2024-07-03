@@ -7,7 +7,7 @@
 #' @return A shiny app
 #'
 #' 
-#' @name infos_dataset
+#' @name convert_dataset
 #' 
 #' @examplesIf interactive()
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
@@ -19,7 +19,7 @@ NULL
 
 #'
 #'
-#' @rdname infos_dataset
+#' @rdname convert_dataset
 #'
 #' @export 
 #' @importFrom shiny NS tagList 
@@ -39,7 +39,7 @@ convert_dataset_ui <- function(id){
 
 # Module Server
 
-#' @rdname infos_dataset
+#' @rdname convert_dataset
 #' @export
 #' 
 #' @keywords internal
@@ -66,14 +66,14 @@ convert_dataset_server <- function(id,
 
 
 #' @export
-#' @rdname infos_dataset
+#' @rdname convert_dataset
 #' 
 convert_dataset <- function(obj){
   
-  ui <- fluidPage(infos_dataset_ui("mod_info"))
+  ui <- fluidPage(convert_dataset_ui("mod_info"))
   
   server <- function(input, output, session) {
-    infos_dataset_server("mod_info", reactive({obj}))
+    convert_dataset_server("mod_info")
   }
   
   app <- shiny::shinyApp(ui, server)

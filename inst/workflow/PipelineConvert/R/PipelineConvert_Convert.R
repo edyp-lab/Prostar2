@@ -5,9 +5,9 @@
 #' @name mod_convert
 #' @author Samuel Wieczorek 
 #' @examplesIf interactive()
-#' source("~/GitHub/Prostar2/inst/extdata/workflow/WorkflowConvert/R/Workflowconvert_Convert.R")
-#' path <- system.file('extdata/workflow/WorkflowConvert', package = 'Prostar2')
-#' shiny::runApp(MagellanNTK::workflowApp("Convert")
+#' data("Exp1_R25_prot", package = "DaparToolshedData")
+#' path <- system.file('workflow/PipelineConvert', package = 'Prostar2')
+#' shiny::runApp(workflowApp("PipelineConvert_Convert", path, dataIn = Exp1_R25_prot))
 #' 
 #' 
 NULL
@@ -259,50 +259,51 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     ############ Read text file to be imported ######################
-    observeEvent(req(rv.widgets$SelectFile_file), {
-      rv.widgets$SelectFile_XLSsheets
-      
-      ext <- GetExtension(rv.widgets$SelectFile_file$name)
-      rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, split='.', fixed = TRUE))[1]
-      if (((ext %in% c("xls", "xlsx"))) && 
-          is.null(rv.widgets$SelectFile_XLSsheets))
-        return(NULL)
-      
-      
-      authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
-      
-      if (!fileExt.ok()) {
-        shinyjs::info("Warning : this file is not a text nor an Excel file !
-     Please choose another one.")
-      } else {
-        tryCatch({
-          
-          shinyjs::disable("SelectFile_file")
-          f.path <- rv.widgets$SelectFile_file$datapath
-          rv.convert$tab <- switch(ext,
-                                   txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
-                                   csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
-                                   tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
-                                   xls = readExcel(f.path, ext, sheet = rv.widgets$SelectFile_XLSsheets),
-                                   xlsx = readExcel(f.path, ext, sheet = rv.widgets$SelectFile_XLSsheets)
-          )
-          
-          colnames(rv.convert$tab) <- gsub(".", "_", colnames(rv.convert$tab), fixed = TRUE)
-          colnames(rv.convert$tab) <- gsub(" ", "_", colnames(rv.convert$tab), fixed = TRUE)
-        },
-        warning = function(w) {
-          shinyjs::info(conditionMessage(w))
-          return(NULL)
-        },
-        error = function(e) {
-          shinyjs::info(conditionMessage(e))
-          return(NULL)
-        },
-        finally = {
-          # cleanup-code
-        })
-      }
-    })
+    # observeEvent(req(rv.widgets$SelectFile_file), {
+    #   rv.widgets$SelectFile_XLSsheets
+    #   
+    #   ext <- GetExtension(rv.widgets$SelectFile_file$name)
+    #   rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
+    #     split='.', fixed = TRUE))[1]
+    #   if (((ext %in% c("xls", "xlsx"))) && 
+    #       is.null(rv.widgets$SelectFile_XLSsheets))
+    #     return(NULL)
+    #   
+    #   
+    #   authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
+    #   
+    #   if (!fileExt.ok()) {
+    #     shinyjs::info("Warning : this file is not a text nor an Excel file !
+    #  Please choose another one.")
+    #   } else {
+    #     tryCatch({
+    # 
+    #       shinyjs::disable("SelectFile_file")
+    #       f.path <- rv.widgets$SelectFile_file$datapath
+    #       rv.convert$tab <- switch(ext,
+    #                                txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+    #                                csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
+    #                                tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+    #                                xls = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets),
+    #                                xlsx = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets)
+    #       )
+    #       
+    #       colnames(rv.convert$tab) <- gsub(".", "_", colnames(rv.convert$tab), fixed = TRUE)
+    #       colnames(rv.convert$tab) <- gsub(" ", "_", colnames(rv.convert$tab), fixed = TRUE)
+    #     },
+    #     warning = function(w) {
+    #       shinyjs::info(conditionMessage(w))
+    #       return(NULL)
+    #     },
+    #     error = function(e) {
+    #       shinyjs::info(conditionMessage(e))
+    #       return(NULL)
+    #     },
+    #     finally = {
+    #       # cleanup-code
+    #     })
+    #   }
+    # })
     
     output$SelectFile_ManageXlsFiles_ui <- renderUI({
       req(rv.widgets$SelectFile_software)
@@ -381,13 +382,57 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(input$SelectFile_btn_validate, {
       # Do some stuff
-      # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
-      #                                     dataset = rnorm(1:5),
-      #                                     name = paste0('temp_',id))
-      # 
+      
+      req(rv.widgets$SelectFile_file)
+        req(rv.widgets$SelectFile_XLSsheets)
+        
+        ext <- GetExtension(rv.widgets$SelectFile_file$name)
+        rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
+          split='.', fixed = TRUE))[1]
+        if (((ext %in% c("xls", "xlsx"))) && 
+            is.null(rv.widgets$SelectFile_XLSsheets))
+          return(NULL)
+        
+        
+        authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
+        
+        if (!fileExt.ok()) {
+          shinyjs::info("Warning : this file is not a text nor an Excel file !
+     Please choose another one.")
+        } else {
+          tryCatch({
+            
+            shinyjs::disable("SelectFile_file")
+            f.path <- rv.widgets$SelectFile_file$datapath
+            rv.convert$tab <- switch(ext,
+              txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+              csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
+              tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+              xls = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets),
+              xlsx = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets)
+            )
+            
+            colnames(rv.convert$tab) <- gsub(".", "_", colnames(rv.convert$tab), fixed = TRUE)
+            colnames(rv.convert$tab) <- gsub(" ", "_", colnames(rv.convert$tab), fixed = TRUE)
+          },
+            warning = function(w) {
+              shinyjs::info(conditionMessage(w))
+              return(NULL)
+            },
+            error = function(e) {
+              shinyjs::info(conditionMessage(e))
+              return(NULL)
+            },
+            finally = {
+              # cleanup-code
+            })
+        }
+      
+      
+      
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
       
     })
@@ -543,7 +588,7 @@ PipelineConvert_Convert_server <- function(id,
       # 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['DataId'] <- stepStatus$VALIDATED
     })
     
@@ -655,7 +700,7 @@ PipelineConvert_Convert_server <- function(id,
       # 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['ExpandFeatData'] <- stepStatus$VALIDATED
     })
     
@@ -693,7 +738,7 @@ PipelineConvert_Convert_server <- function(id,
       # 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['Design'] <- stepStatus$VALIDATED
     })
     
@@ -730,6 +775,7 @@ PipelineConvert_Convert_server <- function(id,
         indQData = rv.widgets$ExpandFeatData_quantCols,
         keyId = rv.widgets$DataId_datasetId,
         analysis = "analysis",
+        logData = rv.widgets$SelectFile_checkDataLogged == 'no',
         indexForMetacell = rv.widgets$ExpandFeatData_inputGroup,
         typeDataset = rv.widgets$SelectFile_typeOfData,
         parentProtId = rv.widgets$DataId_parentProteinID,
@@ -740,9 +786,9 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$trigger <- Timestamp()
       dataOut$value <- list(data = rv$dataIn, name = rv.custom$name)
       rv$steps.status['Save'] <- stepStatus$VALIDATED
+      
       MagellanNTK::download_dataset_server('createQuickLink', 
-                dataIn = reactive({rv$dataIn}),
-                extension = c('csv', 'xlsx', 'RData'))
+                dataIn = reactive({rv$dataIn}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------

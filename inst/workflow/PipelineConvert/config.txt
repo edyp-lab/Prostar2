@@ -12,5 +12,3 @@ addDatasets: Prostar2
 keepDatasets: Prostar2
 
 # Other
-
-user: 
