@@ -161,8 +161,6 @@ mod_Metacell_Filtering_server <- function(id,
     
     output$qMetacell_Filter_DT <- renderUI({
         req(rv.custom$qMetacell_Filter_SummaryDT)
- 
-      
       MagellanNTK::format_DT_ui(ns("dt"))
       })
     
@@ -220,7 +218,9 @@ mod_Metacell_Filtering_server <- function(id,
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])
       
-      .html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
+      #.html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
+   
+      .html <- rv.custom$funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
       .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
 

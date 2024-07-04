@@ -315,6 +315,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
       req(rv.custom$tmp.dataset)
+      req(rv$dataIn)
       obj1 <- rv$dataIn[[length(rv$dataIn)]]
       obj2 <- rv.custom$tmp.dataset
 
