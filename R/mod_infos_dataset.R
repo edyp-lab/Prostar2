@@ -70,34 +70,29 @@ infos_dataset_server <- function(id,
     ns <- session$ns
     
     
-    rv.infos <- reactiveValues(
-      obj = NULL
+    rv <- reactiveValues(
+      dataIn = NULL
     )
-    
     observeEvent(req(inherits(obj(),'QFeatures')), {
-       rv.infos$obj <- obj()
+       rv$dataIn <- obj()
     })
       
       
       
-      
-      
-      
-      
       output$samples_tab_ui <- renderUI({
-        req(rv.infos$obj)
+        req(rv$dataIn)
         
         
         MagellanNTK::format_DT_server('samples_tab',
           obj = reactive({
-            req((rv.infos$obj))
-            data.frame(colData(rv.infos$obj))
+            req((rv$dataIn))
+            data.frame(colData(rv$dataIn))
           }),
           hc_style = reactive({
             list(
-              cols = colnames(colData(rv.infos$obj)),
-              vals = colnames(colData(rv.infos$obj))[2],
-              unique = unique(colData(rv.infos$obj)$Condition),
+              cols = colnames(colData(rv$dataIn)),
+              vals = colnames(colData(rv$dataIn))[2],
+              unique = unique(colData(rv$dataIn)$Condition),
               pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
           })
         )
@@ -125,8 +120,8 @@ MagellanNTK::format_DT_server('dt',
 
 
     output$title <- renderUI({
-      req(rv.infos$obj)
-      name <- metadata(rv.infos$obj)$analysis
+      req(rv$dataIn)
+      name <- metadata(rv$dataIn)$analysis
       tagList(
           h3("Dataset summary"),
         p(paste0("Name of analysis:", name$analysis))
@@ -136,28 +131,28 @@ MagellanNTK::format_DT_server('dt',
 
 
     output$choose_SE_ui <- renderUI({
-      req(rv.infos$obj)
+      req(rv$dataIn)
       selectInput(ns("selectInputSE"),
         "Select a dataset for further information",
-        choices = c("None", names(experiments(rv.infos$obj)))
+        choices = c("None", names(experiments(rv$dataIn)))
       )
     })
 
     
     Get_QFeatures_summary <- reactive({
 
-      req(rv.infos$obj)
-      nb_assay <- length(rv.infos$obj)
-      names_assay <- unlist(names(rv.infos$obj))
-      pipeline <- metadata(rv.infos$obj)$pipelineType
+      req(rv$dataIn)
+      nb_assay <- length(rv$dataIn)
+      names_assay <- unlist(names(rv$dataIn))
+      pipeline <- metadata(rv$dataIn)$pipelineType
 
       columns <- c("Number of assay(s)",
                    "List of assay(s)",
                    "Pipeline Type")
 
-      vals <- c( if(is.null(metadata(rv.infos$obj)$pipelineType)) '-' else metadata(rv.infos$obj)$pipelineType,
-                 length(rv.infos$obj),
-                 if (length(rv.infos$obj)==0) '-' 
+      vals <- c( if(is.null(metadata(rv$dataIn)$pipelineType)) '-' else metadata(rv$dataIn)$pipelineType,
+                 length(rv$dataIn),
+                 if (length(rv$dataIn)==0) '-' 
         else HTML(paste0('<ul>', paste0('<li>', names_assay, "</li>", collapse=""), '</ul>', collapse=""))
       )
 
@@ -174,11 +169,11 @@ MagellanNTK::format_DT_server('dt',
     
     
     Get_SE_Summary <- reactive({
-      req(rv.infos$obj)
+      req(rv$dataIn)
       req(input$selectInputSE != "None")
 
      
-        .se <- rv.infos$obj[[input$selectInputSE]]
+        .se <- rv$dataIn[[input$selectInputSE]]
         
         typeOfData <- metadata(.se)$typeDataset
         nLines <- nrow(.se)
@@ -219,9 +214,35 @@ MagellanNTK::format_DT_server('dt',
     
     
     
+    
+    Get_SE_History <- reactive({
+      req(rv$dataIn)
+      req(input$selectInputSE != "None")
+      input$selectInputSE
+      
+      
+      .se <- rv$dataIn[[input$selectInputSE]]
+      
+      se_history <- '-'
+     
+      if (!is.null(paramshistory(.se))){
+        se_history <- lapply(paramshistory(.se), function(x) 
+          toString(x))
+
+      data.frame(Name = names(se_history), 
+        History = unlist(se_history))
+      } else {
+        data.frame(Name = '-', 
+          History = '-')
+      }
+      
+    })
+    
+    
+    
     output$properties_ui <- renderUI({
       req(input$selectInputSE)
-      req(rv.infos$obj)
+      req(rv$dataIn)
 
       if (input$selectInputSE != "None") {
         checkboxInput(ns('properties_button'), "Display details?", value = FALSE)
@@ -251,20 +272,23 @@ MagellanNTK::format_DT_server('dt',
     #   }
     # })
     
+    MagellanNTK::format_DT_server('dt2',
+      obj = reactive({Get_SE_Summary()})
+    )
     
+    MagellanNTK::format_DT_server('history',
+      obj = reactive({Get_SE_History()})
+    )
     
     output$show_SE_ui <- renderUI({
       req(input$selectInputSE != "None")
-      req(rv.infos$obj)
+      req(rv$dataIn)
 
-      data <- experiments(rv.infos$obj)[[input$selectInputSE]]
-        MagellanNTK::format_DT_server('dt2',
-          obj = reactive({Get_SE_Summary()})
-          )
         tagList(
           MagellanNTK::format_DT_ui(ns('dt2')),
           br(),
-          uiOutput(ns('info'))
+          #uiOutput(ns('info'))
+          MagellanNTK::format_DT_ui(ns('history'))
         )
     })
     
@@ -272,10 +296,10 @@ MagellanNTK::format_DT_server('dt',
     
     # output$info <- renderUI({
     #   req(input$selectInputSE)
-    #   req(obj())
-    #   
+    #   req(rv$dataIn)
+    # 
     #   if (input$selectInputSE != "None") {
-    #     
+    # 
     #     typeOfDataset <- Get_SE_Summary()["Type of data", 2]
     #     pourcentage <- Get_SE_Summary()["% of missing values", 2]
     #     nb.empty.lines <- Get_SE_Summary()["Number of empty lines", 2]
@@ -287,7 +311,7 @@ MagellanNTK::format_DT_server('dt',
     #              has been disabled because the dataset contains
     #              protein quantitative data.")
     #         },
-    #         
+    # 
     #         if (pourcentage > 0){
     #           tags$p("As your dataset contains missing values, you should
     #              impute them prior to proceed to the differential analysis.")
