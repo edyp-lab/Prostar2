@@ -104,16 +104,23 @@ PipelineProtein_Normalization_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    
+
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
     
     
     output$Description <- renderUI({
-      file <- normalizePath(file.path(session$userData$workflow.path, 
-        'md', paste0(id, '.md')))
-      
+      # print('titi')
+      # print(session$userData$workflow.path)
+      # file <- normalizePath(file.path(session$userData$workflow.path, 
+      #   'md', paste0(id, '.md')))
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.md')))
+     
       tagList(
         # In this example, the md file is found in the extdata/module_examples directory
         # but with a real app, it should be provided by the package which

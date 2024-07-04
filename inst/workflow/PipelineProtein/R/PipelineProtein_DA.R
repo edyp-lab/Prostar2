@@ -161,8 +161,16 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$Description <- renderUI({
-      file <- normalizePath(file.path(session$userData$workflow.path, 
-        'md', paste0(id, '.md')))
+      # file <- normalizePath(file.path(session$userData$workflow.path, 
+      #   'md', paste0(id, '.md')))
+      
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.md')))
+      
+      
       tagList(
         ### In this example, the md file is found in the extdata/module_examples 
         ### directory but with a real app, it should be provided by the package 

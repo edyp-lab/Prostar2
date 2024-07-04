@@ -55,8 +55,15 @@ PipelineProtein_Save_server <- function(id,
     
     ###### ------------------- Code for Save (step 0) -------------------------    #####
     output$Save <- renderUI({
-      file <- normalizePath(file.path(session$userData$workflow.path, 
-        'md', paste0(id, '.md')))
+      # file <- normalizePath(file.path(session$userData$workflow.path, 
+      #   'md', paste0(id, '.md')))
+      
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.md')))
+      
       tagList(
         if (file.exists(file))
           includeMarkdown(file)

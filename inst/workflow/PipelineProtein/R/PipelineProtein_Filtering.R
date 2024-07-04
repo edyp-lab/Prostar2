@@ -126,8 +126,15 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$Description <- renderUI({
-      file <- normalizePath(file.path(session$userData$workflow.path, 
-        'md', paste0(id, '.md')))
+      # file <- normalizePath(file.path(session$userData$workflow.path, 
+      #   'md', paste0(id, '.md')))
+      
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.md')))
+      
       tagList(
         # Insert validation button
         uiOutput(ns('Description_btn_validate_ui')),
