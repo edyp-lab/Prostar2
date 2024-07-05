@@ -86,7 +86,8 @@ mod_Metacell_Filtering_server <- function(id,
     widgets.value = list(),
     funFilter = reactive({NULL}),
     qMetacell_Filter_SummaryDT = NULL, 
-    df = data.frame()
+    df = data.frame(),
+    history = list()
   )
   
   
@@ -139,22 +140,7 @@ mod_Metacell_Filtering_server <- function(id,
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-    
-    
-    # showDT <- function(df) {
-    #   DT::datatable(df,
-    #     extensions = c("Scroller"),
-    #     escape = FALSE,
-    #     rownames = FALSE,
-    #     options = list(
-    #       dom = "rt",
-    #       initComplete = .initComplete(),
-    #       deferRender = TRUE,
-    #       bLengthChange = FALSE
-    #     )
-    #   )
-    # }
-    
+
     MagellanNTK::format_DT_server("dt", 
       obj = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
     
@@ -245,18 +231,21 @@ mod_Metacell_Filtering_server <- function(id,
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
       
+      # Add history
+      
+      
       # Add params
       par <- rv.custom$funFilter()$value$ll.widgets.value
       query <- rv.custom$funFilter()$value$ll.query
       i <- length(rv$dataIn)
-      #browser()
-      DaparToolshed::paramshistory(rv$dataIn[[i]]) <- c(DaparToolshed::paramshistory(rv$dataIn[[i]]), query)
+      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Metacell_Filtering']]
+      
+      .history <- append(.history, query)
+      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Metacell_Filtering']] <- .history
       
       
-      #DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      print(DaparToolshed::paramshistory(rv$dataIn[[i]]))
       
-      print(rv$dataIn)
-      print(DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]))
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })

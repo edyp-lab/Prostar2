@@ -96,7 +96,8 @@ PipelineProtein_Filtering_server <- function(id,
     deleted.metacell = NULL,
     deleted.numeric = NULL,
     tmp.filtering1 = reactive({NULL}),
-    tmp.filtering2 = reactive({NULL})
+    tmp.filtering2 = reactive({NULL}),
+    history = list()
   )
   
   ###-------------------------------------------------------------###
