@@ -146,9 +146,10 @@ MagellanNTK::format_DT_server('dt',
       names_assay <- unlist(names(rv$dataIn))
       pipeline <- metadata(rv$dataIn)$pipelineType
 
-      columns <- c("Number of assay(s)",
-                   "List of assay(s)",
-                   "Pipeline Type")
+      columns <- c("Pipeline Type",
+        "Number of assay(s)",
+                   "List of assay(s)"
+                   )
 
       vals <- c( if(is.null(metadata(rv$dataIn)$pipelineType)) '-' else metadata(rv$dataIn)$pipelineType,
                  length(rv$dataIn),
@@ -158,8 +159,8 @@ MagellanNTK::format_DT_server('dt',
 
 
 
-      do <- data.frame(Definition= columns,
-                       Value=vals
+      do <- data.frame(Definition = columns,
+                       Value = vals
       )
 
       do

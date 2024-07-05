@@ -85,7 +85,8 @@ PipelineProtein_Normalization_server <- function(id,
   )
   
   rv.custom.default.values <- list(
-    tmp.dataset = NULL
+    tmp.dataset = NULL,
+    history = NULL
   )
   
   ###-------------------------------------------------------------###
@@ -408,6 +409,8 @@ PipelineProtein_Normalization_server <- function(id,
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
 
+      rv.custom$history <- list(Normalization_method = rv.widgets$Normalization_method)
+      
       .tmp <- NULL
       .tmp <- try({
         .conds <- colData(rv$dataIn)[, "Condition"]
@@ -433,6 +436,12 @@ PipelineProtein_Normalization_server <- function(id,
               type = rv.widgets$Normalization_type, 
               subset.norm = selectProt(), 
               quantile = quant)
+            
+            rv.custom$history[['Normalization_quantile']] <- quant
+            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
+            rv.custom$history[['subset.norm']] <- selectProt()
+            
+            
           },
           
           MeanCentering = {
@@ -482,7 +491,7 @@ PipelineProtein_Normalization_server <- function(id,
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- Timestamp()
-        #dataOut$value <- NULL
+        dataOut$value <- NULL
        rv$steps.status['Normalization'] <- stepStatus$VALIDATED
       }
       
@@ -519,7 +528,7 @@ PipelineProtein_Normalization_server <- function(id,
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
       assay(new.dataset) <- rv.custom$tmp.dataset
       
-      paramshistory(new.dataset) <- reactiveValuesToList(rv.widgets)
+      paramshistory(new.dataset) <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       
