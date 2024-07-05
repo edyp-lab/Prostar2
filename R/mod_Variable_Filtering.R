@@ -54,10 +54,10 @@ mod_Variable_Filtering_ui <- function(id) {
     # For more details, please refer to the dev document.
     
     uiOutput(ns("variable_buildQuery_ui")),
-    # Insert validation button
-    uiOutput(ns("variable_btn_validate_ui")),
-      DT::dataTableOutput(ns("variable_Filter_DT"))
+    uiOutput(ns("variable_Filter_DT"))
     
+    # Insert validation button
+    #uiOutput(ns("variable_btn_validate_ui")),
   )
 }
 
@@ -71,7 +71,7 @@ mod_Variable_Filtering_ui <- function(id) {
 #'
 mod_Variable_Filtering_server <- function(id,
   obj = reactive({NULL}),
-  i,
+  i = reactive({1}),
   remoteReset = reactive({NULL}),
   is.enabled = reactive({TRUE})) {
   
@@ -81,9 +81,7 @@ mod_Variable_Filtering_server <- function(id,
   
   rv.custom.default.values <- list(
     indices = NULL,
-    Filtering = NULL,
     query = list(),
-    fun.list = list(),
     widgets.value = list(),
     funFilter = reactive({NULL}),
     variable_Filter_SummaryDT = data.frame(
@@ -108,101 +106,122 @@ mod_Variable_Filtering_server <- function(id,
     )
     
     
-    observe({
-      req(obj())
-      #browser()
+    observeEvent(req(obj()), ignoreNULL = TRUE,{
       stopifnot(inherits(obj(), 'QFeatures'))
+      rv$dataIn <- obj()
+    }, priority = 1000)
+    
+
+    MagellanNTK::format_DT_server("dt", 
+      obj = reactive({rv.custom$variable_Filter_SummaryDT}))
+
+    output$variable_Filter_DT <- renderUI({
+     
+      req(rv.custom$variable_Filter_SummaryDT)
+      MagellanNTK::format_DT_ui(ns("dt"))
     })
     
     
     observe({
       req(is.enabled())
       req(obj())
-      mod_ds_metacell_Histos_server(
-        id = "plots",
+      rv.custom$funFilter <- mod_VariableFilter_Generator_server(
+        id = "query",
         obj = reactive({obj()[[length(obj())]]}),
-        pattern = reactive({"Missing"}),
-        group = reactive({omXplore::get_group(obj())})
+        is.enabled = reactive({is.enabled()}),
+        remoteReset = reactive({remoteReset()})
       )
     })
+    
 
-    
-    showDT <- function(df) {
-      DT::datatable(df,
-        extensions = c("Scroller"),
-        escape = FALSE,
-        rownames = FALSE,
-        options = list(
-          dom = "rt",
-          initComplete = .initComplete(),
-          deferRender = TRUE,
-          bLengthChange = FALSE
-        )
-      )
-    }
-    
-    output$variable_Filter_DT <- DT::renderDataTable(server = TRUE,{
-      req(rv.custom$funFilter()$value$ll.query)
-
-      df <- rv.custom$variable_Filter_SummaryDT
-      query <- rv.custom$funFilter()$value$ll.query
-      df[, "query"] <- ConvertListToHtml(query)
-      showDT(df)
-    })
-    
     output$variable_buildQuery_ui <- renderUI({
-      observe({
-        req(is.enabled())
-        req(obj())
-        rv.custom$funFilter <- mod_VariableFilter_Generator_server(
-          id = "query",
-          obj = reactive({obj()[[length(obj())]]}),
-          is.enabled = reactive({is.enabled()}),
-          remoteReset = reactive({remoteReset()})
-        )
-      })
       widget <- mod_VariableFilter_Generator_ui(ns("query"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
+    
+    
     observeEvent(rv.custom$funFilter()$trigger, {
-    })
-    
-    
-    output$variable_btn_validate_ui <- renderUI({
-      #browser()
-      #req(length(rv.custom$funFilter()$value$ll.var) > 0)
-      
-      widget <- actionButton(ns("variable_btn_validate"),
-        "Perform filtering", class = "btn-success")
-      
-      MagellanNTK::toggleWidget(widget, is.enabled())
-    })
-    # >>> END: Definition of the widgets
-    
-    
-    observeEvent(input$variable_btn_validate, {
-     req(obj())
+      req(rv$dataIn)
+ 
       tmp <- filterFeaturesOneSE(
-        object = obj(),
-        i = length(obj()),
+        object = rv$dataIn,
+        i = length(rv$dataIn),
         name = "variableFiltered",
         filters = rv.custom$funFilter()$value$ll.var
       )
       
       # Add infos
-      #browser()
+      
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])
       
-      rv.custom$variable_Filter_SummaryDT[, "nbDeleted"] <- nBefore - nAfter
-      rv.custom$variable_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
       
-      par <- rv.custom$funFilter()$value$ll.widgets.value
-      paramshistory(tmp[[length(obj())]], length(tmp[[length(obj())]])) <- par
+      .html <- rv.custom$funFilter()$value$ll.query
+      .nbDeleted <- nBefore - nAfter
+      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+      
+      rv.custom$variable_Filter_SummaryDT <- rbind(
+        rv.custom$variable_Filter_SummaryDT , 
+        c(.html, .nbDeleted, .nbRemaining))
+
+      .history <- DaparToolshed::paramshistory(tmp[[length(tmp)]])[['Filtering']][['Variable_Filtering']]
+      
+      ll.query <-  rv.custom$funFilter()$value$ll.widgets.value
+      .history <- append(.history, ll.query)
+      DaparToolshed::paramshistory(tmp[[length(tmp)]])[['Filtering']][['Variable_Filtering']] <- .history
+      
+      
+      rv$dataIn <- tmp
+      
+      
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- tmp
+      dataOut$value <- rv$dataIn 
     })
+    
+    # 
+    # output$variable_btn_validate_ui <- renderUI({
+    #   #browser()
+    #   #req(length(rv.custom$funFilter()$value$ll.var) > 0)
+    #   
+    #   widget <- actionButton(ns("variable_btn_validate"),
+    #     "Perform filtering", class = "btn-success")
+    #   
+    #   MagellanNTK::toggleWidget(widget, is.enabled())
+    # })
+    # # >>> END: Definition of the widgets
+    # 
+    # 
+    # observeEvent(input$variable_btn_validate, {
+    #  req(obj())
+    #   tmp <- filterFeaturesOneSE(
+    #     object = obj(),
+    #     i = length(obj()),
+    #     name = "variableFiltered",
+    #     filters = rv.custom$funFilter()$value$ll.var
+    #   )
+    #   
+    #   # Add infos
+    #   #browser()
+    #   nBefore <- nrow(tmp[[length(tmp) - 1]])
+    #   nAfter <- nrow(tmp[[length(tmp)]])
+    #   
+    #   rv.custom$variable_Filter_SummaryDT[, "nbDeleted"] <- nBefore - nAfter
+    #   rv.custom$variable_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
+    # 
+    #   .history <- DaparToolshed::paramshistory(tmp[[i]])[['Filtering']][['Variable_Filtering']]
+    #   
+    #   ll.query <-  rv.custom$funFilter()$value$ll.widgets.value
+    #   .history <- append(.history, ll.query)
+    #   DaparToolshed::paramshistory(tmp[[i]])[['Filtering']][['Variable_Filtering']] <- .history
+    #   
+    #   
+    #   rv$dataIn <- tmp
+    #   
+    #   dataOut$trigger <- MagellanNTK::Timestamp()
+    #   dataOut$value <- tmp
+    # })
     
     return(reactive({dataOut}))
   })

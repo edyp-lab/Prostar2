@@ -47,6 +47,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 
     uiOutput(ns("qMetacell_Filter_DT"))
     ,uiOutput(ns('plots_ui'))
+    
     # Insert validation button
     # uiOutput(ns("Quantimetadatafiltering_btn_validate_ui"))
   )
@@ -115,25 +116,19 @@ mod_Metacell_Filtering_server <- function(id,
         stringsAsFactors = FALSE
       )
       
-      observe({
-        req(rv$dataIn)
-        #req(length(rv$dataIn))
-
+      
       mod_ds_metacell_Histos_server(
         id = "plots",
         obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
-      })
-      
-      
+
     }, priority = 1000)
 
     
     
     output$plots_ui <- renderUI({
-      
       req(rv.custom$funFilter()$value$ll.pattern)
       
       widget <- mod_ds_metacell_Histos_ui(ns("plots"))
