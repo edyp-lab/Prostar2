@@ -409,7 +409,6 @@ PipelineProtein_Normalization_server <- function(id,
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
 
-      rv.custom$history <- list(Normalization_method = rv.widgets$Normalization_method)
       
       .tmp <- NULL
       .tmp <- try({
@@ -437,6 +436,7 @@ PipelineProtein_Normalization_server <- function(id,
               subset.norm = selectProt(), 
               quantile = quant)
             
+            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_quantile']] <- quant
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
             rv.custom$history[['subset.norm']] <- selectProt()
@@ -452,6 +452,12 @@ PipelineProtein_Normalization_server <- function(id,
               scaling = rv.widgets$Normalization_varReduction,
               subset.norm = selectProt()
             )
+            
+            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
+            rv.custom$history[['Normalization_varReduction']] <- rv.widgets$Normalization_varReduction
+            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
+            rv.custom$history[['subset.norm']] <- selectProt()
+            
           },
           SumByColumns = {
             DaparToolshed::SumByColumns(
@@ -460,6 +466,11 @@ PipelineProtein_Normalization_server <- function(id,
               type = rv.widgets$Normalization_type,
               subset.norm = selectProt()
             )
+            
+            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
+            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
+            rv.custom$history[['subset.norm']] <- selectProt()
+            
           },
           LOESS = {
             DaparToolshed::LOESS(
@@ -468,6 +479,11 @@ PipelineProtein_Normalization_server <- function(id,
               type = rv.widgets$Normalization_type,
               span = as.numeric(rv.widgets$Normalization_spanLOESS)
             )
+            
+            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
+            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
+            rv.custom$history[['Normalization_spanLOESS']] <- as.numeric(rv.widgets$Normalization_spanLOESS)
+            
           },
           vsn = {
             DaparToolshed::vsn(
@@ -475,6 +491,10 @@ PipelineProtein_Normalization_server <- function(id,
               conds = .conds,
               type = rv.widgets$Normalization_type
             )
+            
+            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
+            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
+            
           }
         )
       })
@@ -531,9 +551,6 @@ PipelineProtein_Normalization_server <- function(id,
       paramshistory(new.dataset) <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
-      
-      # rename last SE
-      #names(rv$dataIn)[length(rv$dataIn)] <- 'Normalization'
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
