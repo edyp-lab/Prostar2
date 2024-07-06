@@ -411,16 +411,20 @@ PipelineProtein_Normalization_server <- function(id,
 
       
       .tmp <- NULL
-      .tmp <- try({
+      try({
         .conds <- colData(rv$dataIn)[, "Condition"]
         qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
         
         switch(rv.widgets$Normalization_method,
           
-          G_noneStr = rv$dataIn[[length(rv$dataIn)]],
+          G_noneStr = {
+            .tmp <- rv$dataIn[[length(rv$dataIn)]]
+            },
           
           GlobalQuantileAlignment = {
-            DaparToolshed::GlobalQuantileAlignment(qdata)
+            .tmp <- DaparToolshed::GlobalQuantileAlignment(qdata)
+            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
+            
           },
           
           QuantileCentering = {
@@ -429,7 +433,7 @@ PipelineProtein_Normalization_server <- function(id,
               quant <- as.numeric(rv.widgets$Normalization_quantile)
             }
             
-            DaparToolshed::QuantileCentering(
+            .tmp <- DaparToolshed::QuantileCentering(
               qData = qdata, 
               conds = .conds, 
               type = rv.widgets$Normalization_type, 
@@ -445,7 +449,7 @@ PipelineProtein_Normalization_server <- function(id,
           },
           
           MeanCentering = {
-            DaparToolshed::MeanCentering(
+            .tmp <- DaparToolshed::MeanCentering(
               qData = qdata, 
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -460,7 +464,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           SumByColumns = {
-            DaparToolshed::SumByColumns(
+            .tmp <- DaparToolshed::SumByColumns(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -473,7 +477,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           LOESS = {
-            DaparToolshed::LOESS(
+            .tmp <- DaparToolshed::LOESS(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -486,7 +490,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           vsn = {
-            DaparToolshed::vsn(
+            .tmp <- DaparToolshed::vsn(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type
@@ -507,6 +511,8 @@ PipelineProtein_Normalization_server <- function(id,
           text = .tmp[[1]],
           type = 'error' )
       } else {
+        
+        
         rv.custom$tmp.dataset <- .tmp
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
@@ -545,12 +551,15 @@ PipelineProtein_Normalization_server <- function(id,
     })
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
+      
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
       assay(new.dataset) <- rv.custom$tmp.dataset
       
-      paramshistory(new.dataset) <- rv.custom$history
+      paramshistory(new.dataset)[['Normalization']] <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
+      #i <- length(rv$dataIn)
+      #DaparToolshed::paramshistory(rv$dataIn[[i]])[['Normalization']] <- .history
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
