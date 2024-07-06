@@ -554,12 +554,8 @@ PipelineProtein_Normalization_server <- function(id,
       
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
       assay(new.dataset) <- rv.custom$tmp.dataset
-      
       paramshistory(new.dataset)[['Normalization']] <- rv.custom$history
-      
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
-      #i <- length(rv$dataIn)
-      #DaparToolshed::paramshistory(rv$dataIn[[i]])[['Normalization']] <- .history
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
