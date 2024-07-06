@@ -225,10 +225,7 @@ mod_Metacell_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
-      
-      # Add history
-      
-      
+
       # Add params
       par <- rv.custom$funFilter()$value$ll.widgets.value
       query <- rv.custom$funFilter()$value$ll.query
@@ -238,9 +235,7 @@ mod_Metacell_Filtering_server <- function(id,
       .history <- append(.history, query)
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Metacell_Filtering']] <- .history
       
-      
-      print(DaparToolshed::paramshistory(rv$dataIn[[i]]))
-      
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })

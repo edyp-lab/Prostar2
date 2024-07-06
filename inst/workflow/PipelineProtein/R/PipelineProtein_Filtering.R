@@ -304,8 +304,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(rv.custom$tmp.filtering2()$value)
       rv.custom$dataIn2 <- rv.custom$tmp.filtering2()$value
       
-      
-      browser()
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Variablefiltering"] <- stepStatus$VALIDATED

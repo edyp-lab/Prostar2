@@ -253,11 +253,14 @@ mod_VariableFilter_Generator_server <- function(id,
     })
     
     observeEvent(input$addFilter_btn, {
-
-      rv.custom$ll.var <- append(rv.custom$ll.var, BuildVariableFilter())
-      rv.custom$ll.query <- append(rv.custom$ll.query, WriteQuery())
-      rv.custom$ll.widgets.value <- append(rv.custom$ll.widgets.value,
-        list(reactiveValuesToList(rv.widgets)))
+      req(BuildVariableFilter())
+      req(WriteQuery())
+      
+      
+      #browser()
+      rv.custom$ll.var <- list(BuildVariableFilter())
+      rv.custom$ll.query <- list(WriteQuery())
+      rv.custom$ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
       
       
       # Append a new FunctionFilter to the list

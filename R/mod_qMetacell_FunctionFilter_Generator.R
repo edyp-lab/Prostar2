@@ -424,12 +424,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
           req(BuildFunctionFilter())
           req(WriteQuery())
           
-            rv.custom$ll.fun <- append(rv.custom$ll.fun, BuildFunctionFilter())
-            rv.custom$ll.query <- append(rv.custom$ll.query, WriteQuery())
-            rv.custom$ll.widgets.value <- append(
-                rv.custom$ll.widgets.value,
-                list(reactiveValuesToList(rv.widgets))
-            )
+            rv.custom$ll.fun <- list(BuildFunctionFilter())
+            rv.custom$ll.query <- list(WriteQuery())
+            rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
 
             # Append a new FunctionFilter to the list
             dataOut$trigger <- as.numeric(Sys.time())

@@ -147,7 +147,7 @@ mod_Variable_Filtering_server <- function(id,
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
-        name = "variableFiltered",
+        name = paste0("variableFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$funFilter()$value$ll.var
       )
       
@@ -164,18 +164,32 @@ mod_Variable_Filtering_server <- function(id,
       rv.custom$variable_Filter_SummaryDT <- rbind(
         rv.custom$variable_Filter_SummaryDT , 
         c(.html, .nbDeleted, .nbRemaining))
+      
+      #browser()
+      # Keeps only the last filtered SE
+      len_start <- length(obj())
+      len_end <- length(tmp)
+      len_diff <- len_end - len_start
+      #browser()
+      req(len_diff > 0)
+      
+      if (len_diff == 2)
+        rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
+      else 
+        rv$dataIn <- tmp
+      
+      # Rename the new dataset with the name of the process
+      names(rv$dataIn)[length(rv$dataIn)] <- 'Variable_Filtering'
+      
 
-      .history <- DaparToolshed::paramshistory(tmp[[length(tmp)]])[['Filtering']][['Variable_Filtering']]
+      i <- length(rv$dataIn)
+  
+      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Variable_Filtering']]
+      .history <- append(.history, rv.custom$funFilter()$value$ll.query)
+      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Variable_Filtering']] <- .history
       
-      ll.query <-  rv.custom$funFilter()$value$ll.widgets.value
-      .history <- append(.history, ll.query)
-      DaparToolshed::paramshistory(tmp[[length(tmp)]])[['Filtering']][['Variable_Filtering']] <- .history
-      
-      
-      rv$dataIn <- tmp
-      
-      
-      
+      print(rv$dataIn)
+      print(paramshistory(rv$dataIn[[length(rv$dataIn)]]))
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })
