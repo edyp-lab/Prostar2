@@ -188,8 +188,6 @@ mod_Variable_Filtering_server <- function(id,
       .history <- append(.history, rv.custom$funFilter()$value$ll.query)
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Variable_Filtering']] <- .history
       
-      print(rv$dataIn)
-      print(paramshistory(rv$dataIn[[length(rv$dataIn)]]))
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })
