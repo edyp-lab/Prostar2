@@ -14,8 +14,17 @@
 #' 
 #' In this example, `PipelineProtein_HypothesisTest_ulength(rv$dataIn)` and `PipelineProtein_HypothesisTest_server()` define
 #' the code for the process `ProcessProtein` which is part of the pipeline called `PipelineProtein`.
-
-
+#' 
+#' @examplesIf interactive()
+#' library(MagellanNTK)
+#' data(Exp1_R25_prot, package = "DaparToolshedData")
+#' obj <- Exp1_R25_prot
+#' # Simulate imputation of missing values
+#' obj <- NAIsZero(obj, 1)
+#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
+#' shiny::runApp(workflowApp("PipelineProtein_HypothesisTest", path, dataIn = Exp1_R25_prot))
+#'
+#' 
 #' @rdname PipelineProtein
 #' @export
 #' 
@@ -426,7 +435,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]))
       
       req(length(which(m)) == 0)
-      browser()
+
       rv.custom$AllPairwiseComp <- NULL
       rv.custom$AllPairwiseComp <- switch(rv.widgets$HypothesisTest_method,
         Limma = {
@@ -435,7 +444,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
             sTab = MultiAssayExperiment::colData(rv$dataIn),
             comp.type = rv.widgets$HypothesisTest_design
           )
-        },
+          
+          
+         },
         ttests = {
           DaparToolshed::compute_t_tests(
             obj = rv$dataIn,
@@ -443,8 +454,15 @@ PipelineProtein_HypothesisTest_server <- function(id,
             contrast = rv.widgets$HypothesisTest_design,
             type = rv.widgets$HypothesisTest_ttestOptions
           )
+          rv.custom$history[['HypothesisTest']][['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
+          
         }
       )
+      
+      
+      rv.custom$history[['HypothesisTest']][['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
+      rv.custom$history[['HypothesisTest']][['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
+      
       
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
 
@@ -464,7 +482,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     output$HypothesisTest_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("HypothesisTest_btn_validate"),
-        "Run HypothesisTest",
+        "Validate step",
         class = "btn-success")
       toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
       
@@ -525,7 +543,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
       rv.widgets$HypothesisTest_thlogFC <- as.numeric(
         rv.widgets$HypothesisTest_thlogFC)
-      #browser()
+     
+      rv.custom$history[['HypothesisTest']][['HypothesisTest_thlogFC']] <- rv.widgets$HypothesisTest_thlogFC
+      
       rv.custom$AllPairwiseComp <- ComputeComparisons()
       
       if(is.null(rv.custom$AllPairwiseComp)){} 
@@ -580,7 +600,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       df <- cbind(rv.custom$AllPairwiseComp$logFC, 
         rv.custom$AllPairwiseComp$P_Value)
       DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
-      paramshistory(new.dataset) <- reactiveValuesToList(rv.widgets)
+      paramshistory(new.dataset) <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
       

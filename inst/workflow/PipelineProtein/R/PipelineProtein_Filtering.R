@@ -208,17 +208,15 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observe({
-     # req(rv$dataIn)
-    rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
-      id = "metaFiltering",
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
-      is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
-      remoteReset = reactive({remoteReset()})
-    )
+      rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
+        id = "metaFiltering",
+        obj = reactive({rv$dataIn}),
+        i = reactive({length(rv$dataIn)}),
+        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
+        remoteReset = reactive({remoteReset()})
+      )
     })
     
-    # >>> START: Definition of the widgets
     output$mod_metacell_filtering_ui <- renderUI({
       widget <- Prostar2::mod_Metacell_Filtering_ui(ns("metaFiltering"))
       MagellanNTK::toggleWidget(widget, 

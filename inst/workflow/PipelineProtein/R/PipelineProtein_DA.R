@@ -33,6 +33,11 @@
 #' 
 #' @examplesIf interactive()
 #' library(MagellanNTK)
+#' library(MagellanNTK)
+#' library(highcharter)
+#' library(DaparToolshed)
+#' library(Prostar2)
+#' library(omXplore)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -41,12 +46,10 @@
 #' qData <- as.matrix(assay(obj[[2]]))
 #' sTab <- MultiAssayExperiment::colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
-#' 
+#' df <- cbind(limma$logFC, limma$P_Value)
 #' new.dataset <- obj[[length(obj)]]
-#' HypothesisTest(new.dataset) <- limma
+#' HypothesisTest(new.dataset) <- as.data.frame(df)
 #' obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
-#' 
-#' 
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_DA", path, dataIn = obj))
 #' 
@@ -127,7 +130,8 @@ PipelineProtein_DA_server <- function(id,
     AnaDiff_indices = reactive({NULL}),
     dataToAnalyze = NULL,
     Condition1 = NULL,
-    Condition2 = NULL
+    Condition2 = NULL, 
+    history = list()
   )
   
   grey <- "#FFFFFF"
@@ -227,7 +231,7 @@ PipelineProtein_DA_server <- function(id,
       
       rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
-      
+      #browser()
       
       # Get logfc threshold from Hypothesis test dataset
       if(!is.null(paramshistory(rv$dataIn[[length(rv$dataIn)]])$thlogfc))
@@ -245,10 +249,7 @@ PipelineProtein_DA_server <- function(id,
     Get_Dataset_to_Analyze <- reactive({
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
       datasetToAnalyze <- NULL
-      
-      #rv.widgets$Pairwisecomparison_tooltipInfo <- parentProtId(rv$dataIn[[length(rv$dataIn)]])
-      #UpdateCompList()
-      
+
       .split <- strsplit(
         as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
       )
@@ -266,24 +267,27 @@ PipelineProtein_DA_server <- function(id,
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
         Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
       } else {
-        condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
-        condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
-        
-        if (substr(condition1, 1, 1) == "(" &&
-            substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
-          condition1 <- sub("^.(.*).$", "\\1", condition1)
-        }
-        
-        if (substr(condition2, 1, 1) == "(" &&
-            substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
-          condition2 <- sub("^.(.*).$", "\\1", condition2)
-        }
+        # condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
+        # condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
+        # 
+        # if (substr(condition1, 1, 1) == "(" &&
+        #     substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
+        #   condition1 <- sub("^.(.*).$", "\\1", condition1)
+        # }
+        # 
+        # if (substr(condition2, 1, 1) == "(" &&
+        #     substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
+        #   condition2 <- sub("^.(.*).$", "\\1", condition2)
+        # }
         
         ind <- c(
-          which(omXplore::get_group(rv$dataIn) == condition1),
-          which(omXplore::get_group(rv$dataIn) == condition2)
+          which(omXplore::get_group(rv$dataIn) == rv.custom$Condition1),
+          which(omXplore::get_group(rv$dataIn) == rv.custom$Condition2)
         )
         
+        
+        # Reduce the size of the variable to be used in volcanoplot
+        # One need the quantitative
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]][, ind]
       }
       
@@ -299,7 +303,7 @@ PipelineProtein_DA_server <- function(id,
         condition2 = rv.custom$Condition2,
         pushed = NULL
       )
-    
+      
       datasetToAnalyze
     })
     
@@ -348,7 +352,7 @@ PipelineProtein_DA_server <- function(id,
     
     Get_Pairwisecomparison_Names <- reactive({
       req(rv.custom$res_AllPairwiseComparisons)
-      
+    
       .names <- colnames(rv.custom$res_AllPairwiseComparisons)
       .names <- gsub('_logFC', '', .names, fixed = TRUE)
       .names <- gsub('_pval', '', .names, fixed = TRUE)
@@ -402,7 +406,7 @@ PipelineProtein_DA_server <- function(id,
       Prostar2::mod_volcanoplot_server(
         id = "Pairwisecomparison_volcano",
         dataIn = reactive({Get_Dataset_to_Analyze()}),
-        comparison = reactive({GetComparisons()}),
+        comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
         group = reactive({omXplore::get_group(rv$dataIn)}),
         thlogfc = reactive({rv.custom$thlogfc}),
         tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
@@ -513,11 +517,8 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(rv.custom$AnaDiff_indices()$trigger),{
-      #UpdateCompList()
-      #print('received infos from AnaDiff indices')
       .ind <- rv.custom$AnaDiff_indices()$value$ll.indices
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
-      
       
       
       if (length(.ind) > 1 && length(.ind) < nrow(Get_Dataset_to_Analyze())) {
@@ -568,6 +569,8 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$Pairwisecomparison_btn_validate, {
       #UpdateCompList()
+      rv.custom$history[['Push pval query']] <- rv.custom$AnaDiff_indices()$value$ll.query
+      rv.custom$history[['Comparison']] <- GetComparisons()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -725,14 +728,17 @@ PipelineProtein_DA_server <- function(id,
       
       
       txt <- paste("Non-DA protein proportion = ",
-        round(100 * rv.cutom$calibrationRes$pi0, digits = 2), "%<br>",
+        round(100 * rv.custom$calibrationRes$pi0, digits = 2), "%<br>",
         "DA protein concentration = ",
-        round(100 * rv.cutom$calibrationRes$h1.concentration, digits = 2),
+        round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2),
         "%<br>",
         "Uniformity underestimation = ",
-        rv.cutom$calibrationRes$unif.under, "<br><br><hr>",
+        rv.custom$calibrationRes$unif.under, "<br><br><hr>",
         sep = ""
       )
+      
+      
+      
       HTML(txt)
     })
     
@@ -945,6 +951,8 @@ PipelineProtein_DA_server <- function(id,
       }
       .calibMethod
       
+      
+      
     })
     
     
@@ -962,6 +970,18 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(input$Pvaluecalibration_btn_validate, {
+      
+      
+      rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
+      rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
+      rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
+      rv.custom$history[['Uniformity underestimation']] <- rv.custom$calibrationRes$unif.under
+      rv.custom$history[['Non-DA protein proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
+      rv.custom$history[['DA protein concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
+      
+      
+      
+      
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -1365,6 +1385,13 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$FDR_btn_validate, {
       
+      
+      rv.custom$history[['FDR']] <- Get_FDR()
+      rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
+      
+      
+      
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["FDR"] <- stepStatus$VALIDATED
@@ -1402,7 +1429,7 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       
-      paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- reactiveValuesToList(rv.widgets)
+      paramshistory(rv$dataIn[[length(rv$dataIn)]])[['DA']] <- rv.custom$history
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()

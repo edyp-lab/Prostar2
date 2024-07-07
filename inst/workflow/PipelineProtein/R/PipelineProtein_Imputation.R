@@ -89,7 +89,7 @@ PipelineProtein_Imputation_server <- function(id,
     dataIn2 = NULL,
     tmp.mec = reactive({NULL}),
     tmp.pov = reactive({NULL}),
-    params.tmp = list()
+    history = list()
   )
   
   ###-------------------------------------------------------------###
@@ -192,15 +192,14 @@ PipelineProtein_Imputation_server <- function(id,
         # For more details, please refer to the dev document.
         
         # Insert validation button
-        uiOutput(ns("POVImputation_btn_validate_ui")),
+        #uiOutput(ns("POVImputation_btn_validate_ui")),
         uiOutput(ns("POVImputation_ui"))
       )
     })
     
     
     observe({
-      # >>> START: Definition of the widgets
-    rv.custom$tmp.pov <- Prostar2::mod_Prot_Imputation_POV_server(
+      rv.custom$tmp.pov <- Prostar2::mod_Prot_Imputation_POV_server(
       id = 'pov',
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
@@ -214,26 +213,25 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] )
     })
     
-    output$POVImputation_btn_validate_ui <- renderUI({
-
-      widget <-  actionButton(
-        ns("POVImputation_btn_validate"),
-        "Validate step", class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
-      
-    })
+    # output$POVImputation_btn_validate_ui <- renderUI({
+    # 
+    #   widget <-  actionButton(
+    #     ns("POVImputation_btn_validate"),
+    #     "Validate step", class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
+    #   
+    # })
     # >>> END: Definition of the widgets
     
     
-    observeEvent(input$POVImputation_btn_validate, {
-      req(rv.custom$tmp.pov()$value)
+    observeEvent(req(rv.custom$tmp.pov()$value), {
+      
       # Do some stuff
       rv.custom$dataIn1 <- rv.custom$tmp.pov()$value
       rv.custom$dataIn2 <- rv.custom$tmp.pov()$value
       
-     
-      rv.custom$params.tmp[['POVImputation']] <- paramshistory(rv.custom$tmp.pov()$value[[length(rv.custom$tmp.pov()$value)]])
-      #rv.custom$dataIn2 <- rv$dataIn
+     .history <- rv.custom$tmp.pov()$value[[length(rv.custom$tmp.pov()$value)]]
+      rv.custom$params.tmp[['Imputation']][['POVImputation']] <- paramshistory(.history)
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- Timestamp()
@@ -251,7 +249,7 @@ PipelineProtein_Imputation_server <- function(id,
         
         # Insert validation button
         # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('MECImputation_btn_validate_ui')),
+        #uiOutput(ns('MECImputation_btn_validate_ui')),
         uiOutput(ns('MECImputation_ui'))
         
       )
@@ -284,20 +282,20 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
     })
     
-    output$MECImputation_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("MECImputation_btn_validate"),
-                             "Perform",
-                             class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
-    })
+    # output$MECImputation_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("MECImputation_btn_validate"),
+    #                          "Perform",
+    #                          class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
+    # })
     
-    observeEvent(input$MECImputation_btn_validate, {
+    observeEvent(req(rv.custom$tmp.mec()$value), {
       # Do some stuff
-      req(rv.custom$tmp.mec()$value)
+      #req(rv.custom$tmp.mec()$value)
       rv.custom$dataIn2 <- rv.custom$tmp.mec()$value
       
-      
-      rv.custom$params.tmp[['MECImputation']] <- paramshistory(rv.custom$tmp.mec()$value[[length(rv.custom$tmp.mec()$value)]])
+      .history <- rv.custom$tmp.mec()$value[[length(rv.custom$tmp.mec()$value)]]
+      rv.custom$params.tmp[['Imputation']][['MECImputation']] <- paramshistory(.history)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
@@ -342,15 +340,15 @@ PipelineProtein_Imputation_server <- function(id,
       
       req(len_diff > 0)
       
- 
       if (len_diff == 2)
         rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
           length(rv.custom$dataIn2) - 1)
       
       
       # Rename the new dataset with the name of the process
-      names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Imputation'
-      DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
+      i <- length(rv.custom$dataIn2)
+      names(rv.custom$dataIn2)[i] <- 'Imputation'
+      DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]) <- 
         rv.custom$params.tmp
       
       
@@ -358,7 +356,8 @@ PipelineProtein_Imputation_server <- function(id,
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      download_dataset_server('createQuickLink', data = reactive({rv.custom$dataIn2}))
+      download_dataset_server('createQuickLink', 
+        data = reactive({rv.custom$dataIn2}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------
