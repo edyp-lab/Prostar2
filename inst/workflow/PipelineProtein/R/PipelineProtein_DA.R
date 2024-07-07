@@ -131,7 +131,8 @@ PipelineProtein_DA_server <- function(id,
     dataToAnalyze = NULL,
     Condition1 = NULL,
     Condition2 = NULL, 
-    history = list()
+    history = list(),
+    step1_query = '-'
   )
   
   grey <- "#FFFFFF"
@@ -234,8 +235,10 @@ PipelineProtein_DA_server <- function(id,
       #browser()
       
       # Get logfc threshold from Hypothesis test dataset
-      if(!is.null(paramshistory(rv$dataIn[[length(rv$dataIn)]])$thlogfc))
-        rv.custom$thlogfc <- paramshistory(rv$dataIn[[length(rv$dataIn)]])$thlogfc
+      .se <- rv$dataIn[[length(rv$dataIn)]]
+      .thlogfc <- paramshistory(.se)[['HypothesisTest']]$thlogfc
+      if(!is.null(.thlogfc))
+        rv.custom$thlogfc <- .thlogfc
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -249,7 +252,7 @@ PipelineProtein_DA_server <- function(id,
     Get_Dataset_to_Analyze <- reactive({
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
       datasetToAnalyze <- NULL
-
+      
       .split <- strsplit(
         as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
       )
@@ -267,19 +270,6 @@ PipelineProtein_DA_server <- function(id,
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
         Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
       } else {
-        # condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
-        # condition2 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][2]
-        # 
-        # if (substr(condition1, 1, 1) == "(" &&
-        #     substr(condition1, nchar(condition1), nchar(condition1)) == ")") {
-        #   condition1 <- sub("^.(.*).$", "\\1", condition1)
-        # }
-        # 
-        # if (substr(condition2, 1, 1) == "(" &&
-        #     substr(condition2, nchar(condition2), nchar(condition2)) == ")") {
-        #   condition2 <- sub("^.(.*).$", "\\1", condition2)
-        # }
-        
         ind <- c(
           which(omXplore::get_group(rv$dataIn) == rv.custom$Condition1),
           which(omXplore::get_group(rv$dataIn) == rv.custom$Condition2)
@@ -290,8 +280,6 @@ PipelineProtein_DA_server <- function(id,
         # One need the quantitative
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]][, ind]
       }
-      
-      
       
       .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
       .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
@@ -352,7 +340,7 @@ PipelineProtein_DA_server <- function(id,
     
     Get_Pairwisecomparison_Names <- reactive({
       req(rv.custom$res_AllPairwiseComparisons)
-    
+      
       .names <- colnames(rv.custom$res_AllPairwiseComparisons)
       .names <- gsub('_logFC', '', .names, fixed = TRUE)
       .names <- gsub('_pval', '', .names, fixed = TRUE)
@@ -401,17 +389,17 @@ PipelineProtein_DA_server <- function(id,
     
     
     #  req(GetComparisons())
-     # req(rv.custom$dataToAnalyze)
-      
-      Prostar2::mod_volcanoplot_server(
-        id = "Pairwisecomparison_volcano",
-        dataIn = reactive({Get_Dataset_to_Analyze()}),
-        comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
-        group = reactive({omXplore::get_group(rv$dataIn)}),
-        thlogfc = reactive({rv.custom$thlogfc}),
-        tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
-        remoteReset = reactive({remoteReset()})
-      )
+    # req(rv.custom$dataToAnalyze)
+    
+    Prostar2::mod_volcanoplot_server(
+      id = "Pairwisecomparison_volcano",
+      dataIn = reactive({Get_Dataset_to_Analyze()}),
+      comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
+      group = reactive({omXplore::get_group(rv$dataIn)}),
+      thlogfc = reactive({rv.custom$thlogfc}),
+      tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
+      remoteReset = reactive({remoteReset()})
+    )
     #})
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
@@ -450,7 +438,7 @@ PipelineProtein_DA_server <- function(id,
       content = "Infos to be displayed in the tooltip of volcanoplot"
     )
     
-
+    
     MagellanNTK::mod_popover_for_help_server("modulePopover_pushPVal",
       title = h3("Push p-value"),
       content = "This functionality is useful in case of multiple pairwise comparisons 
@@ -537,6 +525,9 @@ PipelineProtein_DA_server <- function(id,
         n <- length(rv.custom$resAnaDiff$P_Value)
         rv.custom$pushed <- seq(n)[indices_to_push]
         
+        rv.custom$step1_query <- rv.custom$AnaDiff_indices()$value$ll.query
+        
+        
       }
     })
     
@@ -569,7 +560,8 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$Pairwisecomparison_btn_validate, {
       #UpdateCompList()
-      rv.custom$history[['Push pval query']] <- rv.custom$AnaDiff_indices()$value$ll.query
+     
+      rv.custom$history[['Push pval query']] <- rv.custom$step1_query
       rv.custom$history[['Comparison']] <- GetComparisons()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
@@ -918,7 +910,7 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-
+    
     output$calibrationPlotAll <- renderImage(
       {
         outfile <- tempfile(fileext = ".png")
@@ -1385,13 +1377,10 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$FDR_btn_validate, {
       
-      
-      rv.custom$history[['FDR']] <- Get_FDR()
+      rv.custom$history[['th pval']] <- rv.custom$thpval
+      rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
       rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
-      
-      
-      
-      
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["FDR"] <- stepStatus$VALIDATED
