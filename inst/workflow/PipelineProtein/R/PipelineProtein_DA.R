@@ -968,13 +968,11 @@ PipelineProtein_DA_server <- function(id,
       
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
-      rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
-      rv.custom$history[['Uniformity underestimation']] <- rv.custom$calibrationRes$unif.under
-      rv.custom$history[['Non-DA protein proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
-      rv.custom$history[['DA protein concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
-      
-      browser()
-      
+      # rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
+      # rv.custom$history[['Uniformity underestimation']] <- rv.custom$calibrationRes$unif.under
+      # rv.custom$history[['Non-DA protein proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
+      # rv.custom$history[['DA protein concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
+      # 
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Pvaluecalibration"] <- stepStatus$VALIDATED
