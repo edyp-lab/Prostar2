@@ -728,7 +728,7 @@ PipelineProtein_DA_server <- function(id,
         rv.custom$calibrationRes$unif.under, "<br><br><hr>",
         sep = ""
       )
-      
+       
       
       
       HTML(txt)
@@ -964,6 +964,8 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(input$Pvaluecalibration_btn_validate, {
       
       
+      
+      
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
       rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
@@ -971,9 +973,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$history[['Non-DA protein proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
       rv.custom$history[['DA protein concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
       
-      
-      
-      
+      browser()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -1102,10 +1102,18 @@ PipelineProtein_DA_server <- function(id,
       #     sep = ""
       # )
       
+      rv.custom$history[['Total number']] <- A
+      rv.custom$history[['Total remaining after push p-values']] <- B
+      rv.custom$history[['Number of selected']] <- C
+      rv.custom$history[['Number of non selected']] <- D
+      
+      
+      
       div(id="bloc_page",
         style = "background-color: lightgrey; width: 300px",
         p(paste("Total number of ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
-        tags$em(p(style = "padding:0 0 0 20px;", paste("Total remaining after push p-values = ", B, sep=''))),
+        tags$em(p(style = "padding:0 0 0 20px;", 
+          paste("Total remaining after push p-values = ", B, sep=''))),
         p(paste("Number of selected ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
         p(paste("Number of non selected ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", D, sep = ''))
       )
@@ -1380,6 +1388,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$history[['th pval']] <- rv.custom$thpval
       rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
       rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
+
 
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
