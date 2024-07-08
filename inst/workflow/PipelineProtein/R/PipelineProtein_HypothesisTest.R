@@ -347,7 +347,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       print('titi')
       print(as.data.frame(rv.custom$AllPairwiseComp$logFC)[1, 1])
-      print(colnames(rv.custom$AllPairwiseComp$logFC))
+      
       withProgress(message = "Computing plot...", detail = "", value = 0.5, {
         
         DaparToolshed::hc_logFC_DensityPlot(
@@ -360,7 +360,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     output$showConds <- renderUI({
-      req(rv.custom$AllPairwiseComp)
+      #req(rv.custom$AllPairwiseComp)
       .style <- "align: center; display:inline-block; vertical-align: middle;
       padding-right: 50px; padding-bottom: 50px;"
       
@@ -375,7 +375,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
           div(style = .style, p(gsub("[()]", "", ll.conds[1]))),
           div(style = .style, p(gsub("[()]", "", ll.conds[3]))),
           div(style = .style,
-            checkboxInput(ns(paste0("compswap", i)), "")
+            checkboxInput(ns(paste0("compswap", i)), "",
+              value = rv.custom$swap.history[i])
           )
         )
       })
