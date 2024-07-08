@@ -244,9 +244,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
                 uiOutput(ns("HypothesisTest_swapConds_ui"))
               )
             ),
-            div(style = .style,
-              uiOutput(ns("HypothesisTest_perform_btn_ui"))
-            ),
+            # div(style = .style,
+            #   uiOutput(ns("HypothesisTest_perform_btn_ui"))
+            # ),
             
             
             
@@ -332,13 +332,49 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     
-    output$HypothesisTest_perform_btn_ui <- renderUI({
-      widget <- actionButton(ns("HypothesisTest_perform_btn"),
-        "Compute log FC plot",
-        class = actionBtnClass
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
-    })
+    observeEvent(
+      c(
+        req(rv.widgets$HypothesisTest_method != 'None'), 
+        req(rv.widgets$HypothesisTest_design != 'None')
+      ), {
+        req(rv$dataIn)
+        print('In observe')
+        
+        rv.widgets$HypothesisTest_thlogFC <- as.numeric(
+          rv.widgets$HypothesisTest_thlogFC)
+        
+        rv.custom$history[['HypothesisTest']][['HypothesisTest_thlogFC']] <- rv.widgets$HypothesisTest_thlogFC
+        #browser()
+        rv.custom$AllPairwiseComp <- ComputeComparisons()
+        
+        if(is.null(rv.custom$AllPairwiseComp)){} 
+        else if(inherits(rv.custom$AllPairwiseComp, "try-error")) {
+          
+          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
+            text = rv.custom$AllPairwiseComp[[1]],
+            type = 'error' )
+        } else {
+          # sendSweetAlert(
+          #   session = session,
+          #   title = "Success",
+          #   type = "success"
+          # )
+          
+          rv.custom$n <- ncol(rv.custom$AllPairwiseComp$logFC)
+          rv.custom$swap.history <- rep(0, rv.custom$n)
+        }
+        # })
+        
+      })
+    
+    # 
+    # output$HypothesisTest_perform_btn_ui <- renderUI({
+    #   widget <- actionButton(ns("HypothesisTest_perform_btn"),
+    #     "Compute log FC plot",
+    #     class = actionBtnClass
+    #   )
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
+    # })
     
     
     output$FoldChangePlot <- highcharter::renderHighchart({
@@ -360,11 +396,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     output$showConds <- renderUI({
-      #req(rv.custom$AllPairwiseComp)
+      req(rv.custom$AllPairwiseComp)
       .style <- "align: center; display:inline-block; vertical-align: middle;
       padding-right: 50px; padding-bottom: 50px;"
-      
-      print('In showConds <- renderUI')
       
       widget <- lapply(seq_len(rv.custom$n), function(i) {
         ll.conds <- unlist(
@@ -388,16 +422,10 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     observeEvent(GetSwapShinyValue(), ignoreInit = TRUE,{
-      
-      #swap <- GetSwapShinyValue()
-      print(GetSwapShinyValue())
-      #isolate({
       ind.swap <- which(GetSwapShinyValue() != rv.custom$swap.history)
       
       req(length(ind.swap) > 0)
       rv.custom$swap.history <- GetSwapShinyValue()
-      print(paste0('ind.swap = ', ind.swap))
-      #browser()
       #if (length(ind.swap) > 0) {
       # for (i in ind.swap) {
       current.comp <- colnames(rv.custom$AllPairwiseComp$logFC)[ind.swap]
@@ -406,11 +434,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
       ll <- unlist(strsplit(current.comp, split = "_"))
       tmp.cond1 <- gsub("[( )]", "", ll[1])
       tmp.cond2 <- gsub("[( )]", "", ll[3])
-      tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
-      tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
-      # 
-      #tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
-      #tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
+      #tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
+      #tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
+       
+      tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
+      tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
       
       colnames(rv.custom$AllPairwiseComp$logFC)[ind.swap] <- tmp.logFC
       colnames(rv.custom$AllPairwiseComp$P_Value)[ind.swap] <- tmp.pval
@@ -418,9 +446,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       # Swap logFC values
       .logFC <- rv.custom$AllPairwiseComp$logFC
       rv.custom$AllPairwiseComp$logFC[, ind.swap] <- -.logFC[, ind.swap]
-      # }
-      #}
-      #})
     })
     
     GetSwapShinyValue <- reactive({
@@ -437,9 +462,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
     ComputeComparisons <- reactive({
       req(rv.widgets$HypothesisTest_method != "None")
       req(rv.widgets$HypothesisTest_design != "None")
+      if (rv.widgets$HypothesisTest_method == 'ttests')
+        req(rv.widgets$HypothesisTest_ttestOptions != "None")
       
-      #browser()
-      print('In ComputeComparisons()')
       m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing",
         level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]))
@@ -454,8 +479,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
             sTab = MultiAssayExperiment::colData(rv$dataIn),
             comp.type = rv.widgets$HypothesisTest_design
           )
-          
-          
         },
         ttests = {
           DaparToolshed::compute_t_tests(
@@ -464,7 +487,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
             contrast = rv.widgets$HypothesisTest_design,
             type = rv.widgets$HypothesisTest_ttestOptions
           )
-          rv.custom$history[['HypothesisTest']][['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
           
         }
       )
@@ -472,6 +494,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       rv.custom$history[['HypothesisTest']][['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
       rv.custom$history[['HypothesisTest']][['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
+      if (rv.widgets$HypothesisTest_method == 'ttests')
+        rv.custom$history[['HypothesisTest']][['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
       
       
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
@@ -483,11 +507,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv.widgets$HypothesisTest_design,
       rv.widgets$HypothesisTest_ttestOptions
     )
-    
-    
-    
-    
-    
     
     
     output$HypothesisTest_btn_validate_ui <- renderUI({
@@ -546,40 +565,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     # >>> END: Definition of the widgets
     
-    observeEvent(
-      c(
-        req(rv.widgets$HypothesisTest_method != 'None'), 
-        req(rv.widgets$HypothesisTest_design != 'None')
-      ), {
-        req(rv$dataIn)
-        print('In observe')
-        
-        rv.widgets$HypothesisTest_thlogFC <- as.numeric(
-          rv.widgets$HypothesisTest_thlogFC)
-        
-        rv.custom$history[['HypothesisTest']][['HypothesisTest_thlogFC']] <- rv.widgets$HypothesisTest_thlogFC
-        #browser()
-        rv.custom$AllPairwiseComp <- ComputeComparisons()
-        
-        if(is.null(rv.custom$AllPairwiseComp)){} 
-        else if(inherits(rv.custom$AllPairwiseComp, "try-error")) {
-          
-          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
-            text = rv.custom$AllPairwiseComp[[1]],
-            type = 'error' )
-        } else {
-          # sendSweetAlert(
-          #   session = session,
-          #   title = "Success",
-          #   type = "success"
-          # )
-          
-          rv.custom$n <- ncol(rv.custom$AllPairwiseComp$logFC)
-          rv.custom$swap.history <- rep(0, rv.custom$n)
-        }
-        # })
-        
-      })
+    
     
     # <<< END ------------- Code for step 1 UI---------------
     
