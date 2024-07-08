@@ -335,7 +335,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
     observeEvent(
       c(
         req(rv.widgets$HypothesisTest_method != 'None'), 
-        req(rv.widgets$HypothesisTest_design != 'None')
+        req(rv.widgets$HypothesisTest_design != 'None'),
+        if (rv.widgets$HypothesisTest_method == 'ttests')
+          req(rv.widgets$HypothesisTest_ttestOptions != "None")
       ), {
         req(rv$dataIn)
         print('In observe')
@@ -378,7 +380,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     output$FoldChangePlot <- highcharter::renderHighchart({
-      #req(rv.custom$AllPairwiseComp$logFC)
+      req(rv.custom$AllPairwiseComp$logFC)
       #
       
       print('titi')
