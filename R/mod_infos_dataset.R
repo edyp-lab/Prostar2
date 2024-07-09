@@ -225,9 +225,9 @@ MagellanNTK::format_DT_server('dt',
       .se <- rv$dataIn[[input$selectInputSE]]
       #.name <- names(rv$dataIn)
       se_history <- '-'
-     
+  
       if (!is.null(paramshistory(.se))){
-        se_history <- lapply(paramshistory(.se)[[1]], function(x) 
+        se_history <- lapply(paramshistory(.se), function(x) 
           ConvertListToHtml(paste0(names(x), ' = ', x))
           )
         
