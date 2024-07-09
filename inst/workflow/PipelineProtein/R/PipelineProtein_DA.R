@@ -254,7 +254,7 @@ PipelineProtein_DA_server <- function(id,
     Get_Dataset_to_Analyze <- reactive({
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
       datasetToAnalyze <- NULL
-      
+      print('In Get_Dataset_to_Analyze()......')
       .split <- strsplit(
         as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
       )
@@ -290,8 +290,7 @@ PipelineProtein_DA_server <- function(id,
         logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
         P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
         condition1 = rv.custom$Condition1,
-        condition2 = rv.custom$Condition2,
-        pushed = NULL
+        condition2 = rv.custom$Condition2
       )
       
       datasetToAnalyze
@@ -523,13 +522,13 @@ PipelineProtein_DA_server <- function(id,
         
         HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
         rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+        rv.custom$history[['Number of pushed values to 1']] <- length(indices_to_push)
         
         n <- length(rv.custom$resAnaDiff$P_Value)
         rv.custom$pushed <- seq(n)[indices_to_push]
-        
+        rv.custom$resAnaDiff$pushed <- length(indices_to_push)
         rv.custom$step1_query <- rv.custom$AnaDiff_indices()$value$ll.query
-        
-        
+
       }
     })
     
@@ -1091,7 +1090,7 @@ PipelineProtein_DA_server <- function(id,
       ## Condition: A = C + D
       ##
       A <- rv.custom$nbTotalAnaDiff
-      B <- A - length(rv.custom$resAnaDiff$pushed)
+      B <- A - length(rv.custom$pushed)
       C <- rv.custom$nbSelectedAnaDiff
       D <- ( A - C)
       # 
@@ -1106,7 +1105,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$history[['Total remaining after push p-values']] <- B
       rv.custom$history[['Number of selected']] <- C
       rv.custom$history[['Number of non selected']] <- D
-      
+      browser()
       
       
       div(id="bloc_page",
