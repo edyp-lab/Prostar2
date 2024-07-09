@@ -184,9 +184,12 @@ mod_Variable_Filtering_server <- function(id,
 
       i <- length(rv$dataIn)
   
-      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Variable_Filtering']]
-      .history <- append(.history, rv.custom$funFilter()$value$ll.query)
-      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Variable_Filtering']] <- .history
+      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Variable_Filtering']]
+      #.history <- append(.history, rv.custom$funFilter()$value$ll.query)
+      query <- rv.custom$funFilter()$value$ll.query
+      .history[[paste0('query_', length(.history))]] <- query
+      
+      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Variable_Filtering']] <- .history
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 

@@ -230,10 +230,10 @@ mod_Metacell_Filtering_server <- function(id,
       par <- rv.custom$funFilter()$value$ll.widgets.value
       query <- rv.custom$funFilter()$value$ll.query
       i <- length(rv$dataIn)
-      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Metacell_Filtering']]
+      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
       
-      .history <- append(.history, query)
-      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Filtering']][['Metacell_Filtering']] <- .history
+      .history[[paste0('query_', length(.history))]] <- query
+      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
       
 
       dataOut$trigger <- MagellanNTK::Timestamp()

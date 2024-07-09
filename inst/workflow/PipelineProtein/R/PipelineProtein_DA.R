@@ -240,6 +240,8 @@ PipelineProtein_DA_server <- function(id,
       if(!is.null(.thlogfc))
         rv.custom$thlogfc <- .thlogfc
       
+      paramshistory(.se) <- NULL
+      
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
@@ -268,7 +270,7 @@ PipelineProtein_DA_server <- function(id,
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
         ind_virtual_cond2 <- which(.conds != condition1)
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
-        Biobase::pData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
+        #colData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
       } else {
         ind <- c(
           which(omXplore::get_group(rv$dataIn) == rv.custom$Condition1),
@@ -1425,7 +1427,9 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       
-      paramshistory(rv$dataIn[[length(rv$dataIn)]])[['DA']] <- rv.custom$history
+      last.se <- length(rv$dataIn)
+      paramshistory(rv$dataIn[[last.se]]) <- NULL
+      paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()

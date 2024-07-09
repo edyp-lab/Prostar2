@@ -47,8 +47,8 @@ mod_VariableFilter_Generator_ui <- function(id) {
     div(
       div(style = .style, uiOutput(ns("chooseKeepRemove_ui"))),
       div(style = .style, uiOutput(ns("cname_ui"))),
-      div(style = .style, uiOutput(ns("value_ui"))),
-      div(style = .style, uiOutput(ns("operator_ui")))
+      div(style = .style, uiOutput(ns("operator_ui"))),
+      div(style = .style, uiOutput(ns("value_ui")))
       ),
     uiOutput(ns("addFilter_btn_ui")),
     # Show example

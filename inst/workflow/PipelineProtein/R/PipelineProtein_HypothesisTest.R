@@ -493,10 +493,10 @@ PipelineProtein_HypothesisTest_server <- function(id,
       )
       
       
-      rv.custom$history[['HypothesisTest']][['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
-      rv.custom$history[['HypothesisTest']][['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
+      rv.custom$history[['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
+      rv.custom$history[['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
       if (rv.widgets$HypothesisTest_method == 'ttests')
-        rv.custom$history[['HypothesisTest']][['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
+        rv.custom$history[['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
       
       
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
@@ -601,8 +601,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       df <- cbind(rv.custom$AllPairwiseComp$logFC, 
         rv.custom$AllPairwiseComp$P_Value)
       DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
-      rv.custom$history[['HypothesisTest']][['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
+      rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
       
+      paramshistory(new.dataset) <- NULL
       paramshistory(new.dataset) <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')

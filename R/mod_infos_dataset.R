@@ -223,15 +223,20 @@ MagellanNTK::format_DT_server('dt',
       
       
       .se <- rv$dataIn[[input$selectInputSE]]
-      
+      #.name <- names(rv$dataIn)
       se_history <- '-'
      
       if (!is.null(paramshistory(.se))){
-        se_history <- lapply(paramshistory(.se), function(x) 
-          toString(x))
+        se_history <- lapply(paramshistory(.se)[[1]], function(x) 
+          ConvertListToHtml(paste0(names(x), ' = ', x))
+          )
+        
+        #se_history_values <- lapply(paramshistory(.se), function(x) x)
 
-      data.frame(Name = names(se_history), 
-        History = unlist(se_history))
+      data.frame(
+        Name = names(se_history), 
+        History = unlist(se_history)
+        )
       } else {
         data.frame(Name = '-', 
           History = '-')

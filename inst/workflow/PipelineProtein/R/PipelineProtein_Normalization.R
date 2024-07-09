@@ -554,7 +554,8 @@ PipelineProtein_Normalization_server <- function(id,
       
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]
       assay(new.dataset) <- rv.custom$tmp.dataset
-      paramshistory(new.dataset)[['Normalization']] <- rv.custom$history
+      paramshistory(new.dataset) <- NULL
+      paramshistory(new.dataset) <- rv.custom$history
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
