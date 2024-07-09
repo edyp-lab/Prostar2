@@ -1105,7 +1105,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$history[['Total remaining after push p-values']] <- B
       rv.custom$history[['Number of selected']] <- C
       rv.custom$history[['Number of non selected']] <- D
-      browser()
+     
       
       
       div(id="bloc_page",
