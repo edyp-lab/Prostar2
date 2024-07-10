@@ -336,11 +336,11 @@ PipelineProtein_Normalization_server <- function(id,
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
         conds = omXplore::get_group(rv$dataIn),
         pal = NULL,
-        # Consider only 20% of the entire dataset
+        # Consider only 2% of the entire dataset
         n = if (!is.null(selectProt())) {
           length(selectProt())
         } else {
-          floor(0.2 * nrow(SummarizedExperiment::assay(obj1)))
+          floor(0.02 * nrow(SummarizedExperiment::assay(obj1)))
         },
         subset.view = if (!is.null(selectProt())) {
           selectProt()
