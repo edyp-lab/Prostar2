@@ -10,32 +10,11 @@
 #' - 'Random': xxx,
 #' - 'Specific column': xxx
 #'
-#' @name tracking
+#' @name mod_tracker
 #'
-#' @examples
-#' if (interactive()) {
-#'     ui <- tagList(
-#'         mod_tracker_ui("track"),
-#'         uiOutput("show")
-#'     )
-#'
-#'     server <- function(input, output, session) {
-#'         rv <- reactiveValues(
-#'             tmp = NULL
-#'         )
-#'
-#'         rv$tmp <- mod_tracker_server(
-#'             id = "track",
-#'             object = reactive({
-#'                 ft[[1]]
-#'             })
-#'         )
-#'
-#'         output$show <- renderUI({
-#'             p(paste0(rv$tmp(), collapse = " "))
-#'         })
-#'     }
-#'     shinyApp(ui = ui, server = server)
+#' @examplesIf interactive()
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' shiny::runApp(mod_tracker(Exp1_R25_prot))
 #' }
 NULL
 
@@ -46,7 +25,7 @@ NULL
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs useShinyjs hidden
 #'
-#' @rdname tracking
+#' @rdname mod_tracker
 #'
 #' @return NA
 #'
@@ -55,7 +34,6 @@ mod_tracker_ui <- function(id) {
 
     tagList(
         useShinyjs(),
-        actionButton(ns("rst_btn"), "Reset"),
         uiOutput(ns("typeSelect_ui")),
         uiOutput(ns("listSelect_ui")),
         uiOutput(ns("randSelect_ui")),
@@ -66,7 +44,7 @@ mod_tracker_ui <- function(id) {
 #' @param id xxx
 #' @param object A instance of the class `SummarizedExperiment`
 #'
-#' @rdname tracking
+#' @rdname mod_tracker
 #'
 #' @export
 #'
@@ -75,23 +53,55 @@ mod_tracker_ui <- function(id) {
 #' @return A `list()` of integers
 #'
 mod_tracker_server <- function(id,
-    object, 
-  remoteReset = reactive({NULL}),
+    object = reactive({NULL}), 
+    remoteReset = reactive({NULL}),
     is.enabled = reactive({TRUE})
   ) {
+  
+  
+  
+  widgets.default.values <- list(
+    typeSelect = "None",
+    listSelect = NULL,
+    randSelect = NULL,
+    colSelect = 'None'
+  )
+  
+  rv.custom.default.values <- list(
+    #indices = NULL
+  )
+  
+  
     moduleServer(id, function(input, output, session) {
         ns <- session$ns
 
-        rv.track <- reactiveValues(
-            typeSelect = "None",
-            listSelect = NULL,
-            randSelect = "",
-            colSelect = NULL,
-            indices = NULL
+        eval(
+          str2expression(
+            MagellanNTK::Get_AdditionalModule_Core_Code(
+              w.names = names(widgets.default.values),
+              rv.custom.names = names(rv.custom.default.values)
+            )
+          )
         )
-
         
-        observeEvent(req(remoteReset()), {
+        observeEvent(object(), {
+          
+          req(inherits(object(), 'SummarizedExperiment'))
+        
+          rv$dataIn <- object()
+          
+          dataOut$trigger <- Timestamp()
+          dataOut$value <- NULL
+        }, priority = 1000)
+        
+        observeEvent(remoteReset(), ignoreInit = FALSE, ignoreNULL = TRUE, {
+          lapply(names(rv.widgets), function(x){
+            rv.widgets[[x]] <- widgets.default.values[[x]]
+          })
+          
+          lapply(names(rv.custom), function(x){
+            rv.custom[[x]] <- rv.custom.default.values[[x]]
+          })
           
         })
 
@@ -99,119 +109,137 @@ mod_tracker_server <- function(id,
             tmp <- c("None", "ProteinList", "Random", "Column")
             nm <- c("None", "Protein list", "Random", "Specific Column")
 
-            selectInput(ns("typeSelect"),
+            widget <- selectInput(ns("typeSelect"),
                 "Type of selection",
                 choices = stats::setNames(tmp, nm),
-                selected = rv.track$typeSelect,
+                selected = rv.widgets$typeSelect,
                 width = "130px"
             )
+            
+            MagellanNTK::toggleWidget(widget, is.enabled())
         })
 
 
         output$listSelect_ui <- renderUI({
-            widget <- selectInput(ns("listSelect"),
+          req(rv$dataIn)
+          req(rv.widgets$typeSelect == "ProteinList")
+
+          widget <- selectInput(ns("listSelect"),
                 "Select protein",
-                choices = c("None", rowData(object())[, idcol(object())]),
-                multiple = TRUE,
-                selected = rv.track$listSelect,
-                width = "200px",
-                # size = 10,
-                selectize = TRUE
+              choices = setNames(nm = rowData(rv$dataIn)[, omXplore::get_colID(rv$dataIn)]),
+            multiple = TRUE,
+            selected = rv.widgets$listSelect,
+            width = "200px",
+            selectize = TRUE
             )
 
-            if (rv.track$typeSelect == "ProteinList") {
-                widget
-            } else {
-                hidden(widget)
-            }
+            MagellanNTK::toggleWidget(widget, is.enabled())
         })
+        
+        
+        # observeEvent(req(rv.widgets$typeSelect == "ProteinList"), {
+        #   browser()
+        #   updateSelectizeInput(session = session, 
+        #     inputId = 'listSelect', 
+        #     choices = setNames(nm = rowData(rv$dataIn)[, omXplore::get_colID(rv$dataIn)]), 
+        #     server = TRUE,
+        #     
+        #     selected = rv.widgets$colSelect
+        #   )
+        # }, once = TRUE)
 
         output$colSelect_ui <- renderUI({
+          req(rv$dataIn)
+          req(rv.widgets$typeSelect == "Column")
+       
             widget <- selectInput(ns("colSelect"),
                 "Column of rowData",
-                choices = c("", colnames(rowData(object()))),
-                selected = rv.track$colSelect
+                choices = setNames(nm = c("None", colnames(rowData(rv$dataIn)))),
+                selected = rv.widgets$colSelect
             )
-            if (rv.track$typeSelect == "Column") {
-                widget
-            } else {
-                hidden(widget)
-            }
+
+            MagellanNTK::toggleWidget(widget, is.enabled())
         })
 
         output$randSelect_ui <- renderUI({
+          req(rv.widgets$typeSelect == "Random")
+          
             widget <- textInput(ns("randSelect"),
                 "Random",
-                value = rv.track$randSelect,
+                value = rv.widgets$randSelect,
                 width = ("120px")
             )
-            if (rv.track$typeSelect == "Random") {
-                widget
-            } else {
-                hidden(widget)
-            }
-        })
-
-        observeEvent(req(input$typeSelect), {
-            rv.track$typeSelect <- input$typeSelect
+            MagellanNTK::toggleWidget(widget, is.enabled())
         })
 
 
-        observeEvent(input$rst_btn, {
-            rv.track$typeSelect <- "None"
-            rv.track$listSelect <- NULL
-            rv.track$randSelect <- ""
-            rv.track$colSelect <- NULL
-            rv.track$indices <- NULL
-        })
 
         # Catch event on the list selection
-        observeEvent(input$listSelect, {
-            rv.track$listSelect <- input$listSelect
-            rv.track$randSelect <- ""
-            rv.track$colSelect <- ""
-
-            if (is.null(rv.track$listSelect)) {
-                rv.track$indices <- NULL
-            } else {
-                rv.track$indices <- match(rv.track$listSelect, 
-                    rowData(object())[[idcol(object())]])
-            }
+        observeEvent(rv.widgets$listSelect, {
+          req(rv$dataIn)
+          
+          dataOut$trigger <- Timestamp()
+          dataOut$value <- match(rv.widgets$listSelect, 
+                    rowData(rv$dataIn)[[omXplore::get_colID(rv$dataIn)]])
         })
 
 
+        observeEvent(rv.widgets$randSelect, {
+          req(rv$dataIn)
 
-
-
-        observeEvent(input$randSelect, {
-            rv.track$randSelect <- input$randSelect
-            rv.track$listSelect <- NULL
-            rv.track$colSelect <- NULL
-            cond <- is.null(rv.track$randSelect)
-            cond <- cond || rv.track$randSelect == ""
-            cond <- cond || (as.numeric(rv.track$randSelect) < 0)
-            cond <- cond || (as.numeric(rv.track$randSelect) > nrow(object()))
+            cond <- is.null(rv.widgets$randSelect)
+            cond <- cond || rv.widgets$randSelect == ""
+            cond <- cond || (as.numeric(rv.widgets$randSelect) < 0)
+            cond <- cond || (as.numeric(rv.widgets$randSelect) > nrow(rv$dataIn))
             if (!cond) {
-                rv.track$indices <- sample(seq_len(nrow(object())),
-                    as.numeric(rv.track$randSelect),
+              dataOut$trigger <- Timestamp()
+              dataOut$value <- sample(seq_len(nrow(rv$dataIn)),
+                    as.numeric(rv.widgets$randSelect),
                     replace = FALSE
                 )
             }
         })
 
-        observeEvent(input$colSelect, {
-            rv.track$colSelect <- input$colSelect
-            rv.track$listSelect <- NULL
-            rv.track$randSelect <- ""
+        observeEvent(rv.widgets$colSelect, {
+           req(rv.widgets$colSelect != "None")
 
-            if (rv.track$colSelect != "") {
-                .op1 <- rowData(object())[, rv.track$colSelect]
-                rv.track$indices <- which( .op1 == 1)
-            }
+          .op1 <- rowData(rv$dataIn)[, rv.widgets$colSelect]
+          dataOut$trigger <- Timestamp()
+          dataOut$value <- which( .op1 == 1)
         })
 
-        return(reactive({
-            rv.track$indices
-        }))
+        return(reactive({dataOut}))
     })
+}
+
+
+
+#' @export
+#' @rdname mod_tracker
+#' 
+mod_tracker <- function(obj){
+  
+ui <- fluidPage(
+  actionButton("rst_btn", "Reset"),
+  mod_tracker_ui("track"),
+        uiOutput("show")
+    )
+
+server <- function(input, output, session) {
+       
+  rv <- reactiveValues(
+    res = reactive({NULL})
+  )
+  rv$res <- mod_tracker_server(
+             id = "track",
+              object = reactive({obj}),
+    remoteReset = reactive({input$rst_btn})
+          )
+          
+          observeEvent(rv$res()$trigger, {
+            #browser()
+            print(rv$res()$value)
+          })
+     }
+     app <- shiny::shinyApp(ui = ui, server = server)
 }

@@ -208,7 +208,7 @@ mod_Prot_Imputation_POV_server <- function(id,
     output$mod_Prot_Imputation_POV_btn_validate_ui <- renderUI({
 
       widget <- actionButton(ns("mod_Prot_Imputation_POV_btn_validate"),
-        "Perform POV imputation", class = "btn-success")
+        "validate step", class = "btn-success")
       
       MagellanNTK::toggleWidget(widget, is.enabled())
     })

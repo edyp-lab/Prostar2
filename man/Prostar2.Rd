@@ -4,7 +4,7 @@
 \alias{Prostar2}
 \title{xxx}
 \usage{
-Prostar2(wf.name)
+Prostar2(wf.name, usermod = "user", verbose = FALSE)
 }
 \description{
 xxxx

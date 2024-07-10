@@ -157,6 +157,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
+      
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
@@ -322,10 +323,10 @@ PipelineProtein_Normalization_server <- function(id,
 
     
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
-      req(rv.custom$tmp.dataset)
+      req(length(rv$dataIn) > 1)
       req(rv$dataIn)
       obj1 <- rv$dataIn[[length(rv$dataIn)]]
-      obj2 <- rv.custom$tmp.dataset
+      obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
 
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
       
@@ -408,9 +409,8 @@ PipelineProtein_Normalization_server <- function(id,
       # Do some stuff 
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
-
       
-      .tmp <- NULL
+      rv.custom$tmpAssay <- NULL
       try({
         .conds <- colData(rv$dataIn)[, "Condition"]
         qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
@@ -418,11 +418,11 @@ PipelineProtein_Normalization_server <- function(id,
         switch(rv.widgets$Normalization_method,
           
           G_noneStr = {
-            .tmp <- rv$dataIn[[length(rv$dataIn)]]
+            rv.custom$tmpAssay <- rv$dataIn[[length(rv$dataIn)]]
             },
           
           GlobalQuantileAlignment = {
-            .tmp <- DaparToolshed::GlobalQuantileAlignment(qdata)
+            rv.custom$tmpAssay <- DaparToolshed::GlobalQuantileAlignment(qdata)
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             
           },
@@ -433,7 +433,7 @@ PipelineProtein_Normalization_server <- function(id,
               quant <- as.numeric(rv.widgets$Normalization_quantile)
             }
             
-            .tmp <- DaparToolshed::QuantileCentering(
+            rv.custom$tmpAssay <- DaparToolshed::QuantileCentering(
               qData = qdata, 
               conds = .conds, 
               type = rv.widgets$Normalization_type, 
@@ -449,7 +449,7 @@ PipelineProtein_Normalization_server <- function(id,
           },
           
           MeanCentering = {
-            .tmp <- DaparToolshed::MeanCentering(
+            rv.custom$tmpAssay <- DaparToolshed::MeanCentering(
               qData = qdata, 
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -464,7 +464,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           SumByColumns = {
-            .tmp <- DaparToolshed::SumByColumns(
+            rv.custom$tmpAssay <- DaparToolshed::SumByColumns(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -477,7 +477,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           LOESS = {
-            .tmp <- DaparToolshed::LOESS(
+            rv.custom$tmpAssay <- DaparToolshed::LOESS(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -490,7 +490,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           vsn = {
-            .tmp <- DaparToolshed::vsn(
+            rv.custom$tmpAssay <- DaparToolshed::vsn(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type
@@ -505,16 +505,20 @@ PipelineProtein_Normalization_server <- function(id,
       
       
       
-      if(inherits(.tmp, "try-error")) {
+      if(inherits(rv.custom$tmpAssay, "try-error")) {
         
         MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_normalization',
-          text = .tmp[[1]],
+          text = rv.custom$tmpAssay[[1]],
           type = 'error' )
       } else {
         
         
-        rv.custom$tmp.dataset <- .tmp
-        
+        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
+        assay(new.dataset) <- rv.custom$tmpAssay
+        paramshistory(new.dataset) <- NULL
+        paramshistory(new.dataset) <- rv.custom$history
+        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
+
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- Timestamp()
         dataOut$value <- NULL
@@ -551,12 +555,6 @@ PipelineProtein_Normalization_server <- function(id,
     })
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      
-      new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-      assay(new.dataset) <- rv.custom$tmp.dataset
-      paramshistory(new.dataset) <- NULL
-      paramshistory(new.dataset) <- rv.custom$history
-      rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()

@@ -13,7 +13,9 @@ mod_Variable_Filtering_server(
   obj = reactive({
      NULL
  }),
-  i,
+  i = reactive({
+     1
+ }),
   remoteReset = reactive({
      NULL
  }),
