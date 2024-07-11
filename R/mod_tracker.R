@@ -116,6 +116,12 @@ mod_tracker_server <- function(id,
             tmp <- c("None", "ProteinList", "Random", "Column")
             nm <- c("None", "Protein list", "Random", "Specific Column")
 
+            
+            if (length(Get_LogicalCols_in_Dataset()) > 0)
+              .choices <- c(.choices, "Column" = "Column")
+            
+            
+            
             widget <- selectInput(ns("typeSelect"),
                 "Type of selection",
                 choices = stats::setNames(tmp, nm),
