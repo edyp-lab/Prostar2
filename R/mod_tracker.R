@@ -75,9 +75,12 @@ mod_tracker_server <- function(id,
     moduleServer(id, function(input, output, session) {
         ns <- session$ns
 
-        observe({
+        observeEvent(is.enabled(),{
           print('tytyty')
+          print(is.enabled())
         })
+        
+        
         eval(
           str2expression(
             MagellanNTK::Get_AdditionalModule_Core_Code(
