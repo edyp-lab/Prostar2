@@ -92,13 +92,13 @@ mod_tracker_server <- function(id,
           req(inherits(object(), 'SummarizedExperiment'))
         
           rv$dataIn <- object()
-          print('dataIn in tracker')
+
           dataOut$trigger <- Timestamp()
           dataOut$value <- NULL
         }, priority = 1000)
         
         observeEvent(remoteReset(), ignoreInit = FALSE, ignoreNULL = TRUE, {
-          print('rrrrr')
+         
           lapply(names(rv.widgets), function(x){
             rv.widgets[[x]] <- widgets.default.values[[x]]
           })
@@ -140,17 +140,6 @@ mod_tracker_server <- function(id,
             MagellanNTK::toggleWidget(widget, is.enabled())
         })
         
-        
-        # observeEvent(req(rv.widgets$typeSelect == "ProteinList"), {
-        #   browser()
-        #   updateSelectizeInput(session = session, 
-        #     inputId = 'listSelect', 
-        #     choices = setNames(nm = rowData(rv$dataIn)[, omXplore::get_colID(rv$dataIn)]), 
-        #     server = TRUE,
-        #     
-        #     selected = rv.widgets$colSelect
-        #   )
-        # }, once = TRUE)
 
         output$colSelect_ui <- renderUI({
           req(rv$dataIn)
@@ -225,6 +214,7 @@ mod_tracker <- function(obj){
   
 ui <- fluidPage(
   actionButton("rst_btn", "Reset"),
+  checkboxInput("isEnabled_btn", "Enable/Disable"),
   mod_tracker_ui("track"),
         uiOutput("show")
     )
@@ -237,7 +227,8 @@ server <- function(input, output, session) {
   rv$res <- mod_tracker_server(
              id = "track",
               object = reactive({obj}),
-    remoteReset = reactive({input$rst_btn})
+    remoteReset = reactive({input$rst_btn}),
+    is.enabled = reactive({input$isEnabled_btn})
           )
           
           observeEvent(rv$res()$trigger, {

@@ -243,7 +243,7 @@ PipelineProtein_Normalization_server <- function(id,
       obj = reactive({rv.custom$init.dataset}),
       i = reactive({length(rv.custom$init.dataset)}),
       remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({is.enabled('Normalization')})
+      is.enabled = reactive({rv$steps.enabled['Normalization']})
     )
     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
