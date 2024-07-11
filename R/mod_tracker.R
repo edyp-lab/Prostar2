@@ -75,6 +75,9 @@ mod_tracker_server <- function(id,
     moduleServer(id, function(input, output, session) {
         ns <- session$ns
 
+        observe({
+          print('tytyty')
+        })
         eval(
           str2expression(
             MagellanNTK::Get_AdditionalModule_Core_Code(
@@ -84,17 +87,18 @@ mod_tracker_server <- function(id,
           )
         )
         
-        observeEvent(object(), {
+        observeEvent(req(object()), {
           
           req(inherits(object(), 'SummarizedExperiment'))
         
           rv$dataIn <- object()
-          
+          print('dataIn in tracker')
           dataOut$trigger <- Timestamp()
           dataOut$value <- NULL
         }, priority = 1000)
         
         observeEvent(remoteReset(), ignoreInit = FALSE, ignoreNULL = TRUE, {
+          print('rrrrr')
           lapply(names(rv.widgets), function(x){
             rv.widgets[[x]] <- widgets.default.values[[x]]
           })

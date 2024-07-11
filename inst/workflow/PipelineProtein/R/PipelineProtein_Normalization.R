@@ -86,6 +86,7 @@ PipelineProtein_Normalization_server <- function(id,
   
   rv.custom.default.values <- list(
     tmp.dataset = NULL,
+    init.dataset = NULL,
     history = NULL
   )
   
@@ -157,6 +158,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
+      rv.custom$init.dataset <- dataIn()
       
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
@@ -238,8 +240,8 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     selectProt <- omXplore::plots_tracking_server("tracker",
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
+      obj = reactive({rv.custom$init.dataset}),
+      i = reactive({length(rv.custom$init.dataset)}),
       remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({is.enabled('Normalization')})
     )
@@ -249,7 +251,7 @@ PipelineProtein_Normalization_server <- function(id,
       i = reactive({length(rv$dataIn)}),
       track.indices = reactive({selectProt()}),
       remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({is.enabled('Normalization')})
+      is.enabled = reactive({rv$steps.enabled['Normalization']})
     )
     
     
