@@ -87,7 +87,8 @@ PipelineProtein_Normalization_server <- function(id,
   rv.custom.default.values <- list(
     tmp.dataset = NULL,
     init.dataset = NULL,
-    history = NULL
+    history = NULL,
+    selectProt = reactive({NULL})
   )
   
   ###-------------------------------------------------------------###
@@ -233,28 +234,30 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     
+    # observe({
+    #   req(rv.custom$init.dataset)
+    #   req(rv$dataIn)
+    #   remoteReset()
+      rv.custom$selectProt()$value
     omXplore::omXplore_density_server("density_plot", 
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)})
     )
     
     
-    selectProt <- omXplore::plots_tracking_server(
-      id = "tracker",
-      obj = reactive({rv.custom$init.dataset[[length(rv.custom$init.dataset)]]}),
-      remoteReset = reactive({remoteReset()})
-    )
+   
     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
-      track.indices = reactive({selectProt()$value}),
+      track.indices = reactive({rv.custom$selectProt()$value}),
       remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({!rv$steps.enabled['Normalization']})
     )
     
+    # })
     
-    
+
     # >>> START: Definition of the widgets
     
     # This part must be customized by the developer of a new module
@@ -322,8 +325,16 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
 
+    observe({
+      rv.custom$selectProt <- omXplore::plots_tracking_server(
+        id = "tracker",
+        obj = reactive({rv.custom$init.dataset[[length(rv.custom$init.dataset)]]}),
+        remoteReset = reactive({remoteReset()})
+      )
+    })
+    
     output$tracking <- renderUI({
-      widget <-  plots_tracking_ui(ns("tracker"))
+      widget <-  omXplore::plots_tracking_ui(ns("tracker"))
       toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
@@ -345,13 +356,13 @@ PipelineProtein_Normalization_server <- function(id,
         conds = omXplore::get_group(rv$dataIn),
         pal = NULL,
         # Consider only 2% of the entire dataset
-        n = if (!is.null(selectProt()$value)) {
-          length(selectProt()$value)
+        n = if (!is.null(rv.custom$selectProt()$value)) {
+          length(rv.custom$selectProt()$value)
         } else {
           floor(0.02 * nrow(SummarizedExperiment::assay(obj1)))
         },
-        subset.view = if (!is.null(selectProt()$value)) {
-          selectProt()$value
+        subset.view = if (!is.null(rv.custom$selectProt()$value)) {
+          rv.custom$selectProt()$value
         } else {
           seq(nrow(obj1))
         }
@@ -445,13 +456,13 @@ PipelineProtein_Normalization_server <- function(id,
               qData = qdata, 
               conds = .conds, 
               type = rv.widgets$Normalization_type, 
-              subset.norm = selectProt()$value, 
+              subset.norm = rv.custom$selectProt()$value, 
               quantile = quant)
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_quantile']] <- quant
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$value
+            rv.custom$history[['subset.norm']] <- rv.custom$selectProt()$value
             
             
           },
@@ -462,13 +473,13 @@ PipelineProtein_Normalization_server <- function(id,
               conds = .conds,
               type = rv.widgets$Normalization_type,
               scaling = rv.widgets$Normalization_varReduction,
-              subset.norm = selectProt()$value
+              subset.norm = rv.custom$selectProt()$value
             )
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_varReduction']] <- rv.widgets$Normalization_varReduction
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$value
+            rv.custom$history[['subset.norm']] <- rv.custom$selectProt()$value
             
           },
           SumByColumns = {
@@ -481,7 +492,7 @@ PipelineProtein_Normalization_server <- function(id,
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$value
+            rv.custom$history[['subset.norm']] <- rv.custom$selectProt()$value
             
           },
           LOESS = {
