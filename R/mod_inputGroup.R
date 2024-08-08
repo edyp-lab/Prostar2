@@ -101,7 +101,9 @@ mod_inputGroup_server <- function(
           ),
           div(
             style = "align: center;display:inline-block; vertical-align: middle;",
-            selectInput(inputName, "", choices = c("None", colnames(df))
+            selectInput(inputName, "", 
+              choices = c("None", colnames(df)),
+              width = '300px'
             )
           )
         )

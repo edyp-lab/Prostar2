@@ -33,8 +33,11 @@ A shiny Module.
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(MagellanNTK)
+library(Prostar2)
+library(DaparToolshed)
 data(Exp1_R25_prot, package = 'DaparToolshedData')
-shiny::runApp(infos_dataset(Exp1_R25_prot))
+shiny::runApp(convert_dataset())
 \dontshow{\}) # examplesIf}
 }
 \keyword{internal}

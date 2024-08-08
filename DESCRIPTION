@@ -33,7 +33,7 @@ Imports:
     BiocManager,
     sass,
     rhandsontable
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Suggests: 
     testthat (>= 2.1.0),

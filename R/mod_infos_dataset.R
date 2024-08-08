@@ -93,7 +93,7 @@ infos_dataset_server <- function(id,
               cols = colnames(colData(rv$dataIn)),
               vals = colnames(colData(rv$dataIn))[2],
               unique = unique(colData(rv$dataIn)$Condition),
-              pal = RColorBrewer::brewer.pal(3,'Dark2')[1:2])
+              pal = RColorBrewer::brewer.pal(3,'Dark2')[seq(length(unique(colData(rv$dataIn)$Condition)))])
           })
         )
         

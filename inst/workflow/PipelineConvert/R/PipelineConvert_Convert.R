@@ -17,7 +17,8 @@ PrevNextBtnClass <- "btn-info"
 btn_success_color <- 'info'
 
 optionsBtnClass <- "info"
-options(shiny.fullstacktrace = TRUE)
+options(shiny.fullstacktrace = TRUE,
+  shiny.maxRequestSize=3000*1024^2)
 
 #' @rdname mod_convert
 #' @export
@@ -484,7 +485,8 @@ PipelineConvert_Convert_server <- function(id,
         widget <- selectInput(ns("DataId_datasetId"), 
                               label = "", 
                               choices = setNames(nm = c("AutoID", colnames(rv.convert$tab))),
-                              selected = rv.widgets$DataId_datasetId
+                              selected = rv.widgets$DataId_datasetId,
+          width = '300px'
         )
       )
       
@@ -642,7 +644,7 @@ PipelineConvert_Convert_server <- function(id,
       req(as.logical(rv.widgets$ExpandFeatData_idMethod))
       rv.widgets$ExpandFeatData_quantCols
       
-      rv.convert$inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
+      rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
                             df = rv.convert$tab,
                             quantCols = rv.widgets$ExpandFeatData_quantCols)
       mod_inputGroup_ui(ns('inputGroup'))
@@ -659,7 +661,7 @@ PipelineConvert_Convert_server <- function(id,
       tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("help_ExpandFeatData_quantCols")),
         widget <- selectInput(ns("ExpandFeatData_quantCols"),
-                              label = "",
+                              label = "Select columns of quantification",
                               choices = setNames(nm=colnames(rv.convert$tab)),
                               multiple = TRUE, selectize = FALSE ,
                               width = "200px", size = 20,
@@ -768,6 +770,8 @@ PipelineConvert_Convert_server <- function(id,
     
     
     observeEvent(input$Save_btn_validate, {
+      
+
       # Create QFeatures dataset file
       rv$dataIn <- DaparToolshed::createQFeatures(
         data = rv.convert$tab, 
@@ -776,7 +780,7 @@ PipelineConvert_Convert_server <- function(id,
         keyId = rv.widgets$DataId_datasetId,
         analysis = "analysis",
         logData = rv.widgets$SelectFile_checkDataLogged == 'no',
-        indexForMetacell = rv.widgets$ExpandFeatData_inputGroup,
+        indexForMetacell = rv.widgets$ExpandFeatData_inputGroup(),
         typeDataset = rv.widgets$SelectFile_typeOfData,
         parentProtId = rv.widgets$DataId_parentProteinID,
         force.na = rv.widgets$SelectFile_replaceAllZeros,

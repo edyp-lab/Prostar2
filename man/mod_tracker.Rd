@@ -10,7 +10,9 @@ mod_tracker_ui(id)
 
 mod_tracker_server(
   id,
-  object,
+  object = reactive({
+     NULL
+ }),
   remoteReset = reactive({
      NULL
  }),

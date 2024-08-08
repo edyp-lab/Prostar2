@@ -10,8 +10,12 @@
 #' @name convert_dataset
 #' 
 #' @examplesIf interactive()
+#' library(MagellanNTK)
+#' library(Prostar2)
+#' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
-#' shiny::runApp(infos_dataset(Exp1_R25_prot))
+#' shiny::runApp(convert_dataset())
+#' 
 
 NULL
 
@@ -68,7 +72,7 @@ convert_dataset_server <- function(id,
 #' @export
 #' @rdname convert_dataset
 #' 
-convert_dataset <- function(obj){
+convert_dataset <- function(){
   
   ui <- fluidPage(convert_dataset_ui("mod_info"))
   
