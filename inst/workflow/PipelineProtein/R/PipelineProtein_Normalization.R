@@ -14,7 +14,10 @@
 #' 
 #' In this example, `PipelineProtein_Normalization_ui()` and `PipelineProtein_Normalization_server()` define
 #' the code for the process `ProcessProtein` which is part of the pipeline called `PipelineProtein`.
-
+#' 
+#' @example inst/workflow/PipelineProtein/examples/example_PipelineProtein_Normalization.R
+#' 
+NULL
 
 #' @rdname PipelineProtein
 #' @export
@@ -221,8 +224,11 @@ PipelineProtein_Normalization_server <- function(id,
           # )
            ,fluidRow(
              column(width = 5,
-               omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
+               omXplore::omXplore_density_ui(ns("densityPlot_Norm"))
                ),
+             column(width = 5,
+               omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
+             ),
              column(width = 5,
                highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
             )
@@ -234,17 +240,17 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     
-    # observe({
+     observe({
     #   req(rv.custom$init.dataset)
     #   req(rv$dataIn)
     #   remoteReset()
-      rv.custom$selectProt()$value
-    omXplore::omXplore_density_server("density_plot", 
+     # rv.custom$selectProt()$value
+    omXplore::omXplore_density_server("densityPlot_Norm", 
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)})
     )
     
-    
+     })
    
     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
@@ -325,13 +331,13 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
 
-    observe({
+    #observe({
       rv.custom$selectProt <- omXplore::plots_tracking_server(
         id = "tracker",
         obj = reactive({rv.custom$init.dataset[[length(rv.custom$init.dataset)]]}),
         remoteReset = reactive({remoteReset()})
       )
-    })
+   # })
     
     output$tracking <- renderUI({
       widget <-  omXplore::plots_tracking_ui(ns("tracker"))
@@ -342,11 +348,11 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
-      req(length(rv$dataIn) > 1)
       req(rv$dataIn)
+      req(length(rv$dataIn) > 1)
       obj1 <- rv$dataIn[[length(rv$dataIn)]]
       obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
-
+      
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
       
       DaparToolshed::compareNormalizationD_HC(
@@ -487,7 +493,7 @@ PipelineProtein_Normalization_server <- function(id,
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
-              subset.norm = selectProt()$value
+              subset.norm = rv.custom$selectProt()$value
             )
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
@@ -522,22 +528,19 @@ PipelineProtein_Normalization_server <- function(id,
         )
       })
       
-      
-      
       if(inherits(rv.custom$tmpAssay, "try-error")) {
         
         MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_normalization',
           text = rv.custom$tmpAssay[[1]],
           type = 'error' )
       } else {
-        
-        
+ 
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
         assay(new.dataset) <- rv.custom$tmpAssay
-        paramshistory(new.dataset) <- NULL
-        paramshistory(new.dataset) <- rv.custom$history
+        DaparToolshed::paramshistory(new.dataset) <- NULL
+        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
-
+ 
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- Timestamp()
         dataOut$value <- NULL

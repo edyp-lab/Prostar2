@@ -14,6 +14,9 @@
 #' 
 #' @name PipelineProtein
 #' 
+#' @example inst/workflow/PipelineProtein/examples/example_pipelineProtein.R
+#' 
+#' 
 NULL
 
 
