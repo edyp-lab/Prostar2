@@ -5,7 +5,10 @@
 #' `MagellanNTK`. They wrap the entire workflow into a single function
 #' 
 #' @examplesIf interactive()
-#' shiny::runApp(convert_dataset())
+#' library(DaparToolshed)
+#' library(MagellanNTK)
+#' library(Prostar2)
+#' shiny::runApp(Prostar2::convert_dataset())
 #' 
 #' @name Convert_wrapper
 #' 

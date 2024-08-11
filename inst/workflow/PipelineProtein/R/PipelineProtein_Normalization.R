@@ -331,6 +331,10 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
 
+    
+    # observeEvent(rv.custom$selectProt$value(), {
+    #   print(rv.custom$selectProt$value())
+    # })
     #observe({
       rv.custom$selectProt <- omXplore::plots_tracking_server(
         id = "tracker",
@@ -354,7 +358,7 @@ PipelineProtein_Normalization_server <- function(id,
       obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
       
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
-      
+      #browser()
       DaparToolshed::compareNormalizationD_HC(
         qDataBefore = SummarizedExperiment::assay(obj1),
         qDataAfter = SummarizedExperiment::assay(obj2),
