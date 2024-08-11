@@ -128,7 +128,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
 
         output$Add_btn_UI <- renderUI({
-          widget <- actionButton(ns("BuildFilter_btn"), "Add filter")
+          widget <- actionButton(ns("BuildFilter_btn"), "Add filter",
+            class = "btn-info")
           
           MagellanNTK::toggleWidget(widget, is.enabled())
           

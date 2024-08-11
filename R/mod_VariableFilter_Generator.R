@@ -213,7 +213,8 @@ mod_VariableFilter_Generator_server <- function(id,
     
 
     output$addFilter_btn_ui <- renderUI({
-      widget <- actionButton(ns("addFilter_btn"), "Add filter")
+      widget <- actionButton(ns("addFilter_btn"), "Add filter",
+        class = "btn-info")
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
