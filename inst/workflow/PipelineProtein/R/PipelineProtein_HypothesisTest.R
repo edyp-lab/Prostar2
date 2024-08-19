@@ -603,7 +603,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
       rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
       
-      paramshistory(new.dataset) <- NULL
       paramshistory(new.dataset) <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')

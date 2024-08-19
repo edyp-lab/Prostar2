@@ -236,7 +236,7 @@ PipelineProtein_DA_server <- function(id,
       
       # Get logfc threshold from Hypothesis test dataset
       .se <- rv$dataIn[[length(rv$dataIn)]]
-      .thlogfc <- paramshistory(.se)[['HypothesisTest']]$thlogfc
+      .thlogfc <- paramshistory(.se)[['HypothesisTest_thlogFC']]
       if(!is.null(.thlogfc))
         rv.custom$thlogfc <- .thlogfc
       
