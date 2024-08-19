@@ -1016,7 +1016,7 @@ PipelineProtein_DA_server <- function(id,
             ),
             column(width = 4,
               downloadButton(ns("FDR_download_SelectedItems_UI"), 
-                "Download (Excel file)", class = actionBtnClass)
+                "Selected final results (Excel file)", class = actionBtnClass)
             )
           ),
           DT::DTOutput(ns("FDR_selectedItems_UI"))
