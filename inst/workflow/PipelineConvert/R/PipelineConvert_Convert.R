@@ -774,6 +774,7 @@ PipelineConvert_Convert_server <- function(id,
 
       # Create QFeatures dataset file
       rv$dataIn <- DaparToolshed::createQFeatures(
+        file = rv.widgets$SelectFile_file,
         data = rv.convert$tab, 
         sample = as.data.frame(rv.convert$design()$design),
         indQData = rv.widgets$ExpandFeatData_quantCols,
