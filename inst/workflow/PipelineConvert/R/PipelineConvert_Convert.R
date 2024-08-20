@@ -79,11 +79,11 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @return NA
 #'
 PipelineConvert_Convert_server <- function(id,
-                           dataIn = reactive({NULL}),
-                           steps.enabled = reactive({NULL}),
-                           remoteReset = reactive({FALSE}),
-                           steps.status = reactive({NULL}),
-                           current.pos = reactive({1})
+  dataIn = reactive({NULL}),
+  steps.enabled = reactive({NULL}),
+  remoteReset = reactive({FALSE}),
+  steps.status = reactive({NULL}),
+  current.pos = reactive({1})
 ) {
   
   requireNamespace("openxlsx")
@@ -96,7 +96,7 @@ PipelineConvert_Convert_server <- function(id,
     SelectFile_typeOfData = NULL,
     SelectFile_checkDataLogged = "no",
     SelectFile_replaceAllZeros = TRUE,
-    SelectFile_XLSsheets = '',
+    SelectFile_XLSsheets = NULL,
     
     DataId_datasetId = NULL,
     DataId_parentProteinID = NULL,
@@ -173,7 +173,7 @@ PipelineConvert_Convert_server <- function(id,
     
     output$Description_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Description_btn_validate"), "Start",
-                             class = 'info')
+        class = 'info')
       toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
@@ -194,22 +194,22 @@ PipelineConvert_Convert_server <- function(id,
     output$SelectFile <- renderUI({
       fluidPage(
         wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        uiOutput(ns('SelectFile_software_ui')),
-        uiOutput(ns('SelectFile_file_ui')),
-        uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
-        uiOutput(ns('SelectFile_typeOfData_ui')),
-        uiOutput(ns('SelectFile_checkDataLogged_ui')),
-        uiOutput(ns('SelectFile_replaceAllZeros_ui')),
-        
-        # Insert validation button
-        uiOutput(ns('SelectFile_btn_validate_ui')),
+          # uiOutput for all widgets in this UI
+          # This part is mandatory
+          # The renderUI() function of each widget is managed by MagellanNTK
+          # The dev only have to define a reactive() function for each
+          # widget he want to insert
+          # Be aware of the naming convention for ids in uiOutput()
+          # For more details, please refer to the dev document.
+          uiOutput(ns('SelectFile_software_ui')),
+          uiOutput(ns('SelectFile_file_ui')),
+          uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
+          uiOutput(ns('SelectFile_typeOfData_ui')),
+          uiOutput(ns('SelectFile_checkDataLogged_ui')),
+          uiOutput(ns('SelectFile_replaceAllZeros_ui')),
+          
+          # Insert validation button
+          uiOutput(ns('SelectFile_btn_validate_ui')),
         )
       )
     })
@@ -221,9 +221,9 @@ PipelineConvert_Convert_server <- function(id,
     
     output$SelectFile_software_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_software"), 
-                             "Software to import from",
-                             choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
-                             selected = rv.widgets$SelectFile_software)
+        "Software to import from",
+        choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
+        selected = rv.widgets$SelectFile_software)
       
       toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
@@ -234,18 +234,18 @@ PipelineConvert_Convert_server <- function(id,
       fluidRow(
         column(width = 2,
           MagellanNTK::mod_popover_for_help_server(
-                 "help_chooseFile",
-                 title = "Data file",
-                 content = "Select one (.txt, .csv, .tsv, .xls, .xlsx) file."
-               ),
+            "help_chooseFile",
+            title = "Data file",
+            content = "Select one (.txt, .csv, .tsv, .xls, .xlsx) file."
+          ),
           MagellanNTK::mod_popover_for_help_ui(ns("help_chooseFile"))
         ),
         column(width = 10,
-               widget <- fileInput(
-                 ns("SelectFile_file"), "",
-                 multiple = FALSE,
-                 accept = c(".txt", ".tsv", ".csv", ".xls", ".xlsx")
-               )
+          widget <- fileInput(
+            ns("SelectFile_file"), "",
+            multiple = FALSE,
+            accept = c(".txt", ".tsv", ".csv", ".xls", ".xlsx")
+          )
         )
       )
       
@@ -307,43 +307,44 @@ PipelineConvert_Convert_server <- function(id,
     # })
     
     output$SelectFile_ManageXlsFiles_ui <- renderUI({
+      
       req(rv.widgets$SelectFile_software)
       req(rv.widgets$SelectFile_file)
       
       req(GetExtension(rv.widgets$SelectFile_file$name) %in% c("xls", "xlsx"))
       
-      tryCatch({   
-        sheets <- listSheets(rv.widgets$SelectFile_file$datapath)
-        widget <- selectInput(ns("SelectFile_XLSsheets"), 
-                              "sheets", 
-                              choices = as.list(sheets), 
-                              width = "200px",
-                              selected = rv.widgets$SelectFile_XLSsheets)
-      },
-      warning = function(w) {
-        shinyjs::info(conditionMessage(w))
-        return(NULL)
-      },
-      error = function(e) {
-        shinyjs::info(conditionMessage(e))
-        return(NULL)
-      },
-      finally = {
-        # cleanup-code
-      }
-      )
+      # tryCatch({   
+      sheets <- c('', DaparToolshed::listSheets(rv.widgets$SelectFile_file$datapath))
+      
+      widget <- selectInput(ns("SelectFile_XLSsheets"), 
+        "sheets", 
+        choices = sheets, 
+        width = "200px",
+        selected = rv.widgets$SelectFile_XLSsheets)
+      # },
+      # warning = function(w) {
+      #   shinyjs::info(conditionMessage(w))
+      #   return(NULL)
+      # },
+      # error = function(e) {
+      #   shinyjs::info(conditionMessage(e))
+      #   return(NULL)
+      # },
+      # finally = {
+      #   # cleanup-code
+      # }
+      # )
       toggleWidget(widget, rv$steps.enabled['SelectFile'])
     })
     
     
-    
     output$SelectFile_typeOfData_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_typeOfData"), 
-                             "Is it a peptide or protein dataset ?",
-                             choices = c("peptide dataset" = "peptide",
-                                         "protein dataset" = "protein"
-                             ),
-                             selected = rv.widgets$SelectFile_typeOfData)
+        "Is it a peptide or protein dataset ?",
+        choices = c("peptide dataset" = "peptide",
+          "protein dataset" = "protein"
+        ),
+        selected = rv.widgets$SelectFile_typeOfData)
       
       toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
@@ -351,10 +352,10 @@ PipelineConvert_Convert_server <- function(id,
     
     output$SelectFile_checkDataLogged_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_checkDataLogged"), 
-                             "Are your data already log-transformed ?",
-                             choices = c("yes (they stay unchanged)" = "yes",
-                                         "no (they wil be automatically transformed)" = "no"),
-                             selected = rv.widgets$SelectFile_checkDataLogged
+        "Are your data already log-transformed ?",
+        choices = c("yes (they stay unchanged)" = "yes",
+          "no (they wil be automatically transformed)" = "no"),
+        selected = rv.widgets$SelectFile_checkDataLogged
       )
       
       toggleWidget(widget, rv$steps.enabled['SelectFile'] )
@@ -363,8 +364,8 @@ PipelineConvert_Convert_server <- function(id,
     
     output$SelectFile_replaceAllZeros_ui <- renderUI({
       widget <- checkboxInput(ns("SelectFile_replaceAllZeros"), 
-                              "Replace all 0 and NaN by NA",
-                              value = rv.widgets$SelectFile_replaceAllZeros
+        "Replace all 0 and NaN by NA",
+        value = rv.widgets$SelectFile_replaceAllZeros
       )
       
       toggleWidget(widget, rv$steps.enabled['SelectFile'] )
@@ -374,7 +375,7 @@ PipelineConvert_Convert_server <- function(id,
     
     output$SelectFile_btn_validate_ui <- renderUI({
       widget <-  actionButton(ns("SelectFile_btn_validate"), "Perform",
-                              class = 'info')
+        class = 'info')
       toggleWidget(widget, rv$steps.enabled['SelectFile'] )
       
     })
@@ -385,49 +386,49 @@ PipelineConvert_Convert_server <- function(id,
       # Do some stuff
       
       req(rv.widgets$SelectFile_file)
-        req(rv.widgets$SelectFile_XLSsheets)
-        
-        ext <- GetExtension(rv.widgets$SelectFile_file$name)
-        rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
-          split='.', fixed = TRUE))[1]
-        if (((ext %in% c("xls", "xlsx"))) && 
-            is.null(rv.widgets$SelectFile_XLSsheets))
-          return(NULL)
-        
-        
-        authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
-        
-        if (!fileExt.ok()) {
-          shinyjs::info("Warning : this file is not a text nor an Excel file !
+      
+      ext <- GetExtension(rv.widgets$SelectFile_file$name)
+      rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
+        split='.', fixed = TRUE))[1]
+      if (((ext %in% c("xls", "xlsx"))) && (
+        is.null(rv.widgets$SelectFile_XLSsheets) ||
+          nchar(rv.widgets$SelectFile_XLSsheets) == 0))
+        return(NULL)
+      
+      
+      authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
+      
+      if (!fileExt.ok()) {
+        shinyjs::info("Warning : this file is not a text nor an Excel file !
      Please choose another one.")
-        } else {
-          tryCatch({
-            
-            shinyjs::disable("SelectFile_file")
-            f.path <- rv.widgets$SelectFile_file$datapath
-            rv.convert$tab <- switch(ext,
-              txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
-              csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
-              tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
-              xls = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets),
-              xlsx = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets)
-            )
-            
-            colnames(rv.convert$tab) <- gsub(".", "_", colnames(rv.convert$tab), fixed = TRUE)
-            colnames(rv.convert$tab) <- gsub(" ", "_", colnames(rv.convert$tab), fixed = TRUE)
+      } else {
+        tryCatch({
+          
+          shinyjs::disable("SelectFile_file")
+          f.path <- rv.widgets$SelectFile_file$datapath
+          rv.convert$tab <- switch(ext,
+            txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+            csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
+            tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+            xls = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets),
+            xlsx = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets)
+          )
+          
+          colnames(rv.convert$tab) <- gsub(".", "_", colnames(rv.convert$tab), fixed = TRUE)
+          colnames(rv.convert$tab) <- gsub(" ", "_", colnames(rv.convert$tab), fixed = TRUE)
+        },
+          warning = function(w) {
+            shinyjs::info(conditionMessage(w))
+            return(NULL)
           },
-            warning = function(w) {
-              shinyjs::info(conditionMessage(w))
-              return(NULL)
-            },
-            error = function(e) {
-              shinyjs::info(conditionMessage(e))
-              return(NULL)
-            },
-            finally = {
-              # cleanup-code
-            })
-        }
+          error = function(e) {
+            shinyjs::info(conditionMessage(e))
+            return(NULL)
+          },
+          finally = {
+            # cleanup-code
+          })
+      }
       
       
       
@@ -476,16 +477,16 @@ PipelineConvert_Convert_server <- function(id,
       #names(.choices) <- c("Auto ID", colnames(rv.convert$tab))
       
       MagellanNTK::mod_popover_for_help_server("help_convertIdType",
-                             title = "ID definition",
-                             content = "If you choose the automatic ID, 
+        title = "ID definition",
+        content = "If you choose the automatic ID, 
                             Prostar will build an index.")
       
       tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("help_convertIdType")),
         widget <- selectInput(ns("DataId_datasetId"), 
-                              label = "", 
-                              choices = setNames(nm = c("AutoID", colnames(rv.convert$tab))),
-                              selected = rv.widgets$DataId_datasetId,
+          label = "", 
+          choices = setNames(nm = c("", "AutoID", colnames(rv.convert$tab))),
+          selected = rv.widgets$DataId_datasetId,
           width = '300px'
         )
       )
@@ -501,7 +502,7 @@ PipelineConvert_Convert_server <- function(id,
         t <- TRUE
       } else {
         t <- (length(as.data.frame(rv.convert$tab)[, rv.widgets$DataId_datasetId])
-              == length(unique(as.data.frame(rv.convert$tab)[, rv.widgets$DataId_datasetId])))
+          == length(unique(as.data.frame(rv.convert$tab)[, rv.widgets$DataId_datasetId])))
       }
       t
     })
@@ -529,16 +530,16 @@ PipelineConvert_Convert_server <- function(id,
       req(rv.widgets$SelectFile_typeOfData != "protein")
       
       MagellanNTK::mod_popover_for_help_server("help_ProteinId",
-                             title = "Select protein IDs",
-                             content = "Select the column containing the parent protein IDs."
+        title = "Select protein IDs",
+        content = "Select the column containing the parent protein IDs."
       )
       
       tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("help_ProteinId")),
         widget <- selectInput(ns("DataId_parentProteinId"),
-                              "",
-                              choices = setNames(nm =c("", colnames(rv.convert$tab))),
-                              selected = rv.widgets$DataId_parentProteinId)
+          "",
+          choices = setNames(nm =c("", colnames(rv.convert$tab))),
+          selected = rv.widgets$DataId_parentProteinId)
       )
       toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
@@ -548,9 +549,9 @@ PipelineConvert_Convert_server <- function(id,
       req(rv.widgets$SelectFile_typeOfData)
       
       t <- switch(rv.widgets$SelectFile_typeOfData,
-                  protein = "proteins",
-                  peptide = "peptides",
-                  default = "")
+        protein = "proteins",
+        peptide = "peptides",
+        default = "")
       
       txt <- paste("Please select among the columns of your data the one that
                 corresponds to a unique ID of the ", t, ".", sep = " ")
@@ -577,7 +578,7 @@ PipelineConvert_Convert_server <- function(id,
     
     output$DataId_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("DataId_btn_validate"), "Perform",
-                             class = 'info')
+        class = 'info')
       toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
     
@@ -587,7 +588,13 @@ PipelineConvert_Convert_server <- function(id,
       # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
       #                                     dataset = new.dataset,
       #                                     name = paste0('temp_',id))
-      # 
+      
+      req(rv.widgets$DataId_datasetId)
+      
+      if(rv.widgets$SelectFile_typeOfData != "protein")
+        req(rv.widgets$DataId_parentProteinId)
+      
+      
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
       dataOut$value <- NULL
@@ -607,9 +614,9 @@ PipelineConvert_Convert_server <- function(id,
           #column(width = 4, uiOutput(ns("ExpandFeatData_checkIdTab_ui")),
           column(width = 4, shinyjs::hidden(
             div(id = "warning_neg_values",
-                p("Warning : Your original dataset may contain negative values",
-                  "so that they cannot be logged. Please check back the dataset or",
-                  "the log option in the first tab.")
+              p("Warning : Your original dataset may contain negative values",
+                "so that they cannot be logged. Please check back the dataset or",
+                "the log option in the first tab.")
             )
           ))
         ),
@@ -617,7 +624,7 @@ PipelineConvert_Convert_server <- function(id,
           column(width = 4, uiOutput(ns("ExpandFeatData_quantCols_ui"), width = "400px")),
           column(width = 8, shinyjs::hidden(
             uiOutput(ns("ExpandFeatData_inputGroup_ui")
-                     #, width = "600px"
+              #, width = "600px"
             )
           ))
         ),
@@ -631,11 +638,11 @@ PipelineConvert_Convert_server <- function(id,
     
     output$ExpandFeatData_idMethod_ui <- renderUI({
       widget <- radioButtons(ns("ExpandFeatData_idMethod"), 
-                             "Provide identification method",
-                             choices = list(
-                               "No (default values will be computed)" = FALSE,
-                               "Yes" = TRUE),
-                             selected = rv.widgets$ExpandFeatData_idMethod)
+        "Provide identification method",
+        choices = list(
+          "No (default values will be computed)" = FALSE,
+          "Yes" = TRUE),
+        selected = rv.widgets$ExpandFeatData_idMethod)
       toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
     })
     
@@ -645,8 +652,8 @@ PipelineConvert_Convert_server <- function(id,
       rv.widgets$ExpandFeatData_quantCols
       
       rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
-                            df = rv.convert$tab,
-                            quantCols = rv.widgets$ExpandFeatData_quantCols)
+        df = rv.convert$tab,
+        quantCols = rv.widgets$ExpandFeatData_quantCols)
       mod_inputGroup_ui(ns('inputGroup'))
     })
     
@@ -654,18 +661,18 @@ PipelineConvert_Convert_server <- function(id,
       req(rv.convert$tab)
       
       MagellanNTK::mod_popover_for_help_server("help_ExpandFeatData_quantCols",
-                             title = "Quantitative data",
-                             content = "Select the columns that are quantitation values
+        title = "Quantitative data",
+        content = "Select the columns that are quantitation values
             by clicking in the field below.")
       
       tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("help_ExpandFeatData_quantCols")),
         widget <- selectInput(ns("ExpandFeatData_quantCols"),
-                              label = "Select columns of quantification",
-                              choices = setNames(nm=colnames(rv.convert$tab)),
-                              multiple = TRUE, selectize = FALSE ,
-                              width = "200px", size = 20,
-                              selected = rv.widgets$ExpandFeatData_quantCols
+          label = "Select columns of quantification",
+          choices = setNames(nm=colnames(rv.convert$tab)),
+          multiple = TRUE, selectize = FALSE ,
+          width = "200px", size = 20,
+          selected = rv.widgets$ExpandFeatData_quantCols
         )
       )
       
@@ -677,8 +684,8 @@ PipelineConvert_Convert_server <- function(id,
     
     observe({
       shinyjs::toggle("warning_neg_values",
-                      condition = !is.null(rv.widgets$ExpandFeatData_quantCols) &&
-                        length(which(rv.convert$tab[, rv.widgets$ExpandFeatData_quantCols] < 0)) > 0
+        condition = !is.null(rv.widgets$ExpandFeatData_quantCols) &&
+          length(which(rv.convert$tab[, rv.widgets$ExpandFeatData_quantCols] < 0)) > 0
       )
       shinyjs::toggle("ExpandFeatData_idMethod", condition = !is.null(rv.widgets$ExpandFeatData_quantCols))
       shinyjs::toggle("ExpandFeatData_inputGroup_ui", condition = as.logical(rv.widgets$idMethod) == TRUE)
@@ -688,8 +695,8 @@ PipelineConvert_Convert_server <- function(id,
     
     output$ExpandFeatData_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("ExpandFeatData_btn_validate"),
-                             "Perform",
-                             class = 'info')
+        "Perform",
+        class = 'info')
       toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
     })
     
@@ -725,7 +732,7 @@ PipelineConvert_Convert_server <- function(id,
     
     output$Design_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Design_btn_validate"), "Validate design",
-                             class = 'info')
+        class = 'info')
       toggleWidget(widget, rv$steps.enabled['Design'] )
     })
     
@@ -764,13 +771,13 @@ PipelineConvert_Convert_server <- function(id,
       toggleWidget(actionButton(ns("Save_btn_validate"), 
         "Create QFeatures dataset", 
         class = 'info'),
-                   rv$steps.enabled['Save']
+        rv$steps.enabled['Save']
       )
     })
     
     
     observeEvent(input$Save_btn_validate, {
-
+      
       # Create QFeatures dataset file
       rv$dataIn <- DaparToolshed::createQFeatures(
         file = rv.widgets$SelectFile_file$name,
@@ -792,7 +799,7 @@ PipelineConvert_Convert_server <- function(id,
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
       MagellanNTK::download_dataset_server('createQuickLink', 
-                dataIn = reactive({rv$dataIn}))
+        dataIn = reactive({rv$dataIn}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------
