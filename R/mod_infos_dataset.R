@@ -115,16 +115,14 @@ MagellanNTK::format_DT_server('dt',
         }))
 
 
-
-
-
-
     output$title <- renderUI({
       req(rv$dataIn)
       name <- metadata(rv$dataIn)$analysis
+    
       tagList(
           h3("Dataset summary"),
-        p(paste0("Name of analysis:", name$analysis))
+        p(paste0("Name of analysis:", name$analysis)),
+        p(paste0("Original file:", metadata(rv$dataIn)$file))
         )
     })
 
