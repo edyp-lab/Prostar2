@@ -13,7 +13,7 @@ obj <- NAIsZero(obj, 1)
 obj <- NAIsZero(obj, 2)
 qData <- as.matrix(assay(obj[[2]]))
 sTab <- MultiAssayExperiment::colData(obj)
-limma <- limmaCompleteTest(qData, sTab)
+limma <- limmaCompleteTest(qData, sTab, comp.type = "OnevsAll")
 df <- cbind(limma$logFC, limma$P_Value)
 new.dataset <- obj[[length(obj)]]
 HypothesisTest(new.dataset) <- as.data.frame(df)
