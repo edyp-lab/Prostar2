@@ -208,14 +208,15 @@ mod_Prot_Imputation_MEC_server <- function(id,
       
       widget <- switch(rv.widgets$MEC_algorithm,
           detQuantile = {
-            div(style = .style,
+            tagList(
+              div(style = .style,
               numericInput(ns("MEC_detQuant_quantile"), "Quantile",
                   value = rv.widgets$MEC_detQuant_quantile,
                   step = 0.5,
                   min = 0,
                   max = 100,
                   width = "100px"
-                ))
+                )),
               div(style = .style,
                 numericInput(ns("MEC_detQuant_factor"), "Factor",
                   value = rv.widgets$MEC_detQuant_factor,
@@ -223,6 +224,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
                   width = "100px"
                 )
               )
+            )
           },
           fixedValue = {
             div(style = .style,
