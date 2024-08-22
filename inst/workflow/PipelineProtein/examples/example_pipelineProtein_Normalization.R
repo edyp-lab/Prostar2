@@ -9,6 +9,7 @@ library(MagellanNTK)
 library(Prostar2)
 
 data(Exp1_R25_prot, package = 'DaparToolshedData')
+obj <- Exp1_R25_prot
 wf.name <- 'PipelineProtein_Normalization'
 wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 
