@@ -240,6 +240,17 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     
+     # observe({
+     #   rv$dataIn
+     #   remoteReset()
+     #  rv.custom$
+        selectProt <- omXplore::plots_tracking_server(
+        id = "tracker",
+        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        remoteReset = reactive({remoteReset()})
+      )
+    #})
+    
 
     #   req(rv.custom$init.dataset)
     #   req(rv$dataIn)
@@ -251,18 +262,28 @@ PipelineProtein_Normalization_server <- function(id,
     )
     
 
-   
-    
+   observe({
+     rv.custom$selectProt()
+     rv$dataIn
+     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
-      track.indices = reactive({rv.custom$selectProt()$indices}),
+      track.indices = reactive({selectProt()$indices}),
       remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({!rv$steps.enabled['Normalization']})
     )
     
-    # })
+     })
     
+   
+   observeEvent(rv.custom$selectProt()$indices, ignoreNULL = FALSE,{
+   
+     print("in observeEvent(selectProt()$indices")
+     print('new value fo selectProt()$indices = ')
+     print(selectProt()$indices)
+
+   })
 
     # >>> START: Definition of the widgets
     
@@ -273,7 +294,7 @@ PipelineProtein_Normalization_server <- function(id,
         "Normalization method",
         choices = DaparToolshed::normalizeMethods(),
         selected = rv.widgets$Normalization_method,
-        width = '150px')
+        width = '250px')
       toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
@@ -331,22 +352,6 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
 
-    
-    observeEvent(rv.custom$selectProt()$indices, {
-      print(rv.custom$selectProt()$indices)
-     #browser()
-      #print(rv.custom$selectProt$value())
-    })
-    
-    
-    observe({
-      rv.custom$selectProt <- omXplore::plots_tracking_server(
-        id = "tracker",
-        obj = reactive({rv.custom$init.dataset[[length(rv.custom$init.dataset)]]}),
-        remoteReset = reactive({remoteReset()})
-      )
-    })
-    
     output$tracking <- renderUI({
       req(rv.widgets$Normalization_method %in% c('QuantileCentering', 'MeanCentering', 'SumByColumns'))
       widget <-  omXplore::plots_tracking_ui(ns("tracker"))
@@ -372,12 +377,12 @@ PipelineProtein_Normalization_server <- function(id,
         pal = NULL,
         # Consider only 2% of the entire dataset
         n = if (!is.null(rv.custom$selectProt()$indices)) {
-          length(rv.custom$selectProt()$indices)
+          length(selectProt()$indices)
         } else {
           floor(0.02 * nrow(SummarizedExperiment::assay(obj1)))
         },
-        subset.view = if (!is.null(rv.custom$selectProt()$indices)) {
-          rv.custom$selectProt()$indices
+        subset.view = if (!is.null(selectProt()$indices)) {
+          selectProt()$indices
         } else {
           seq(nrow(obj1))
         }
@@ -472,13 +477,13 @@ PipelineProtein_Normalization_server <- function(id,
               qData = qdata, 
               conds = .conds, 
               type = rv.widgets$Normalization_type, 
-              subset.norm = rv.custom$selectProt()$indices, 
+              subset.norm = selectProt()$indices, 
               quantile = quant)
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_quantile']] <- quant
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- rv.custom$selectProt()$indices
+            rv.custom$history[['subset.norm']] <- selectProt()$indices
             
             
           },
@@ -489,13 +494,13 @@ PipelineProtein_Normalization_server <- function(id,
               conds = .conds,
               type = rv.widgets$Normalization_type,
               scaling = rv.widgets$Normalization_varReduction,
-              subset.norm = rv.custom$selectProt()$indices
+              subset.norm = selectProt()$indices
             )
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_varReduction']] <- rv.widgets$Normalization_varReduction
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- rv.custom$selectProt()$indices
+            rv.custom$history[['subset.norm']] <- selectProt()$indices
             
           },
           SumByColumns = {
@@ -503,12 +508,12 @@ PipelineProtein_Normalization_server <- function(id,
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
-              subset.norm = rv.custom$selectProt()$indices
+              subset.norm = selectProt()$indices
             )
             
             rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- rv.custom$selectProt()$indices
+            rv.custom$history[['subset.norm']] <- selectProt()$indices
             
           },
           LOESS = {
