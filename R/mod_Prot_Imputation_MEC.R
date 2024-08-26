@@ -189,7 +189,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
       req(rv.widgets$MEC_algorithm == "detQuantile")
       
       mod_DetQuantImpValues_server(id = "MEC_DetQuantValues_DT",
-        obj = reactive({rv$dataIn}),
+        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         quant = reactive({rv.widgets$MEC_detQuant_quantile}),
         factor = reactive({rv.widgets$MEC_detQuant_factor})
         )

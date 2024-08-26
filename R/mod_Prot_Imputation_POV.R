@@ -152,8 +152,8 @@ mod_Prot_Imputation_POV_server <- function(id,
     output$POV_showDetQuantValues <- renderUI({
       req(rv.widgets$POV_algorithm == "detQuantile")
       
-      mod_DetQuantImpValues_server(id = "MEC_DetQuantValues_DT",
-        obj = reactive({rv$dataIn}),
+      mod_DetQuantImpValues_server(id = "POV_DetQuantValues_DT",
+        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         quant = reactive({rv.widgets$POV_detQuant_quantile}),
         factor = reactive({rv.widgets$POV_detQuant_factor})
       )
@@ -177,8 +177,7 @@ mod_Prot_Imputation_POV_server <- function(id,
       
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
-    
+
     
     output$POV_detQuant_UI <- renderUI({
       req(rv.widgets$POV_algorithm == 'detQuantile')
