@@ -103,7 +103,10 @@ PipelineConvert_Convert_server <- function(id,
     
     ExpandFeatData_idMethod = NULL,
     ExpandFeatData_quantCols = NULL,
-    ExpandFeatData_inputGroup = NULL
+    ExpandFeatData_inputGroup = NULL,
+    
+    Save_analysis = NULL,
+    Save_description = NULL
   )
   
   rv.custom.default.values <- list(
@@ -647,13 +650,17 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     
+    observe({
+    rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
+      df = rv.convert$tab,
+      quantCols = rv.widgets$ExpandFeatData_quantCols)
+  })
+  
     output$ExpandFeatData_inputGroup_ui <- renderUI({
       req(as.logical(rv.widgets$ExpandFeatData_idMethod))
       rv.widgets$ExpandFeatData_quantCols
       
-      rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
-        df = rv.convert$tab,
-        quantCols = rv.widgets$ExpandFeatData_quantCols)
+      
       mod_inputGroup_ui(ns('inputGroup'))
     })
     
@@ -756,6 +763,7 @@ PipelineConvert_Convert_server <- function(id,
       tagList(
         # Insert validation button
         # This line is necessary. DO NOT MODIFY
+        uiOutput(ns('Save_infos_ui')),
         uiOutput(ns('Save_btn_validate_ui')),
         uiOutput(ns('mod_dl_ui'))
       )
@@ -766,6 +774,18 @@ PipelineConvert_Convert_server <- function(id,
       req(rv$steps.status['Save'] == stepStatus$VALIDATED)
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
+    
+    
+    output$Save_infos_ui <- renderUI({
+      toggleWidget(
+        tagList(
+          textInput(ns('Save_analysis'), '', placeholder = 'Name of the analysis'),
+          textAreaInput(ns('Save_description'), '', placeholder = 'Description of the analysis', height = '150px')
+        ),
+        rv$steps.enabled['Save']
+      )
+    })
+    
     
     output$Save_btn_validate_ui <- renderUI({
       toggleWidget(actionButton(ns("Save_btn_validate"), 
@@ -778,6 +798,8 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       
+      
+      
       # Create QFeatures dataset file
       rv$dataIn <- DaparToolshed::createQFeatures(
         file = rv.widgets$SelectFile_file$name,
@@ -785,7 +807,8 @@ PipelineConvert_Convert_server <- function(id,
         sample = as.data.frame(rv.convert$design()$design),
         indQData = rv.widgets$ExpandFeatData_quantCols,
         keyId = rv.widgets$DataId_datasetId,
-        analysis = "analysis",
+        analysis = rv.widgets$Save_analysis,
+        description = rv.widgets$Save_description,
         logData = rv.widgets$SelectFile_checkDataLogged == 'no',
         indexForMetacell = rv.widgets$ExpandFeatData_inputGroup(),
         typeDataset = rv.widgets$SelectFile_typeOfData,
