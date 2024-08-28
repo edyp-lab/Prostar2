@@ -1137,12 +1137,7 @@ PipelineProtein_DA_server <- function(id,
       tmp <- gsub(",", ".", logpval(), fixed = TRUE)
       
       rv.custom$thpval <- as.numeric(tmp)
-      
-      
-      
-      # req(Get_FDR())
-      # req(Get_Nb_Significant())
-      
+
       th <- Get_FDR() * Get_Nb_Significant()
       
       if (th < 1) {
@@ -1156,9 +1151,6 @@ PipelineProtein_DA_server <- function(id,
           title = 'Warning',
           text = warntxt)
       }
-      
-      
-      
     })
     
     
@@ -1203,45 +1195,52 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
+    BuildPairwiseComp_wb <- reactive({
+      DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
+      hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
+        halign = "CENTER",
+        textDecoration = "italic",
+        border = "Bottom")
+      
+      wb <- openxlsx::createWorkbook() # Create wb in R
+      openxlsx::addWorksheet(wb, sheetName = "DA result") # create sheet
+      openxlsx::writeData(wb,
+        sheet = 1,
+        as.character(rv.widgets$Pairwisecomparison_Comparison),
+        colNames = TRUE,
+        headerStyle = hs1
+      )
+      openxlsx::writeData(wb,
+        sheet = 1,
+        startRow = 3,
+        Build_pval_table(),
+      )
+      
+      .txt <- paste0("isDifferential (",
+        as.character(rv.widgets$Pairwisecomparison_Comparison),
+        ")")
+      
+      ll.DA.row <- which(Build_pval_table()[, .txt] == 1)
+      ll.DA.col <- rep(which(colnames(Build_pval_table()) == .txt),
+        length(ll.DA.row) )
+      
+      openxlsx::addStyle(wb,
+        sheet = 1, 
+        cols = ll.DA.col,
+        rows = 3 + ll.DA.row, 
+        style = DA_Style
+      )
+      
+      
+      wb
+    })
+    
+    
     output$FDR_download_SelectedItems_UI <- downloadHandler(
       
       filename = function() {rv.custom$filename},
       content = function(fname) {
-        DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
-        hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
-          halign = "CENTER",
-          textDecoration = "italic",
-          border = "Bottom")
-        
-        wb <- openxlsx::createWorkbook() # Create wb in R
-        openxlsx::addWorksheet(wb, sheetName = "DA result") # create sheet
-        openxlsx::writeData(wb,
-          sheet = 1,
-          as.character(rv.widgets$Pairwisecomparison_Comparison),
-          colNames = TRUE,
-          headerStyle = hs1
-        )
-        openxlsx::writeData(wb,
-          sheet = 1,
-          startRow = 3,
-          Build_pval_table(),
-        )
-        
-        .txt <- paste0("isDifferential (",
-          as.character(rv.widgets$Pairwisecomparison_Comparison),
-          ")")
-        
-        ll.DA.row <- which(Build_pval_table()[, .txt] == 1)
-        ll.DA.col <- rep(which(colnames(Build_pval_table()) == .txt),
-          length(ll.DA.row) )
-        
-        openxlsx::addStyle(wb,
-          sheet = 1, 
-          cols = ll.DA.col,
-          rows = 3 + ll.DA.row, 
-          style = DA_Style
-        )
-        
+        wb <- BuildPairwiseComp_wb()
         openxlsx::saveWorkbook(wb, file = fname, overwrite = TRUE)
       }
     )
@@ -1429,6 +1428,13 @@ PipelineProtein_DA_server <- function(id,
       last.se <- length(rv$dataIn)
       paramshistory(rv$dataIn[[last.se]]) <- NULL
       paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
+      
+     
+      # Add the result of pairwise comparison to the coldata
+      rowData(rv$dataIn[[last.se]]) <- cbind(
+        rowData(rv$dataIn[[last.se]]),
+        Build_pval_table()
+      )
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- Timestamp()
