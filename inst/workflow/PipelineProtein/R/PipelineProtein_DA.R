@@ -1442,7 +1442,7 @@ PipelineProtein_DA_server <- function(id,
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
       
-      MagellanNTK::download_dataset_server('createQuickLink', 
+      Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv$dataIn}))
       
     })

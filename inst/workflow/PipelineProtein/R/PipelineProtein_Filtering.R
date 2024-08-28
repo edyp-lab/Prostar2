@@ -363,7 +363,7 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
 
-      MagellanNTK::download_dataset_server('createQuickLink', 
+      Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv.custom$dataIn2}))
     })
     # <<< END ------------- Code for step 3 UI---------------

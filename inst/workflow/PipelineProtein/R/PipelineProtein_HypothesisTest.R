@@ -611,7 +611,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       dataOut$trigger <- Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      download_dataset_server('createQuickLink', data = reactive({rv$dataIn}))
+      Prostar2::download_dataset_server('createQuickLink', data = reactive({rv$dataIn}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------
