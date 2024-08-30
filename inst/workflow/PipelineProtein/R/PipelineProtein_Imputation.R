@@ -357,7 +357,7 @@ PipelineProtein_Imputation_server <- function(id,
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', 
-        data = reactive({rv.custom$dataIn2}))
+        dataIn = reactive({rv.custom$dataIn2}))
       
     })
     # <<< END ------------- Code for step 3 UI---------------

@@ -821,7 +821,7 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$value <- list(data = rv$dataIn, name = rv.custom$name)
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
-      MagellanNTK::download_dataset_server('createQuickLink', 
+      Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv$dataIn}))
       
     })
