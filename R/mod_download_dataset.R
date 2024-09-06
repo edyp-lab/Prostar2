@@ -5,7 +5,7 @@
 #' 
 #' @param id internal
 #' @param dataIn internal
-#' @param extension Available values are `csv` (default), `RData` and `Excel`.
+#' @param extension Available values are `csv` (default), `qf` and `Excel`.
 #' @param widget.type Available values are `Button` and `Link` (default).
 #' @param name internal
 #' @param excel.style xxx
@@ -41,7 +41,7 @@ download_dataset_ui <- function(id) {
 #'
 download_dataset_server <- function(id,
   dataIn = reactive({NULL}),
-  extension = c('xlsx', 'RData'),
+  extension = c('xlsx', 'qf'),
   widget.type = 'Link',
   filename = 'myDataset', 
   excel.style = NULL,
@@ -53,7 +53,7 @@ download_dataset_server <- function(id,
     
     rv <- reactiveValues(
       UI_type = NULL,
-      export_file_RData = NULL,
+      export_file_qf = NULL,
       export_file_xlsx = NULL
     )
     
@@ -72,13 +72,13 @@ download_dataset_server <- function(id,
       )
       
       
-      rv$export_file_RData <- tryCatch({
-        out.RData <- tempfile(fileext = ".RData")
-        saveRDS(dataIn(), file = out.RData)
-        out.RData
+      rv$export_file_qf <- tryCatch({
+        out.qf <- tempfile(fileext = ".qf")
+        saveRDS(dataIn(), file = out.qf)
+        out.qf
       },
-        warning = function(w) NULL,
-        error = function(e) NULL
+        warning = function(w) w,
+        error = function(e) e
       )
       
     })
@@ -110,13 +110,14 @@ download_dataset_server <- function(id,
     })
     
     output$dl_raw <- renderUI({
-      req('RData' %in% extension)
-      req(rv$export_file_RData)
-      type <- GetType()[which(extension == 'RData')]
+      req('qf' %in% extension)
+      req(rv$export_file_qf)
+      type <- GetType()[which(extension == 'qf')]
+
       do.call(paste0('download', type),
         list(
-          ns("downloadDataRData"), 
-          "RData",
+          ns("downloadDataQf"), 
+          "qf",
           class = if (type=='Button') actionBtnClass else ''
         )
       )
@@ -124,14 +125,14 @@ download_dataset_server <- function(id,
     
 
     
-    output$downloadDataRData <- downloadHandler(
+    output$downloadDataQf <- downloadHandler(
       filename = function() {
-        #paste ("data-", Sys.Date(), ".RData", sep = "")
-        paste(filename, '.RData', sep = "")
+        #paste ("data-", Sys.Date(), ".qf", sep = "")
+        paste(filename, '.qf', sep = "")
       },
       content = function(file) {
         file.copy(
-          from = rv$export_file_RData,
+          from = rv$export_file_qf,
           to = file
         )
       }
@@ -167,7 +168,7 @@ download_dataset <- function(data, filename = 'myDataset'){
     
     download_dataset_server("dl",
       dataIn = reactive({data}),
-      extension = c('csv', 'xlsx', 'RData'),
+      extension = c('csv', 'xlsx', 'qf'),
       filename = filename
     )
   }
