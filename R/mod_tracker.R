@@ -54,7 +54,7 @@ mod_tracker_ui <- function(id) {
 #'
 mod_tracker_server <- function(id,
     object = reactive({NULL}), 
-    remoteReset = reactive({NULL}),
+    remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})
   ) {
   

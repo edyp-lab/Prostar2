@@ -19,7 +19,7 @@
 #'   qMetadata.def(typeDataset(ft_na[[1]]))$node)
 #'   
 #'   rv$res <- foo_server('query', 
-#'   remoteReset = reactive({NULL}),
+#'   remoteReset = reactive({0}),
 #'   is.enabled = reactive({NULL})
 #'   )
 #'   
@@ -52,7 +52,7 @@ foo_ui <- function(id){
 
 foo_server <- function(id,
   obj,
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
 ) {
   

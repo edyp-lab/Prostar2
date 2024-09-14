@@ -72,7 +72,7 @@ mod_Variable_Filtering_ui <- function(id) {
 mod_Variable_Filtering_server <- function(id,
   obj = reactive({NULL}),
   i = reactive({1}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
   # Define default selected values for widgets

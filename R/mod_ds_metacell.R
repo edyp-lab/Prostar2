@@ -55,7 +55,7 @@ mod_ds_metacell_Histos_server <- function(id,
   pal = reactive({NULL}), 
   pattern = reactive({NULL}),
   showSelect = reactive({TRUE}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
   ) {
     moduleServer(id, function(input, output, session) {

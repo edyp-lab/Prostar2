@@ -92,7 +92,7 @@ PipelineProtein_DA_ui <- function(id){
 PipelineProtein_DA_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
-  remoteReset = reactive({FALSE}),
+  remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1})
 ){
@@ -499,7 +499,7 @@ PipelineProtein_DA_server <- function(id,
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
-        remoteReset = reactive({NULL}),
+        remoteReset = reactive({0}),
         is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
       )
     })
@@ -1038,7 +1038,7 @@ PipelineProtein_DA_server <- function(id,
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
       tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
-      remoteReset = reactive({NULL}),
+      remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]})
     )
     
@@ -1128,7 +1128,7 @@ PipelineProtein_DA_server <- function(id,
     logpval <- Prostar2::mod_set_pval_threshold_server(id = "Title",
       pval_init = reactive({10^(-rv.custom$thpval)}),
       fdr = reactive({Get_FDR()}),
-      remoteReset = reactive({NULL}),
+      remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]}))
     
     

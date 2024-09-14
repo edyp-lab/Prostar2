@@ -41,7 +41,7 @@ mod_inputGroup_server <- function(
     id, 
   df, 
   quantCols,
-  remoteReset = reactive({FALSE}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
 ) {
   requireNamespace("shinyBS")

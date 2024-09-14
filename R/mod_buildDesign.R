@@ -64,7 +64,7 @@ mod_buildDesign_ui <- function(id) {
 #' @export
 mod_buildDesign_server <- function(id,
   quantCols,
-  remoteReset = reactive({FALSE}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
   ) {
   

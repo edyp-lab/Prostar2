@@ -41,7 +41,7 @@ mod_DetQuantImpValues_server <- function(
     obj = reactive({NULL}),
     quant = reactive({1}),
     factor = reactive({1}),
-  remoteReset = reactive({FALSE}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
   
   ) {

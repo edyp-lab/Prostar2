@@ -99,7 +99,7 @@ mod_settings_ui <- function(id) {
 mod_settings_server <- function(
     id, 
   obj,
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
     
   

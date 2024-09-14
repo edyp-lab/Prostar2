@@ -51,7 +51,7 @@ convert_dataset_ui <- function(id){
 #' @importFrom tibble as_tibble
 #' 
 convert_dataset_server <- function(id,
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
 ){
   

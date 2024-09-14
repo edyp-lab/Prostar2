@@ -82,7 +82,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
     val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
     operator = reactive({setNames(nm = SymFilteringOperators())}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})) {
 
     # Define default selected values for widgets
@@ -463,7 +463,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
     keep_vs_remove = setNames(nm = c("delete", "keep")),
     val_vs_percent = setNames(nm = c("Count", "Percentage")),
     operator = setNames(nm = SymFilteringOperators()),
-  remoteReset = FALSE,
+  remoteReset = reactive({0}),
   is.enabled = TRUE){
   
   
@@ -478,7 +478,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
       val_vs_percent = reactive({val_vs_percent}),
       operator = reactive({operator}),
       is.enabled = reactive({is.enabled}),
-      remoteReset = reactive({remoteReset}))
+      remoteReset = reactive({remoteReset()}))
     
     observeEvent(res()$trigger, {
       #browser()

@@ -68,7 +68,7 @@ mod_metacell_tree_ui <- function(id) {
 #' 
 mod_metacell_tree_server <- function(id, 
   obj = reactive({NULL}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
    
   #pkgs.require(c("shinyBS", "shinyjs"))

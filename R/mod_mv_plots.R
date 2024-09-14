@@ -54,7 +54,7 @@ mod_mv_plots_server <- function(id,
   pal = reactive({NULL}), 
   pattern,
   is.enabled = reactive({TRUE}),
-  remoteReset = reactive({NULL})
+  remoteReset = reactive({0})
   ) {
   
   

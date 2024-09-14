@@ -74,7 +74,7 @@ mod_Prot_Imputation_POV_ui <- function(id) {
 mod_Prot_Imputation_POV_server <- function(id,
   obj = reactive({NULL}),
   i = reactive({NULL}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
   # Define default selected values for widgets

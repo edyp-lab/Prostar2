@@ -83,7 +83,7 @@ mod_volcanoplot_server <- function(
     thlogfc = reactive({0}),
     thpval = reactive({0}),
     tooltip = reactive({NULL}),
-    remoteReset = reactive({NULL}),
+    remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})
     ) {
   

@@ -24,7 +24,7 @@ PipelineProtein_Description_ui <- function(id){
 PipelineProtein_Description_server <- function(id,
     dataIn = reactive({NULL}),
     steps.enabled = reactive({NULL}),
-    remoteReset = reactive({FALSE}),
+    remoteReset = reactive({0}),
     steps.status = reactive({NULL}),
     current.pos = reactive({1}),
     path = NULL

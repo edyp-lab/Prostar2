@@ -60,7 +60,7 @@ mod_Pirat_ui <- function(id){
 #' 
 mod_Pirat_server <- function(id,
   obj = reactive({NULL}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE}),
   verbose = FALSE) {
 

@@ -79,7 +79,7 @@ mod_VariableFilter_Generator_server <- function(id,
   value = reactive({NULL}),
   operator = reactive({NULL}),
   keep_vs_remove = reactive({'delete'}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
   # Define default selected values for widgets

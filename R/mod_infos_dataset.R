@@ -61,7 +61,7 @@ infos_dataset_ui <- function(id){
 #' 
 infos_dataset_server <- function(id,
   obj = reactive({NULL}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
   ){
   

@@ -45,7 +45,7 @@ download_dataset_server <- function(id,
   widget.type = 'Link',
   filename = 'myDataset', 
   excel.style = NULL,
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
   ) {
   moduleServer(id, function(input, output, session) {

@@ -36,7 +36,7 @@ mod_designExample_ui <- function(id) {
 mod_designExample_server <- function(
     id, 
     n,
-  remoteReset = reactive({FALSE}),
+  remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})
     ){
   

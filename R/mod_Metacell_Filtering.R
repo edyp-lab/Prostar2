@@ -72,7 +72,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 mod_Metacell_Filtering_server <- function(id,
   obj = reactive({NULL}),
   i = reactive({1}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
   # Define default selected values for widgets
@@ -149,6 +149,7 @@ mod_Metacell_Filtering_server <- function(id,
     observe({
       req(is.enabled())
       req(rv$dataIn)
+      
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
         obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),

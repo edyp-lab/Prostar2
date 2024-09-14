@@ -64,7 +64,7 @@ mod_set_pval_threshold_server <- function(id,
   pval_init = reactive({1}),
   fdr = reactive({0}),
   threshold.type = reactive({'logpval'}),
-  remoteReset = reactive({NULL}),
+  remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
   
