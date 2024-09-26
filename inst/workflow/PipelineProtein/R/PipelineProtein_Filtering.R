@@ -126,6 +126,10 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> 
     
     
+    # observeEvent(remoteReset(), {
+    #   browser()
+    # })
+    
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 
       #   'md', paste0(id, '.md')))
@@ -208,6 +212,9 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observe({
+      print('tututut')
+      print(remoteReset())
+      
       rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
         id = "metaFiltering",
         obj = reactive({rv$dataIn}),

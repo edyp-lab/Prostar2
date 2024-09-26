@@ -56,6 +56,7 @@ open_dataset_ui <- function(id){
 #' @rdname open_dataset
 #' @export
 #' @importFrom shinyjs info
+#' @import shiny
 #' @import QFeatures
 #' 
 open_dataset_server <- function(
@@ -120,8 +121,8 @@ open_dataset_server <- function(
 
 
 
-#----------------------------------------------------
-
+open_dataset <- function(){
+  
 ui <- fluidPage(
   tagList(
     open_dataset_ui("qf_file"),
@@ -150,4 +151,6 @@ server <- function(input, output, session) {
   })
 }
 
-shinyApp(ui, server)
+app <- shinyApp(ui, server)
+
+}

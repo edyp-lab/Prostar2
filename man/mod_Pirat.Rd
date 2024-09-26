@@ -14,7 +14,7 @@ mod_Pirat_server(
      NULL
  }),
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

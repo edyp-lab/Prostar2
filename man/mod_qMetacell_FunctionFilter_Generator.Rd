@@ -22,7 +22,7 @@ mod_qMetacell_FunctionFilter_Generator_server(
      setNames(nm = SymFilteringOperators())
  }),
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE
@@ -35,7 +35,9 @@ mod_qMetacell_FunctionFilter_Generator(
   keep_vs_remove = setNames(nm = c("delete", "keep")),
   val_vs_percent = setNames(nm = c("Count", "Percentage")),
   operator = setNames(nm = SymFilteringOperators()),
-  remoteReset = FALSE,
+  remoteReset = reactive({
+     0
+ }),
   is.enabled = TRUE
 )
 }

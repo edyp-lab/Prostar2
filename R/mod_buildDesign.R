@@ -10,8 +10,9 @@
 #' 
 #' @return NA
 #'
-#' @exampleIf interactive()
+#' @examplesIf interactive()
 #' shiny::runApp(mod_buildDesign(letters[seq(6)]))
+#' 
 #'
 NULL
 

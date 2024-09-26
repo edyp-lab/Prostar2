@@ -27,6 +27,9 @@ These functions are inspired by the functions run_workflow() in the package
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-shiny::runApp(convert_dataset())
+library(DaparToolshed)
+library(MagellanNTK)
+library(Prostar2)
+shiny::runApp(Prostar2::convert_dataset())
 \dontshow{\}) # examplesIf}
 }

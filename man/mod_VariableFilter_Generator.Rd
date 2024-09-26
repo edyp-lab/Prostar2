@@ -26,7 +26,7 @@ mod_VariableFilter_Generator_server(
      "delete"
  }),
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

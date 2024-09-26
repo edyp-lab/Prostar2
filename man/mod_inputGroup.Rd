@@ -10,10 +10,14 @@ mod_inputGroup_ui(id)
 
 mod_inputGroup_server(
   id,
-  df,
-  quantCols,
+  df = reactive({
+     NULL
+ }),
+  quantCols = reactive({
+     NULL
+ }),
   remoteReset = reactive({
-     FALSE
+     0
  }),
   is.enabled = reactive({
      TRUE
@@ -37,6 +41,6 @@ A shiny Module.
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-shiny::runApp(mod_inputGroup())
+shiny::runApp(Prostar2::mod_inputGroup())
 \dontshow{\}) # examplesIf}
 }

@@ -4,14 +4,18 @@
 \alias{Prostar2}
 \title{xxx}
 \usage{
-Prostar2(wf.name, usermod = "user", verbose = FALSE)
+Prostar2(wf.name = NULL, usermod = "user", verbose = FALSE)
 }
 \description{
 xxxx
 }
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+library(Prostar2)
+library(MagellanNTK)
 Prostar2('PipelineProtein')
+
+Prostar2('PipelineConvert')
 
 \dontshow{\}) # examplesIf}
 }

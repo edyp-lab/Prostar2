@@ -28,7 +28,7 @@ mod_ds_metacell_Histos_server(
      TRUE
  }),
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

@@ -17,7 +17,7 @@ mod_Variable_Filtering_server(
      1
  }),
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

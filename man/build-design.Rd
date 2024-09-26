@@ -13,7 +13,7 @@ mod_buildDesign_server(
   id,
   quantCols,
   remoteReset = reactive({
-     FALSE
+     0
  }),
   is.enabled = reactive({
      TRUE
@@ -32,4 +32,10 @@ NA
 }
 \description{
 xxxx
+}
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+shiny::runApp(mod_buildDesign(letters[seq(6)]))
+
+\dontshow{\}) # examplesIf}
 }

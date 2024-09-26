@@ -25,7 +25,7 @@ mod_mv_plots_server(
      TRUE
  }),
   remoteReset = reactive({
-     NULL
+     0
  })
 )
 

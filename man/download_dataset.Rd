@@ -16,12 +16,12 @@ download_dataset_server(
   dataIn = reactive({
      NULL
  }),
-  extension = c("xlsx", "RData"),
+  extension = c("xlsx", "qf"),
   widget.type = "Link",
   filename = "myDataset",
   excel.style = NULL,
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE
@@ -35,7 +35,7 @@ download_dataset(data, filename = "myDataset")
 
 \item{dataIn}{internal}
 
-\item{extension}{Available values are \code{csv} (default), \code{RData} and \code{Excel}.}
+\item{extension}{Available values are \code{csv} (default), \code{qf} and \code{Excel}.}
 
 \item{widget.type}{Available values are \code{Button} and \code{Link} (default).}
 

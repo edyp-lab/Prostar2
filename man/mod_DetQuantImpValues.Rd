@@ -20,7 +20,7 @@ mod_DetQuantImpValues_server(
      1
  }),
   remoteReset = reactive({
-     FALSE
+     0
  }),
   is.enabled = reactive({
      TRUE

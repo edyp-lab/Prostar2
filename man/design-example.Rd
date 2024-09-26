@@ -13,7 +13,7 @@ mod_designExample_server(
   id,
   n,
   remoteReset = reactive({
-     FALSE
+     0
  }),
   is.enabled = reactive({
      TRUE

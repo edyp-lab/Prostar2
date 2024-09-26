@@ -54,7 +54,6 @@ mod_Pirat_ui <- function(id){
 #' @importFrom shiny moduleServer reactiveVal reactiveValues renderUI 
 #' selectInput observeEvent withProgress setProgress req reactive renderPlot
 #' @importFrom SummarizedExperiment assay
-#' @importFrom S4Vectors metadata
 #' @export
 #' @return A shiny app
 #' 

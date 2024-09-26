@@ -11,7 +11,7 @@ open_dataset_ui(id)
 open_dataset_server(
   id,
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

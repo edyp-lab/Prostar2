@@ -5,12 +5,17 @@
 #' 
 #' 
 #' @examplesIf interactive()
+#' library(Prostar2)
+#' library(MagellanNTK)
 #' Prostar2('PipelineProtein')
+#' 
+#' Prostar2('PipelineConvert')
 #' 
 #' 
 #' @export
 #' 
-Prostar2 <- function(wf.name, 
+Prostar2 <- function(
+    wf.name = NULL, 
   usermod = 'user',
   verbose = FALSE){
   wf.path <- system.file(paste0('workflow/', wf.name), package = 'Prostar2')

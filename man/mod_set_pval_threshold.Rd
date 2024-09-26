@@ -20,7 +20,7 @@ mod_set_pval_threshold_server(
      "logpval"
  }),
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

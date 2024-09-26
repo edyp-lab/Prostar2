@@ -38,7 +38,6 @@ open_demoDataset_ui <- function(id){
 #' @export
 #' @keywords internal
 #' 
-#' @importFrom BiocGenerics get
 #' @importFrom utils data
 #' @importFrom shinyjs info
 #' @import QFeatures
@@ -80,7 +79,7 @@ open_demoDataset_server <- function(
       withProgress(message = '',detail = '', value = 0, {
         incProgress(1/nSteps, detail = 'Loading dataset')
         utils::data(list=input$demoDataset, package=.package)
-        rv.openDemo$dataRead <- BiocGenerics::get(input$demoDataset)
+        rv.openDemo$dataRead <- get(input$demoDataset)
         if (!inherits(rv.openDemo$dataRead, "QFeatures")) {
           shinyjs::info("Warning : this file is not a QFeatures file ! 
                       Please choose another one.")

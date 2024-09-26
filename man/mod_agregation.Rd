@@ -17,7 +17,7 @@ mod_Agregation_server(
      NULL
  }),
   remoteReset = reactive({
-     FALSE
+     0
  }),
   steps.status = reactive({
      NULL

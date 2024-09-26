@@ -652,8 +652,9 @@ PipelineConvert_Convert_server <- function(id,
     
     observe({
     rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
-      df = rv.convert$tab,
-      quantCols = rv.widgets$ExpandFeatData_quantCols)
+      df = reactive({rv.convert$tab}),
+      quantCols = reactive({rv.widgets$ExpandFeatData_quantCols})
+        )
   })
   
     output$ExpandFeatData_inputGroup_ui <- renderUI({

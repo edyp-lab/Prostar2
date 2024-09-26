@@ -11,7 +11,7 @@ mod_settings_server(
   id,
   obj,
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE

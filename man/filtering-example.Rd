@@ -16,7 +16,7 @@ mod_filtering_example_server(
   operation = "keep",
   title = "myTitle",
   remoteReset = reactive({
-     NULL
+     0
  }),
   is.enabled = reactive({
      TRUE
