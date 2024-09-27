@@ -86,6 +86,7 @@ PipelineProtein_DA_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
+#' @importFrom magrittr "%>%"
 #' 
 #' @export
 #' 
@@ -208,7 +209,7 @@ PipelineProtein_DA_server <- function(id,
       widget <- actionButton(ns("Description_btn_validate"),
         "Start",
         class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
@@ -242,7 +243,7 @@ PipelineProtein_DA_server <- function(id,
       
       paramshistory(.se) <- NULL
       
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
@@ -1415,7 +1416,7 @@ PipelineProtein_DA_server <- function(id,
     })
     
     output$Save_btn_validate_UI <- renderUI({
-      toggleWidget(
+      MagellanNTK::toggleWidget(
         actionButton(ns("Save_btn_validate"), "Save",
           class = "btn-success"),
         rv$steps.enabled['Save']
@@ -1438,7 +1439,7 @@ PipelineProtein_DA_server <- function(id,
       
 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
@@ -1453,7 +1454,7 @@ PipelineProtein_DA_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
   }
   )
 }

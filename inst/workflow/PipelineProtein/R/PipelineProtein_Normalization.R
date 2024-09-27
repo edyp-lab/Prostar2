@@ -156,7 +156,7 @@ PipelineProtein_Normalization_server <- function(id,
       widget <- actionButton(ns("Description_btn_validate"),
                              "Start",
                              class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
@@ -164,7 +164,7 @@ PipelineProtein_Normalization_server <- function(id,
       rv$dataIn <- dataIn()
       rv.custom$init.dataset <- dataIn()
       
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
@@ -295,7 +295,7 @@ PipelineProtein_Normalization_server <- function(id,
         choices = DaparToolshed::normalizeMethods(),
         selected = rv.widgets$Normalization_method,
         width = '250px')
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
     
@@ -306,7 +306,7 @@ PipelineProtein_Normalization_server <- function(id,
           nm = c("overall", "within conditions")),
         selected = rv.widgets$Normalization_type,
         width = '150px')
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
     
@@ -316,7 +316,7 @@ PipelineProtein_Normalization_server <- function(id,
         'Span',
         value = rv.widgets$Normalization_spanLOESS,
         width = '100px')
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
     
@@ -327,7 +327,7 @@ PipelineProtein_Normalization_server <- function(id,
         MagellanNTK::mod_popover_for_help_ui(ns('quantile_help')),
         value = rv.widgets$Normalization_quantile,
         width = '100px')
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
     
@@ -338,7 +338,7 @@ PipelineProtein_Normalization_server <- function(id,
         "Include variance reduction",
         value = rv.widgets$Normalization_varReduction
         )
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
     
@@ -348,14 +348,14 @@ PipelineProtein_Normalization_server <- function(id,
           "Synchronise with selection above",
           value = rv.widgets$Normalization_sync
           )
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
 
     output$tracking <- renderUI({
       req(rv.widgets$Normalization_method %in% c('QuantileCentering', 'MeanCentering', 'SumByColumns'))
       widget <-  omXplore::plots_tracking_ui(ns("tracker"))
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
     })
     
    
@@ -439,7 +439,7 @@ PipelineProtein_Normalization_server <- function(id,
       widget <-  actionButton(ns("Normalization_btn_validate"),
                               "Run Normalization",
                               class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Normalization'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
       
     })
     # >>> END: Definition of the widgets
@@ -557,7 +557,7 @@ PipelineProtein_Normalization_server <- function(id,
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
  
         # DO NOT MODIFY THE THREE FOLLOWING LINES
-        dataOut$trigger <- Timestamp()
+        dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['Normalization'] <- stepStatus$VALIDATED
       }
@@ -578,7 +578,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     output$Save_btn_validate_ui <- renderUI({
       tagList(
-        toggleWidget( 
+        MagellanNTK::toggleWidget( 
           actionButton(ns("Save_btn_validate"), "Save",
             class = "btn-success"),
           rv$steps.enabled['Save']
@@ -594,7 +594,7 @@ PipelineProtein_Normalization_server <- function(id,
       # Do some stuff
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
@@ -606,7 +606,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
   }
   )
 }

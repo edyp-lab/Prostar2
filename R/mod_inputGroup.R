@@ -144,16 +144,16 @@ mod_inputGroup_server <- function(
       if (length(which(temp == "None")) > 0) {
         txt <- "The identification method is not appropriately defined for
       each sample."
-        res <- list(trigger = Timestamp(), ok = FALSE, temp = temp, txt = txt)
+        res <- list(trigger = MagellanNTK::Timestamp(), ok = FALSE, temp = temp, txt = txt)
         rv$dataOut <- NULL
       } else {
         if (length(temp) != length(unique(temp))) {
           txt <- "There are duplicates in identification columns."
-          res <- list(trigger = Timestamp(), ok = FALSE, temp = temp, txt = txt)
+          res <- list(trigger = MagellanNTK::Timestamp(), ok = FALSE, temp = temp, txt = txt)
           rv$dataOut <- NULL
         } else {
           txt <- "Correct"
-          res <- list(trigger = Timestamp(), ok = TRUE, temp = temp, txt = txt)
+          res <- list(trigger = MagellanNTK::Timestamp(), ok = TRUE, temp = temp, txt = txt)
           rv$dataOut <- temp
         }
       }

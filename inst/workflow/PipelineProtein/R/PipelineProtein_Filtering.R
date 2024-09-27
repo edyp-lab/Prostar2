@@ -172,7 +172,7 @@ PipelineProtein_Filtering_server <- function(id,
       widget <- actionButton(ns("Description_btn_validate"),
         "Start",
         class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
@@ -182,7 +182,7 @@ PipelineProtein_Filtering_server <- function(id,
       rv.custom$dataIn1 <- dataIn()
       rv.custom$dataIn2 <- dataIn()
       
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
@@ -336,7 +336,7 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     output$Save_btn_validate_ui <- renderUI({
-      toggleWidget(
+      MagellanNTK::toggleWidget(
         actionButton(ns("Save_btn_validate"), "Save",
                      class = "btn-success"),
         rv$steps.enabled['Save']
@@ -366,7 +366,7 @@ PipelineProtein_Filtering_server <- function(id,
         
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
 
@@ -379,7 +379,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
   }
   )
 }

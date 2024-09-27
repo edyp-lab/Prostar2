@@ -31,6 +31,7 @@ mod_designExample_ui <- function(id) {
 
 #' @rdname design-example
 #' @import shiny
+#' @importFrom magrittr "%>%"
 #' @export
 #' 
 mod_designExample_server <- function(

@@ -94,6 +94,7 @@ mod_settings_ui <- function(id) {
 #'
 #' @import highcharter
 #' @importFrom shinyjs onclick toggle
+#' @importFrom magrittr "%>%"
 #'
 #'
 mod_settings_server <- function(

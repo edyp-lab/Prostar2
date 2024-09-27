@@ -167,7 +167,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
 
         output$tree_UI <- renderUI({
-            widget <- div(mod_metacell_tree_ui(ns('tree')))
+            widget <- div(
+              mod_metacell_tree_ui(ns('tree')))
             MagellanNTK::toggleWidget(widget, is.enabled())
         })
         

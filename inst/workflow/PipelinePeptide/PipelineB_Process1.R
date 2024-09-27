@@ -159,13 +159,13 @@ PipelineB_Process1_server <- function(id,
       widget <- actionButton(ns("Description_btn_validate"),
                              "Start",
                              class = "btn-success")
-     toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
@@ -217,7 +217,7 @@ PipelineB_Process1_server <- function(id,
       widget <- actionButton(ns('Step1_btn1'),
                            'Step1_btn1',
                            class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Step1'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step1'] )
     })
 
     # This part must be customized by the developer of a new module
@@ -227,7 +227,7 @@ PipelineB_Process1_server <- function(id,
                   choices = 1:4,
                   selected = rv.widgets$Step1_select1,
                   width = '150px')
-      toggleWidget(widget, rv$steps.enabled['Step1'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step1'] )
     })
 
     
@@ -237,7 +237,7 @@ PipelineB_Process1_server <- function(id,
                     choices = 1:4,
                     selected = rv.widgets$Step1_select2,
                     width = '150px')
-      toggleWidget(widget, rv$steps.enabled['Step1'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step1'])
     })
     
     
@@ -247,7 +247,7 @@ PipelineB_Process1_server <- function(id,
                     choices = 1:4,
                     selected = rv.widgets$Step1_select3,
                     width = '150px')
-      toggleWidget(widget, rv$steps.enabled['Step1'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step1'])
     })
     
 
@@ -256,7 +256,7 @@ PipelineB_Process1_server <- function(id,
     widget <-  actionButton(ns("Step1_btn_validate"),
                    "Perform",
                    class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Step1'] )
+    MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step1'] )
       
     })
     # >>> END: Definition of the widgets
@@ -269,7 +269,7 @@ PipelineB_Process1_server <- function(id,
                                           name = paste0('temp_',id))
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Step1'] <- stepStatus$VALIDATED
     })
@@ -302,7 +302,7 @@ PipelineB_Process1_server <- function(id,
                     choices = 1:4,
                     selected = rv.widgets$Step2_select1,
                     width = '150px')
-      toggleWidget(widget, rv$steps.enabled['Step2'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step2'] )
     })
     
     output$Step2_select2_ui <- renderUI({
@@ -311,14 +311,14 @@ PipelineB_Process1_server <- function(id,
                     choices = 1:4,
                     selected = rv.widgets$Step2_select2,
                     width = '150px')
-      toggleWidget(widget, rv$steps.enabled['Step2'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step2'] )
     })
     
     output$Step2_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Step2_btn_validate"),
                      "Perform",
                      class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Step2'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Step2'] )
     })
     
     observeEvent(input$Step2_btn_validate, {
@@ -326,7 +326,7 @@ PipelineB_Process1_server <- function(id,
       
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Step2'] <- stepStatus$VALIDATED
     })
@@ -351,7 +351,7 @@ PipelineB_Process1_server <- function(id,
     })
     
     output$Save_btn_validate_ui <- renderUI({
-      toggleWidget(actionButton(ns("Save_btn_validate"), "Save",
+      MagellanNTK::toggleWidget(actionButton(ns("Save_btn_validate"), "Save",
                                   class = "btn-success"),
                      rv$steps.enabled['Save']
                      )
@@ -363,7 +363,7 @@ PipelineB_Process1_server <- function(id,
                                           name = id)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       MagellanNTK::mod_download_dataset_server('createQuickLink', 
@@ -376,7 +376,7 @@ PipelineB_Process1_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
   }
   )
 }

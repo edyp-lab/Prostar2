@@ -6,7 +6,6 @@
 #' 
 #' @examplesIf interactive()
 #' library(Prostar2)
-#' library(MagellanNTK)
 #' Prostar2('PipelineProtein')
 #' 
 #' Prostar2('PipelineConvert')

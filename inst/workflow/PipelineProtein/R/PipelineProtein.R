@@ -108,7 +108,7 @@ PipelineProtein_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
     }
   )
 }

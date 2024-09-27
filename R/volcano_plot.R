@@ -66,6 +66,9 @@
 #' conditions = cond, 
 #' clickFunction = hc_clickFunction)
 #'
+#'
+#' 
+#' @importFrom magrittr "%>%"
 #' @export
 #'
 #'

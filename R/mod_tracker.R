@@ -96,7 +96,7 @@ mod_tracker_server <- function(id,
         
           rv$dataIn <- object()
 
-          dataOut$trigger <- Timestamp()
+          dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
         }, priority = 1000)
         
@@ -180,7 +180,7 @@ mod_tracker_server <- function(id,
         observeEvent(rv.widgets$listSelect, {
           req(rv$dataIn)
           
-          dataOut$trigger <- Timestamp()
+          dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- match(rv.widgets$listSelect, 
                     rowData(rv$dataIn)[[omXplore::get_colID(rv$dataIn)]])
         })
@@ -194,7 +194,7 @@ mod_tracker_server <- function(id,
             cond <- cond || (as.numeric(rv.widgets$randSelect) < 0)
             cond <- cond || (as.numeric(rv.widgets$randSelect) > nrow(rv$dataIn))
             if (!cond) {
-              dataOut$trigger <- Timestamp()
+              dataOut$trigger <- MagellanNTK::Timestamp()
               dataOut$value <- sample(seq_len(nrow(rv$dataIn)),
                     as.numeric(rv.widgets$randSelect),
                     replace = FALSE
@@ -206,7 +206,7 @@ mod_tracker_server <- function(id,
            req(rv.widgets$colSelect != "None")
 
           .op1 <- rowData(rv$dataIn)[, rv.widgets$colSelect]
-          dataOut$trigger <- Timestamp()
+          dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- which( .op1 == 1)
         })
 

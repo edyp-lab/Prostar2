@@ -90,7 +90,7 @@ PipelineProtein_Save_server <- function(id,
       widget <- actionButton(ns("Save_btn_validate"),
         "Start",
         class = btn_success_color)
-      toggleWidget(widget, rv$steps.enabled['Save'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Save'])
     })
     
     
@@ -100,7 +100,7 @@ PipelineProtein_Save_server <- function(id,
       # validation of the step but without rebuilds the vector of datasets 
       # to send
       rv$dataIn <- dataIn()
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Save'] <- stepStatus$VALIDATED
     })
@@ -108,7 +108,7 @@ PipelineProtein_Save_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
     
   }
   )

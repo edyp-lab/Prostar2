@@ -58,6 +58,7 @@ NULL
 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
+#' @importFrom magrittr "%>%"
 #' @export
 #' @rdname volcanoplot
 #'

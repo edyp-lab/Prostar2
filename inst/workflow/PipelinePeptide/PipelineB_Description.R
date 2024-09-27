@@ -94,13 +94,13 @@ PipelineB_Description_server <- function(id,
       widget <- actionButton(ns("Description_btn_validate"),
                              "Start",
                              class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepsStatus$VALIDATED
     })
@@ -108,7 +108,7 @@ PipelineB_Description_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
     
   }
   )

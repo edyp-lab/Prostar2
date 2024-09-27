@@ -158,7 +158,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
     
     output$mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("mvplots"))
-      toggleWidget(widget, is.enabled())
+      MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
     

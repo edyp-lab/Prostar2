@@ -174,7 +174,7 @@ mod_metacell_tree_server <- function(id,
         init_tree <- function(){
           req(omXplore::get_type(obj()))
           #print('------------ init_tree() ---------------')
-          rv$meta <- DAPAR::metacell.def(omXplore::get_type(obj()))
+          rv$meta <- omXplore::metacell.def(omXplore::get_type(obj()))
           rv$mapping <- BuildMapping(rv$meta)$names
           rv$bg_colors <- BuildMapping(rv$meta)$colors
           

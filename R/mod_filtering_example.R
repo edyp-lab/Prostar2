@@ -66,6 +66,7 @@ mod_filtering_example_ui <- function(id) {
 #' @importFrom shiny NS renderUI moduleServer 
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
 #' @import shiny
+#' @importFrom magrittr "%>%"
 #' @export
 #' 
 mod_filtering_example_server <- function(id, 

@@ -168,13 +168,13 @@ PipelineProtein_HypothesisTest_server <- function(id,
       widget <- actionButton(ns("Description_btn_validate"),
         "Start",
         class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
@@ -466,9 +466,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
       if (rv.widgets$HypothesisTest_method == 'ttests')
         req(rv.widgets$HypothesisTest_ttestOptions != "None")
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::match.metacell(
+        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing",
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]))
+        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        )
       
       req(length(which(m)) == 0)
       
@@ -502,19 +504,20 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
       
       rv.custom$AllPairwiseComp
-    }) %>% bindCache(
-      rv$dataIn,
-      rv.widgets$HypothesisTest_method,
-      rv.widgets$HypothesisTest_design,
-      rv.widgets$HypothesisTest_ttestOptions
-    )
+    }) 
+    # %>% bindCache(
+    #   rv$dataIn,
+    #   rv.widgets$HypothesisTest_method,
+    #   rv.widgets$HypothesisTest_design,
+    #   rv.widgets$HypothesisTest_ttestOptions
+    # )
     
     
     output$HypothesisTest_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("HypothesisTest_btn_validate"),
         "Validate step",
         class = "btn-success")
-      toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
       
     })
     
@@ -522,7 +525,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       # Do some stuff
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['HypothesisTest'] <- stepStatus$VALIDATED
     })
@@ -561,7 +564,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         uiOutput(ns("showConds")),
       )
       
-      toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
     })
     
     # >>> END: Definition of the widgets
@@ -582,7 +585,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     output$Save_btn_validate_ui <- renderUI({
       tagList(
-        toggleWidget( 
+        MagellanNTK::toggleWidget( 
           actionButton(ns("Save_btn_validate"), "Validate step",
             class = "btn-success"),
           rv$steps.enabled['Save']
@@ -608,7 +611,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', 
@@ -621,7 +624,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
   }
   )
 }

@@ -177,7 +177,7 @@ PipelineConvert_Convert_server <- function(id,
     output$Description_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Description_btn_validate"), "Start",
         class = 'info')
-      toggleWidget(widget, rv$steps.enabled['Description'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     
     
@@ -228,7 +228,7 @@ PipelineConvert_Convert_server <- function(id,
         choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
         selected = rv.widgets$SelectFile_software)
       
-      toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
     # This part must be customized by the developer of a new module
@@ -252,7 +252,7 @@ PipelineConvert_Convert_server <- function(id,
         )
       )
       
-      toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
     fileExt.ok <- reactive({
@@ -337,7 +337,7 @@ PipelineConvert_Convert_server <- function(id,
       #   # cleanup-code
       # }
       # )
-      toggleWidget(widget, rv$steps.enabled['SelectFile'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'])
     })
     
     
@@ -349,7 +349,7 @@ PipelineConvert_Convert_server <- function(id,
         ),
         selected = rv.widgets$SelectFile_typeOfData)
       
-      toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
     
@@ -361,7 +361,7 @@ PipelineConvert_Convert_server <- function(id,
         selected = rv.widgets$SelectFile_checkDataLogged
       )
       
-      toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
     
@@ -371,7 +371,7 @@ PipelineConvert_Convert_server <- function(id,
         value = rv.widgets$SelectFile_replaceAllZeros
       )
       
-      toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
     
@@ -379,7 +379,7 @@ PipelineConvert_Convert_server <- function(id,
     output$SelectFile_btn_validate_ui <- renderUI({
       widget <-  actionButton(ns("SelectFile_btn_validate"), "Perform",
         class = 'info')
-      toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
       
     })
     # >>> END: Definition of the widgets
@@ -494,7 +494,7 @@ PipelineConvert_Convert_server <- function(id,
         )
       )
       
-      toggleWidget(widget, rv$steps.enabled['DataId'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
     
     
@@ -544,7 +544,7 @@ PipelineConvert_Convert_server <- function(id,
           choices = setNames(nm =c("", colnames(rv.convert$tab))),
           selected = rv.widgets$DataId_parentProteinId)
       )
-      toggleWidget(widget, rv$steps.enabled['DataId'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
     
     
@@ -582,7 +582,7 @@ PipelineConvert_Convert_server <- function(id,
     output$DataId_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("DataId_btn_validate"), "Perform",
         class = 'info')
-      toggleWidget(widget, rv$steps.enabled['DataId'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
     
     observeEvent(input$DataId_btn_validate, {
@@ -599,7 +599,7 @@ PipelineConvert_Convert_server <- function(id,
       
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['DataId'] <- stepStatus$VALIDATED
     })
@@ -646,7 +646,7 @@ PipelineConvert_Convert_server <- function(id,
           "No (default values will be computed)" = FALSE,
           "Yes" = TRUE),
         selected = rv.widgets$ExpandFeatData_idMethod)
-      toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
     })
     
     
@@ -684,7 +684,7 @@ PipelineConvert_Convert_server <- function(id,
         )
       )
       
-      toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
     })
     
     
@@ -705,7 +705,7 @@ PipelineConvert_Convert_server <- function(id,
       widget <- actionButton(ns("ExpandFeatData_btn_validate"),
         "Perform",
         class = 'info')
-      toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'] )
     })
     
     observeEvent(input$ExpandFeatData_btn_validate, {
@@ -716,7 +716,7 @@ PipelineConvert_Convert_server <- function(id,
       #                                     name = paste0('temp_',id))
       # 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['ExpandFeatData'] <- stepStatus$VALIDATED
     })
@@ -741,7 +741,7 @@ PipelineConvert_Convert_server <- function(id,
     output$Design_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Design_btn_validate"), "Validate design",
         class = 'info')
-      toggleWidget(widget, rv$steps.enabled['Design'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Design'] )
     })
     
     observeEvent(input$Design_btn_validate, {
@@ -754,7 +754,7 @@ PipelineConvert_Convert_server <- function(id,
       #                                     name = paste0('temp_',id))
       # 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Design'] <- stepStatus$VALIDATED
     })
@@ -778,7 +778,7 @@ PipelineConvert_Convert_server <- function(id,
     
     
     output$Save_infos_ui <- renderUI({
-      toggleWidget(
+      MagellanNTK::toggleWidget(
         tagList(
           textInput(ns('Save_analysis'), '', placeholder = 'Name of the analysis'),
           textAreaInput(ns('Save_description'), '', placeholder = 'Description of the analysis', height = '150px')
@@ -789,7 +789,7 @@ PipelineConvert_Convert_server <- function(id,
     
     
     output$Save_btn_validate_ui <- renderUI({
-      toggleWidget(actionButton(ns("Save_btn_validate"), 
+      MagellanNTK::toggleWidget(actionButton(ns("Save_btn_validate"), 
         "Create QFeatures dataset", 
         class = 'info'),
         rv$steps.enabled['Save']
@@ -818,7 +818,7 @@ PipelineConvert_Convert_server <- function(id,
         software = rv.widgets$SelectFile_software)
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- Timestamp()
+      dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- list(data = rv$dataIn, name = rv.custom$name)
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
@@ -830,7 +830,7 @@ PipelineConvert_Convert_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(parse(text = Module_Return_Func()))
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
   })
 }
 
