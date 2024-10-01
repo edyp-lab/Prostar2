@@ -86,8 +86,10 @@ infos_dataset_server <- function(id,
         MagellanNTK::format_DT_server('samples_tab',
           obj = reactive({
             req((rv$dataIn))
+            
             data.frame(colData(rv$dataIn))
           }),
+          max.rows = nrow(colData(rv$dataIn)),
           hc_style = reactive({
             list(
               cols = colnames(colData(rv$dataIn)),
