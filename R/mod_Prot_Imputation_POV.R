@@ -16,10 +16,12 @@
 #'   language,
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_pept, package="DaparToolshedData")
 #' obj <- Exp1_R25_pept[seq_len(100)]
 #' shiny::runApp(mod_Prot_Imputation_POV(obj, 1))
+#' }
 #' 
 NULL
 

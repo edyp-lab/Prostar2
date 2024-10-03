@@ -13,7 +13,7 @@
 #' @name mod_Pirat
 #' 
 #' @examples
-#' if(interactive()){
+#' \dontrun{
 #' data(subbouyssie)
 #' 
 #' # Builds the instance of `SummarizedExperiment`

@@ -11,9 +11,11 @@
 #' @name mod_mv_plots
 #' 
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(mod_mv_plots(Exp1_R25_prot[[1]]))
+#' }
 #' 
 NULL
 

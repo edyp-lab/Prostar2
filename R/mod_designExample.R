@@ -10,8 +10,10 @@
 #' 
 #' @return NA
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' shiny::runApp(mod_designExample(2))
+#' }
 #' 
 NULL
 

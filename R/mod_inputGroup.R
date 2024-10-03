@@ -10,8 +10,10 @@
 #' 
 #' @return A shiny app
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' shiny::runApp(Prostar2::mod_inputGroup())
+#' }
 #' 
 NULL
 

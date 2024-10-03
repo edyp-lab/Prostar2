@@ -34,8 +34,8 @@ NA
 xxxx
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 shiny::runApp(mod_buildDesign(letters[seq(6)]))
+}
 
-\dontshow{\}) # examplesIf}
 }

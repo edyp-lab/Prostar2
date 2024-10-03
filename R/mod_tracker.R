@@ -12,9 +12,11 @@
 #'
 #' @name mod_tracker
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(mod_tracker(Exp1_R25_prot))
+#' }
 #' 
 NULL
 

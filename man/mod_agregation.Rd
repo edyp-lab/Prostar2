@@ -80,9 +80,10 @@ xxxxxx
 }
 
 \examples{
-\dontshow{if () (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 shiny::runApp(workflowApp("Agregation", verbose = TRUE))
-\dontshow{\}) # examplesIf}
+}
+
 }
 \seealso{
 The user manual of the package \code{MagellanNTK}.

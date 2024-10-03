@@ -10,12 +10,11 @@ Prostar2(wf.name = NULL, usermod = "user", verbose = FALSE)
 xxxx
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 library(Prostar2)
-library(MagellanNTK)
 Prostar2('PipelineProtein')
 
 Prostar2('PipelineConvert')
+}
 
-\dontshow{\}) # examplesIf}
 }

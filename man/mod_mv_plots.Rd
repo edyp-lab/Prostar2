@@ -46,8 +46,9 @@ mod_mv_plots(data, title = NULL, pal = NULL, pattern = NULL)
 xxx
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 shiny::runApp(mod_mv_plots(Exp1_R25_prot[[1]]))
-\dontshow{\}) # examplesIf}
+}
+
 }

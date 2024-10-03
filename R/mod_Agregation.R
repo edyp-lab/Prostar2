@@ -27,8 +27,10 @@
 #' 
 #' @return NA
 #'
-#' @examplesIf
+#' @examples
+#' \dontrun{
 #' shiny::runApp(workflowApp("Agregation", verbose = TRUE))
+#' }
 #' 
 NULL
 

@@ -63,8 +63,9 @@ This function is written with specifications of the package \code{MagellanNTK} s
 as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
-\dontshow{\}) # examplesIf}
+}
+
 }

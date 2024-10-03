@@ -18,9 +18,11 @@
 #'   language,
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
+#' }
 #' 
 NULL
 

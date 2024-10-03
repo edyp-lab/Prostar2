@@ -6,9 +6,11 @@
 #' 
 #' @name mod_export_dataset
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(lldata)
 #' shiny::runApp(export_dataset(lldata))
+#' }
 #' 
 #' @return A list
 #' 

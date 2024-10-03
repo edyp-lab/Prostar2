@@ -42,8 +42,9 @@ mod_DetQuantImpValues(obj)
 A shiny Module.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(ft_na)
 shiny::runApp(mod_DetQuantImpValues(ft_na[[1]]))
-\dontshow{\}) # examplesIf}
+}
+
 }

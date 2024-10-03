@@ -42,7 +42,8 @@ mod_set_pval_threshold(pval_init = 1, fdr = 0, threshold.type = "logpval")
 A shiny Module.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 shiny::runApp(mod_set_pval_threshold())
-\dontshow{\}) # examplesIf}
+}
+
 }

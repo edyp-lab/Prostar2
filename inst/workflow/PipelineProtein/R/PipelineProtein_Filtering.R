@@ -31,12 +31,13 @@
 #' @param path xxx
 #' 
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(MagellanNTK)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_Filtering", path, dataIn = Exp1_R25_prot))
-#' 
+#' }
 #' 
 #' 
 #' @author Samuel Wieczorek

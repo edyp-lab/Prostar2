@@ -12,8 +12,11 @@
 #' 
 #' @name mod_set_pval_threshold
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' shiny::runApp(mod_set_pval_threshold())
+#' }
+#' 
 NULL
 
 

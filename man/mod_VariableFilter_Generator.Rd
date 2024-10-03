@@ -77,7 +77,7 @@ This function is written with specifications of the package \code{MagellanNTK} s
 as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 obj <- Exp1_R25_prot[[1]]
 operator = setNames(nm = SymFilteringOperators())
@@ -85,5 +85,6 @@ keep_vs_remove <- setNames(nm = c("delete", "keep"))
 value = 3
 shiny::runApp(
 mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
-\dontshow{\}) # examplesIf}
+}
+
 }

@@ -13,9 +13,11 @@
 #' @return NA
 #'
 #' @name download_dataset
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(download_dataset(Exp1_R25_prot))
+#' }
 #'
 NULL
 

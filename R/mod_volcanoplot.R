@@ -15,7 +15,8 @@
 #' 
 #' @name volcanoplot
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(highcharter)
 #' data(Exp1_R25_prot, package="DaparToolshedData")
 #' obj <- Exp1_R25_prot
@@ -50,6 +51,7 @@
 #' conditions = cond, 
 #' clickFunction = hc_clickFunction)
 #' shiny::runApp(volcanoplot(xxxx))
+#' }
 #'
 NULL
 

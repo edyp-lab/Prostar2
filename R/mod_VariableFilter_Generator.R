@@ -18,7 +18,8 @@
 #'   language,
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' obj <- Exp1_R25_prot[[1]]
 #' operator = setNames(nm = SymFilteringOperators())
@@ -26,6 +27,7 @@
 #' value = 3
 #' shiny::runApp(
 #' mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
+#' }
 #' 
 NULL
 

@@ -34,10 +34,11 @@ NA
 A shiny Module.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(sub_R25)
 shiny::runApp(build_report(sub_R25))
 
 shiny::runApp(build_report(sub_R25, filename = 'myDataset'))
-\dontshow{\}) # examplesIf}
+}
+
 }

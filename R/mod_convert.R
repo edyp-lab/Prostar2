@@ -9,12 +9,14 @@
 #' 
 #' @name convert_dataset
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(MagellanNTK)
 #' library(Prostar2)
 #' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(convert_dataset())
+#' }
 #' 
 
 NULL

@@ -44,8 +44,9 @@ Three modes of selection are implemented:
 }
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 shiny::runApp(mod_tracker(Exp1_R25_prot))
-\dontshow{\}) # examplesIf}
+}
+
 }

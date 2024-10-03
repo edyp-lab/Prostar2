@@ -4,11 +4,13 @@
 #' These functions are inspired by the functions run_workflow() in the package
 #' `MagellanNTK`. They wrap the entire workflow into a single function
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(DaparToolshed)
 #' library(MagellanNTK)
 #' library(Prostar2)
 #' shiny::runApp(Prostar2::convert_dataset())
+#' }
 #' 
 #' @name Convert_wrapper
 #' 

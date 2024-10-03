@@ -4,12 +4,13 @@
 #' @import MagellanNTK
 #' 
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(Prostar2)
 #' Prostar2('PipelineProtein')
 #' 
 #' Prostar2('PipelineConvert')
-#' 
+#' }
 #' 
 #' @export
 #' 

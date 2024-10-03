@@ -11,7 +11,7 @@
 #' @keywords internal
 #' 
 #' @examples 
-#' if (interactive()){
+#'\dontrun{
 #' ui <- fluidPage(
 #' tagList(
 #'   open_dataset_ui("qf_file"),

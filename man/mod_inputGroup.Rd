@@ -40,7 +40,8 @@ A shiny app
 A shiny Module.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 shiny::runApp(Prostar2::mod_inputGroup())
-\dontshow{\}) # examplesIf}
+}
+
 }

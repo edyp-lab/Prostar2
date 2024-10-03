@@ -14,7 +14,8 @@
 #' 
 #' @return NA
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' grp <- omXplore::get_group(Exp1_R25_prot)
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))
@@ -22,6 +23,7 @@
 #' # Test with pattern already defined
 #' pat <- c('Missing MEC', 'Missing POV')
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], pattern = pat, group = grp))
+#' }
 #' 
 NULL
 

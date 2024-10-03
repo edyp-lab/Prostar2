@@ -81,12 +81,13 @@ class \code{FunctionFilter} to filter the quantitative metadata of an instance
 of the class \code{SummarizedExperiment})
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package ='DaparToolshedData')
 obj <- Exp1_R25_prot[[1]]
 conds <- get_group(Exp1_R25_prot)
 
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))
-\dontshow{\}) # examplesIf}
+}
+
 }

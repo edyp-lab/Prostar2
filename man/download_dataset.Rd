@@ -50,8 +50,9 @@ NA
 A shiny Module.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 shiny::runApp(download_dataset(Exp1_R25_prot))
-\dontshow{\}) # examplesIf}
+}
+
 }

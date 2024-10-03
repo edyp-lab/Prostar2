@@ -15,12 +15,13 @@
 #' In this example, `PipelineProtein_Imputation_ui()` and `PipelineProtein_Imputation_server()` define
 #' the code for the process `PipelineProtein_Imputation` which is part of the pipeline called `PipelineProtein`.
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(MagellanNTK)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_Imputation", path, dataIn = Exp1_R25_prot))
-#' 
+#' }
 #' 
 
 #' @rdname PipelineProtein

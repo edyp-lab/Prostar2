@@ -58,7 +58,7 @@ results of hypothesis testing stored as a data.frame in its metadata}
 A shiny Module.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 library(highcharter)
 data(Exp1_R25_prot, package="DaparToolshedData")
 obj <- Exp1_R25_prot
@@ -93,5 +93,6 @@ th_logfc = 1,
 conditions = cond, 
 clickFunction = hc_clickFunction)
 shiny::runApp(volcanoplot(xxxx))
-\dontshow{\}) # examplesIf}
+}
+
 }

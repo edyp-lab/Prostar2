@@ -50,11 +50,12 @@ NA
 xxxx
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 obj <- Exp1_R25_prot[[1]]
 indices <- 1:5
 operation <- "delete"
 shiny::runApp(mod_filtering_example(obj, indices, operation))
-\dontshow{\}) # examplesIf}
+}
+
 }

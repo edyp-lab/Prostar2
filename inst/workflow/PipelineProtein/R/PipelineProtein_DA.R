@@ -31,7 +31,8 @@
 #' @param path xxx
 #' 
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(MagellanNTK)
 #' library(MagellanNTK)
 #' library(highcharter)
@@ -52,7 +53,7 @@
 #' obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_DA", path, dataIn = obj))
-#' 
+#' }
 #' 
 #' 
 #' @author Samuel Wieczorek

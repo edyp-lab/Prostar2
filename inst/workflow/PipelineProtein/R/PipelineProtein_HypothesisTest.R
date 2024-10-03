@@ -15,7 +15,8 @@
 #' In this example, `PipelineProtein_HypothesisTest_ulength(rv$dataIn)` and `PipelineProtein_HypothesisTest_server()` define
 #' the code for the process `ProcessProtein` which is part of the pipeline called `PipelineProtein`.
 #' 
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' library(MagellanNTK)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
@@ -23,7 +24,7 @@
 #' obj <- NAIsZero(obj, 1)
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_HypothesisTest", path, dataIn = Exp1_R25_prot))
-#'
+#' }
 #' 
 #' @rdname PipelineProtein
 #' @export

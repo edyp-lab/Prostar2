@@ -17,13 +17,15 @@
 #'   language,
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
-#' @examplesIf interactive()
+#' @examples
+#' \dontrun{
 #' data(Exp1_R25_prot, package ='DaparToolshedData')
 #' obj <- Exp1_R25_prot[[1]]
 #' conds <- get_group(Exp1_R25_prot)
 #' 
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))
+#' }
 #' 
 NULL
 

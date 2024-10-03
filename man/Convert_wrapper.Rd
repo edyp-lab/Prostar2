@@ -26,10 +26,11 @@ These functions are inspired by the functions run_workflow() in the package
 \code{MagellanNTK}. They wrap the entire workflow into a single function
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontrun{
 library(DaparToolshed)
 library(MagellanNTK)
 library(Prostar2)
 shiny::runApp(Prostar2::convert_dataset())
-\dontshow{\}) # examplesIf}
+}
+
 }

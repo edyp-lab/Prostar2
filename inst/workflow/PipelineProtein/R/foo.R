@@ -6,7 +6,7 @@
 #' @name mod-foo
 #'
 #' @examples 
-#' if (interactive()){
+#' \dontrun{
 #' data(ft_na)
 #' ui <- foo_ui('query')
 #' 
