@@ -46,3 +46,5 @@ Suggests:
     rmarkdown
 VignetteBuilder:
     knitr
+URL: https://github.com/edyp-lab/Prostar2
+BugReports: https://github.com/edyp-lab/Prostar2/issues

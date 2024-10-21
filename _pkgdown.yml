@@ -37,7 +37,7 @@ navbar:
         href: articles/Prostar_workflow_userguide.html
     github:
       icon: fa-github
-      href: https://github.com/samWieczorek/DAPAR2
+      href: https://github.com/edyp-lab/Prostar2
     forum:
       icon: fa-users
       href: https://support.bioconductor.org/

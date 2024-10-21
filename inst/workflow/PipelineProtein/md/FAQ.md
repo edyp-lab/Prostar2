@@ -126,7 +126,7 @@ Protein-level vocabulary:
 #### Prostar from 1.31.2
 
 
-<img src="https://github.com/prostarproteomics/Prostar_website/raw/master/docs/img/metacellTags.png"   width="600"/>
+<img src="https://github.com/edyp-lab/Prostar_website/raw/master/docs/img/metacellTags.png"   width="600"/>
 
 ### How the cells metadata tags are aggregated?
 
@@ -170,7 +170,7 @@ This case is not possible.
 If the set of metacell to agregate is a mix of 3.X and 3.0 and other (1.X), then the final metadata is set to 
 'Combined tags' (4.0).
 
-<img src="https://github.com/prostarproteomics/Prostar_website/raw/master/docs/img/metacellTags2.png"   width="800"/>
+<img src="https://github.com/edyp-lab/Prostar_website/raw/master/docs/img/metacellTags2.png"   width="800"/>
 
 
 Once the cell metadata tags have been aggregated, the final step of the process consist in analyzing missing values in order to identify 'missing POV' and 'missing MEC'. Thus, at the end of the agregation process, a dataset may contains
