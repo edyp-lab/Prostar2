@@ -1433,11 +1433,8 @@ PipelineProtein_DA_server <- function(id,
       
      
       # Add the result of pairwise comparison to the coldata
-      rowData(rv$dataIn[[last.se]]) <- cbind(
-        rowData(rv$dataIn[[last.se]]),
-        Build_pval_table()
-      )
-      
+     DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
+     
 
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

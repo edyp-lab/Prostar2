@@ -217,7 +217,7 @@ mod_Prot_Imputation_POV_server <- function(id,
     
     
     observeEvent(input$mod_Prot_Imputation_POV_btn_validate, {
-      
+
       req(rv$dataIn)
       m <- match.metacell(
         omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
