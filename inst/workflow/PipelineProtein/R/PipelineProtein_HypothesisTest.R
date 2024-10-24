@@ -402,14 +402,15 @@ PipelineProtein_HypothesisTest_server <- function(id,
       .style <- "align: center; display:inline-block; vertical-align: middle;
       padding-right: 50px; padding-bottom: 50px;"
       
+      #browser()
       widget <- lapply(seq_len(rv.custom$n), function(i) {
         ll.conds <- unlist(
-          strsplit(rv.custom$listNomsComparaison[i], split = "_")
+          strsplit(rv.custom$listNomsComparaison[i], split = "_vs_")
         )
         
         div(
           div(style = .style, p(gsub("[()]", "", ll.conds[1]))),
-          div(style = .style, p(gsub("[()]", "", ll.conds[3]))),
+          div(style = .style, p(gsub("[()]", "", ll.conds[2]))),
           div(style = .style,
             checkboxInput(ns(paste0("compswap", i)), "",
               value = rv.custom$swap.history[i])
@@ -503,6 +504,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
+      rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split='_logFC'))
       
       rv.custom$AllPairwiseComp
     }) 
