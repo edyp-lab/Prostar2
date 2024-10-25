@@ -38,6 +38,11 @@ Imports:
     magrittr,
     methods, 
     tibble
+Remotes:
+    git::https://github.com/edyp-lab/MagellanNTK,
+    git::https://github.com/edyp-lab/DaparToolshed,
+    git::https://github.com/edyp-lab/DaparToolshedData,
+    git::https://github.com/prostarproteomics/omXplore
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Suggests: 
