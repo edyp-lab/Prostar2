@@ -70,7 +70,7 @@ mod_buildDesign_server <- function(id,
   is.enabled = reactive({TRUE})
   ) {
   
-  requireNamespace("shinyBS")
+  #requireNamespace("shinyBS")
   requireNamespace('magrittr')
   
   moduleServer(id, function(input, output, session) {

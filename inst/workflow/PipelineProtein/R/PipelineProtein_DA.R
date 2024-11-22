@@ -49,7 +49,7 @@
 #' limma <- limmaCompleteTest(qData, sTab)
 #' df <- cbind(limma$logFC, limma$P_Value)
 #' new.dataset <- obj[[length(obj)]]
-#' HypothesisTest(new.dataset) <- as.data.frame(df)
+#' DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
 #' obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_DA", path, dataIn = obj))
@@ -88,6 +88,7 @@ PipelineProtein_DA_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @importFrom magrittr "%>%"
+#' @import DaparToolshed
 #' 
 #' @export
 #' 
@@ -220,7 +221,7 @@ PipelineProtein_DA_server <- function(id,
       
       # Find the assay containing the hypothesis tests comparisons
       .ind <- unlist(lapply(seq(length(dataIn())), function(x){
-        if(!is.null(HypothesisTest(dataIn()[[x]])))
+        if(!is.null(DaparToolshed::HypothesisTest(dataIn()[[x]])))
           x
       }))
       #rv$dataIn <- dataIn()[[.ind]]
@@ -232,7 +233,7 @@ PipelineProtein_DA_server <- function(id,
         rv$dataIn[[length(rv$dataIn)]], 
         'DA')
       
-      rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+      rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
       #browser()
       
@@ -522,8 +523,8 @@ PipelineProtein_DA_server <- function(id,
         
         .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
         
-        HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
-        rv.custom$res_AllPairwiseComparisons <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+        DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
+        rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
         rv.custom$history[['Number of pushed values to 1']] <- length(indices_to_push)
         
         n <- length(rv.custom$resAnaDiff$P_Value)
@@ -1315,7 +1316,7 @@ PipelineProtein_DA_server <- function(id,
       
       
       rv.widgets$Pairwisecomparison_Comparison
-      ht <- HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+      ht <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       .logfc <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')]
       .pval <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')]
       

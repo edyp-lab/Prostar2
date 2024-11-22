@@ -18,6 +18,18 @@ Prostar2 <- function(
     wf.name = NULL, 
   usermod = 'user',
   verbose = FALSE){
+  
+  library(MagellanNTK)
+  library(highcharter)
+  library(DaparToolshed)
+  library(shinyBS)
+  library(omXplore)
+  library(shiny)
+  library(shinyjs)
+  library(shinydashboard)
+  library(shinydashboardPlus)
+  
+  
   wf.path <- system.file(paste0('workflow/', wf.name), package = 'Prostar2')
   
   MagellanNTK::MagellanNTK(

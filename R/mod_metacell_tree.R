@@ -35,7 +35,6 @@ NULL
 #' 
 mod_metacell_tree_ui <- function(id) {
     ns <- NS(id)
-   require(shinyBS)
     
     addResourcePath('images', system.file('images', package = 'DaparToolshed'))
     fluidPage(
