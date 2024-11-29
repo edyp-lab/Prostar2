@@ -33,6 +33,16 @@ RUN wget https://cran.rstudio.com/src/base/R-4/R-4.4.1.tar.gz ; \
 
 
 RUN Rscript -e 'install.packages("BiocManager", repo="https://cran.rstudio.com")'
+
+RUN	Rscript -e 'remotes::install_github("prostarproteomics/omXplore")'
+RUN	Rscript -e 'remotes::install_github("edyp-lab/DaparToolshed")'
+RUN	Rscript -e 'remotes::install_github("edyp-lab/DaparToolshedData")'
+RUN	Rscript -e 'remotes::install_github("edyp-lab/MagellanNTK")'
+RUN	Rscript -e 'remotes::install_github("edyp-lab/Prostar2")'
+
+
+
+
 RUN Rscript -e 'BiocManager::install("shinyTree")'
 RUN Rscript -e 'BiocManager::install("igraph")'
 RUN Rscript -e 'BiocManager::install("highcharter")'
@@ -130,11 +140,6 @@ RUN Rscript -e 'BiocManager::install("remotes")'
 # This allows to update Prostar
 
 
-RUN	Rscript -e 'remotes::install_github("prostarproteomics/omXplore")'
-RUN	Rscript -e 'remotes::install_github("edyp-lab/DaparToolshed")'
-RUN	Rscript -e 'remotes::install_github("edyp-lab/DaparToolshedData")'
-RUN	Rscript -e 'remotes::install_github("edyp-lab/MagellanNTK")'
-RUN	Rscript -e 'remotes::install_github("edyp-lab/Prostar2")'
 
 
 EXPOSE 3838

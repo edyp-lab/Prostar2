@@ -19,6 +19,13 @@ Prostar2 <- function(
   usermod = 'user',
   verbose = FALSE){
   
+  
+  options(
+    shiny.maxRequestSize = 1024^3,
+    port = 3838,
+    host = "0.0.0.0"
+  )
+  
   library(MagellanNTK)
   library(highcharter)
   library(DaparToolshed)
