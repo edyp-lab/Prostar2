@@ -23,7 +23,7 @@ Prostar2 <- function(
   options(
     shiny.maxRequestSize = 1024^3,
     port = 3838,
-    host = "0.0.0.0",
+    host = "127.0.0.1",
     launch.browser = FALSE
   )
   
