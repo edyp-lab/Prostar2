@@ -22,9 +22,10 @@ Prostar2 <- function(
   
   options(
     shiny.maxRequestSize = 1024^3,
-    port = 3838,
+    port = 3939,
     host = "127.0.0.1",
-    launch.browser = FALSE
+    launch.browser = FALSE,
+    browser = NULL
   )
   
   library(MagellanNTK)
