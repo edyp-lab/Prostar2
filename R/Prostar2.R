@@ -9,6 +9,8 @@
 #' library(Prostar2)
 #' Prostar2('PipelineProtein')
 #' 
+#' Prostar2('PipelinePeptide')
+#' 
 #' Prostar2('PipelineConvert')
 #' }
 #' 
@@ -20,12 +22,12 @@ Prostar2 <- function(
   verbose = FALSE){
   
   
-  options(
-    shiny.maxRequestSize = 1024^3,
-    port = 3939,
-    host = "127.0.0.1",
-    launch.browser = FALSE
-  )
+  # options(
+  #   shiny.maxRequestSize = 1024^3,
+  #   port = 3838,
+  #   host = "127.0.0.1",
+  #   launch.browser = FALSE
+  # )
   
   library(MagellanNTK)
   library(highcharter)

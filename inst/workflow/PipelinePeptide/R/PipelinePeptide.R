@@ -1,36 +1,50 @@
-#' @title Shiny example module `Pipeline B`
+#' @title Shiny example module `Pipeline A`
 #'
 #' @description
 #' This module contains the configuration information for the corresponding pipeline.
 #' It is called by the nav_pipeline module of the package MagellanNTK
-#' This documentation is for developpers who want to create their own pipelines nor processes
+#' This documentation is for developers who want to create their own pipelines nor processes
 #' to be managed with `MagellanNTK`.
+#' 
+#' @name module_PiplelinePeptide
+#' @examples
+#' \dontrun{
+#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelinePeptide/R/PipelinePeptide.R")
+#' path <- system.file('extdata/workflow/PipelinePeptide', package = 'Prostar2')
+#' shiny::runApp(MagellanNTK::workflowApp("PipelinePeptide")
+#' }
+#' 
+#' @name PipelineProtein
+#' 
+#' @example inst/workflow/PipelinePeptide/examples/example_pipelinePeptide.R
+#' 
+#' 
+NULL
 
 
-
-#' @rdname example_PiplelineB
+#' @rdname PipelinePeptide
 #' @export
 #' 
-PipelineB_conf <- function(){
+PipelinePeptide_conf <- function(){
   MagellanNTK::Config(
-    mode = 'pipeline',
-    fullname = 'PipelineB',
-    steps = c('Process1', 'Process2', 'Process3'),
-    mandatory = c(FALSE, FALSE, TRUE)
-  )
+  mode = 'pipeline',
+  fullname = 'PipelinePeptide',
+  steps = c('Filtering', 'Normalization', 'Imputation', 'Aggregation', 'HypothesisTest', 'DA'),
+  mandatory = c(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE)
+)
 }
 
 
 
 #' @param id xxx
 #'
-#' @rdname example_pipelineB
+#' @rdname PipelinePeptide
 #'
 #' @author Samuel Wieczorek
 #' 
 #' @export
 #' 
-PipelineB_ui <- function(id){
+PipelinePeptide_ui <- function(id){
   ns <- NS(id)
 }
 
@@ -54,22 +68,25 @@ PipelineB_ui <- function(id){
 #' 
 #' @param current.pos xxx
 #' 
-#' @rdname example_pipelineA
+#' @rdname PipelineProtein
 #'
 #' @import shiny
 #' @importFrom stats setNames
 #' 
 #' @export
 #'
-PipelineB_server <- function(id,
-                             dataIn = reactive({NULL}),
-                             steps.enabled = reactive({NULL}),
-                             remoteReset = reactive({0}),
-                             steps.status = reactive({NULL}),
-                             current.pos = reactive({1}),
-                             path = NULL
-                             ){
+PipelinePeptide_server <- function(id,
+  dataIn = reactive({NULL}),
+  steps.enabled = reactive({NULL}),
+  remoteReset = reactive({0}),
+  steps.status = reactive({NULL}),
+  current.pos = reactive({1}),
+  path = NULL
+  ){
 
+
+  
+  
   # Contrary to the simple workflow, there is no widget in this module
   # because all the widgets are provided by the simple workflows.
   widgets.default.values <- NULL
@@ -84,7 +101,6 @@ PipelineB_server <- function(id,
     ns <- session$ns
     
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
-      mode = 'pipeline',
       name = id,
       w.names = names(widgets.default.values),
       rv.custom.names = names(rv.custom.default.values)
@@ -92,13 +108,10 @@ PipelineB_server <- function(id,
     
     eval(str2expression(core.code))
     
-    rv.custom <- reactiveValues()
-    
-    
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-  }
+    }
   )
 }
 

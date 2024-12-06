@@ -1,0 +1,32 @@
+# Configuration file to be used with MagellanNTK
+class: QFeatures
+package: Prostar2
+
+
+# Customizable core functions
+
+convert_dataset: Prostar2
+open_dataset: MagellanNTK
+open_demoDataset: MagellanNTK
+view_dataset: omXplore
+infos_dataset: Prostar2
+download_dataset: Prostar2
+build_report: Prostar2
+addDatasets: Prostar2
+keepDatasets: Prostar2
+
+
+
+# UI options
+
+UI_view_debugger: 'disabled'
+verbose: 'disabled'
+UI_view_open_pipeline: 'disabled'
+UI_view_convertDataset: 'disabled'
+UI_view_change_Look_Feel: 'disabled'
+UI_view_change_core_funcs: 'disabled'
+
+
+URL_manual: https://www.bioconductor.org/packages/release/bioc/vignettes/Prostar/inst/doc/Prostar_UserManual.pdf
+
+URL_ReleaseNotes: http://www.prostar-proteomics.org/md/versionNotes.md

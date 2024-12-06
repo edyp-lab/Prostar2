@@ -5,25 +5,23 @@
 
 #' @export
 #' 
-PipelineB_Description_conf <- function(){
+PipelinePeptide_Description_conf <- function(){
   MagellanNTK::Config(
-    fullname = 'PipelineB_Description',
-    mode = 'process',
-    steps = '',
-    mandatory = ''
-  )
+    fullname = 'PipelinePeptide_Description',
+    mode = 'process'
+    )
 }
 
 
 
 #' @export
-PipelineB_Description_ui <- function(id){
+PipelinePeptide_Description_ui <- function(id){
   ns <- NS(id)
 }
 
 
 #' @export
-PipelineB_Description_server <- function(id,
+PipelinePeptide_Description_server <- function(id,
     dataIn = reactive({NULL}),
     steps.enabled = reactive({NULL}),
     remoteReset = reactive({0}),
@@ -50,24 +48,26 @@ PipelineB_Description_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
-    eval(
-      str2expression(
-        MagellanNTK::Get_Workflow_Core_Code(
-          mode = 'process',
-          name = id,
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-          
-        )
-      )
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
+      mode = 'process',
+      name = id,
+      w.names = names(widgets.default.values),
+      rv.custom.names = names(rv.custom.default.values)
     )
     
-    #rv.custom <- reactiveValues()
-    #rv.custom.default.values <- list()
+    eval(str2expression(core.code))
     
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
-      file <- paste0(path, '/md/', name, '.md')
+      # file <- normalizePath(file.path(session$userData$workflow.path, 
+      #   'md', paste0(id, '.md')))
+      
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.md')))
+      
       tagList(
         if (file.exists(file))
           includeMarkdown(file)
@@ -102,7 +102,7 @@ PipelineB_Description_server <- function(id,
       rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepsStatus$VALIDATED
+      rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
     
     
