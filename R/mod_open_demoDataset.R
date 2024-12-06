@@ -5,6 +5,12 @@
 #' @param id xxx
 #' 
 #' @name open_demo_dataset
+#' 
+#' @examples
+#' \dontrun{
+#' shiny::runApp(open_demoDataset())
+#' }
+#' 
 #'
 #' @keywords internal
 #' 
@@ -112,10 +118,14 @@ open_demoDataset_server <- function(
 ##                                                               ##
 ###################################################################
 
-library(shiny)
-library(DaparToolshedData)
-library(shinyjs)
-
+#' @import shiny
+#' @import DaparToolshedData
+#' @import shinyjs
+#' 
+#' @export
+#' @rdname open_demo_dataset
+#' 
+open_demoDataset <- function(){
 ui <- fluidPage(
   tagList(
     open_demoDataset_ui("demo"),
@@ -136,4 +146,5 @@ server <- function(input, output, session) {
   })
 }
 
-shinyApp(ui = ui, server = server)
+app <- shinyApp(ui = ui, server = server)
+}

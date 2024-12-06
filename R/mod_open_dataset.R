@@ -12,26 +12,7 @@
 #' 
 #' @examples 
 #'\dontrun{
-#' ui <- fluidPage(
-#' tagList(
-#'   open_dataset_ui("qf_file"),
-#'   textOutput('res')
-#' )
-#' )
-#' 
-#' server <- function(input, output, session) {
-#'   rv <- reactiveValues(
-#'     obj = NULL
-#'   )
-#'   rv$obj <- open_dataset_server("qf_file")
-#'   
-#'   output$res <- renderText({
-#'     rv$obj()
-#'     paste0('Names of the datasets: ', names(rv$obj()))
-#'   })
-#' }
-#' 
-#' shinyApp(ui, server)
+#' shiny::runApp(open_dataset())
 #' }
 #' 
 NULL
@@ -120,7 +101,8 @@ open_dataset_server <- function(
 
 
 
-
+#' @export 
+#' @rdname open_dataset
 open_dataset <- function(){
   
 ui <- fluidPage(

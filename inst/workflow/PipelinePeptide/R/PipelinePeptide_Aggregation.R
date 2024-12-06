@@ -23,7 +23,7 @@
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelinePeptide_Aggregation", path, dataIn = Exp1_R25_prot))
+#' shiny::runApp(workflowApp("PipelinePeptide_Aggregation", path, dataIn = obj))
 #' }
 #' 
 #' @rdname PipelinePeptide
@@ -238,7 +238,7 @@ PipelinePeptide_Aggregation_server <- function(id,
             uiOutput(ns("Aggregation_AggregationDone_ui"))
           ),
           div(style = .style,
-            uiOutput(ns("Aggregation_aggregationStats_ui"))
+            DT::dataTableOutput(ns("Aggregation_aggregationStats_ui"))
           )
             
           )
