@@ -209,8 +209,6 @@ PipelinePeptide_Aggregation_server <- function(id,
         # widget he want to insert
         # Be aware of the naming convention for ids in uiOutput()
         # For more details, please refer to the dev document.
-        
-        tagList(
             div(
               div(style = .style,
                 uiOutput(ns('Aggregation_warning_ui'))
@@ -242,7 +240,6 @@ PipelinePeptide_Aggregation_server <- function(id,
           )
             
           )
-      )
     })
     
     
@@ -255,7 +252,7 @@ PipelinePeptide_Aggregation_server <- function(id,
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
       )
-      # NA.count <- length(which(m))
+      NA.count <- length(which(m))
       
       if (NA.count > 0) {
         tags$p(style = "color: red;",
@@ -437,9 +434,7 @@ PipelinePeptide_Aggregation_server <- function(id,
           }
         }
       })
-      
-      
-      
+
       return(ll.agg)
     })
     
@@ -460,8 +455,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       tags$h3(style = .style, txt)
     })
     
-    })
-    
+
     
     ##
     ##
@@ -649,7 +643,6 @@ PipelinePeptide_Aggregation_server <- function(id,
                 width = "200px",
                 selectize = TRUE
               )
-
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'] )
     })
@@ -702,7 +695,6 @@ observeEvent(input$AddMetadata_btn_validate, {
       
     })
     
-
     
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
@@ -787,6 +779,6 @@ observeEvent(input$AddMetadata_btn_validate, {
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-  }
-  )
+  })
+})
 }
