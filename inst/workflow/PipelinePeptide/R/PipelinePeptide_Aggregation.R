@@ -192,10 +192,11 @@ PipelinePeptide_Aggregation_server <- function(id,
       shinyjs::useShinyjs()
       
       .style <- "display:inline-block; vertical-align: middle; padding-right: 20px;"
+      .data <- rv$dataIn[[length(rv$dataIn)]]
       m <- DaparToolshed::match.metacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(.data),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(.data)
       )
       NA.count <- length(which(m))
       
@@ -266,7 +267,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     
     output$Aggregation_chooseProteinId_ui <- renderUI({
       
-      if (!is.null(parentProtId(rv$dataIn))) {
+      if (!is.null(DaparToolshed::parentProtId(rv$dataIn))) {
         return(NULL)
       }
       
@@ -373,14 +374,11 @@ PipelinePeptide_Aggregation_server <- function(id,
       rv.widgets$Aggregation_topN
       
       withProgress(message = "", detail = "", value = 0, {
-        incProgress(0.2, detail = "Loading foreach package")
-        
-        
         incProgress(0.5, detail = "Aggregation in progress")
         
         
         X <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
-        X.split <- splitAdjacencyMat(X)
+        X.split <- DaparToolshed::splitAdjacencyMat(X)
         X.shared <- X.split$matWithSharedPeptides
         X.unique <- X.split$matWithUniquePeptides
         
@@ -465,9 +463,12 @@ PipelinePeptide_Aggregation_server <- function(id,
       req(QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]))
       req(rv.widgets$Aggregation_proteinId != "None")
       
-      res <- DaparToolshed::GetProteinsStats(
-        QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])$matWithSharedPeptides
-      )
+      X <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
+      X.split <- DaparToolshed::splitAdjacencyMat(X)
+      X.shared <- X.split$matWithSharedPeptides
+      X.unique <- X.split$matWithUniquePeptides
+      
+      res <- DaparToolshed::GetProteinsStats(X.shared)
       
       rv.custom$AggregProtStats$nb <- c(
         res$nbPeptides,
@@ -533,7 +534,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     # >>> START ------------- Code for Aggregation UI---------------
     # >>> 
     
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
+    # >>>> -------------------- STEP 1 : Global UI -----------------
     output$AddMetadata <- renderUI({
       shinyjs::useShinyjs()
       
@@ -547,7 +548,7 @@ PipelinePeptide_Aggregation_server <- function(id,
         # For more details, please refer to the dev document.
         
         uiOutput("AddMetadata_displayNbPeptides_ui"),
-        popover_for_help_ui("modulePopover_colsForAggreg"),
+        #popover_for_help_ui("modulePopover_colsForAggreg"),
         uiOutput("AddMetadata_columnsForProteinDataset_ui")
         )
     })
@@ -563,9 +564,10 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$AddMetadata_columnsForProteinDataset_ui <- renderUI({
       req(rv$dataIn)
         
+      .data <- rv$dataIn[[length(rv$dataIn)]]
         ind <- match(
-          colnames(qMetacell(rv$dataIn[[length(rv$dataIn)]])), .colnames)
-        .colnames <- colnames(rowData(rv$dataIn[[length(rv$dataIn)]]))
+          colnames(qMetacell(.data)), .colnames)
+        .colnames <- colnames(rowData(.data))
         choices <- setNames(nm = .colnames[-ind])
         
         widget <- selectInput(ns("AddMetadata_columnsForProteinDataset"),
@@ -576,7 +578,7 @@ PipelinePeptide_Aggregation_server <- function(id,
                 selectize = TRUE
               )
       
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['AddMetadata'] )
     })
     
     
@@ -587,7 +589,7 @@ output$AddMetadata_btn_validate_ui <- renderUI({
   widget <- actionButton(ns("AddMetadata_btn_validate"),
     "Validate step",
     class = "btn-success")
-  MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'] )
+  MagellanNTK::toggleWidget(widget, rv$steps.enabled['AddMetadata'] )
   
 })
 
@@ -631,19 +633,25 @@ observeEvent(input$AddMetadata_btn_validate, {
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       
-      req(QFeatures::adjacencyMatrix(rv$dataIn[[length[[rv$dataIn]]]]))
       req(rv.custom$temp.aggregate$obj.prot)
       req(is.null(rv.custom$temp.aggregate$issues))
       
-      X <- QFeatures::adjacencyMatrix(rv$dataIn[[length[[rv$dataIn]]]])
+      .data <- rv$dataIn[[length(rv$dataIn)]]
+      mat <- QFeatures::adjacencyMatrix(.data)
+      req(mat)
+      X.split <- DaparToolshed::splitAdjacencyMat(mat)
+      X.shared <- X.split$matWithSharedPeptides
+      X.unique <- X.split$matWithUniquePeptides
+      
+      
       
       isolate({
         withProgress(message = "", detail = "", value = 0, {
           X <- NULL
           if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes2", "Yes1")) {
-            X <- X$matWithSharedPeptides
+            X <- X.shared
           } else {
-            X <- X$matWithUniquePeptides
+            X <- X.unique
           }
           
           total <- 60
@@ -653,7 +661,7 @@ observeEvent(input$AddMetadata_btn_validate, {
           
           for (c in rv.widgets$AddMetadata_columnsForProteinDataset) {
             newCol <- BuildColumnToProteinDataset(
-              peptideData = rowData(rv$dataIn[[length(rv$dataIn)]]),
+              peptideData = rowData(.data),
               matAdj = X,
               columnName = c,
               proteinNames = rownames(rowData((rv.custom$temp.aggregate$obj.prot)))
@@ -671,13 +679,6 @@ observeEvent(input$AddMetadata_btn_validate, {
             incProgress(cpt / 100, detail = paste0("Processing column ", c))
           }
 
-          rvModProcess$moduleAggregationDone[3] <- TRUE
-          updateSelectInput(session, "datasets",
-            choices = names(rv$dataset),
-            selected = name
-          )
-          ##########################################################################
-          
       rv.custom$history[['Aggregation_includeSharedPeptides']] <- as.numeric(rv.widgets$Aggregation_includeSharedPeptides)
       rv.custom$history[['Aggregation_operator']] <- as.numeric(rv.widgets$Aggregation_operator)
       rv.custom$history[['Aggregation_considerPeptides']] <- as.numeric(rv.widgets$Aggregation_considerPeptides)
