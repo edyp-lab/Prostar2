@@ -92,8 +92,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     Aggregation_proteinId = "None",
     Aggregation_topN = 3,
     Aggregation_filterProtAfterAgregation = NULL,
-    Aggregation_columnsForProteinDataset.box = NULL,
-    Aggregation_nbPeptides = 0
+    AddMetadata_columnsForProteinDataset = NULL
   )
   
   rv.custom.default.values <- list(
@@ -192,12 +191,11 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation <- renderUI({
       shinyjs::useShinyjs()
       
-      .style <- "display:inline-block; vertical-align: middle; 
-      padding-right: 20px;"
+      .style <- "display:inline-block; vertical-align: middle; padding-right: 20px;"
       m <- DaparToolshed::match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       NA.count <- length(which(m))
       
@@ -222,7 +220,7 @@ PipelinePeptide_Aggregation_server <- function(id,
               ),
               
               div(style = .style,
-                uiOutput(ns('Aggregation_Aggregation_considerPeptides_ui'))
+                uiOutput(ns('Aggregation_considerPeptides_ui'))
               ),
               
               div(style = .style,
@@ -247,10 +245,11 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation_warning_ui <- renderUI({
       
       req(rv$dataIn)
+      .data <- rv$dataIn[[length(rv$dataIn)]]
       m <- DaparToolshed::match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(.data),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(.data)
       )
       NA.count <- length(which(m))
       
@@ -367,7 +366,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     ########################################################
     RunAggregation <- reactive({
       
-      req(DaparToolshed::AdjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]))
+      req(QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]))
       rv.widgets$Aggregation_includeSharedPeptides
       rv.widgets$Aggregation_operator
       rv.widgets$Aggregation_considerPeptides
@@ -379,21 +378,26 @@ PipelinePeptide_Aggregation_server <- function(id,
         
         incProgress(0.5, detail = "Aggregation in progress")
         
+        
+        X <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
+        X.split <- splitAdjacencyMat(X)
+        X.shared <- X.split$matWithSharedPeptides
+        X.unique <- X.split$matWithUniquePeptides
+        
+        
         ll.agg <- NULL
         if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes2", "Yes1")) {
-          X <- DaparToolshed::AdjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])$matWithSharedPeptides
+          
           if (rv.widgets$Aggregation_includeSharedPeptides == "Yes1") {
             if (rv.widgets$Aggregation_considerPeptides == "allPeptides") {
               ll.agg <- do.call(
-                paste0(
-                  "aggregate",
-                  rv.widgets$Aggregation_operator
-                ),
-                list(obj.pep = rv$current.obj, X = X)
+                paste0("DaparToolshed::aggregate", rv.widgets$Aggregation_operator),
+                list(obj.pep = rv$dataIn[[length(rv$dataIn)]], 
+                  X = X.shared)
               )
             } else {
-              ll.agg <- aggregateTopn(rv$current.obj,
-                X,
+              ll.agg <- DaparToolshed::aggregateTopn(rv$dataIn[[length(rv$dataIn)]],
+                X.shared,
                 rv.widgets$Aggregation_operator,
                 n = as.numeric(rv.widgets$Aggregation_topN)
               )
@@ -402,14 +406,14 @@ PipelinePeptide_Aggregation_server <- function(id,
             if (rv.widgets$Aggregation_considerPeptides == "allPeptides") {
               ll.agg <- aggregateIterParallel(
                 obj.pep = rv$dataIn[[length(rv$dataIn)]],
-                X = X,
+                X = X.shared,
                 init.method = "Sum",
                 method = "Mean"
               )
             } else {
-              ll.agg <- aggregateIterParallel(
+              ll.agg <- DaparToolshed::aggregateIterParallel(
                 obj.pep = rv$dataIn[[length(rv$dataIn)]],
-                X,
+                X.shared,
                 init.method = "Sum",
                 method = "onlyN",
                 n = rv.widgets$Aggregation_topN
@@ -417,17 +421,16 @@ PipelinePeptide_Aggregation_server <- function(id,
             }
           }
         } else {
-          X <- DaparToolshed::AdjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])$matWithUniquePeptides
           if (rv.widgets$Aggregation_considerPeptides == "allPeptides") {
             ll.agg <- do.call(
-              paste0("aggregate", rv.widgets$Aggregation_operator),
-              list(obj.pep = rv$current.obj,
-                X = X
+              paste0("DaparToolshed::aggregate", rv.widgets$Aggregation_operator),
+              list(obj.pep = rv$dataIn[[length(rv$dataIn)]],
+                X = X.unique
               )
             )
           } else {
-            ll.agg <- aggregateTopn(rv$current.obj,
-              X,
+            ll.agg <- DaparToolshed::aggregateTopn(rv$dataIn[[length(rv$dataIn)]],
+              X.unique,
               rv.widgets$Aggregation_operator,
               n = as.numeric(rv.widgets$Aggregation_topN)
             )
@@ -457,82 +460,13 @@ PipelinePeptide_Aggregation_server <- function(id,
     
 
     
-    ##
-    ##
-    ##
-    ##
-    GetProteinsStats <- function(X.shared = NULL) {
-      if (missing(X.shared)) {
-        stop("'X.shared' is needed.")
-      }
-      if (is.null(X.shared)) {
-        stop("'X.shared' is NULL")
-      }
-      
-      nbPeptide <- 0
-      
-      ind.shared.Pep <- which(rowSums(as.matrix(X.shared)) > 1)
-      M.shared.Pep <- X.shared[ind.shared.Pep, ]
-      if (length(ind.shared.Pep) == 1) {
-        j <- which(as.matrix(M.shared.Pep) == 0)
-        M.shared.Pep <- M.shared.Pep[-j]
-        pep.names.shared <- names(M.shared.Pep)
-      } else {
-        j <- which(colSums(as.matrix(M.shared.Pep)) == 0)
-        M.shared.Pep <- M.shared.Pep[, -j]
-        pep.names.shared <- colnames(M.shared.Pep)
-      }
-      
-      
-      ind.unique.Pep <- which(rowSums(as.matrix(X.shared)) == 1)
-      M.unique.Pep <- X.shared[ind.unique.Pep, ]
-      if (length(ind.unique.Pep) == 1) {
-        j <- which(as.matrix(M.unique.Pep) == 0)
-        M.unique.Pep <- M.unique.Pep[-j]
-        pep.names.unique <- names(M.unique.Pep)
-      } else {
-        j <- which(colSums(as.matrix(M.unique.Pep)) == 0)
-        M.unique.Pep <- M.unique.Pep[, -j]
-        pep.names.unique <- colnames(M.unique.Pep)
-      }
-      
-      
-      
-      protOnlyShared <- setdiff(
-        pep.names.shared,
-        intersect(pep.names.shared, pep.names.unique)
-      )
-      protOnlyUnique <- setdiff(
-        pep.names.unique,
-        intersect(pep.names.shared, pep.names.unique)
-      )
-      protMix <- intersect(pep.names.shared, pep.names.unique)
-      
-      
-      
-      return(
-        list(
-          nbPeptides = length(ind.unique.Pep) + length(ind.shared.Pep),
-          nbSpecificPeptides = length(ind.unique.Pep),
-          nbSharedPeptides = length(ind.shared.Pep),
-          nbProt = length(protOnlyShared) + length(protOnlyUnique) + 
-            length(protMix),
-          protOnlyUniquePep = protOnlyUnique,
-          protOnlySharedPep = protOnlyShared,
-          protMixPep = protMix
-        )
-      )
-    }
-    
-    
-    
     
     output$Aggregation_aggregationStats_ui <- DT::renderDataTable(server = TRUE, {
-      req(DaparToolshed::AdjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]))
+      req(QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]))
       req(rv.widgets$Aggregation_proteinId != "None")
       
-      res <- GetProteinsStats(
-        DaparToolshed::AdjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])$matWithSharedPeptides
+      res <- DaparToolshed::GetProteinsStats(
+        QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])$matWithSharedPeptides
       )
       
       rv.custom$AggregProtStats$nb <- c(
@@ -629,12 +563,10 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$AddMetadata_columnsForProteinDataset_ui <- renderUI({
       req(rv$dataIn)
         
-        # if (rv$current.obj@experimentData@other$typeOfData == typePeptide) {
         ind <- match(
-          rv$current.obj@experimentData@other$names_metacell,
-          colnames(Biobase::fData(rv$current.obj))
-        )
-        choices <- setNames(nm = colnames(Biobase::fData(rv$current.obj))[-ind])
+          colnames(qMetacell(rv$dataIn[[length(rv$dataIn)]])), .colnames)
+        .colnames <- colnames(rowData(rv$dataIn[[length(rv$dataIn)]]))
+        choices <- setNames(nm = .colnames[-ind])
         
         widget <- selectInput(ns("AddMetadata_columnsForProteinDataset"),
                 label = "",
@@ -699,13 +631,11 @@ observeEvent(input$AddMetadata_btn_validate, {
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       
-      
-      ############################################################
-      ############################################################req(DaparToolshed::AdjacencyMatrix(rv$dataIn[[length[[rv$dataIn]]]]))
+      req(QFeatures::adjacencyMatrix(rv$dataIn[[length[[rv$dataIn]]]]))
       req(rv.custom$temp.aggregate$obj.prot)
       req(is.null(rv.custom$temp.aggregate$issues))
       
-      X <- DaparToolshed::AdjacencyMatrix(rv$dataIn[[length[[rv$dataIn]]]])
+      X <- QFeatures::adjacencyMatrix(rv$dataIn[[length[[rv$dataIn]]]])
       
       isolate({
         withProgress(message = "", detail = "", value = 0, {
@@ -718,10 +648,10 @@ observeEvent(input$AddMetadata_btn_validate, {
           
           total <- 60
           
-          delta <- round(total / length(rv.widgets$Aggregation_columnsForProteinDataset))
+          delta <- round(total / length(rv.widgets$AddMetadata_columnsForProteinDataset))
           cpt <- 10
           
-          for (c in rv.widgets$Aggregation_columnsForProteinDataset) {
+          for (c in rv.widgets$AddMetadata_columnsForProteinDataset) {
             newCol <- BuildColumnToProteinDataset(
               peptideData = rowData(rv$dataIn[[length(rv$dataIn)]]),
               matAdj = X,
@@ -752,10 +682,10 @@ observeEvent(input$AddMetadata_btn_validate, {
       rv.custom$history[['Aggregation_operator']] <- as.numeric(rv.widgets$Aggregation_operator)
       rv.custom$history[['Aggregation_considerPeptides']] <- as.numeric(rv.widgets$Aggregation_considerPeptides)
       rv.custom$history[['Aggregation_proteinId']] <- as.numeric(rv.widgets$Aggregation_proteinId)
-      rv.custom$history[['Aggregation_Aggregation_topN']] <- as.numeric(rv.widgets$Aggregation_topN)
+      rv.custom$history[['Aggregation_topN']] <- as.numeric(rv.widgets$Aggregation_topN)
       rv.custom$history[['Aggregation_filterProtAfterAgregation']] <- as.numeric(rv.widgets$Aggregation_filterProtAfterAgregation)
-      rv.custom$history[['Aggregation_columnsForProteinDataset.box']] <- as.numeric(rv.widgets$Aggregation_columnsForProteinDataset.box)
-      rv.custom$history[['Aggregation_nbPeptides']] <- as.numeric(rv.widgets$Aggregation_nbPeptides)
+      rv.custom$history[['AddMetadata_columnsForProteinDataset']] <- as.numeric(rv.widgets$AddMetadata_columnsForProteinDataset)
+
       paramshistory(new.dataset) <- rv.custom$history
       
       new.dataset <- rv$temp.aggregate$obj.prot
