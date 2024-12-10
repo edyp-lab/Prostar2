@@ -403,15 +403,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.5, detail = "Aggregation in progress")
         
-        # Update the adjacency matrix to use
-        # X <- NULL
-        # if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes2", "Yes1"))
-        #   X = rv.custom$X.shared
-        # else
-        #   X = rv.custom$X.unique
-        
         i.last <- length(rv$dataIn)
-        #adjacencyMatrix(rv$dataIn[[i.last]]) <- X
         
         ll.agg <- aggregateFeatures4Prostar(
           object = rv$dataIn,
@@ -424,11 +416,12 @@ PipelinePeptide_Aggregation_server <- function(id,
       return(ll.agg)
     })
     
+    
+    
+    
+    
     Add_Aggregated_rowData <- reactive({
-      
-      
       req('aggregated' %in% names(rv.custom$temp.aggregate))
-      
       
       # Add aggregated simple columns rowData
       total <- 60
@@ -449,7 +442,7 @@ PipelinePeptide_Aggregation_server <- function(id,
           
           newCol <- BuildColumnToProteinDataset(
             peptideData = rowData((rv.custom$temp.aggregate[[i.agg - 1]])),
-            matAdj = rv.custom$X,
+            matAdj = adjacencyMatrix(rv.custom$temp.aggregate[[i.agg - 1]]),
             columnName = col.name,
             proteinNames = rownames(rowData((rv.custom$temp.aggregate[[i.agg]])))
           )
@@ -490,7 +483,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     
     
     output$Aggregation_aggregationStats_ui <- DT::renderDataTable(server = TRUE, {
-      req(rv.custom$X)
+      req(rv.custom$X.all)
       req(rv.widgets$Aggregation_proteinId != "None")
       
       res <- DaparToolshed::GetProteinsStats(rv.custom$X.shared)
@@ -526,10 +519,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       
     })
     
-    
-    
-    
-    
+
     output$Aggregation_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Aggregation_btn_validate"),
         "Validate step",
@@ -546,12 +536,27 @@ PipelinePeptide_Aggregation_server <- function(id,
         withProgress(message = "", detail = "", value = 0, {
           incProgress(0.5, detail = "Build the adjacency matrix")
         QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]) <- BuildAdjacencyMatrix(.data, DaparToolshed::parentProtId(.data), FALSE)
+        
+        incProgress(0.75, detail = "Splitting matrix")
+        rv.custom$X.all <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
+        rv.custom$X.split <- DaparToolshed::splitAdjacencyMat(rv.custom$X.all)
+        rv.custom$X.shared <- rv.custom$X.split$Xshared
+        rv.custom$X.unique <- rv.custom$X.split$Xspec
+        
+        
       })
       }
-      rv.custom$X <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
-      rv.custom$X.split <- DaparToolshed::splitAdjacencyMat(rv.custom$X)
-      rv.custom$X.shared <- rv.custom$X.split$Xshared
-      rv.custom$X.unique <- rv.custom$X.split$Xspec
+      
+      
+      i.last <- length(rv$dataIn)
+      
+      # Update the adjacency matrix to use
+      if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes2", "Yes1"))
+        adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.shared
+      else
+        adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.unique
+      
+      
       
       print("Initialization finished")
       
@@ -608,23 +613,6 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       req(rv.custom$temp.aggregate)
       
-      # req(is.null(rv.custom$temp.aggregate$issues))
-      # 
-      # .data <- last_assay(rv$dataIn)
-      # req(rv.custom$X)
-      # 
-      # 
-      # isolate({
-      #   withProgress(message = "", detail = "", value = 0, {
-      #     X <- NULL
-      #     if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes2", "Yes1")) {
-      #       X <- rv.custom$X.shared
-      #     } else {
-      #       X <- rv.custom$X.unique
-      #     }
-      #     
-      
-
       rv.custom$history[['Aggregation_includeSharedPeptides']] <- as.numeric(rv.widgets$Aggregation_includeSharedPeptides)
       rv.custom$history[['Aggregation_operator']] <- as.numeric(rv.widgets$Aggregation_operator)
       rv.custom$history[['Aggregation_considerPeptides']] <- as.numeric(rv.widgets$Aggregation_considerPeptides)
