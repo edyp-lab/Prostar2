@@ -539,9 +539,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     })
     
     
-    BiuldAdjacencyMatrix <- reactive({
-      
-      
+    BuildAdjacencyMatrix <- reactive({
       ## Build the adjacency matrix if they are not present
       .data <- last_assay(rv$dataIn)
       if (!("adjacencyMatrix" %in% names(rowData(.data)))){
