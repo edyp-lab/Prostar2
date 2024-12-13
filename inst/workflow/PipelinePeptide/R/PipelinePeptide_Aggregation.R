@@ -317,7 +317,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation_considerPeptides_ui <- renderUI({
       widget <- radioButtons(ns("Aggregation_considerPeptides"), "Consider",
         choices = c("all peptides" = "allPeptides",
-          "N most abundant" = "onlyN"),
+          "N most abundant" = "topN"),
         selected = rv.widgets$Aggregation_considerPeptides
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])
@@ -350,7 +350,7 @@ PipelinePeptide_Aggregation_server <- function(id,
             selected = rv.widgets$Aggregation_operator
           )),
           div(style = .style, 
-            if(rv.widgets$Aggregation_considerPeptides == "onlyN")
+            if(rv.widgets$Aggregation_considerPeptides == "topN")
               
               numericInput(ns("Aggregation_topN"),
                 "N",
@@ -436,7 +436,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       
     output$Aggregation_AggregationDone_ui <- renderUI({
        req(rv.custom$temp.aggregate)
-      
+      print('new test')
       if (!is.null(rv.custom$temp.aggregate$issues) &&
           length(rv.custom$temp.aggregate$issues) > 0) {
         .style <- "color: red;"
@@ -499,64 +499,33 @@ PipelinePeptide_Aggregation_server <- function(id,
       
     })
     
-    
-    # BuildAdjacencyMatrix <- reactive({
-    #   ## Build the adjacency matrix if they are not present
-    #   .data <- last_assay(rv$dataIn)
-    #   if (!("adjacencyMatrix" %in% names(rowData(.data)))){
-    #     withProgress(message = "", detail = "", value = 0, {
-    #       incProgress(0.5, detail = "Build the adjacency matrix")
-    #     QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]) <- BuildAdjacencyMatrix(.data, DaparToolshed::parentProtId(.data), FALSE)
-    #     
-    #     incProgress(0.75, detail = "Splitting matrix")
-    #     rv.custom$X.all <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
-    #     rv.custom$X.split <- DaparToolshed::splitAdjacencyMat(rv.custom$X.all)
-    #     rv.custom$X.shared <- rv.custom$X.split$Xshared
-    #     rv.custom$X.unique <- rv.custom$X.split$Xspec
-    #     
-    #     
-    #   })
-    #   }
-    #   
-      # 
-      # i.last <- length(rv$dataIn)
-      # 
-      # # Update the adjacency matrix to use
-      # if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes_Redistribution", "Yes_As_Specific"))
-      #   adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.shared
-      # else
-      #   adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.unique
-      # 
-    #   
-    #   
-    #   print("Initialization finished")
-    #   
-    # })
-    
+
     
     observeEvent(input$Aggregation_btn_validate, {
       
       
-        
+      withProgress(message = "", detail = "", value = 0, {
+        incProgress(0.5, detail = "Aggregation processing")
       # Do some stuff
       rv.custom$temp.aggregate <- DaparToolshed::RunAggregation(
         qf = rv$dataIn,
         i = length(rv$dataIn),
         includeSharedPeptides = rv.widgets$Aggregation_includeSharedPeptides,
+        operator = rv.widgets$Aggregation_operator,
         considerPeptides = rv.widgets$Aggregation_considerPeptides,
-        n = rv.widgets$Aggregation_topN
+        n = rv.widgets$Aggregation_topN,
+        addRowData = rv.widgets$Aggregation_addRowData
         )
-      
-      browser()
-      if (rv.widgets$Aggregation_addRowData)
-        rv.custom$temp.aggregate <- Add_Aggregated_rowData()
-      
+     
+      })
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      #rv$steps.status['Aggregation'] <- is.null(rv.custom$temp.aggregate$issues)
-
-  rv$steps.status['Aggregation'] <- stepStatus$VALIDATED
+      if(is.null(rv.custom$temp.aggregate$issues)){
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['Aggregation'] <- stepStatus$VALIDATED
+      } else {
+        #rv.custom$temp.aggregate <- NULL
+      }
 })
 
 # <<< END ------------- Code for step 1 UI---------------
