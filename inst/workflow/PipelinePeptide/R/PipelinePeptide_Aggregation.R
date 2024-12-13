@@ -89,7 +89,7 @@ PipelinePeptide_Aggregation_server <- function(id,
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
-    Aggregation_includeSharedPeptides = "Yes2",
+    Aggregation_includeSharedPeptides = "Yes_Redistribution",
     Aggregation_operator = "Mean",
     Aggregation_considerPeptides = "allPeptides",
     Aggregation_proteinId = "None",
@@ -302,8 +302,8 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       widget <- radioButtons(ns("Aggregation_includeSharedPeptides"), NULL,
         choices = c("No" = "No",
-          "Yes (as protein specific)" = "Yes1",
-          "Yes (redistribution)" = "Yes2"
+          "Yes (as protein specific)" = "Yes_As_Specific",
+          "Yes (redistribution)" = "Yes_Redistribution"
         ),
         selected = rv.widgets$Aggregation_includeSharedPeptides
       )
@@ -336,9 +336,9 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       .style <- "display:inline-block; vertical-align: middle; padding-right: 20px;"
       
-      choice <- if (rv.widgets$Aggregation_includeSharedPeptides %in% c("No", "Yes1")) {
+      choice <- if (rv.widgets$Aggregation_includeSharedPeptides %in% c("No", "Yes_As_Specific")) {
         c("Mean" = "Mean", "Sum" = "Sum")
-      } else if (rv.widgets$Aggregation_includeSharedPeptides == "Yes2"){
+      } else if (rv.widgets$Aggregation_includeSharedPeptides == "Yes_Redistribution"){
         c("Mean" = "Mean")
       }
       
@@ -389,36 +389,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     # )
     
 
-    ########################################################
-    RunAggregation <- reactive({
-      ll.agg <- NULL
-      
-      req(QFeatures::adjacencyMatrix(last_assay(rv$dataIn)))
-      rv.widgets$Aggregation_includeSharedPeptides
-      rv.widgets$Aggregation_operator
-      rv.widgets$Aggregation_considerPeptides
-      rv.widgets$Aggregation_topN
-      
-      
-      withProgress(message = "", detail = "", value = 0, {
-        incProgress(0.5, detail = "Aggregation in progress")
-        
-        i.last <- length(rv$dataIn)
-        
-        ll.agg <- aggregateFeatures4Prostar(
-          object = rv$dataIn,
-          i = i.last,
-          name = 'aggregated',
-          fcol = 'adjacencyMatrix',
-          fun = 'colSumsMat')
-      })
 
-      return(ll.agg)
-    })
-    
-    
-    
-    
     
     Add_Aggregated_rowData <- reactive({
       req('aggregated' %in% names(rv.custom$temp.aggregate))
@@ -529,47 +500,54 @@ PipelinePeptide_Aggregation_server <- function(id,
     })
     
     
-    BuildAdjacencyMatrix <- reactive({
-      ## Build the adjacency matrix if they are not present
-      .data <- last_assay(rv$dataIn)
-      if (!("adjacencyMatrix" %in% names(rowData(.data)))){
-        withProgress(message = "", detail = "", value = 0, {
-          incProgress(0.5, detail = "Build the adjacency matrix")
-        QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]) <- BuildAdjacencyMatrix(.data, DaparToolshed::parentProtId(.data), FALSE)
-        
-        incProgress(0.75, detail = "Splitting matrix")
-        rv.custom$X.all <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
-        rv.custom$X.split <- DaparToolshed::splitAdjacencyMat(rv.custom$X.all)
-        rv.custom$X.shared <- rv.custom$X.split$Xshared
-        rv.custom$X.unique <- rv.custom$X.split$Xspec
-        
-        
-      })
-      }
-      
-      
-      i.last <- length(rv$dataIn)
-      
-      # Update the adjacency matrix to use
-      if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes2", "Yes1"))
-        adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.shared
-      else
-        adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.unique
-      
-      
-      
-      print("Initialization finished")
-      
-    })
+    # BuildAdjacencyMatrix <- reactive({
+    #   ## Build the adjacency matrix if they are not present
+    #   .data <- last_assay(rv$dataIn)
+    #   if (!("adjacencyMatrix" %in% names(rowData(.data)))){
+    #     withProgress(message = "", detail = "", value = 0, {
+    #       incProgress(0.5, detail = "Build the adjacency matrix")
+    #     QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]]) <- BuildAdjacencyMatrix(.data, DaparToolshed::parentProtId(.data), FALSE)
+    #     
+    #     incProgress(0.75, detail = "Splitting matrix")
+    #     rv.custom$X.all <- QFeatures::adjacencyMatrix(rv$dataIn[[length(rv$dataIn)]])
+    #     rv.custom$X.split <- DaparToolshed::splitAdjacencyMat(rv.custom$X.all)
+    #     rv.custom$X.shared <- rv.custom$X.split$Xshared
+    #     rv.custom$X.unique <- rv.custom$X.split$Xspec
+    #     
+    #     
+    #   })
+    #   }
+    #   
+      # 
+      # i.last <- length(rv$dataIn)
+      # 
+      # # Update the adjacency matrix to use
+      # if (rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes_Redistribution", "Yes_As_Specific"))
+      #   adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.shared
+      # else
+      #   adjacencyMatrix(rv$dataIn[[i.last]]) <- rv.custom$X.unique
+      # 
+    #   
+    #   
+    #   print("Initialization finished")
+    #   
+    # })
     
     
     observeEvent(input$Aggregation_btn_validate, {
       
       
-      BuildAdjacencyMatrix()
+        
       # Do some stuff
-      rv.custom$temp.aggregate <- RunAggregation()
+      rv.custom$temp.aggregate <- DaparToolshed::RunAggregation(
+        qf = rv$dataIn,
+        i = length(rv$dataIn),
+        includeSharedPeptides = rv.widgets$Aggregation_includeSharedPeptides,
+        considerPeptides = rv.widgets$Aggregation_considerPeptides,
+        n = rv.widgets$Aggregation_topN
+        )
       
+      browser()
       if (rv.widgets$Aggregation_addRowData)
         rv.custom$temp.aggregate <- Add_Aggregated_rowData()
       
