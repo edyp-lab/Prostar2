@@ -94,7 +94,6 @@ PipelinePeptide_Aggregation_server <- function(id,
     Aggregation_considerPeptides = "allPeptides",
     Aggregation_proteinId = "None",
     Aggregation_topN = 3,
-    Aggregation_filterProtAfterAgregation = NULL,
     Aggregation_addRowData = FALSE,
     Addmetadata_columnsForProteinDataset = NULL
   )
@@ -569,7 +568,6 @@ PipelinePeptide_Aggregation_server <- function(id,
       rv.custom$history[['Aggregation_considerPeptides']] <- as.numeric(rv.widgets$Aggregation_considerPeptides)
       rv.custom$history[['Aggregation_proteinId']] <- as.numeric(rv.widgets$Aggregation_proteinId)
       rv.custom$history[['Aggregation_topN']] <- as.numeric(rv.widgets$Aggregation_topN)
-      rv.custom$history[['Aggregation_filterProtAfterAgregation']] <- as.numeric(rv.widgets$Aggregation_filterProtAfterAgregation)
       rv.custom$history[['Aggregation_addRowData']] <- rv.widgets$Aggregation_addRowData
       
       paramshistory(rv.custom$temp.aggregate[[length(rv.custom$temp.aggregate)]]) <- rv.custom$history
