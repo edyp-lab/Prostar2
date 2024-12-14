@@ -524,6 +524,10 @@ PipelinePeptide_Aggregation_server <- function(id,
         dataOut$value <- NULL
         rv$steps.status['Aggregation'] <- stepStatus$VALIDATED
       } else {
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['Aggregation'] <- stepStatus$VALIDATED
+        
         #rv.custom$temp.aggregate <- NULL
       }
 })
@@ -570,12 +574,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       paramshistory(rv.custom$temp.aggregate[[length(rv.custom$temp.aggregate)]]) <- rv.custom$history
       
-      browser()
-      # new.dataset <- rv$temp.aggregate$obj.prot
-      # 
-      # new.name <- paste0("Aggregated", ".", TypeOfDataset(new.dataset))
-      #   
-      # 
+      rv$dataIn <- rv.custom$temp.aggregate 
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

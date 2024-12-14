@@ -63,16 +63,16 @@ download_dataset_server <- function(id,
       
       
       rv$export_file_xlsx <- tryCatch({
-        
+     
         out.xlsx <- tempfile(fileext = ".xlsx")
-        DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
+        obj.cleaned <- DaparToolshed::CleanRowData(dataIn())
+        DaparToolshed::write.excel(obj = obj.cleaned, filename = out.xlsx)
         out.xlsx
         
       },
         warning = function(w) w,
         error = function(e) e
       )
-      
       
       rv$export_file_qf <- tryCatch({
         out.qf <- tempfile(fileext = ".qf")
