@@ -6,12 +6,12 @@
 * [Why do the items of the contextual menus for plots remain 'undefined'?](#why-do-the-items-of-the-contextual-menus-for-plots-remain-undefined)
 * [Why does my volcano plot look so aligned?](#why-does-my-volcano-plot-look-so-aligned)
 * [How to recover differential analysis results?](#how-to-recover-differential-analysis-results)
-* [Why isn't it possible to adjust the logFC threshold on each differential analysis comparison?](#why-isnt-it-possible-to-adjust-the-logfc-threshold-on-each-differential-analysis-comparison)
+* [Why I cannot adjust the logFC threshold on each differential analysis comparison?](#why-i-cannot-adjust-the-logfc-threshold-on-each-differential-analysis-comparison)
 * [How does "Push p-values" works?](#how-does-push-p-values-works)
 * [How should I tune the calibration plot options?](#how-should-i-tune-the-calibration-plot-options)
 * [Why are the adjusted p-values hidden in the tabular outputs of the differential analysis?](#why-are-the-adjusted-p-values-hidden-in-the-tabular-outputs-of-the-differential-analysis)
 * [How the cells metadata tags are structured?](#how-the-cells-metadata-tags-are-structured)
-* [How the cells metadata tags are aggregated?](#How-the-cells-metadata-tags-are-aggregated)
+* [How the cells metadata tags are aggregated?](#how-the-cells-metadata-tags-are-aggregated)
 
 
 ### Why does the table in experimental design blink during edition?
@@ -61,7 +61,7 @@ In very uncommun situations, one may obtain a bowl shape volcano plot such as de
 
 From Prostar 1.14, the differential analysis results are not exported anymore when using the "Export fo file" functionality, regardless the format (MSnset, excel or zipped CSV). This is due to the separate management of the "data mining" and "data processing" outputs. As a result, after performing the differential analysis, the results must be downloaded thanks to the devoted buttons (otherwise, they will be lost when closing the Prostar session). However, all the p-value computatations (from the "hypothesis testing" menu) can be exported and recovered from one session to another one.
 
-### Why isn't it possible to adjust the logFC threshold on each differential analysis comparison?
+### Why I cannot adjust the logFC threshold on each differential analysis comparison?
 Shortly, because from a statistical viewpoint, doing so roughly amount to FDR cheating. We have observed that numerous practitioners use the logFC threshold as a way to discard some proteins on the volcano plot, so that other proteins of interests appear more strikingly. In addition to be an uncontrolled and subjective way of sorting the proteins regardless of p-values, it has an important side effect on FDR computation: FDR computation requires a sufficiently large amount of proteins "below" the horizontal threshold on the volcano plot. However, all the proteins filtered out because of a too low logFC are not considered in FDR computation, so that tuning the logFC threshold to a too high value (so as to fine tune the protein selection) may lead to a spurious FDR. Finally, in case of more than two conditions (say A, B and C) , it would not make sense to defined differently (i.e. with a different logFC threshold) differentialy abundant proteins across various comparisons (e.g. when comparing AvsB, BvsC and CvsA). For all these reasons, we advise Prostar user to define once and for all the logFC threshold of each proteomics experiment (to a minimal value, such that below the threshold, a protein cannot be interesting froma biological viewpoint, because de FC cannot be properly exploited). More detailed explanations can be found in the following articles:   
 
 * <a href="http://prabig-prostar.univ-lyon1.fr/Articles/OnTheMissuseOfFudgeFactorInProteomics_FV.pdf" target="_blank">_Q. Giai Gianetto, Y. Coute, C. Bruley and T. Burger_. Uses and misuses of the fudge factor in quantitative discovery proteomics. **Proteomics**, 16(14):1955-60, 2016.</a>  
