@@ -1,7 +1,7 @@
 # Configuration file to be used with MagellanNTK
 class: QFeatures
 package: Prostar2
-
+demo_package: DaparToolshedData
 
 # Customizable core functions
 
