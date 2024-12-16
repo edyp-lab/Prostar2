@@ -455,6 +455,8 @@ PipelineProtein_Normalization_server <- function(id,
         .conds <- colData(rv$dataIn)[, "Condition"]
         qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
         
+        #browser()
+        
         switch(rv.widgets$Normalization_method,
           
           G_noneStr = {

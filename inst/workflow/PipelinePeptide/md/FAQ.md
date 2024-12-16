@@ -66,18 +66,18 @@ Shortly, because from a statistical viewpoint, doing so roughly amount to FDR ch
 
 * <a href="http://prabig-prostar.univ-lyon1.fr/Articles/OnTheMissuseOfFudgeFactorInProteomics_FV.pdf" target="_blank">_Q. Giai Gianetto, Y. Coute, C. Bruley and T. Burger_. Uses and misuses of the fudge factor in quantitative discovery proteomics. **Proteomics**, 16(14):1955-60, 2016.</a>  
 * <a href="http://prabig-prostar.univ-lyon1.fr/Articles/fdrtuto.pdf" target="_blank">_T. Burger_. Gentle introduction to the statistical foundations of false discovery rate in quantitative proteomics. **Journal of Proteome Research**, 17(1):12-22, 2017.</a>
-* <a href="https://sites.google.com/site/thomasburgerswebpage/download/5tips-VF-accepted.pdf" target="_blank">_S. Wieczorek, Q. Giai Gianetto, T. Burger_. Five simple yet essential steps to correctly estimate the rate of false differentially abundant proteins in mass spectrometry analyses.  **Journal of Proteomics**, vol 207, p. 103441, In Press, 2019</a> (Section 2).
+* <a href="https://pubmed.ncbi.nlm.nih.gov/31301518/" target="_blank">_S. Wieczorek, Q. Giai Gianetto, T. Burger_. Five simple yet essential steps to correctly estimate the rate of false differentially abundant proteins in mass spectrometry analyses.  **Journal of Proteomics**, vol 207, p. 103441, In Press, 2019</a> (Section 2).
 
 
 ### How does "Push p-values" works?
-This is now clearly explained and illustrated in <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/Prostar/inst/doc/Prostar_UserManual.pdf" target="_blank">Prostar user manual</a> as well as in the following article (Section 3):
+This is now clearly explained and illustrated in <a href="https://bioconductor.org/packages/release/bioc/vignettes/Prostar/inst/doc/Prostar_UserManual.html" target="_blank">Prostar user manual</a> as well as in the following article (Section 3):
 
-<a href="https://sites.google.com/site/thomasburgerswebpage/download/5tips-VF-accepted.pdf" target="_blank">_S. Wieczorek, Q. Giai Gianetto, T. Burger_. Five simple yet essential steps to correctly estimate the rate of false differentially abundant proteins in mass spectrometry analyses.  **Journal of Proteomics**, vol 207, p. 103441, In Press, 2019.</a>
+<a href="https://pubmed.ncbi.nlm.nih.gov/31301518/" target="_blank">_S. Wieczorek, Q. Giai Gianetto, T. Burger_. Five simple yet essential steps to correctly estimate the rate of false differentially abundant proteins in mass spectrometry analyses.  **Journal of Proteomics**, vol 207, p. 103441, In Press, 2019.</a>
 
 ### How should I tune the calibration plot options?
-This is now clearly explained and illustrated in <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/Prostar/inst/doc/Prostar_UserManual.pdf" target="_blank">Prostar user manual</a> as well as in the following article (Sections 4, 5 and 6):
+This is now clearly explained and illustrated in <a href="https://bioconductor.org/packages/release/bioc/vignettes/Prostar/inst/doc/Prostar_UserManual.html" target="_blank">Prostar user manual</a> as well as in the following article (Sections 4, 5 and 6):
 
-<a href="https://sites.google.com/site/thomasburgerswebpage/download/5tips-VF-accepted.pdf" target="_blank">_S. Wieczorek, Q. Giai Gianetto, T. Burger_. Five simple yet essential steps to correctly estimate the rate of false differentially abundant proteins in mass spectrometry analyses.  **Journal of Proteomics**, vol 207, p. 103441, In Press, 2019.</a>
+<a href="https://pubmed.ncbi.nlm.nih.gov/31301518/" target="_blank">_S. Wieczorek, Q. Giai Gianetto, T. Burger_. Five simple yet essential steps to correctly estimate the rate of false differentially abundant proteins in mass spectrometry analyses.  **Journal of Proteomics**, vol 207, p. 103441, In Press, 2019.</a>
 
 
 ### Why are the adjusted p-values hidden in the tabular outputs of the differential analysis?
