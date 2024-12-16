@@ -152,8 +152,6 @@ mod_Metacell_Filtering_server <- function(id,
       req(is.enabled())
       req(rv$dataIn)
       
-      print('in toto')
-      print(remoteReset())
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
         obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),

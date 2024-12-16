@@ -175,14 +175,14 @@ MagellanNTK::format_DT_server('dt',
       req(rv$dataIn)
       req(input$selectInputSE != "None")
 
-     
+
         .se <- rv$dataIn[[input$selectInputSE]]
         
-        typeOfData <- metadata(.se)$typeDataset
+        typeOfData <- typeDataset(.se)
         nLines <- nrow(.se)
         .nNA <- QFeatures::nNA(.se)
-        percentMV <- round(.nNA$nNA[,'pNA'], digits = 2)
-        nEmptyLines <-  length(which(.nNA$nNArows[,'pNA']==100))
+        percentMV <- round(100*.nNA$nNA[,'pNA'], digits = 2)
+        nEmptyLines <-  length(which(.nNA$nNArows[,'nNA']==ncol(.se)))
 
         val <- c(typeOfData, nLines, percentMV, nEmptyLines)
         row_names <- c("Type of data",
