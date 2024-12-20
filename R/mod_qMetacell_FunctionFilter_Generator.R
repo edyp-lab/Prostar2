@@ -21,7 +21,7 @@
 #' \dontrun{
 #' data(Exp1_R25_prot, package ='DaparToolshedData')
 #' obj <- Exp1_R25_prot[[1]]
-#' conds <- get_group(Exp1_R25_prot)
+#' conds <- colData(Exp1_R25_prot)$Condition
 #' 
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))
@@ -45,9 +45,8 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
                 column(2, uiOutput(ns("tree_UI"))),
                 column(2, uiOutput(ns("chooseKeepRemove_ui"))),
                 column(2, uiOutput(ns("chooseScope_ui"))),
-                column(6, tagList(
-                    uiOutput(ns("qMetacellScope_widgets_set2_ui"))
-                ))
+                column(6, uiOutput(ns("qMetacellScope_widgets_set2_ui"))
+                )
             ),
             div(
                 style = "display:inline-block; 
@@ -84,7 +83,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
     val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
     operator = reactive({setNames(nm = SymFilteringOperators())}),
-  remoteReset = reactive({0}),
+    remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})) {
 
     # Define default selected values for widgets
@@ -135,7 +134,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
             class = "btn-info")
           
           MagellanNTK::toggleWidget(widget, is.enabled())
-          
         })
 
         MagellanNTK::mod_popover_for_help_server("tag_help",
@@ -471,7 +469,12 @@ mod_qMetacell_FunctionFilter_Generator <- function(
   is.enabled = TRUE){
   
   
-  ui <- mod_qMetacell_FunctionFilter_Generator_ui('query')
+  ui <- 
+    tagList(
+      actionButton("Reset", "Simulate reset"),
+      mod_qMetacell_FunctionFilter_Generator_ui('query')
+    
+  )
   
   server <- function(input, output, session){
     
@@ -482,7 +485,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
       val_vs_percent = reactive({val_vs_percent}),
       operator = reactive({operator}),
       is.enabled = reactive({is.enabled}),
-      remoteReset = reactive({remoteReset()}))
+      remoteReset = reactive({remoteReset()+input$Reset}))
     
     observeEvent(res()$trigger, {
       #browser()

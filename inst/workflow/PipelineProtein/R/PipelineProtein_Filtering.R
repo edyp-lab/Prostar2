@@ -213,8 +213,6 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observe({
-      print('tututut')
-      print(remoteReset())
       
       rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
         id = "metaFiltering",
@@ -273,9 +271,6 @@ PipelineProtein_Filtering_server <- function(id,
     
 
     observe({
-      # # If the previous step has been run and validated,
-      # # Update dataIn to its result
-
       rv.custom$tmp.filtering2 <- Prostar2::mod_Variable_Filtering_server(
         id = "varFiltering",
         obj = reactive({rv.custom$dataIn1}),
@@ -283,16 +278,12 @@ PipelineProtein_Filtering_server <- function(id,
         is.enabled = reactive({rv$steps.enabled["Variablefiltering"]}),
         remoteReset = reactive({remoteReset()})
       )
-
     })
     
     
     output$mod_variable_filtering_ui <- renderUI({
-      
-      
     widget <- Prostar2::mod_Variable_Filtering_ui(ns("varFiltering"))
-    MagellanNTK::toggleWidget(widget, 
-      rv$steps.enabled["Variablefiltering"])
+    MagellanNTK::toggleWidget(widget, rv$steps.enabled["Variablefiltering"])
   })
   
 

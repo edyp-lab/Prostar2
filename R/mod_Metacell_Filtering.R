@@ -46,7 +46,7 @@ mod_Metacell_Filtering_ui <- function(id) {
     # For more details, please refer to the dev document.
     
     uiOutput(ns("Quantimetadatafiltering_buildQuery_ui")),
-
+    
     uiOutput(ns("qMetacell_Filter_DT"))
     ,uiOutput(ns('plots_ui'))
     
@@ -96,7 +96,7 @@ mod_Metacell_Filtering_server <- function(id,
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     eval(
       str2expression(
         MagellanNTK::Get_AdditionalModule_Core_Code(
@@ -108,7 +108,7 @@ mod_Metacell_Filtering_server <- function(id,
     
     
     observeEvent(req(obj()), ignoreNULL = TRUE,{
-
+      
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
@@ -125,9 +125,8 @@ mod_Metacell_Filtering_server <- function(id,
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
-
     }, priority = 1000)
-
+    
     
     
     output$plots_ui <- renderUI({
@@ -137,15 +136,15 @@ mod_Metacell_Filtering_server <- function(id,
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-
+    
     MagellanNTK::format_DT_server("dt", 
       obj = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
     
     
     output$qMetacell_Filter_DT <- renderUI({
-        req(rv.custom$qMetacell_Filter_SummaryDT)
+      req(rv.custom$qMetacell_Filter_SummaryDT)
       MagellanNTK::format_DT_ui(ns("dt"))
-      })
+    })
     
     
     observe({
@@ -169,7 +168,7 @@ mod_Metacell_Filtering_server <- function(id,
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-
+    
     # output$Quantimetadatafiltering_btn_validate_ui <- renderUI({
     # 
     #   req(length(rv.custom$funFilter()$value$ll.fun) > 0)
@@ -184,11 +183,11 @@ mod_Metacell_Filtering_server <- function(id,
     # >>> END: Definition of the widgets
     
     
-   # observeEvent(input$Quantimetadatafiltering_btn_validate, {
-      observeEvent(req(rv.custom$funFilter()$trigger), {
-        req(length(rv.custom$funFilter()$value$ll.fun) > 0)
+    # observeEvent(input$Quantimetadatafiltering_btn_validate, {
+    observeEvent(req(rv.custom$funFilter()$trigger), {
+      req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
- 
+      
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
@@ -197,17 +196,17 @@ mod_Metacell_Filtering_server <- function(id,
       )
       indices <- rv.custom$funFilter()$value$ll.indices
       
-      
+      #browser()
       # Add infos
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])
       
       #.html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
-   
+      
       .html <- rv.custom$funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
       .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
-
+      
       rv.custom$qMetacell_Filter_SummaryDT <- rbind(
         rv.custom$qMetacell_Filter_SummaryDT , 
         c(.html, .nbDeleted, .nbRemaining))
@@ -218,7 +217,7 @@ mod_Metacell_Filtering_server <- function(id,
       len_start <- length(obj())
       len_end <- length(tmp)
       len_diff <- len_end - len_start
-      #browser()
+
       req(len_diff > 0)
       
       if (len_diff == 2)
@@ -228,9 +227,9 @@ mod_Metacell_Filtering_server <- function(id,
       
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
-
+      
       # Add params
-      par <- rv.custom$funFilter()$value$ll.widgets.value
+      #par <- rv.custom$funFilter()$value$ll.widgets.value
       query <- rv.custom$funFilter()$value$ll.query
       i <- length(rv$dataIn)
       .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
@@ -238,7 +237,7 @@ mod_Metacell_Filtering_server <- function(id,
       .history[[paste0('query_', length(.history))]] <- query
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
       
-
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })

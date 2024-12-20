@@ -25,8 +25,7 @@
 #' operator = setNames(nm = SymFilteringOperators())
 #' keep_vs_remove <- setNames(nm = c("delete", "keep"))
 #' value = 3
-#' shiny::runApp(
-#' mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
+#' shiny::runApp(mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
 #' }
 #' 
 NULL
@@ -44,7 +43,7 @@ mod_VariableFilter_Generator_ui <- function(id) {
   
   .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
   wellPanel(
-    DT::dataTableOutput(ns("VarFilter_DT")),
+    #DT::dataTableOutput(ns("VarFilter_DT")),
     # Build queries
     div(
       div(style = .style, uiOutput(ns("chooseKeepRemove_ui"))),
@@ -52,11 +51,11 @@ mod_VariableFilter_Generator_ui <- function(id) {
       div(style = .style, uiOutput(ns("operator_ui"))),
       div(style = .style, uiOutput(ns("value_ui")))
       ),
-    uiOutput(ns("addFilter_btn_ui")),
+    uiOutput(ns("addFilter_btn_ui"))
     # Show example
-    uiOutput(ns("example_ui")),
+    #uiOutput(ns("example_ui")),
     # Process the queries
-    uiOutput(ns("btn_validate_ui"))
+    #uiOutput(ns("btn_validate_ui"))
   )
 }
 
@@ -80,7 +79,7 @@ mod_VariableFilter_Generator_server <- function(id,
   cname = reactive({NULL}),
   value = reactive({NULL}),
   operator = reactive({NULL}),
-  keep_vs_remove = reactive({'delete'}),
+  keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
@@ -88,91 +87,88 @@ mod_VariableFilter_Generator_server <- function(id,
   # This is only for simple workflows
   widgets.default.values <- list(
     cname = "None",
-    value = "None",
+    value = NA,
     keep_vs_remove = "delete",
-    operator = character(0)
+    operator = "None"
   )
   
   rv.custom.default.values <- list(
-    indices = NULL,
-    variableFilter = NULL,
-    query = list(),
-    fun.list = list(),
-    widgets.value = list()
+    ll.var = list(),
+    ll.query = list(),
+    ll.widgets.value = list()
   )
   
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    eval(
-      str2expression(
-        MagellanNTK::Get_AdditionalModule_Core_Code(
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-        )
-      )
+    # eval(
+    #   str2expression(
+    #     MagellanNTK::Get_AdditionalModule_Core_Code(
+    #       w.names = names(widgets.default.values),
+    #       rv.custom.names = names(rv.custom.default.values)
+    #     )
+    #   )
+    # )
+    
+    #eval(str2expression(Get_Code_for_remoteReset()))
+    
+    core <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(),
+      sep = "\n"
     )
     
+    eval(str2expression(core))
     
-    # output$example_ui <- renderUI({
-    #   req(length(rv.custom$varFilters) > 0)
-    #   req(rv$steps.status["Variablefiltering"] == 0)
+    
+    
+    # One need to rewrite a second observer for remoteReset because
+    observeEvent(remoteReset(), ignoreInit = FALSE, ignoreNULL = TRUE, {
+      updateTextInput(session, "value", 
+        placeholder = 'Enter value...', 
+        value = widgets.default.values[['value']])
+    })
+
+
+    
+    observeEvent(req(obj()), ignoreNULL = FALSE, {
+      stopifnot(inherits(obj(), 'SummarizedExperiment'))
+      rv$dataIn <- obj()
+    }, priority = 1000)
+    
+    
+    
+    # observeEvent(req(remoteReset() >= 1), ignoreInit = TRUE, ignoreNULL = FALSE, {
+    #   lapply(names(rv.widgets), function(x){
+    #     rv.widgets[[x]] <- widgets.default.values[[x]]
+    #   })
     #   
-    #   temp <- filterFeaturesOneSE(
-    #     object = mainAssay(rv$dataIn),
-    #     filters = rv.custom$varFilters
-    #   )
-    #   
-    #   mod_filterExample_server(
-    #     id = "varFilterExample",
-    #     objBefore = reactive({mainAssay(rv$dataIn)}),
-    #     objAfter = reactive({temp}),
-    #     query = reactive({rv.custom$varQueries})
-    #   )
-    #   
-    #   widget <- mod_filterExample_ui(ns("varFilterExample"))
-    #   MagellanNTK::toggleWidget(widget, 
-    #     rv$steps.enabled["Variablefiltering"])
+    #   lapply(names(rv.custom), function(x){
+    #     rv.custom[[x]] <- rv.custom.default.values[[x]]
+    #   })
     # })
     # 
-    
-    
     
     output$chooseKeepRemove_ui <- renderUI({
  
       widget <- radioButtons(ns("keep_vs_remove"),
         "Type of filter operation",
-        choices = setNames(nm = c('delete', 'keep')),
+        choices = keep_vs_remove(),
         selected = rv.widgets$keep_vs_remove
       )
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-    
-    output$VarFilter_DT <- DT::renderDataTable(server = TRUE,{
-      req(rv.custom$varQueries)
-        rv.custom$varFilter_DT[, "query"] <- ConvertListToHtml(rv.custom$varQueries)
-        showDT(rv.custom$varFilter_DT)
-      })
-    
-    showDT <- function(df) {
-      DT::datatable(df,
-        extensions = c("Scroller"),
-        escape = FALSE,
-        rownames = FALSE,
-        options = list(
-          dom = "rt",
-          initComplete = .initComplete(),
-          deferRender = TRUE,
-          bLengthChange = FALSE
-        )
-      )
-    }
-    
+
     
     output$cname_ui <- renderUI({
-      .choices <- c("None", colnames(rowData(obj())))
+      req(rv$dataIn)
+      .choices <- c("None", colnames(rowData(rv$dataIn)))
       
       widget <- selectInput(ns("cname"),
         "Column name",
@@ -186,15 +182,17 @@ mod_VariableFilter_Generator_server <- function(id,
     
     
     output$operator_ui <- renderUI({
-      #req(rv.widgets$value)
+      req(rv$dataIn)
+      req(rv.widgets$cname %in% colnames(rowData(rv$dataIn)))
 
-      if (is.na(as.numeric(rv.widgets$value))) {
-        .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
-      } else {
+      if (is.numeric(rowData(rv$dataIn)[, rv.widgets$cname])) {
         .operator <- DaparToolshed::SymFilteringOperators()
+      } else {
+        .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
       }
       
-      
+      .operator = c("None" = "None", .operator)
+      print(.operator)
       widget <- selectInput(ns("operator"),
         "operator",
         choices = stats::setNames(nm = .operator),
@@ -204,11 +202,14 @@ mod_VariableFilter_Generator_server <- function(id,
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
+
     output$value_ui <- renderUI({
+      
       widget <- textInput(ns("value"),
         "value",
         placeholder = 'Enter value...',
         width = "100px"
+        #value = rv.widgets$value
       )
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
@@ -232,8 +233,14 @@ mod_VariableFilter_Generator_server <- function(id,
       return(val)
     }
     
+    
+    
     BuildVariableFilter <- reactive({
-      req(rv.widgets$value)
+      req(obj())
+#browser()
+      req(rv.widgets$value != 'Enter value...')
+      req(rv.widgets$operator != "None")
+      req(rv.widgets$cname != "None")
 
         QFeatures::VariableFilter(
           field = rv.widgets$cname,
@@ -255,17 +262,25 @@ mod_VariableFilter_Generator_server <- function(id,
       
     })
     
-    observeEvent(input$addFilter_btn, {
+    observeEvent(input$addFilter_btn, ignoreInit = FALSE, ignoreNULL = TRUE, {
+      rv.widgets$value
+      rv.widgets$operator
+      rv.widgets$cname
+      
+      #print('titititi')
+      #print(input$addFilter_btn)
+      #browser()
+      
+      
       req(BuildVariableFilter())
       req(WriteQuery())
       
-      
-      #browser()
       rv.custom$ll.var <- list(BuildVariableFilter())
       rv.custom$ll.query <- list(WriteQuery())
       rv.custom$ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
       
       
+      print("OUtput of mod_VariableFilter_Generator")
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(
@@ -273,6 +288,10 @@ mod_VariableFilter_Generator_server <- function(id,
         ll.query = rv.custom$ll.query,
         ll.widgets.value = rv.custom$ll.widgets.value
       )
+      
+      print(dataOut$trigger)
+      print(dataOut$value)
+      
     })
     
     return(reactive({dataOut}))
@@ -289,10 +308,14 @@ mod_VariableFilter_Generator <- function(
   cname = NULL,
   value = NULL,
   operator = NULL,
-  keep_vs_remove = 'delete'){
+  keep_vs_remove = 'delete',
+  remoteReset = reactive({0})){
   
   
-  ui <- mod_VariableFilter_Generator_ui('query')
+  ui <- tagList(
+    actionButton("Reset", "Simulate reset"),
+    mod_VariableFilter_Generator_ui('query')
+  )
   
   server <- function(input, output, session){
     
@@ -301,7 +324,8 @@ mod_VariableFilter_Generator <- function(
       cname = reactive({cname}),
       value = reactive({value}),
       operator = reactive({operator}),
-      keep_vs_remove = reactive({keep_vs_remove})
+      keep_vs_remove = reactive({keep_vs_remove}),
+      remoteReset = reactive({remoteReset() + input$Reset})
       )
     
     observeEvent(res()$trigger, {

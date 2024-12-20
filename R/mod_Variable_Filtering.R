@@ -85,54 +85,46 @@ mod_Variable_Filtering_server <- function(id,
     indices = NULL,
     query = list(),
     widgets.value = list(),
-    funFilter = reactive({NULL}),
     variable_Filter_SummaryDT = data.frame(
-      query = "-",
-      nbDeleted = "-",
-      TotalMainAssay = "-",
+      query = NA,
+      nbDeleted = NA,
+      TotalBeforeFiltering = NA,
+      TotalAfterFiltering = NA,
       stringsAsFactors = FALSE
-    )
+    ), 
+    history = list()
   )
   
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    eval(
-      str2expression(
-        MagellanNTK::Get_AdditionalModule_Core_Code(
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-        )
-      )
+    
+    core <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(),
+      sep = "\n"
     )
     
+    eval(str2expression(core))
     
-    observeEvent(req(obj()), ignoreNULL = TRUE,{
+    
+    observeEvent(req(obj()), ignoreNULL = FALSE, ignoreInit = FALSE, {
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
     }, priority = 1000)
     
 
-    MagellanNTK::format_DT_server("dt", 
-      obj = reactive({rv.custom$variable_Filter_SummaryDT}))
-
+   
     output$variable_Filter_DT <- renderUI({
-     
-      req(rv.custom$variable_Filter_SummaryDT)
+      MagellanNTK::format_DT_server("dt", 
+        obj = reactive({rv.custom$variable_Filter_SummaryDT}))
+      
       MagellanNTK::format_DT_ui(ns("dt"))
-    })
-    
-    
-    observe({
-      req(is.enabled())
-      req(obj())
-      rv.custom$funFilter <- mod_VariableFilter_Generator_server(
-        id = "query",
-        obj = reactive({obj()[[length(obj())]]}),
-        is.enabled = reactive({is.enabled()}),
-        remoteReset = reactive({remoteReset()})
-      )
     })
     
 
@@ -141,17 +133,24 @@ mod_Variable_Filtering_server <- function(id,
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
+    funFilter <- mod_VariableFilter_Generator_server(
+      id = "query",
+      obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      is.enabled = reactive({is.enabled()}),
+      remoteReset = reactive({remoteReset()})
+    )
     
-    
-    observeEvent(rv.custom$funFilter()$trigger, {
+    observeEvent(funFilter()$trigger, ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(length(funFilter()$value$ll.var) > 0)
       req(rv$dataIn)
- 
+
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = paste0("variableFiltered", MagellanNTK::Timestamp()),
-        filters = rv.custom$funFilter()$value$ll.var
+        filters = funFilter()$value$ll.var
       )
+      indices <- funFilter()$value$ll.indices
       
       # Add infos
       
@@ -159,20 +158,20 @@ mod_Variable_Filtering_server <- function(id,
       nAfter <- nrow(tmp[[length(tmp)]])
       
       
-      .html <- rv.custom$funFilter()$value$ll.query
+      .html <- funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
-      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+      .nbBefore <- nrow(assay(obj()))
+      .nbAfter <- nrow(assay(tmp[[length(tmp)]]))
       
       rv.custom$variable_Filter_SummaryDT <- rbind(
         rv.custom$variable_Filter_SummaryDT , 
-        c(.html, .nbDeleted, .nbRemaining))
-      
-      #browser()
+        c(.html, .nbDeleted, .nbBefore, .nbAfter))
+      print('update du DT')
       # Keeps only the last filtered SE
       len_start <- length(obj())
       len_end <- length(tmp)
       len_diff <- len_end - len_start
-      #browser()
+
       req(len_diff > 0)
       
       if (len_diff == 2)
@@ -180,65 +179,23 @@ mod_Variable_Filtering_server <- function(id,
       else 
         rv$dataIn <- tmp
       
+      
+     
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'Variable_Filtering'
       
 
+      query <- funFilter()$value$ll.query
       i <- length(rv$dataIn)
-  
       .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Variable_Filtering']]
-      #.history <- append(.history, rv.custom$funFilter()$value$ll.query)
-      query <- rv.custom$funFilter()$value$ll.query
       .history[[paste0('query_', length(.history))]] <- query
-      
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Variable_Filtering']] <- .history
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn 
     })
     
-    # 
-    # output$variable_btn_validate_ui <- renderUI({
-    #   #browser()
-    #   #req(length(rv.custom$funFilter()$value$ll.var) > 0)
-    #   
-    #   widget <- actionButton(ns("variable_btn_validate"),
-    #     "Perform filtering", class = "btn-success")
-    #   
-    #   MagellanNTK::toggleWidget(widget, is.enabled())
-    # })
-    # # >>> END: Definition of the widgets
-    # 
-    # 
-    # observeEvent(input$variable_btn_validate, {
-    #  req(obj())
-    #   tmp <- filterFeaturesOneSE(
-    #     object = obj(),
-    #     i = length(obj()),
-    #     name = "variableFiltered",
-    #     filters = rv.custom$funFilter()$value$ll.var
-    #   )
-    #   
-    #   # Add infos
-    #   #browser()
-    #   nBefore <- nrow(tmp[[length(tmp) - 1]])
-    #   nAfter <- nrow(tmp[[length(tmp)]])
-    #   
-    #   rv.custom$variable_Filter_SummaryDT[, "nbDeleted"] <- nBefore - nAfter
-    #   rv.custom$variable_Filter_SummaryDT[, "TotalMainAssay"] <- nrow(assay(tmp[[length(tmp)]]))
-    # 
-    #   .history <- DaparToolshed::paramshistory(tmp[[i]])[['Filtering']][['Variable_Filtering']]
-    #   
-    #   ll.query <-  rv.custom$funFilter()$value$ll.widgets.value
-    #   .history <- append(.history, ll.query)
-    #   DaparToolshed::paramshistory(tmp[[i]])[['Filtering']][['Variable_Filtering']] <- .history
-    #   
-    #   
-    #   rv$dataIn <- tmp
-    #   
-    #   dataOut$trigger <- MagellanNTK::Timestamp()
-    #   dataOut$value <- tmp
-    # })
+    
     
     return(reactive({dataOut}))
   })
@@ -250,13 +207,18 @@ mod_Variable_Filtering_server <- function(id,
 #' @rdname mod_Variable_Filtering
 #' 
 mod_Variable_Filtering <- function(obj, i){
-  ui <- mod_Variable_Filtering_ui('query')
+  ui <- tagList(
+    actionButton('Reset', "Reset"),
+    mod_Variable_Filtering_ui('query')
+  )
   
   server <- function(input, output, session){
     
     res <- mod_Variable_Filtering_server('query',
       obj = reactive({obj}),
-      i = reactive({i}))
+      i = reactive({i}),
+      remoteReset = reactive({input$Reset})
+      )
     
     observeEvent(res()$trigger, {
       print(res()$value)
