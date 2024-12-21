@@ -437,11 +437,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
       ll <- unlist(strsplit(current.comp, split = "_"))
       tmp.cond1 <- gsub("[( )]", "", ll[1])
       tmp.cond2 <- gsub("[( )]", "", ll[3])
-      #tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
-      #tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
+      tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
+      tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
        
-      tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
-      tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
+      #tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
+      #tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
       
       colnames(rv.custom$AllPairwiseComp$logFC)[ind.swap] <- tmp.logFC
       colnames(rv.custom$AllPairwiseComp$P_Value)[ind.swap] <- tmp.pval

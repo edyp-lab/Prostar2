@@ -800,18 +800,32 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       
+      
+      # Check if the conditions have been reordered or not.
+      # If it is the case, the metacells must also be reordered
+      # in the same way.
+      #rv.convert$design
 
+      # Reorder colums before creatinf QFetatures object
+      print(rv.convert$design()$design)
+      print(rv.convert$design()$order)
+      as.data.frame(rv.convert$design()$design)
+      #browser()
+      .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.convert$design()$order]
+      .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.convert$design()$order]
+      
+      
       # Create QFeatures dataset file
       rv$dataIn <- DaparToolshed::createQFeatures(
         file = rv.widgets$SelectFile_file$name,
         data = rv.convert$tab, 
         sample = as.data.frame(rv.convert$design()$design),
-        indQData = rv.widgets$ExpandFeatData_quantCols,
+        indQData = .indQData,
         keyId = rv.widgets$DataId_datasetId,
         analysis = rv.widgets$Save_analysis,
         description = rv.widgets$Save_description,
         logData = rv.widgets$SelectFile_checkDataLogged == 'no',
-        indexForMetacell = rv.widgets$ExpandFeatData_inputGroup(),
+        indexForMetacell = .indexForMetacell,
         typeDataset = rv.widgets$SelectFile_typeOfData,
         parentProtId = rv.widgets$DataId_parentProteinID,
         force.na = rv.widgets$SelectFile_replaceAllZeros,

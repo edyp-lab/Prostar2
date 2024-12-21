@@ -130,10 +130,11 @@ mod_buildDesign_server <- function(id,
       #   return(NULL)
       # }
       req(!("Bio.Rep" %in% colnames(rv$hot)))
-      
+
       if (input$convert_reorder == "Yes") {
-        rv$newOrder <- order(rv$hot["Condition"])
+        rv$newOrder <- order(rv$hot[,"Condition"])
         rv$hot <- rv$hot[rv$newOrder, ]
+        
       }
       
       rv$conditionsChecked <- check.conditions(rv$hot$Condition)
@@ -457,6 +458,13 @@ mod_buildDesign_server <- function(id,
         dataOut$design <- rv$hot
       else
         dataOut$design <- NULL
+      
+      if (input$convert_reorder == "Yes")
+        dataOut$order <- rv$newOrder
+      else
+        dataOut$order <- order(rownames(rv$hot))
+      
+
     })
     
     
@@ -478,7 +486,10 @@ mod_buildDesign_server <- function(id,
 #' @export
 mod_buildDesign <- function(quantCols) {
   
-  ui <- mod_buildDesign_ui('buildDesign')
+  ui <- fluidPage(
+    mod_buildDesign_ui('buildDesign')
+  )
+  
   server <- function(input, output, session) {
     mod_buildDesign_server('buildDesign', quantCols)
   }
