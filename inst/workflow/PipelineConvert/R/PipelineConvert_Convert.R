@@ -583,7 +583,7 @@ PipelineConvert_Convert_server <- function(id,
     output$DataId_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("DataId_btn_validate"), "Perform",
         class = 'info')
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] && datasetID_Ok())
     })
     
     observeEvent(input$DataId_btn_validate, {
