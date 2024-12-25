@@ -554,6 +554,12 @@ PipelineProtein_Normalization_server <- function(id,
           type = 'error' )
       } else {
  
+        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
+        assay(new.dataset) <- rv.custom$tmpAssay
+        DaparToolshed::paramshistory(new.dataset) <- NULL
+        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
+        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
+        
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
@@ -594,11 +600,6 @@ PipelineProtein_Normalization_server <- function(id,
       req(rv.custom$tmpAssay)
       req(rv.custom$history)
       
-      new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-      assay(new.dataset) <- rv.custom$tmpAssay
-      DaparToolshed::paramshistory(new.dataset) <- NULL
-      DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
-      rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
