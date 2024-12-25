@@ -367,6 +367,8 @@ PipelineProtein_Normalization_server <- function(id,
       obj1 <- rv$dataIn[[length(rv$dataIn)]]
       obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
       
+      req(obj1)
+      req(obj2)
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
       #browser()
       DaparToolshed::compareNormalizationD_HC(
@@ -552,12 +554,7 @@ PipelineProtein_Normalization_server <- function(id,
           type = 'error' )
       } else {
  
-        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        assay(new.dataset) <- rv.custom$tmpAssay
-        DaparToolshed::paramshistory(new.dataset) <- NULL
-        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
-        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
- 
+        
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
@@ -594,6 +591,15 @@ PipelineProtein_Normalization_server <- function(id,
     })
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
+      req(rv.custom$tmpAssay)
+      req(rv.custom$history)
+      
+      new.dataset <- rv$dataIn[[length(rv$dataIn)]]
+      assay(new.dataset) <- rv.custom$tmpAssay
+      DaparToolshed::paramshistory(new.dataset) <- NULL
+      DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
+      rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
+      
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
