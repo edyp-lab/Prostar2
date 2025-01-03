@@ -89,7 +89,7 @@ PipelineProtein_Normalization_server <- function(id,
   
   rv.custom.default.values <- list(
     tmp.dataset = NULL,
-    init.dataset = NULL,
+    #init.dataset = NULL,
     history = NULL,
     selectProt = reactive({NULL})
   )
@@ -109,8 +109,32 @@ PipelineProtein_Normalization_server <- function(id,
       rv.custom.names = names(rv.custom.default.values)
     )
     
+    # name <- id
+    # w.names <- names(widgets.default.values)
+    # rv.custom.names <- names(rv.custom.default.values)
+    # 
+    # add.code <- "rv$dataIn <- NULL
+    # rv.custom$tmpAssay <- NULL"
+    # 
+    # core.code <- paste0(
+    #   Insert_Call_to_Config(name),
+    #   Get_Code_Declare_widgets(w.names),
+    #   #Get_Code_Update_Config_Variable(),
+    #   Get_Code_for_ObserveEvent_widgets(w.names),
+    #   Get_Code_for_rv_reactiveValues(),
+    #   Get_Code_Declare_rv_custom(rv.custom.names),
+    #   Get_Code_for_dataOut(),
+    #   Get_Code_for_General_observeEvents(),
+    #   Get_Code_for_remoteReset2_observeEvents(add.code),
+    #   sep = "\n"
+    # )
+    
+    
+    
     eval(str2expression(core.code))
 
+    
+    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -162,7 +186,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       rv$dataIn <- dataIn()
-      rv.custom$init.dataset <- dataIn()
+      #rv.custom$init.dataset <- dataIn()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -193,7 +217,6 @@ PipelineProtein_Normalization_server <- function(id,
         
         
         tagList(
-
           div(style = .style,
             uiOutput(ns("Normalization_btn_validate_ui"))
           ),
@@ -256,28 +279,37 @@ PipelineProtein_Normalization_server <- function(id,
     #   req(rv$dataIn)
     #   remoteReset()
      # rv.custom$selectProt()$value
+    # omXplore::omXplore_density_server("densityPlot_Norm", 
+    #   obj = reactive({rv$dataIn}),
+    #   i = reactive({length(rv$dataIn)})
+    # )
+    # 
+
+   #observe({
+     #selectProt()
+    # req(rv$dataIn)
+     
+     
+    # print("in toto")
+     
+     #print(rv$dataIn)
+      omXplore::omXplore_intensity_server("boxPlot_Norm",
+        obj = reactive({rv$dataIn}),
+        i = reactive({length(rv$dataIn)}),
+        track.indices = reactive({selectProt()$indices}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({!rv$steps.enabled['Normalization']})
+    )
+    
     omXplore::omXplore_density_server("densityPlot_Norm", 
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)})
     )
     
-
-   observe({
-     rv.custom$selectProt()
-     rv$dataIn
-     
-    omXplore::omXplore_intensity_server("boxPlot_Norm",
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
-      track.indices = reactive({selectProt()$indices}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({!rv$steps.enabled['Normalization']})
-    )
-    
-     })
+     #})
     
    
-   observeEvent(rv.custom$selectProt()$indices, ignoreNULL = FALSE,{
+   observeEvent(selectProt()$indices, ignoreNULL = FALSE,{
    
      print("in observeEvent(selectProt()$indices")
      print('new value fo selectProt()$indices = ')
@@ -292,7 +324,7 @@ PipelineProtein_Normalization_server <- function(id,
       widget <- selectInput(
         ns('Normalization_method'),
         "Normalization method",
-        choices = DaparToolshed::normalizeMethods(),
+        choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())),
         selected = rv.widgets$Normalization_method,
         width = '250px')
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
@@ -364,30 +396,33 @@ PipelineProtein_Normalization_server <- function(id,
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
       req(rv$dataIn)
       req(length(rv$dataIn) > 1)
+      #req(names(rv$dataIn)[length(rv$dataIn)] == 'Normalization')
       obj1 <- rv$dataIn[[length(rv$dataIn)]]
       obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
       
       req(obj1)
       req(obj2)
       protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
-      #browser()
+ 
+      if (!is.null(selectProt()$indices)) {
+        .n <- length(selectProt()$indices)
+        .subset <- selectProt()$indices
+      } else {
+        .n <- floor(0.02 * nrow(obj1))
+        .subset <- seq(nrow(obj1))
+      }
+
+ 
+ 
       DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = SummarizedExperiment::assay(obj1),
-        qDataAfter = SummarizedExperiment::assay(obj2),
+        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
         conds = omXplore::get_group(rv$dataIn),
         pal = NULL,
         # Consider only 2% of the entire dataset
-        n = if (!is.null(rv.custom$selectProt()$indices)) {
-          length(selectProt()$indices)
-        } else {
-          floor(0.02 * nrow(SummarizedExperiment::assay(obj1)))
-        },
-        subset.view = if (!is.null(selectProt()$indices)) {
-          selectProt()$indices
-        } else {
-          seq(nrow(obj1))
-        }
+        n = .n,
+        subset.view = .subset
       )
     })
     
@@ -447,6 +482,8 @@ PipelineProtein_Normalization_server <- function(id,
     # >>> END: Definition of the widgets
     
     observeEvent(input$Normalization_btn_validate, {
+      #browser()
+      
       # Do some stuff 
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
@@ -455,9 +492,8 @@ PipelineProtein_Normalization_server <- function(id,
       rv.custom$tmpAssay <- NULL
       try({
         .conds <- colData(rv$dataIn)[, "Condition"]
-        qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
+        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
         
-        #browser()
         
         switch(rv.widgets$Normalization_method,
           
@@ -547,7 +583,9 @@ PipelineProtein_Normalization_server <- function(id,
         )
       })
       
-      if(inherits(rv.custom$tmpAssay, "try-error")) {
+      
+      
+      if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
         
         MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_normalization',
           text = rv.custom$tmpAssay[[1]],
