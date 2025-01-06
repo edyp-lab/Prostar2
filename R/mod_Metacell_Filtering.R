@@ -20,6 +20,8 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(Prostar2)
+#' library(shinyBS)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
 #' }
@@ -110,6 +112,7 @@ mod_Metacell_Filtering_server <- function(id,
     observeEvent(req(obj()), ignoreNULL = TRUE,{
       
       stopifnot(inherits(obj(), 'QFeatures'))
+      
       rv$dataIn <- obj()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
@@ -119,18 +122,21 @@ mod_Metacell_Filtering_server <- function(id,
       )
       
       
+      
+    }, priority = 1000)
+    
+    
+     
+    output$plots_ui <- renderUI({
+      req(rv.custom$funFilter()$value$ll.pattern)
+      
       mod_ds_metacell_Histos_server(
         id = "plots",
         obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
-    }, priority = 1000)
-    
-    
-    
-    output$plots_ui <- renderUI({
-      req(rv.custom$funFilter()$value$ll.pattern)
+      
       
       widget <- mod_ds_metacell_Histos_ui(ns("plots"))
       MagellanNTK::toggleWidget(widget, is.enabled())
