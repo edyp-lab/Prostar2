@@ -84,7 +84,7 @@ of the class \code{SummarizedExperiment})
 \dontrun{
 data(Exp1_R25_prot, package ='DaparToolshedData')
 obj <- Exp1_R25_prot[[1]]
-conds <- get_group(Exp1_R25_prot)
+conds <- colData(Exp1_R25_prot)$Condition
 
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))

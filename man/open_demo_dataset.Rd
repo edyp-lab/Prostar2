@@ -4,6 +4,7 @@
 \alias{open_demo_dataset}
 \alias{open_demoDataset_ui}
 \alias{open_demoDataset_server}
+\alias{open_demoDataset}
 \title{mod_open_demo_dataset_ui and mod_open_demo_dataset_server}
 \usage{
 open_demoDataset_ui(id)
@@ -17,11 +18,20 @@ open_demoDataset_server(
      TRUE
  })
 )
+
+open_demoDataset()
 }
 \arguments{
 \item{id}{xxx}
 }
 \description{
 A shiny Module.
+}
+\examples{
+\dontrun{
+shiny::runApp(open_demoDataset())
+}
+
+
 }
 \keyword{internal}

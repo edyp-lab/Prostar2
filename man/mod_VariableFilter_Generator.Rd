@@ -23,7 +23,7 @@ mod_VariableFilter_Generator_server(
      NULL
  }),
   keep_vs_remove = reactive({
-     "delete"
+     setNames(nm = c("delete", "keep"))
  }),
   remoteReset = reactive({
      0
@@ -38,7 +38,10 @@ mod_VariableFilter_Generator(
   cname = NULL,
   value = NULL,
   operator = NULL,
-  keep_vs_remove = "delete"
+  keep_vs_remove = "delete",
+  remoteReset = reactive({
+     0
+ })
 )
 }
 \arguments{
@@ -83,8 +86,7 @@ obj <- Exp1_R25_prot[[1]]
 operator = setNames(nm = SymFilteringOperators())
 keep_vs_remove <- setNames(nm = c("delete", "keep"))
 value = 3
-shiny::runApp(
-mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
+shiny::runApp(mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
 }
 
 }

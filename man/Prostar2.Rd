@@ -13,6 +13,8 @@ xxxx
 \dontrun{
 library(Prostar2)
 Prostar2('PipelineProtein')
+Prostar2('PipelineProtein', user = 'dev')
+Prostar2('PipelinePeptide')
 
 Prostar2('PipelineConvert')
 }

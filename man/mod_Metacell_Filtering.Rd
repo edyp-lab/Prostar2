@@ -64,6 +64,8 @@ as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
 \dontrun{
+library(Prostar2)
+library(shinyBS)
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
 }
