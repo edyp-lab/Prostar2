@@ -44,10 +44,9 @@ mod_buildDesign_ui <- function(id) {
       column(width = 6, uiOutput(ns("checkDesign")))
     ),
     hr(),
-    selectInput(ns("convert_reorder"), "Order by conditions ?",
-                choices = setNames(nm = c("No", "Yes")),
-                width = "100px"
-    ),
+    tags$div(style = "display:inline-block; vertical-align: top;",
+      uiOutput(ns('UI_reorder'))
+      ),
     tags$div(
       tags$div(style = "display:inline-block; vertical-align: top;",
         uiOutput(ns("viewDesign"), width = "100%")
@@ -92,9 +91,22 @@ mod_buildDesign_server <- function(id,
       design = NULL
     )
     
+    output$UI_reorder <- renderUI({
+      widget <- selectInput(ns("convert_reorder"), "Order by conditions ?",
+        choices = setNames(nm = c("No", "Yes")),
+        width = "100px")
+      
+      MagellanNTK::toggleWidget(widget, is.enabled() )
+      
+    })
+    
+
+    
     color_renderer <- reactive({
       rv$hot$Condition
       conds <- rv$hot$Condition
+      
+      req(length(conds) > 0)
       if (length(which(conds == "")) == 0) {
         uniqueConds <- unique(conds)
       } else {
@@ -108,6 +120,8 @@ mod_buildDesign_server <- function(id,
   Handsontable.renderers.TextRenderer.apply(this, arguments);"
       c <- 1
       for (i in 1:length(conds)) {
+        
+        
         if (conds[i] != "") {
           txt <- paste0(txt, "if(row==", (i - 1), " && col==",
                         c, ") {td.style.background = '",
@@ -155,13 +169,13 @@ mod_buildDesign_server <- function(id,
       rv$hot
       input$chooseExpDesign
       
-      if (is.null(rv$hot)) {
-        rv$hot <- data.frame(
-          Sample.name = as.character(input$choose_quantitative_columns),
-          Condition = rep("", length(input$choose_quantitative_columns)),
-          stringsAsFactors = FALSE
-        )
-      }
+      # if (is.null(rv$hot)) {
+      #   rv$hot <- data.frame(
+      #     Sample.name = as.character(input$choose_quantitative_columns),
+      #     Condition = rep("", length(input$choose_quantitative_columns)),
+      #     stringsAsFactors = FALSE
+      #   )
+      # }
       
       hot <- rhandsontable::rhandsontable(
         rv$hot,

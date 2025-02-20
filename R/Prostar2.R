@@ -11,7 +11,7 @@
 #' Prostar2('PipelineProtein', user = 'dev')
 #' Prostar2('PipelinePeptide')
 #' 
-#' Prostar2('PipelineConvert')
+#' Prostar2('PipelineConvert_Convert')
 #' }
 #' 
 #' @export

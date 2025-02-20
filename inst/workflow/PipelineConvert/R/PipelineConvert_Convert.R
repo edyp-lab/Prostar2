@@ -728,8 +728,11 @@ PipelineConvert_Convert_server <- function(id,
     ############# STEP 4 ######################
     output$Design <- renderUI({
       
-      rv.convert$design <- Prostar2::mod_buildDesign_server("designEx", 
-        rv.widgets$ExpandFeatData_quantCols)
+      rv.convert$design <- Prostar2::mod_buildDesign_server(
+        "designEx", 
+        quantCols = rv.widgets$ExpandFeatData_quantCols,
+        is.enabled = reactive({rv$steps.enabled['Design']})
+        )
       
       wellPanel(
         mod_buildDesign_ui(ns("designEx")),
