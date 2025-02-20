@@ -43,6 +43,7 @@ mod_VariableFilter_Generator_ui <- function(id) {
   
   .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
   wellPanel(
+    useShinyFeedback(), # include shinyFeedback
     #DT::dataTableOutput(ns("VarFilter_DT")),
     # Build queries
     div(
@@ -185,6 +186,7 @@ mod_VariableFilter_Generator_server <- function(id,
       req(rv$dataIn)
       req(rv.widgets$cname %in% colnames(rowData(rv$dataIn)))
 
+      
       if (is.numeric(rowData(rv$dataIn)[, rv.widgets$cname])) {
         .operator <- DaparToolshed::SymFilteringOperators()
       } else {
@@ -222,12 +224,37 @@ mod_VariableFilter_Generator_server <- function(id,
     })
     
     
+
+    observeEvent(c(input$value, rv.widgets$cname), {
+      req(rv$dataIn)
+      req(rv.widgets$value != 'Enter value...')
+      req(rv.widgets$cname != "None")
+      
+      if (is.na(Extract_Value(input$value))) {
+        showFeedbackWarning(
+          inputId = "value",
+          text = "wrong type of value"
+        )  
+      } else {
+        hideFeedback("value")
+      }
+      
+    })
+    
+    
+    
     Extract_Value <- function(value){
       val <- NULL
       val <- tryCatch({
-        as.numeric(value)
+        
+        
+        if (is.numeric(rowData(rv$dataIn)[, rv.widgets$cname]) ) {
+          as.numeric(value)
+        } else if (!is.numeric(rowData(rv$dataIn)[, rv.widgets$cname])){
+          as.character(value)
+        }
         },
-        warning = function(w){value},
+        warning = function(w){NA},
         error = function(e) NA
 )
       return(val)
@@ -237,7 +264,7 @@ mod_VariableFilter_Generator_server <- function(id,
     
     BuildVariableFilter <- reactive({
       req(obj())
-#browser()
+
       req(rv.widgets$value != 'Enter value...')
       req(rv.widgets$operator != "None")
       req(rv.widgets$cname != "None")
@@ -252,7 +279,7 @@ mod_VariableFilter_Generator_server <- function(id,
     
     
     WriteQuery <- reactive({
-      #req()
+
       
       value <- Extract_Value(rv.widgets$value)
       query <- paste0(
@@ -266,11 +293,6 @@ mod_VariableFilter_Generator_server <- function(id,
       rv.widgets$value
       rv.widgets$operator
       rv.widgets$cname
-      
-      #print('titititi')
-      #print(input$addFilter_btn)
-      #browser()
-      
       
       req(BuildVariableFilter())
       req(WriteQuery())
