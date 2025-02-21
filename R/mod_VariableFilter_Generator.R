@@ -225,12 +225,12 @@ mod_VariableFilter_Generator_server <- function(id,
     
     
 
-    observeEvent(c(input$value, rv.widgets$cname), {
+    observeEvent(c(rv.widgets$value, rv.widgets$cname), {
       req(rv$dataIn)
       req(rv.widgets$value != 'Enter value...')
       req(rv.widgets$cname != "None")
       
-      if (is.na(Extract_Value(input$value))) {
+      if (is.na(Extract_Value(rv.widgets$value))) {
         showFeedbackWarning(
           inputId = "value",
           text = "wrong type of value"
@@ -268,6 +268,7 @@ mod_VariableFilter_Generator_server <- function(id,
       req(rv.widgets$value != 'Enter value...')
       req(rv.widgets$operator != "None")
       req(rv.widgets$cname != "None")
+      req(Extract_Value(rv.widgets$value))
 
         QFeatures::VariableFilter(
           field = rv.widgets$cname,

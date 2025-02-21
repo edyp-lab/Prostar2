@@ -381,10 +381,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     output$FoldChangePlot <- highcharter::renderHighchart({
       req(rv.custom$AllPairwiseComp$logFC)
-      #
-      
-      print('titi')
-      print(as.data.frame(rv.custom$AllPairwiseComp$logFC)[1, 1])
       
       withProgress(message = "Computing plot...", detail = "", value = 0.5, {
         
@@ -496,7 +492,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         }
       )
       
-      
+      browser()
       rv.custom$history[['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
       rv.custom$history[['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
       if (rv.widgets$HypothesisTest_method == 'ttests')
@@ -508,6 +504,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       rv.custom$AllPairwiseComp
     }) 
+    
+    
+    
     # %>% bindCache(
     #   rv$dataIn,
     #   rv.widgets$HypothesisTest_method,
