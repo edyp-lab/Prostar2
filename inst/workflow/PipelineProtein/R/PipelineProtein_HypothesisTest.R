@@ -23,7 +23,7 @@
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelineProtein_HypothesisTest", path, dataIn = Exp1_R25_prot))
+#' shiny::runApp(workflowApp("PipelineProtein_HypothesisTest", path, dataIn = obj))
 #' }
 #' 
 #' @rdname PipelineProtein
@@ -346,10 +346,15 @@ PipelineProtein_HypothesisTest_server <- function(id,
         rv.widgets$HypothesisTest_thlogFC <- as.numeric(
           rv.widgets$HypothesisTest_thlogFC)
         
-        #browser()
-        rv.custom$AllPairwiseComp <- ComputeComparisons()
-        
-        if(is.null(rv.custom$AllPairwiseComp)){} 
+        ComputeComparisons()
+        if(is.null(rv.custom$AllPairwiseComp)){
+          
+          print(rv.custom$AllPairwiseCompMsg)
+         
+          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
+            text = rv.custom$AllPairwiseCompMsg,
+            type = 'error' )
+        } 
         else if(inherits(rv.custom$AllPairwiseComp, "try-error")) {
           
           MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
@@ -473,36 +478,60 @@ PipelineProtein_HypothesisTest_server <- function(id,
       req(length(which(m)) == 0)
       
       rv.custom$AllPairwiseComp <- NULL
-      rv.custom$AllPairwiseComp <- switch(rv.widgets$HypothesisTest_method,
-        Limma = {
-          DaparToolshed::limmaCompleteTest(
-            qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-            sTab = MultiAssayExperiment::colData(rv$dataIn),
-            comp.type = rv.widgets$HypothesisTest_design
-          )
-        },
-        ttests = {
-          DaparToolshed::compute_t_tests(
-            obj = rv$dataIn,
-            i = length(rv$dataIn),
-            contrast = rv.widgets$HypothesisTest_design,
-            type = rv.widgets$HypothesisTest_ttestOptions
-          )
-          
-        }
-      )
+      rv.custom$AllPairwiseCompMsg <- NULL
+   
       
-      browser()
+      
+      rv.custom$AllPairwiseComp <- tryCatch({
+        switch(rv.widgets$HypothesisTest_method,
+          Limma = {
+            DaparToolshed::limmaCompleteTest(
+              qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+              sTab = MultiAssayExperiment::colData(rv$dataIn),
+              comp.type = rv.widgets$HypothesisTest_design
+            )
+          },
+          ttests = {
+            rv.custom$AllPairwiseComp <- DaparToolshed::compute_t_tests(
+              obj = rv$dataIn,
+              i = length(rv$dataIn),
+              contrast = rv.widgets$HypothesisTest_design,
+              type = rv.widgets$HypothesisTest_ttestOptions
+            )
+            
+          }
+        )
+      },
+        warning = function(w) {
+          msg <- w
+          rv.custom$AllPairwiseCompMsg <- w$message
+          return(NULL)
+          },
+        error = function(e) {
+          rv.custom$AllPairwiseCompMsg <- e$message
+          return(NULL)
+          },
+        finally = {
+          # cleanup-code
+        }
+        
+        )
+      
+      
+      
+      
+      
       rv.custom$history[['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
       rv.custom$history[['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
       if (rv.widgets$HypothesisTest_method == 'ttests')
         rv.custom$history[['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
       
       
+      if(!is.null(rv.custom$AllPairwiseComp)){
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
-      rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split='_logFC'))
+      rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = '_logFC'))
+      }
       
-      rv.custom$AllPairwiseComp
     }) 
     
     
