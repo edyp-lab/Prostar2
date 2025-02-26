@@ -126,8 +126,8 @@ mod_ds_metacell_Histos_server <- function(id,
 
             output$histo_per_lines_per_conds <- highcharter::renderHighchart({
                tmp <- NULL
-               req(group())
                req(obj())
+               req(group())
                # isolate({
                 # pattern <- paste0(GetCurrentObjName(),".MVplot2")
                 tmp <- metacellPerLinesHistoPerCondition_HC(obj(),

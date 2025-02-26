@@ -19,6 +19,7 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(DaparToolshed)
 #' data(Exp1_R25_prot, package ='DaparToolshedData')
 #' obj <- Exp1_R25_prot[[1]]
 #' conds <- colData(Exp1_R25_prot)$Condition
@@ -95,7 +96,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         valueTh = 0,
         percentTh = 0,
         valPercent = "Count",
-        operator = "<="
+        operator = "None"
     )
 
     rv.custom.default.values <- list(
@@ -118,16 +119,26 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
     moduleServer(id, function(input, output, session) {
         ns <- session$ns
 
-        eval(
-            str2expression(
-                MagellanNTK::Get_AdditionalModule_Core_Code(
-                    w.names = names(widgets.default.values),
-                    rv.custom.names = names(rv.custom.default.values)
-                )
-            )
+        # eval(
+        #     str2expression(
+        #         MagellanNTK::Get_AdditionalModule_Core_Code(
+        #             w.names = names(widgets.default.values),
+        #             rv.custom.names = names(rv.custom.default.values)
+        #         )
+        #     )
+        # )
+
+
+        core <- paste0(
+          MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+          MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+          MagellanNTK::Get_Code_for_rv_reactiveValues(),
+          MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+          MagellanNTK::Get_Code_for_dataOut(),
+          MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = TRUE, dataIn = 'obj()'),
+          sep = "\n"
         )
-
-
+        eval(str2expression(core))
 
         output$Add_btn_UI <- renderUI({
           widget <- actionButton(ns("BuildFilter_btn"), "Add filter",
@@ -166,6 +177,14 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         )
 
 
+        
+        
+        observeEvent(obj(), ignoreNULL = FALSE, {
+          stopifnot(inherits(obj(), 'SummarizedExperiment'))
+          rv$dataIn <- obj()
+        }, priority = 1000)
+        
+        
         output$tree_UI <- renderUI({
             widget <- div(
               mod_metacell_tree_ui(ns('tree')))
@@ -174,8 +193,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         
         
         tmp.tags <- mod_metacell_tree_server('tree',
-          obj = reactive({obj()}),
-          remoteReset = reactive({rv$reset_tree}),
+          obj = reactive({rv$dataIn}),
+          remoteReset = reactive({remoteReset()}),
           is.enabled = reactive({is.enabled()})
         )
         
@@ -274,7 +293,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
             widget <- selectInput(ns("valueTh"),
               MagellanNTK::mod_popover_for_help_ui(ns("value_th_help")),
                 choices = getListNbValuesInLines(
-                    object = obj(),
+                    object = rv$dataIn,
                     conds = conds(),
                     type = rv.widgets$scope
                 ),
@@ -374,7 +393,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
 
         BuildFunctionFilter <- reactive({
-            req(obj())
+            req(rv$dataIn)
             req(rv.widgets$tag != "None")
             req(rv.widgets$scope != "None")
 
@@ -423,7 +442,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         })
 
 
-        observeEvent(input$BuildFilter_btn, {
+        observeEvent(req(input$BuildFilter_btn), ignoreInit = FALSE,{
+          
+          #browser()
           req(BuildFunctionFilter())
           req(WriteQuery())
           
@@ -439,9 +460,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
               ll.widgets.value = rv.custom$ll.widgets.value,
               ll.pattern = rv.widgets$tag,
               ll.indices = GetIndices_FunFiltering(
-                obj = obj(),
+                obj = rv$dataIn,
                 conds = conds(), 
-                level = omXplore::get_type(obj()), 
+                level = omXplore::get_type(rv$dataIn), 
                 pattern = rv.custom$ll.fun[[1]]@params$pattern,
                 type = rv.widgets$scope,
                 percent = rv.custom$ll.fun[[1]]@params$percent, 

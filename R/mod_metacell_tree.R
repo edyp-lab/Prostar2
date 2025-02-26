@@ -173,6 +173,7 @@ mod_metacell_tree_server <- function(id,
 
         
         init_tree <- function(){
+          req(obj())
           req(omXplore::get_type(obj()))
           #print('------------ init_tree() ---------------')
           rv$meta <- omXplore::metacell.def(omXplore::get_type(obj()))
@@ -185,7 +186,8 @@ mod_metacell_tree_server <- function(id,
         }
         
         
-        observeEvent(req(remoteReset()), ignoreInit = TRUE, {
+        observeEvent(req(remoteReset()), ignoreInit = FALSE, {
+          req(obj())
             #print('------------ observeEvent(req(reset()) ---------------')
             # init_tree()
             # update_CB()
@@ -224,7 +226,7 @@ observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
 
 
 
-observeEvent(id, ignoreInit = FALSE, {
+observeEvent(obj(), ignoreInit = TRUE, {
 
   if (!is.null(omXplore::get_type(obj())))
     init_tree()
@@ -270,6 +272,7 @@ observeEvent(input$checkbox_mode, {
 
 
 output$tree <- renderUI({
+  req(obj())
     div(style = "overflow-y: auto;",
         uiOutput(ns(paste0('metacell_tree_', omXplore::get_type(obj()))))
     )
@@ -280,7 +283,7 @@ output$tree <- renderUI({
 
 # Define tree for protein dataset
 output$metacell_tree_protein <- renderUI({
-    
+  req(obj())
   nb <- GetNbTags(obj())
   pourcentages <- round(100*nb/sum(nb), digits = 1)
   
@@ -355,6 +358,7 @@ output$metacell_tree_protein <- renderUI({
 
 
 output$metacell_tree_peptide <- renderUI({
+  req(obj())
   nb <- GetNbTags(obj())
   pourcentages <- round(100*nb/sum(nb), digits = 1)
   
@@ -592,15 +596,21 @@ ul {
 #' @export
 #' @rdname metacell-tree
 #' 
-mod_metacell_tree <- function(obj){
+mod_metacell_tree <- function(
+    obj,
+  remoteReset = reactive({0})){
   ui <- fluidPage(
-    mod_metacell_tree_ui('tree')
+    tagList(
+      actionButton("Reset", "Simulate reset"),
+      mod_metacell_tree_ui('tree')
+    )
     )
   
   server <- function(input, output) {
     
     tags <- mod_metacell_tree_server('tree', 
-      obj = reactive({obj}))
+      obj = reactive({obj}),
+      remoteReset = reactive({remoteReset()+input$Reset}))
     
     observeEvent(req(tags()$trigger), {
       print(tags()$values)

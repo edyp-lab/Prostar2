@@ -90,7 +90,12 @@ mod_Metacell_Filtering_server <- function(id,
     fun.list = list(),
     widgets.value = list(),
     funFilter = reactive({NULL}),
-    qMetacell_Filter_SummaryDT = NULL, 
+    qMetacell_Filter_SummaryDT = data.frame(
+      query = "-",
+      nbDeleted = "0",
+      TotalMainAssay = '0',
+      stringsAsFactors = FALSE
+    ), 
     df = data.frame(),
     history = list()
   )
@@ -99,20 +104,30 @@ mod_Metacell_Filtering_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    eval(
-      str2expression(
-        MagellanNTK::Get_AdditionalModule_Core_Code(
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-        )
-      )
+    # eval(
+    #   str2expression(
+    #     MagellanNTK::Get_AdditionalModule_Core_Code(
+    #       w.names = names(widgets.default.values),
+    #       rv.custom.names = names(rv.custom.default.values)
+    #     )
+    #   )
+    # )
+    
+    core <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = TRUE, dataIn = 'obj()'),
+      sep = "\n"
     )
+    eval(str2expression(core))
     
+
     
-    observeEvent(req(obj()), ignoreNULL = TRUE,{
-      
+    observeEvent(obj(), ignoreNULL = FALSE, {
       stopifnot(inherits(obj(), 'QFeatures'))
-      
       rv$dataIn <- obj()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
@@ -120,13 +135,9 @@ mod_Metacell_Filtering_server <- function(id,
         TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
         stringsAsFactors = FALSE
       )
-      
-      
-      
     }, priority = 1000)
     
-    
-     
+
     output$plots_ui <- renderUI({
       req(rv.custom$funFilter()$value$ll.pattern)
       
@@ -193,7 +204,7 @@ mod_Metacell_Filtering_server <- function(id,
     observeEvent(req(rv.custom$funFilter()$trigger), {
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
-      
+      print("tutu")
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
@@ -257,14 +268,21 @@ mod_Metacell_Filtering_server <- function(id,
 #' @export
 #' @rdname mod_Metacell_Filtering
 #' 
-mod_Metacell_Filtering <- function(obj = NULL, i = 1){
-  ui <- mod_Metacell_Filtering_ui('query')
+mod_Metacell_Filtering <- function(obj = NULL, 
+  i = 1,
+  remoteReset = reactive({0}),
+  is.enabled = TRUE){
+  ui <- tagList(
+    actionButton("Reset", "Simulate reset"),
+    mod_Metacell_Filtering_ui('query')
+  )
   
   server <- function(input, output, session){
     
     res <- mod_Metacell_Filtering_server('query',
       obj = reactive({obj}),
-      i = reactive({i}))
+      i = reactive({i}),
+      remoteReset = reactive({remoteReset()+input$Reset}))
     
     observeEvent(res()$trigger, {
       print(res()$value)
