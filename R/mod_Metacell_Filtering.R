@@ -118,15 +118,35 @@ mod_Metacell_Filtering_server <- function(id,
       MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_rv_reactiveValues(),
       MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-      MagellanNTK::Get_Code_for_dataOut(),
-      MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = TRUE, dataIn = 'obj()'),
+      MagellanNTK::Get_Code_for_dataOut()
+      # MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
+      #   custom = TRUE,
+      #   dataIn = 'obj()')
+      #   addon = "rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
+      #   query = '-',
+      #   nbDeleted = '0',
+      #   TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+      #   stringsAsFactors = FALSE
+      # )
+         ,
       sep = "\n"
     )
+      
     eval(str2expression(core))
     
 
+
+    observeEvent(remoteReset(), ignoreInit = FALSE, {
+      rv$dataIn <- obj()
+      rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
+        query = "-",
+        nbDeleted = "0",
+        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
+    })
     
-    observeEvent(obj(), ignoreNULL = FALSE, {
+    observeEvent(obj(), ignoreInit = FALSE, {
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
@@ -137,6 +157,7 @@ mod_Metacell_Filtering_server <- function(id,
       )
     }, priority = 1000)
     
+
 
     output$plots_ui <- renderUI({
       req(rv.custom$funFilter()$value$ll.pattern)
@@ -166,7 +187,7 @@ mod_Metacell_Filtering_server <- function(id,
     
     observe({
       req(is.enabled())
-      req(rv$dataIn)
+      #req(rv$dataIn)
       
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
@@ -199,12 +220,15 @@ mod_Metacell_Filtering_server <- function(id,
     # })
     # >>> END: Definition of the widgets
     
+    # observeEvent(rv.custom$funFilter()$trigger, {
+    #   print('tutu')
+    # })
     
     # observeEvent(input$Quantimetadatafiltering_btn_validate, {
-    observeEvent(req(rv.custom$funFilter()$trigger), {
+    observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE,{
+      
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
-      print("tutu")
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
@@ -213,7 +237,7 @@ mod_Metacell_Filtering_server <- function(id,
       )
       indices <- rv.custom$funFilter()$value$ll.indices
       
-      #browser()
+
       # Add infos
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])

@@ -110,7 +110,7 @@ mod_metacell_tree_server <- function(id,
         
         dataOut <- reactiveValues(
             trigger = NULL,
-            values = ''
+            values = NULL
         )
         
         rv <- reactiveValues(
@@ -220,14 +220,12 @@ observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
     #print('------------ input$lastModalClose ---------------')
     dataOut$trigger <- as.numeric(Sys.time())
     dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
-    #browser()
 })
 
 
 
 
-observeEvent(obj(), ignoreInit = TRUE, {
-
+observeEvent(obj(), ignoreInit = FALSE, {
   if (!is.null(omXplore::get_type(obj())))
     init_tree()
   dataOut$trigger <- as.numeric(Sys.time())
@@ -497,7 +495,6 @@ observeEvent(somethingChanged(), ignoreInit = TRUE, {
                    # by default, all its children must be also selected
                    for (i in newSelection){
                        if (i %in% metacell.def(level)$parent) {
-                           #browser()
                            childrens <- Children(level, i)
                            if (!is.null(childrens) && length(childrens)>0){
                                lapply(childrens, function(x){
@@ -521,10 +518,9 @@ observeEvent(somethingChanged(), ignoreInit = TRUE, {
 
 
 
-reactive({dataOut})
+return(reactive({dataOut}))
 
-}
-)
+})
 
 
 }

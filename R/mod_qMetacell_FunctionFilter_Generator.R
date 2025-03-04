@@ -104,7 +104,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         functionFilter = NULL,
         query = list(),
         fun.list = list(),
-        widgets.value = list()
+        widgets.value = list(),
+      tmp.tags = reactive({NULL})
     )
     
 
@@ -135,7 +136,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
           MagellanNTK::Get_Code_for_rv_reactiveValues(),
           MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
           MagellanNTK::Get_Code_for_dataOut(),
-          MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = TRUE, dataIn = 'obj()'),
+          MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = FALSE, dataIn = 'obj()'),
           sep = "\n"
         )
         eval(str2expression(core))
@@ -177,7 +178,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         )
 
 
-        
+        # observeEvent(remoteReset(),{
+        #   #browser()
+        #   dataOut <- list()
+        #   rv$dataIn <- obj()
+        # })
         
         observeEvent(obj(), ignoreNULL = FALSE, {
           stopifnot(inherits(obj(), 'SummarizedExperiment'))
@@ -191,23 +196,25 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
             MagellanNTK::toggleWidget(widget, is.enabled())
         })
         
-        
-        tmp.tags <- mod_metacell_tree_server('tree',
+        #rv.custom$tmp.tags <- reactive({NULL})
+        rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
           obj = reactive({rv$dataIn}),
           remoteReset = reactive({remoteReset()}),
           is.enabled = reactive({is.enabled()})
         )
         
-        observeEvent(tmp.tags()$values, 
-          ignoreNULL = FALSE, ignoreInit = TRUE, {
-            rv.widgets$tag <- tmp.tags()$values
-            
+        observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
+
+            rv.widgets$tag <- rv.custom$tmp.tags()$values
             dataOut$trigger <- as.numeric(Sys.time())
             dataOut$value <- list(
-              ll.pattern = rv.widgets$tag
+              ll.fun = NULL,
+              ll.query = NULL,
+              ll.widgets.value = NULL,
+              ll.pattern = rv.widgets$tag,
+              ll.indices = NULL
             )
-              
-          }, priority = 900)
+          })
 
         
         
@@ -442,12 +449,10 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         })
 
 
-        observeEvent(req(input$BuildFilter_btn), ignoreInit = FALSE,{
-          
-          #browser()
+        observeEvent(input$BuildFilter_btn, ignoreInit = TRUE,{
           req(BuildFunctionFilter())
           req(WriteQuery())
-          
+
             rv.custom$ll.fun <- list(BuildFunctionFilter())
             rv.custom$ll.query <- list(WriteQuery())
             rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
@@ -469,6 +474,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
                 op = rv.custom$ll.fun[[1]]@params$operator, 
                 th = rv.custom$ll.fun[[1]]@params$th)
             )
+
         })
 
         return(reactive({dataOut}))
@@ -509,8 +515,9 @@ mod_qMetacell_FunctionFilter_Generator <- function(
       remoteReset = reactive({remoteReset()+input$Reset}))
     
     observeEvent(res()$trigger, {
-      #browser()
+      print(" --- res()$value ---")
       print(res()$value)
+      print(" -------------------")
     })
   }
   
