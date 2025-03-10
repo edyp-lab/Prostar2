@@ -18,6 +18,7 @@
 #' @examples
 #' \dontrun{
 #' library(MagellanNTK)
+#' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -72,6 +73,7 @@ PipelineProtein_HypothesisTest_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
+#' @import DaparToolshed
 #' 
 #' @export
 #' 

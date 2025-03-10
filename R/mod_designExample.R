@@ -61,7 +61,7 @@ mod_designExample_server <- function(
                     }")
     
       df <- data.frame(
-        Sample.name = paste0("Sample ", as.character(1:14)),
+        quantCols = paste0("Sample ", as.character(1:14)),
         Condition = c(rep("A", 4), rep("B", 4), rep("C", 6)),
         Bio.Rep = as.integer(c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7)),
         Tech.Rep = c(1:14),
@@ -93,7 +93,7 @@ mod_designExample_server <- function(
     )
     
     df <- data.frame(
-      Sample.name = paste0("Sample ", as.character(1:16)),
+      quantCols = paste0("Sample ", as.character(1:16)),
       Condition = c(rep("A", 8), rep("B", 8)),
       Bio.Rep = as.integer(c(rep(1, 4), rep(2, 4), rep(3, 4), rep(4, 4))),
       Tech.Rep = as.integer(c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8)),

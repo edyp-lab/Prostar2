@@ -16,6 +16,7 @@
 #' @author Samuel Wieczorek
 #'
 #' @examples
+#' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -57,6 +58,7 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
 #' @author Samuel Wieczorek
 #'
 #' @examples
+#' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -196,6 +198,7 @@ diffAnaComputeFDR <- function(adj.pvals) {
 #' @author Samuel Wieczorek
 #'
 #' @examples
+#' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values

@@ -3,7 +3,7 @@ library(highcharter)
 library(DaparToolshed)
 library(Prostar2)
 library(omXplore)
-
+library(DaparToolshed)
 
 history <- list()
 data(Exp1_R25_prot, package = "DaparToolshedData")

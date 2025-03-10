@@ -12,6 +12,7 @@ xxxx
 \examples{
 \dontrun{
 library(Prostar2)
+library(DaparToolshed)
 Prostar2('PipelineProtein')
 Prostar2('PipelineProtein', user = 'dev')
 Prostar2('PipelinePeptide')

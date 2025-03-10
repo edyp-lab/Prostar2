@@ -78,7 +78,7 @@ mod_buildDesign_server <- function(id,
     
     rv <- reactiveValues(
       hot = data.frame(
-        Sample.name = as.character(quantCols),
+        quantCols = as.character(quantCols),
         Condition = rep("", length(quantCols)),
         stringsAsFactors = FALSE
       ),
@@ -197,7 +197,7 @@ mod_buildDesign_server <- function(id,
           autoInsertRow = FALSE
         ) %>%
         rhandsontable::hot_cols(renderer = color_renderer()) %>%
-        rhandsontable::hot_col(col = "Sample.name", readOnly = TRUE)
+        rhandsontable::hot_col(col = "quantCols", readOnly = TRUE)
       
       if (!is.null(input$chooseExpDesign)) {
         switch(input$chooseExpDesign,

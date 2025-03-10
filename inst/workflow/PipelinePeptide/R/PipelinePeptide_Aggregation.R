@@ -18,6 +18,7 @@
 #' @examples
 #' \dontrun{
 #' library(MagellanNTK)
+#' library(DaparToolshed)
 #' data(Exp1_R25_pept, package = "DaparToolshedData")
 #' obj <- Exp1_R25_pept
 #' # Simulate imputation of missing values

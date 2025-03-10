@@ -82,6 +82,7 @@ of the class \code{SummarizedExperiment})
 }
 \examples{
 \dontrun{
+library(DaparToolshed)
 data(Exp1_R25_prot, package ='DaparToolshedData')
 obj <- Exp1_R25_prot[[1]]
 conds <- colData(Exp1_R25_prot)$Condition

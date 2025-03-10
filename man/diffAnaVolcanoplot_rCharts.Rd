@@ -53,11 +53,12 @@ a point of the scatter plot.
 }
 \examples{
 library(highcharter)
+library(DaparToolshed)
 data(Exp1_R25_prot, package="DaparToolshedData")
 obj <- Exp1_R25_prot
 # Simulate imputation of missing values
-obj <- NAIsZero(obj, 1)
-obj <- NAIsZero(obj, 2)
+obj <- DaparToolshed::NAIsZero(obj, 1)
+obj <- DaparToolshed::NAIsZero(obj, 2)
 qData <- as.matrix(assay(obj[[2]]))
 sTab <- MultiAssayExperiment::colData(obj)
 limma <- limmaCompleteTest(qData, sTab)

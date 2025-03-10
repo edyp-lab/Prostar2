@@ -24,7 +24,14 @@ mod_Metacell_Filtering_server(
  })
 )
 
-mod_Metacell_Filtering(obj = NULL, i = 1)
+mod_Metacell_Filtering(
+  obj = NULL,
+  i = 1,
+  remoteReset = reactive({
+     0
+ }),
+  is.enabled = TRUE
+)
 }
 \arguments{
 \item{id}{xxx}

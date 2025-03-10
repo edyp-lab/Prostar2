@@ -23,7 +23,12 @@ mod_metacell_tree_server(
  })
 )
 
-mod_metacell_tree(obj)
+mod_metacell_tree(
+  obj,
+  remoteReset = reactive({
+     0
+ })
+)
 }
 \arguments{
 \item{id}{xxx}
