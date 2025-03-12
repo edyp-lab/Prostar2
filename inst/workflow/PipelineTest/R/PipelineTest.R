@@ -6,31 +6,31 @@
 #' This documentation is for developers who want to create their own pipelines nor processes
 #' to be managed with `MagellanNTK`.
 #' 
-#' @name module_PiplelineProtein
+#' @name module_PiplelineTest
 #' @examples
 #' \dontrun{
-#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelineProtein/R/PipelineProtein.R")
-#' path <- system.file('extdata/workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(MagellanNTK::workflowApp("PipelineProtein"))
+#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelineTest/R/PipelineTest.R")
+#' path <- system.file('extdata/workflow/PipelineTest', package = 'Prostar2')
+#' shiny::runApp(MagellanNTK::workflowApp("PipelineTest"))
 #' }
 #' 
-#' @name PipelineProtein
+#' @name PipelineTest
 #' 
-#' @example inst/workflow/PipelineProtein/examples/example_pipelineProtein.R
+#' @example inst/workflow/PipelineTest/examples/example_pipelineTest.R
 #' 
 #' 
 NULL
 
 
-#' @rdname PipelineProtein
+#' @rdname PipelineTest
 #' @export
 #' 
-PipelineProtein_conf <- function(){
+PipelineTest_conf <- function(){
   MagellanNTK::Config(
   mode = 'pipeline',
-  fullname = 'PipelineProtein',
-  steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest', 'DA'),
-  mandatory = c(FALSE, FALSE, FALSE, FALSE, FALSE)
+  fullname = 'PipelineTest',
+  steps = c('Normalization'),
+  mandatory = c(FALSE)
 )
 }
 
@@ -38,13 +38,13 @@ PipelineProtein_conf <- function(){
 
 #' @param id xxx
 #'
-#' @rdname PipelineProtein
+#' @rdname PipelineTest
 #'
 #' @author Samuel Wieczorek
 #' 
 #' @export
 #' 
-PipelineProtein_ui <- function(id){
+PipelineTest_ui <- function(id){
   ns <- NS(id)
 }
 
@@ -68,14 +68,14 @@ PipelineProtein_ui <- function(id){
 #' 
 #' @param current.pos xxx
 #' 
-#' @rdname PipelineProtein
+#' @rdname PipelineTest
 #'
 #' @import shiny
 #' @importFrom stats setNames
 #' 
 #' @export
 #'
-PipelineProtein_server <- function(id,
+PipelineTest_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),

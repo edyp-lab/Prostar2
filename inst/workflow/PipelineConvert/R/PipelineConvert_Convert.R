@@ -813,7 +813,8 @@ PipelineConvert_Convert_server <- function(id,
       print(rv.convert$design()$design)
       print(rv.convert$design()$order)
       as.data.frame(rv.convert$design()$design)
-      #browser()
+      
+
       .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.convert$design()$order]
       .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.convert$design()$order]
       

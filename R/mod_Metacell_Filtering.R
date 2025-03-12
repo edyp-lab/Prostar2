@@ -136,8 +136,9 @@ mod_Metacell_Filtering_server <- function(id,
     
 
 
-    observeEvent(remoteReset(), ignoreInit = FALSE, {
+    observeEvent(req(remoteReset()), ignoreInit = FALSE, {
       rv$dataIn <- obj()
+      req(rv$dataIn)
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
         nbDeleted = "0",
