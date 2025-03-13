@@ -118,6 +118,7 @@ PipelineProtein_DA_server <- function(id,
     tmp.dataIn = NULL,
     resAnaDiff = NULL,
     res_AllPairwiseComparisons = NULL,
+    Pairwisecomparison_tooltipInfo = NULL,
     thpval = 0,
     thlogfc = 0,
     nbTotalAnaDiff = NULL,
@@ -401,7 +402,7 @@ PipelineProtein_DA_server <- function(id,
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
       group = reactive({omXplore::get_group(rv$dataIn)}),
       thlogfc = reactive({rv.custom$thlogfc}),
-      tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
+      tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
     )
     #})
@@ -436,6 +437,10 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
+    
+    observeEvent(input$Pairwisecomparison_validTooltipInfo, {
+      rv.custom$Pairwisecomparison_tooltipInfo <- rv.widgets$Pairwisecomparison_tooltipInfo
+    })
     
     MagellanNTK::mod_popover_for_help_server("modulePopover_volcanoTooltip",
       title = "Tooltip",
@@ -1040,7 +1045,7 @@ PipelineProtein_DA_server <- function(id,
       group = reactive({omXplore::get_group(rv$dataIn)}),
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
-      tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
+      tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]})
     )
@@ -1356,9 +1361,9 @@ PipelineProtein_DA_server <- function(id,
       
       
       tmp <- as.data.frame(
-        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.widgets$Pairwisecomparison_tooltipInfo]
+        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
       )
-      names(tmp) <- rv.widgets$Pairwisecomparison_tooltipInfo
+      names(tmp) <- rv.custom$Pairwisecomparison_tooltipInfo
       pval_table <- cbind(pval_table, tmp)
       
       colnames(pval_table)[2:6] <- paste0(colnames(pval_table)[2:6], " (", as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
