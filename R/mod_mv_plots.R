@@ -13,8 +13,12 @@
 #' 
 #' @examples
 #' \dontrun{
+#' library(DaparToolshed)
+#' library(highcharter)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
-#' shiny::runApp(mod_mv_plots(Exp1_R25_prot[[1]]))
+#' pattern <- c("Missing POV")
+#' grp <- design.qf(Exp1_R25_prot)$Condition
+#' shiny::runApp(mod_mv_plots(Exp1_R25_prot[[1]], pattern = pattern, grp = grp))
 #' }
 #' 
 NULL
@@ -52,9 +56,9 @@ mod_mv_plots_ui <- function(id) {
 mod_mv_plots_server <- function(id, 
   data = reactive({NULL}), 
   grp = reactive({NULL}),
-  mytitle = NULL, 
+  mytitle = reactive({NULL}), 
   pal = reactive({NULL}), 
-  pattern,
+  pattern = reactive({NULL}),
   is.enabled = reactive({TRUE}),
   remoteReset = reactive({0})
   ) {
@@ -62,33 +66,45 @@ mod_mv_plots_server <- function(id,
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+   
     
     rv <- reactiveValues(
-      grp = grp(),
-      title = mytitle,
-      palette = pal()
+      grp = NULL,
+      mytitle = NULL,
+      palette = NULL,
+      pattern = NULL
     )
     
     observeEvent(req(data()), {
       stopifnot(inherits(data(), 'SummarizedExperiment'))
       
-      if(is.null(rv$grp))
+      if(is.null(grp()))
         rv$grp <- paste0('grp_', seq(ncol(data())))
+      else
+        rv$grp <- grp()
       
-      if(is.null(rv$palette))
-        rv$title <- 'my title'
+      if(is.null(mytitle()))
+        rv$mytitle <- 'my title'
+      else
+        rv$mytitle <- mytitle()
       
-      if(is.null(rv$palette))
-        rv$palette <- GetColorsForConditions(rv$grp)
+      if(is.null(palette()))
+        rv$palette <- GetColorsForConditions(grp())
+      else
+        rv$palette <- palette()
+      
+      rv$pattern <- pattern()
     })
     
   output$plot_viewNAbyMean <- highcharter::renderHighchart({
     req(data())
-    
-    hc_mvTypePlot2( obj = data(),
+    req(rv$pattern)
+    req(rv$grp)
+    hc_mvTypePlot2(
+      obj = data(),
       group = rv$grp,
-      pattern = pattern,
-      title = rv$title,
+      pattern = rv$pattern,
+      title = rv$mytitle,
       pal = rv$palette
     )
   })
@@ -150,6 +166,7 @@ mod_mv_plots_server <- function(id,
 #' 
 mod_mv_plots <- function(
     data, 
+  grp = NULL,
   title = NULL,
   pal = NULL,
   pattern = NULL){
@@ -164,10 +181,11 @@ mod_mv_plots <- function(
     #observe({
       res.imp <- mod_mv_plots_server("mvImputationPlots_MV",
       data = reactive({data}),
-      title = reactive(title),
-      pal = reactive(pal),
-      pattern = c("Missing", "Missing POV", "Missing MEC")
-      )
+        grp = reactive({grp}),
+        mytitle = reactive({title}),
+      pal = reactive({pal}),
+      pattern = reactive({pattern})
+        )
     #})
   }
   

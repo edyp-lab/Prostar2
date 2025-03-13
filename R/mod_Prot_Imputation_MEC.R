@@ -184,9 +184,9 @@ mod_Prot_Imputation_MEC_server <- function(id,
       mod_mv_plots_server("mvplots",
         data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         grp = reactive({get_group(rv$dataIn)}),
-        mytitle = "MEC imputation",
+        mytitle = reactive({"MEC imputation"}),
         pal = reactive({NULL}),
-        pattern = c("Missing", "Missing POV", "Missing MEC")
+        pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })
     

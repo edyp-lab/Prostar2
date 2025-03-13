@@ -143,12 +143,13 @@ mod_Prot_Imputation_POV_server <- function(id,
     
     observe({
       req(rv$dataIn)
+  
     mod_mv_plots_server("mvplots",
       data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
       grp = reactive({get_group(rv$dataIn)}),
-      mytitle = "POV imputation",
+      mytitle = reactive({"POV imputation"}),
       pal = reactive({NULL}),
-      pattern = c("Missing", "Missing POV", "Missing MEC")
+      pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })
     
