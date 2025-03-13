@@ -18,7 +18,7 @@
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' pattern <- c("Missing POV")
 #' grp <- design.qf(Exp1_R25_prot)$Condition
-#' shiny::runApp(mod_mv_plots(Exp1_R25_prot[[1]], pattern = pattern, grp = grp))
+#' shiny::runApp(mod_mv_plots(obj[[4]], pattern = pattern, grp = grp))
 #' }
 #' 
 NULL
@@ -100,6 +100,7 @@ mod_mv_plots_server <- function(id,
     req(data())
     req(rv$pattern)
     req(rv$grp)
+
     hc_mvTypePlot2(
       obj = data(),
       group = rv$grp,
