@@ -262,7 +262,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
     
     output$mod_Prot_Imputation_MEC_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("mod_Prot_Imputation_MEC_btn_validate"),
-        "validate step", class = "btn-success")
+        "Validate step", class = "btn-success")
       
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
