@@ -95,21 +95,39 @@ mod_Prot_Imputation_POV_server <- function(id,
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
+    # eval(
+    #   str2expression(
+    #     MagellanNTK::Get_AdditionalModule_Core_Code(
+    #       w.names = names(widgets.default.values),
+    #       rv.custom.names = names(rv.custom.default.values)
+    #     )
+    #   )
+    # )
     
-    eval(
-      str2expression(
-        MagellanNTK::Get_AdditionalModule_Core_Code(
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-        )
-      )
+    core <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
+        custom = TRUE,
+        dataIn = 'obj()'),
+      sep = "\n"
     )
     
-    .localStyle <- "display:inline-block; vertical-align: top;
-                  padding-right: 20px;"
+    eval(str2expression(core))
     
     
-    observeEvent(obj(), ignoreNULL = TRUE,{
+    # observeEvent(req(remoteReset()), ignoreInit = FALSE, {
+    #   rv$dataIn <- obj()
+    #   req(rv$dataIn)
+    #   
+    # })
+    
+    
+    observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
       req(obj())
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
@@ -219,6 +237,7 @@ mod_Prot_Imputation_POV_server <- function(id,
     observeEvent(input$mod_Prot_Imputation_POV_btn_validate, {
 
       req(rv$dataIn)
+      req(rv.widgets$POV_algorithm != "None")
       m <- match.metacell(
         omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing POV",
@@ -272,7 +291,8 @@ mod_Prot_Imputation_POV_server <- function(id,
                 K = rv.widgets$POV_KNN_n
               )
               
-            }
+            },
+            None = {}
           )
         })
         
@@ -299,7 +319,6 @@ mod_Prot_Imputation_POV_server <- function(id,
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
         }
 
-        
       rv$dataIn <- Prostar2::addDatasets(
         rv$dataIn,
         .tmp,

@@ -125,12 +125,7 @@ PipelineProtein_Filtering_server <- function(id,
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
-    
-    
-    # observeEvent(remoteReset(), {
-    #   browser()
-    # })
-    
+
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 
       #   'md', paste0(id, '.md')))
@@ -225,8 +220,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$mod_metacell_filtering_ui <- renderUI({
       widget <- Prostar2::mod_Metacell_Filtering_ui(ns("metaFiltering"))
-      MagellanNTK::toggleWidget(widget, 
-        rv$steps.enabled["Cellmetadatafiltering"])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
     
 

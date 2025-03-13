@@ -164,9 +164,10 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
     
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
       req(dataIn())
       rv$dataIn <- dataIn()
+      print("passage dans uniitalisation de description")
       rv.custom$dataIn1 <- dataIn()
       rv.custom$dataIn2 <- dataIn()
       
@@ -220,13 +221,13 @@ PipelineProtein_Imputation_server <- function(id,
     #     ns("POVImputation_btn_validate"),
     #     "Validate step", class = "btn-success")
     #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
-    #   
+    # 
     # })
     # >>> END: Definition of the widgets
     
     
-    observeEvent(req(rv.custom$tmp.pov()$value), {
-      
+    observeEvent(req(rv.custom$tmp.pov()$value), ignoreInit = FALSE, {
+      print('In : observeEvent(req(rv.custom$tmp.pov()$value)')
       # Do some stuff
       rv.custom$dataIn1 <- rv.custom$tmp.pov()$value
       rv.custom$dataIn2 <- rv.custom$tmp.pov()$value
@@ -250,7 +251,7 @@ PipelineProtein_Imputation_server <- function(id,
         
         # Insert validation button
         # This line is necessary. DO NOT MODIFY
-        #uiOutput(ns('MECImputation_btn_validate_ui')),
+       # uiOutput(ns('MECImputation_btn_validate_ui')),
         uiOutput(ns('MECImputation_ui'))
         
       )
@@ -290,8 +291,9 @@ PipelineProtein_Imputation_server <- function(id,
     #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
     # })
     
-    observeEvent(req(rv.custom$tmp.mec()$value), {
+    observeEvent(req(rv.custom$tmp.mec()$value), ignoreInit = FALSE, {
       # Do some stuff
+      print("In observeEvent(req(rv.custom$tmp.mec()$value)")
       #req(rv.custom$tmp.mec()$value)
       rv.custom$dataIn2 <- rv.custom$tmp.mec()$value
       
@@ -313,12 +315,20 @@ PipelineProtein_Imputation_server <- function(id,
       tagList(
         # Insert validation button
         # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('Save_btn_validate_ui'))
+        uiOutput(ns('Save_btn_validate_ui')),
+        uiOutput(ns('dl_ui'))
       )
     })
     
     
-   
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    })
+    
+    
     output$Save_btn_validate_ui <- renderUI({
       tagList(
         MagellanNTK::toggleWidget( 
@@ -357,6 +367,7 @@ PipelineProtein_Imputation_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
+      
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv.custom$dataIn2}))
       

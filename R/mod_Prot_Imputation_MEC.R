@@ -94,22 +94,37 @@ mod_Prot_Imputation_MEC_server <- function(id,
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
     
-    eval(
-      str2expression(
-        MagellanNTK::Get_AdditionalModule_Core_Code(
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-        )
-      )
+    # eval(
+    #   str2expression(
+    #     MagellanNTK::Get_AdditionalModule_Core_Code(
+    #       w.names = names(widgets.default.values),
+    #       rv.custom.names = names(rv.custom.default.values)
+    #     )
+    #   )
+    # )
+    core <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
+         custom = TRUE,
+         dataIn = 'obj()'),
+      sep = "\n"
     )
     
+    eval(str2expression(core))
     
-    .localStyle <- "display:inline-block; vertical-align: top;
-                  padding-right: 20px;"
+    # observeEvent(req(remoteReset()), ignoreInit = FALSE, {
+    #   rv$dataIn <- obj()
+    #   req(rv$dataIn)
+    #   
+    # })
     
-    
-    observeEvent(obj(), ignoreNULL = TRUE,{
+    observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
       req(obj())
       
       stopifnot(inherits(obj(), 'QFeatures'))
@@ -236,7 +251,8 @@ mod_Prot_Imputation_MEC_server <- function(id,
               width = "100px"
             )
             )
-          }
+          },
+        None = {}
         )
       
       MagellanNTK::toggleWidget(widget, is.enabled())
@@ -255,6 +271,7 @@ mod_Prot_Imputation_MEC_server <- function(id,
     observeEvent(input$mod_Prot_Imputation_MEC_btn_validate, {
       
       req(rv$dataIn)
+      req(rv.widgets$MEC_algorithm != "None")
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.25, detail = "Reintroduce MEC")
         
@@ -299,7 +316,8 @@ mod_Prot_Imputation_MEC_server <- function(id,
                 MEC_algorithm = rv.widgets$MEC_algorithm,
                 fixVal = rv.widgets$MEC_fixedValue,
                 na.type = 'Missing MEC')
-            }
+            },
+            None = {}
           )
         })
         
