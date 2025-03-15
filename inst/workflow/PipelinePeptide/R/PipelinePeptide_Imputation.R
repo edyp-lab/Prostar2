@@ -204,14 +204,15 @@ PipelinePeptide_Imputation_server <- function(id,
       id = 'pov',
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
-      is.enabled = reactive({rv$steps.enabled["POVImputation"]}),
+      conditions = reactive({design.qf(rv$dataIn)$Condition}),
+      is.enabled = reactive({rv$steps.enabled["Imputation"]}),
       remoteReset = reactive({remoteReset()})
       )
     })
 
     output$Imputation_ui <- renderUI({
       widget <- Prostar2::mod_Pept_Imputation_ui(ns('pov'))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Imputation'] )
     })
     
     # output$POVImputation_btn_validate_ui <- renderUI({
@@ -232,12 +233,12 @@ PipelinePeptide_Imputation_server <- function(id,
       rv.custom$dataIn2 <- rv.custom$tmp.pov()$value
       
      .history <- rv.custom$tmp.pov()$value[[length(rv.custom$tmp.pov()$value)]]
-      rv.custom$params.tmp[['Imputation']][['POVImputation']] <- paramshistory(.history)
+      rv.custom$params.tmp[['Imputation']][['Imputation']] <- paramshistory(.history)
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status['POVImputation'] <- stepStatus$VALIDATED
+      rv$steps.status['Imputation'] <- stepStatus$VALIDATED
     })
 
     # <<< END ------------- Code for step 1 UI---------------

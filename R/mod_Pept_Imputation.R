@@ -79,6 +79,7 @@ mod_Pept_Imputation_ui <- function(id) {
 mod_Pept_Imputation_server <- function(id,
   obj = reactive({NULL}),
   i = reactive({NULL}),
+  conditions = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
@@ -165,7 +166,7 @@ mod_Pept_Imputation_server <- function(id,
       widget <- selectInput(ns("Imp_algorithm"), "Method",
         choices = list(
           "None" = "None",
-          "imp4p" = "slsa",
+          "imp4p" = "imp4p",
           "Det quantile" = "detQuantile",
           "KNN" = "KNN",
           "MLE" = "MLE"
@@ -232,14 +233,15 @@ mod_Pept_Imputation_server <- function(id,
     output$Imp_imp4p_UI <- renderUI({
       req(rv.widgets$Imp_algorithm == 'imp4p')
       
+      
       widget <- tagList(
         tags$div(style = .localStyle,
-          numericInput("imp4p_nbiter", "Iterations",
+          numericInput("Imp_imp4p_nbiter", "Iterations",
             value = rv.widgets$Imp_imp4p_nbiter,
             step = 1, min = 1, width = "100px")
         ),
         tags$div(style = .localStyle,
-          checkboxInput("imp4p_withLapala", "Impute MEC also",
+          checkboxInput("Imp_imp4p_withLapala", "Impute MEC also",
             value = rv.widgets$Imp_imp4p_withLapala)
         )
       )
@@ -256,14 +258,14 @@ mod_Pept_Imputation_server <- function(id,
       
       widget <- tagList(
         tags$div(style = .localStyle,
-          numericInput("imp4p_qmin", "Upper lapala bound",
+          numericInput("Imp_imp4p_qmin", "Upper lapala bound",
             value = rv.widgets$Imp_imp4p_qmin,
             step = 0.1, min = 0, max = 100,
             width = "100px"
           )
         ),
         tags$div(style = .localStyle,
-          radioButtons("imp4pLAPALA_distrib",
+          radioButtons("Imp_imp4pLAPALA_distrib",
             "Distribution type",
             choices = G_imp4PDistributionType_Choices,
             selected = rv.widgets$Imp_imp4pLAPALA_distrib
@@ -287,8 +289,8 @@ mod_Pept_Imputation_server <- function(id,
       req(rv$dataIn)
       req(rv.widgets$Imp_algorithm != "None")
       m <- match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = "Missing POV",
+        qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+        pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
       )
       nbPOVBefore <- length(which(m))
@@ -304,7 +306,7 @@ mod_Pept_Imputation_server <- function(id,
           switch(rv.widgets$Imp_algorithm,
             None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
             imp4p = {
-              incProgress(0.5, detail = "slsa Imputation")
+              incProgress(0.5, detail = "Imp4p imputation")
               if (rv.widgets$Imp_imp4p_withLapala) {
                 .tmp <- wrapper.dapar.impute.mi(
                   rv$dataIn[[length(rv$dataIn)]],
@@ -352,7 +354,7 @@ mod_Pept_Imputation_server <- function(id,
               
               .tmp <- wrapper.impute.KNN(
                 obj = rv$dataIn[[length(rv$dataIn)]],
-                grp = design.qf(rv$dataIn)$Condition,
+                grp = conditions(),
                 K = rv.widgets$Imp_KNN_n);
               .param <- list(
                 algorithm = rv.widgets$Imp_algorithm,
