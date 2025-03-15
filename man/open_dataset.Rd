@@ -28,7 +28,7 @@ A shiny Module.
 }
 \examples{
 \dontrun{
-shiny::runApp(open_dataset())
+shiny::runApp(Prostar2::open_dataset())
 }
 
 }

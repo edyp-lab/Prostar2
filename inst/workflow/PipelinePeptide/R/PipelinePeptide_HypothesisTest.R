@@ -24,7 +24,7 @@
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelinePeptide_HypothesisTest", path, dataIn = Exp1_R25_prot))
+#' shiny::runApp(workflowApp("PipelinePeptide_HypothesisTest", path, dataIn = obj))
 #' }
 #' 
 #' @rdname PipelinePeptide
@@ -348,10 +348,15 @@ PipelinePeptide_HypothesisTest_server <- function(id,
         rv.widgets$HypothesisTest_thlogFC <- as.numeric(
           rv.widgets$HypothesisTest_thlogFC)
         
-        #browser()
-        rv.custom$AllPairwiseComp <- ComputeComparisons()
-        
-        if(is.null(rv.custom$AllPairwiseComp)){} 
+        ComputeComparisons()
+        if(is.null(rv.custom$AllPairwiseComp)){
+          
+          print(rv.custom$AllPairwiseCompMsg)
+          
+          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
+            text = rv.custom$AllPairwiseCompMsg,
+            type = 'error' )
+        } 
         else if(inherits(rv.custom$AllPairwiseComp, "try-error")) {
           
           MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
@@ -383,10 +388,6 @@ PipelinePeptide_HypothesisTest_server <- function(id,
     
     output$FoldChangePlot <- highcharter::renderHighchart({
       req(rv.custom$AllPairwiseComp$logFC)
-      #
-      
-      print('titi')
-      print(as.data.frame(rv.custom$AllPairwiseComp$logFC)[1, 1])
       
       withProgress(message = "Computing plot...", detail = "", value = 0.5, {
         
@@ -439,11 +440,11 @@ PipelinePeptide_HypothesisTest_server <- function(id,
       ll <- unlist(strsplit(current.comp, split = "_"))
       tmp.cond1 <- gsub("[( )]", "", ll[1])
       tmp.cond2 <- gsub("[( )]", "", ll[3])
-      #tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
-      #tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
-       
-      tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
-      tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
+      tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
+      tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
+      
+      #tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
+      #tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
       
       colnames(rv.custom$AllPairwiseComp$logFC)[ind.swap] <- tmp.logFC
       colnames(rv.custom$AllPairwiseComp$P_Value)[ind.swap] <- tmp.pval
@@ -463,7 +464,7 @@ PipelinePeptide_HypothesisTest_server <- function(id,
     
     
     ### Computation of comparisons selected in the variable
-    # 'rv$widgets$HypothesisTest$design'
+    # 'rv$widgets$hypothesisTest$design'
     ComputeComparisons <- reactive({
       req(rv.widgets$HypothesisTest_method != "None")
       req(rv.widgets$HypothesisTest_design != "None")
@@ -474,29 +475,52 @@ PipelinePeptide_HypothesisTest_server <- function(id,
         omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing",
         level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
-        )
+      )
       
       req(length(which(m)) == 0)
       
       rv.custom$AllPairwiseComp <- NULL
-      rv.custom$AllPairwiseComp <- switch(rv.widgets$HypothesisTest_method,
-        Limma = {
-          DaparToolshed::limmaCompleteTest(
-            qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-            sTab = MultiAssayExperiment::colData(rv$dataIn),
-            comp.type = rv.widgets$HypothesisTest_design
-          )
+      rv.custom$AllPairwiseCompMsg <- NULL
+      
+      
+      
+      rv.custom$AllPairwiseComp <- tryCatch({
+        switch(rv.widgets$HypothesisTest_method,
+          Limma = {
+            DaparToolshed::limmaCompleteTest(
+              qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+              sTab = MultiAssayExperiment::colData(rv$dataIn),
+              comp.type = rv.widgets$HypothesisTest_design
+            )
+          },
+          ttests = {
+            rv.custom$AllPairwiseComp <- DaparToolshed::compute_t_tests(
+              obj = rv$dataIn,
+              i = length(rv$dataIn),
+              contrast = rv.widgets$HypothesisTest_design,
+              type = rv.widgets$HypothesisTest_ttestOptions
+            )
+            
+          }
+        )
+      },
+        warning = function(w) {
+          msg <- w
+          rv.custom$AllPairwiseCompMsg <- w$message
+          return(NULL)
         },
-        ttests = {
-          DaparToolshed::compute_t_tests(
-            obj = rv$dataIn,
-            i = length(rv$dataIn),
-            contrast = rv.widgets$HypothesisTest_design,
-            type = rv.widgets$HypothesisTest_ttestOptions
-          )
-          
+        error = function(e) {
+          rv.custom$AllPairwiseCompMsg <- e$message
+          return(NULL)
+        },
+        finally = {
+          # cleanup-code
         }
+        
       )
+      
+      
+      
       
       
       rv.custom$history[['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
@@ -505,11 +529,15 @@ PipelinePeptide_HypothesisTest_server <- function(id,
         rv.custom$history[['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
       
       
-      rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
-      rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split='_logFC'))
+      if(!is.null(rv.custom$AllPairwiseComp)){
+        rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
+        rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = '_logFC'))
+      }
       
-      rv.custom$AllPairwiseComp
     }) 
+    
+    
+    
     # %>% bindCache(
     #   rv$dataIn,
     #   rv.widgets$HypothesisTest_method,

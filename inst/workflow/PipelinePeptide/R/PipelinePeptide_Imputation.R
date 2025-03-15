@@ -31,8 +31,8 @@ PipelinePeptide_Imputation_conf <- function(){
   MagellanNTK::Config(
     fullname = 'PipelinePeptide_Imputation',
     mode = 'process',
-    steps = c('POV Imputation', 'MEC Imputation'),
-    mandatory = c(FALSE, FALSE)
+    steps = c('Imputation'),
+    mandatory = c(FALSE)
   )
 }
 
@@ -182,7 +182,7 @@ PipelinePeptide_Imputation_server <- function(id,
     # >>> 
     
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
-    output$POVImputation <- renderUI({
+    output$Imputation <- renderUI({
       wellPanel(
         # uiOutput for all widgets in this UI
         # This part is mandatory
@@ -194,13 +194,13 @@ PipelinePeptide_Imputation_server <- function(id,
         
         # Insert validation button
         #uiOutput(ns("POVImputation_btn_validate_ui")),
-        uiOutput(ns("POVImputation_ui"))
+        uiOutput(ns("Imputation_ui"))
       )
     })
     
     
     observe({
-      rv.custom$tmp.pov <- Prostar2::mod_Prot_Imputation_POV_server(
+      rv.custom$tmp.pov <- Prostar2::mod_Pept_Imputation_server(
       id = 'pov',
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
@@ -209,8 +209,8 @@ PipelinePeptide_Imputation_server <- function(id,
       )
     })
 
-    output$POVImputation_ui <- renderUI({
-      widget <- Prostar2::mod_Prot_Imputation_POV_ui(ns('pov'))
+    output$Imputation_ui <- renderUI({
+      widget <- Prostar2::mod_Pept_Imputation_ui(ns('pov'))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'] )
     })
     
@@ -242,69 +242,6 @@ PipelinePeptide_Imputation_server <- function(id,
 
     # <<< END ------------- Code for step 1 UI---------------
     
-    
-    # >>> START ------------- Code for step 2 UI---------------
-    
-    output$MECImputation <- renderUI({
-      wellPanel(
-        
-        # Insert validation button
-        # This line is necessary. DO NOT MODIFY
-        #uiOutput(ns('MECImputation_btn_validate_ui')),
-        uiOutput(ns('MECImputation_ui'))
-        
-      )
-    })
-    
- 
-    #observe({
-    #  req(rv$dataIn)
-    #  dataIn <- rv$custom
-      # # If the previous step has been run and validated,
-      # # Update dataIn to its result
-      #if (rv$steps.status["Cellmetadatafiltering"] == stepStatus$VALIDATED)
-     # browser()
-      # if (!is.null(rv.custom$tmp1()$value))
-      #   dataIn <- Prostar2::addDatasets(rv$dataIn, 
-      #     rv.custom$tmp1()$value, 'POVImputation')
-      
-    observe({
-    rv.custom$tmp.mec <- Prostar2::mod_Prot_Imputation_MEC_server(
-      id = 'mec',
-      obj = reactive({rv.custom$dataIn1}),
-      i = reactive({length(rv.custom$dataIn1)}),
-      is.enabled = reactive({rv$steps.enabled["MECImputation"]}),
-      remoteReset = reactive({remoteReset()})
-    )
-    })
-    
-    output$MECImputation_ui <- renderUI({
-      widget <- Prostar2::mod_Prot_Imputation_MEC_ui(ns('mec'))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
-    })
-    
-    # output$MECImputation_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("MECImputation_btn_validate"),
-    #                          "Perform",
-    #                          class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
-    # })
-    
-    observeEvent(req(rv.custom$tmp.mec()$value), {
-      # Do some stuff
-      #req(rv.custom$tmp.mec()$value)
-      rv.custom$dataIn2 <- rv.custom$tmp.mec()$value
-      
-      .history <- rv.custom$tmp.mec()$value[[length(rv.custom$tmp.mec()$value)]]
-      rv.custom$params.tmp[['Imputation']][['MECImputation']] <- paramshistory(.history)
-      
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['MECImputation'] <- stepStatus$VALIDATED
-    })
-    
-    # <<< END ------------- Code for step 2 UI---------------
     
     
     # >>> START ------------- Code for step 3 UI---------------

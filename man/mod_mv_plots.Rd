@@ -16,11 +16,15 @@ mod_mv_plots_server(
   grp = reactive({
      NULL
  }),
-  mytitle = NULL,
+  mytitle = reactive({
+     NULL
+ }),
   pal = reactive({
      NULL
  }),
-  pattern,
+  pattern = reactive({
+     NULL
+ }),
   is.enabled = reactive({
      TRUE
  }),
@@ -29,7 +33,7 @@ mod_mv_plots_server(
  })
 )
 
-mod_mv_plots(data, title = NULL, pal = NULL, pattern = NULL)
+mod_mv_plots(data, grp = NULL, title = NULL, pal = NULL, pattern = NULL)
 }
 \arguments{
 \item{data}{xxx}
@@ -47,8 +51,12 @@ xxx
 }
 \examples{
 \dontrun{
+library(DaparToolshed)
+library(highcharter)
 data(Exp1_R25_prot, package = 'DaparToolshedData')
-shiny::runApp(mod_mv_plots(Exp1_R25_prot[[1]]))
+pattern <- c("Missing POV")
+grp <- design.qf(Exp1_R25_prot)$Condition
+shiny::runApp(mod_mv_plots(obj[[4]], pattern = pattern, grp = grp))
 }
 
 }

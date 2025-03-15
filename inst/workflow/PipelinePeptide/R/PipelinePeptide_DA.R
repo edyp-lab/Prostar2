@@ -118,6 +118,7 @@ PipelinePeptide_DA_server <- function(id,
     tmp.dataIn = NULL,
     resAnaDiff = NULL,
     res_AllPairwiseComparisons = NULL,
+    Pairwisecomparison_tooltipInfo = NULL,
     thpval = 0,
     thlogfc = 0,
     nbTotalAnaDiff = NULL,
@@ -401,7 +402,7 @@ PipelinePeptide_DA_server <- function(id,
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
       group = reactive({omXplore::get_group(rv$dataIn)}),
       thlogfc = reactive({rv.custom$thlogfc}),
-      tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
+      tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
     )
     #})
@@ -437,6 +438,10 @@ PipelinePeptide_DA_server <- function(id,
     
     
     
+    observeEvent(input$Pairwisecomparison_validTooltipInfo, {
+      rv.custom$Pairwisecomparison_tooltipInfo <- rv.widgets$Pairwisecomparison_tooltipInfo
+    })
+    
     MagellanNTK::mod_popover_for_help_server("modulePopover_volcanoTooltip",
       title = "Tooltip",
       content = "Infos to be displayed in the tooltip of volcanoplot"
@@ -447,7 +452,7 @@ PipelinePeptide_DA_server <- function(id,
       title = h3("Push p-value"),
       content = "This functionality is useful in case of multiple pairwise comparisons 
               (more than 2 conditions): At the filtering step, a given analyte X
-              (either peptide or protein) may have been kept because it contains
+              (either peptide or Peptide) may have been kept because it contains
               very few missing values in a given condition (say Cond. A), even
               though it contains (too) many of them in all other conditions
               (say Cond B and C only contains 'MEC' type missing values).
@@ -531,7 +536,7 @@ PipelinePeptide_DA_server <- function(id,
         rv.custom$pushed <- seq(n)[indices_to_push]
         rv.custom$resAnaDiff$pushed <- length(indices_to_push)
         rv.custom$step1_query <- rv.custom$AnaDiff_indices()$value$ll.query
-
+        
       }
     })
     
@@ -564,7 +569,7 @@ PipelinePeptide_DA_server <- function(id,
     
     observeEvent(input$Pairwisecomparison_btn_validate, {
       #UpdateCompList()
-     
+      
       rv.custom$history[['Push pval query']] <- rv.custom$step1_query
       rv.custom$history[['Comparison']] <- GetComparisons()
       
@@ -723,16 +728,16 @@ PipelinePeptide_DA_server <- function(id,
       rv$dataIn
       
       
-      txt <- paste("Non-DA protein proportion = ",
+      txt <- paste("Non-DA Peptide proportion = ",
         round(100 * rv.custom$calibrationRes$pi0, digits = 2), "%<br>",
-        "DA protein concentration = ",
+        "DA Peptide concentration = ",
         round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2),
         "%<br>",
         "Uniformity underestimation = ",
         rv.custom$calibrationRes$unif.under, "<br><br><hr>",
         sep = ""
       )
-       
+      
       
       
       HTML(txt)
@@ -974,8 +979,8 @@ PipelinePeptide_DA_server <- function(id,
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
       # rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
       # rv.custom$history[['Uniformity underestimation']] <- rv.custom$calibrationRes$unif.under
-      # rv.custom$history[['Non-DA protein proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
-      # rv.custom$history[['DA protein concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
+      # rv.custom$history[['Non-DA Peptide proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
+      # rv.custom$history[['DA Peptide concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
       # 
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -1040,7 +1045,7 @@ PipelinePeptide_DA_server <- function(id,
       group = reactive({omXplore::get_group(rv$dataIn)}),
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
-      tooltip = reactive({rv.widgets$Pairwisecomparison_tooltipInfo}),
+      tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]})
     )
@@ -1108,7 +1113,7 @@ PipelinePeptide_DA_server <- function(id,
       rv.custom$history[['Total remaining after push p-values']] <- B
       rv.custom$history[['Number of selected']] <- C
       rv.custom$history[['Number of non selected']] <- D
-     
+      
       
       
       div(id="bloc_page",
@@ -1140,7 +1145,7 @@ PipelinePeptide_DA_server <- function(id,
       tmp <- gsub(",", ".", logpval(), fixed = TRUE)
       
       rv.custom$thpval <- as.numeric(tmp)
-
+      
       th <- Get_FDR() * Get_Nb_Significant()
       
       if (th < 1) {
@@ -1332,7 +1337,7 @@ PipelinePeptide_DA_server <- function(id,
       )
       
       
-      # Determine significant proteins
+      # Determine significant Peptides
       signifItems <- intersect(which(pval_table$Log_PValue >= rv.custom$thpval),
         which(abs(pval_table$logFC) >= rv.custom$thlogfc)
       )
@@ -1356,9 +1361,9 @@ PipelinePeptide_DA_server <- function(id,
       
       
       tmp <- as.data.frame(
-        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.widgets$Pairwisecomparison_tooltipInfo]
+        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
       )
-      names(tmp) <- rv.widgets$Pairwisecomparison_tooltipInfo
+      names(tmp) <- rv.custom$Pairwisecomparison_tooltipInfo
       pval_table <- cbind(pval_table, tmp)
       
       colnames(pval_table)[2:6] <- paste0(colnames(pval_table)[2:6], " (", as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
@@ -1389,8 +1394,8 @@ PipelinePeptide_DA_server <- function(id,
       rv.custom$history[['th pval']] <- rv.custom$thpval
       rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
       rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
-
-
+      
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["FDR"] <- stepStatus$VALIDATED
@@ -1432,11 +1437,11 @@ PipelinePeptide_DA_server <- function(id,
       paramshistory(rv$dataIn[[last.se]]) <- NULL
       paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
       
-     
+      
       # Add the result of pairwise comparison to the coldata
-     DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
-     
-
+      DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
+      
+      
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

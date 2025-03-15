@@ -6,8 +6,8 @@ library(omXplore)
 library(DaparToolshed)
 
 history <- list()
-data(Exp1_R25_prot, package = "DaparToolshedData")
-obj <- Exp1_R25_prot
+data(Exp1_R25_pept, package = "DaparToolshedData")
+obj <- Exp1_R25_pept
 # Simulate imputation of missing values
 obj <- NAIsZero(obj, 1)
 obj <- NAIsZero(obj, 2)
