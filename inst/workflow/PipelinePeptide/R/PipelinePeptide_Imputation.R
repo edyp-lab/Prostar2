@@ -200,11 +200,11 @@ PipelinePeptide_Imputation_server <- function(id,
     
     
     observe({
+      req(rv$dataIn)
       rv.custom$tmp.pov <- Prostar2::mod_Pept_Imputation_server(
       id = 'pov',
       obj = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
-      conditions = reactive({design.qf(rv$dataIn)$Condition}),
       is.enabled = reactive({rv$steps.enabled["Imputation"]}),
       remoteReset = reactive({remoteReset()})
       )
