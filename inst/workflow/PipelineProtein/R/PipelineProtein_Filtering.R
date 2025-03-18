@@ -241,6 +241,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       req(rv.custom$tmp.filtering1()$value)
 
+      browser()
       rv.custom$dataIn1 <- rv.custom$tmp.filtering1()$value
       rv.custom$dataIn2 <- rv.custom$tmp.filtering1()$value
     

@@ -24,6 +24,14 @@
 #' library(shinyBS)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
+#' 
+#' 
+#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' fun <- FunctionFilter('qMetacellWholeLine', 
+#' cmd = 'delete', 
+#' pattern = c("Missing","Missing POV", "Missing MEC"))
+#' 
+#' 
 #' }
 #' 
 NULL
@@ -230,6 +238,8 @@ mod_Metacell_Filtering_server <- function(id,
       
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
+      
+      browser()
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),

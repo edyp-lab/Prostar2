@@ -45,20 +45,7 @@ mod_Pept_Imputation_ui <- function(id) {
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
     # For more details, please refer to the dev document.
-    
-    tags$div(
-      tags$div(style = .localStyle, uiOutput(ns("Imp_algorithm_UI"))),
-      tags$div(style = .localStyle, uiOutput(ns("Imp_imp4p_UI"))),
-      tags$div(style = .localStyle, uiOutput(ns("Imp_imp4pOpts2_UI"))),
-      tags$div(style = .localStyle, uiOutput(ns("Imp_KNN_nbNeighbors_UI"))),
-      tags$div(style = .localStyle, uiOutput(ns("Imp_detQuant_UI"))),
-      tags$div(style = .localStyle, uiOutput(ns("Imp_MLE_UI"))),
-      tags$div(style = .localStyle, uiOutput(ns("Imp_showDetQuantValues_UI")))
-    ),
-    # Insert validation button
-    uiOutput(ns("mod_Pept_Imputation_btn_validate_ui")),
-    htmlOutput("helpForImputation"),
-    tags$hr(),
+    uiOutput(ns('Imp_UI')),
     uiOutput(ns('mvplots_ui'))
   )
 }
@@ -137,6 +124,9 @@ mod_Pept_Imputation_server <- function(id,
       req(obj())
       stopifnot(inherits(obj(), 'QFeatures'))
       rv$dataIn <- obj()
+      
+      
+        
     }, priority = 1000)
     
     
@@ -157,6 +147,70 @@ mod_Pept_Imputation_server <- function(id,
         pal = reactive({NULL}),
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
+    })
+    
+    
+    
+    output$Imp_UI <- renderUI({
+      
+      # Checks if
+      .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
+      nbEmptyLines <- getNumberOfEmptyLines(.data)
+      if (nbEmptyLines > 0) {
+        tags$p("Your dataset contains empty lines (fully filled with missing
+    values). In order to use the imputation tool, you must delete them by
+      using the filter tool.")
+      } else if (sum(is.na(.data)) == 0) {
+        tags$p("Your dataset does not contains missing values.")
+      } else {
+        tagList(
+          tags$div(
+            tags$div(style = .localStyle, uiOutput(ns("Imp_warning"))),
+            tags$div(style = .localStyle, uiOutput(ns("Imp_algorithm_UI"))),
+          tags$div(style = .localStyle, uiOutput(ns("Imp_imp4p_UI"))),
+          tags$div(style = .localStyle, uiOutput(ns("Imp_imp4pOpts2_UI"))),
+          tags$div(style = .localStyle, uiOutput(ns("Imp_KNN_nbNeighbors_UI"))),
+          tags$div(style = .localStyle, uiOutput(ns("Imp_detQuant_UI"))),
+          tags$div(style = .localStyle, uiOutput(ns("Imp_MLE_UI"))),
+          tags$div(style = .localStyle, uiOutput(ns("Imp_showDetQuantValues_UI")))
+        ),
+        # Insert validation button
+        uiOutput(ns("mod_Pept_Imputation_btn_validate_ui")),
+        htmlOutput("helpForImputation")
+    )
+      }
+    })
+    
+    
+    output$Imp_warning <- renderText({
+      req(rv.widgets$Imp_algorithm != "None")
+       
+      txtForBasics <- "<font color='red'>Please note that none of these
+         'Basic methods' impute the MEC (Missing on the Entire Condition) and
+         aggregation of peptides won't be possible if MEC data aren't imputed.
+          <br>To do so, please choose the 'imp4p' algorithm as imputation
+    method and check 'Impute MEC also' option.</font color='red'>"
+      
+      t <- switch(rv.widgets$Imp_algorithm,
+        imp4p = {
+          if (isFALSE(rv.widgets$Imp_imp4p_withLapala)) {
+            "<font color='red'>Please note that aggregation of peptides
+              won't be possible if MEC (Missing on the Entire Condition)
+              data aren't imputed. To do so, check 'Impute MEC also' option.
+           </font color='red'>"
+          } else {
+            "<font color='red'><strong>Warning:</strong> Imputed MEC
+               (Missing on the Entire Condition)
+                values must be very cautiously interpreted <br>[see the
+           User manual, Section 6.3.1].</font color='red'>"
+          }
+        },
+        KNN = txtForBasics,
+        detQuantile = txtForBasics,
+        MLE = txtForBasics
+      )
+      
+      HTML(t)
     })
     
     
@@ -233,6 +287,7 @@ mod_Pept_Imputation_server <- function(id,
       req(rv.widgets$Imp_algorithm == 'imp4p')
       
       widget <- tagList(
+        
         tags$div(style = .localStyle,
           numericInput(ns("Imp_imp4p_nbiter"), "Iterations",
             value = rv.widgets$Imp_imp4p_nbiter,
