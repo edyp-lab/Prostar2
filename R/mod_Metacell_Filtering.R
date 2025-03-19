@@ -239,7 +239,7 @@ mod_Metacell_Filtering_server <- function(id,
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
       
-      browser()
+
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),

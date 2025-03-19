@@ -78,21 +78,11 @@ PipelineProtein_Normalization_server <- function(id,
   
   # Define default selected values for widgets
   # This is only for simple workflows
-  widgets.default.values <- list(
-    Normalization_method = "None",
-    Normalization_type = "overall",
-    Normalization_spanLOESS = 0.7,
-    Normalization_quantile = 0.15,
-    Normalization_varReduction = FALSE,
-    Normalization_sync = FALSE
-  )
+  widgets.default.values <- list()
   
   rv.custom.default.values <- list(
     tmp.dataset = NULL,
-    #init.dataset = NULL,
-    history = NULL,
-    selectProt = reactive({NULL})
-  )
+    history = NULL)
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -109,31 +99,13 @@ PipelineProtein_Normalization_server <- function(id,
       rv.custom.names = names(rv.custom.default.values)
     )
     
-    # name <- id
-    # w.names <- names(widgets.default.values)
-    # rv.custom.names <- names(rv.custom.default.values)
-    # 
-    # add.code <- "rv$dataIn <- NULL
-    # rv.custom$tmpAssay <- NULL"
-    # 
-    # core.code <- paste0(
-    #   Insert_Call_to_Config(name),
-    #   Get_Code_Declare_widgets(w.names),
-    #   #Get_Code_Update_Config_Variable(),
-    #   Get_Code_for_ObserveEvent_widgets(w.names),
-    #   Get_Code_for_rv_reactiveValues(),
-    #   Get_Code_Declare_rv_custom(rv.custom.names),
-    #   Get_Code_for_dataOut(),
-    #   Get_Code_for_General_observeEvents(),
-    #   Get_Code_for_remoteReset2_observeEvents(add.code),
-    #   sep = "\n"
-    # )
-    
-    
-    
     eval(str2expression(core.code))
 
     
+    observeEvent(remoteReset(), {
+      print('tutu')
+      #browser()
+    })
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -184,9 +156,9 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
+      req(dataIn())
       rv$dataIn <- dataIn()
-      #rv.custom$init.dataset <- dataIn()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -215,399 +187,38 @@ PipelineProtein_Normalization_server <- function(id,
         # Be aware of the naming convention for ids in uiOutput()
         # For more details, please refer to the dev document.
         
-        
-        tagList(
-          div(style = .style,
-            uiOutput(ns("Normalization_btn_validate_ui"))
-          ),
-          div(
-            div(style = .style,
-              uiOutput(ns('Normalization_method_ui'))
-            ),
-            
-              div(id = "div_Normalization_type_ui",
-                style = .style,
-                shinyjs::hidden(uiOutput(ns('Normalization_type_ui')))
-            ),
-            div(style = .style,
-              shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
-              #module_Not_a_numericUI(ns("test_spanLOESS")),
-              uiOutput(ns("Normalization_quantile_ui")),
-              uiOutput(ns("Normalization_varReduction_ui"))
-            ),
-            div(style = .style,
-              uiOutput(ns('tracking')),
-              shinyjs::hidden(uiOutput(ns("Normalization_sync_ui"))
-              )
-            )
-          ),
-          tags$hr()
-          # ,div(style = .style,
-          #   omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
-          # )
-           ,fluidRow(
-             column(width = 5,
-               omXplore::omXplore_density_ui(ns("densityPlot_Norm"))
-               ),
-             column(width = 5,
-               omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
-             ),
-             column(width = 5,
-               highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
-            )
-          )
-        )
-        
+        uiOutput(ns("Prot_Normalization_ui"))
       )
     })
     
-    
-    
-     # observe({
-     #   rv$dataIn
-     #   remoteReset()
-     #  rv.custom$
-        selectProt <- omXplore::plots_tracking_server(
-        id = "tracker",
-        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        remoteReset = reactive({remoteReset()})
-      )
-    #})
-    
-
-    #   req(rv.custom$init.dataset)
-    #   req(rv$dataIn)
-    #   remoteReset()
-     # rv.custom$selectProt()$value
-    # omXplore::omXplore_density_server("densityPlot_Norm", 
-    #   obj = reactive({rv$dataIn}),
-    #   i = reactive({length(rv$dataIn)})
-    # )
-    # 
-
-   #observe({
-     #selectProt()
-    # req(rv$dataIn)
-     
-     
-    # print("in toto")
-     
-     #print(rv$dataIn)
-      omXplore::omXplore_intensity_server("boxPlot_Norm",
+    observe({
+      rv.custom$tmp.norm <- Prostar2::mod_Prot_Normalization_server(
+        id = 'norm',
         obj = reactive({rv$dataIn}),
         i = reactive({length(rv$dataIn)}),
-        track.indices = reactive({selectProt()$indices}),
-        remoteReset = reactive({remoteReset()}),
-        is.enabled = reactive({!rv$steps.enabled['Normalization']})
-    )
-    
-    omXplore::omXplore_density_server("densityPlot_Norm", 
-      obj = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)})
-    )
-    
-     #})
-    
-   
-   observeEvent(selectProt()$indices, ignoreNULL = FALSE,{
-   
-     print("in observeEvent(selectProt()$indices")
-     print('new value fo selectProt()$indices = ')
-     print(selectProt()$indices)
-
-   })
-
-    # >>> START: Definition of the widgets
-    
-    # This part must be customized by the developer of a new module
-    output$Normalization_method_ui <- renderUI({
-      widget <- selectInput(
-        ns('Normalization_method'),
-        "Normalization method",
-        choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())),
-        selected = rv.widgets$Normalization_method,
-        width = '250px')
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-    
-    output$Normalization_type_ui <- renderUI({
-      widget <- selectInput(ns('Normalization_type'),
-        "Normalization type",
-        choices = stats::setNames(
-          nm = c("overall", "within conditions")),
-        selected = rv.widgets$Normalization_type,
-        width = '150px')
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-    
-    output$Normalization_spanLOESS_ui <- renderUI({
-      widget <- textInput(
-        ns('Normalization_spanLOESS'),
-        'Span',
-        value = rv.widgets$Normalization_spanLOESS,
-        width = '100px')
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-    
-    output$Normalization_quantile_ui <- renderUI({
-      req(rv.widgets$Normalization_method == "QuantileCentering")
-      widget <- textInput(
-        ns('Normalization_quantile'),
-        MagellanNTK::mod_popover_for_help_ui(ns('quantile_help')),
-        value = rv.widgets$Normalization_quantile,
-        width = '100px')
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-    
-    output$Normalization_varReduction_ui <- renderUI({
-      req(rv.widgets$Normalization_method == "MeanCentering")
-      widget <- checkboxInput(
-        ns('Normalization_varReduction'),
-        "Include variance reduction",
-        value = rv.widgets$Normalization_varReduction
-        )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-    
-    output$Normalization_sync_ui <- renderUI({
-      widget <- checkboxInput(
-          ns('Normalization_sync'),
-          "Synchronise with selection above",
-          value = rv.widgets$Normalization_sync
-          )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-
-    output$tracking <- renderUI({
-      req(rv.widgets$Normalization_method %in% c('QuantileCentering', 'MeanCentering', 'SumByColumns'))
-      widget <-  omXplore::plots_tracking_ui(ns("tracker"))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    })
-    
-   
-    
-    
-    output$viewComparisonNorm_hc <- highcharter::renderHighchart({
-      req(rv$dataIn)
-      req(length(rv$dataIn) > 1)
-      #req(names(rv$dataIn)[length(rv$dataIn)] == 'Normalization')
-      obj1 <- rv$dataIn[[length(rv$dataIn)]]
-      obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
-      
-      req(obj1)
-      req(obj2)
-      protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
- 
-      if (!is.null(selectProt()$indices)) {
-        .n <- length(selectProt()$indices)
-        .subset <- selectProt()$indices
-      } else {
-        .n <- floor(0.02 * nrow(obj1))
-        .subset <- seq(nrow(obj1))
-      }
-
- 
- 
-      DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
-        keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
-        conds = omXplore::get_group(rv$dataIn),
-        pal = NULL,
-        # Consider only 2% of the entire dataset
-        n = .n,
-        subset.view = .subset
+        is.enabled = reactive({rv$steps.enabled["Normalization"]}),
+        remoteReset = reactive({remoteReset()})
       )
     })
     
-    
-    
-    
-    observeEvent(rv.widgets$Normalization_method, {
-      req(rv.widgets$Normalization_method)
-      req(rv$dataIn)
-      shinyjs::toggle("Normalization_btn_validate",
-        condition = rv.widgets$Normalization_method != "None")
-      
-      shinyjs::toggle("spanLOESS",
-        condition = rv.widgets$Normalization_method == "LOESS")
-      
-      .choice <- c("QuantileCentering", "MeanCentering", "SumByColumns", 
-        "LOESS", "vsn")
-      
-      shinyjs::toggle("Normalization_type_ui",
-        condition = (rv.widgets$Normalization_method %in% .choice)
-      )
- 
-      cond <- metadata(rv$dataIn[[length(rv$dataIn)]])[['typeDataset']] == "protein"
-      
-      .meths <- DaparToolshed::normalizeMethods('withTracking')
-      trackAvailable <- rv.widgets$Normalization_method %in% .meths
-      shinyjs::toggle("Normalization_sync_ui",
-        condition = cond && trackAvailable)
-      
-      shinyjs::toggle("Normalization_sync_ui",
-        condition = cond && trackAvailable)
-      
-    })
-    
-
-    
-    
-    MagellanNTK::mod_popover_for_help_server(id = 'quantile_help',
-      title = "Normalization quantile",
-      content = "lower limit/noise (quantile = 0.15),
-            median (quantile = 0.5). Min value=0, max value=1"
-    )
-    
-
-    
-    
-    
-
-    
-    output$Normalization_btn_validate_ui <- renderUI({
-      widget <-  actionButton(ns("Normalization_btn_validate"),
-                              "Run Normalization",
-                              class = "btn-success")
+    output$Prot_Normalization_ui <- renderUI({
+      widget <- Prostar2::mod_Prot_Normalization_ui(ns('norm'))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-      
-    })
-    # >>> END: Definition of the widgets
-    
-    observeEvent(input$Normalization_btn_validate, {
-      #browser()
-      
-      # Do some stuff 
-      req(rv.widgets$Normalization_method)
-      req(rv$dataIn)
-      
-
-      rv.custom$tmpAssay <- NULL
-      try({
-        .conds <- colData(rv$dataIn)[, "Condition"]
-        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
-        
-        
-        switch(rv.widgets$Normalization_method,
-          
-          G_noneStr = {
-            rv.custom$tmpAssay <- rv$dataIn[[length(rv$dataIn)]]
-            },
-          
-          GlobalQuantileAlignment = {
-            rv.custom$tmpAssay <- DaparToolshed::GlobalQuantileAlignment(qdata)
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            
-          },
-          
-          QuantileCentering = {
-            quant <- NA
-            if (!is.null(rv.widgets$Normalization_quantile)) {
-              quant <- as.numeric(rv.widgets$Normalization_quantile)
-            }
-            
-            rv.custom$tmpAssay <- DaparToolshed::QuantileCentering(
-              qData = qdata, 
-              conds = .conds, 
-              type = rv.widgets$Normalization_type, 
-              subset.norm = selectProt()$indices, 
-              quantile = quant)
-            
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_quantile']] <- quant
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$indices
-            
-            
-          },
-          
-          MeanCentering = {
-            rv.custom$tmpAssay <- DaparToolshed::MeanCentering(
-              qData = qdata, 
-              conds = .conds,
-              type = rv.widgets$Normalization_type,
-              scaling = rv.widgets$Normalization_varReduction,
-              subset.norm = selectProt()$indices
-            )
-            
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_varReduction']] <- rv.widgets$Normalization_varReduction
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$indices
-            
-          },
-          SumByColumns = {
-            rv.custom$tmpAssay <- DaparToolshed::SumByColumns(
-              qData = qdata,
-              conds = .conds,
-              type = rv.widgets$Normalization_type,
-              subset.norm = selectProt()$indices
-            )
-            
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$indices
-            
-          },
-          LOESS = {
-            rv.custom$tmpAssay <- DaparToolshed::LOESS(
-              qData = qdata,
-              conds = .conds,
-              type = rv.widgets$Normalization_type,
-              span = as.numeric(rv.widgets$Normalization_spanLOESS)
-            )
-            
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['Normalization_spanLOESS']] <- as.numeric(rv.widgets$Normalization_spanLOESS)
-            
-          },
-          vsn = {
-            rv.custom$tmpAssay <- DaparToolshed::vsn(
-              qData = qdata,
-              conds = .conds,
-              type = rv.widgets$Normalization_type
-            )
-            
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            
-          }
-        )
-      })
-      
-      
-      
-      if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
-        
-        MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_normalization',
-          text = rv.custom$tmpAssay[[1]],
-          type = 'error' )
-      } else {
- 
-        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        assay(new.dataset) <- rv.custom$tmpAssay
-        DaparToolshed::paramshistory(new.dataset) <- NULL
-        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
-        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
-        
-        
-        # DO NOT MODIFY THE THREE FOLLOWING LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status['Normalization'] <- stepStatus$VALIDATED
-      }
-      
     })
     
-    # <<< END ------------- Code for step 1 UI---------------
+    
+    observeEvent(req(rv.custom$tmp.norm()$value), ignoreInit = FALSE, {
+      # Do some stuff
+      rv.custom$dataIn1 <- rv.custom$tmp.norm()$value
+      
+      .history <- rv.custom$tmp.norm()$value[[length(rv.custom$tmp.norm()$value)]]
+      rv.custom$params.tmp[['Normalization']] <- paramshistory(.history)
+      
+      # DO NOT MODIFY THE THREE FOLLOWING LINES
+      dataOut$trigger <- MagellanNTK::Timestamp()
+      dataOut$value <- NULL
+      rv$steps.status['Normalization'] <- stepStatus$VALIDATED
+    })
     
     
     # >>> START ------------- Code for step 3 UI---------------
@@ -615,9 +226,18 @@ PipelineProtein_Normalization_server <- function(id,
       tagList(
         # Insert validation button
         # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('Save_btn_validate_ui'))
+        uiOutput(ns('Save_btn_validate_ui')),
+        uiOutput(ns('dl_ui'))
       )
     })
+    
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    })
+    
     
     output$Save_btn_validate_ui <- renderUI({
       tagList(
@@ -635,10 +255,6 @@ PipelineProtein_Normalization_server <- function(id,
     })
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      req(rv.custom$tmpAssay)
-      req(rv.custom$history)
-      
-      
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

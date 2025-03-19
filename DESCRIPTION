@@ -37,7 +37,8 @@ Imports:
     SummarizedExperiment,
     magrittr,
     methods, 
-    tibble
+    tibble,
+    shinyFeedback
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,

@@ -119,14 +119,7 @@ mod_Prot_Imputation_POV_server <- function(id,
     
     eval(str2expression(core))
     
-    
-    # observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-    #   rv$dataIn <- obj()
-    #   req(rv$dataIn)
-    #   
-    # })
-    
-    
+
     observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
       req(obj())
       stopifnot(inherits(obj(), 'QFeatures'))

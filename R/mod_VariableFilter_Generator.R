@@ -28,6 +28,7 @@
 #' shiny::runApp(mod_VariableFilter_Generator(obj, keep_vs_remove, value, operator))
 #' }
 #' 
+#' @importFrom shinyFeedback useShinyFeedback showFeedbackWarning hideFeedback
 NULL
 
 
