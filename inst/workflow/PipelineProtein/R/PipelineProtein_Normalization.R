@@ -209,10 +209,10 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(req(rv.custom$tmp.norm()$value), ignoreInit = FALSE, {
       # Do some stuff
-      rv.custom$dataIn1 <- rv.custom$tmp.norm()$value
+      rv$dataIn <- rv.custom$tmp.norm()$value
       
-      .history <- rv.custom$tmp.norm()$value[[length(rv.custom$tmp.norm()$value)]]
-      rv.custom$params.tmp[['Normalization']] <- paramshistory(.history)
+      #.history <- rv.custom$tmp.norm()$value[[length(rv.custom$tmp.norm()$value)]]
+      #rv.custom$params.tmp[['Normalization']] <- paramshistory(.history)
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
@@ -255,7 +255,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      
+      print(rv$dataIn)
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
