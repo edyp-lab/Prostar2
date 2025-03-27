@@ -98,9 +98,23 @@ PipelineProtein_Normalization_server <- function(id,
       w.names = names(widgets.default.values),
       rv.custom.names = names(rv.custom.default.values)
     )
-    
+
     eval(str2expression(core.code))
 
+    # core <- paste0(
+    #   MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+    #   MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+    #   MagellanNTK::Get_Code_for_rv_reactiveValues(),
+    #   MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+    #   MagellanNTK::Get_Code_for_dataOut(),
+    #   MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
+    #     custom = TRUE,
+    #     dataIn = 'dataIn()'),
+    #   sep = "\n"
+    # )
+    # 
+    # eval(str2expression(core))
+    
     
     observeEvent(remoteReset(), {
       print('tutu')

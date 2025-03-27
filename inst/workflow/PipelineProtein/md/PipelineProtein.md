@@ -6,7 +6,6 @@ abstract: >
 output:
     BiocStyle::html_document:
         highlight: tango
-        thme: sandstone
         toc: false
         number_sections: TRUE
         css: style.css

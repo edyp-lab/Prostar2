@@ -130,14 +130,16 @@ mod_Prot_Normalization_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
-    # eval(
-    #   str2expression(
-    #     MagellanNTK::Get_AdditionalModule_Core_Code(
-    #       w.names = names(widgets.default.values),
-    #       rv.custom.names = names(rv.custom.default.values)
-    #     )
-    #   )
+    
+    # 
+    # core.code <- MagellanNTK::Get_Workflow_Core_Code(
+    #   mode = 'process',
+    #   name = id,
+    #   w.names = names(widgets.default.values),
+    #   rv.custom.names = names(rv.custom.default.values)
     # )
+    # 
+    # eval(str2expression(core.code))
     
     core <- paste0(
       MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
@@ -150,7 +152,7 @@ mod_Prot_Normalization_server <- function(id,
         dataIn = 'obj()'),
       sep = "\n"
     )
-    
+
     eval(str2expression(core))
     
 
