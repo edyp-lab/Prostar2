@@ -203,7 +203,7 @@ PipelineProtein_Imputation_server <- function(id,
     observe({
       rv.custom$tmp.pov <- Prostar2::mod_Prot_Imputation_POV_server(
       id = 'pov',
-      obj = reactive({rv$dataIn}),
+        dataIn = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
       is.enabled = reactive({rv$steps.enabled["POVImputation"]}),
       remoteReset = reactive({remoteReset()})
@@ -272,7 +272,7 @@ PipelineProtein_Imputation_server <- function(id,
     observe({
     rv.custom$tmp.mec <- Prostar2::mod_Prot_Imputation_MEC_server(
       id = 'mec',
-      obj = reactive({rv.custom$dataIn1}),
+      dataIn = reactive({rv.custom$dataIn1}),
       i = reactive({length(rv.custom$dataIn1)}),
       is.enabled = reactive({rv$steps.enabled["MECImputation"]}),
       remoteReset = reactive({remoteReset()})

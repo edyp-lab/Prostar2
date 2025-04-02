@@ -64,7 +64,7 @@ mod_Pept_Imputation_ui <- function(id) {
 #' @export
 #'
 mod_Pept_Imputation_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   i = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
@@ -106,7 +106,7 @@ mod_Pept_Imputation_server <- function(id,
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
         custom = TRUE,
-        dataIn = 'obj()'),
+        dataIn = 'dataIn()'),
       sep = "\n"
     )
     
@@ -114,16 +114,16 @@ mod_Pept_Imputation_server <- function(id,
     
     
     # observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-    #   rv$dataIn <- obj()
+    #   rv$dataIn <- dataIn()
     #   req(rv$dataIn)
     #   
     # })
     
     
-    observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-      req(obj())
-      stopifnot(inherits(obj(), 'QFeatures'))
-      rv$dataIn <- obj()
+    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
+      req(dataIn())
+      stopifnot(inherits(dataIn(), 'QFeatures'))
+      rv$dataIn <- dataIn()
       
       
         
@@ -235,7 +235,7 @@ mod_Pept_Imputation_server <- function(id,
       req(rv.widgets$Imp_algorithm == "detQuantile")
       
       mod_DetQuantImpValues_server(id = "DetQuantValues_DT",
-        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         quant = reactive({rv.widgets$Imp_detQuant_quantile}),
         factor = reactive({rv.widgets$Imp_detQuant_factor})
       )
@@ -479,13 +479,13 @@ mod_Pept_Imputation_server <- function(id,
 #' @export
 #' @rdname mod_Pept_Imputation
 #' 
-mod_Pept_Imputation <- function(obj, i){
+mod_Pept_Imputation <- function(dataIn, i){
   ui <- mod_Pept_Imputation_ui('pov')
   
   server <- function(input, output, session){
     
     res <- mod_Pept_Imputation_server('pov',
-      obj = reactive({obj}),
+      dataIn = reactive({dataIn}),
       i = reactive({i}))
     
     observeEvent(res()$trigger, {

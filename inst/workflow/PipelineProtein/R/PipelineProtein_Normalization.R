@@ -81,8 +81,9 @@ PipelineProtein_Normalization_server <- function(id,
   widgets.default.values <- list()
   
   rv.custom.default.values <- list(
-    tmp.dataset = NULL,
-    history = NULL)
+    history = NULL,
+    tmp.norm = reactive({NULL})
+    )
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -102,6 +103,7 @@ PipelineProtein_Normalization_server <- function(id,
     eval(str2expression(core.code))
 
     # core <- paste0(
+    #   MagellanNTK::Insert_Call_to_Config(id),
     #   MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
     #   MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
     #   MagellanNTK::Get_Code_for_rv_reactiveValues(),
@@ -109,16 +111,15 @@ PipelineProtein_Normalization_server <- function(id,
     #   MagellanNTK::Get_Code_for_dataOut(),
     #   MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
     #     custom = TRUE,
-    #     dataIn = 'dataIn()'),
+    #     dataIn = 'NULL'),
     #   sep = "\n"
     # )
     # 
     # eval(str2expression(core))
     
     
-    observeEvent(remoteReset(), {
-      print('tutu')
-      #browser()
+    observeEvent(dataIn(), {
+      browser()
     })
     
     # >>>
@@ -208,7 +209,7 @@ PipelineProtein_Normalization_server <- function(id,
     observe({
       rv.custom$tmp.norm <- Prostar2::mod_Prot_Normalization_server(
         id = 'norm',
-        obj = reactive({rv$dataIn}),
+        dataIn = reactive({rv$dataIn}),
         i = reactive({length(rv$dataIn)}),
         is.enabled = reactive({rv$steps.enabled["Normalization"]}),
         remoteReset = reactive({remoteReset()})
@@ -221,7 +222,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(req(rv.custom$tmp.norm()$value), ignoreInit = FALSE, {
+    observeEvent(req(rv.custom$tmp.norm()$trigger), ignoreInit = FALSE, {
       # Do some stuff
       rv$dataIn <- rv.custom$tmp.norm()$value
       

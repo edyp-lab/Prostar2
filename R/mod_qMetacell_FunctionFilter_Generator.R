@@ -79,7 +79,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
 #' @export
 #'
 mod_qMetacell_FunctionFilter_Generator_server <- function(id,
-    obj,
+  dataIn,
     conds,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
     val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
@@ -136,7 +136,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
           MagellanNTK::Get_Code_for_rv_reactiveValues(),
           MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
           MagellanNTK::Get_Code_for_dataOut(),
-          MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = FALSE, dataIn = 'obj()'),
+          MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = FALSE, dataIn = 'dataIn()'),
           sep = "\n"
         )
         eval(str2expression(core))
@@ -184,9 +184,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         #   rv$dataIn <- obj()
         # })
         
-        observeEvent(obj(), ignoreNULL = FALSE, {
-          stopifnot(inherits(obj(), 'SummarizedExperiment'))
-          rv$dataIn <- obj()
+        observeEvent(dataIn(), ignoreNULL = FALSE, {
+          stopifnot(inherits(dataIn(), 'SummarizedExperiment'))
+          rv$dataIn <- dataIn()
         }, priority = 1000)
         
         
@@ -198,7 +198,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         
         #rv.custom$tmp.tags <- reactive({NULL})
         rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
-          obj = reactive({rv$dataIn}),
+          dataIn = reactive({rv$dataIn}),
           remoteReset = reactive({remoteReset()}),
           is.enabled = reactive({is.enabled()})
         )
@@ -506,7 +506,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
   server <- function(input, output, session){
     
     res <- mod_qMetacell_FunctionFilter_Generator_server('query',
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       conds = reactive({conds}),
       keep_vs_remove = reactive({keep_vs_remove}),
       val_vs_percent = reactive({val_vs_percent}),

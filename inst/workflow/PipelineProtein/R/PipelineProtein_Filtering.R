@@ -221,7 +221,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
         id = "metaFiltering",
-        obj = reactive({rv$dataIn}),
+        dataIn = reactive({rv$dataIn}),
         i = reactive({length(rv$dataIn)}),
         is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
         remoteReset = reactive({remoteReset()})
@@ -277,7 +277,7 @@ PipelineProtein_Filtering_server <- function(id,
     observe({
       rv.custom$tmp.filtering2 <- Prostar2::mod_Variable_Filtering_server(
         id = "varFiltering",
-        obj = reactive({rv.custom$dataIn1}),
+        dataIn = reactive({rv.custom$dataIn1}),
         i = reactive({length(rv.custom$dataIn1)}),
         is.enabled = reactive({rv$steps.enabled["Variablefiltering"]}),
         remoteReset = reactive({remoteReset()})

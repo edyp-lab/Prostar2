@@ -67,7 +67,7 @@ mod_Prot_Imputation_MEC_ui <- function(id) {
 #' @export
 #'
 mod_Prot_Imputation_MEC_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   i = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
@@ -112,23 +112,23 @@ mod_Prot_Imputation_MEC_server <- function(id,
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
          custom = TRUE,
-         dataIn = 'obj()'),
+         dataIn = 'dataIn()'),
       sep = "\n"
     )
     
     eval(str2expression(core))
     
     # observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-    #   rv$dataIn <- obj()
+    #   rv$dataIn <- dataIn()
     #   req(rv$dataIn)
     #   
     # })
     
-    observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-      req(obj())
+    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
+      req(dataIn())
       
-      stopifnot(inherits(obj(), 'QFeatures'))
-      rv$dataIn <- obj()
+      stopifnot(inherits(dataIn(), 'QFeatures'))
+      rv$dataIn <- dataIn()
       
       qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
       rv.custom$mv.present <- sum(is.na(qdata)) > 0
@@ -205,8 +205,9 @@ mod_Prot_Imputation_MEC_server <- function(id,
     output$MEC_showDetQuantValues_ui <- renderUI({
       req(rv.widgets$MEC_algorithm == "detQuantile")
       
-      mod_DetQuantImpValues_server(id = "MEC_DetQuantValues_DT",
-        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      mod_DetQuantImpValues_server(
+        id = "MEC_DetQuantValues_DT",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         quant = reactive({rv.widgets$MEC_detQuant_quantile}),
         factor = reactive({rv.widgets$MEC_detQuant_factor})
         )
@@ -381,7 +382,7 @@ mod_Prot_Imputation_MEC <- function(obj, i){
   server <- function(input, output, session){
     
     res <- mod_Prot_Imputation_MEC_server('mec',
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       i = reactive({i}))
     
     observeEvent(res()$trigger, {

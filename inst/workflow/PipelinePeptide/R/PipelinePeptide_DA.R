@@ -502,7 +502,7 @@ PipelinePeptide_DA_server <- function(id,
       req(Get_Dataset_to_Analyze())
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
-        obj = reactive({Get_Dataset_to_Analyze()}),
+        dataIn = reactive({Get_Dataset_to_Analyze()}),
         conds = reactive({omXplore::get_group(rv$dataIn)}),
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 

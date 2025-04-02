@@ -58,7 +58,7 @@ mod_Pirat_ui <- function(id){
 #' @return A shiny app
 #' 
 mod_Pirat_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE}),
   verbose = FALSE) {
@@ -87,17 +87,17 @@ mod_Pirat_server <- function(id,
     )
     
     observe({
-      req(obj())
+      req(dataIn())
       
-      if(!inherits(obj(), 'SummarizedExperiment')){
+      if(!inherits(dataIn(), 'SummarizedExperiment')){
         return(NULL)
       }
       
       data(list(
-        peptides_ab = t(assay(obj())),
-        adj = metadata(obj())$adj,
-        mask_prot_diff = metadata(obj())$mask_prot_diff,
-        mask_pep_diff = metadata(obj())$mask_pep_diff
+        peptides_ab = t(assay(dataIn())),
+        adj = metadata(dataIn())$adj,
+        mask_prot_diff = metadata(dataIn())$mask_prot_diff,
+        mask_pep_diff = metadata(dataIn())$mask_pep_diff
       )
       )
       
@@ -175,7 +175,7 @@ mod_Pirat <- function(obj){
   )
   
   server <- function(input, output, session) {
-    mod_Pirat_server('pirat', obj = reactive({obj}))
+    mod_Pirat_server('pirat', dataIn = reactive({obj}))
   }
   
   app <- shiny::shinyApp(ui, server)

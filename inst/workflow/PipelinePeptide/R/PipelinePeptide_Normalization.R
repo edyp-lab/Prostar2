@@ -269,7 +269,7 @@ PipelinePeptide_Normalization_server <- function(id,
     #  rv.custom$
     selectProt <- omXplore::plots_tracking_server(
       id = "tracker",
-      obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
       remoteReset = reactive({remoteReset()})
     )
     #})
@@ -294,7 +294,7 @@ PipelinePeptide_Normalization_server <- function(id,
     
     #print(rv$dataIn)
     omXplore::omXplore_intensity_server("boxPlot_Norm",
-      obj = reactive({rv$dataIn}),
+      dataIn = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
       track.indices = reactive({selectProt()$indices}),
       remoteReset = reactive({remoteReset()}),
@@ -302,7 +302,7 @@ PipelinePeptide_Normalization_server <- function(id,
     )
     
     omXplore::omXplore_density_server("densityPlot_Norm", 
-      obj = reactive({rv$dataIn}),
+      dataIn = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)})
     )
     

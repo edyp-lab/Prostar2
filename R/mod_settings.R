@@ -99,7 +99,7 @@ mod_settings_ui <- function(id) {
 #'
 mod_settings_server <- function(
     id, 
-  obj,
+  dataIn = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
     
@@ -114,13 +114,13 @@ mod_settings_server <- function(
         orangeProstar <- "#E97D5E"
 
         observe({
-            req(obj())
+            req(dataIn())
 
-            if (!is(obj(), "QFeatures")) {
-                warning("mod_settings: 'obj()' is not of class 'QFeatures'.")
+            if (!is(dataIn(), "QFeatures")) {
+                warning("mod_settings: 'dataIn()' is not of class 'QFeatures'.")
                 return(NULL)
             }
-            rv.settings$conditions <- colData(obj())[["Condition"]]
+            rv.settings$conditions <- colData(dataIn())[["Condition"]]
         })
 
 

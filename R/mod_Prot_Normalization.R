@@ -18,9 +18,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' data(Exp1_R25_pept, package="DaparToolshedData")
-#' obj <- Exp1_R25_pept[seq_len(100)]
-#' shiny::runApp(mod_Prot_Normalization(obj, 1))
+#' data(Exp1_R25_prot, package="DaparToolshedData")
+#' obj <- Exp1_R25_prot[seq_len(100)]
+#' mod_Prot_Normalization(obj, 1)
 #' }
 #' 
 NULL
@@ -103,7 +103,7 @@ mod_Prot_Normalization_ui <- function(id) {
 #' @export
 #'
 mod_Prot_Normalization_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   i = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
@@ -149,28 +149,28 @@ mod_Prot_Normalization_server <- function(id,
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
         custom = TRUE,
-        dataIn = 'obj()'),
+        dataIn = 'dataIn()'),
       sep = "\n"
     )
 
     eval(str2expression(core))
     
 
-    observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-      req(obj())
-      stopifnot(inherits(obj(), 'QFeatures'))
-      rv$dataIn <- obj()
+    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
+      req(dataIn())
+      stopifnot(inherits(dataIn(), 'QFeatures'))
+      rv$dataIn <- dataIn()
     }, priority = 1000)
     
     
     selectProt <- omXplore::plots_tracking_server(
       id = "tracker",
-      obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
       remoteReset = reactive({remoteReset()})
     )
     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
-      obj = reactive({rv$dataIn}),
+      dataIn = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)}),
       track.indices = reactive({selectProt()$indices}),
       remoteReset = reactive({remoteReset()}),
@@ -178,7 +178,7 @@ mod_Prot_Normalization_server <- function(id,
     )
     
     omXplore::omXplore_density_server("densityPlot_Norm", 
-      obj = reactive({rv$dataIn}),
+      dataIn = reactive({rv$dataIn}),
       i = reactive({length(rv$dataIn)})
     )
     
@@ -477,21 +477,28 @@ mod_Prot_Normalization_server <- function(id,
 #' @rdname mod_Prot_Normalization
 #' 
 mod_Prot_Normalization <- function(obj, i){
-  ui <- mod_Prot_Normalization_ui('pov')
+  ui <- fluidPage(
+    actionButton('Reset', 'Reset'),
+    mod_Prot_Normalization_ui('pov')
+  )
   
   server <- function(input, output, session){
     
-    res <- mod_Prot_Normalization_server('pov',
-      obj = reactive({obj}),
+    rv.custom <- reactiveValues(
+      tmp.norm = reactive({NULL})
+    )
+    
+    rv.custom$tmp.norm <- mod_Prot_Normalization_server('pov',
+      dataIn = reactive({obj}),
       i = reactive({i}),
       is.enabled = reactive({TRUE}),
-      remoteReset = reactive({0}))
+      remoteReset = reactive({input$Reset}))
     
-    observeEvent(res()$trigger, {
-      print(res()$value)
+    observeEvent(rv.custom$tmp.norm()$trigger, {
+      print(rv.custom$tmp.norm()$value)
     })
   }
   
-  app <- shiny::shinyApp(ui, server)
+  shiny::shinyApp(ui, server)
   
 }

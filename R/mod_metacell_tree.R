@@ -68,7 +68,7 @@ mod_metacell_tree_ui <- function(id) {
 #' @export
 #' 
 mod_metacell_tree_server <- function(id, 
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
    
@@ -173,10 +173,10 @@ mod_metacell_tree_server <- function(id,
 
         
         init_tree <- function(){
-          req(obj())
-          req(omXplore::get_type(obj()))
+          req(dataIn())
+          req(omXplore::get_type(dataIn()))
           #print('------------ init_tree() ---------------')
-          rv$meta <- omXplore::metacell.def(omXplore::get_type(obj()))
+          rv$meta <- omXplore::metacell.def(omXplore::get_type(dataIn()))
           rv$mapping <- BuildMapping(rv$meta)$names
           rv$bg_colors <- BuildMapping(rv$meta)$colors
           
@@ -187,7 +187,7 @@ mod_metacell_tree_server <- function(id,
         
         
         observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-          req(obj())
+          req(dataIn())
             #print('------------ observeEvent(req(reset()) ---------------')
             # init_tree()
             # update_CB()
@@ -196,7 +196,7 @@ mod_metacell_tree_server <- function(id,
             # dataOut$trigger <- as.numeric(Sys.time())
             # dataOut$values <- NULL
             
-            if (!is.null(omXplore::get_type(obj())))
+            if (!is.null(omXplore::get_type(dataIn())))
                 init_tree()
             dataOut$trigger <- as.numeric(Sys.time())
             dataOut$values <- NULL
@@ -225,8 +225,8 @@ observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
 
 
 
-observeEvent(obj(), ignoreInit = FALSE, {
-  if (!is.null(omXplore::get_type(obj())))
+observeEvent(dataIn(), ignoreInit = FALSE, {
+  if (!is.null(omXplore::get_type(dataIn())))
     init_tree()
   dataOut$trigger <- as.numeric(Sys.time())
   dataOut$values <- NULL
@@ -270,9 +270,9 @@ observeEvent(input$checkbox_mode, {
 
 
 output$tree <- renderUI({
-  req(obj())
+  req(dataIn())
     div(style = "overflow-y: auto;",
-        uiOutput(ns(paste0('metacell_tree_', omXplore::get_type(obj()))))
+        uiOutput(ns(paste0('metacell_tree_', omXplore::get_type(dataIn()))))
     )
 })
 
@@ -281,8 +281,8 @@ output$tree <- renderUI({
 
 # Define tree for protein dataset
 output$metacell_tree_protein <- renderUI({
-  req(obj())
-  nb <- GetNbTags(obj())
+  req(dataIn())
+  nb <- GetNbTags(dataIn())
   pourcentages <- round(100*nb/sum(nb), digits = 1)
   
   div(class='wtree',
@@ -356,8 +356,8 @@ output$metacell_tree_protein <- renderUI({
 
 
 output$metacell_tree_peptide <- renderUI({
-  req(obj())
-  nb <- GetNbTags(obj())
+  req(dataIn())
+  nb <- GetNbTags(dataIn())
   pourcentages <- round(100*nb/sum(nb), digits = 1)
   
   div(class='wtree',
@@ -490,7 +490,7 @@ observeEvent(somethingChanged(), ignoreInit = TRUE, {
                    update_CB(newSelection)
                    },
                subtree = {
-                   level <- omXplore::get_type(obj())
+                   level <- omXplore::get_type(dataIn())
                    # As the leaves are disabled, this selection is a node
                    # by default, all its children must be also selected
                    for (i in newSelection){
@@ -605,7 +605,7 @@ mod_metacell_tree <- function(
   server <- function(input, output) {
     
     tags <- mod_metacell_tree_server('tree', 
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       remoteReset = reactive({remoteReset()+input$Reset}))
     
     observeEvent(req(tags()$trigger), {

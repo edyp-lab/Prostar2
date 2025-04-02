@@ -52,7 +52,7 @@ mod_ds_metacell_Histos_ui <- function(id) {
 #' @export
 #' 
 mod_ds_metacell_Histos_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   group = reactive({NULL}),
   pal = reactive({NULL}), 
   pattern = reactive({NULL}),
@@ -72,12 +72,12 @@ mod_ds_metacell_Histos_server <- function(id,
                 type = NULL
             )
             
-            observeEvent(req(obj()), {
-              rv$type <- omXplore::get_type(obj())
+            observeEvent(req(dataIn()), {
+              rv$type <- omXplore::get_type(dataIn())
             })
 
               tmp.tags <- mod_metacell_tree_server('tree', 
-                obj = reactive({obj()}))
+                dataIn = reactive({dataIn()}))
 
             
             observeEvent(tmp.tags()$values, ignoreNULL = FALSE, ignoreInit = TRUE,{
@@ -86,7 +86,7 @@ mod_ds_metacell_Histos_server <- function(id,
             
             
             output$chooseTagUI <- renderUI({
-                req(obj())
+                req(dataIn())
               req(is.null(pattern()))
                 tagList(
                   p('Select one or several tag(s) to display statistics about'),
@@ -95,10 +95,10 @@ mod_ds_metacell_Histos_server <- function(id,
              })
 
             output$histo <- highcharter::renderHighchart({
-              req(obj())
+              req(dataIn())
               req(group())
                tmp <- NULL
-               tmp <- metacellHisto_HC(obj(),
+               tmp <- metacellHisto_HC(dataIn(),
                  group = group(),
                  pattern = rv$chooseTag,
                  pal = pal())
@@ -108,11 +108,11 @@ mod_ds_metacell_Histos_server <- function(id,
 
 
             output$histo_per_lines <- highcharter::renderHighchart({
-              req(obj())
+              req(dataIn())
               req(group())
               tmp <- NULL
                tmp <-
-                  metacellPerLinesHisto_HC(obj(),
+                  metacellPerLinesHisto_HC(dataIn(),
                     group = group(),
                     pattern = rv$chooseTag,
                     indLegend = seq.int(from = 2, to = length(group()))
@@ -126,11 +126,11 @@ mod_ds_metacell_Histos_server <- function(id,
 
             output$histo_per_lines_per_conds <- highcharter::renderHighchart({
                tmp <- NULL
-               req(obj())
+               req(dataIn())
                req(group())
                # isolate({
                 # pattern <- paste0(GetCurrentObjName(),".MVplot2")
-                tmp <- metacellPerLinesHistoPerCondition_HC(obj(),
+                tmp <- metacellPerLinesHistoPerCondition_HC(dataIn(),
                   group = group(),
                   pattern = rv$chooseTag,
                   pal = pal()
@@ -165,7 +165,7 @@ server <- function(input, output) {
   
   observe({
     rv$tags <- mod_ds_metacell_Histos_server('test',
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       group = reactive({group}),
       pal = reactive({NULL}),
       pattern = reactive({pattern}),

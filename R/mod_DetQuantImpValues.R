@@ -40,7 +40,7 @@ mod_DetQuantImpValues_ui <- function(id) {
 #'
 mod_DetQuantImpValues_server <- function(
     id,
-    obj = reactive({NULL}),
+    dataIn = reactive({NULL}),
     quant = reactive({1}),
     factor = reactive({1}),
   remoteReset = reactive({0}),
@@ -51,10 +51,10 @@ mod_DetQuantImpValues_server <- function(
         ns <- session$ns
         
         output$detQuantValues_DT <- DT::renderDataTable(server = TRUE, {
-            req(obj())
+            req(dataIn())
             
             values <- getQuantile4Imp(
-                SummarizedExperiment::assay(obj()),
+                SummarizedExperiment::assay(dataIn()),
                 quant() / 100, factor())
             DT::datatable(as.data.frame(t(values$shiftedImpVal)),
                           rownames = FALSE,
@@ -80,7 +80,7 @@ mod_DetQuantImpValues <- function(obj){
 server <- function(input, output) {
 
     mod_DetQuantImpValues_server(id = "Title",
-                                 obj = reactive({obj}))
+      dataIn = reactive({dataIn}))
 }
 
 app <- shiny::shinyApp(ui, server)

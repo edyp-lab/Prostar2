@@ -49,7 +49,7 @@ mod_Variable_Filtering_ui <- function(id) {
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
-    # The renderUlength(obj()) function of each widget is managed by MagellanNTK
+    # The renderUlength(dataIn()) function of each widget is managed by MagellanNTK
     # The dev only have to define a reactive() function for each
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
@@ -72,7 +72,7 @@ mod_Variable_Filtering_ui <- function(id) {
 #' @export
 #'
 mod_Variable_Filtering_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   i = reactive({1}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
@@ -113,16 +113,16 @@ mod_Variable_Filtering_server <- function(id,
     eval(str2expression(core))
     
     
-    observeEvent(req(obj()), ignoreNULL = FALSE, ignoreInit = FALSE, {
-      stopifnot(inherits(obj(), 'QFeatures'))
-      rv$dataIn <- obj()
+    observeEvent(req(dataIn()), ignoreNULL = FALSE, ignoreInit = FALSE, {
+      stopifnot(inherits(dataIn(), 'QFeatures'))
+      rv$dataIn <- dataIn()
     }, priority = 1000)
     
 
    
     output$variable_Filter_DT <- renderUI({
       MagellanNTK::format_DT_server("dt", 
-        obj = reactive({rv.custom$variable_Filter_SummaryDT}))
+        dataIn = reactive({rv.custom$variable_Filter_SummaryDT}))
       
       MagellanNTK::format_DT_ui(ns("dt"))
     })
@@ -135,7 +135,7 @@ mod_Variable_Filtering_server <- function(id,
     
     funFilter <- mod_VariableFilter_Generator_server(
       id = "query",
-      obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
       is.enabled = reactive({is.enabled()}),
       remoteReset = reactive({remoteReset()})
     )
@@ -160,7 +160,7 @@ mod_Variable_Filtering_server <- function(id,
       
       .html <- funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
-      .nbBefore <- nrow(assay(obj()))
+      .nbBefore <- nrow(assay(dataIn()))
       .nbAfter <- nrow(assay(tmp[[length(tmp)]]))
       
       rv.custom$variable_Filter_SummaryDT <- rbind(
@@ -168,7 +168,7 @@ mod_Variable_Filtering_server <- function(id,
         c(.html, .nbDeleted, .nbBefore, .nbAfter))
       print('update du DT')
       # Keeps only the last filtered SE
-      len_start <- length(obj())
+      len_start <- length(dataIn())
       len_end <- length(tmp)
       len_diff <- len_end - len_start
 
@@ -215,7 +215,7 @@ mod_Variable_Filtering <- function(obj, i){
   server <- function(input, output, session){
     
     res <- mod_Variable_Filtering_server('query',
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       i = reactive({i}),
       remoteReset = reactive({input$Reset})
       )

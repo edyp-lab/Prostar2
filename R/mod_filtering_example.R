@@ -72,7 +72,7 @@ mod_filtering_example_ui <- function(id) {
 #' @export
 #' 
 mod_filtering_example_server <- function(id, 
-  obj, 
+  dataIn = reactive({NULL}), 
   indices = NULL, 
   operation = 'keep', 
   title = 'myTitle',
@@ -138,15 +138,15 @@ mod_filtering_example_server <- function(id,
     }
     
     output$example_tab_filtered <- DT::renderDataTable({
-      df <- Build_enriched_qdata(obj())
+      df <- Build_enriched_qdata(dataIn())
       .colDef <- range.invisible <- NULL
-      is.enriched <- !isTRUE(all.equal(df, obj()))
+      is.enriched <- !isTRUE(all.equal(df, dataIn()))
       index2darken <- NULL
       # Darken lines that will be filtered
       if (!is.null(indices()) &&
           input$run_btn == "simulate filtered dataset") {
         if (operation() == "keep") {
-          index2darken <- (1:nrow(obj()))[-indices()]
+          index2darken <- (1:nrow(dataIn()))[-indices()]
         } else if (operation() == "delete") {
           index2darken <- indices()
         }
@@ -154,7 +154,7 @@ mod_filtering_example_server <- function(id,
       
       
       if (is.enriched){
-        .style <- BuildColorStyles(omXplore::get_type(obj()))
+        .style <- BuildColorStyles(omXplore::get_type(dataIn()))
         c.tags <- names(.style)
         c.colors <- unlist(.style, use.names = FALSE)
         
@@ -251,7 +251,7 @@ server <- function(input, output) {
   #   th = filtering.query$metacell_value_th)
   
   mod_filtering_example_server('tree',
-    obj = reactive({obj}),
+    dataIn = reactive({obj}),
     indices = reactive({indices}),
     operation = reactive({operation}),
     title = reactive({title}))

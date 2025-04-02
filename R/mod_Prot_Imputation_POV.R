@@ -74,7 +74,7 @@ mod_Prot_Imputation_POV_ui <- function(id) {
 #' @export
 #'
 mod_Prot_Imputation_POV_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   i = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
@@ -113,17 +113,17 @@ mod_Prot_Imputation_POV_server <- function(id,
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
         custom = TRUE,
-        dataIn = 'obj()'),
+        dataIn = 'dataIn()'),
       sep = "\n"
     )
     
     eval(str2expression(core))
     
 
-    observeEvent(obj(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-      req(obj())
-      stopifnot(inherits(obj(), 'QFeatures'))
-      rv$dataIn <- obj()
+    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
+      req(dataIn())
+      stopifnot(inherits(dataIn(), 'QFeatures'))
+      rv$dataIn <- dataIn()
     }, priority = 1000)
     
     
@@ -166,8 +166,9 @@ mod_Prot_Imputation_POV_server <- function(id,
     output$POV_showDetQuantValues <- renderUI({
       req(rv.widgets$POV_algorithm == "detQuantile")
       
-      mod_DetQuantImpValues_server(id = "POV_DetQuantValues_DT",
-        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      mod_DetQuantImpValues_server(
+      id = "POV_DetQuantValues_DT",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         quant = reactive({rv.widgets$POV_detQuant_quantile}),
         factor = reactive({rv.widgets$POV_detQuant_factor})
       )
@@ -342,7 +343,7 @@ mod_Prot_Imputation_POV <- function(obj, i){
   server <- function(input, output, session){
     
     res <- mod_Prot_Imputation_POV_server('pov',
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       i = reactive({i}))
     
     observeEvent(res()$trigger, {

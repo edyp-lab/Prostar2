@@ -77,7 +77,7 @@ mod_VariableFilter_Generator_ui <- function(id) {
 #' @export
 #'
 mod_VariableFilter_Generator_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   cname = reactive({NULL}),
   value = reactive({NULL}),
   operator = reactive({NULL}),
@@ -138,9 +138,9 @@ mod_VariableFilter_Generator_server <- function(id,
 
 
     
-    observeEvent(req(obj()), ignoreNULL = FALSE, {
-      stopifnot(inherits(obj(), 'SummarizedExperiment'))
-      rv$dataIn <- obj()
+    observeEvent(req(dataIn()), ignoreNULL = FALSE, {
+      stopifnot(inherits(dataIn(), 'SummarizedExperiment'))
+      rv$dataIn <- dataIn()
     }, priority = 1000)
     
     
@@ -264,7 +264,7 @@ mod_VariableFilter_Generator_server <- function(id,
     
     
     BuildVariableFilter <- reactive({
-      req(obj())
+      req(dataIn())
 
       req(rv.widgets$value != 'Enter value...')
       req(rv.widgets$operator != "None")
@@ -344,7 +344,7 @@ mod_VariableFilter_Generator <- function(
   server <- function(input, output, session){
     
     res <- mod_VariableFilter_Generator_server('query',
-      obj = reactive({obj}),
+      dataIn = reactive({obj}),
       cname = reactive({cname}),
       value = reactive({value}),
       operator = reactive({operator}),

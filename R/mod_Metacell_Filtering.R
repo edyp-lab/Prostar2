@@ -82,7 +82,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 #' @export
 #'
 mod_Metacell_Filtering_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   i = reactive({1}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
@@ -129,7 +129,7 @@ mod_Metacell_Filtering_server <- function(id,
       MagellanNTK::Get_Code_for_dataOut()
       # MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
       #   custom = TRUE,
-      #   dataIn = 'obj()')
+      #   dataIn = 'dataIn()')
       #   addon = "rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
       #   query = '-',
       #   nbDeleted = '0',
@@ -145,7 +145,7 @@ mod_Metacell_Filtering_server <- function(id,
 
 
     observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-      rv$dataIn <- obj()
+      rv$dataIn <- dataIn()
       req(rv$dataIn)
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
@@ -155,9 +155,9 @@ mod_Metacell_Filtering_server <- function(id,
       )
     })
     
-    observeEvent(obj(), ignoreInit = FALSE, {
-      stopifnot(inherits(obj(), 'QFeatures'))
-      rv$dataIn <- obj()
+    observeEvent(dataIn(), ignoreInit = FALSE, {
+      stopifnot(inherits(dataIn(), 'QFeatures'))
+      rv$dataIn <- dataIn()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
         nbDeleted = "0",
@@ -173,7 +173,7 @@ mod_Metacell_Filtering_server <- function(id,
       
       mod_ds_metacell_Histos_server(
         id = "plots",
-        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
@@ -185,7 +185,7 @@ mod_Metacell_Filtering_server <- function(id,
     
     
     MagellanNTK::format_DT_server("dt", 
-      obj = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
+      dataIn = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
     
     
     output$qMetacell_Filter_DT <- renderUI({
@@ -200,7 +200,7 @@ mod_Metacell_Filtering_server <- function(id,
       
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
-        obj = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         conds = reactive({omXplore::get_group(rv$dataIn)}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
@@ -266,7 +266,7 @@ mod_Metacell_Filtering_server <- function(id,
       
       
       # Keeps only the last filtered SE
-      len_start <- length(obj())
+      len_start <- length(dataIn())
       len_end <- length(tmp)
       len_diff <- len_end - len_start
 
@@ -303,7 +303,8 @@ mod_Metacell_Filtering_server <- function(id,
 #' @export
 #' @rdname mod_Metacell_Filtering
 #' 
-mod_Metacell_Filtering <- function(obj = NULL, 
+mod_Metacell_Filtering <- function(
+    dataIn = NULL, 
   i = 1,
   remoteReset = reactive({0}),
   is.enabled = TRUE){
@@ -315,7 +316,7 @@ mod_Metacell_Filtering <- function(obj = NULL,
   server <- function(input, output, session){
     
     res <- mod_Metacell_Filtering_server('query',
-      obj = reactive({obj}),
+      dataIn = reactive({dataIn}),
       i = reactive({i}),
       remoteReset = reactive({remoteReset()+input$Reset}))
     

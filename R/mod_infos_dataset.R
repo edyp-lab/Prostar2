@@ -62,7 +62,7 @@ infos_dataset_ui <- function(id){
 #' @importFrom tibble as_tibble
 #' 
 infos_dataset_server <- function(id,
-  obj = reactive({NULL}),
+  dataIn = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})
   ){
@@ -75,8 +75,8 @@ infos_dataset_server <- function(id,
     rv <- reactiveValues(
       dataIn = NULL
     )
-    observeEvent(req(inherits(obj(),'QFeatures')), {
-       rv$dataIn <- obj()
+    observeEvent(req(inherits(dataIn(),'QFeatures')), {
+       rv$dataIn <- dataIn()
     })
       
       
@@ -86,7 +86,7 @@ infos_dataset_server <- function(id,
         
         
         MagellanNTK::format_DT_server('samples_tab',
-          obj = reactive({
+          dataIn = reactive({
             req((rv$dataIn))
             
             data.frame(colData(rv$dataIn))
@@ -113,7 +113,7 @@ infos_dataset_server <- function(id,
 
 
 MagellanNTK::format_DT_server('dt',
-      obj = reactive({
+  dataIn = reactive({
         req(Get_QFeatures_summary())
         tibble::as_tibble(Get_QFeatures_summary())
         }))
@@ -281,11 +281,11 @@ MagellanNTK::format_DT_server('dt',
     # })
     
     MagellanNTK::format_DT_server('dt2',
-      obj = reactive({Get_SE_Summary()})
+      dataIn = reactive({Get_SE_Summary()})
     )
     
     MagellanNTK::format_DT_server('history',
-      obj = reactive({Get_SE_History()})
+      dataIn = reactive({Get_SE_History()})
     )
     
     output$show_SE_ui <- renderUI({
@@ -365,7 +365,7 @@ infos_dataset <- function(obj){
   
   server <- function(input, output, session) {
     infos_dataset_server("mod_info", 
-      obj = reactive({obj}))
+      dataIn = reactive({obj}))
   }
 
   app <- shiny::shinyApp(ui, server)
