@@ -83,6 +83,10 @@ PipelineProtein_Description_server <- function(id,
     
     
     
+    # observeEvent(dataIn(), ignoreInit = FALSE, ignoreNULL = FALSE, {
+    #   browser()
+    # })
+    
     output$datasetDescription_ui <- renderUI({
       # Insert your own code to vizualise some information
       # about your dataset. It will appear once the 'Start' button
@@ -91,9 +95,10 @@ PipelineProtein_Description_server <- function(id,
     })
     
     output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-                             "Start",
-                             class = "btn-success")
+      widget <- actionButton(
+        ns("Description_btn_validate"),
+        "Start",
+        class = "btn-success")
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
     })
     

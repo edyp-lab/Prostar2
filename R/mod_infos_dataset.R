@@ -2,7 +2,7 @@
 #' @description  A shiny Module.
 #' 
 #' @param id shiny id
-#' @param obj An instance of the class `QFeatures`.
+#' @param dataIn An instance of the class `QFeatures`.
 #' 
 #' @return A shiny app
 #'
