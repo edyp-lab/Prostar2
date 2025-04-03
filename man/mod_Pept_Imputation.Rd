@@ -10,7 +10,7 @@ mod_Pept_Imputation_ui(id)
 
 mod_Pept_Imputation_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   i = reactive({
@@ -24,17 +24,17 @@ mod_Pept_Imputation_server(
  })
 )
 
-mod_Pept_Imputation(obj, i)
+mod_Pept_Imputation(dataIn, i)
 }
 \arguments{
 \item{id}{xxx}
-
-\item{obj}{An instance of the class \code{QFeatures}}
 
 \item{remoteReset}{A \code{integer(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{QFeatures}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a

@@ -10,7 +10,7 @@ mod_Metacell_Filtering_ui(id)
 
 mod_Metacell_Filtering_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   i = reactive({
@@ -25,7 +25,7 @@ mod_Metacell_Filtering_server(
 )
 
 mod_Metacell_Filtering(
-  obj = NULL,
+  dataIn = NULL,
   i = 1,
   remoteReset = reactive({
      0
@@ -36,12 +36,12 @@ mod_Metacell_Filtering(
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{QFeatures}}
-
 \item{remoteReset}{A \code{ìnteger(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{QFeatures}}
 
 \item{keep_vs_remove}{A character(1) indicating whether to keep or delete
 items. Default value is "delete"}

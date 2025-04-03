@@ -12,7 +12,7 @@ mod_metacell_tree_ui(id)
 
 mod_metacell_tree_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   remoteReset = reactive({
@@ -33,9 +33,9 @@ mod_metacell_tree(
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
-
 \item{remoteReset}{xxx}
+
+\item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
 \value{
 NA

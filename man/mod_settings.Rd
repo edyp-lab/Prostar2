@@ -9,7 +9,9 @@ mod_settings_ui(id)
 
 mod_settings_server(
   id,
-  obj,
+  dataIn = reactive({
+     NULL
+ }),
   remoteReset = reactive({
      0
  }),
@@ -21,13 +23,13 @@ mod_settings_server(
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{xxx}
-
 \item{input}{internal}
 
 \item{output}{internal}
 
 \item{session}{internal}
+
+\item{obj}{xxx}
 }
 \value{
 NA

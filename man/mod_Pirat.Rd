@@ -10,7 +10,7 @@ mod_Pirat_ui(id)
 
 mod_Pirat_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   remoteReset = reactive({
@@ -27,10 +27,10 @@ mod_Pirat(obj)
 \arguments{
 \item{id}{The id of the module}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}.}
-
 \item{verbose}{A boolean (FALSE as default) which indicates whether to
 display more details on the process}
+
+\item{obj}{An instance of the class \code{SummarizedExperiment}.}
 
 \item{reset}{A boolean which indicates whether to reset the widgets or not.}
 }

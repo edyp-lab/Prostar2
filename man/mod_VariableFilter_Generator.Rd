@@ -10,7 +10,7 @@ mod_VariableFilter_Generator_ui(id)
 
 mod_VariableFilter_Generator_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   cname = reactive({
@@ -47,8 +47,6 @@ mod_VariableFilter_Generator(
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
-
 \item{operator}{xxx}
 
 \item{keep_vs_remove}{xxx}
@@ -57,6 +55,8 @@ mod_VariableFilter_Generator(
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a

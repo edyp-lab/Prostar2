@@ -12,7 +12,7 @@ mod_ds_metacell_Histos_ui(id)
 
 mod_ds_metacell_Histos_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   group = reactive({
@@ -40,13 +40,13 @@ mod_ds_metacell_Histos(obj, group, pal, pattern = NULL, showSelect)
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
-
 \item{pal}{xxx}
 
 \item{pattern}{xxx}
 
 \item{showSelect}{xxx}
+
+\item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
 \value{
 NA

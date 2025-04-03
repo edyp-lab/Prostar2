@@ -11,7 +11,9 @@ mod_filtering_example_ui(id)
 
 mod_filtering_example_server(
   id,
-  obj,
+  dataIn = reactive({
+     NULL
+ }),
   indices = NULL,
   operation = "keep",
   title = "myTitle",
@@ -33,8 +35,6 @@ mod_filtering_example(
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
-
 \item{indices}{xxx}
 
 \item{operation}{A character(1) that indicates whether to keep or remove
@@ -42,6 +42,8 @@ lines identified by indices. Available values are 'keep' (default)
 or 'delete'}
 
 \item{title}{xxx}
+
+\item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
 \value{
 NA

@@ -10,7 +10,7 @@ infos_dataset_ui(id)
 
 infos_dataset_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   remoteReset = reactive({

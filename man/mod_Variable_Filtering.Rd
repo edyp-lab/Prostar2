@@ -10,7 +10,7 @@ mod_Variable_Filtering_ui(id)
 
 mod_Variable_Filtering_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   i = reactive({
@@ -29,12 +29,12 @@ mod_Variable_Filtering(obj, i)
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{QFeatures}}
-
 \item{remoteReset}{A \code{ìnteger(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{QFeatures}}
 
 \item{keep_vs_remove}{A character(1) indicating whether to keep or delete
 items. Default value is "delete"}

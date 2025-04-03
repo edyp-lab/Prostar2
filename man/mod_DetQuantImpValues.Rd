@@ -10,7 +10,7 @@ mod_DetQuantImpValues_ui(id)
 
 mod_DetQuantImpValues_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   quant = reactive({
@@ -32,11 +32,11 @@ mod_DetQuantImpValues(obj)
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{xxx}
-
 \item{quant}{xxx}
 
 \item{factor}{xxx}
+
+\item{obj}{xxx}
 }
 \description{
 A shiny Module.

@@ -10,7 +10,7 @@ mod_Prot_Imputation_MEC_ui(id)
 
 mod_Prot_Imputation_MEC_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   i = reactive({
@@ -29,12 +29,12 @@ mod_Prot_Imputation_MEC(obj, i)
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{QFeatures}}
-
 \item{remoteReset}{A \code{integer(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{QFeatures}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a

@@ -10,7 +10,7 @@ mod_qMetacell_FunctionFilter_Generator_ui(id)
 
 mod_qMetacell_FunctionFilter_Generator_server(
   id,
-  obj,
+  dataIn,
   conds,
   keep_vs_remove = reactive({
      setNames(nm = c("delete", "keep"))
@@ -44,8 +44,6 @@ mod_qMetacell_FunctionFilter_Generator(
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
-
 \item{conds}{A \code{character()} which contains the name of the conditions. The
 length of this vector must be equal to the number of samples in the assay
 (i.e. number of columns in assay(obj))}
@@ -60,6 +58,8 @@ length of this vector must be equal to the number of samples in the assay
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a

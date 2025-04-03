@@ -10,7 +10,7 @@ mod_Prot_Normalization_ui(id)
 
 mod_Prot_Normalization_server(
   id,
-  obj = reactive({
+  dataIn = reactive({
      NULL
  }),
   i = reactive({
@@ -29,12 +29,12 @@ mod_Prot_Normalization(obj, i)
 \arguments{
 \item{id}{xxx}
 
-\item{obj}{An instance of the class \code{QFeatures}}
-
 \item{remoteReset}{A \code{integer(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{An instance of the class \code{QFeatures}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a
@@ -57,9 +57,9 @@ as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
 \dontrun{
-data(Exp1_R25_pept, package="DaparToolshedData")
-obj <- Exp1_R25_pept[seq_len(100)]
-shiny::runApp(mod_Prot_Normalization(obj, 1))
+data(Exp1_R25_prot, package="DaparToolshedData")
+obj <- Exp1_R25_prot[seq_len(100)]
+mod_Prot_Normalization(obj, 1)
 }
 
 }
