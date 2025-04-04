@@ -149,7 +149,7 @@ mod_Prot_Normalization_server <- function(id,
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
         custom = TRUE,
-        dataIn = 'dataIn()'),
+        dataIn = 'NULL'),
       sep = "\n"
     )
 

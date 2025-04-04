@@ -167,7 +167,6 @@ PipelineProtein_Imputation_server <- function(id,
     observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
       req(dataIn())
       rv$dataIn <- dataIn()
-      print("passage dans uniitalisation de description")
       rv.custom$dataIn1 <- dataIn()
       rv.custom$dataIn2 <- dataIn()
       
@@ -293,8 +292,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(req(rv.custom$tmp.mec()$value), ignoreInit = FALSE, {
       # Do some stuff
-      print("In observeEvent(req(rv.custom$tmp.mec()$value)")
-      #req(rv.custom$tmp.mec()$value)
       rv.custom$dataIn2 <- rv.custom$tmp.mec()$value
       
       .history <- rv.custom$tmp.mec()$value[[length(rv.custom$tmp.mec()$value)]]

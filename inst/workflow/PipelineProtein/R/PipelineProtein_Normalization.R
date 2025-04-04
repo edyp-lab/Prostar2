@@ -117,10 +117,7 @@ PipelineProtein_Normalization_server <- function(id,
     # 
     # eval(str2expression(core))
     
-    
-    observeEvent(dataIn(), {
-      browser()
-    })
+
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -128,10 +125,6 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     output$Description <- renderUI({
-      # print('titi')
-      # print(session$userData$workflow.path)
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -222,7 +215,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(req(rv.custom$tmp.norm()$trigger), ignoreInit = FALSE, {
+    observeEvent(req(rv.custom$tmp.norm()$value), ignoreInit = FALSE, {
       # Do some stuff
       rv$dataIn <- rv.custom$tmp.norm()$value
       
@@ -270,7 +263,6 @@ PipelineProtein_Normalization_server <- function(id,
     })
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      print(rv$dataIn)
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

@@ -81,11 +81,7 @@ PipelineProtein_Description_server <- function(id,
       )
     })
     
-    
-    
-    # observeEvent(dataIn(), ignoreInit = FALSE, ignoreNULL = FALSE, {
-    #   browser()
-    # })
+
     
     output$datasetDescription_ui <- renderUI({
       # Insert your own code to vizualise some information
