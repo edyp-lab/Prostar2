@@ -277,9 +277,9 @@ mod_Prot_Imputation_MEC_server <- function(id,
         incProgress(0.25, detail = "Reintroduce MEC")
         
       m <- match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing MEC",
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       nbMECBefore <- length(which(m))
       incProgress(0.75, detail = "MEC Imputation")
@@ -337,9 +337,9 @@ mod_Prot_Imputation_MEC_server <- function(id,
           incProgress(1, detail = "Finalize MEC imputation")
           
           
-          m <- match.metacell(omXplore::get_metacell(.tmp),
+          m <- match.metacell(DaparToolshed::qMetacell(.tmp),
             pattern = "Missing MEC",
-            level = omXplore::get_type(.tmp)
+            level = DaparToolshed::typeDataset(.tmp)
           )
           nbMECAfter <- length(which(m))
           rv$nbMECimputed <- nbMECBefore - nbMECAfter

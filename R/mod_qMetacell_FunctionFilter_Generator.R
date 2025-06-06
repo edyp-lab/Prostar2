@@ -467,7 +467,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
               ll.indices = GetIndices_FunFiltering(
                 obj = rv$dataIn,
                 conds = conds(), 
-                level = omXplore::get_type(rv$dataIn), 
+                level = DaparToolshed::typeDataset(rv$dataIn), 
                 pattern = rv.custom$ll.fun[[1]]@params$pattern,
                 type = rv.widgets$scope,
                 percent = rv.custom$ll.fun[[1]]@params$percent, 

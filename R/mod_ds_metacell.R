@@ -73,7 +73,7 @@ mod_ds_metacell_Histos_server <- function(id,
             )
             
             observeEvent(req(dataIn()), {
-              rv$type <- omXplore::get_type(dataIn())
+              rv$type <- DaparToolshed::typeDataset(dataIn())
             })
 
               tmp.tags <- mod_metacell_tree_server('tree', 

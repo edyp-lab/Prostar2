@@ -12,12 +12,14 @@ options(shiny.fullstacktrace = TRUE)
 
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 obj <- Exp1_R25_prot
-wf.name <- 'PipelineProtein_Normalization'
+wf.name <- 'PipelineProtein_Imputation'
 wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 
 
 # Launch in a standalone mode
 shiny::runApp(workflowApp(wf.name, wf.path, dataIn = obj))
+
+proc_workflowApp(wf.name, wf.path, dataIn = Exp1_R25_prot, tl.layout = c("v", "h"))
 
 
 # Launch in the Magellan workspace
