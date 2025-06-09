@@ -466,7 +466,7 @@ mod_Prot_Normalization_server <- function(id,
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
         
-        
+        #browser()
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn

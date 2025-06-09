@@ -215,7 +215,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(req(rv.custom$tmp.norm()$trigger), ignoreInit = TRUE, {
+    observeEvent(req(rv.custom$tmp.norm()$trigger), ignoreInit = FALSE, {
       # Do some stuff
       browser()
       rv$dataIn <- rv.custom$tmp.norm()$value
