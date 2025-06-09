@@ -161,7 +161,7 @@ mod_Prot_Normalization_server <- function(id,
       stopifnot(inherits(dataIn(), 'QFeatures'))
       rv$dataIn <- dataIn()
       
-      browser()
+      #browser()
     }, priority = 1000)
     
     
@@ -347,7 +347,7 @@ mod_Prot_Normalization_server <- function(id,
     # >>> END: Definition of the widgets
     
     observeEvent(input$Normalization_btn_validate, ignoreInit = TRUE, {
-     browser()
+     #browser()
       # Do some stuff 
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
