@@ -93,7 +93,7 @@ mod_Prot_Normalization_ui <- function(id) {
 
 
 #' @param id xxx
-#' @param obj An instance of the class `QFeatures`
+#' @param dataIn An instance of the class `QFeatures`
 #' @param remoteReset A `integer(1)` xxxx
 #' @param is.enabled A `logical(1)` that indicates whether the module is
 #' enabled or disabled. This is a remote command.
