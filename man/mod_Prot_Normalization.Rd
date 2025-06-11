@@ -24,17 +24,17 @@ mod_Prot_Normalization_server(
  })
 )
 
-mod_Prot_Normalization(obj, i)
+mod_Prot_Normalization()
 }
 \arguments{
 \item{id}{xxx}
+
+\item{dataIn}{An instance of the class \code{QFeatures}}
 
 \item{remoteReset}{A \code{integer(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
-
-\item{obj}{An instance of the class \code{QFeatures}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a

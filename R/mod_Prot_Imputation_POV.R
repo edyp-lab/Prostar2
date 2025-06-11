@@ -234,12 +234,12 @@ mod_Prot_Imputation_POV_server <- function(id,
       req(rv$dataIn)
       req(rv.widgets$POV_algorithm != "None")
       m <- match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing POV",
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       nbPOVBefore <- length(which(m))
-      #browser()
+      
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.25, detail = "Find MEC blocks")
         
@@ -252,11 +252,11 @@ mod_Prot_Imputation_POV_server <- function(id,
             None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
             slsa = {
               incProgress(0.5, detail = "slsa Imputation")
+         
               .tmp <- wrapper.impute.slsa(
                 obj = rv$dataIn[[length(rv$dataIn)]],
-                grp = omXplore::get_group(rv$dataIn),
-                coldata = MultiAssayExperiment::colData(rv$dataIn)
-                )
+                design = design.qf(rv$dataIn))
+              
               .param <- list(
                   POV_algorithm = rv.widgets$POV_algorithm
                 )
@@ -291,6 +291,7 @@ mod_Prot_Imputation_POV_server <- function(id,
           )
         })
         
+       
         if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
           mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
             text = .tmp,
@@ -305,10 +306,9 @@ mod_Prot_Imputation_POV_server <- function(id,
           # incProgress(0.75, detail = 'Reintroduce MEC blocks')
           incProgress(1, detail = "Finalize POV imputation")
 
-          
-          m <- match.metacell(omXplore::get_metacell(.tmp),
+          m <- match.metacell(DaparToolshed::qMetacell(.tmp),
             pattern = "Missing POV",
-            level = omXplore::get_type(.tmp)
+            level = DaparToolshed::typeDataset(.tmp)
           )
           nbPOVAfter <- length(which(m))
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter

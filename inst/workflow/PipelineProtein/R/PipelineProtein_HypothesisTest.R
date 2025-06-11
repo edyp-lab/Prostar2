@@ -195,9 +195,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
       m <- DaparToolshed::match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       NA.count <- length(which(m))
       
@@ -472,9 +472,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
         req(rv.widgets$HypothesisTest_ttestOptions != "None")
       
       m <- DaparToolshed::match.metacell(
-        omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = "Missing",
-        level = omXplore::get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
         )
       
       req(length(which(m)) == 0)

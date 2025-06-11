@@ -174,9 +174,9 @@ mod_metacell_tree_server <- function(id,
         
         init_tree <- function(){
           req(dataIn())
-          req(omXplore::get_type(dataIn()))
+          req(DaparToolshed::typeDataset(dataIn()))
           #print('------------ init_tree() ---------------')
-          rv$meta <- omXplore::metacell.def(omXplore::get_type(dataIn()))
+          rv$meta <- omXplore::metacell.def(DaparToolshed::typeDataset(dataIn()))
           rv$mapping <- BuildMapping(rv$meta)$names
           rv$bg_colors <- BuildMapping(rv$meta)$colors
           
@@ -196,7 +196,7 @@ mod_metacell_tree_server <- function(id,
             # dataOut$trigger <- as.numeric(Sys.time())
             # dataOut$values <- NULL
             
-            if (!is.null(omXplore::get_type(dataIn())))
+            if (!is.null(DaparToolshed::typeDataset(dataIn())))
                 init_tree()
             dataOut$trigger <- as.numeric(Sys.time())
             dataOut$values <- NULL
@@ -226,7 +226,7 @@ observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
 
 
 observeEvent(dataIn(), ignoreInit = FALSE, {
-  if (!is.null(omXplore::get_type(dataIn())))
+  if (!is.null(DaparToolshed::typeDataset(dataIn())))
     init_tree()
   dataOut$trigger <- as.numeric(Sys.time())
   dataOut$values <- NULL
@@ -272,7 +272,7 @@ observeEvent(input$checkbox_mode, {
 output$tree <- renderUI({
   req(dataIn())
     div(style = "overflow-y: auto;",
-        uiOutput(ns(paste0('metacell_tree_', omXplore::get_type(dataIn()))))
+        uiOutput(ns(paste0('metacell_tree_', DaparToolshed::typeDataset(dataIn()))))
     )
 })
 
@@ -490,7 +490,7 @@ observeEvent(somethingChanged(), ignoreInit = TRUE, {
                    update_CB(newSelection)
                    },
                subtree = {
-                   level <- omXplore::get_type(dataIn())
+                   level <- DaparToolshed::typeDataset(dataIn())
                    # As the leaves are disabled, this selection is a node
                    # by default, all its children must be also selected
                    for (i in newSelection){

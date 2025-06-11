@@ -692,9 +692,9 @@ PipelinePeptide_DA_server <- function(id,
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = get_type(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       req(length(which(m)) == 0)
       
@@ -753,7 +753,7 @@ PipelinePeptide_DA_server <- function(id,
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide")
       req(length(which(m)) == 0)
@@ -878,7 +878,7 @@ PipelinePeptide_DA_server <- function(id,
       req(!is.na(rv.custom$thlogfc))
       req(length(rv.custom$resAnaDiff$logFC) > 0) 
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide")
       req(length(which(m)) == 0)
@@ -1064,7 +1064,7 @@ PipelinePeptide_DA_server <- function(id,
       req(Build_pval_table())
       
       
-      m <- DaparToolshed::match.metacell(omXplore::get_metacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide"
       )
@@ -1118,11 +1118,11 @@ PipelinePeptide_DA_server <- function(id,
       
       div(id="bloc_page",
         style = "background-color: lightgrey; width: 300px",
-        p(paste("Total number of ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
+        p(paste("Total number of ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
         tags$em(p(style = "padding:0 0 0 20px;", 
           paste("Total remaining after push p-values = ", B, sep=''))),
-        p(paste("Number of selected ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
-        p(paste("Number of non selected ", omXplore::get_type(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", D, sep = ''))
+        p(paste("Number of selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
+        p(paste("Number of non selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", D, sep = ''))
       )
       #HTML(txt)
     })

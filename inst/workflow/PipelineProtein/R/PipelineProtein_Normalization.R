@@ -111,7 +111,7 @@ PipelineProtein_Normalization_server <- function(id,
     #   MagellanNTK::Get_Code_for_dataOut(),
     #   MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
     #     custom = TRUE,
-    #     dataIn = 'NULL'),
+    #     dataIn = 'dataIn()'),
     #   sep = "\n"
     # )
     # 
@@ -165,7 +165,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
-      req(dataIn())
+      #req(dataIn())
       rv$dataIn <- dataIn()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
@@ -215,8 +215,9 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(req(rv.custom$tmp.norm()$value), ignoreInit = FALSE, {
+    observeEvent(req(rv.custom$tmp.norm()$trigger), ignoreInit = FALSE, {
       # Do some stuff
+      #browser()
       rv$dataIn <- rv.custom$tmp.norm()$value
       
       #.history <- rv.custom$tmp.norm()$value[[length(rv.custom$tmp.norm()$value)]]

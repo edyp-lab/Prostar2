@@ -4,7 +4,7 @@ output:
     BiocStyle::html_document:
         highlight: tango
         toc: false
-        number_sections: yes
+        number_sections: FALSE
 vignette: >
     %\VignetteIndexEntry{Worfkflow Convert - Convert}
     %\VignetteEngine{knitr::rmarkdown}

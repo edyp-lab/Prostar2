@@ -154,7 +154,7 @@ mod_filtering_example_server <- function(id,
       
       
       if (is.enriched){
-        .style <- BuildColorStyles(omXplore::get_type(dataIn()))
+        .style <- BuildColorStyles(DaparToolshed::typeDataset(dataIn()))
         c.tags <- names(.style)
         c.colors <- unlist(.style, use.names = FALSE)
         

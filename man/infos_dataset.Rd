@@ -26,7 +26,7 @@ infos_dataset(obj)
 \arguments{
 \item{id}{shiny id}
 
-\item{obj}{An instance of the class \code{QFeatures}.}
+\item{dataIn}{An instance of the class \code{QFeatures}.}
 }
 \value{
 A shiny app

@@ -93,7 +93,7 @@ mod_Prot_Normalization_ui <- function(id) {
 
 
 #' @param id xxx
-#' @param obj An instance of the class `QFeatures`
+#' @param dataIn An instance of the class `QFeatures`
 #' @param remoteReset A `integer(1)` xxxx
 #' @param is.enabled A `logical(1)` that indicates whether the module is
 #' enabled or disabled. This is a remote command.
@@ -157,9 +157,11 @@ mod_Prot_Normalization_server <- function(id,
     
 
     observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-      req(dataIn())
+      #req(dataIn())
       stopifnot(inherits(dataIn(), 'QFeatures'))
       rv$dataIn <- dataIn()
+      
+      #browser()
     }, priority = 1000)
     
     
@@ -344,7 +346,8 @@ mod_Prot_Normalization_server <- function(id,
     })
     # >>> END: Definition of the widgets
     
-    observeEvent(input$Normalization_btn_validate, {
+    observeEvent(input$Normalization_btn_validate, ignoreInit = TRUE, {
+     #browser()
       # Do some stuff 
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
@@ -444,13 +447,17 @@ mod_Prot_Normalization_server <- function(id,
         )
       })
       
-      
+     
       
       if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
         
         MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_normalization',
           text = rv.custom$tmpAssay[[1]],
           type = 'error' )
+        
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- rv$dataIn
       } else {
         
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
@@ -459,7 +466,7 @@ mod_Prot_Normalization_server <- function(id,
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
         
-        
+        #browser()
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
@@ -476,7 +483,7 @@ mod_Prot_Normalization_server <- function(id,
 #' @export
 #' @rdname mod_Prot_Normalization
 #' 
-mod_Prot_Normalization <- function(obj, i){
+mod_Prot_Normalization <- function( ){
   ui <- fluidPage(
     actionButton('Reset', 'Reset'),
     mod_Prot_Normalization_ui('pov')
