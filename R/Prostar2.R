@@ -23,12 +23,12 @@ Prostar2 <- function(
   verbose = FALSE){
   
   
-  # options(
-  #   shiny.maxRequestSize = 1024^3,
-  #   port = 3838,
-  #   host = "127.0.0.1",
-  #   launch.browser = FALSE
-  # )
+  options(
+    shiny.maxRequestSize = 1024^3,
+    port = 3838,
+    host = "127.0.0.1",
+    launch.browser = TRUE
+  )
   
   library(MagellanNTK)
   library(highcharter)
