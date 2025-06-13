@@ -25,25 +25,16 @@ Prostar2 <- function(
   
   options(
     shiny.maxRequestSize = 1024^3,
+    shiny.fullstacktrace = TRUE,
     port = 3838,
     host = "127.0.0.1",
     launch.browser = TRUE
   )
-  
-  library(MagellanNTK)
-  library(highcharter)
-  library(DaparToolshed)
-  library(shinyBS)
-  library(omXplore)
-  library(shiny)
-  library(shinyjs)
-  library(shinydashboard)
-  library(shinydashboardPlus)
-  
-  
+
   wf.path <- system.file(paste0('workflow/', wf.name), package = 'Prostar2')
   
   MagellanNTK::MagellanNTK(
+    obj = NULL,
     workflow.path = wf.path,
     workflow.name = wf.name,
     usermod = usermod,
