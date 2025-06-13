@@ -185,12 +185,12 @@ mod_Prot_Normalization_server <- function(id,
     )
     
 
-    observeEvent(selectProt()$indices, ignoreNULL = FALSE,{
-      print("in observeEvent(selectProt()$indices")
-      print('new value fo selectProt()$indices = ')
-      print(selectProt()$indices)
-    })
-    
+    # observeEvent(selectProt()$indices, ignoreNULL = FALSE,{
+    #   print("in observeEvent(selectProt()$indices")
+    #   print('new value fo selectProt()$indices = ')
+    #   print(selectProt()$indices)
+    # })
+    # 
     # >>> START: Definition of the widgets
     
     # This part must be customized by the developer of a new module
