@@ -17,7 +17,7 @@ wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 
 
 # Launch in a standalone mode
-shiny::runApp(workflowApp(wf.name, wf.path, dataIn = obj))
+#shiny::runApp(workflowApp(wf.name, wf.path, dataIn = obj))
 
 proc_workflowApp(wf.name, wf.path, dataIn = Exp1_R25_prot, tl.layout = c("v", "h"))
 
