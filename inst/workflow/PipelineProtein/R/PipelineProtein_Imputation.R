@@ -227,7 +227,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(rv.custom$tmp.pov()$trigger, ignoreInit = TRUE, {
       print('In : observeEvent(req(rv.custom$tmp.pov()$value)')
-      browser()
       # Do some stuff
       rv.custom$dataIn1 <- rv.custom$tmp.pov()$value
       rv.custom$dataIn2 <- rv.custom$tmp.pov()$value

@@ -207,8 +207,6 @@ PipelineProtein_Normalization_server <- function(id,
         is.enabled = reactive({rv$steps.enabled["Normalization"]}),
         remoteReset = reactive({remoteReset()})
       )
-      
-    #  browser()
     })
     
     output$Prot_Normalization_ui <- renderUI({
@@ -220,7 +218,6 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(rv.custom$tmp.norm()$value, {
       # Do some stuff
       # Do some stuff
-      browser()
       rv$dataIn <- rv.custom$tmp.norm()$value
       
       #.history <- rv.custom$tmp.norm()$value[[length(rv.custom$tmp.norm()$value)]]
