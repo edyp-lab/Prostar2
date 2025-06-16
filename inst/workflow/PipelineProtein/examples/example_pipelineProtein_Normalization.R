@@ -12,7 +12,7 @@ options(shiny.fullstacktrace = TRUE)
 
 data(Exp1_R25_prot, package = 'DaparToolshedData')
 obj <- Exp1_R25_prot
-wf.name <- 'PipelineProtein_Imputation'
+wf.name <- 'PipelineProtein_Normalization'
 wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 
 

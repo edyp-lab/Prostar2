@@ -346,7 +346,7 @@ mod_Prot_Normalization_server <- function(id,
     })
     # >>> END: Definition of the widgets
     
-    observeEvent(input$Normalization_btn_validate, ignoreInit = TRUE, {
+    observeEvent(input$Normalization_btn_validate, {
      #browser()
       # Do some stuff 
       req(rv.widgets$Normalization_method)
@@ -388,8 +388,6 @@ mod_Prot_Normalization_server <- function(id,
             rv.custom$history[['Normalization_quantile']] <- quant
             rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
             rv.custom$history[['subset.norm']] <- selectProt()$indices
-            
-            
           },
           
           MeanCentering = {
@@ -447,7 +445,7 @@ mod_Prot_Normalization_server <- function(id,
         )
       })
       
-     
+    
       
       if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
         
@@ -465,12 +463,11 @@ mod_Prot_Normalization_server <- function(id,
         DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
-        
-        #browser()
-        # DO NOT MODIFY THE THREE FOLLOWING LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- rv$dataIn
       }
+      
+      # DO NOT MODIFY THE THREE FOLLOWING LINES
+      dataOut$trigger <- MagellanNTK::Timestamp()
+      dataOut$value <- rv$dataIn
     })
     
     return(reactive({dataOut}))
@@ -483,7 +480,7 @@ mod_Prot_Normalization_server <- function(id,
 #' @export
 #' @rdname mod_Prot_Normalization
 #' 
-mod_Prot_Normalization <- function( ){
+mod_Prot_Normalization <- function(obj, i){
   ui <- fluidPage(
     actionButton('Reset', 'Reset'),
     mod_Prot_Normalization_ui('pov')
@@ -501,7 +498,8 @@ mod_Prot_Normalization <- function( ){
       is.enabled = reactive({TRUE}),
       remoteReset = reactive({input$Reset}))
     
-    observeEvent(rv.custom$tmp.norm()$trigger, {
+    observeEvent(rv.custom$tmp.norm()$trigger, ignoreInit = TRUE, {
+      print("Result of process:")
       print(rv.custom$tmp.norm()$value)
     })
   }
