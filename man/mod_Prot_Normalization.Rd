@@ -24,7 +24,7 @@ mod_Prot_Normalization_server(
  })
 )
 
-mod_Prot_Normalization()
+mod_Prot_Normalization(obj, i)
 }
 \arguments{
 \item{id}{xxx}

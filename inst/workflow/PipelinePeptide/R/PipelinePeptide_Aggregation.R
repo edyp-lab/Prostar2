@@ -19,12 +19,21 @@
 #' \dontrun{
 #' library(MagellanNTK)
 #' library(DaparToolshed)
+#' library(omXplore)
+#' library(shiny)
+#' library(waiter)
+#' library(shinyjs)
+#' library(shinyBS)
+#' library(shinydashboard)
+#' library(shinydashboardPlus)
+#' library(highcharter)
+#' library(Prostar2)
 #' data(Exp1_R25_pept, package = "DaparToolshedData")
 #' obj <- Exp1_R25_pept
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelinePeptide_Aggregation", path, dataIn = obj))
+#' proc_workflowApp("PipelinePeptide_Aggregation", path, dataIn = obj)
 #' }
 #' 
 #' @rdname PipelinePeptide
@@ -44,7 +53,7 @@ PipelinePeptide_Aggregation_conf <- function(){
 #' 
 #' @rdname PipelinePeptide
 #' 
-#' @author Samuel Wieczorek
+#' @author Samuel Wieczorek, Manon Gaudin
 #' 
 #' @export
 #'
@@ -90,22 +99,21 @@ PipelinePeptide_Aggregation_server <- function(id,
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
-    Aggregation_includeSharedPeptides = "Yes_Redistribution",
+    Aggregation_includeSharedPeptides = "Yes_Iterative_Redistribution",
+    Aggregation_ponderation = "Global",
     Aggregation_operator = "Mean",
     Aggregation_considerPeptides = "allPeptides",
     Aggregation_proteinId = "None",
     Aggregation_topN = 3,
-    Aggregation_addRowData = FALSE,
-    Addmetadata_columnsForProteinDataset = NULL
+    Aggregation_addRowData = NULL,
+    Addmetadata_columnsForProteinDataset = NULL,
+    Aggregation_maxiter = 500
   )
   
   rv.custom.default.values <- list(
     temp.aggregate = NULL,
-    AggregProtStats = NULL,
-    X = NULL,
-    X.split = NULL,
-    X.shared = NULL,
-    X.unique = NULL
+    AggregProtStatsPept = NULL,
+    AggregProtStatsProt = NULL
   )
   
   ###-------------------------------------------------------------###
@@ -201,7 +209,6 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation <- renderUI({
       shinyjs::useShinyjs()
       
-      .style <- "display:inline-block; vertical-align: middle; padding-right: 20px;"
       .data <- last_assay(rv$dataIn)
       m <- DaparToolshed::match.metacell(
         DaparToolshed::qMetacell(.data),
@@ -210,55 +217,40 @@ PipelinePeptide_Aggregation_server <- function(id,
       )
       NA.count <- length(which(m))
       
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUlength(rv$dataIn) function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        tagList(
-          div(
-              div(style = .style,
-                uiOutput(ns('Aggregation_warning_ui'))
-              ),
-              div(style = .style,
-                uiOutput(ns('Aggregation_chooseProteinId_ui'))
-              ),
-              
-              div(style = .style,
-                uiOutput(ns('Aggregation_includeSharedPeptides_ui'))
-              ),
-              
-              div(style = .style,
-                uiOutput(ns('Aggregation_considerPeptides_ui'))
-              ),
-              div(style = .style,
-                uiOutput(ns('Aggregation_operator_ui'))
-              ),
-            div(style = .style,
-              uiOutput(ns('Aggregation_addRowData_ui'))
-            )
-            ),
-            div(style = .style,
-              uiOutput(ns("Aggregation_btn_validate_ui"))
-            ),
-          div(style = .style,
-            uiOutput(ns("Aggregation_AggregationDone_ui"))
-          ),
-          div(style = .style,
-            DT::dataTableOutput(ns("Aggregation_aggregationStats_ui"))
-          )
+      # uiOutput for all widgets in this UI
+      # This part is mandatory
+      # The renderUlength(rv$dataIn) function of each widget is managed by MagellanNTK
+      # The dev only have to define a reactive() function for each
+      # widget he want to insert
+      # Be aware of the naming convention for ids in uiOutput()
+      # For more details, please refer to the dev document.
+      fluidRow(
+        column(4,
+               wellPanel(
+               uiOutput(ns('Aggregation_chooseProteinId_ui')),
+               uiOutput(ns('Aggregation_includeSharedPeptides_ui')),
+               tags$hr(),
+               uiOutput(ns('Aggregation_considerPeptides_ui')),
+               tags$hr(),
+               uiOutput(ns('Aggregation_operator_ui')),
+               tags$hr(),
+               uiOutput(ns('Aggregation_addRowData_ui')),
+               uiOutput(ns('Aggregation_btn_validate_ui'))
+               )
+        ), 
+        column(8,
+               uiOutput(ns('Aggregation_warning_ui')),
+               uiOutput(ns('Aggregation_AggregationDone_ui')),
+               uiOutput(ns('Aggregation_aggregationStats_ui'))
         )
-          )
+      )
     })
     
     
     
     output$Aggregation_warning_ui <- renderUI({
-      
       req(rv$dataIn)
+      
       .data <- last_assay(rv$dataIn)
       m <- DaparToolshed::match.metacell(
         DaparToolshed::qMetacell(.data),
@@ -295,75 +287,172 @@ PipelinePeptide_Aggregation_server <- function(id,
     })
     
     
+    ## Selection of how to handle shared peptides
+    mod_popover_for_help_server("modulePopover_includeShared",
+                                title = "Include shared peptides",
+                                content = HTML(
+                                  paste0(
+                                    "<strong>• No :</strong>",
+                                    " only protein-specific peptides ", "<br>",
+                                    "<strong>• Yes (as protein specific) :</strong>",
+                                    " shared peptides processed as protein specific", "<br>",
+                                    "<strong>• Yes (simple redistribution) :</strong>",
+                                    " single proportional redistribution of shared peptides", "<br>",
+                                    "<strong>• Yes (iterative redistribution) :</strong>",
+                                    " iterative proportional redistribution of shared peptides"
+                                  )
+                                )
+    )
+    mod_popover_for_help_server("modulePopover_ponderation",
+                                title = "Ponderation",
+                                content = HTML(
+                                  paste0(
+                                    "Modify how is calculated the coefficient for shared peptides redistribution.", "<br>",
+                                    "<strong>• Global :</strong>",
+                                    " calculated using all sample from all conditions", "<br>",
+                                    "<strong>• Condition-wise :</strong>",
+                                    " calculated using samples from each condition independantly", "<br>",
+                                    "<strong>• Sample-wise :</strong>",
+                                    " calculated using each sample independantly"
+                                  )
+                                )
+    )
+    
+    mod_popover_for_help_server("modulePopover_maxiter",
+                                title = "Max iteration",
+                                content = HTML(
+                                  paste0(
+                                    "Maximum number of iteration."
+                                  )
+                                )
+    )
     
     output$Aggregation_includeSharedPeptides_ui <- renderUI({
-      
-      #popover_for_help_ui("modulePopover_includeShared")
-      
-      widget <- radioButtons(ns("Aggregation_includeSharedPeptides"), NULL,
-        choices = c("No" = "No",
-          "Yes (as protein specific)" = "Yes_As_Specific",
-          "Yes (redistribution)" = "Yes_Redistribution"
-        ),
-        selected = rv.widgets$Aggregation_includeSharedPeptides
+      widget <- radioButtons(ns("Aggregation_includeSharedPeptides"), 
+                             mod_popover_for_help_ui(ns("modulePopover_includeShared")),
+                             choices = c("No" = "No",
+                                         "Yes (as protein specific)" = "Yes_As_Specific",
+                                         "Yes (simple redistribution)" = "Yes_Simple_Redistribution",
+                                         "Yes (iterative redistribution)" = "Yes_Iterative_Redistribution"),
+                             selected = rv.widgets$Aggregation_includeSharedPeptides
       )
+      widget2 <- radioButtons(ns("Aggregation_ponderation"), 
+                              mod_popover_for_help_ui(ns("modulePopover_ponderation")),
+                              choices = c("Global" = "Global",
+                                          "Condition" = "Condition",
+                                          "Sample" = "Sample"),
+                              selected = rv.widgets$Aggregation_ponderation
+      )
+      widget3 <- numericInput(ns("Aggregation_maxiter"),
+                              mod_popover_for_help_ui(ns("modulePopover_maxiter")),
+                              value = rv.widgets$Aggregation_maxiter,
+                              min = 1,
+                              step = 1,
+                              width = "100px"
+      )
+        
       
-      
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])
+      tagList(div(style = "display: inline-block; margin-right: 35px;", 
+                  MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])),
+              div(style = "display: inline-block; vertical-align: top;",
+                  if(rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes_Simple_Redistribution", "Yes_Iterative_Redistribution")){
+                    tagList(
+                      MagellanNTK::toggleWidget(widget2, rv$steps.enabled['Aggregation']),
+                      MagellanNTK::toggleWidget(widget3, rv$steps.enabled['Aggregation'])
+                    )
+                  }
+              ))
     })
     
+    
+    
+    ## Selection of peptides to considers
+    mod_popover_for_help_server("modulePopover_considerPeptides",
+                                title = "Consider",
+                                content = HTML(
+                                  paste0(
+                                    "<strong>• All peptides :</strong>",
+                                    " considers all peptides ", "<br>",
+                                    "<strong>• N most abundant :</strong>",
+                                    " considers only the N top peptides for each protein"
+                                  )
+                                )
+    )
+    mod_popover_for_help_server("modulePopover_topN",
+                                title = "N ",
+                                content = HTML(
+                                  paste0(
+                                    "Number of N top peptides to consider for each protein"
+                                  )
+                                )
+    )
     
     
     output$Aggregation_considerPeptides_ui <- renderUI({
-      widget <- radioButtons(ns("Aggregation_considerPeptides"), "Consider",
-        choices = c("all peptides" = "allPeptides",
-          "N most abundant" = "topN"),
-        selected = rv.widgets$Aggregation_considerPeptides
+      widget <- radioButtons(ns("Aggregation_considerPeptides"), 
+                             mod_popover_for_help_ui(ns("modulePopover_considerPeptides")),
+                             choices = c("All peptides" = "allPeptides",
+                                         "N most abundant" = "topN"),
+                             selected = rv.widgets$Aggregation_considerPeptides
       )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])
+      widget2 <- numericInput(ns("Aggregation_topN"),
+                              mod_popover_for_help_ui(ns("modulePopover_topN")),
+                              value = rv.widgets$Aggregation_topN,
+                              min = 0,
+                              step = 1,
+                              width = "100px"
+      )
+
+      tagList(div(style = "display: inline-block; margin-right: 35px;", 
+        MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])),
+        div(style = "display: inline-block; vertical-align: top;",
+            if(rv.widgets$Aggregation_considerPeptides == "topN"){
+                 MagellanNTK::toggleWidget(widget2, rv$steps.enabled['Aggregation'])
+              }
+      ))
     })
     
-    
-    output$Aggregation_addRowData_ui <- renderUI({
-      widget <- checkboxInput(ns("Aggregation_addRowData"), "Add rowData?",
-        value = rv.widgets$Aggregation_addRowData
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])
-    })
-    
-    
+    ## Selection of aggregation function
+    mod_popover_for_help_server("modulePopover_operator",
+                                title = "Function",
+                                content = HTML(
+                                  paste0(
+                                    "Function to use for quantitative data aggregation"
+                                  )
+                                )
+    )
     output$Aggregation_operator_ui <- renderUI({
-      
-      .style <- "display:inline-block; vertical-align: middle; padding-right: 20px;"
-      
-      choice <- if (rv.widgets$Aggregation_includeSharedPeptides %in% c("No", "Yes_As_Specific")) {
-        c("Mean" = "Mean", "Sum" = "Sum")
-      } else if (rv.widgets$Aggregation_includeSharedPeptides == "Yes_Redistribution"){
-        c("Mean" = "Mean")
-      }
-      
-      widget <- tagList(
-        div(
-          div(style = .style, 
-            radioButtons(ns("Aggregation_operator"), "Operator",
-            choices = choice,
-            selected = rv.widgets$Aggregation_operator
-          )),
-          div(style = .style, 
-            if(rv.widgets$Aggregation_considerPeptides == "topN")
-              
-              numericInput(ns("Aggregation_topN"),
-                "N",
-                value = rv.widgets$Aggregation_topN,
-                min = 0,
-                step = 1,
-                width = "100px"
-              )
-          ))
+      widget <- radioButtons(ns("Aggregation_operator"), 
+                       mod_popover_for_help_ui(ns("modulePopover_operator")),
+                       choices = c("Sum" = "Sum", 
+                  "Mean" = "Mean", 
+                  "Median" =  "Median", 
+                  "medianPolish" = "medianPolish", 
+                  "robustSummary" = "robustSummary"),
+                       selected = rv.widgets$Aggregation_operator
         )
         
+        
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])
+    })
+    
+    ## Selection of rowData columns
+    mod_popover_for_help_server("modulePopover_addRowData",
+                                title = "RowData columns to aggregate",
+                                content = HTML(
+                                  paste0(
+                                    "Selection of column from rowData to be aggregated"
+                                  )
+                                )
+    )
+    output$Aggregation_addRowData_ui <- renderUI({
+      widget <- selectInput(ns("Aggregation_addRowData"), 
+                            mod_popover_for_help_ui(ns("modulePopover_addRowData")),
+                            colnames(rowData(last_assay(rv$dataIn))),
+                            selected = rv.widgets$Aggregation_addRowData,
+                            multiple = TRUE
+      )
       
-
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])
     })
     
@@ -388,61 +477,57 @@ PipelinePeptide_Aggregation_server <- function(id,
     #   }
     # )
     
-
-
     
-    Add_Aggregated_rowData <- reactive({
-      req('aggregated' %in% names(rv.custom$temp.aggregate))
+    # Add_Aggregated_rowData <- reactive({
+    #   req('aggregated' %in% names(rv.custom$temp.aggregate))
+    #   
+    #   # Add aggregated simple columns rowData
+    #   total <- 60
+    #   
+    #   i.agg <- length(rv.custom$temp.aggregate)
+    #   i.before.agg <- i.agg - 1
+    #   .names <- names(rowData(rv.custom$temp.aggregate[[i.before.agg]]))
+    #   .names <- .names[-match(c('qMetacell', 'adjacencyMatrix'), .names)]
+    #   
+    #   delta <- round(total / length(.names))
+    #   cpt <- 10
+    #   
+    #   withProgress(message = "", detail = "", value = 0, {
+    #     incProgress(0.5, detail = "Aggregation in progress")
+    #     
+    #     for (col.name in .names) {
+    #       #browser()
+    #       
+    #       newCol <- BuildColumnToProteinDataset(
+    #         peptideData = rowData((rv.custom$temp.aggregate[[i.agg - 1]])),
+    #         matAdj = adjacencyMatrix(rv.custom$temp.aggregate[[i.agg - 1]]),
+    #         columnName = col.name,
+    #         proteinNames = rownames(rowData((rv.custom$temp.aggregate[[i.agg]])))
+    #       )
+    #       #browser()
+    #       cnames <- colnames(rowData(rv.custom$temp.aggregate[[i.agg]]))
+    #       rowData(rv.custom$temp.aggregate[[i.agg]]) <-
+    #         data.frame(rowData(rv.custom$temp.aggregate[[i.agg]]), newCol)
+    #       
+    #       colnames(rowData(rv.custom$temp.aggregate[[i.agg]])) <- c(
+    #         cnames,
+    #         paste0("agg_", col.name)
+    #       )
+    #       
+    #       cpt <- cpt + delta
+    #       incProgress(cpt / 100, detail = paste0("Processing column ", col.name))
+    #   }
+    #   })
+    # })
       
-      # Add aggregated simple columns rowData
-      total <- 60
-      
-      i.agg <- length(rv.custom$temp.aggregate)
-      i.before.agg <- i.agg - 1
-      .names <- names(rowData(rv.custom$temp.aggregate[[i.before.agg]]))
-      .names <- .names[-match(c('qMetacell', 'adjacencyMatrix'), .names)]
-      
-      delta <- round(total / length(.names))
-      cpt <- 10
-      
-      withProgress(message = "", detail = "", value = 0, {
-        incProgress(0.5, detail = "Aggregation in progress")
-        
-        for (col.name in .names) {
-          #browser()
-          
-          newCol <- BuildColumnToProteinDataset(
-            peptideData = rowData((rv.custom$temp.aggregate[[i.agg - 1]])),
-            matAdj = adjacencyMatrix(rv.custom$temp.aggregate[[i.agg - 1]]),
-            columnName = col.name,
-            proteinNames = rownames(rowData((rv.custom$temp.aggregate[[i.agg]])))
-          )
-          #browser()
-          cnames <- colnames(rowData(rv.custom$temp.aggregate[[i.agg]]))
-          rowData(rv.custom$temp.aggregate[[i.agg]]) <-
-            data.frame(rowData(rv.custom$temp.aggregate[[i.agg]]), newCol)
-          
-          colnames(rowData(rv.custom$temp.aggregate[[i.agg]])) <- c(
-            cnames,
-            paste0("agg_", col.name)
-          )
-          
-          cpt <- cpt + delta
-          incProgress(cpt / 100, detail = paste0("Processing column ", col.name))
-      }
-      })
-    })
-      
-      
+    ### Aggregation done message
     output$Aggregation_AggregationDone_ui <- renderUI({
        req(rv.custom$temp.aggregate)
       print('new test')
       if (!is.null(rv.custom$temp.aggregate$issues) &&
           length(rv.custom$temp.aggregate$issues) > 0) {
         .style <- "color: red;"
-        txt <- "The aggregation process did not succeed because some sets of
-    peptides contains missing values and quantitative
-       values at the same time."
+        txt <- "The aggregation process did not succeed because some sets of peptides contains missing values and quantitative values at the same time."
       } else {
         txt <- "Aggregation done"
         .style <- ""
@@ -450,47 +535,84 @@ PipelinePeptide_Aggregation_server <- function(id,
       tags$h3(style = .style, txt)
     })
     
-
-    
-    
-    output$Aggregation_aggregationStats_ui <- DT::renderDataTable(server = TRUE, {
-      req(rv.custom$X.all)
-      req(rv.widgets$Aggregation_proteinId != "None")
+    ### Table with informations
+    ## About peptides
+    aggregationStatsPept <- reactive({
+      req(rv$dataIn)
       
-      res <- DaparToolshed::GetProteinsStats(rv.custom$X.shared)
+      for (k in 1:length(rv$dataIn)){
+        if (typeDataset(rv$dataIn[[k]]) != "protein")
+          i_datapept <- k
+      }
+      res <- DaparToolshed::getProteinsStats(rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
       
-      rv.custom$AggregProtStats$nb <- c(
+      rv.custom$AggregProtStatsPept$desc <- c(
+        "Total number of peptides",
+        "Number of specific peptides",
+        "Number of shared peptides"
+      )
+      rv.custom$AggregProtStatsPept$nb <- c(
         res$nbPeptides,
         res$nbSpecificPeptides,
-        res$nbSharedPeptides,
+        res$nbSharedPeptides
+      )
+      rv.custom$AggregProtStatsPept$percent <- round(rv.custom$AggregProtStatsPept$nb*100/rv.custom$AggregProtStatsPept$nb[1], 2)
+      
+      df <- as.data.frame(rv.custom$AggregProtStatsPept)
+      names(df) <- c("Description", 
+                     "Count",
+                     "Percentage")
+      df
+    })
+    
+    ## About proteins
+    aggregationStatsProt <- reactive({
+      req(rv$dataIn)
+      
+      for (k in 1:length(rv$dataIn)){
+        if (typeDataset(rv$dataIn[[k]]) != "protein")
+          i_datapept <- k
+      }
+      res <- DaparToolshed::getProteinsStats(rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
+      
+      rv.custom$AggregProtStatsProt$desc <- c(
+        "Total number of proteins",
+        "Number of proteins with only specific peptides",
+        "Number of proteins with only shared peptides",
+        "Number of proteins with both specific and shared peptides"
+      )
+      rv.custom$AggregProtStatsProt$nb <- c(
         res$nbProt,
         length(res$protOnlyUniquePep),
         length(res$protOnlySharedPep),
         length(res$protMixPep)
       )
+      rv.custom$AggregProtStatsProt$percent <- round(rv.custom$AggregProtStatsProt$nb*100/rv.custom$AggregProtStatsProt$nb[1], 2)
       
-      df <- as.data.frame(rv.custom$AggregProtStats)
-      names(df) <- c("Description", "Value")
-      
-      DT::datatable(df,
-        escape = FALSE,
-        rownames = FALSE,
-        extensions = c("Scroller"),
-        option = list(
-          initComplete = initComplete(),
-          dom = "rt",
-          autoWidth = TRUE,
-          ordering = F,
-          columnDefs = list(
-            list(width = "150px", targets = 0),
-            list(width = "100px", targets = 1)
-          )
-        )
-      )
-      
+      df <- as.data.frame(rv.custom$AggregProtStatsProt)
+      names(df) <- c("Description", 
+                     "Count",
+                     "Percentage")
+      df
     })
     
-
+    MagellanNTK::format_DT_server('dtaggregationStatsPept',
+                                  reactive({aggregationStatsPept()})
+    )
+    MagellanNTK::format_DT_server('dtaggregationStatsProt',
+                                  reactive({aggregationStatsProt()})
+    )
+    
+    ## Table UI
+    output$Aggregation_aggregationStats_ui <- renderUI({
+      tagList(
+        MagellanNTK::format_DT_ui(ns('dtaggregationStatsPept')),
+        MagellanNTK::format_DT_ui(ns('dtaggregationStatsProt'))
+      )
+    })
+    
+    
+    ### Validation button
     output$Aggregation_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Aggregation_btn_validate"),
         "Validate step",
@@ -502,19 +624,20 @@ PipelinePeptide_Aggregation_server <- function(id,
 
     
     observeEvent(input$Aggregation_btn_validate, {
-      
-      
+
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.5, detail = "Aggregation processing")
       # Do some stuff
       rv.custom$temp.aggregate <- DaparToolshed::RunAggregation(
         qf = rv$dataIn,
-        i = length(rv$dataIn),
         includeSharedPeptides = rv.widgets$Aggregation_includeSharedPeptides,
         operator = rv.widgets$Aggregation_operator,
         considerPeptides = rv.widgets$Aggregation_considerPeptides,
+        adjMatrix = 'adjacencyMatrix',
+        ponderation = rv.widgets$Aggregation_ponderation,
         n = rv.widgets$Aggregation_topN,
-        addRowData = rv.widgets$Aggregation_addRowData
+        aggregated_col = rv.widgets$Aggregation_addRowData,
+        max_iter = rv.widgets$Aggregation_maxiter
         )
      
       })

@@ -119,6 +119,10 @@ MagellanNTK::format_DT_server('dt',
         }))
 
 
+
+#observe({browser()})
+
+
     output$title <- renderUI({
       req(rv$dataIn)
       name <- metadata(rv$dataIn)$analysis
