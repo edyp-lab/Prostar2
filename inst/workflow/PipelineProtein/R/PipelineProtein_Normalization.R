@@ -42,6 +42,7 @@ PipelineProtein_Normalization_conf <- function(){
 #'
 PipelineProtein_Normalization_ui <- function(id){
   ns <- NS(id)
+  h4("tutu")
 }
 
 
@@ -73,7 +74,8 @@ PipelineProtein_Normalization_server <- function(id,
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
-  current.pos = reactive({1})
+  current.pos = reactive({1}), 
+  timeline = reactive({NULL})
 ){
   
   # Define default selected values for widgets
@@ -131,24 +133,75 @@ PipelineProtein_Normalization_server <- function(id,
         'md', 
         paste0(id, '.md')))
      
-      tagList(
-        # In this example, the md file is found in the extdata/module_examples directory
-        # but with a real app, it should be provided by the package which
-        # contains the UI for the different steps of the process module.
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui')),
+      
+      
+      fluidPage(
         
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui')),
-        
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available')
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            column(12,
+              timeline_h_ui(ns('frise_desc')),
+              hr(style = "border-top: 3px solid #000000;"),
+              uiOutput(ns("Normalization_btn_validate_ui")),
+              hr(style = "border-top: 3px solid #000000;"),
+              fluidRow(
+                inputPanel(
+                  h2(strong("Options"))
+                )
+              )
+            ),
+            width = 310,
+            position = "left",
+            bg='lightblue',
+            padding = c(7, 5), # 1ere valeur : padding vertical, 2eme : horizontal
+            style = "p1"
+          ),
+          
+          tagList(
+            # In this example, the md file is found in the extdata/module_examples directory
+            # but with a real app, it should be provided by the package which
+            # contains the UI for the different steps of the process module.
+            # Insert validation button
+            uiOutput(ns('Description_btn_validate_ui')),
+            
+            # Used to show some information about the dataset which is loaded
+            # This function must be provided by the package of the process module
+            uiOutput(ns('datasetDescription_ui')),
+            
+            if (file.exists(file))
+              includeMarkdown(file)
+            else
+              p('No Description available')
+          )
+          
+          #padding = c(0, 40)
+        )
       )
+      # tagList(
+      #   # In this example, the md file is found in the extdata/module_examples directory
+      #   # but with a real app, it should be provided by the package which
+      #   # contains the UI for the different steps of the process module.
+      #   # Insert validation button
+      #   uiOutput(ns('Description_btn_validate_ui')),
+      #   
+      #   # Used to show some information about the dataset which is loaded
+      #   # This function must be provided by the package of the process module
+      #   uiOutput(ns('datasetDescription_ui')),
+      #   
+      #   if (file.exists(file))
+      #     includeMarkdown(file)
+      #   else
+      #     p('No Description available')
+      # )
     })
     
+    
+    timeline_h_server('frise_desc',
+      config = PipelineProtein_Normalization_conf(),
+      status = reactive({rv$steps.status}),
+      position = reactive({current.pos()}),
+      enabled = reactive({rv$steps.enabled})
+    )
     output$datasetDescription_ui <- renderUI({
       # Insert your own code to visualize some information
       # about your dataset. It will appear once the 'Start' button
@@ -186,19 +239,83 @@ PipelineProtein_Normalization_server <- function(id,
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
       
+      # wellPanel(
+      #   # uiOutput for all widgets in this UI
+      #   # This part is mandatory
+      #   # The renderUI() function of each widget is managed by MagellanNTK
+      #   # The dev only have to define a reactive() function for each
+      #   # widget he want to insert
+      #   # Be aware of the naming convention for ids in uiOutput()
+      #   # For more details, please refer to the dev document.
+      #   h2('titititit'),
+      #   uiOutput(ns("Prot_Normalization_ui"))
+      # )
+      
       wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
+
+      fluidPage(
         
-        uiOutput(ns("Prot_Normalization_ui"))
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            column(12,
+                      fluidRow(
+                        style = "display: flex; align-items: top; justify-content: center;",
+                        column(width = 1, shinyjs::disabled(
+                          actionButton(ns("prevBtn"),
+                            tl_h_prev_icon,
+                            class = PrevNextBtnClass,
+                            style = "font-size:60%"
+                          )
+                        )),
+                        column(width = 1,
+                          mod_modalDialog_ui(id = ns("rstBtn"))
+                          ),
+                        column(width = 9, timeline_h_ui(ns('frise_norm'))),
+                        column(width = 1,
+                          actionButton(ns("nextBtn"),
+                            tl_h_next_icon,
+                            class = PrevNextBtnClass,
+                            style = "font-size:60%"
+                          )
+                        )
+                      ),
+              h3('add frise'),
+              hr(style = "border-top: 3px solid #000000;"),
+              uiOutput(ns("Normalization_btn_validate_ui")),
+              hr(style = "border-top: 3px solid #000000;"),
+              fluidRow(
+                inputPanel(
+                  h2(strong("Options"))
+                )
+              )
+            ),
+            width = 310,
+            position = "left",
+            bg='lightblue',
+            padding = c(7, 5), # 1ere valeur : padding vertical, 2eme : horizontal
+            style = "p1"
+          ),
+
+          h2('titititit'),
+          uiOutput(ns("Prot_Normalization_ui"))
+
+
+          #padding = c(0, 40)
+        )
+      )
+
       )
     })
     
+    
+    timeline_h_server('frise_norm',
+      config = PipelineProtein_Normalization_conf(),
+      status = reactive({rv$steps.status}),
+      position = reactive({current.pos()}),
+      enabled = reactive({rv$steps.enabled})
+        )
+      
+      
     observe({
       rv.custom$tmp.norm <- Prostar2::mod_Prot_Normalization_server(
         id = 'norm',

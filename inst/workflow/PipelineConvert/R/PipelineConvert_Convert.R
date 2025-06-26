@@ -205,12 +205,15 @@ PipelineConvert_Convert_server <- function(id,
           # widget he want to insert
           # Be aware of the naming convention for ids in uiOutput()
           # For more details, please refer to the dev document.
-          uiOutput(ns('SelectFile_software_ui')),
-          uiOutput(ns('SelectFile_file_ui')),
-          uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
-          uiOutput(ns('SelectFile_typeOfData_ui')),
-          uiOutput(ns('SelectFile_checkDataLogged_ui')),
-          uiOutput(ns('SelectFile_replaceAllZeros_ui')),
+          div(style="display: flex; flex-wrap: wrap;",
+              uiOutput(ns('SelectFile_software_ui'), style = "margin-right : 30px;"),
+              uiOutput(ns('SelectFile_file_ui'), style = "margin-right : 30px;"),
+              uiOutput(ns('SelectFile_ManageXlsFiles_ui'))),
+          tags$hr(),
+          div(style="display: flex; flex-wrap: wrap;",
+              uiOutput(ns('SelectFile_typeOfData_ui'), style = "margin-right : 30px;"),
+              uiOutput(ns('SelectFile_checkDataLogged_ui'), style = "margin-right : 30px;"),
+              uiOutput(ns('SelectFile_replaceAllZeros_ui'))),
           
           # Insert validation button
           uiOutput(ns('SelectFile_btn_validate_ui')),
@@ -221,39 +224,38 @@ PipelineConvert_Convert_server <- function(id,
     
     # >>> START: Definition of the widgets
     
-    
+    ## File selection
+    MagellanNTK::mod_popover_for_help_server(
+      "help_filesoftware",
+      title = "Data source",
+      content = "Which software the data comes from."
+    )
     
     output$SelectFile_software_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_software"), 
-        "Software to import from",
-        choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
-        selected = rv.widgets$SelectFile_software)
+                             MagellanNTK::mod_popover_for_help_ui(ns("help_filesoftware")),
+                             choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
+                             selected = rv.widgets$SelectFile_software)
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
-    # This part must be customized by the developer of a new module
-    output$SelectFile_file_ui <- renderUI({
-      req(rv.widgets$SelectFile_software)
-      fluidRow(
-        column(width = 2,
-          MagellanNTK::mod_popover_for_help_server(
+    MagellanNTK::mod_popover_for_help_server(
             "help_chooseFile",
             title = "Data file",
             content = "Select one (.txt, .csv, .tsv, .xls, .xlsx) file."
-          ),
-          MagellanNTK::mod_popover_for_help_ui(ns("help_chooseFile"))
-        ),
-        column(width = 10,
-          widget <- fileInput(
-            ns("SelectFile_file"), "",
-            multiple = FALSE,
-            accept = c(".txt", ".tsv", ".csv", ".xls", ".xlsx")
           )
-        )
-      )
+    
+    output$SelectFile_file_ui <- renderUI({
+      req(rv.widgets$SelectFile_software)
+      widget <- fileInput(
+                 ns("SelectFile_file"), MagellanNTK::mod_popover_for_help_ui(ns("help_chooseFile")),
+                 multiple = FALSE,
+                 accept = c(".txt", ".tsv", ".csv", ".xls", ".xlsx"),
+                 width = "400px"
+               )
       
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'])
     })
     
     fileExt.ok <- reactive({
@@ -310,18 +312,21 @@ PipelineConvert_Convert_server <- function(id,
     #   }
     # })
     
+    MagellanNTK::mod_popover_for_help_server(
+      "help_sheets",
+      title = "Select sheet",
+      content = "Select the sheet containing the data to process."
+    )
+    
     output$SelectFile_ManageXlsFiles_ui <- renderUI({
-      
       req(rv.widgets$SelectFile_software)
       req(rv.widgets$SelectFile_file)
-      
       req(GetExtension(rv.widgets$SelectFile_file$name) %in% c("xls", "xlsx"))
       
       # tryCatch({   
       sheets <- c('', DaparToolshed::listSheets(rv.widgets$SelectFile_file$datapath))
-      
       widget <- selectInput(ns("SelectFile_XLSsheets"), 
-        "sheets", 
+        MagellanNTK::mod_popover_for_help_ui(ns("help_sheets")), 
         choices = sheets, 
         width = "200px",
         selected = rv.widgets$SelectFile_XLSsheets)
@@ -338,33 +343,45 @@ PipelineConvert_Convert_server <- function(id,
       #   # cleanup-code
       # }
       # )
+      
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'])
     })
     
     
+    ## File options
+    MagellanNTK::mod_popover_for_help_server(
+      "help_typeOfData",
+      title = "Type of dataset",
+      content = "Is it a peptide or protein dataset ?"
+    )
+    
     output$SelectFile_typeOfData_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_typeOfData"), 
-        "Is it a peptide or protein dataset ?",
+        MagellanNTK::mod_popover_for_help_ui(ns("help_typeOfData")),
         choices = c("peptide dataset" = "peptide",
-          "protein dataset" = "protein"
+                    "protein dataset" = "protein"
         ),
         selected = rv.widgets$SelectFile_typeOfData)
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
+    MagellanNTK::mod_popover_for_help_server(
+      "help_checkDataLogged",
+      title = "Data already log-transformed",
+      content = "If not, a log2 transformation will be applied to the data automatically."
+    )
     
     output$SelectFile_checkDataLogged_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_checkDataLogged"), 
-        "Are your data already log-transformed ?",
-        choices = c("yes (they stay unchanged)" = "yes",
-          "no (they wil be automatically transformed)" = "no"),
+        MagellanNTK::mod_popover_for_help_ui(ns("help_checkDataLogged")),
+        choices = c("Yes" = "yes",
+                    "No" = "no"),
         selected = rv.widgets$SelectFile_checkDataLogged
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
-    
     
     output$SelectFile_replaceAllZeros_ui <- renderUI({
       widget <- checkboxInput(ns("SelectFile_replaceAllZeros"), 
@@ -374,8 +391,6 @@ PipelineConvert_Convert_server <- function(id,
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
-    
-    
     
     output$SelectFile_btn_validate_ui <- renderUI({
       widget <-  actionButton(ns("SelectFile_btn_validate"), "Perform",
@@ -398,7 +413,6 @@ PipelineConvert_Convert_server <- function(id,
         is.null(rv.widgets$SelectFile_XLSsheets) ||
           nchar(rv.widgets$SelectFile_XLSsheets) == 0))
         return(NULL)
-      
       
       authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
       
@@ -432,17 +446,14 @@ PipelineConvert_Convert_server <- function(id,
           finally = {
             # cleanup-code
           })
+        
+        
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
       }
-      
-      
-      
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
-      
     })
-    
     
     # <<< END ------------- Code for step 1 UI---------------
     
@@ -452,20 +463,17 @@ PipelineConvert_Convert_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     
     output$DataId <- renderUI({
-      wellPanel(
-        br(), br(),
-        tags$div(
-          tags$div(
-            # Two examples of widgets in a renderUI() function
-            uiOutput(ns('DataId_datasetId_ui')),
-            uiOutput(ns('DataId_warningNonUniqueID_ui'))
-          ),
-          tags$div(
-            style = "display:inline-block; vertical-align: top;",
-            uiOutput("DataId_parentProteinID_ui"),
-            uiOutput("DataId_previewProteinID_ui")
-          ),
-          
+      fluidPage(
+        wellPanel(
+          uiOutput(ns('helpTextDataID')),
+          # Definition of which ID to use
+          uiOutput(ns('DataId_datasetId_ui')),
+          uiOutput(ns('DataId_warningNonUniqueID_ui')),
+          tags$hr(),
+          # Definition of Protein ID if peptide dataset
+          div(style="display: flex; flex-wrap: wrap;",
+              uiOutput(ns("DataId_parentProteinId_ui"), style = "margin-right: 20px;"),
+              uiOutput(ns("DataId_previewProteinID_ui"))),
           # Insert validation button
           # This line is necessary. DO NOT MODIFY
           uiOutput(ns('DataId_btn_validate_ui'))
@@ -474,30 +482,39 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     
+    ## Definition of which ID to use
+    output$helpTextDataID <- renderUI({
+      req(rv.widgets$SelectFile_typeOfData)
+      
+      t <- switch(rv.widgets$SelectFile_typeOfData,
+                  protein = "proteins",
+                  peptide = "peptides",
+                  default = "")
+      txt <- paste("Please select among the columns of your data the one that
+                corresponds to a unique ID of the ", t, ".", sep = "")
+      
+      helpText(txt)
+    })
+    
+    MagellanNTK::mod_popover_for_help_server("help_convertIdType",
+        title = "ID definition",
+        content = "If AutoID is choosen, Prostar will build an index.")
+    
     output$DataId_datasetId_ui <- renderUI({
       req(rv.convert$tab)
       
       #.choices <- setNames(nm = c("AutoID", colnames(rv.convert$tab)))
       #names(.choices) <- c("Auto ID", colnames(rv.convert$tab))
       
-      MagellanNTK::mod_popover_for_help_server("help_convertIdType",
-        title = "ID definition",
-        content = "If you choose the automatic ID, 
-                            Prostar will build an index.")
-      
-      tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("help_convertIdType")),
-        widget <- selectInput(ns("DataId_datasetId"), 
-          label = "", 
-          choices = setNames(nm = c("", "AutoID", colnames(rv.convert$tab))),
-          selected = rv.widgets$DataId_datasetId,
-          width = '300px'
-        )
+      widget <- selectInput(ns("DataId_datasetId"), 
+        label = MagellanNTK::mod_popover_for_help_ui(ns("help_convertIdType")), 
+        choices = setNames(nm = c("", "AutoID", colnames(rv.convert$tab))),
+        selected = rv.widgets$DataId_datasetId,
+        width = '300px'
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
-    
     
     datasetID_Ok <- reactive({
       req(rv.widgets$DataId_datasetId)
@@ -511,7 +528,6 @@ PipelineConvert_Convert_server <- function(id,
       t
     })
     
-    
     output$DataId_warningNonUniqueID_ui <- renderUI({
       # req(rv.widgets$DataId_datasetId != "AutoID")
       # req(rv.convert$tab)
@@ -521,7 +537,7 @@ PipelineConvert_Convert_server <- function(id,
       # 
       if (!datasetID_Ok()) {
         text <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">
-        Warning ! Your ID contains duplicate data. Please choose another one."
+        Warning ! Your ID contains duplicate data. Please choose another one.</font>"
       } else {
         text <- "<img src=\"images/Ok.png\" height=\"24\"></img>"
       }
@@ -529,55 +545,46 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     
-    output$DataId_parentProteinId_ui <- renderUI({
-      req(rv.convert$tab)
-      req(rv.widgets$SelectFile_typeOfData != "protein")
-      
-      MagellanNTK::mod_popover_for_help_server("help_ProteinId",
+    ## Definition of Protein ID if peptide dataset
+    MagellanNTK::mod_popover_for_help_server("help_ProteinId",
         title = "Select protein IDs",
         content = "Select the column containing the parent protein IDs."
       )
-      
-      tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("help_ProteinId")),
-        widget <- selectInput(ns("DataId_parentProteinId"),
-          "",
-          choices = setNames(nm =c("", colnames(rv.convert$tab))),
-          selected = rv.widgets$DataId_parentProteinId)
+    
+    output$DataId_parentProteinId_ui <- renderUI({
+      req(rv.convert$tab)
+      req(rv.widgets$SelectFile_typeOfData != "protein")
+
+      widget <- selectInput(ns("DataId_parentProteinId"), 
+                            MagellanNTK::mod_popover_for_help_ui(ns("help_ProteinId")), 
+                            choices = setNames(nm = c("", colnames(rv.convert$tab))),
+                            selected = rv.widgets$DataId_parentProteinId,
+                            width = '300px'
       )
+      
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['DataId'] )
     })
     
-    
-    output$helpTextDataID <- renderUI({
-      req(rv.widgets$SelectFile_typeOfData)
-      
-      t <- switch(rv.widgets$SelectFile_typeOfData,
-        protein = "proteins",
-        peptide = "peptides",
-        default = "")
-      
-      txt <- paste("Please select among the columns of your data the one that
-                corresponds to a unique ID of the ", t, ".", sep = " ")
-      helpText(txt)
+    observeEvent(input$DataId_parentProteinId, {
+      rv.widgets$DataId_parentProteinId <- input$DataId_parentProteinId
     })
     
+    previewProtID <- reactive({
+      req(rv.widgets$DataId_parentProteinId)
+      
+      head(rv.convert$tab[, rv.widgets$DataId_parentProteinId, drop = FALSE])
+    })
     
+    MagellanNTK::format_DT_server('DT_previewProtID',
+                                  reactive({previewProtID()}))
     
-    
-    output$previewProteinID_UI <- renderUI({
+    output$DataId_previewProteinID_ui <- renderUI({
       req(rv.widgets$DataId_parentProteinId)
       
       tagList(
-        p(style = "color: black;", "Preview"),
-        tableOutput("previewProtID")
-      )
+        p(style = "color: black; font-weight: bold;", "Preview :"),
+        MagellanNTK::format_DT_ui(ns('DT_previewProtID')))
     })
-    
-    output$previewProtID <- renderTable(
-      head(rv.convert$tab[, rv.widgets$DataId_parentProteinId]), colnames = FALSE
-    )
-    
     
     
     output$DataId_btn_validate_ui <- renderUI({
@@ -592,12 +599,9 @@ PipelineConvert_Convert_server <- function(id,
       # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
       #                                     dataset = new.dataset,
       #                                     name = paste0('temp_',id))
-      
       req(rv.widgets$DataId_datasetId)
-      
-      if(rv.widgets$SelectFile_typeOfData != "protein")
-        req(rv.widgets$DataId_parentProteinId)
-      
+      if(rv.widgets$SelectFile_typeOfData != "protein"){
+        req(rv.widgets$DataId_parentProteinId)}
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
