@@ -1,28 +1,22 @@
 ---
-title: "Filtering"
+title: "Workflow Peptide: Filtering"
 abstract: >
-  This Process contains two steps: a Metacell filtering tool and a variable filtering tool
+  This page describes the computations done with Filtering.
 
 output:
     BiocStyle::html_document:
         highlight: tango
-        thme: sandstone
         toc: false
-        number_sections: TRUE
-        css: style.css
+        number_sections: FALSE
 date: 30 mai 2024
 link-citations: true
 ---
 
 
-To prune the peptide list according to various criteria (missing values, string matching).
 
-### Function filtering
-
+### Metacell filtering
 
 
-
-### Variable filtering
-
+### Column filtering
 
 

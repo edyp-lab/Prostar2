@@ -121,6 +121,21 @@ PipelinePeptide_Filtering_server <- function(id,
     eval(str2expression(core.code))
     
     
+    # core <- paste0(
+    #   MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+    #   MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+    #   MagellanNTK::Get_Code_for_rv_reactiveValues(),
+    #   MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+    #   MagellanNTK::Get_Code_for_dataOut(),
+    #   MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
+    #     custom = TRUE,
+    #     dataIn = 'dataIn()'),
+    #   sep = "\n"
+    # )
+    # 
+    # eval(str2expression(core))
+    
+    
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -140,20 +155,15 @@ PipelinePeptide_Filtering_server <- function(id,
         # Insert validation button
         uiOutput(ns('Description_btn_validate_ui')),
         
-        ### In this example, the md file is found in the extdata/module_examples 
-        ### directory but with a real app, it should be provided by the package 
-        ### which contains the UI for the different steps of the process module.
-        ### system.file(xxx)
+        # # Used to show some information about the dataset which is loaded
+        # # This function must be provided by the package of the process module
+        uiOutput(ns('datasetDescription_ui')),
+        # 
+        if (file.exists(file)){
+          htmltools::includeMarkdown(file)
+        } else
+          p('No Description available')
         
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
