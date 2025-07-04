@@ -248,7 +248,6 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(input$Cellmetadatafiltering_btn_validate, {
-      
       req(rv.custom$tmp.filtering1()$value)
 
       rv.custom$dataIn1 <- rv.custom$tmp.filtering1()$value
