@@ -655,7 +655,7 @@ PipelineProtein_Imputation_server <- function(id,
         None = {}
       )
       
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
     })
     
     
