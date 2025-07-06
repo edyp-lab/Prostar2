@@ -531,7 +531,7 @@ PipelineProtein_Imputation_server <- function(id,
       shinyjs::useShinyjs()
       path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
       includeCSS(path)
-      req(rv$dataIn)
+     
       
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
