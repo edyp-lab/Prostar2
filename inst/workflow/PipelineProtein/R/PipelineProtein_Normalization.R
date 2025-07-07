@@ -638,10 +638,21 @@ PipelineProtein_Normalization_server <- function(id,
     
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
-      tagList(
-        # Insert validation button
-        # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('Save_btn_validate_ui')),
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('Save_Sidebar'),
+          timeline_process_ui(ns('Save_timeline')),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          hr(style = "border-top: 3px solid #000000;"),
+          inputPanel(
+            uiOutput(ns('Save_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
         uiOutput(ns('dl_ui'))
       )
     })

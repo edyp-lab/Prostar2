@@ -121,6 +121,51 @@ PipelineProtein_HypothesisTest_server <- function(id,
     eval(str2expression(core.code))
     
     
+    
+    timeline_process_server(
+      id = 'Description_timeline',
+      config = PipelineProtein_Imputation_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    
+    timeline_process_server(
+      id = 'HypothesisTest_timeline',
+      config = PipelineProtein_Imputation_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+
+    timeline_process_server(
+      id = 'Save_timeline',
+      config = PipelineProtein_Imputation_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Description_Sidebar
+    })
+
+    observeEvent(input$HypothesisTest_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$HypothesisTest_Sidebar
+    })
+    
+    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Save_Sidebar
+    })
+    
+    
+    
+    
+    
     # Add a new observer to remoteReset to complete the default behaviour
     observeEvent(remoteReset(), {
       
@@ -141,22 +186,31 @@ PipelineProtein_HypothesisTest_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      
-      tagList(
-        # In this example, the md file is found in the extdata/module_examples directory
-        # but with a real app, it should be provided by the package which
-        # contains the UI for the different steps of the process module.
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui')),
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui')),
-        
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns("Description_Sidebar"),  # Add an explicit ID
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          
+          timeline_process_ui(ns('Description_timeline')),
+          
+          inputPanel(
+            uiOutput(ns('Description_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
         if (file.exists(file))
           includeMarkdown(file)
         else
-          p('No Description available')
+          p('No Description available'),
+        
+        
+        # Used to show some information about the dataset which is loaded
+        # This function must be provided by the package of the process module
+        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
@@ -191,78 +245,58 @@ PipelineProtein_HypothesisTest_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$HypothesisTest <- renderUI({
       shinyjs::useShinyjs()
-      
+      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      includeCSS(path)
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
+      
+      
       m <- DaparToolshed::match.metacell(
         DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       NA.count <- length(which(m))
+
       
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUlength(rv$dataIn) function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        
-        if (NA.count > 0) {
-          tags$p("Your dataset contains missing values. Before using the
-      Hypothesis test, you must filter/impute them.")
-        } else {
-          tagList(
-            div(
-              div(style = .style,
-                uiOutput(ns('HypothesisTest_warning_conditions_ui'))
-              ),
-              div(style = .style,
-                uiOutput(ns('HypothesisTest_design_ui'))
-              ),
-              
-              div(style = .style,
-                uiOutput(ns('HypothesisTest_method_ui'))
-              ),
-              
-              div(style = .style,
-                uiOutput(ns('HypothesisTest_ttestOptions_ui'))
-              ),
-              
-              div(style = .style,
-                uiOutput(ns('HypothesisTest_thlogFC_ui'))
-              ),
-              
-              tags$div(style = .style,
-                uiOutput(ns("HypothesisTest_correspondingRatio_ui"))
-              ),
-              
-              div(style = .style,
-                uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')),
-              ),
-              tags$hr(),
-              div(style = .style,
-                uiOutput(ns("HypothesisTest_swapConds_ui"))
-              )
-            ),
-            # div(style = .style,
-            #   uiOutput(ns("HypothesisTest_perform_btn_ui"))
-            # ),
-            
-            
-            
-            div(style = .style,
-              uiOutput(ns("HypothesisTest_btn_validate_ui"))
-            ),
-            tags$hr()
-            ,div(style = .style,
-              highchartOutput(ns("FoldChangePlot"), height = "100%")
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('POVImputation_Sidebar'),
+          timeline_process_ui(ns('POVImputation_timeline')),
+          hr(style = "border-top: 3px solid #000000;"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          uiOutput(ns("HypothesisTest_btn_validate_ui")),
+          inputPanel(
+            if (NA.count == 0) {
+              tagList(
+                div(
+                  div(style = .style, uiOutput(ns('HypothesisTest_warning_conditions_ui'))),
+                  div(style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
+                  div(style = .style, uiOutput(ns('HypothesisTest_method_ui'))),
+                  div(style = .style, uiOutput(ns('HypothesisTest_ttestOptions_ui'))),
+                  div(style = .style, uiOutput(ns('HypothesisTest_thlogFC_ui'))),
+                  div(style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
+                  div(style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
+                )
             )
-            
-          )
-        }
+              } else NULL
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
+          style = "z-index: 0;"
+        ),
+        if (NA.count > 0) {
+        
+        tags$p("Your dataset contains missing values. Before using the
+      Hypothesis test, you must filter/impute them.")
+               } else {
+                 tagList(
+                   uiOutput(ns("HypothesisTest_swapConds_ui")),
+                  highchartOutput(ns("FoldChangePlot"), height = "100%")
+                 )
+               }
       )
     })
     
@@ -343,8 +377,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
           req(rv.widgets$HypothesisTest_ttestOptions != "None")
       ), {
         req(rv$dataIn)
-        print('In observe')
-        
+
         rv.widgets$HypothesisTest_thlogFC <- as.numeric(
           rv.widgets$HypothesisTest_thlogFC)
         
@@ -609,11 +642,31 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
-      tagList(
-        # Insert validation button
-        # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('Save_btn_validate_ui'))
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('Save_Sidebar'),
+          timeline_process_ui(ns('Save_timeline')),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          hr(style = "border-top: 3px solid #000000;"),
+          inputPanel(
+            uiOutput(ns('Save_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
+        uiOutput(ns('dl_ui'))
       )
+    })
+    
+    
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
     output$Save_btn_validate_ui <- renderUI({
