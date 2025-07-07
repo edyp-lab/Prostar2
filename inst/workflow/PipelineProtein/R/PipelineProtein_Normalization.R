@@ -117,7 +117,46 @@ PipelineProtein_Normalization_server <- function(id,
     # 
     # eval(str2expression(core))
     
+    timeline_process_server(
+      id = 'Description_timeline',
+      config = PipelineProtein_Normalization_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    
+    timeline_process_server(
+      id = 'Normalization_timeline',
+      config = PipelineProtein_Normalization_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
 
+    
+    timeline_process_server(
+      id = 'Save_timeline',
+      config = PipelineProtein_Normalization_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Description_Sidebar
+    })
+    
+    observeEvent(input$Normalization_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Normalization_Sidebar
+    })
+    
+    
+    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Save_Sidebar
+    })
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -131,21 +170,32 @@ PipelineProtein_Normalization_server <- function(id,
         'md', 
         paste0(id, '.md')))
      
-      tagList(
-        # In this example, the md file is found in the extdata/module_examples directory
-        # but with a real app, it should be provided by the package which
-        # contains the UI for the different steps of the process module.
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui')),
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui')),
-        
+      
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns("Description_Sidebar"),  # Add an explicit ID
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          
+          timeline_process_ui(ns('Description_timeline')),
+          
+          inputPanel(
+            uiOutput(ns('Description_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
         if (file.exists(file))
           includeMarkdown(file)
         else
-          p('No Description available')
+          p('No Description available'),
+        
+        
+        # Used to show some information about the dataset which is loaded
+        # This function must be provided by the package of the process module
+        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
@@ -165,7 +215,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
-      #req(dataIn())
+      req(dataIn())
       rv$dataIn <- dataIn()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
@@ -182,21 +232,56 @@ PipelineProtein_Normalization_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Normalization <- renderUI({
       shinyjs::useShinyjs()
+      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      includeCSS(path)
       
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
+      # 
+      # wellPanel(
+      #   # uiOutput for all widgets in this UI
+      #   # This part is mandatory
+      #   # The renderUI() function of each widget is managed by MagellanNTK
+      #   # The dev only have to define a reactive() function for each
+      #   # widget he want to insert
+      #   # Be aware of the naming convention for ids in uiOutput()
+      #   # For more details, please refer to the dev document.
+      #   
+      #   uiOutput(ns("Prot_Normalization_ui"))
+      # )
       
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        
-        uiOutput(ns("Prot_Normalization_ui"))
+      .localStyle <- "display:inline-block; vertical-align: top;
+                  padding-right: 20px;"
+      
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('POVImputation_Sidebar'),
+          timeline_process_ui(ns('POVImputation_timeline')),
+          hr(style = "border-top: 3px solid #000000;"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          uiOutput(ns("POVImputation_btn_validate_ui")),
+          inputPanel(
+            tags$div(
+              tags$div(style = .localStyle, uiOutput(ns("POVImputation_algorithm_UI"))),
+              tags$div(style = .localStyle, uiOutput(ns("POVImputation_KNN_nbNeighbors_UI"))),
+              tags$div(style = .localStyle, uiOutput(ns("POVImputation_detQuant_UI")))
+            )
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
+          style = "z-index: 0;"
+        ),
+        uiOutput(ns("POVImputation_showDetQuantValues")),
+        htmlOutput("helpForImputation"),
+        tags$hr(),
+        uiOutput(ns('mvplots_ui'))
       )
+      
+      
+      
+      
     })
     
     observe({

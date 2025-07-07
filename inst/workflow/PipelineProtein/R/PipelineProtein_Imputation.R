@@ -185,7 +185,13 @@ PipelineProtein_Imputation_server <- function(id,
     
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
     
-    
+    observe({
+      #Utile for the MEC imputation
+      qdata <- SummarizedExperiment::assay(dataIn()[[length(dataIn())]])
+      rv.custom$mv.present <- sum(is.na(qdata)) > 0
+      dataOut$trigger <- MagellanNTK::Timestamp()
+      dataOut$value <- rv$dataIn
+    })
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -253,16 +259,6 @@ PipelineProtein_Imputation_server <- function(id,
       rv$dataIn <- dataIn()
       rv.custom$dataIn1 <- dataIn()
       rv.custom$dataIn2 <- dataIn()
-      
-      #Utile for the MEC imputation
-      qdata <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
-      rv.custom$mv.present <- sum(is.na(qdata)) > 0
-      
-      # If there is no MV in the dataset, return it
-      if (!rv.custom$mv.present){
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- rv$dataIn
-      }
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -404,7 +400,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     output$POVImputation_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("POVImputation_btn_validate"),
-        "Start",
+        "Perform",
         class = "btn-success")
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
     })
@@ -535,8 +531,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
-      
-      
+
       
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
