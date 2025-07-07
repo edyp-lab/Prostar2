@@ -124,7 +124,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     timeline_process_server(
       id = 'Description_timeline',
-      config = PipelineProtein_Imputation_conf(),
+      config = PipelineProtein_HypothesisTest_conf(),
       status = reactive({steps.status()}),
       position = reactive({current.pos()}),
       enabled = reactive({steps.enabled()})
@@ -134,7 +134,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     timeline_process_server(
       id = 'HypothesisTest_timeline',
-      config = PipelineProtein_Imputation_conf(),
+      config = PipelineProtein_HypothesisTest_conf(),
       status = reactive({steps.status()}),
       position = reactive({current.pos()}),
       enabled = reactive({steps.enabled()})
@@ -143,7 +143,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
     timeline_process_server(
       id = 'Save_timeline',
-      config = PipelineProtein_Imputation_conf(),
+      config = PipelineProtein_HypothesisTest_conf(),
       status = reactive({steps.status()}),
       position = reactive({current.pos()}),
       enabled = reactive({steps.enabled()})
@@ -250,6 +250,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
       
+      req(rv$dataIn)
       
       m <- DaparToolshed::match.metacell(
         DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
@@ -261,14 +262,13 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          id = ns('POVImputation_Sidebar'),
-          timeline_process_ui(ns('POVImputation_timeline')),
+          id = ns('HypothesisTest_Sidebar'),
+          timeline_process_ui(ns('HypothesisTest_timeline')),
           hr(style = "border-top: 3px solid #000000;"),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
           uiOutput(ns("HypothesisTest_btn_validate_ui")),
           inputPanel(
-            if (NA.count == 0) {
-              tagList(
+             tagList(
                 div(
                   div(style = .style, uiOutput(ns('HypothesisTest_warning_conditions_ui'))),
                   div(style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
@@ -278,8 +278,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
                   div(style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
                   div(style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
                 )
-            )
-              } else NULL
+             )
           ),
           width = 200,
           position = "left",
