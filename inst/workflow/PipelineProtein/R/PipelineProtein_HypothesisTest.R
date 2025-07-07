@@ -247,17 +247,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       shinyjs::useShinyjs()
       path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
       includeCSS(path)
-      .style <- "display:inline-block; vertical-align: middle; 
-      padding-right: 20px;"
       
-      req(rv$dataIn)
       
-      m <- DaparToolshed::match.metacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-      )
-      NA.count <- length(which(m))
+      
 
       
       bslib::layout_sidebar(
@@ -268,17 +260,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
           uiOutput(ns("HypothesisTest_btn_validate_ui")),
           inputPanel(
-             tagList(
-                div(
-                  div(style = .style, uiOutput(ns('HypothesisTest_warning_conditions_ui'))),
-                  div(style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
-                  div(style = .style, uiOutput(ns('HypothesisTest_method_ui'))),
-                  div(style = .style, uiOutput(ns('HypothesisTest_ttestOptions_ui'))),
-                  div(style = .style, uiOutput(ns('HypothesisTest_thlogFC_ui'))),
-                  div(style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
-                  div(style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
-                )
-             )
+            uiOutput(ns('HypothesisTest_widgets_ui'))
+            
+            
           ),
           width = 200,
           position = "left",
@@ -286,22 +270,58 @@ PipelineProtein_HypothesisTest_server <- function(id,
           padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
           style = "z-index: 0;"
         ),
-        if (NA.count > 0) {
-        
-        tags$p("Your dataset contains missing values. Before using the
-      Hypothesis test, you must filter/impute them.")
-               } else {
-                 tagList(
-                   uiOutput(ns("HypothesisTest_swapConds_ui")),
-                  highchartOutput(ns("FoldChangePlot"), height = "100%")
-                 )
-               }
+        uiOutput(ns('HypothesisTest_plots_ui'))
       )
     })
     
     
     
+    output$HypothesisTest_plots_ui <- renderUI({
+      
+      req(rv$dataIn)
+
+      m <- DaparToolshed::match.metacell(
+        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+        pattern = c("Missing", "Missing POV", "Missing MEC"),
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+      )
+      NA.count <- length(which(m))
+
+      if (NA.count > 0) {
+      
+      tags$p("Your dataset contains missing values. Before using the
+      Hypothesis test, you must filter/impute them.")
+    } else {
+      tagList(
+        uiOutput(ns('HypothesisTest_warning_conditions_ui')),
+        uiOutput(ns("HypothesisTest_swapConds_ui")),
+        highchartOutput(ns("FoldChangePlot"), height = "100%")
+      )
+    }
+      
+      
+    })
+    
+    
+    
+    output$HypothesisTest_widgets_ui <- renderUI({
+      .style <- "display:inline-block; vertical-align: middle; 
+      padding-right: 20px;"
+      
+      tagList(
+        div(
+          div(style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
+          div(style = .style, uiOutput(ns('HypothesisTest_method_ui'))),
+          div(style = .style, uiOutput(ns('HypothesisTest_ttestOptions_ui'))),
+          div(style = .style, uiOutput(ns('HypothesisTest_thlogFC_ui'))),
+          div(style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
+          div(style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
+        )
+      )
+    })
+    
     output$HypothesisTest_warning_conditions_ui <- renderUI({
+      req(rv$dataIn)
       req(length(unique(omXplore::get_group(rv$dataIn))) > 26)
       req(getDesignLevel(MultiAssayExperiment::colData(rv$dataIn)) > 1)
       h3('Limma with this version of Prostar does not handle datasets with 
