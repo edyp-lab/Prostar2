@@ -295,7 +295,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       tagList(
         uiOutput(ns('HypothesisTest_warning_conditions_ui')),
         uiOutput(ns("HypothesisTest_swapConds_ui")),
-        highchartOutput(ns("FoldChangePlot"), height = "100%")
+        highchartOutput(ns("FoldChangePlot"))
       )
     }
       
@@ -415,28 +415,12 @@ PipelineProtein_HypothesisTest_server <- function(id,
             text = rv.custom$AllPairwiseComp[[1]],
             type = 'error' )
         } else {
-          # sendSweetAlert(
-          #   session = session,
-          #   title = "Success",
-          #   type = "success"
-          # )
-          
           rv.custom$n <- ncol(rv.custom$AllPairwiseComp$logFC)
           rv.custom$swap.history <- rep(0, rv.custom$n)
         }
-        # })
-        
       })
     
-    # 
-    # output$HypothesisTest_perform_btn_ui <- renderUI({
-    #   widget <- actionButton(ns("HypothesisTest_perform_btn"),
-    #     "Compute log FC plot",
-    #     class = actionBtnClass
-    #   )
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
-    # })
-    
+
     
     output$FoldChangePlot <- highcharter::renderHighchart({
       req(rv.custom$AllPairwiseComp$logFC)
