@@ -112,7 +112,21 @@ PipelineProtein_Filtering_server <- function(id,
     query = list(),
     fun.list = list(),
     widgets.value = list(),
-    tmp.tags = reactive({NULL})
+    tmp.tags = reactive({NULL}),
+    indices = NULL,
+    Filtering = NULL,
+    query = list(),
+    fun.list = list(),
+    widgets.value = list(),
+    funFilter = reactive({NULL}),
+    qMetacell_Filter_SummaryDT = data.frame(
+      query = "-",
+      nbDeleted = "0",
+      TotalMainAssay = '0',
+      stringsAsFactors = FALSE
+    ), 
+    df = data.frame(),
+    history = list()
   )
   
   GetFiltersScope <- function()
@@ -158,6 +172,62 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
+    timeline_process_server(
+      id = 'Description_timeline',
+      config = PipelineProtein_Filtering_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    
+    timeline_process_server(
+      id = 'Cellmetadatafiltering_timeline',
+      config = PipelineProtein_Filtering_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    timeline_process_server(
+      id = 'xxx_timeline',
+      config = PipelineProtein_Filtering_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    timeline_process_server(
+      id = 'Save_timeline',
+      config = PipelineProtein_Filtering_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Description_Sidebar
+    })
+    
+    observeEvent(input$Cellmetadatafiltering_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Cellmetadatafiltering_Sidebar
+    })
+    
+    observeEvent(input$xxx_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$xxx_Sidebar
+    })
+    
+    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Save_Sidebar
+    })
+    
+    
+    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
+    
+    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -172,19 +242,32 @@ PipelineProtein_Filtering_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      tagList(
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui')),
+      
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns("Description_Sidebar"),  # Add an explicit ID
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          
+          timeline_process_ui(ns('Description_timeline')),
+          
+          inputPanel(
+            uiOutput(ns('Description_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
+        if (file.exists(file))
+          includeMarkdown(file)
+        else
+          p('No Description available'),
         
-        # # Used to show some information about the dataset which is loaded
-        # # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui')),
-        # 
-        if (file.exists(file)){
-          htmltools::includeMarkdown(file)
-        } else
-          p('No Description available')
         
+        # Used to show some information about the dataset which is loaded
+        # This function must be provided by the package of the process module
+        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
@@ -253,13 +336,14 @@ PipelineProtein_Filtering_server <- function(id,
           style = "z-index: 0;"
         ),
         div(
-          style = "display:inline-block; 
+          style = "display:inline-block;
                 vertical-align: middle; align: center;",
           uiOutput(ns("qMetacellScope_request_ui"))
         ),
-        uiOutput(ns('Add_btn_UI')),
-        uiOutput(ns("qMetacell_Filter_DT")),
-        uiOutput(ns('plots_ui'))
+        uiOutput(ns('Cellmetadatafiltering_Add_btn_UI')),
+        uiOutput(ns('Cellmetadatafiltering_buildQuery_ui')),
+        uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
+        uiOutput(ns('Cellmetadatafiltering_plots_ui'))
       )
       #############################################
     })
@@ -305,7 +389,6 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-      rv$dataIn <- dataIn()
       req(rv$dataIn)
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
@@ -315,9 +398,8 @@ PipelineProtein_Filtering_server <- function(id,
       )
     })
     
-    observeEvent(req(dataIn()), ignoreInit = FALSE, ignoreInit = FALSE, {
+    observeEvent(req(rv$dataIn), ignoreInit = FALSE, ignoreNULL = FALSE, {
       stopifnot(inherits(dataIn(), 'QFeatures'))
-      rv$dataIn <- dataIn()
       rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
         query = "-",
         nbDeleted = "0",
@@ -327,45 +409,102 @@ PipelineProtein_Filtering_server <- function(id,
     }, priority = 1000)
     
     
-    output$tree_UI <- renderUI({
+    output$Cellmetadatafiltering_tree_UI <- renderUI({
+      
+      req(rv$dataIn)
+      
       widget <- div(
         mod_metacell_tree_ui(ns('tree')))
-      MagellanNTK::toggleWidget(widget, is.enabled())
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
     
     #rv.custom$tmp.tags <- reactive({NULL})
     rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
-      dataIn = reactive({rv$dataIn}),
+      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
       remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
     )
     
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       
-      rv.widgets$tag <- rv.custom$tmp.tags()$values
-      dataOut$trigger <- as.numeric(Sys.time())
-      dataOut$value <- list(
-        ll.fun = NULL,
-        ll.query = NULL,
-        ll.widgets.value = NULL,
-        ll.pattern = rv.widgets$tag,
-        ll.indices = NULL
+      rv.widgets$Cellmetadatafiltering_tag <- rv.custom$tmp.tags()$values
+       rv.custom$ll.fun <- NULL
+        rv.custom$ll.query <- NULL
+        rv.custom$ll.widgets.value <- NULL
+        rv.custom$ll.pattern <- rv.widgets$tag
+        rv.custom$ll.indices <- NULL
+    })
+    
+    keep_vs_remove <- reactive({
+      setNames(nm = c('delete', 'keep'))
+    })
+    
+    
+    output$Cellmetadatafiltering_chooseKeepRemove_ui <- renderUI({
+      req(rv.widgets$Cellmetadatafiltering_tag != "None")
+      widget <- radioButtons(ns("Cellmetadatafiltering_keep_vs_remove"),
+        "Type of filter operation",
+        choices = keep_vs_remove(),
+        selected = rv.widgets$Cellmetadatafiltering_keep_vs_remove
       )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    })
+    
+    output$Cellmetadatafiltering_chooseScope_ui <- renderUI({
+      req(rv.widgets$Cellmetadatafiltering_tag != "None")
+      widget <- selectInput(ns("Cellmetadatafiltering_Cellmetadatafiltering_scope"),
+        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_filterScope_help")),
+        choices = c(
+          "None" = "None",
+          "Whole Line" = "WholeLine",
+          "Whole matrix" = "WholeMatrix",
+          "For every condition" = "AllCond",
+          "At least one condition" = "AtLeastOneCond"
+        ),
+        selected = rv.widgets$Cellmetadatafiltering_scope,
+        width = "200px"
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
     
     
     
-    output$qMetacellScope_widgets_set2_ui <- renderUI({
+    observe({
+      req(rv$steps.enabled["Cellmetadatafiltering"])
+      #req(rv$dataIn)
+      
+      rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
+        id = "query",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        conds = reactive({omXplore::get_group(rv$dataIn)}),
+        keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
+        val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
+        operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
+      )
+    })
+    
+    output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
+      widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    })
+    
+    
+    
+    
+    
+    output$Cellmetadatafiltering_qMetacellScope_widgets_set2_ui <- renderUI({
       req(!(rv.widgets$Cellmetadatafiltering_scope %in% c("None", "WholeLine")))
       req(rv.widgets$Cellmetadatafiltering_tag != "None")
       
-      MagellanNTK::mod_popover_for_help_server("chooseValPercent_help",
+      MagellanNTK::mod_popover_for_help_server("Cellmetadatafiltering_chooseValPercent_help",
         title = paste("#/% of values to ", rv.widgets$Cellmetadatafiltering_keep_vs_remove),
         content = "Define xxx"
       )
       
       widget1 <- radioButtons(ns("Cellmetadatafiltering_valPercent"),
-        MagellanNTK::mod_popover_for_help_ui(ns("chooseValPercent_help")),
+        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_chooseValPercent_help")),
         choices = val_vs_percent(),
         selected = rv.widgets$Cellmetadatafiltering_valPercent
       )
@@ -383,24 +522,24 @@ PipelineProtein_Filtering_server <- function(id,
           column(4, MagellanNTK::toggleWidget(widget1, rv$steps.enabled["Cellmetadatafiltering"])),
           column(8, 
             MagellanNTK::toggleWidget(widget2, rv$steps.enabled["Cellmetadatafiltering"]),
-            uiOutput(ns("value_ui")),
-            uiOutput(ns("percentage_ui"))
+            uiOutput(ns("Cellmetadatafiltering_value_ui")),
+            uiOutput(ns("Cellmetadatafiltering_percentage_ui"))
           )
         )
       )
     })
     
     
-    output$value_ui <- renderUI({
+    output$Cellmetadatafiltering_value_ui <- renderUI({
       req(rv.widgets$Cellmetadatafiltering_valPercent == "Count")
       req(!(rv.widgets$Cellmetadatafiltering_scope %in% c("None", "WholeLine")))
-      MagellanNTK::mod_popover_for_help_server("value_th_help",
+      MagellanNTK::mod_popover_for_help_server("Cellmetadatafiltering_value_th_help",
         title = "Count threshold",
         content = "Define xxx"
       )
       
       widget <- selectInput(ns("Cellmetadatafiltering_valueTh"),
-        MagellanNTK::mod_popover_for_help_ui(ns("value_th_help")),
+        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_value_th_help")),
         choices = getListNbValuesInLines(
           object = rv$dataIn,
           conds = conds(),
@@ -410,16 +549,16 @@ PipelineProtein_Filtering_server <- function(id,
         width = "150px"
       )
       tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("keepVal_help")),
+        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_keepVal_help")),
         MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
       )
     })
     
-    output$percentage_ui <- renderUI({
+    output$Cellmetadatafiltering_percentage_ui <- renderUI({
       req(rv.widgets$Cellmetadatafiltering_valPercent == "Percentage")
       req(!(rv.widgets$Cellmetadatafiltering_scope %in% c("None", "WholeLine")))
       
-      MagellanNTK::mod_popover_for_help_server("percentTh_help",
+      MagellanNTK::mod_popover_for_help_server("Cellmetadatafiltering_percentTh_help",
         title = "Percentage threshold",
         content = "Define xxx"
       )
@@ -432,7 +571,7 @@ PipelineProtein_Filtering_server <- function(id,
         width = "250px"
       )
       tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("keepVal_percent_help")),
+        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_keepVal_percent_help")),
         MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
       )
     })
@@ -546,7 +685,7 @@ PipelineProtein_Filtering_server <- function(id,
       
     })
     
-    observeEvent(input$BuildFilter_btn, ignoreInit = TRUE,{
+    observeEvent(input$Cellmetadatafiltering_BuildFilter_btn, ignoreInit = TRUE,{
       req(BuildFunctionFilter())
       req(WriteQuery())
       
@@ -555,8 +694,7 @@ PipelineProtein_Filtering_server <- function(id,
       rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
       
       # Append a new FunctionFilter to the list
-      dataOut$trigger <- as.numeric(Sys.time())
-      dataOut$value <- list(
+      rv.custom$funFilter <- list(
         ll.fun = rv.custom$ll.fun,
         ll.query = rv.custom$ll.query,
         ll.widgets.value = rv.custom$ll.widgets.value,
@@ -602,24 +740,81 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
-    
-    
-    
-    observe({
+    observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE,{
       
-      rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
-        id = "metaFiltering",
-        dataIn = reactive({rv$dataIn}),
-        i = reactive({length(rv$dataIn)}),
-        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
-        remoteReset = reactive({remoteReset()})
+      req(length(rv.custom$funFilter()$value$ll.fun) > 0)
+      req(rv$dataIn)
+      
+      
+      tmp <- filterFeaturesOneSE(
+        object = rv$dataIn,
+        i = length(rv$dataIn),
+        name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
+        filters = rv.custom$funFilter()$value$ll.fun
       )
+      indices <- rv.custom$funFilter()$value$ll.indices
+      
+      
+      # Add infos
+      nBefore <- nrow(tmp[[length(tmp) - 1]])
+      nAfter <- nrow(tmp[[length(tmp)]])
+      
+      #.html <- ConvertListToHtml(rv.custom$funFilter()$value$ll.query)
+      
+      .html <- rv.custom$funFilter()$value$ll.query
+      .nbDeleted <- nBefore - nAfter
+      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+      
+      rv.custom$qMetacell_Filter_SummaryDT <- rbind(
+        rv.custom$qMetacell_Filter_SummaryDT , 
+        c(.html, .nbDeleted, .nbRemaining))
+      
+      
+      
+      # Keeps only the last filtered SE
+      len_start <- length(dataIn())
+      len_end <- length(tmp)
+      len_diff <- len_end - len_start
+      
+      req(len_diff > 0)
+      
+      if (len_diff == 2)
+        rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
+      else 
+        rv$dataIn <- tmp
+      
+      # Rename the new dataset with the name of the process
+      names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
+      
+      # Add params
+      #par <- rv.custom$funFilter()$value$ll.widgets.value
+      query <- rv.custom$funFilter()$value$ll.query
+      i <- length(rv$dataIn)
+      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
+      
+      .history[[paste0('query_', length(.history))]] <- query
+      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
+      
+      rv.custom$tmp.filtering1 <- rv$dataIn 
     })
     
-    output$mod_metacell_filtering_ui <- renderUI({
-      widget <- Prostar2::mod_Metacell_Filtering_ui(ns("metaFiltering"))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    })
+    
+    # 
+    # observe({
+    #   
+    #   rv.custom$tmp.filtering1 <- Prostar2::mod_Metacell_Filtering_server(
+    #     id = "metaFiltering",
+    #     dataIn = reactive({rv$dataIn}),
+    #     i = reactive({length(rv$dataIn)}),
+    #     is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]}),
+    #     remoteReset = reactive({remoteReset()})
+    #   )
+    # })
+    # 
+    # output$mod_metacell_filtering_ui <- renderUI({
+    #   widget <- Prostar2::mod_Metacell_Filtering_ui(ns("metaFiltering"))
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    # })
     
     
     

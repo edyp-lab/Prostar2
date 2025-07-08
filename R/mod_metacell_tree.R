@@ -225,7 +225,8 @@ observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
 
 
 
-observeEvent(dataIn(), ignoreInit = FALSE, {
+observeEvent(dataIn(), ignoreInit = FALSE, ignoreNULL = FALSE,{
+  req(dataIn())
   if (!is.null(DaparToolshed::typeDataset(dataIn())))
     init_tree()
   dataOut$trigger <- as.numeric(Sys.time())
