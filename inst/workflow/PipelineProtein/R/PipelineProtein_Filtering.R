@@ -335,13 +335,13 @@ PipelineProtein_Filtering_server <- function(id,
           padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
           style = "z-index: 0;"
         ),
-        div(
-          style = "display:inline-block;
-                vertical-align: middle; align: center;",
-          uiOutput(ns("qMetacellScope_request_ui"))
-        ),
+        # div(
+        #   style = "display:inline-block;
+        #         vertical-align: middle; align: center;",
+        #   uiOutput(ns("qMetacellScope_request_ui"))
+        # ),
         uiOutput(ns('Cellmetadatafiltering_Add_btn_UI')),
-        uiOutput(ns('Cellmetadatafiltering_buildQuery_ui')),
+        #uiOutput(ns('Cellmetadatafiltering_buildQuery_ui')),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
       )
@@ -435,16 +435,13 @@ PipelineProtein_Filtering_server <- function(id,
         rv.custom$ll.indices <- NULL
     })
     
-    keep_vs_remove <- reactive({
-      setNames(nm = c('delete', 'keep'))
-    })
-    
+
     
     output$Cellmetadatafiltering_chooseKeepRemove_ui <- renderUI({
       req(rv.widgets$Cellmetadatafiltering_tag != "None")
       widget <- radioButtons(ns("Cellmetadatafiltering_keep_vs_remove"),
         "Type of filter operation",
-        choices = keep_vs_remove(),
+        choices = setNames(nm = c("delete", "keep")),
         selected = rv.widgets$Cellmetadatafiltering_keep_vs_remove
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
@@ -469,26 +466,26 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
-    observe({
-      req(rv$steps.enabled["Cellmetadatafiltering"])
-      #req(rv$dataIn)
-      
-      rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
-        id = "query",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        conds = reactive({omXplore::get_group(rv$dataIn)}),
-        keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
-        val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
-        operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
-        remoteReset = reactive({remoteReset()}),
-        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
-      )
-    })
+    # observe({
+    #   req(rv$steps.enabled["Cellmetadatafiltering"])
+    #   #req(rv$dataIn)
+    #   
+    #   rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
+    #     id = "query",
+    #     dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+    #     conds = reactive({omXplore::get_group(rv$dataIn)}),
+    #     keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
+    #     val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
+    #     operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
+    #     remoteReset = reactive({remoteReset()}),
+    #     is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
+    #   )
+    # })
     
-    output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
-      widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    })
+    # output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
+    #   widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    # })
     
     
     
@@ -505,13 +502,13 @@ PipelineProtein_Filtering_server <- function(id,
       
       widget1 <- radioButtons(ns("Cellmetadatafiltering_valPercent"),
         MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_chooseValPercent_help")),
-        choices = val_vs_percent(),
+        choices = setNames(nm = c("Count", "Percentage")),
         selected = rv.widgets$Cellmetadatafiltering_valPercent
       )
       
       widget2 <- selectInput(ns("Cellmetadatafiltering_operator"),
         "Choose operator",
-        choices = operator(),
+        choices = setNames(nm = SymFilteringOperators()),
         selected = rv.widgets$Cellmetadatafiltering_operator,
         width = "100px"
       )
