@@ -449,7 +449,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Cellmetadatafiltering_chooseScope_ui <- renderUI({
       req(rv.widgets$Cellmetadatafiltering_tag != "None")
-      widget <- selectInput(ns("Cellmetadatafiltering_Cellmetadatafiltering_scope"),
+      widget <- selectInput(ns("Cellmetadatafiltering_scope"),
         MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_filterScope_help")),
         choices = c(
           "None" = "None",
@@ -499,7 +499,7 @@ PipelineProtein_Filtering_server <- function(id,
         title = paste("#/% of values to ", rv.widgets$Cellmetadatafiltering_keep_vs_remove),
         content = "Define xxx"
       )
-      
+     
       widget1 <- radioButtons(ns("Cellmetadatafiltering_valPercent"),
         MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_chooseValPercent_help")),
         choices = setNames(nm = c("Count", "Percentage")),
@@ -538,7 +538,7 @@ PipelineProtein_Filtering_server <- function(id,
       widget <- selectInput(ns("Cellmetadatafiltering_valueTh"),
         MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_value_th_help")),
         choices = getListNbValuesInLines(
-          object = rv$dataIn,
+          object = rv$dataIn[[length(rv$dataIn)]],
           conds = conds(),
           type = rv.widgets$Cellmetadatafiltering_scope
         ),
@@ -697,9 +697,9 @@ PipelineProtein_Filtering_server <- function(id,
         ll.widgets.value = rv.custom$ll.widgets.value,
         ll.pattern = rv.widgets$Cellmetadatafiltering_tag,
         ll.indices = GetIndices_FunFiltering(
-          obj = rv$dataIn,
+          obj = rv$dataIn[[length(rv$dataIn)]],
           conds = conds(), 
-          level = DaparToolshed::typeDataset(rv$dataIn), 
+          level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), 
           pattern = rv.custom$ll.fun[[1]]@params$pattern,
           type = rv.widgets$Cellmetadatafiltering_scope,
           percent = rv.custom$ll.fun[[1]]@params$percent, 
