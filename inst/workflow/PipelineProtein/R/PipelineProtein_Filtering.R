@@ -357,7 +357,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         
         uiOutput(ns('qMetacell_Filter_DT_UI')),
-        uiOutput(ns("Cellmetadatafiltering_request_ui")),
+        #uiOutput(ns("Cellmetadatafiltering_request_ui")),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
       )
@@ -469,30 +469,6 @@ PipelineProtein_Filtering_server <- function(id,
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
-    
-    
-    
-    # observe({
-    #   req(rv$steps.enabled["Cellmetadatafiltering"])
-    #   #req(rv$dataIn)
-    #   
-    #   rv.custom$funFilter() <- mod_qMetacell_FunctionFilter_Generator_server(
-    #     id = "query",
-    #     dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-    #     conds = reactive({omXplore::get_group(rv$dataIn)}),
-    #     keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
-    #     val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
-    #     operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
-    #     remoteReset = reactive({remoteReset()}),
-    #     is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
-    #   )
-    # })
-    
-    # output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
-    #   widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    # })
-    
     
     
     
@@ -634,11 +610,11 @@ PipelineProtein_Filtering_server <- function(id,
     }
     
     
-    output$Cellmetadatafiltering_request_ui <- renderUI({
-      tags$p(paste("You are going to ", rv.custom$ll.query),
-        style = "font-size: small; text-align : center; color: purple;"
-      )
-    })
+    # output$Cellmetadatafiltering_request_ui <- renderUI({
+    #   tags$p(paste("You are going to ", rv.custom$ll.query),
+    #     style = "font-size: small; text-align : center; color: purple;"
+    #   )
+    # })
     
     
     # Set useless widgets to default values
@@ -717,7 +693,7 @@ PipelineProtein_Filtering_server <- function(id,
         )
       rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
       
-browser()
+
       # Append a new FunctionFilter to the list
       rv.custom$funFilter <- reactive({
         list(
@@ -839,11 +815,11 @@ browser()
     
     observeEvent(input$Cellmetadatafiltering_btn_validate, {
       
-      req(rv.custom$tmp.filtering1()$value)
+      req(rv.custom$tmp.filtering1)
       
-      rv.custom$dataIn1 <- rv.custom$tmp.filtering1()$value
-      rv.custom$dataIn2 <- rv.custom$tmp.filtering1()$value
-      
+      rv.custom$dataIn1 <- rv.custom$tmp.filtering1
+      rv.custom$dataIn2 <- rv.custom$tmp.filtering1
+      browser()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Cellmetadatafiltering"] <- stepStatus$VALIDATED
