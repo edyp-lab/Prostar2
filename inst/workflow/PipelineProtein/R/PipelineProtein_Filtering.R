@@ -118,7 +118,15 @@ PipelineProtein_Filtering_server <- function(id,
     query = list(),
     fun.list = list(),
     widgets.value = list(),
-    funFilter = reactive({NULL}),
+    funFilter = reactive({
+      list(
+        ll.fun = NULL,
+        ll.query = NULL,
+        ll.widgets.value = NULL,
+        ll.pattern = NULL,
+        ll.indices = NULL
+      )
+    }),
     qMetacell_Filter_SummaryDT = data.frame(
       query = "-",
       nbDeleted = "0",
@@ -326,7 +334,8 @@ PipelineProtein_Filtering_server <- function(id,
               tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_tree_UI"))),
               tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_chooseKeepRemove_ui"))),
               tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_chooseScope_ui"))),
-              tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_qMetacellScope_widgets_set2_ui")))
+              tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_qMetacellScope_widgets_set2_ui"))),
+              tags$div(style = .localStyle, uiOutput(ns('Cellmetadatafiltering_Add_btn_UI')))
             )
           ),
           width = 200,
@@ -340,7 +349,7 @@ PipelineProtein_Filtering_server <- function(id,
         #         vertical-align: middle; align: center;",
         #   uiOutput(ns("qMetacellScope_request_ui"))
         # ),
-        uiOutput(ns('Cellmetadatafiltering_Add_btn_UI')),
+        
         #uiOutput(ns('Cellmetadatafiltering_buildQuery_ui')),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
@@ -711,12 +720,12 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$plots_ui <- renderUI({
-      req(rv.custom$funFilter()$ll.pattern)
+      req(rv.custom$funFilter$ll.pattern)
       
       mod_ds_metacell_Histos_server(
         id = "plots",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        pattern = reactive({rv.custom$funFilter()$ll.pattern}),
+        pattern = reactive({rv.custom$funFilter$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
       
@@ -737,9 +746,9 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
-    observeEvent(req(length(rv.custom$funFilter()$ll.fun) > 0), ignoreInit = FALSE,{
+    observeEvent(req(length(rv.custom$funFilter$ll.fun) > 0), ignoreInit = FALSE,{
       
-      req(length(rv.custom$funFilter()$ll.fun) > 0)
+      req(length(rv.custom$funFilter$ll.fun) > 0)
       req(rv$dataIn)
       
       
@@ -747,18 +756,18 @@ PipelineProtein_Filtering_server <- function(id,
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
-        filters = rv.custom$funFilter()$ll.fun
+        filters = rv.custom$funFilter$ll.fun
       )
-      indices <- rv.custom$funFilter()$ll.indices
+      indices <- rv.custom$funFilter$ll.indices
       
       
       # Add infos
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])
       
-      #.html <- ConvertListToHtml(rv.custom$funFilter()$ll.query)
+      #.html <- ConvertListToHtml(rv.custom$funFilter$ll.query)
       
-      .html <- rv.custom$funFilter()$ll.query
+      .html <- rv.custom$funFilter$ll.query
       .nbDeleted <- nBefore - nAfter
       .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
       
@@ -784,8 +793,8 @@ PipelineProtein_Filtering_server <- function(id,
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
       
       # Add params
-      #par <- rv.custom$funFilter()$ll.widgets.value
-      query <- rv.custom$funFilter()$ll.query
+      #par <- rv.custom$funFilter$ll.widgets.value
+      query <- rv.custom$funFilter$ll.query
       i <- length(rv$dataIn)
       .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
       
