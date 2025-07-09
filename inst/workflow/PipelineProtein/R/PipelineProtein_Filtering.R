@@ -295,10 +295,20 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(input$Description_btn_validate, {
-      req(dataIn())
+      req(inherits(dataIn(), 'QFeatures'))
+      
       rv$dataIn <- dataIn()
       rv.custom$dataIn1 <- dataIn()
       rv.custom$dataIn2 <- dataIn()
+      
+      rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
+        query = "-",
+        nbDeleted = "0",
+        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
+      
+      
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -344,13 +354,10 @@ PipelineProtein_Filtering_server <- function(id,
           padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
           style = "z-index: 0;"
         ),
-        # div(
-        #   style = "display:inline-block;
-        #         vertical-align: middle; align: center;",
-        #   uiOutput(ns("qMetacellScope_request_ui"))
-        # ),
+        
         
         uiOutput(ns('qMetacell_Filter_DT_UI')),
+        uiOutput(ns("Cellmetadatafiltering_request_ui")),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
       )
@@ -406,17 +413,7 @@ PipelineProtein_Filtering_server <- function(id,
         stringsAsFactors = FALSE
       )
     })
-    
-    observeEvent(req(rv$dataIn), ignoreInit = FALSE, ignoreNULL = FALSE, {
-      stopifnot(inherits(dataIn(), 'QFeatures'))
-      rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
-        query = "-",
-        nbDeleted = "0",
-        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
-        stringsAsFactors = FALSE
-      )
-    }, priority = 1000)
-    
+
     
     output$Cellmetadatafiltering_tree_UI <- renderUI({
       
@@ -584,8 +581,19 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
-    WriteQuery <- reactive({
-      txt_summary <- NULL
+    
+    WriteQuery <- function(
+    scope = NULL,
+      keep_vs_remove = NULL,
+      tag = NULL,
+      valPercent = NULL,
+      valueTh = NULL,
+      percentTh = NULL,
+      operator = NULL,
+      text_threshold = NULL,
+      text_method = NULL){
+
+        txt_summary <- NULL
       if (rv.widgets$Cellmetadatafiltering_scope == "None") {
         txt_summary <- "No filtering is processed."
       } else if (rv.widgets$Cellmetadatafiltering_scope == "WholeLine") {
@@ -621,12 +629,13 @@ PipelineProtein_Filtering_server <- function(id,
           text_method
         )
       }
+
       txt_summary
-    })
+    }
     
     
-    output$qMetacellFilter_request_ui <- renderUI({
-      tags$p(paste("You are going to ", WriteQuery()),
+    output$Cellmetadatafiltering_request_ui <- renderUI({
+      tags$p(paste("You are going to ", rv.custom$ll.query),
         style = "font-size: small; text-align : center; color: purple;"
       )
     })
@@ -693,13 +702,22 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(input$Cellmetadatafiltering_BuildFilter_btn, ignoreInit = TRUE,{
       req(BuildFunctionFilter())
-      req(WriteQuery())
       
       rv.custom$ll.fun <- list(BuildFunctionFilter())
-      rv.custom$ll.query <- list(WriteQuery())
+      rv.custom$ll.query <- list(
+        WriteQuery(rv.widgets$Cellmetadatafiltering_scope,
+          rv.widgets$Cellmetadatafiltering_keep_vs_remove,
+          rv.widgets$Cellmetadatafiltering_tag,
+          rv.widgets$Cellmetadatafiltering_valPercent,
+          rv.widgets$Cellmetadatafiltering_valueTh,
+          rv.widgets$Cellmetadatafiltering_percentTh,
+          rv.widgets$Cellmetadatafiltering_operator,
+          rv.widgets$Cellmetadatafiltering_text_threshold,
+          rv.widgets$Cellmetadatafiltering_text_method)
+        )
       rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
       
-
+browser()
       # Append a new FunctionFilter to the list
       rv.custom$funFilter <- reactive({
         list(
@@ -774,60 +792,6 @@ PipelineProtein_Filtering_server <- function(id,
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
       
       rv.custom$tmp.filtering1 <- rv$dataIn
-        req(length(rv.custom$funFilter()$ll.fun) > 0)
-       req(rv$dataIn)
-       
-       
-      tmp <- filterFeaturesOneSE(
-        object = rv$dataIn,
-        i = length(rv$dataIn),
-        name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
-        filters = rv.custom$funFilter()$ll.fun
-      )
-      indices <- rv.custom$funFilter()$ll.indices
-
-
-      # Add infos
-      nBefore <- nrow(tmp[[length(tmp) - 1]])
-      nAfter <- nrow(tmp[[length(tmp)]])
-
-      #.html <- ConvertListToHtml(rv.custom$funFilter()$ll.query)
-
-      .html <- rv.custom$funFilter()$ll.query
-      .nbDeleted <- nBefore - nAfter
-      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
-
-      rv.custom$qMetacell_Filter_SummaryDT <- rbind(
-        rv.custom$qMetacell_Filter_SummaryDT ,
-        c(.html, .nbDeleted, .nbRemaining))
-
-
-
-      # Keeps only the last filtered SE
-      len_start <- length(dataIn())
-      len_end <- length(tmp)
-      len_diff <- len_end - len_start
-
-      req(len_diff > 0)
-
-      if (len_diff == 2)
-        rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
-      else
-        rv$dataIn <- tmp
-
-      # Rename the new dataset with the name of the process
-      names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
-
-      # Add params
-      #par <- rv.custom$funFilter()$ll.widgets.value
-      query <- rv.custom$funFilter()$ll.query
-      i <- length(rv$dataIn)
-      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
-
-      .history[[paste0('query_', length(.history))]] <- query
-      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
-
-      rv.custom$tmp.filtering1 <- rv$dataIn
       rv.custom$dataIn1 <-rv$dataIn
       rv.custom$dataIn2 <-rv$dataIn
     })
@@ -859,66 +823,6 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     
-    # 
-    # observeEvent(rv.custom$funFilter(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    #   browser()
-    #    req(length(rv.custom$funFilter()$ll.fun) > 0)
-    #    req(rv$dataIn)
-    #    
-    #    
-    #   tmp <- filterFeaturesOneSE(
-    #     object = rv$dataIn,
-    #     i = length(rv$dataIn),
-    #     name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
-    #     filters = rv.custom$funFilter()$ll.fun
-    #   )
-    #   indices <- rv.custom$funFilter()$ll.indices
-    # 
-    # 
-    #   # Add infos
-    #   nBefore <- nrow(tmp[[length(tmp) - 1]])
-    #   nAfter <- nrow(tmp[[length(tmp)]])
-    # 
-    #   #.html <- ConvertListToHtml(rv.custom$funFilter()$ll.query)
-    # 
-    #   .html <- rv.custom$funFilter()$ll.query
-    #   .nbDeleted <- nBefore - nAfter
-    #   .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
-    # 
-    #   rv.custom$qMetacell_Filter_SummaryDT <- rbind(
-    #     rv.custom$qMetacell_Filter_SummaryDT ,
-    #     c(.html, .nbDeleted, .nbRemaining))
-    # 
-    # 
-    # 
-    #   # Keeps only the last filtered SE
-    #   len_start <- length(dataIn())
-    #   len_end <- length(tmp)
-    #   len_diff <- len_end - len_start
-    # 
-    #   req(len_diff > 0)
-    # 
-    #   if (len_diff == 2)
-    #     rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
-    #   else
-    #     rv$dataIn <- tmp
-    # 
-    #   # Rename the new dataset with the name of the process
-    #   names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
-    # 
-    #   # Add params
-    #   #par <- rv.custom$funFilter()$ll.widgets.value
-    #   query <- rv.custom$funFilter()$ll.query
-    #   i <- length(rv$dataIn)
-    #   .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
-    # 
-    #   .history[[paste0('query_', length(.history))]] <- query
-    #   DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
-    # 
-    #   rv.custom$tmp.filtering1 <- rv$dataIn
-    #  })
-    # 
-
     
     
     output$Cellmetadatafiltering_btn_validate_ui <- renderUI({
