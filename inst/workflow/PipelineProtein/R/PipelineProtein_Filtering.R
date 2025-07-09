@@ -309,7 +309,6 @@ PipelineProtein_Filtering_server <- function(id,
       )
       
       
-      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
@@ -401,23 +400,17 @@ PipelineProtein_Filtering_server <- function(id,
       title = "Scope",
       content = HTML(help.txt1)
     )
-    
-    
-    
-    observeEvent(req(remoteReset()), ignoreInit = FALSE, {
-      req(rv$dataIn)
-      rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
-        query = "-",
-        nbDeleted = "0",
-        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
-        stringsAsFactors = FALSE
-      )
-    })
 
     
     output$Cellmetadatafiltering_tree_UI <- renderUI({
       
       req(rv$dataIn)
+      rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
+      )
+      
       
       widget <- div(
         mod_metacell_tree_ui(ns('tree')))
@@ -425,20 +418,16 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     #rv.custom$tmp.tags <- reactive({NULL})
-    rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
-      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
-    )
+    
     
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
-      
       rv.widgets$Cellmetadatafiltering_tag <- rv.custom$tmp.tags()$values
        rv.custom$ll.fun <- NULL
         rv.custom$ll.query <- NULL
         rv.custom$ll.widgets.value <- NULL
-        rv.custom$ll.pattern <- rv.widgets$tag
+        rv.custom$ll.pattern <- rv.widgets$Cellmetadatafiltering_tag
         rv.custom$ll.indices <- NULL
+
     })
     
 
@@ -819,7 +808,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       rv.custom$dataIn1 <- rv.custom$tmp.filtering1
       rv.custom$dataIn2 <- rv.custom$tmp.filtering1
-      browser()
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Cellmetadatafiltering"] <- stepStatus$VALIDATED
