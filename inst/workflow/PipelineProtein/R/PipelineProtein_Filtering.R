@@ -350,7 +350,7 @@ PipelineProtein_Filtering_server <- function(id,
         #   uiOutput(ns("qMetacellScope_request_ui"))
         # ),
         
-        #uiOutput(ns('Cellmetadatafiltering_buildQuery_ui')),
+        uiOutput(ns('qMetacell_Filter_DT_UI')),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
       )
@@ -699,11 +699,7 @@ PipelineProtein_Filtering_server <- function(id,
       rv.custom$ll.query <- list(WriteQuery())
       rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
       
-      
-      
-      
-      
-      
+
       # Append a new FunctionFilter to the list
       rv.custom$funFilter <- reactive({
         list(
@@ -723,40 +719,62 @@ PipelineProtein_Filtering_server <- function(id,
       )
       })
       
-
-    })
-    
-    
-    output$plots_ui <- renderUI({
-      req(rv.custom$funFilter()$ll.pattern)
       
-      mod_ds_metacell_Histos_server(
-        id = "plots",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        pattern = reactive({rv.custom$funFilter()$ll.pattern}),
-        group = reactive({omXplore::get_group(rv$dataIn)})
+      req(length(rv.custom$funFilter()$ll.fun) > 0)
+      req(rv$dataIn)
+      
+      
+      tmp <- filterFeaturesOneSE(
+        object = rv$dataIn,
+        i = length(rv$dataIn),
+        name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
+        filters = rv.custom$funFilter()$ll.fun
       )
+      indices <- rv.custom$funFilter()$ll.indices
       
       
-      widget <- mod_ds_metacell_Histos_ui(ns("plots"))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    })
-    
-    
-    MagellanNTK::format_DT_server("dt", 
-      dataIn = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
-    
-    
-    output$qMetacell_Filter_DT <- renderUI({
-      req(rv.custom$qMetacell_Filter_SummaryDT)
-      MagellanNTK::format_DT_ui(ns("dt"))
-    })
-    
-    
-    
-    observeEvent(rv.custom$funFilter(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      browser()
-       req(length(rv.custom$funFilter()$ll.fun) > 0)
+      # Add infos
+      nBefore <- nrow(tmp[[length(tmp) - 1]])
+      nAfter <- nrow(tmp[[length(tmp)]])
+      
+      #.html <- ConvertListToHtml(rv.custom$funFilter()$ll.query)
+      
+      .html <- rv.custom$funFilter()$ll.query
+      .nbDeleted <- nBefore - nAfter
+      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+      
+      rv.custom$qMetacell_Filter_SummaryDT <- rbind(
+        rv.custom$qMetacell_Filter_SummaryDT ,
+        c(.html, .nbDeleted, .nbRemaining))
+      
+      
+      
+      # Keeps only the last filtered SE
+      len_start <- length(dataIn())
+      len_end <- length(tmp)
+      len_diff <- len_end - len_start
+      
+      req(len_diff > 0)
+      
+      if (len_diff == 2)
+        rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
+      else
+        rv$dataIn <- tmp
+      
+      # Rename the new dataset with the name of the process
+      names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
+      
+      # Add params
+      #par <- rv.custom$funFilter()$ll.widgets.value
+      query <- rv.custom$funFilter()$ll.query
+      i <- length(rv$dataIn)
+      .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
+      
+      .history[[paste0('query_', length(.history))]] <- query
+      DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
+      
+      rv.custom$tmp.filtering1 <- rv$dataIn
+        req(length(rv.custom$funFilter()$ll.fun) > 0)
        req(rv$dataIn)
        
        
@@ -810,8 +828,96 @@ PipelineProtein_Filtering_server <- function(id,
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
 
       rv.custom$tmp.filtering1 <- rv$dataIn
-     })
+      rv.custom$dataIn1 <-rv$dataIn
+      rv.custom$dataIn2 <-rv$dataIn
+    })
     
+    
+    output$plots_ui <- renderUI({
+      req(rv.custom$funFilter()$ll.pattern)
+      
+      mod_ds_metacell_Histos_server(
+        id = "plots",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        pattern = reactive({rv.custom$funFilter()$ll.pattern}),
+        group = reactive({omXplore::get_group(rv$dataIn)})
+      )
+      
+      
+      widget <- mod_ds_metacell_Histos_ui(ns("plots"))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    })
+    
+    
+    MagellanNTK::format_DT_server("dt", 
+      dataIn = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
+    
+    
+    output$qMetacell_Filter_DT_UI <- renderUI({
+      req(rv.custom$qMetacell_Filter_SummaryDT)
+      MagellanNTK::format_DT_ui(ns("dt"))
+    })
+    
+    
+    # 
+    # observeEvent(rv.custom$funFilter(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    #   browser()
+    #    req(length(rv.custom$funFilter()$ll.fun) > 0)
+    #    req(rv$dataIn)
+    #    
+    #    
+    #   tmp <- filterFeaturesOneSE(
+    #     object = rv$dataIn,
+    #     i = length(rv$dataIn),
+    #     name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
+    #     filters = rv.custom$funFilter()$ll.fun
+    #   )
+    #   indices <- rv.custom$funFilter()$ll.indices
+    # 
+    # 
+    #   # Add infos
+    #   nBefore <- nrow(tmp[[length(tmp) - 1]])
+    #   nAfter <- nrow(tmp[[length(tmp)]])
+    # 
+    #   #.html <- ConvertListToHtml(rv.custom$funFilter()$ll.query)
+    # 
+    #   .html <- rv.custom$funFilter()$ll.query
+    #   .nbDeleted <- nBefore - nAfter
+    #   .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+    # 
+    #   rv.custom$qMetacell_Filter_SummaryDT <- rbind(
+    #     rv.custom$qMetacell_Filter_SummaryDT ,
+    #     c(.html, .nbDeleted, .nbRemaining))
+    # 
+    # 
+    # 
+    #   # Keeps only the last filtered SE
+    #   len_start <- length(dataIn())
+    #   len_end <- length(tmp)
+    #   len_diff <- len_end - len_start
+    # 
+    #   req(len_diff > 0)
+    # 
+    #   if (len_diff == 2)
+    #     rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
+    #   else
+    #     rv$dataIn <- tmp
+    # 
+    #   # Rename the new dataset with the name of the process
+    #   names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
+    # 
+    #   # Add params
+    #   #par <- rv.custom$funFilter()$ll.widgets.value
+    #   query <- rv.custom$funFilter()$ll.query
+    #   i <- length(rv$dataIn)
+    #   .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
+    # 
+    #   .history[[paste0('query_', length(.history))]] <- query
+    #   DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']] <- .history
+    # 
+    #   rv.custom$tmp.filtering1 <- rv$dataIn
+    #  })
+    # 
 
     
     
