@@ -151,7 +151,7 @@ PipelineProtein_Filtering_server <- function(id,
       Variablefiltering_nbDeleted = NA,
       Variablefiltering_TotalBeforeFiltering = NA,
       Variablefiltering_TotalAfterFiltering = NA,
-      Variablefiltering_stringsAsFactors = FALSE
+      stringsAsFactors = FALSE
     ),
     
     Variablefiltering_ll.var = list(),
@@ -878,7 +878,7 @@ PipelineProtein_Filtering_server <- function(id,
               div(style = .style, uiOutput(ns("Variablefiltering_operator_ui"))),
               div(style = .style, uiOutput(ns("Variablefiltering_value_ui")))
             ),
-            uiOutput(ns("addFilter_btn_ui"))
+            uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
           ),
           width = 200,
           position = "left",
@@ -1049,6 +1049,8 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(input$Variablefiltering_addFilter_btn,
       ignoreInit = FALSE, ignoreNULL = TRUE, {
+        
+
       rv.widgets$Variablefiltering_value
       rv.widgets$Variablefiltering_operator
       rv.widgets$Variablefiltering_cname
@@ -1069,45 +1071,31 @@ PipelineProtein_Filtering_server <- function(id,
           keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
       )
       
-      rv.custom$Variablefiltering_ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
+      rv.custom$Variablefiltering_ll.widgets.value <- reactiveValuesToList(rv.widgets)
+      ind <- grepl('Variablefiltering', names(rv.custom$Variablefiltering_ll.widgets.value))
+      ind <- which(ind == TRUE)
+      rv.custom$Variablefiltering_ll.widgets.value <- rv.custom$Variablefiltering_ll.widgets.value[ind]
       
       
-      rv.custom$tmp.filtering2 <- list(
+      rv.custom$Variablefiltering_funFilter <- list(
         ll.var = rv.custom$Variablefiltering_ll.var,
         ll.query = rv.custom$Variablefiltering_ll.query,
         ll.widgets.value = rv.custom$Variablefiltering_ll.widgets.value
       )
-
-    })
-    
-
-    
-    output$Variablefiltering_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Variablefiltering_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget( widget, rv$steps.enabled["Variablefiltering"])
-    })
-    
-    
-    
-    observeEvent(input$Variablefiltering_btn_validate, {
-      req(rv.custom$tmp.filtering2()$value)
-      rv.custom$dataIn2 <- rv.custom$tmp.filtering2()$value
+      
       
       
       ###########################################
-      req(length(funFilter()$value$ll.var) > 0)
+      req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
       req(rv$dataIn)
       
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = paste0("variableFiltered", MagellanNTK::Timestamp()),
-        filters = funFilter()$value$ll.var
+        filters = rv.custom$Variablefiltering_funFilter$ll.var
       )
-      indices <- funFilter()$value$ll.indices
+      indices <- rv.custom$Variablefiltering_funFilter$ll.indices
       
       # Add infos
       
@@ -1115,17 +1103,17 @@ PipelineProtein_Filtering_server <- function(id,
       nAfter <- nrow(tmp[[length(tmp)]])
       
       
-      .html <- funFilter()$value$ll.query
+      .html <- rv.custom$Variablefiltering_funFilter$ll.query
       .nbDeleted <- nBefore - nAfter
-      .nbBefore <- nrow(assay(dataIn()))
+      .nbBefore <- nrow(assay(rv$dataIn[[length(rv$dataIn)]]))
       .nbAfter <- nrow(assay(tmp[[length(tmp)]]))
       
       rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
         rv.custom$Variablefiltering_variable_Filter_SummaryDT , 
         c(.html, .nbDeleted, .nbBefore, .nbAfter))
-      print('update du DT')
+
       # Keeps only the last filtered SE
-      len_start <- length(dataIn())
+      len_start <- length(rv$ataIn)
       len_end <- length(tmp)
       len_diff <- len_end - len_start
       
@@ -1142,13 +1130,34 @@ PipelineProtein_Filtering_server <- function(id,
       names(rv$dataIn)[length(rv$dataIn)] <- 'Variable_Filtering'
       
       
-      query <- funFilter()$value$ll.query
+      query <- rv.custom$Variablefiltering_funFilter$ll.query
       i <- length(rv$dataIn)
       .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Variable_Filtering']]
       .history[[paste0('query_', length(.history))]] <- query
       DaparToolshed::paramshistory(rv$dataIn[[i]])[['Variable_Filtering']] <- .history
       
       #######################################
+      rv.custom$tmp.filtering2 <- rv$dataIn
+      rv.custom$dataIn1 <-rv$dataIn
+      rv.custom$dataIn2 <-rv$dataIn
+      
+
+    })
+    
+
+    
+    output$Variablefiltering_btn_validate_ui <- renderUI({
+      widget <- actionButton(ns("Variablefiltering_btn_validate"),
+        "Validate step",
+        class = "btn-success"
+      )
+      MagellanNTK::toggleWidget( widget, rv$steps.enabled["Variablefiltering"])
+    })
+    
+    
+    
+    observeEvent(input$Variablefiltering_btn_validate, {
+     
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -1215,7 +1224,7 @@ PipelineProtein_Filtering_server <- function(id,
         c(DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]), 
           reactiveValuesToList(rv.widgets))
       
-      
+      browser()
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv.custom$dataIn2
