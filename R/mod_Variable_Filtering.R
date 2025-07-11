@@ -122,7 +122,7 @@ mod_Variable_Filtering_server <- function(id,
    
     output$variable_Filter_DT <- renderUI({
       MagellanNTK::format_DT_server("dt", 
-        dataIn = reactive({rv.custom$variable_Filter_SummaryDT}))
+        dataIn = reactive({rv.custom$VF_variable_Filter_SummaryDT}))
       
       MagellanNTK::format_DT_ui(ns("dt"))
     })
@@ -163,8 +163,8 @@ mod_Variable_Filtering_server <- function(id,
       .nbBefore <- nrow(assay(dataIn()))
       .nbAfter <- nrow(assay(tmp[[length(tmp)]]))
       
-      rv.custom$variable_Filter_SummaryDT <- rbind(
-        rv.custom$variable_Filter_SummaryDT , 
+      rv.custom$VF_variable_Filter_SummaryDT <- rbind(
+        rv.custom$VF_variable_Filter_SummaryDT , 
         c(.html, .nbDeleted, .nbBefore, .nbAfter))
       print('update du DT')
       # Keeps only the last filtered SE
