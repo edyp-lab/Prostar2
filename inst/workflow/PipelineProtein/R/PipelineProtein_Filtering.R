@@ -1203,19 +1203,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
-      # Clean the result
-      # len_start <- length(rv$dataIn)
-      # len_end <- length(rv.custom$dataIn2)
-      # len_diff <- len_end - len_start
-      # 
-      # 
-      # req(len_diff > 0)
-      # 
-      # if (len_diff == 2)
-      #   rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
-      #     length(rv.custom$dataIn2)-1)
-      # 
-      # 
+      
       # Rename the new dataset with the name of the process
       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
       DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
