@@ -1113,7 +1113,7 @@ PipelineProtein_Filtering_server <- function(id,
         c(.html, .nbDeleted, .nbBefore, .nbAfter))
 
       # Keeps only the last filtered SE
-      len_start <- length(rv$ataIn)
+      len_start <- length(dataIn())
       len_end <- length(tmp)
       len_diff <- len_end - len_start
       
@@ -1123,8 +1123,6 @@ PipelineProtein_Filtering_server <- function(id,
         rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp)-1)
       else 
         rv$dataIn <- tmp
-      
-      
       
       # Rename the new dataset with the name of the process
       names(rv$dataIn)[length(rv$dataIn)] <- 'Variable_Filtering'
@@ -1206,25 +1204,25 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(input$Save_btn_validate, {
       # Do some stuff
       # Clean the result
-      len_start <- length(rv$dataIn)
-      len_end <- length(rv.custom$dataIn2)
-      len_diff <- len_end - len_start
-      
-      
-      req(len_diff > 0)
-      
-      if (len_diff == 2)
-        rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
-          length(rv.custom$dataIn2)-1)
-      
-      
+      # len_start <- length(rv$dataIn)
+      # len_end <- length(rv.custom$dataIn2)
+      # len_diff <- len_end - len_start
+      # 
+      # 
+      # req(len_diff > 0)
+      # 
+      # if (len_diff == 2)
+      #   rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
+      #     length(rv.custom$dataIn2)-1)
+      # 
+      # 
       # Rename the new dataset with the name of the process
       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
       DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
         c(DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]), 
           reactiveValuesToList(rv.widgets))
       
-      browser()
+      
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv.custom$dataIn2
