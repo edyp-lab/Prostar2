@@ -164,6 +164,83 @@ PipelineProtein_DA_server <- function(id,
     )
     
     
+    
+    
+    #####################################################################
+    
+    timeline_process_server(
+      id = 'Description_timeline',
+      config = PipelineProtein_DA_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    
+    timeline_process_server(
+      id = 'Pairwisecomparison_timeline',
+      config = PipelineProtein_DA_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    timeline_process_server(
+      id = 'Pvaluecalibration_timeline',
+      config = PipelineProtein_DA_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    timeline_process_server(
+      id = 'FDR_timeline',
+      config = PipelineProtein_DA_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    timeline_process_server(
+      id = 'Save_timeline',
+      config = PipelineProtein_DA_conf(),
+      status = reactive({steps.status()}),
+      position = reactive({current.pos()}),
+      enabled = reactive({steps.enabled()})
+    )
+    
+    
+    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Description_Sidebar
+    })
+    
+    observeEvent(input$Pairwisecomparison_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Pairwisecomparison_Sidebar
+    })
+    
+    observeEvent(input$Pvaluecalibration_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Pvaluecalibration_Sidebar
+    })
+    
+    observeEvent(input$FDR_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$FDR_Sidebar
+    })
+    
+    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+      dataOut$sidebarState <- input$Save_Sidebar
+    })
+    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
+    
+    #####################################################################
+    
+    
+    
+    
+    
+    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -179,16 +256,22 @@ PipelineProtein_DA_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      
-      tagList(
-        ### In this example, the md file is found in the extdata/module_examples 
-        ### directory but with a real app, it should be provided by the package 
-        ### which contains the UI for the different steps of the process module.
-        ### system.file(xxx)
-        
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_UI')),
-        
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns("Description_Sidebar"),  # Add an explicit ID
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          
+          timeline_process_ui(ns('Description_timeline')),
+          
+          inputPanel(
+            uiOutput(ns('Description_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
         if (file.exists(file))
           includeMarkdown(file)
         else
@@ -197,7 +280,7 @@ PipelineProtein_DA_server <- function(id,
         
         # Used to show some information about the dataset which is loaded
         # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_UI'))
+        uiOutput(ns('datasetDescription_ui'))
       )
     })
     
@@ -218,7 +301,7 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$Description_btn_validate, {
       
-      req(dataIn())
+      req(inherits(dataIn(), 'QFeatures'))
       
       # Find the assay containing the hypothesis tests comparisons
       .ind <- unlist(lapply(seq(length(dataIn())), function(x){
@@ -316,30 +399,36 @@ PipelineProtein_DA_server <- function(id,
     
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Pairwisecomparison <- renderUI({
+      shinyjs::useShinyjs()
+      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      includeCSS(path)
+      
       .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        tagList(
-          # Insert validation button
-          uiOutput(ns("Pairwisecomparison_btn_validate_UI")),
-          tags$div(
-            tags$div(style = .style, 
-              uiOutput(ns('Pairwisecomparison_Comparison_UI')))
+      
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('Pairwisecomparison_Sidebar'),
+          timeline_process_ui(ns('Pairwisecomparison_timeline')),
+          hr(style = "border-top: 3px solid #000000;"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          uiOutput(ns("Pairwisecomparison_btn_validate_ui")),
+          inputPanel(
+            tags$div(
+              tags$div(style = .localStyle, uiOutput(ns('Pairwisecomparison_Comparison_UI'))),
+              tags$div(style = .localStyle, uiOutput(ns("pushpval_UI")))
+            )
           ),
-          uiOutput(ns("pushpval_UI")),
-          tags$hr(),
-          tags$div(
-            tags$div(style = .style, uiOutput(ns("Pairwisecomparison_volcano_UI"))),
-            tags$div(style = .style, uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
-          )
-        )
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
+          style = "z-index: 0;"
+        ),
+        
+      uiOutput(ns("Pairwisecomparison_volcano_UI")),
+      uiOutput(ns("Pairwisecomparison_tooltipInfo_UI"))
       )
+
     })
     
     
@@ -365,36 +454,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
     })
     
-    
-    # # Fill the variable 'rv.custom$resAnaDiff' with informations relatives to
-    # # the comparison choosen by the user.
-    # # Concertely, it extracts data from the variable rv.custom$res_AllPairwiseComparisons
-    # # which contains all info (logFC and pValue) for all comparisons.
-    # UpdateCompList <- reactive({
-    #   req(rv.widgets$Pairwisecomparison_Comparison != 'None')
-    #   
-    #   
-    #   .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
-    #   .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
-    #   
-    #   rv.custom$resAnaDiff <- list(
-    #     logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
-    #     P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
-    #     condition1 = rv.custom$Condition1,
-    #     condition2 = rv.custom$Condition2,
-    #     pushed = NULL
-    #   )
-    # }
-    # )
-    
-    
-    # observeEvent(rv.widgets$Pairwisecomparison_Comparison, {
-    #   print(rv.widgets$Pairwisecomparison_Comparison)
-    # })
-    
-    
-    #  req(GetComparisons())
-    # req(rv.custom$dataToAnalyze)
+
     
     Prostar2::mod_volcanoplot_server(
       id = "Pairwisecomparison_volcano",
@@ -503,7 +563,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
         dataIn = reactive({Get_Dataset_to_Analyze()}),
-        conds = reactive({omXplore::get_group(rv$dataIn)}),
+        conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
@@ -585,48 +645,43 @@ PipelineProtein_DA_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     output$Pvaluecalibration <- renderUI({
       
-      .style <- "display:inline-block; 
+      .localStyle <- "display:inline-block; 
         vertical-align: middle; 
         padding-right: 40px;"
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        
-        tagList(
-          # Insert validation button
-          uiOutput(ns("Pvaluecalibration_btn_validate_UI")),
-          tags$div(
-            tags$div(style = .style,
-              uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))
-            ),
-            tags$div(style = .style,
-              uiOutput(ns("Pvaluecalibration_numericValCalibration_UI"))
-            ),
-            tags$div(style = .style,
-              uiOutput(ns("nBins_UI"))
-            ),
-            tags$div(style = .style,
-              p(tags$strong(
-                paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
-              ))
+
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('Pvaluecalibration_Sidebar'),
+          timeline_process_ui(ns('Pvaluecalibration_timeline')),
+          hr(style = "border-top: 3px solid #000000;"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          uiOutput(ns("Pvaluecalibration_btn_validate_ui")),
+          inputPanel(
+            tags$div(
+              tags$div(style = .localStyle, uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))),
+              tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_numericValCalibration_UI"))),
+              tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_nBins_UI")))
             )
           ),
-          tags$hr(),
-          fluidRow(
-            column(width = 6, fluidRow(style = "height:800px;",
-              imageOutput(ns("calibrationPlotAll"), height = "800px")
-            )),
-            column(width = 6, fluidRow(style = "height:400px;",
-              imageOutput(ns("calibrationPlot"), height = "400px")
-            ),
-              fluidRow(style = "height:400px;", 
-                highchartOutput(ns("histPValue")))
-            )
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
+          style = "z-index: 0;"
+        ),
+        
+        p(tags$strong(
+          paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
+        )),
+        fluidRow(
+          column(width = 6, fluidRow(style = "height:800px;",
+            imageOutput(ns("calibrationPlotAll"), height = "800px")
+          )),
+          column(width = 6, fluidRow(style = "height:400px;",
+            imageOutput(ns("calibrationPlot"), height = "400px")
+          ),
+            fluidRow(style = "height:400px;", 
+              highchartOutput(ns("histPValue")))
           )
         )
       )
@@ -723,7 +778,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     
-    output$calibrationResults <- renderUI({
+    output$Pvaluecalibration_calibrationResults <- renderUI({
       req(rv.custom$calibrationRes)
       rv$dataIn
       
@@ -971,10 +1026,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(input$Pvaluecalibration_btn_validate, {
-      
-      
-      
-      
+
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
       # rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
@@ -992,46 +1044,40 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 2 UI---------------
     output$FDR <- renderUI({
-      widget <- wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        tagList(
-          # Insert validation button
+      widget <- bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('FDR_Sidebar'),
+          timeline_process_ui(ns('FDR_timeline')),
+          hr(style = "border-top: 3px solid #000000;"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
           uiOutput(ns("FDR_btn_validate_UI")),
-          fluidRow(
-            column(width = 5,
-              mod_set_pval_threshold_ui(ns("Title")),
-              uiOutput(ns("nbSelectedItems"))
-              #actionButton(ns('validate_pval'), "Validate threshold", class = actionBtnClass)
-            ),
-            column(width = 7,
-              withProgress(message = "", detail = "", value = 1, {
-                uiOutput(ns('FDR_volcanoplot_UI'))
-              })
-            )
-          ),
-          tags$hr(),
-          fluidRow(
-            column(width = 4,
-              checkboxInput(ns('FDR_viewAdjPval'), 
+          inputPanel(
+            tags$div(
+              tags$div(style = .localStyle, mod_set_pval_threshold_ui(ns("Title"))),
+              tags$div(style = .localStyle, checkboxInput(ns('FDR_viewAdjPval'), 
                 'View adjusted p-value', 
-                value = rv.widgets$FDR_viewAdjPval)
-            ),
-            column(width = 4,
-              downloadButton(ns("FDR_download_SelectedItems_UI"), 
-                "Selected final results (Excel file)", class = actionBtnClass)
+                value = rv.widgets$FDR_viewAdjPval)),
+              
             )
           ),
-          DT::DTOutput(ns("FDR_selectedItems_UI"))
-        )
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
+          style = "z-index: 0;"
+        ),
+        
+        uiOutput(ns("FDR_nbSelectedItems_ui")),
+        withProgress(message = "", detail = "", value = 1, {
+          uiOutput(ns('FDR_volcanoplot_UI'))
+        }),
+        downloadButton(ns("FDR_download_SelectedItems_UI"), 
+          "Selected final results (Excel file)", class = actionBtnClass),
+        DT::DTOutput(ns("FDR_selectedItems_UI"))
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
+      
     })
     
     
@@ -1058,7 +1104,7 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    output$nbSelectedItems <- renderUI({
+    output$FDR_nbSelectedItems_ui <- renderUI({
       rv.custom$thpval
       rv$dataIn
       req(Build_pval_table())
@@ -1285,31 +1331,7 @@ PipelineProtein_DA_server <- function(id,
       nb
     })
     
-    # observe({
-    #   req(Get_FDR())
-    #   req(Get_Nb_Significant())
-    #   
-    #   th <- Get_FDR() * Get_Nb_Significant()
-    #   
-    #   if (th < 1) {
-    #     warntxt <- paste0("With such a dataset size (",
-    #       Get_Nb_Significant(), " selected discoveries), an FDR of ",
-    #       round(100 * Get_FDR(), digits = 2),
-    #       "% should be cautiously interpreted as strictly less than one
-    #     discovery (", round(th, digits = 2), ") is expected to be false"
-    #     )
-    #     mod_errorModal_server('warn_FDR',
-    #       title = 'Warning',
-    #       text = warntxt)
-    #   }
-    #   
-    # })
-    
-    
-    
-    
-    
-    
+
     
     Build_pval_table <- reactive({
       req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
@@ -1407,11 +1429,22 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
-      tagList(
-        # Insert validation button
-        # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('Save_btn_validate_UI')),
-        uiOutput(ns('dl_UI'))
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          id = ns('Save_Sidebar'),
+          timeline_process_ui(ns('Save_timeline')),
+          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          hr(style = "border-top: 3px solid #000000;"),
+          inputPanel(
+            uiOutput(ns('Save_btn_validate_ui'))
+          ),
+          width = 200,
+          position = "left",
+          bg='lightblue',
+          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+          #style = "p1"
+        ),
+        uiOutput(ns('dl_ui'))
       )
     })
     
