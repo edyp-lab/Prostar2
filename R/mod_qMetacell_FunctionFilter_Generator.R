@@ -455,25 +455,25 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
             rv.custom$ll.fun <- list(
               BuildFunctionFilter(
-                rv.widgets$Cellmetadatafiltering_valPercent,
-                rv.widgets$Cellmetadatafiltering_percentTh,
-                rv.widgets$Cellmetadatafiltering_valueTh,
-                rv.widgets$Cellmetadatafiltering_scope,
-                rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-                rv.widgets$Cellmetadatafiltering_tag,
-                rv.widgets$Cellmetadatafiltering_operator
+                rv.widgets$valPercent,
+                rv.widgets$percentTh,
+                rv.widgets$valueTh,
+                rv.widgets$scope,
+                rv.widgets$keep_vs_remove,
+                rv.widgets$tag,
+                rv.widgets$operator
               )
             )
             rv.custom$ll.query <- list(
-              WriteQuery(rv.widgets$Cellmetadatafiltering_scope,
-                rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-                rv.widgets$Cellmetadatafiltering_tag,
-                rv.widgets$Cellmetadatafiltering_valPercent,
-                rv.widgets$Cellmetadatafiltering_valueTh,
-                rv.widgets$Cellmetadatafiltering_percentTh,
-                rv.widgets$Cellmetadatafiltering_operator,
-                rv.widgets$Cellmetadatafiltering_text_threshold,
-                rv.widgets$Cellmetadatafiltering_text_method)
+              WriteQuery(rv.widgets$scope,
+                rv.widgets$keep_vs_remove,
+                rv.widgets$tag,
+                rv.widgets$valPercent,
+                rv.widgets$valueTh,
+                rv.widgets$percentTh,
+                rv.widgets$operator,
+                rv.widgets$text_threshold,
+                rv.widgets$text_method)
             )
             rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
 
