@@ -365,11 +365,7 @@ PipelineProtein_Filtering_server <- function(id,
           uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
           inputPanel(
             tags$div(
-              tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_tree_UI"))),
-              tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_chooseKeepRemove_ui"))),
-              tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_chooseScope_ui"))),
-              tags$div(style = .localStyle, uiOutput(ns("Cellmetadatafiltering_qMetacellScope_widgets_set2_ui"))),
-              tags$div(style = .localStyle, uiOutput(ns('Cellmetadatafiltering_Add_btn_UI')))
+              tags$div(style = .localStyle,  uiOutput(ns("Cellmetadatafiltering_buildQuery_ui")))
             )
           ),
           width = 200,
@@ -389,13 +385,37 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     
-    
-    output$Cellmetadatafiltering_Add_btn_UI <- renderUI({
-      widget <- actionButton(ns("Cellmetadatafiltering_BuildFilter_btn"), "Add filter",
-        class = "btn-info")
+    observe({
+      req(rv$steps.enabled["Cellmetadatafiltering"])
+      #req(rv$dataIn)
       
+      rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
+        id = "query",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        conds = reactive({omXplore::get_group(rv$dataIn)}),
+        keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
+        val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
+        operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({is.enabled()})
+      )
+    })
+    
+    output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
+      widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
+    
+    
+    
+    
+    
+    # output$Cellmetadatafiltering_Add_btn_UI <- renderUI({
+    #   widget <- actionButton(ns("Cellmetadatafiltering_BuildFilter_btn"), "Add filter",
+    #     class = "btn-info")
+    #   
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    # })
     
     MagellanNTK::mod_popover_for_help_server("tag_help",
       title = "Nature of data to filter",
@@ -427,315 +447,7 @@ PipelineProtein_Filtering_server <- function(id,
     )
 
     
-    output$Cellmetadatafiltering_tree_UI <- renderUI({
-      
-      req(rv$dataIn)
-      rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        remoteReset = reactive({remoteReset()}),
-        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
-      )
-      
-      
-      widget <- div(
-        mod_metacell_tree_ui(ns('tree')))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    })
-    
-    observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
-      rv.widgets$Cellmetadatafiltering_tag <- rv.custom$tmp.tags()$values
-       rv.custom$ll.fun <- NULL
-        rv.custom$ll.query <- NULL
-        rv.custom$ll.widgets.value <- NULL
-        rv.custom$ll.pattern <- rv.widgets$Cellmetadatafiltering_tag
-        rv.custom$ll.indices <- NULL
-
-    })
-    
-    output$Cellmetadatafiltering_chooseKeepRemove_ui <- renderUI({
-      req(rv.widgets$Cellmetadatafiltering_tag != "None")
-      widget <- radioButtons(ns("Cellmetadatafiltering_keep_vs_remove"),
-        "Type of filter operation",
-        choices = setNames(nm = c("delete", "keep")),
-        selected = rv.widgets$Cellmetadatafiltering_keep_vs_remove
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    })
-    
-    output$Cellmetadatafiltering_chooseScope_ui <- renderUI({
-      req(rv.widgets$Cellmetadatafiltering_tag != "None")
-      widget <- selectInput(ns("Cellmetadatafiltering_scope"),
-        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_filterScope_help")),
-        choices = c(
-          "None" = "None",
-          "Whole Line" = "WholeLine",
-          "Whole matrix" = "WholeMatrix",
-          "For every condition" = "AllCond",
-          "At least one condition" = "AtLeastOneCond"
-        ),
-        selected = rv.widgets$Cellmetadatafiltering_scope,
-        width = "200px"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-    })
-    
-    
-    
-    
-    output$Cellmetadatafiltering_qMetacellScope_widgets_set2_ui <- renderUI({
-      req(!(rv.widgets$Cellmetadatafiltering_scope %in% c("None", "WholeLine")))
-      req(rv.widgets$Cellmetadatafiltering_tag != "None")
-      
-      MagellanNTK::mod_popover_for_help_server("Cellmetadatafiltering_chooseValPercent_help",
-        title = paste("#/% of values to ", rv.widgets$Cellmetadatafiltering_keep_vs_remove),
-        content = "Define xxx"
-      )
-     
-      widget1 <- radioButtons(ns("Cellmetadatafiltering_valPercent"),
-        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_chooseValPercent_help")),
-        choices = setNames(nm = c("Count", "Percentage")),
-        selected = rv.widgets$Cellmetadatafiltering_valPercent
-      )
-      
-      widget2 <- selectInput(ns("Cellmetadatafiltering_operator"),
-        "Choose operator",
-        choices = setNames(nm = SymFilteringOperators()),
-        selected = rv.widgets$Cellmetadatafiltering_operator,
-        width = "100px"
-      )
-      
-      
-      tagList(
-        fluidRow(
-          column(4, MagellanNTK::toggleWidget(widget1, rv$steps.enabled["Cellmetadatafiltering"])),
-          column(8, 
-            MagellanNTK::toggleWidget(widget2, rv$steps.enabled["Cellmetadatafiltering"]),
-            uiOutput(ns("Cellmetadatafiltering_value_ui")),
-            uiOutput(ns("Cellmetadatafiltering_percentage_ui"))
-          )
-        )
-      )
-    })
-    
-    
-    output$Cellmetadatafiltering_value_ui <- renderUI({
-      req(rv.widgets$Cellmetadatafiltering_valPercent == "Count")
-      req(!(rv.widgets$Cellmetadatafiltering_scope %in% c("None", "WholeLine")))
-      MagellanNTK::mod_popover_for_help_server("Cellmetadatafiltering_value_th_help",
-        title = "Count threshold",
-        content = "Define xxx"
-      )
-      
-      widget <- selectInput(ns("Cellmetadatafiltering_valueTh"),
-        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_value_th_help")),
-        choices = getListNbValuesInLines(
-          object = rv$dataIn[[length(rv$dataIn)]],
-          conds = omXplore::get_group(rv$dataIn),
-          type = rv.widgets$Cellmetadatafiltering_scope
-        ),
-        selected = rv.widgets$Cellmetadatafiltering_valueTh,
-        width = "150px"
-      )
-      tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_keepVal_help")),
-        MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-      )
-    })
-    
-    output$Cellmetadatafiltering_percentage_ui <- renderUI({
-      req(rv.widgets$Cellmetadatafiltering_valPercent == "Percentage")
-      req(!(rv.widgets$Cellmetadatafiltering_scope %in% c("None", "WholeLine")))
-      
-      MagellanNTK::mod_popover_for_help_server("Cellmetadatafiltering_percentTh_help",
-        title = "Percentage threshold",
-        content = "Define xxx"
-      )
-      widget <- sliderInput(ns("Cellmetadatafiltering_percentTh"),
-        MagellanNTK::mod_popover_for_help_ui(ns("percentTh_help")),
-        min = 0,
-        max = 100,
-        step = 1,
-        value = rv.widgets$Cellmetadatafiltering_percentTh,
-        width = "250px"
-      )
-      tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("Cellmetadatafiltering_keepVal_percent_help")),
-        MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
-      )
-    })
-    
-    
-    
-    
-    WriteQuery <- function(
-    scope = NULL,
-      keep_vs_remove = NULL,
-      tag = NULL,
-      valPercent = NULL,
-      valueTh = NULL,
-      percentTh = NULL,
-      operator = NULL,
-      text_threshold = NULL,
-      text_method = NULL){
-
-        txt_summary <- NULL
-      if (rv.widgets$Cellmetadatafiltering_scope == "None") {
-        txt_summary <- "No filtering is processed."
-      } else if (rv.widgets$Cellmetadatafiltering_scope == "WholeLine") {
-        
-        txt_summary <- paste(
-          rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          "lines that contain only (",
-          toString(rv.widgets$Cellmetadatafiltering_tag), ")"
-        )
-      } else {
-        text_method <- switch(rv.widgets$Cellmetadatafiltering_scope,
-          WholeMatrix = "the whole matrix.",
-          AllCond = "each condition.",
-          AtLeastOneCond = "at least one condition."
-        )
-        
-        if (rv.widgets$Cellmetadatafiltering_valPercent == "Count") {
-          text_threshold <- rv.widgets$Cellmetadatafiltering_valueTh
-        } else {
-          text_threshold <- paste(as.character(rv.widgets$Cellmetadatafiltering_percentTh), 
-            " %", sep = "")
-        }
-        
-        txt_summary <- paste(
-          rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          " lines where number of (",
-          toString(rv.widgets$Cellmetadatafiltering_tag),
-          ") data ",
-          rv.widgets$Cellmetadatafiltering_operator,
-          " ",
-          text_threshold,
-          " in ",
-          text_method
-        )
-      }
-
-      txt_summary
-    }
-    
-    
-    # output$Cellmetadatafiltering_request_ui <- renderUI({
-    #   tags$p(paste("You are going to ", rv.custom$ll.query),
-    #     style = "font-size: small; text-align : center; color: purple;"
-    #   )
-    # })
-    
-    
-    # Set useless widgets to default values
-    observeEvent(rv.widgets$Cellmetadatafiltering_scope == "WholeLine", {
-      rv.widgets$Cellmetadatafiltering_percentThh <- 0
-      rv.widgets$Cellmetadatafiltering_valueTh <- 0
-      rv.widgets$Cellmetadatafiltering_valPercent <- "Percentage"
-    }, priority = 1000)
-    
-    
-    
-    
-    BuildFunctionFilter <- function(
-      valPercent = NULL,
-      percentTh = NULL,
-      valueTh = NULL,
-      scope = NULL,
-      keep_vs_remove = NULL,
-      tag = NULL,
-      operator = NULL
-      )
-      {
-      req(rv$dataIn)
-      req(rv.widgets$Cellmetadatafiltering_tag != "None")
-      req(rv.widgets$Cellmetadatafiltering_scope != "None")
-      
-      th <- switch(rv.widgets$Cellmetadatafiltering_valPercent,
-        Percentage = rv.widgets$Cellmetadatafiltering_percentTh / 100,
-        Count = as.integer(rv.widgets$Cellmetadatafiltering_valueTh)
-      )
-      
-      ff <- switch(rv.widgets$Cellmetadatafiltering_scope,
-        WholeLine = FunctionFilter("qMetacellWholeLine",
-          cmd = rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          pattern = rv.widgets$Cellmetadatafiltering_tag
-        ),
-        WholeMatrix = FunctionFilter("qMetacellWholeMatrix",
-          cmd = rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          pattern = rv.widgets$Cellmetadatafiltering_tag,
-          percent = rv.widgets$Cellmetadatafiltering_valPercent,
-          th = th,
-          operator = rv.widgets$Cellmetadatafiltering_operator
-        ),
-        AllCond = FunctionFilter("qMetacellOnConditions",
-          cmd = rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          mode = rv.widgets$Cellmetadatafiltering_scope,
-          pattern = rv.widgets$Cellmetadatafiltering_tag,
-          conds = conds(),
-          percent = rv.widgets$Cellmetadatafiltering_valPercent,
-          th = th,
-          operator = rv.widgets$Cellmetadatafiltering_operator
-        ),
-        AtLeastOneCond = FunctionFilter("qMetacellOnConditions",
-          cmd = rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          mode = rv.widgets$Cellmetadatafiltering_scope,
-          pattern = rv.widgets$Cellmetadatafiltering_tag,
-          conds = conds(),
-          percent = rv.widgets$Cellmetadatafiltering_valPercent,
-          th = th,
-          operator = rv.widgets$Cellmetadatafiltering_operator
-        )
-      )
-      ff
-    }
-    
-
-    
     observeEvent(input$Cellmetadatafiltering_BuildFilter_btn, ignoreInit = TRUE,{
-      req(BuildFunctionFilter())
-      
-      rv.custom$ll.fun <- list(
-        BuildFunctionFilter(
-          rv.widgets$Cellmetadatafiltering_valPercent,
-          rv.widgets$Cellmetadatafiltering_percentTh,
-          rv.widgets$Cellmetadatafiltering_valueTh,
-          rv.widgets$Cellmetadatafiltering_scope,
-          rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          rv.widgets$Cellmetadatafiltering_tag,
-          rv.widgets$Cellmetadatafiltering_operator
-        )
-        )
-      rv.custom$ll.query <- list(
-        WriteQuery(rv.widgets$Cellmetadatafiltering_scope,
-          rv.widgets$Cellmetadatafiltering_keep_vs_remove,
-          rv.widgets$Cellmetadatafiltering_tag,
-          rv.widgets$Cellmetadatafiltering_valPercent,
-          rv.widgets$Cellmetadatafiltering_valueTh,
-          rv.widgets$Cellmetadatafiltering_percentTh,
-          rv.widgets$Cellmetadatafiltering_operator,
-          rv.widgets$Cellmetadatafiltering_text_threshold,
-          rv.widgets$Cellmetadatafiltering_text_method)
-        )
-      rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
-      
-
-      # Append a new FunctionFilter to the list
-      rv.custom$funFilter <- list(
-        ll.fun = rv.custom$ll.fun,
-        ll.query = rv.custom$ll.query,
-        ll.widgets.value = rv.custom$ll.widgets.value,
-        ll.pattern = rv.widgets$Cellmetadatafiltering_tag,
-        ll.indices = GetIndices_FunFiltering(
-          obj = rv$dataIn[[length(rv$dataIn)]],
-          conds = DaparToolshed::design.qf(rv$dataIn)$Condition, 
-          level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), 
-          pattern = rv.custom$ll.fun[[1]]@params$pattern,
-          type = rv.widgets$Cellmetadatafiltering_scope,
-          percent = rv.custom$ll.fun[[1]]@params$percent, 
-          op = rv.custom$ll.fun[[1]]@params$operator, 
-          th = rv.custom$ll.fun[[1]]@params$th)
-      )
-
       req(length(rv.custom$funFilter$ll.fun) > 0)
       req(rv$dataIn)
       

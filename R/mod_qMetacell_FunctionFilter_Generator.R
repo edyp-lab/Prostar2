@@ -329,7 +329,16 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         ## This function xxx
         ##
         ## -------------------------------------------------------------------
-        WriteQuery <- reactive({
+        WriteQuery <- function(
+          scope = NULL,
+          keep_vs_remove = NULL,
+          tag = NULL,
+          valPercent = NULL,
+          valueTh = NULL,
+          percentTh = NULL,
+          operator = NULL,
+          text_threshold = NULL,
+          text_method = NULL){
           txt_summary <- NULL
             if (rv.widgets$scope == "None") {
                 txt_summary <- "No filtering is processed."
@@ -367,7 +376,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
                 )
             }
             txt_summary
-        })
+        }
 
 
         output$qMetacellFilter_request_ui <- renderUI({
@@ -387,7 +396,15 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
 
 
-        BuildFunctionFilter <- reactive({
+        BuildFunctionFilter <- function(
+    valPercent = NULL,
+          percentTh = NULL,
+          valueTh = NULL,
+          scope = NULL,
+          keep_vs_remove = NULL,
+          tag = NULL,
+          operator = NULL
+        ){
             req(rv$dataIn)
             req(rv.widgets$tag != "None")
             req(rv.widgets$scope != "None")
@@ -429,20 +446,35 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
                 )
             )
             ff
-        })
+        }
         
-        
-        GuessIndices <- reactive({
-          
-        })
-
 
         observeEvent(input$BuildFilter_btn, ignoreInit = TRUE,{
           req(BuildFunctionFilter())
           req(WriteQuery())
 
-            rv.custom$ll.fun <- list(BuildFunctionFilter())
-            rv.custom$ll.query <- list(WriteQuery())
+            rv.custom$ll.fun <- list(
+              BuildFunctionFilter(
+                rv.widgets$Cellmetadatafiltering_valPercent,
+                rv.widgets$Cellmetadatafiltering_percentTh,
+                rv.widgets$Cellmetadatafiltering_valueTh,
+                rv.widgets$Cellmetadatafiltering_scope,
+                rv.widgets$Cellmetadatafiltering_keep_vs_remove,
+                rv.widgets$Cellmetadatafiltering_tag,
+                rv.widgets$Cellmetadatafiltering_operator
+              )
+            )
+            rv.custom$ll.query <- list(
+              WriteQuery(rv.widgets$Cellmetadatafiltering_scope,
+                rv.widgets$Cellmetadatafiltering_keep_vs_remove,
+                rv.widgets$Cellmetadatafiltering_tag,
+                rv.widgets$Cellmetadatafiltering_valPercent,
+                rv.widgets$Cellmetadatafiltering_valueTh,
+                rv.widgets$Cellmetadatafiltering_percentTh,
+                rv.widgets$Cellmetadatafiltering_operator,
+                rv.widgets$Cellmetadatafiltering_text_threshold,
+                rv.widgets$Cellmetadatafiltering_text_method)
+            )
             rv.custom$ll.widgets.value <-  list(reactiveValuesToList(rv.widgets))
 
             # Append a new FunctionFilter to the list
