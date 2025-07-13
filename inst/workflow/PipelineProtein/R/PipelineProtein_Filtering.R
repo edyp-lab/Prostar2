@@ -125,13 +125,7 @@ PipelineProtein_Filtering_server <- function(id,
     query = list(),
     fun.list = list(),
     widgets.value = list(),
-    funFilter = list(
-        ll.fun = NULL,
-        ll.query = NULL,
-        ll.widgets.value = NULL,
-        ll.pattern = NULL,
-        ll.indices = NULL
-      ),
+    funFilter = reactive({NULL}),
     qMetacell_Filter_SummaryDT = data.frame(
       query = "-",
       nbDeleted = "0",
@@ -447,8 +441,7 @@ PipelineProtein_Filtering_server <- function(id,
     )
 
     
-    observeEvent(input$Cellmetadatafiltering_BuildFilter_btn, ignoreInit = TRUE,{
-      req(length(rv.custom$funFilter$ll.fun) > 0)
+    observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE,{
       req(rv$dataIn)
       
       
