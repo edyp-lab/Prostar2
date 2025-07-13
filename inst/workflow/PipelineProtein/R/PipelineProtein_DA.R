@@ -622,7 +622,7 @@ PipelineProtein_DA_server <- function(id,
     }
     
     
-    output$Pairwisecomparison_btn_validate_UI <- renderUI({
+    output$Pairwisecomparison_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Pairwisecomparison_btn_validate"),
         "Validate step",
         class = "btn-success"
@@ -1020,7 +1020,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     
-    output$Pvaluecalibration_btn_validate_UI <- renderUI({
+    output$Pvaluecalibration_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Pvaluecalibration_btn_validate"),
         "Validate step",
         class = "btn-success"
@@ -1461,7 +1461,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    output$Save_btn_validate_UI <- renderUI({
+    output$Save_btn_validate_ui <- renderUI({
       MagellanNTK::toggleWidget(
         actionButton(ns("Save_btn_validate"), "Save",
           class = "btn-success"),
