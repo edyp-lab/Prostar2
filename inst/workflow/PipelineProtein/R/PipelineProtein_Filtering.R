@@ -449,18 +449,17 @@ PipelineProtein_Filtering_server <- function(id,
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
-        filters = rv.custom$funFilter$ll.fun
+        filters = rv.custom$funFilter()$value$ll.fun
       )
-      indices <- rv.custom$funFilter$ll.indices
+      indices <- rv.custom$funFilter()$value$ll.indices
       
       
       # Add infos
       nBefore <- nrow(tmp[[length(tmp) - 1]])
       nAfter <- nrow(tmp[[length(tmp)]])
       
-      #.html <- ConvertListToHtml(rv.custom$funFilter$ll.query)
       
-      .html <- rv.custom$funFilter$ll.query
+      .html <- rv.custom$funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
       .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
       
@@ -486,8 +485,8 @@ PipelineProtein_Filtering_server <- function(id,
       names(rv$dataIn)[length(rv$dataIn)] <- 'qMetacellFiltering'
       
       # Add params
-      #par <- rv.custom$funFilter$ll.widgets.value
-      query <- rv.custom$funFilter$ll.query
+      #par <- rv.custom$funFilter()$ll.widgets.value
+      query <- rv.custom$funFilter()$value$ll.query
       i <- length(rv$dataIn)
       .history <- DaparToolshed::paramshistory(rv$dataIn[[i]])[['Metacell_Filtering']]
       
@@ -501,12 +500,12 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$plots_ui <- renderUI({
-      req(rv.custom$funFilter$ll.pattern)
+      req(rv.custom$funFilter()$value$ll.pattern)
       
       mod_ds_metacell_Histos_server(
         id = "plots",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        pattern = reactive({rv.custom$funFilter$ll.pattern}),
+        pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
         group = reactive({omXplore::get_group(rv$dataIn)})
       )
       
