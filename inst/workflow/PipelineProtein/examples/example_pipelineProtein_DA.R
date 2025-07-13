@@ -1,9 +1,16 @@
-library(MagellanNTK)
-library(highcharter)
-library(DaparToolshed)
-library(Prostar2)
 library(omXplore)
+library(shiny)
+library(waiter)
+library(shinyjs)
+library(shinyBS)
+library(highcharter)
+library(MagellanNTK)
+library(Prostar2)
 library(DaparToolshed)
+library(bs4Dash)
+library(shinyFeedback)
+
+options(shiny.fullstacktrace = TRUE)
 
 history <- list()
 data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -23,4 +30,6 @@ paramshistory(new.dataset) <- history
 
 obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
 path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-shiny::runApp(workflowApp("PipelineProtein_DA", path, dataIn = obj))
+
+proc_workflowApp("PipelineProtein_DA", path, dataIn = obj)
+

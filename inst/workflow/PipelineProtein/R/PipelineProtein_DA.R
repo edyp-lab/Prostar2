@@ -264,7 +264,7 @@ PipelineProtein_DA_server <- function(id,
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
-            uiOutput(ns('Description_btn_validate_ui'))
+            uiOutput(ns('Description_btn_validate_UI'))
           ),
           width = 200,
           position = "left",
@@ -425,8 +425,8 @@ PipelineProtein_DA_server <- function(id,
           style = "z-index: 0;"
         ),
         
-      uiOutput(ns("Pairwisecomparison_volcano_UI")),
-      uiOutput(ns("Pairwisecomparison_tooltipInfo_UI"))
+        uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
+        uiOutput(ns("Pairwisecomparison_volcano_UI"))
       )
 
     })
@@ -478,8 +478,9 @@ PipelineProtein_DA_server <- function(id,
     output$Pairwisecomparison_tooltipInfo_UI <- renderUI({
       req(rv$dataIn)
       
-      widget <- tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
+      widget <- fluidRow(
+        column(width = 6,
+          MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
         selectInput(ns("Pairwisecomparison_tooltipInfo"),
           label = NULL,
           choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
@@ -488,9 +489,11 @@ PipelineProtein_DA_server <- function(id,
           selectize = FALSE,
           width = "300px", 
           size = 5
-        ),
-        actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
+        )),
+        column(width = 6,
+          actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
           class = actionBtnClass)
+        )
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
@@ -541,6 +544,9 @@ PipelineProtein_DA_server <- function(id,
         )
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
+      
+      ##############################
+      
     })
     
     

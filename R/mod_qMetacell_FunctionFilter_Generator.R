@@ -41,22 +41,13 @@ NULL
 mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     ns <- NS(id)
     tagList(
-        div(
-            fluidRow(
-                column(2, uiOutput(ns("tree_UI"))),
-                column(2, uiOutput(ns("chooseKeepRemove_ui"))),
-                column(2, uiOutput(ns("chooseScope_ui"))),
-                column(6, uiOutput(ns("qMetacellScope_widgets_set2_ui"))
-                )
-            ),
-            div(
-                style = "display:inline-block; 
-                vertical-align: middle; align: center;",
-                uiOutput(ns("qMetacellScope_request_ui"))
-            ),
-            uiOutput(ns('Add_btn_UI'))
+      uiOutput(ns("tree_UI")),
+      uiOutput(ns("chooseKeepRemove_ui")),
+        uiOutput(ns("chooseScope_ui")),
+        uiOutput(ns("qMetacellScope_widgets_set2_ui")),
+        uiOutput(ns("qMetacellScope_request_ui")),
+        uiOutput(ns('Add_btn_UI'))
         )
-    )
 }
 
 
@@ -185,6 +176,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         # })
         
         observeEvent(dataIn(), ignoreNULL = FALSE, {
+          print('tototo')
           stopifnot(inherits(dataIn(), 'SummarizedExperiment'))
           rv$dataIn <- dataIn()
         }, priority = 1000)
@@ -277,15 +269,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
 
 
             tagList(
-                fluidRow(
-                    column(4, MagellanNTK::toggleWidget(widget1, is.enabled())),
-                    column(8, 
-                      MagellanNTK::toggleWidget(widget2, is.enabled()),
-                        uiOutput(ns("value_ui")),
-                        uiOutput(ns("percentage_ui"))
-                    )
+                MagellanNTK::toggleWidget(widget1, is.enabled()),
+                MagellanNTK::toggleWidget(widget2, is.enabled()),
+                uiOutput(ns("value_ui")),
+                uiOutput(ns("percentage_ui"))
                 )
-            )
         })
 
 
