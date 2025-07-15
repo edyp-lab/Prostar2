@@ -257,18 +257,20 @@ PipelineProtein_DA_server <- function(id,
         paste0(id, '.md')))
       
       bslib::layout_sidebar(
+        tags$style(".sidebar-content {background-color: lightblue; width: 200px;}"),
         sidebar = bslib::sidebar(
           id = ns("Description_Sidebar"),  # Add an explicit ID
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
+          #ags$style(" .bslib-sidebar-input .sidebar-content .slib-gap-spacing .main .bslib-gap-spacing .html-fill-container{background-color: lightblue; width: 300px;}"),
           
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
+            tags$style(".shiny-input-panel {background-color: lightblue;}"),
             uiOutput(ns('Description_btn_validate_UI'))
           ),
-          width = 200,
+          #width = 200,
           position = "left",
-          bg='lightblue',
+          #bg='lightblue',
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
           #style = "p1"
         ),
