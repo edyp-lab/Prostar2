@@ -237,6 +237,7 @@ PipelineProtein_DA_server <- function(id,
     #####################################################################
     
     
+ 
     
     
     
@@ -257,7 +258,9 @@ PipelineProtein_DA_server <- function(id,
         paste0(id, '.md')))
       
       bslib::layout_sidebar(
-        tags$style(".sidebar-content {background-color: lightblue; width: 200px;}"),
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns("Description_Sidebar"),  # Add an explicit ID
           #ags$style(" .bslib-sidebar-input .sidebar-content .slib-gap-spacing .main .bslib-gap-spacing .html-fill-container{background-color: lightblue; width: 300px;}"),
@@ -265,14 +268,11 @@ PipelineProtein_DA_server <- function(id,
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
-            tags$style(".shiny-input-panel {background-color: lightblue;}"),
+           # tags$style(".shiny-input-panel {background-color: lightblue;}"),
             uiOutput(ns('Description_btn_validate_UI'))
           ),
-          #width = 200,
           position = "left",
-          #bg='lightblue',
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
         ),
         if (file.exists(file))
           includeMarkdown(file)
@@ -402,12 +402,13 @@ PipelineProtein_DA_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Pairwisecomparison <- renderUI({
       shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
       
       .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Pairwisecomparison_Sidebar'),
           timeline_process_ui(ns('Pairwisecomparison_timeline')),
@@ -420,11 +421,8 @@ PipelineProtein_DA_server <- function(id,
               tags$div(style = .localStyle, uiOutput(ns("pushpval_UI")))
             )
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
+          padding = c(100, 0)
         ),
         
         uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
@@ -658,11 +656,13 @@ PipelineProtein_DA_server <- function(id,
         padding-right: 40px;"
 
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Pvaluecalibration_Sidebar'),
           timeline_process_ui(ns('Pvaluecalibration_timeline')),
           hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
           uiOutput(ns("Pvaluecalibration_btn_validate_ui")),
           inputPanel(
             tags$div(
@@ -671,11 +671,8 @@ PipelineProtein_DA_server <- function(id,
               tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_nBins_UI")))
             )
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
+          padding = c(100, 0)
         ),
         
         p(tags$strong(
@@ -1052,27 +1049,20 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 2 UI---------------
     output$FDR <- renderUI({
-      widget <- bslib::layout_sidebar(
+      bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('FDR_Sidebar'),
           timeline_process_ui(ns('FDR_timeline')),
           hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
           uiOutput(ns("FDR_btn_validate_UI")),
           inputPanel(
-            tags$div(
-              tags$div(style = .localStyle, mod_set_pval_threshold_ui(ns("Title"))),
-              tags$div(style = .localStyle, checkboxInput(ns('FDR_viewAdjPval'), 
-                'View adjusted p-value', 
-                value = rv.widgets$FDR_viewAdjPval)),
-              
-            )
+            uiOutput(ns('widgets_ui'))
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
+          padding = c(100, 0)
         ),
         
         uiOutput(ns("FDR_nbSelectedItems_ui")),
@@ -1084,11 +1074,22 @@ PipelineProtein_DA_server <- function(id,
         DT::DTOutput(ns("FDR_selectedItems_UI"))
       )
       
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
       
     })
     
     
+    output$widgets_ui <- renderUI({
+      widget <- tags$div(
+        tags$div(style = .localStyle, mod_set_pval_threshold_ui(ns("Title"))),
+        tags$div(style = .localStyle, checkboxInput(ns('FDR_viewAdjPval'), 
+          'View adjusted p-value', 
+          value = rv.widgets$FDR_viewAdjPval)),
+        
+      )
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
+      
+    })
     
     #-------------------------------------------------------------------
     #
@@ -1438,17 +1439,17 @@ PipelineProtein_DA_server <- function(id,
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
           hr(style = "border-top: 3px solid #000000;"),
           inputPanel(
             uiOutput(ns('Save_btn_validate_ui'))
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
           #style = "p1"
         ),
