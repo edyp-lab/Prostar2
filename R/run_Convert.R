@@ -40,7 +40,6 @@ convert_dataset_server <- function(id,
 
   path <- system.file('workflow/PipelineConvert', package = 'Prostar2')
   dataIn <- NULL
-  tl.layout <- NULL
   mode <- "user"
   
   
@@ -59,9 +58,7 @@ convert_dataset_server <- function(id,
       
       dataOut(
         nav_server(id = 'PipelineConvert_Convert',
-          dataIn = reactive({data.frame()}),
-          tl.layout = tl.layout
-        )
+          dataIn = reactive({data.frame()}))
       )
     #})
     

@@ -348,36 +348,29 @@ PipelineProtein_Filtering_server <- function(id,
       
       #####################################################"
       shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
       
       .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
       
       bslib::layout_sidebar(
         tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
+          tags$style(".shiny-input-panel {background-color: lightblue; }")
+          #tags$head(tags$style(HTML("#sidebar_id { overflow: hidden;}"))),
         ),
         sidebar = bslib::sidebar(
           id = ns('Cellmetadatafiltering_Sidebar'),
           timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
           hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
           uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
           inputPanel(
-            tags$div(
-              tags$div(style = .localStyle,  uiOutput(ns("Cellmetadatafiltering_buildQuery_ui")))
-            )
+            uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
           padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
+          options = list(`live-search` = TRUE, size = 10)
         ),
         
         
         uiOutput(ns('qMetacell_Filter_DT_UI')),
-        #uiOutput(ns("Cellmetadatafiltering_request_ui")),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
       )
