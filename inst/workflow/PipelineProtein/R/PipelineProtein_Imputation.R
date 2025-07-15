@@ -210,6 +210,9 @@ PipelineProtein_Imputation_server <- function(id,
       
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns("Description_Sidebar"),  # Add an explicit ID
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
@@ -280,6 +283,9 @@ PipelineProtein_Imputation_server <- function(id,
       .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('POVImputation_Sidebar'),
           timeline_process_ui(ns('POVImputation_timeline')),
@@ -534,6 +540,9 @@ PipelineProtein_Imputation_server <- function(id,
 
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('MECImputation_Sidebar'),
           timeline_process_ui(ns('MECImputation_timeline')),
@@ -769,6 +778,9 @@ PipelineProtein_Imputation_server <- function(id,
     output$Save <- renderUI({
      
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),

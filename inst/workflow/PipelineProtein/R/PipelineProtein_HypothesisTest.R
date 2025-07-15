@@ -187,6 +187,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
         paste0(id, '.md')))
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns("Description_Sidebar"),  # Add an explicit ID
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
@@ -253,6 +256,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('HypothesisTest_Sidebar'),
           timeline_process_ui(ns('HypothesisTest_timeline')),
@@ -646,6 +652,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),

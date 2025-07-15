@@ -271,6 +271,9 @@ PipelineProtein_Filtering_server <- function(id,
       
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns("Description_Sidebar"),  # Add an explicit ID
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
@@ -351,6 +354,9 @@ PipelineProtein_Filtering_server <- function(id,
       .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Cellmetadatafiltering_Sidebar'),
           timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
@@ -566,6 +572,9 @@ PipelineProtein_Filtering_server <- function(id,
       
       
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Variablefiltering_Sidebar'),
           timeline_process_ui(ns('Variablefiltering_timeline')),
@@ -872,6 +881,9 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       bslib::layout_sidebar(
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+          tags$style(".shiny-input-panel {background-color: lightblue;}")
+        ),
         sidebar = bslib::sidebar(
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),
