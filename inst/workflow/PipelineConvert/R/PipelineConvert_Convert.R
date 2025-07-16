@@ -984,8 +984,11 @@ PipelineConvert_Convert_server <- function(id,
           timeline_process_ui(ns('Save_timeline')),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
           hr(style = "border-top: 3px solid #000000;"),
+          uiOutput(ns('Save_btn_validate_ui')),
           inputPanel(
-            uiOutput(ns('Save_btn_validate_ui'))
+            
+            uiOutput(ns('Save_infos_ui')),
+            uiOutput(ns('Save_mod_dl_ui'))
           ),
           position = "left",
           padding = c(100, 0),
@@ -1046,7 +1049,7 @@ PipelineConvert_Convert_server <- function(id,
       # as.data.frame(rv.custom$design()$design)
       
       if (input$Save_analysis != ""){
-        analysis_name <- input$Save_analysis
+        analysis_name <- rv.widgets$Save_analysis
       }else{
         analysis_name <- "myDataset"
       }

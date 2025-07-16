@@ -9,6 +9,7 @@
 #' library(DaparToolshed)
 #' library(MagellanNTK)
 #' library(Prostar2)
+#' library(spsComps)
 #' shiny::runApp(Prostar2::convert_dataset())
 #' }
 #' 
