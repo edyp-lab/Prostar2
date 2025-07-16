@@ -987,14 +987,13 @@ PipelineConvert_Convert_server <- function(id,
           uiOutput(ns('Save_btn_validate_ui')),
           inputPanel(
             
-            uiOutput(ns('Save_infos_ui')),
-            uiOutput(ns('Save_mod_dl_ui'))
+            uiOutput(ns('Save_infos_ui'))
           ),
           position = "left",
           padding = c(100, 0),
           style = "z-index: 0;"
         ),
-        uiOutput(ns('dl_ui'))
+         uiOutput(ns('Save_mod_dl_ui'))
       )
     })
     
