@@ -52,7 +52,13 @@ mod_metacell_tree_ui <- function(id) {
             )
             ),
         br(),
-        uiOutput(ns('modaltree'))
+      absolutePanel(
+        uiOutput(ns('modaltree')),
+        top = 0,
+        left = 20,
+        draggable = FALSE
+        
+      )
         )
 
 }
@@ -134,7 +140,12 @@ mod_metacell_tree_server <- function(id,
                 '").on("hidden.bs.modal", function (event) {
                 x = new Date().toLocaleString();
                 Shiny.onInputChange("', ns('lastModalClose'), '",x);});})')),
-            tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
+            tags$head(
+              tags$style(
+                paste0(".modal-dialog { 
+                width: fit-content !important; 
+                  z-index: 100000000000;
+                  }"))),
             #tags$head(tags$style("#modalExample{ display:none;")),
             
             shinyBS::bsModal(ns("modalExample"),

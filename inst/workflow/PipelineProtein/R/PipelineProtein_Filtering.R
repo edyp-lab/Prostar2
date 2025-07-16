@@ -283,9 +283,7 @@ PipelineProtein_Filtering_server <- function(id,
           inputPanel(
             uiOutput(ns('Description_btn_validate_ui'))
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
           #style = "p1"
         ),
@@ -352,7 +350,7 @@ PipelineProtein_Filtering_server <- function(id,
       .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
       
       bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px; height: 400px;}"),
           tags$style(".shiny-input-panel {background-color: lightblue; }")
           #tags$head(tags$style(HTML("#sidebar_id { overflow: hidden;}"))),
         ),
@@ -365,8 +363,8 @@ PipelineProtein_Filtering_server <- function(id,
             uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
           ),
           position = "left",
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          options = list(`live-search` = TRUE, size = 10)
+          padding = c(100, 0),
+          style = "z-index: 0;"
         ),
         
         
@@ -395,6 +393,7 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
+      
       widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
@@ -586,9 +585,7 @@ PipelineProtein_Filtering_server <- function(id,
             ),
             uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
           padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
           style = "z-index: 0;"
         ),
@@ -885,11 +882,9 @@ PipelineProtein_Filtering_server <- function(id,
           inputPanel(
             uiOutput(ns('Save_btn_validate_ui'))
           ),
-          width = 200,
           position = "left",
-          bg='lightblue',
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
+          padding = c(100, 0),
+          style = "z-index: 0;"
         ),
         uiOutput(ns('dl_ui'))
       )
