@@ -509,7 +509,7 @@ PipelineConvert_Convert_server <- function(id,
     
     
     ## Validation button -----
-    loader_inline_SelectFile <- addLoader$new("SelectFile_btn_validate", color = "blue", method = "inline", type = "spinner")
+    loader_inline_SelectFile <- spsComps::addLoader$new("SelectFile_btn_validate", color = "blue", method = "inline", type = "spinner")
     
     output$SelectFile_btn_validate_ui <- renderUI({
       widget <-  actionButton(ns("SelectFile_btn_validate"), "Perform",
@@ -735,7 +735,7 @@ PipelineConvert_Convert_server <- function(id,
     
     
     ## Validation button -----
-    loader_inline_DataId <- addLoader$new("DataId_btn_validate", color = "blue", method = "inline", type = "spinner")
+    loader_inline_DataId <- spsComps::addLoader$new("DataId_btn_validate", color = "blue", method = "inline", type = "spinner")
     
     output$DataId_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("DataId_btn_validate"), "Perform",
@@ -873,7 +873,7 @@ PipelineConvert_Convert_server <- function(id,
     
     
     ## Validation button -----
-    loader_inline_ExpandFeatData <- addLoader$new("ExpandFeatData_btn_validate", color = "blue", method = "inline", type = "spinner")
+    loader_inline_ExpandFeatData <- spsComps::addLoader$new("ExpandFeatData_btn_validate", color = "blue", method = "inline", type = "spinner")
     
     output$ExpandFeatData_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("ExpandFeatData_btn_validate"), "Perform",
@@ -946,7 +946,7 @@ PipelineConvert_Convert_server <- function(id,
     
     
     ## Validation button -----
-    loader_inline_Design <- addLoader$new("Design_btn_validate", color = "blue", method = "inline", type = "spinner")
+    loader_inline_Design <- spsComps::addLoader$new("Design_btn_validate", color = "blue", method = "inline", type = "spinner")
     
     output$Design_btn_validate_ui <- renderUI({
       widget <- actionButton(ns("Design_btn_validate"), "Validate design",
@@ -1023,7 +1023,7 @@ PipelineConvert_Convert_server <- function(id,
     })    
     
     ## Validation button -----
-    loader_inline_Save <- addLoader$new("Save_btn_validate", color = "blue", method = "inline", type = "spinner")
+    loader_inline_Save <- spsComps::addLoader$new("Save_btn_validate", color = "blue", method = "inline", type = "spinner")
     
     output$Save_btn_validate_ui <- renderUI({
       MagellanNTK::toggleWidget(actionButton(ns("Save_btn_validate"), 
