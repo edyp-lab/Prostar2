@@ -871,7 +871,7 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 400px;}"),
           tags$style(".shiny-input-panel {background-color: lightblue;}")
         ),
         sidebar = bslib::sidebar(

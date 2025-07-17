@@ -24,7 +24,7 @@ convert_dataset_ui <- function(id){
   requireNamespace('MagellanNTK')
   ns <- NS(id)
     tagList(
-      MagellanNTK::nav_ui(ns('PipelineConvert_Convert'))
+      MagellanNTK::nav_process_ui(ns('PipelineConvert_Convert'))
     )
 }
 
@@ -53,18 +53,10 @@ convert_dataset_server <- function(id,
     
     dataOut <- reactiveVal()
     session$userData$workflow.path <- path
-    
-    #observeEvent(dataIn, {
-     # session$userData$workflow.path <- path
-      
-      dataOut(
-        nav_server(id = 'PipelineConvert_Convert',
+     
+    nav_process_server(id = 'PipelineConvert_Convert',
           dataIn = reactive({data.frame()}))
-      )
-    #})
-    
-    return(reactive({dataOut()}))
-    
+
   })
 }
 
@@ -87,17 +79,19 @@ convert_dataset <- function() {
     )
     
     
+    
+    
     output$test <- renderUI({
 
     rv.core$result_convert <- convert_dataset_server('Convert')
-    
+
     convert_dataset_ui('Convert')
   })
     
     
-    observeEvent(req(rv.core$result_convert()$dataOut()$trigger), {
-      print(rv.core$result_convert()$dataOut()$value$data)
-      print(rv.core$result_convert()$dataOut()$value$name)
+    observeEvent(req(rv.core$result_convert$dataOut()$trigger), ignoreNULL = TRUE, {
+      print(rv.core$result_convert())
+      print(rv.core$result_convert())
     })
   }
 

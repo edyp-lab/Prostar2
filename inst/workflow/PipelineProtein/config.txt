@@ -23,7 +23,6 @@ keepDatasets: Prostar2
 UI_view_debugger: 'disabled'
 verbose: 'disabled'
 UI_view_open_pipeline: 'disabled'
-UI_view_convertDataset: 'disabled'
 UI_view_change_Look_Feel: 'disabled'
 UI_view_change_core_funcs: 'disabled'
 
