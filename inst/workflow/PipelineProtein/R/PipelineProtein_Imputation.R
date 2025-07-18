@@ -78,7 +78,8 @@ PipelineProtein_Imputation_server <- function(id,
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1}),
-  path = NULL
+  path = NULL,
+  btnEvents = reactive({NULL})
 ){
   
   # Define default selected values for widgets
@@ -220,7 +221,7 @@ PipelineProtein_Imputation_server <- function(id,
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
-            uiOutput(ns('Description_btn_validate_ui'))
+            #uiOutput(ns('Description_btn_validate_ui'))
           ),
           width = 200,
           position = "left",
@@ -249,15 +250,16 @@ PipelineProtein_Imputation_server <- function(id,
       
     })
     
-    output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-                             "Start",
-                             class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
+    # output$Description_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Description_btn_validate"),
+    #                          "Start",
+    #                          class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
+    # })
     
     
-    observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Description')
       req(dataIn())
       rv$dataIn <- dataIn()
       rv.custom$dataIn1 <- dataIn()
@@ -289,9 +291,9 @@ PipelineProtein_Imputation_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('POVImputation_Sidebar'),
           timeline_process_ui(ns('POVImputation_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
+          #hr(style = "border-top: 3px solid #000000;"),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          uiOutput(ns("POVImputation_btn_validate_ui")),
+          #uiOutput(ns("POVImputation_btn_validate_ui")),
           inputPanel(
             tags$div(
               tags$div(style = .localStyle, uiOutput(ns("POVImputation_algorithm_UI"))),
@@ -404,15 +406,16 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
     
-    output$POVImputation_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("POVImputation_btn_validate"),
-        "Perform",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
-    })
+    # output$POVImputation_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("POVImputation_btn_validate"),
+    #     "Perform",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
+    # })
+    # 
     
-    
-    observeEvent(input$POVImputation_btn_validate, ignoreInit = FALSE, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='POVImputation')
       req(dataIn())
       rv$dataIn <- dataIn()
       rv.custom$dataIn1 <- dataIn()
@@ -546,9 +549,9 @@ PipelineProtein_Imputation_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('MECImputation_Sidebar'),
           timeline_process_ui(ns('MECImputation_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
+         # hr(style = "border-top: 3px solid #000000;"),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          uiOutput(ns("MECImputation_btn_validate_ui")),
+          #uiOutput(ns("MECImputation_btn_validate_ui")),
           inputPanel(
             if (rv.custom$mv.present) {
               div(
@@ -664,16 +667,17 @@ PipelineProtein_Imputation_server <- function(id,
     
     
 
-    output$MECImputation_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("MECImputation_btn_validate"),
-                             "Perform",
-                             class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
-    })
+    # output$MECImputation_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("MECImputation_btn_validate"),
+    #                          "Perform",
+    #                          class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
+    # })
     
 
     
-    observeEvent(input$MECImputation_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='MECImputation')
       
       req(rv.custom$dataIn1)
       req(rv.widgets$MECImputation_algorithm != "None")
@@ -785,9 +789,9 @@ PipelineProtein_Imputation_server <- function(id,
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          hr(style = "border-top: 3px solid #000000;"),
+          #hr(style = "border-top: 3px solid #000000;"),
           inputPanel(
-            uiOutput(ns('Save_btn_validate_ui'))
+            #uiOutput(ns('Save_btn_validate_ui'))
           ),
           width = 200,
           position = "left",
@@ -811,11 +815,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     output$Save_btn_validate_ui <- renderUI({
       tagList(
-        MagellanNTK::toggleWidget( 
-          actionButton(ns("Save_btn_validate"), "Save",
-            class = "btn-success"),
-          rv$steps.enabled['Save']
-        ),
+        
         if (config@mode == 'process' && 
             rv$steps.status['Save'] == stepStatus$VALIDATED) {
           download_dataset_ui(ns('createQuickLink'))
@@ -823,7 +823,8 @@ PipelineProtein_Imputation_server <- function(id,
       )
     })
     
-    observeEvent(input$Save_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Save')
       # Do some stuff
       len_start <- length(rv$dataIn)
       len_end <- length(rv.custom$dataIn2)

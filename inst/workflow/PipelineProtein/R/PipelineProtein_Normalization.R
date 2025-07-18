@@ -169,11 +169,10 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-  
-    observeEvent(btnEvents(), ignoreInit = FALSE, {
+    observeEvent(btnEvents(), ignoreInit = TRUE, {
       
       print(paste0(current.pos(), '__', btnEvents()))
-      
+
     }, priority = 10000)
     
     
@@ -201,7 +200,7 @@ PipelineProtein_Normalization_server <- function(id,
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
-            uiOutput(ns('Description_btn_validate_ui'))
+           # uiOutput(ns('Description_btn_validate_ui'))
           ),
           width = 200,
           position = "left",
@@ -228,15 +227,16 @@ PipelineProtein_Normalization_server <- function(id,
       
     })
     
-    output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-                             "Start",
-                             class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
+    # output$Description_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Description_btn_validate"),
+    #                          "Start",
+    #                          class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
+    # })
+    # 
     
-    
-    observeEvent(btnEvents() == 'Description', ignoreInit = TRUE, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Description')
       req(dataIn())
       rv$dataIn <- dataIn()
       
@@ -284,7 +284,7 @@ PipelineProtein_Normalization_server <- function(id,
           timeline_process_ui(ns('POVImputation_timeline')),
           hr(style = "border-top: 3px solid #000000;"),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          uiOutput(ns("Normalization_btn_validate_ui")),
+          #uiOutput(ns("Normalization_btn_validate_ui")),
           inputPanel(
             tags$div(
               tags$div(style = .localStyle, uiOutput(ns("Normalization_method_ui"))),
@@ -482,36 +482,17 @@ PipelineProtein_Normalization_server <- function(id,
             median (quantile = 0.5). Min value=0, max value=1"
     )
     
-    ######################################################################
-    
-    
-    # observe({
-    #   rv.custom$tmp.norm <- Prostar2::mod_Prot_Normalization_server(
-    #     id = 'norm',
-    #     dataIn = reactive({rv$dataIn}),
-    #     i = reactive({length(rv$dataIn)}),
-    #     is.enabled = reactive({rv$steps.enabled["Normalization"]}),
-    #     remoteReset = reactive({remoteReset()})
-    #   )
+
+    # output$Normalization_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Normalization_btn_validate"),
+    #     "Perform",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'])
     # })
     # 
-    # output$Prot_Normalization_ui <- renderUI({
-    #   widget <- Prostar2::mod_Prot_Normalization_ui(ns('norm'))
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'] )
-    # })
     
-    
-    
-    output$Normalization_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Normalization_btn_validate"),
-        "Perform",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'])
-    })
-    
-    
-    observeEvent(btnEvents() == 'Normalization', ignoreInit = TRUE,{
-      #browser()
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Normalization')
       # Do some stuff 
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
@@ -664,7 +645,7 @@ PipelineProtein_Normalization_server <- function(id,
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
           hr(style = "border-top: 3px solid #000000;"),
           inputPanel(
-            uiOutput(ns('Save_btn_validate_ui'))
+            #uiOutput(ns('Save_btn_validate_ui'))
           ),
           width = 200,
           position = "left",
@@ -698,7 +679,9 @@ PipelineProtein_Normalization_server <- function(id,
       )
       
     })
-    observeEvent(btnEvents() == 'Save', ignoreInit = TRUE,{
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Save')
+      
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

@@ -82,7 +82,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
-  current.pos = reactive({1})
+  current.pos = reactive({1}),
+  btnEvents = reactive({NULL})
 ){
   
   # Define default selected values for widgets
@@ -197,7 +198,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
-            uiOutput(ns('Description_btn_validate_ui'))
+            
           ),
           width = 200,
           position = "left",
@@ -224,15 +225,16 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
     })
     
-    output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-        "Start",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
+    # output$Description_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Description_btn_validate"),
+    #     "Start",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
+    # })
     
     
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Description')
       rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -262,9 +264,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('HypothesisTest_Sidebar'),
           timeline_process_ui(ns('HypothesisTest_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
+          #hr(style = "border-top: 3px solid #000000;"),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          uiOutput(ns("HypothesisTest_btn_validate_ui")),
+          #uiOutput(ns("HypothesisTest_btn_validate_ui")),
           inputPanel(
             uiOutput(ns('HypothesisTest_widgets_ui'))
             
@@ -588,15 +590,16 @@ PipelineProtein_HypothesisTest_server <- function(id,
     # )
     
     
-    output$HypothesisTest_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("HypothesisTest_btn_validate"),
-        "Validate step",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
-      
-    })
+    # output$HypothesisTest_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("HypothesisTest_btn_validate"),
+    #     "Validate step",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
+    #   
+    # })
     
-    observeEvent(input$HypothesisTest_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='HypothesisTest')
       # Do some stuff
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
@@ -659,9 +662,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          hr(style = "border-top: 3px solid #000000;"),
+          #hr(style = "border-top: 3px solid #000000;"),
           inputPanel(
-            uiOutput(ns('Save_btn_validate_ui'))
+           # uiOutput(ns('Save_btn_validate_ui'))
           ),
           width = 200,
           position = "left",
@@ -683,11 +686,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     output$Save_btn_validate_ui <- renderUI({
       tagList(
-        MagellanNTK::toggleWidget( 
-          actionButton(ns("Save_btn_validate"), "Validate step",
-            class = "btn-success"),
-          rv$steps.enabled['Save']
-        ),
+        
         if (config@mode == 'process' && 
             rv$steps.status['Save'] == stepStatus$VALIDATED) {
           download_dataset_ui(ns('createQuickLink'))
@@ -695,7 +694,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       )
       
     })
-    observeEvent(input$Save_btn_validate, {
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Save')
       # Do some stuff
       
       new.dataset <- rv$dataIn[[length(rv$dataIn)]]

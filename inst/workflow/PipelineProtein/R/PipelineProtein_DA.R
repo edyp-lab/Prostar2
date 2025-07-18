@@ -97,7 +97,8 @@ PipelineProtein_DA_server <- function(id,
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
-  current.pos = reactive({1})
+  current.pos = reactive({1}),
+  btnEvents = reactive({NULL})
 ){
   
   requireNamespace('DaparToolshed')

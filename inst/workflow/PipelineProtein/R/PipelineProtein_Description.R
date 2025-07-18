@@ -27,7 +27,8 @@ PipelineProtein_Description_server <- function(id,
     remoteReset = reactive({0}),
     steps.status = reactive({NULL}),
     current.pos = reactive({1}),
-    path = NULL
+    path = NULL,
+    btnEvents = reactive({NULL})
 ){
   
   
@@ -74,10 +75,10 @@ PipelineProtein_Description_server <- function(id,
         else
           p('No Description available'),
         
-        uiOutput(ns('datasetDescription_ui')),
+        uiOutput(ns('datasetDescription_ui'))
         
         # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui'))
+        #uiOutput(ns('Description_btn_validate_ui'))
       )
     })
     
@@ -90,16 +91,17 @@ PipelineProtein_Description_server <- function(id,
       
     })
     
-    output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(
-        ns("Description_btn_validate"),
-        "Start",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
+    # output$Description_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(
+    #     ns("Description_btn_validate"),
+    #     "Start",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
+    # })
     
     
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Description')
       rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

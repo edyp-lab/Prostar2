@@ -80,7 +80,8 @@ PipelineProtein_Filtering_server <- function(id,
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1}),
-  path = NULL
+  path = NULL,
+  btnEvents = reactive({NULL})
 ){
   
   
@@ -281,7 +282,7 @@ PipelineProtein_Filtering_server <- function(id,
           timeline_process_ui(ns('Description_timeline')),
           
           inputPanel(
-            uiOutput(ns('Description_btn_validate_ui'))
+            #uiOutput(ns('Description_btn_validate_ui'))
           ),
           position = "left",
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
@@ -306,15 +307,16 @@ PipelineProtein_Filtering_server <- function(id,
       
     })
     
-    output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-        "Start",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
+    # output$Description_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Description_btn_validate"),
+    #     "Start",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
+    # })
     
     
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Description')
       req(inherits(dataIn(), 'QFeatures'))
       
       rv$dataIn <- dataIn()
@@ -357,8 +359,8 @@ PipelineProtein_Filtering_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('Cellmetadatafiltering_Sidebar'),
           timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
-          uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
+          #hr(style = "border-top: 3px solid #000000;"),
+          #uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
           inputPanel(
             uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
           ),
@@ -525,20 +527,20 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
-    output$Cellmetadatafiltering_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Cellmetadatafiltering_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget, 
-        rv$steps.enabled["Cellmetadatafiltering"])
-    })
+    # output$Cellmetadatafiltering_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Cellmetadatafiltering_btn_validate"),
+    #     "Validate step",
+    #     class = "btn-success"
+    #   )
+    #   MagellanNTK::toggleWidget(widget, 
+    #     rv$steps.enabled["Cellmetadatafiltering"])
+    # })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$Cellmetadatafiltering_btn_validate, {
-      
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+        req(btnEvents()=='Cellmetadatafiltering')
       req(rv.custom$tmp.filtering1)
       
       rv.custom$dataIn1 <- rv.custom$tmp.filtering1
@@ -570,9 +572,9 @@ PipelineProtein_Filtering_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('Variablefiltering_Sidebar'),
           timeline_process_ui(ns('Variablefiltering_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
+          #hr(style = "border-top: 3px solid #000000;"),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          uiOutput(ns("Variablefiltering_btn_validate_ui")),
+          #uiOutput(ns("Variablefiltering_btn_validate_ui")),
           inputPanel(
             useShinyFeedback(), # include shinyFeedback
             #DT::dataTableOutput(ns("VarFilter_DT")),
@@ -847,18 +849,18 @@ PipelineProtein_Filtering_server <- function(id,
     
 
     
-    output$Variablefiltering_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Variablefiltering_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget( widget, rv$steps.enabled["Variablefiltering"])
-    })
+    # output$Variablefiltering_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Variablefiltering_btn_validate"),
+    #     "Validate step",
+    #     class = "btn-success"
+    #   )
+    #   MagellanNTK::toggleWidget( widget, rv$steps.enabled["Variablefiltering"])
+    # })
     
     
     
-    observeEvent(input$Variablefiltering_btn_validate, {
-     
+      observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+        req(btnEvents()=='Variablefiltering')
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -878,9 +880,8 @@ PipelineProtein_Filtering_server <- function(id,
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),
           tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          hr(style = "border-top: 3px solid #000000;"),
           inputPanel(
-            uiOutput(ns('Save_btn_validate_ui'))
+            
           ),
           position = "left",
           padding = c(100, 0),
@@ -897,16 +898,16 @@ PipelineProtein_Filtering_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    output$Save_btn_validate_ui <- renderUI({
-      MagellanNTK::toggleWidget(
-        actionButton(ns("Save_btn_validate"), "Save",
-          class = "btn-success"),
-        rv$steps.enabled['Save']
-      )
-    })
+    # output$Save_btn_validate_ui <- renderUI({
+    #   MagellanNTK::toggleWidget(
+    #     actionButton(ns("Save_btn_validate"), "Save",
+    #       class = "btn-success"),
+    #     rv$steps.enabled['Save']
+    #   )
+    # })
     
-    observeEvent(input$Save_btn_validate, {
-      # Do some stuff
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(btnEvents()=='Save')
       
       # Rename the new dataset with the name of the process
       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
