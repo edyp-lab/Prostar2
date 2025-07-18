@@ -236,7 +236,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(btnEvents() == 'Description', ignoreInit = FALSE, {
+    observeEvent(btnEvents() == 'Description', ignoreInit = TRUE, {
       req(dataIn())
       rv$dataIn <- dataIn()
       
@@ -510,7 +510,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(btnEvents() == 'Normalization', {
+    observeEvent(btnEvents() == 'Normalization', ignoreInit = TRUE,{
       #browser()
       # Do some stuff 
       req(rv.widgets$Normalization_method)
@@ -698,7 +698,7 @@ PipelineProtein_Normalization_server <- function(id,
       )
       
     })
-    observeEvent(btnEvents() == 'Save', {
+    observeEvent(btnEvents() == 'Save', ignoreInit = TRUE,{
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
