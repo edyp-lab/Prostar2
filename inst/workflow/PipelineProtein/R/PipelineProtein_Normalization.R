@@ -510,7 +510,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(input$Normalization_btn_validate, {
+    observeEvent(btnEvents() == 'Normalization', {
       #browser()
       # Do some stuff 
       req(rv.widgets$Normalization_method)
@@ -698,7 +698,7 @@ PipelineProtein_Normalization_server <- function(id,
       )
       
     })
-    observeEvent(input$Save_btn_validate, {
+    observeEvent(btnEvents() == 'Save', {
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
