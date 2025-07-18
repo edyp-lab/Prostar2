@@ -73,7 +73,8 @@ PipelineProtein_Normalization_server <- function(id,
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
-  current.pos = reactive({1})
+  current.pos = reactive({1}),
+  btnEvents = reactive({NULL})
 ){
   
   # Define default selected values for widgets
@@ -167,6 +168,15 @@ PipelineProtein_Normalization_server <- function(id,
       dataOut$sidebarState <- input$Save_Sidebar
     })
     
+    
+  
+    observeEvent(btnEvents(), ignoreInit = FALSE, {
+      
+      print(paste0(current.pos(), '__', btnEvents()))
+      
+    }, priority = 10000)
+    
+    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -226,7 +236,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    observeEvent(input$Description_btn_validate, ignoreInit = FALSE, {
+    observeEvent(btnEvents() == 'Description', ignoreInit = FALSE, {
       req(dataIn())
       rv$dataIn <- dataIn()
       
