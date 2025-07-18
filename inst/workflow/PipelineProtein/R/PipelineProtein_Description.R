@@ -88,6 +88,8 @@ PipelineProtein_Description_server <- function(id,
       # Insert your own code to vizualise some information
       # about your dataset. It will appear once the 'Start' button
       # has been clicked
+      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      #includeCSS(path)
       
     })
     

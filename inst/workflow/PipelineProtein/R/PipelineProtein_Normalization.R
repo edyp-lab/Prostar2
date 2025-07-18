@@ -254,8 +254,8 @@ PipelineProtein_Normalization_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Normalization <- renderUI({
       shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
+      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      #includeCSS(path)
       
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"

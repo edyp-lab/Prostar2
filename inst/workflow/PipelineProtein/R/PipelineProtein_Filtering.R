@@ -561,8 +561,8 @@ PipelineProtein_Filtering_server <- function(id,
       
       #####################################################"
       shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
+      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      #includeCSS(path)
       
       
       bslib::layout_sidebar(

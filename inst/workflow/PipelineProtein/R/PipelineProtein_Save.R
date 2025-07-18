@@ -71,10 +71,10 @@ PipelineProtein_Save_server <- function(id,
         else
           p('No Save available'),
         
-        uiOutput(ns('datasetSave_ui')),
+        uiOutput(ns('datasetSave_ui'))
         
         # Insert validation button
-        uiOutput(ns('Save_btn_validate_ui'))
+        #uiOutput(ns('Save_btn_validate_ui'))
       )
     })
     
@@ -87,15 +87,16 @@ PipelineProtein_Save_server <- function(id,
       
     })
     
-    output$Save_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Save_btn_validate"),
-        "Start",
-        class = btn_success_color)
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Save'])
-    })
+    # output$Save_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Save_btn_validate"),
+    #     "Start",
+    #     class = btn_success_color)
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Save'])
+    # })
     
     
-    observeEvent(input$Save_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Save')
       # In this process, there is no dataset resend to the server
       # This is why the dataOut$value is set to NULL. This triggers the 
       # validation of the step but without rebuilds the vector of datasets 

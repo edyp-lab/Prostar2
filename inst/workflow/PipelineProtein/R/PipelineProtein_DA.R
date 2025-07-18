@@ -270,7 +270,7 @@ PipelineProtein_DA_server <- function(id,
           
           inputPanel(
            # tags$style(".shiny-input-panel {background-color: lightblue;}"),
-            uiOutput(ns('Description_btn_validate_UI'))
+            #uiOutput(ns('Description_btn_validate_UI'))
           ),
           position = "left",
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
@@ -294,15 +294,16 @@ PipelineProtein_DA_server <- function(id,
       
     })
     
-    output$Description_btn_validate_UI <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-        "Start",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
+    # output$Description_btn_validate_UI <- renderUI({
+    #   widget <- actionButton(ns("Description_btn_validate"),
+    #     "Start",
+    #     class = "btn-success")
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
+    # })
     
     
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Description')
       
       req(inherits(dataIn(), 'QFeatures'))
       
@@ -623,18 +624,19 @@ PipelineProtein_DA_server <- function(id,
     }
     
     
-    output$Pairwisecomparison_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Pairwisecomparison_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget,  rv$steps.enabled["Pairwisecomparison"])
-    })
+    # output$Pairwisecomparison_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Pairwisecomparison_btn_validate"),
+    #     "Validate step",
+    #     class = "btn-success"
+    #   )
+    #   MagellanNTK::toggleWidget(widget,  rv$steps.enabled["Pairwisecomparison"])
+    # })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$Pairwisecomparison_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='PairwiseComparison')
       #UpdateCompList()
      
       rv.custom$history[['Push pval query']] <- rv.custom$step1_query
@@ -663,8 +665,8 @@ PipelineProtein_DA_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('Pvaluecalibration_Sidebar'),
           timeline_process_ui(ns('Pvaluecalibration_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
-          uiOutput(ns("Pvaluecalibration_btn_validate_ui")),
+          #hr(style = "border-top: 3px solid #000000;"),
+          #uiOutput(ns("Pvaluecalibration_btn_validate_ui")),
           inputPanel(
             tags$div(
               tags$div(style = .localStyle, uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))),
@@ -1020,18 +1022,19 @@ PipelineProtein_DA_server <- function(id,
     
     
     
-    output$Pvaluecalibration_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Pvaluecalibration_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"])
-    })
+    # output$Pvaluecalibration_btn_validate_ui <- renderUI({
+    #   widget <- actionButton(ns("Pvaluecalibration_btn_validate"),
+    #     "Validate step",
+    #     class = "btn-success"
+    #   )
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"])
+    # })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$Pvaluecalibration_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='PValuecalibration')
 
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
@@ -1057,8 +1060,8 @@ PipelineProtein_DA_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('FDR_Sidebar'),
           timeline_process_ui(ns('FDR_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
-          uiOutput(ns("FDR_btn_validate_UI")),
+          #hr(style = "border-top: 3px solid #000000;"),
+          #uiOutput(ns("FDR_btn_validate_UI")),
           inputPanel(
             uiOutput(ns('widgets_ui'))
           ),
@@ -1410,19 +1413,19 @@ PipelineProtein_DA_server <- function(id,
     }
     
     
-    output$FDR_btn_validate_UI <- renderUI({
-      widget <- actionButton(ns("FDR_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
-    })
+    # output$FDR_btn_validate_UI <- renderUI({
+    #   widget <- actionButton(ns("FDR_btn_validate"),
+    #     "Validate step",
+    #     class = "btn-success"
+    #   )
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
+    # })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$FDR_btn_validate, {
-      
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+        req(btnEvents()=='FDR') 
       rv.custom$history[['th pval']] <- rv.custom$thpval
       rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
       rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
@@ -1446,9 +1449,9 @@ PipelineProtein_DA_server <- function(id,
         sidebar = bslib::sidebar(
           id = ns('Save_Sidebar'),
           timeline_process_ui(ns('Save_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
+          #hr(style = "border-top: 3px solid #000000;"),
           inputPanel(
-            uiOutput(ns('Save_btn_validate_ui'))
+            #uiOutput(ns('Save_btn_validate_ui'))
           ),
           position = "left",
           padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
@@ -1465,15 +1468,16 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    output$Save_btn_validate_ui <- renderUI({
-      MagellanNTK::toggleWidget(
-        actionButton(ns("Save_btn_validate"), "Save",
-          class = "btn-success"),
-        rv$steps.enabled['Save']
-      )
-    })
+    # output$Save_btn_validate_ui <- renderUI({
+    #   MagellanNTK::toggleWidget(
+    #     actionButton(ns("Save_btn_validate"), "Save",
+    #       class = "btn-success"),
+    #     rv$steps.enabled['Save']
+    #   )
+    # })
     
-    observeEvent(input$Save_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Save')
       # Do some stuff
       
       last.se <- length(rv$dataIn)

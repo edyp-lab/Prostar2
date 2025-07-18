@@ -250,8 +250,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$HypothesisTest <- renderUI({
       shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
+      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      #includeCSS(path)
       
       
       

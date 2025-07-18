@@ -534,8 +534,8 @@ PipelineProtein_Imputation_server <- function(id,
     
     output$MECImputation <- renderUI({
       shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
+      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      #includeCSS(path)
      
       
       widget <- NULL
