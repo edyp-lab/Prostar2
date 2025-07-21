@@ -270,34 +270,76 @@ PipelineProtein_Filtering_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
+      div(
+        style = "position: relative;",
+        absolutePanel(
+          top = 85,
+          left = 75,
+          width = 200,
+          height = "100%",
+          fixed = TRUE,
+          style = "background:orange;",
+          div(
+            style = "margin-top:55px;",
+            timeline_process_ui(ns('Description_timeline'))
+          )
         ),
-        sidebar = bslib::sidebar(
-          id = ns("Description_Sidebar"),  # Add an explicit ID
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          
-          timeline_process_ui(ns('Description_timeline')),
-          
-          inputPanel(
-            #uiOutput(ns('Description_btn_validate_ui'))
-          ),
-          position = "left",
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
-        ),
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
+        absolutePanel(
+          top = 85,
+          left = 275,
+          width = '100%',
+          height = "100%",
+          fixed = TRUE,
+          #style = "padding:15px; background:lightblue;",
+          div(
+            style = "",
+            tagList(
+              if (file.exists(file))
+                includeMarkdown(file)
+              else
+                p('No Description available'),
+              
+              
+              # Used to show some information about the dataset which is loaded
+              # This function must be provided by the package of the process module
+              uiOutput(ns('datasetDescription_ui'))
+            )
+          )
+        )
         
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui'))
       )
+
+      
+      # 
+      # bslib::layout_sidebar(
+      #   class = ns("p-0"),
+      #   
+      #   tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+      #     tags$style(".shiny-input-panel {background-color: lightblue;}")
+      #   ),
+      #   sidebar = bslib::sidebar(
+      #     id = ns("Description_Sidebar"),  # Add an explicit ID
+      #     tags$style(".shiny-input-panel {background-color: lightblue;}"),
+      # 
+      #     timeline_process_ui(ns('Description_timeline')),
+      # 
+      #     inputPanel(
+      #       #uiOutput(ns('Description_btn_validate_ui'))
+      #     ),
+      #     position = "left",
+      #     padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
+      #     #style = "p1"
+      #   ),
+      #   if (file.exists(file))
+      #     includeMarkdown(file)
+      #   else
+      #     p('No Description available'),
+      # 
+      # 
+      #   # Used to show some information about the dataset which is loaded
+      #   # This function must be provided by the package of the process module
+      #   uiOutput(ns('datasetDescription_ui'))
+      # )
     })
     
     output$datasetDescription_ui <- renderUI({
@@ -368,8 +410,8 @@ PipelineProtein_Filtering_server <- function(id,
           padding = c(100, 0),
           style = "z-index: 0;"
         ),
-        
-        
+
+
         uiOutput(ns('qMetacell_Filter_DT_UI')),
         uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
         uiOutput(ns('Cellmetadatafiltering_plots_ui'))
@@ -561,39 +603,39 @@ PipelineProtein_Filtering_server <- function(id,
       
       #####################################################"
       shinyjs::useShinyjs()
-      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      #includeCSS(path)
+      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      includeCSS(path)
       
       
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('Variablefiltering_Sidebar'),
-          timeline_process_ui(ns('Variablefiltering_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          #uiOutput(ns("Variablefiltering_btn_validate_ui")),
-          inputPanel(
-            useShinyFeedback(), # include shinyFeedback
-            #DT::dataTableOutput(ns("VarFilter_DT")),
-            # Build queries
-            div(
-              div(style = .style, uiOutput(ns("Variablefiltering_chooseKeepRemove_ui"))),
-              div(style = .style, uiOutput(ns("Variablefiltering_cname_ui"))),
-              div(style = .style, uiOutput(ns("Variablefiltering_operator_ui"))),
-              div(style = .style, uiOutput(ns("Variablefiltering_value_ui")))
-            ),
-            uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
-          ),
-          position = "left",
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
-        ),
-        
-        uiOutput(ns("Variablefiltering_DT_UI"))
-      )
+      # bslib::layout_sidebar(
+      #   tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
+      #     tags$style(".shiny-input-panel {background-color: lightblue;}")
+      #   ),
+      #   sidebar = bslib::sidebar(
+      #     id = ns('Variablefiltering_Sidebar'),
+      #     timeline_process_ui(ns('Variablefiltering_timeline')),
+      #     #hr(style = "border-top: 3px solid #000000;"),
+      #     tags$style(".shiny-input-panel {background-color: lightblue;}"),
+      #     #uiOutput(ns("Variablefiltering_btn_validate_ui")),
+      #     inputPanel(
+      #       useShinyFeedback(), # include shinyFeedback
+      #       #DT::dataTableOutput(ns("VarFilter_DT")),
+      #       # Build queries
+      #       div(
+      #         div(style = .style, uiOutput(ns("Variablefiltering_chooseKeepRemove_ui"))),
+      #         div(style = .style, uiOutput(ns("Variablefiltering_cname_ui"))),
+      #         div(style = .style, uiOutput(ns("Variablefiltering_operator_ui"))),
+      #         div(style = .style, uiOutput(ns("Variablefiltering_value_ui")))
+      #       ),
+      #       uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
+      #     ),
+      #     position = "left",
+      #     padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
+      #     style = "z-index: 0;"
+      #   ),
+      #   
+      #   uiOutput(ns("Variablefiltering_DT_UI"))
+      # )
     })
     
     
@@ -872,23 +914,23 @@ PipelineProtein_Filtering_server <- function(id,
     
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 400px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('Save_Sidebar'),
-          timeline_process_ui(ns('Save_timeline')),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          inputPanel(
-            
-          ),
-          position = "left",
-          padding = c(100, 0),
-          style = "z-index: 0;"
-        ),
-        uiOutput(ns('dl_ui'))
-      )
+      # bslib::layout_sidebar(
+      #   tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 400px;}"),
+      #     tags$style(".shiny-input-panel {background-color: lightblue;}")
+      #   ),
+      #   sidebar = bslib::sidebar(
+      #     id = ns('Save_Sidebar'),
+      #     timeline_process_ui(ns('Save_timeline')),
+      #     tags$style(".shiny-input-panel {background-color: lightblue;}"),
+      #     inputPanel(
+      #       
+      #     ),
+      #     position = "left",
+      #     padding = c(100, 0),
+      #     style = "z-index: 0;"
+      #   ),
+      #   uiOutput(ns('dl_ui'))
+      # )
     })
     
     output$dl_ui <- renderUI({
