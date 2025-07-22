@@ -214,25 +214,26 @@ PipelineProtein_DA_server <- function(id,
     )
     
     
-    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Description_Sidebar
-    })
+    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Description_Sidebar
+    # })
+    # 
+    # observeEvent(input$Pairwisecomparison_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Pairwisecomparison_Sidebar
+    # })
+    # 
+    # observeEvent(input$Pvaluecalibration_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Pvaluecalibration_Sidebar
+    # })
+    # 
+    # observeEvent(input$FDR_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$FDR_Sidebar
+    # })
+    # 
+    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Save_Sidebar
+    # })
     
-    observeEvent(input$Pairwisecomparison_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Pairwisecomparison_Sidebar
-    })
-    
-    observeEvent(input$Pvaluecalibration_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Pvaluecalibration_Sidebar
-    })
-    
-    observeEvent(input$FDR_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$FDR_Sidebar
-    })
-    
-    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Save_Sidebar
-    })
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
     
     #####################################################################
@@ -258,32 +259,14 @@ PipelineProtein_DA_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns("Description_Sidebar"),  # Add an explicit ID
-          #ags$style(" .bslib-sidebar-input .sidebar-content .slib-gap-spacing .main .bslib-gap-spacing .html-fill-container{background-color: lightblue; width: 300px;}"),
-          
-          timeline_process_ui(ns('Description_timeline')),
-          
-          inputPanel(
-           # tags$style(".shiny-input-panel {background-color: lightblue;}"),
-            #uiOutput(ns('Description_btn_validate_UI'))
-          ),
-          position = "left",
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-        ),
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui'))
+      MagellanNTK::process_layout(
+        sidebar = timeline_process_ui(ns('Description_timeline')),
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Description available')
+        )
       )
     })
     
@@ -407,29 +390,22 @@ PipelineProtein_DA_server <- function(id,
       
       .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
       
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('Pairwisecomparison_Sidebar'),
+      
+      MagellanNTK::process_layout(
+        sidebar = tagList(
           timeline_process_ui(ns('Pairwisecomparison_timeline')),
-          hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          uiOutput(ns("Pairwisecomparison_btn_validate_ui")),
-          inputPanel(
-            tags$div(
-              tags$div(style = .localStyle, uiOutput(ns('Pairwisecomparison_Comparison_UI'))),
-              tags$div(style = .localStyle, uiOutput(ns("pushpval_UI")))
-            )
-          ),
-          position = "left",
-          padding = c(100, 0)
+          tags$div(
+            tags$div(style = .localStyle, uiOutput(ns('Pairwisecomparison_Comparison_UI'))),
+            tags$div(style = .localStyle, uiOutput(ns("pushpval_UI")))
+          )
         ),
-        
-        uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
-        uiOutput(ns("Pairwisecomparison_volcano_UI"))
+        content = div(
+          uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
+          uiOutput(ns("Pairwisecomparison_volcano_UI"))
+        )
       )
+      
+
 
     })
     
@@ -658,41 +634,35 @@ PipelineProtein_DA_server <- function(id,
         vertical-align: middle; 
         padding-right: 40px;"
 
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('Pvaluecalibration_Sidebar'),
+      
+      MagellanNTK::process_layout(
+        sidebar = tagList(
           timeline_process_ui(ns('Pvaluecalibration_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          #uiOutput(ns("Pvaluecalibration_btn_validate_ui")),
-          inputPanel(
-            tags$div(
-              tags$div(style = .localStyle, uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))),
-              tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_numericValCalibration_UI"))),
-              tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_nBins_UI")))
-            )
-          ),
-          position = "left",
-          padding = c(100, 0)
+          tags$div(
+            tags$div(style = .localStyle, uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))),
+            tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_numericValCalibration_UI"))),
+            tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_nBins_UI")))
+          )
         ),
-        
-        p(tags$strong(
-          paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
-        )),
-        fluidRow(
-          column(width = 6, fluidRow(style = "height:800px;",
-            imageOutput(ns("calibrationPlotAll"), height = "800px")
+        content = div(
+          p(tags$strong(
+            paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
           )),
-          column(width = 6, fluidRow(style = "height:400px;",
-            imageOutput(ns("calibrationPlot"), height = "400px")
-          ),
-            fluidRow(style = "height:400px;", 
-              highchartOutput(ns("histPValue")))
+          fluidRow(
+            column(width = 6, fluidRow(style = "height:800px;",
+              imageOutput(ns("calibrationPlotAll"), height = "800px")
+            )),
+            column(width = 6, fluidRow(style = "height:400px;",
+              imageOutput(ns("calibrationPlot"), height = "400px")
+            ),
+              fluidRow(style = "height:400px;", 
+                highchartOutput(ns("histPValue")))
+            )
           )
         )
       )
+      
+      
     })
     
     
@@ -1053,6 +1023,26 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 2 UI---------------
     output$FDR <- renderUI({
+      
+      MagellanNTK::process_layout(
+        sidebar = tagList(
+          timeline_process_ui(ns('FDR_timeline')),
+          tags$div(
+            uiOutput(ns('widgets_ui'))
+          )
+        ),
+        content = div(
+          uiOutput(ns("FDR_nbSelectedItems_ui")),
+          withProgress(message = "", detail = "", value = 1, {
+            uiOutput(ns('FDR_volcanoplot_UI'))
+          }),
+          downloadButton(ns("FDR_download_SelectedItems_UI"), 
+            "Selected final results (Excel file)", class = actionBtnClass),
+          DT::DTOutput(ns("FDR_selectedItems_UI"))
+        )
+      )
+      
+      
       bslib::layout_sidebar(
         tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
           tags$style(".shiny-input-panel {background-color: lightblue;}")
@@ -1442,22 +1432,11 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
+      MagellanNTK::process_layout(
+        sidebar = tagList(
+          timeline_process_ui(ns('Save_timeline'))
         ),
-        sidebar = bslib::sidebar(
-          id = ns('Save_Sidebar'),
-          timeline_process_ui(ns('Save_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          inputPanel(
-            #uiOutput(ns('Save_btn_validate_ui'))
-          ),
-          position = "left",
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
-        ),
-        uiOutput(ns('dl_ui'))
+        content = uiOutput(ns('dl_ui'))
       )
     })
     
@@ -1467,15 +1446,7 @@ PipelineProtein_DA_server <- function(id,
       
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
-    
-    # output$Save_btn_validate_ui <- renderUI({
-    #   MagellanNTK::toggleWidget(
-    #     actionButton(ns("Save_btn_validate"), "Save",
-    #       class = "btn-success"),
-    #     rv$steps.enabled['Save']
-    #   )
-    # })
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(btnEvents()=='Save')
       # Do some stuff

@@ -155,25 +155,25 @@ PipelineProtein_Normalization_server <- function(id,
     )
     
     
-    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Description_Sidebar
-    })
-    
-    observeEvent(input$Normalization_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Normalization_Sidebar
-    })
-    
-    
-    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Save_Sidebar
-    })
-    
-    
-    observeEvent(btnEvents(), ignoreInit = TRUE, {
-      
-      print(paste0(current.pos(), '__', btnEvents()))
-
-    }, priority = 10000)
+    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Description_Sidebar
+    # })
+    # 
+    # observeEvent(input$Normalization_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Normalization_Sidebar
+    # })
+    # 
+    # 
+    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Save_Sidebar
+    # })
+    # 
+    # 
+    # observeEvent(btnEvents(), ignoreInit = TRUE, {
+    #   
+    #   print(paste0(current.pos(), '__', btnEvents()))
+    # 
+    # }, priority = 10000)
     
     
     # >>>
@@ -245,7 +245,7 @@ PipelineProtein_Normalization_server <- function(id,
       
       MagellanNTK::process_layout(
         sidebar = tagList(
-          timeline_process_ui(ns('POVImputation_timeline')),
+          timeline_process_ui(ns('Normalization_timeline')),
           tags$div(
             tags$div(style = .localStyle, uiOutput(ns("Normalization_method_ui"))),
             tags$div(style = .localStyle, shinyjs::hidden(uiOutput(ns('Normalization_type_ui')))),

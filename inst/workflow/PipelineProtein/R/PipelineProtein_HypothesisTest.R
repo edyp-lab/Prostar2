@@ -151,18 +151,18 @@ PipelineProtein_HypothesisTest_server <- function(id,
     )
     
     
-    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Description_Sidebar
-    })
-
-    observeEvent(input$HypothesisTest_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$HypothesisTest_Sidebar
-    })
-    
-    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Save_Sidebar
-    })
-    
+    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Description_Sidebar
+    # })
+    # 
+    # observeEvent(input$HypothesisTest_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$HypothesisTest_Sidebar
+    # })
+    # 
+    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Save_Sidebar
+    # })
+    # 
     
     
     
@@ -186,52 +186,17 @@ PipelineProtein_HypothesisTest_server <- function(id,
         unlist(strsplit(id, '_'))[1], 
         'md', 
         paste0(id, '.md')))
-      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns("Description_Sidebar"),  # Add an explicit ID
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          
-          timeline_process_ui(ns('Description_timeline')),
-          
-          inputPanel(
-            
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
-        ),
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui'))
+
+      MagellanNTK::process_layout(
+        sidebar = timeline_process_ui(ns('Description_timeline')),
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Description available')
+        )
       )
     })
-    
-    output$datasetDescription_ui <- renderUI({
-      # Insert your own code to visualize some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
-      
-    })
-    
-    # output$Description_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("Description_btn_validate"),
-    #     "Start",
-    #     class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    # })
-    
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='Description')
@@ -254,31 +219,17 @@ PipelineProtein_HypothesisTest_server <- function(id,
       #includeCSS(path)
       
       
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.md')))
       
-
-      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('HypothesisTest_Sidebar'),
+      MagellanNTK::process_layout(
+        sidebar = tagList(
           timeline_process_ui(ns('HypothesisTest_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          #uiOutput(ns("HypothesisTest_btn_validate_ui")),
-          inputPanel(
-            uiOutput(ns('HypothesisTest_widgets_ui'))
-            
-            
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
-        ),
-        uiOutput(ns('HypothesisTest_plots_ui'))
+          uiOutput(ns('HypothesisTest_widgets_ui'))),
+        content = uiOutput(ns('HypothesisTest_plots_ui'))
       )
     })
     
@@ -654,25 +605,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
+      MagellanNTK::process_layout(
+        sidebar = tagList(
+          timeline_process_ui(ns('Save_timeline'))
         ),
-        sidebar = bslib::sidebar(
-          id = ns('Save_Sidebar'),
-          timeline_process_ui(ns('Save_timeline')),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          #hr(style = "border-top: 3px solid #000000;"),
-          inputPanel(
-           # uiOutput(ns('Save_btn_validate_ui'))
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
-        ),
-        uiOutput(ns('dl_ui'))
+        content = uiOutput(ns('dl_ui'))
       )
     })
     
@@ -684,17 +621,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    output$Save_btn_validate_ui <- renderUI({
-      tagList(
-        
-        if (config@mode == 'process' && 
-            rv$steps.status['Save'] == stepStatus$VALIDATED) {
-          download_dataset_ui(ns('createQuickLink'))
-        }
-      )
-      
-    })
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='Save')
       # Do some stuff

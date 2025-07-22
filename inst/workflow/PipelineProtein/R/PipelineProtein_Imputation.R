@@ -167,21 +167,21 @@ PipelineProtein_Imputation_server <- function(id,
     )
     
     
-    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Description_Sidebar
-    })
-    
-    observeEvent(input$POVImputation_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$POVImputation_Sidebar
-    })
-    
-    observeEvent(input$MECImputation_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$MECImputation_Sidebar
-    })
-    
-    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Save_Sidebar
-    })
+    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Description_Sidebar
+    # })
+    # 
+    # observeEvent(input$POVImputation_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$POVImputation_Sidebar
+    # })
+    # 
+    # observeEvent(input$MECImputation_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$MECImputation_Sidebar
+    # })
+    # 
+    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Save_Sidebar
+    # })
     
     
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
@@ -208,56 +208,20 @@ PipelineProtein_Imputation_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      
-      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns("Description_Sidebar"),  # Add an explicit ID
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          
-          timeline_process_ui(ns('Description_timeline')),
-          
-          inputPanel(
-            #uiOutput(ns('Description_btn_validate_ui'))
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
-        ),
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_ui'))
+      MagellanNTK::process_layout(
+        sidebar = timeline_process_ui(ns('Description_timeline')),
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Description available')
+        )
       )
       
 
     })
     
-    output$datasetDescription_ui <- renderUI({
-      # Insert your own code to vizualise some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
-      
-    })
-    
-    # output$Description_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("Description_btn_validate"),
-    #                          "Start",
-    #                          class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    # })
-    
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='Description')
       req(dataIn())
@@ -284,35 +248,23 @@ PipelineProtein_Imputation_server <- function(id,
       
       .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
       
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('POVImputation_Sidebar'),
-          timeline_process_ui(ns('POVImputation_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          #uiOutput(ns("POVImputation_btn_validate_ui")),
-          inputPanel(
-            tags$div(
-              tags$div(style = .localStyle, uiOutput(ns("POVImputation_algorithm_UI"))),
-              tags$div(style = .localStyle, uiOutput(ns("POVImputation_KNN_nbNeighbors_UI"))),
-              tags$div(style = .localStyle, uiOutput(ns("POVImputation_detQuant_UI")))
-            )
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
-        ),
-        uiOutput(ns("POVImputation_showDetQuantValues")),
-        htmlOutput("helpForImputation"),
-        tags$hr(),
-        uiOutput(ns('mvplots_ui'))
-      )
       
+      MagellanNTK::process_layout(
+        sidebar = tagList(
+          timeline_process_ui(ns('POVImputation_Sidebar')),
+          tags$div(
+            tags$div(style = .localStyle, uiOutput(ns("POVImputation_algorithm_UI"))),
+            tags$div(style = .localStyle, uiOutput(ns("POVImputation_KNN_nbNeighbors_UI"))),
+            tags$div(style = .localStyle, uiOutput(ns("POVImputation_detQuant_UI")))
+          )
+        ),
+        content = tagList(
+          uiOutput(ns("POVImputation_showDetQuantValues")),
+          htmlOutput("helpForImputation"),
+          tags$hr(),
+          uiOutput(ns('mvplots_ui'))
+        )
+      )
       
     })
     
@@ -541,40 +493,28 @@ PipelineProtein_Imputation_server <- function(id,
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
 
-      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
+      MagellanNTK::process_layout(
+        sidebar = tagList(
+          timeline_process_ui(ns('MECImputation_Sidebar')),
+          if (rv.custom$mv.present) {
+            div(
+              div(style = .style, uiOutput(ns("MECImputation_chooseImputationMethod_ui"))),
+              div(style = .style, uiOutput(ns("MECImputation_Params_ui")))
+            )
+            
+          }
         ),
-        sidebar = bslib::sidebar(
-          id = ns('MECImputation_Sidebar'),
-          timeline_process_ui(ns('MECImputation_timeline')),
-         # hr(style = "border-top: 3px solid #000000;"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          #uiOutput(ns("MECImputation_btn_validate_ui")),
-          inputPanel(
-            if (rv.custom$mv.present) {
-              div(
-                div(style = .style, uiOutput(ns("MECImputation_chooseImputationMethod_ui"))),
-                div(style = .style, uiOutput(ns("MECImputation_Params_ui")))
-              )
-              
-            }
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0), # 1ere valeur : padding vertical, 2eme : horizontal
-          style = "z-index: 0;"
-        ),
-        uiOutput(ns("warningMECImputation")),
-        uiOutput(ns("MECImputation_showDetQuantValues_ui")),
-        tags$hr(),
-        withProgress(message = "", detail = "", value = 0, {
-          incProgress(0.5, detail = "Building plots...")
-          uiOutput(ns('MECImputation_mvplots_ui'))
-        })
+        content = tagList(
+          uiOutput(ns("warningMECImputation")),
+          uiOutput(ns("MECImputation_showDetQuantValues_ui")),
+          tags$hr(),
+          withProgress(message = "", detail = "", value = 0, {
+            incProgress(0.5, detail = "Building plots...")
+            uiOutput(ns('MECImputation_mvplots_ui'))
+          })
+        )
       )
+      
       
       
     })
@@ -781,27 +721,12 @@ PipelineProtein_Imputation_server <- function(id,
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
+      MagellanNTK::process_layout(
+        sidebar = tagList(
+          timeline_process_ui(ns('Save_timeline'))
         ),
-        sidebar = bslib::sidebar(
-          id = ns('Save_Sidebar'),
-          timeline_process_ui(ns('Save_timeline')),
-          tags$style(".shiny-input-panel {background-color: lightblue;}"),
-          #hr(style = "border-top: 3px solid #000000;"),
-          inputPanel(
-            #uiOutput(ns('Save_btn_validate_ui'))
-          ),
-          width = 200,
-          position = "left",
-          bg='lightblue',
-          padding = c(100, 0) # 1ere valeur : padding vertical, 2eme : horizontal
-          #style = "p1"
-        ),
-        uiOutput(ns('dl_ui'))
+        content = uiOutput(ns('dl_ui'))
       )
-      
     })
     
     

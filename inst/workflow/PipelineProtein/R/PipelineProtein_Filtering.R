@@ -236,21 +236,21 @@ PipelineProtein_Filtering_server <- function(id,
     )
     
     
-    observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Description_Sidebar
-    })
-    
-    observeEvent(input$Cellmetadatafiltering_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Cellmetadatafiltering_Sidebar
-    })
-    
-    observeEvent(input$Variablefiltering_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Variablefiltering_Sidebar
-    })
-    
-    observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-      dataOut$sidebarState <- input$Save_Sidebar
-    })
+    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Description_Sidebar
+    # })
+    # 
+    # observeEvent(input$Cellmetadatafiltering_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Cellmetadatafiltering_Sidebar
+    # })
+    # 
+    # observeEvent(input$Variablefiltering_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Variablefiltering_Sidebar
+    # })
+    # 
+    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
+    #   dataOut$sidebarState <- input$Save_Sidebar
+    # })
     
     
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
@@ -278,23 +278,11 @@ PipelineProtein_Filtering_server <- function(id,
           if (file.exists(file))
             includeMarkdown(file)
           else
-            p('No Description available'),
-          
-          
-          # Used to show some information about the dataset which is loaded
-          # This function must be provided by the package of the process module
-          uiOutput(ns('datasetDescription_ui'))
+            p('No Description available')
         )
       )
-      
     })
-    
-    output$datasetDescription_ui <- renderUI({
-      # Insert your own code to visualize some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
-      
-    })
+
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='Description')
