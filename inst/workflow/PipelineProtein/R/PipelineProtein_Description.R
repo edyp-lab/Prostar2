@@ -69,42 +69,27 @@ PipelineProtein_Description_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      tagList(
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        uiOutput(ns('datasetDescription_ui'))
-        
-        # Insert validation button
-        #uiOutput(ns('Description_btn_validate_ui'))
+      MagellanNTK::process_layout(
+        sidebar = NULL,
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Description available'),
+          
+          
+          # Used to show some information about the dataset which is loaded
+          # This function must be provided by the package of the process module
+          uiOutput(ns('datasetDescription_ui'))
+        )
       )
     })
     
 
-    
-    output$datasetDescription_ui <- renderUI({
-      # Insert your own code to vizualise some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
-      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      #includeCSS(path)
-      
-    })
-    
-    # output$Description_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(
-    #     ns("Description_btn_validate"),
-    #     "Start",
-    #     class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    # })
-    
-    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='Description')
       rv$dataIn <- dataIn()
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
