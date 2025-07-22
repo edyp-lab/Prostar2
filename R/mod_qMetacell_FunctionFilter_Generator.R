@@ -176,7 +176,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         # })
         
         observeEvent(dataIn(), ignoreNULL = FALSE, {
-          stopifnot(inherits(dataIn(), 'SummarizedExperiment'))
+          req(inherits(dataIn(), 'SummarizedExperiment'))
           rv$dataIn <- dataIn()
         }, priority = 1000)
         

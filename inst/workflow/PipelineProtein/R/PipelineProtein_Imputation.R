@@ -251,7 +251,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       MagellanNTK::process_layout(
         sidebar = tagList(
-          timeline_process_ui(ns('POVImputation_Sidebar')),
+          timeline_process_ui(ns('POVImputation_timeline')),
           tags$div(
             tags$div(style = .localStyle, uiOutput(ns("POVImputation_algorithm_UI"))),
             tags$div(style = .localStyle, uiOutput(ns("POVImputation_KNN_nbNeighbors_UI"))),
@@ -495,7 +495,7 @@ PipelineProtein_Imputation_server <- function(id,
 
       MagellanNTK::process_layout(
         sidebar = tagList(
-          timeline_process_ui(ns('MECImputation_Sidebar')),
+          timeline_process_ui(ns('MECImputation_timeline')),
           if (rv.custom$mv.present) {
             div(
               div(style = .style, uiOutput(ns("MECImputation_chooseImputationMethod_ui"))),
