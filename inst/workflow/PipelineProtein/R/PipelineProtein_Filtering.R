@@ -264,6 +264,7 @@ PipelineProtein_Filtering_server <- function(id,
       # file <- normalizePath(file.path(session$userData$workflow.path, 
       #   'md', paste0(id, '.md')))
       
+
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -273,9 +274,9 @@ PipelineProtein_Filtering_server <- function(id,
       div(
         style = "position: relative;",
         absolutePanel(
-          top = 85,
-          left = 75,
-          width = 200,
+          top = MagellanNTK::default.layout$top_sidebar,
+          left = MagellanNTK::default.layout$left_sidebar,
+          width = MagellanNTK::default.layout$width_sidebar,
           height = "100%",
           fixed = TRUE,
           style = "background:orange;",
@@ -285,9 +286,9 @@ PipelineProtein_Filtering_server <- function(id,
           )
         ),
         absolutePanel(
-          top = 85,
-          left = 275,
-          width = '100%',
+          top = MagellanNTK::default.layout$top_panel,
+          left = MagellanNTK::default.layout$left_panel,
+          width = MagellanNTK::default.layout$width_panel,
           height = "100%",
           fixed = TRUE,
           #style = "padding:15px; background:lightblue;",
