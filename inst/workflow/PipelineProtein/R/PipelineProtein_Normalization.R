@@ -301,7 +301,8 @@ PipelineProtein_Normalization_server <- function(id,
         "Normalization method",
         choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())),
         selected = rv.widgets$Normalization_method,
-        width = '250px')
+        width = '180px'
+        )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
     })
     

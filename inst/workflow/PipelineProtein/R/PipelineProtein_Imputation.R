@@ -368,13 +368,9 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='POVImputation')
-      req(dataIn())
-      rv$dataIn <- dataIn()
-      rv.custom$dataIn1 <- dataIn()
-      rv.custom$dataIn2 <- dataIn()
-      
-      
       req(rv$dataIn)
+      
+
       req(rv.widgets$POVImputation_algorithm != "None")
       m <- match.metacell(
         DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
@@ -457,21 +453,20 @@ PipelineProtein_Imputation_server <- function(id,
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
         }
         
-        rv.custom$tmp.pov <- Prostar2::addDatasets(
+        rv.custom$dataIn1 <- Prostar2::addDatasets(
           rv$dataIn,
           .tmp,
           'POVImputation')
         
-        paramshistory(rv.custom$tmp.pov[[length(rv.custom$tmp.pov)]]) <- .param
+        paramshistory(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]) <- .param
       })
 
-      print('In : observeEvent(req(rv.custom$tmp.pov()$value)')
-      # Do some stuff
-      rv.custom$dataIn1 <- rv.custom$tmp.pov
-      rv.custom$dataIn2 <- rv.custom$tmp.pov
-      
-     .history <- rv.custom$tmp.pov[[length(rv.custom$tmp.pov)]]
+
+     .history <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]]
       rv.custom$params.tmp[['Imputation']][['POVImputation']] <- paramshistory(.history)
+      
+      
+      rv$dataIn2 <- rv$dataIn1
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

@@ -341,7 +341,6 @@ PipelineProtein_Filtering_server <- function(id,
     
     observe({
       req(rv$steps.enabled["Cellmetadatafiltering"])
-      #req(rv$dataIn)
       
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
@@ -483,8 +482,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(btnEvents()=='Cellmetadatafiltering')
       req(rv$dataIn1)
       
-      #rv.custom$dataIn1 <- rv.custom$tmp.filtering1
-      # rv.custom$dataIn2 <- rv.custom$tmp.filtering1
+      rv.custom$dataIn2 <- rv.custom$dataIn1
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
