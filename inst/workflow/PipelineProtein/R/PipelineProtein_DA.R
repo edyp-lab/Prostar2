@@ -260,6 +260,7 @@ PipelineProtein_DA_server <- function(id,
         paste0(id, '.md')))
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
@@ -392,6 +393,7 @@ PipelineProtein_DA_server <- function(id,
       
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Pairwisecomparison_timeline')),
           tags$div(
@@ -636,6 +638,7 @@ PipelineProtein_DA_server <- function(id,
 
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Pvaluecalibration_timeline')),
           tags$div(
@@ -1025,6 +1028,7 @@ PipelineProtein_DA_server <- function(id,
     output$FDR <- renderUI({
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('FDR_timeline')),
           tags$div(
@@ -1433,6 +1437,7 @@ PipelineProtein_DA_server <- function(id,
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Save_timeline'))
         ),

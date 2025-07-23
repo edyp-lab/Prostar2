@@ -273,6 +273,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
@@ -322,6 +323,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
           #hr(style = "border-top: 3px solid #000000;"),
           #uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
@@ -504,6 +506,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Variablefiltering_timeline')),
           inputPanel(
@@ -787,6 +790,7 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Save_timeline'))
         ),

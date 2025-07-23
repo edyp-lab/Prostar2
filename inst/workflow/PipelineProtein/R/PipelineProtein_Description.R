@@ -70,17 +70,13 @@ PipelineProtein_Description_server <- function(id,
         paste0(id, '.md')))
       
       MagellanNTK::process_layout(
+        ns = NS(id),
         sidebar = NULL,
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
           else
             p('No Description available'),
-          
-          
-          # Used to show some information about the dataset which is loaded
-          # This function must be provided by the package of the process module
-          uiOutput(ns('datasetDescription_ui'))
         )
       )
     })

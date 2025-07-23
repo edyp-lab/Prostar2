@@ -56,7 +56,8 @@ mod_metacell_tree_ui <- function(id) {
         uiOutput(ns('modaltree')),
         top = 0,
         left = 20,
-        draggable = FALSE
+        draggable = FALSE,
+        style = "z-index : 999999999999999;"
         
       )
         )
@@ -144,7 +145,6 @@ mod_metacell_tree_server <- function(id,
               tags$style(
                 paste0(".modal-dialog { 
                 width: fit-content !important; 
-                  z-index: 100000000000;
                   }"))),
             #tags$head(tags$style("#modalExample{ display:none;")),
             
