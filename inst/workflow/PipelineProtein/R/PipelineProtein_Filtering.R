@@ -315,21 +315,11 @@ PipelineProtein_Filtering_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Cellmetadatafiltering <- renderUI({
       
-      
-      #####################################################"
-      shinyjs::useShinyjs()
-      
-      .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
-      
-      
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = tagList(timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          #uiOutput(ns("Cellmetadatafiltering_btn_validate_ui")),
-          inputPanel(
-            uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
-          )
+        sidebar = tagList(
+          timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
+          uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
         ),
         content = tagList(
           uiOutput(ns('qMetacell_Filter_DT_UI')),
@@ -337,6 +327,8 @@ PipelineProtein_Filtering_server <- function(id,
           uiOutput(ns('Cellmetadatafiltering_plots_ui'))
         )
       )
+      
+      
       
     })
     
@@ -498,25 +490,15 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     
     output$Variablefiltering <- renderUI({
-      
-      #####################################################"
-      shinyjs::useShinyjs()
-      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      includeCSS(path)
-      
-      
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Variablefiltering_timeline')),
           inputPanel(
-            useShinyFeedback(), # include shinyFeedback
-            div(
-              div(style = .style, uiOutput(ns("Variablefiltering_chooseKeepRemove_ui"))),
-              div(style = .style, uiOutput(ns("Variablefiltering_cname_ui"))),
-              div(style = .style, uiOutput(ns("Variablefiltering_operator_ui"))),
-              div(style = .style, uiOutput(ns("Variablefiltering_value_ui")))
-            ),
+            uiOutput(ns("Variablefiltering_chooseKeepRemove_ui")),
+            uiOutput(ns("Variablefiltering_cname_ui")),
+            uiOutput(ns("Variablefiltering_operator_ui")),
+            uiOutput(ns("Variablefiltering_value_ui")),
             uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
           )
         ),
