@@ -37,7 +37,7 @@ mod_metacell_tree_ui <- function(id) {
   ns <- NS(id)
   
   addResourcePath('images', system.file('images', package = 'DaparToolshed'))
-  tagList(
+  fluidPage(
     shinyjs::useShinyjs(),
     fluidRow(
       column(width=6, 
@@ -51,7 +51,14 @@ mod_metacell_tree_ui <- function(id) {
       column(width=6, uiOutput(ns('selectedNodes'))
       )
     ),
-    uiOutput(ns('modaltree'))
+    br(),
+    absolutePanel(
+      uiOutput(ns('modaltree')),
+      top = 0,
+      left = 20,
+      draggable = FALSE
+      
+    )
   )
   
 }
@@ -70,6 +77,9 @@ mod_metacell_tree_server <- function(id,
   dataIn = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
+  
+  #pkgs.require(c("shinyBS", "shinyjs"))
+  
   
   convertWidgetName <- function(name){
     # This function implements the transformations used to
@@ -104,7 +114,6 @@ mod_metacell_tree_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    
     dataOut <- reactiveValues(
       trigger = NULL,
       values = NULL
@@ -132,27 +141,31 @@ mod_metacell_tree_server <- function(id,
                 x = new Date().toLocaleString();
                 Shiny.onInputChange("', ns('lastModalClose'), '",x);});})')),
         tags$head(
-          tags$style(paste0(".modal-dialog .modal-lg{ width: fit-content !important;}"))),
+          tags$style(
+            paste0(".modal-dialog { 
+                width: fit-content !important; 
+                  z-index: 100000000000;
+                  }"))),
+        #tags$head(tags$style("#modalExample{ display:none;")),
         
-        shinyBS::bsModal(
-          id = ns("modalExample"),
+        shinyBS::bsModal(ns("modalExample"),
           title = '',
           # tagList(
           #     p('Cells metadata tags'),
           #     p('To get help about the organization of those tags, please refer to the FAQ')
           # ),
           trigger = ns("openModalBtn"),
-          size = "small",
+          size = "large",
           #popover_for_help_ui(ns("metacellTag_help")),
           div(
-            div(style = "align: center;display:inline-block; vertical-align: middle; margin: 0px; padding-right: 0px",
+            div(style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
               p('To get help about the organization of those tags, please refer to the FAQ'),
               radioButtons(ns('checkbox_mode'), '',
                 choices = c('Single selection' = 'single',
                   'Complete subtree' = 'subtree',
                   'Multiple selection' = 'multiple'),
                 width = '150px')),
-            div(style = "align: center; display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
+            div(style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
               actionButton(ns('cleartree'), 'Clear')
             )
           ),
@@ -206,6 +219,8 @@ mod_metacell_tree_server <- function(id,
       update_CB()
       updateRadioButtons(session, 'checkbox_mode', selected = 'single')
       rv$autoChanged <- FALSE
+      #dataOut$trigger <- as.numeric(Sys.time())
+      #dataOut$values <- NULL
     })  
     
     
@@ -213,6 +228,7 @@ mod_metacell_tree_server <- function(id,
     # remove the modal. If not show another modal, but this time with a failure
     # message.
     observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
+      #print('------------ input$lastModalClose ---------------')
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
     })
@@ -267,9 +283,9 @@ mod_metacell_tree_server <- function(id,
     
     output$tree <- renderUI({
       req(dataIn())
-      #div(style = "overflow-y: auto;",
+      div(style = "overflow-y: auto;",
         uiOutput(ns(paste0('metacell_tree_', DaparToolshed::typeDataset(dataIn()))))
-      #)
+      )
     })
     
     .style <- 'vertical-align: top; background: #bg-color#; color: white; padding: 5px;'

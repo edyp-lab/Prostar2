@@ -42,7 +42,6 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     ns <- NS(id)
     tagList(
       absolutePanel(
-        style = "z-index: 9999999;",
         uiOutput(ns("tree_UI"))
         ),
       uiOutput(ns("chooseKeepRemove_ui")),
