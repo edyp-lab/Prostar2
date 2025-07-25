@@ -24,7 +24,7 @@ mod_metacell_tree_server(
 )
 
 mod_metacell_tree(
-  obj,
+  obj = NULL,
   remoteReset = reactive({
      0
  })
@@ -45,6 +45,9 @@ xxxx
 }
 \examples{
 \dontrun{
+
+shiny::runApp(mod_metacell_tree())
+
 data(Exp1_R25_pept, package = 'DaparToolshedData')
 shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
 

@@ -20,6 +20,7 @@
 #' @examples
 #' \dontrun{
 #' library(DaparToolshed)
+#' library(shinyBS)
 #' data(Exp1_R25_prot, package ='DaparToolshedData')
 #' obj <- Exp1_R25_prot[[1]]
 #' conds <- colData(Exp1_R25_prot)$Condition
@@ -41,15 +42,13 @@ NULL
 mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     ns <- NS(id)
     tagList(
-      absolutePanel(
-        uiOutput(ns("tree_UI"))
-        ),
+      uiOutput(ns("tree_UI")),
       uiOutput(ns("chooseKeepRemove_ui")),
-        uiOutput(ns("chooseScope_ui")),
-        uiOutput(ns("qMetacellScope_widgets_set2_ui")),
-        uiOutput(ns("qMetacellScope_request_ui")),
-        uiOutput(ns('Add_btn_UI'))
-        )
+      uiOutput(ns("chooseScope_ui")),
+      uiOutput(ns("qMetacellScope_widgets_set2_ui")),
+      uiOutput(ns("qMetacellScope_request_ui")),
+      uiOutput(ns('Add_btn_UI'))
+      )
 }
 
 
@@ -184,8 +183,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
         
         
         output$tree_UI <- renderUI({
-            widget <- div(
-              mod_metacell_tree_ui(ns('tree')))
+            widget <- mod_metacell_tree_ui(ns('tree'))
             MagellanNTK::toggleWidget(widget, is.enabled())
         })
         
