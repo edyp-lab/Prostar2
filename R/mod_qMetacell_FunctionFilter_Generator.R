@@ -40,7 +40,7 @@ NULL
 #'
 mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
   ns <- NS(id)
-  #tagList(
+  tagList(
     div(
       uiOutput(ns("tree_UI")),
     uiOutput(ns("chooseKeepRemove_ui")),
@@ -49,7 +49,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("qMetacellScope_request_ui")),
     uiOutput(ns('Add_btn_UI'))
     )
-   # )
+    )
     
  # tagList(
     # div(

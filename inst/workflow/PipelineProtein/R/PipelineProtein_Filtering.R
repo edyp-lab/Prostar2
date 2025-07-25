@@ -160,9 +160,7 @@ PipelineProtein_Filtering_server <- function(id,
       "For every condition" = "AllCond",
       "At least one condition" = "AtLeastOneCond"
     )
-  
-  .localStyle <- .style <- "display:inline-block; vertical-align: top; padding-right: 20px;"
-  
+ 
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -251,10 +249,7 @@ PipelineProtein_Filtering_server <- function(id,
     # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
     #   dataOut$sidebarState <- input$Save_Sidebar
     # })
-    
-    
-    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
-    
+
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -318,8 +313,10 @@ PipelineProtein_Filtering_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
+          div(
           timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
           uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
+          )
         ),
         content = tagList(
           uiOutput(ns('qMetacell_Filter_DT_UI')),
@@ -350,7 +347,9 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
       
-      widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
+      widget <- div(
+        mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
+      )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
     
@@ -422,21 +421,21 @@ PipelineProtein_Filtering_server <- function(id,
       req(len_diff > 0)
       
       if (len_diff == 2)
-        rv$dataIn1 <- QFeatures::removeAssay(tmp, length(tmp)-1)
+        rv.custom$dataIn1 <- QFeatures::removeAssay(tmp, length(tmp)-1)
       else
-        rv$dataIn1 <- tmp
+        rv.custom$dataIn1 <- tmp
       
       # Rename the new dataset with the name of the process
-      names(rv$dataIn1)[length(rv$dataIn1)] <- 'qMetacellFiltering'
+      names(rv.custom$dataIn1)[length(rv.custom$dataIn1)] <- 'qMetacellFiltering'
       
       # Add params
       #par <- rv.custom$funFilter()$ll.widgets.value
       query <- rv.custom$funFilter()$value$ll.query
-      i <- length(rv$dataIn1)
-      .history <- DaparToolshed::paramshistory(rv$dataIn1[[i]])[['Metacell_Filtering']]
+      i <- length(rv.custom$dataIn1)
+      .history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
       
       .history[[paste0('query_', length(.history))]] <- query
-      DaparToolshed::paramshistory(rv$dataIn1[[i]])[['Metacell_Filtering']] <- .history
+      DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']] <- .history
       
       #rv.custom$dataIn2 <-rv$dataIn
     })
@@ -474,7 +473,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(btnEvents()=='Cellmetadatafiltering')
-      req(rv$dataIn1)
+      req(rv.custom$dataIn1)
       
       rv.custom$dataIn2 <- rv.custom$dataIn1
       
@@ -494,13 +493,11 @@ PipelineProtein_Filtering_server <- function(id,
         ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Variablefiltering_timeline')),
-          inputPanel(
-            uiOutput(ns("Variablefiltering_chooseKeepRemove_ui")),
+          uiOutput(ns("Variablefiltering_chooseKeepRemove_ui")),
             uiOutput(ns("Variablefiltering_cname_ui")),
             uiOutput(ns("Variablefiltering_operator_ui")),
             uiOutput(ns("Variablefiltering_value_ui")),
             uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
-          )
         ),
         content = tagList(
           uiOutput(ns("Variablefiltering_DT_UI"))
@@ -524,8 +521,8 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$Variablefiltering_cname_ui <- renderUI({
-      req(rv$dataIn1)
-      .choices <- c("None", colnames(rowData(rv$dataIn1[[length(rv$dataIn1)]])))
+      req(rv.custom$dataIn1)
+      .choices <- c("None", colnames(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
       
       widget <- selectInput(ns("Variablefiltering_cname"),
         "Column name",
@@ -539,11 +536,11 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$Variablefiltering_operator_ui <- renderUI({
-      req(rv$dataIn1)
-      req(rv.widgets$Variablefiltering_cname %in% colnames(rowData(rv$dataIn1[[length(rv$dataIn1)]])))
+      req(rv.custom$dataIn1)
+      req(rv.widgets$Variablefiltering_cname %in% colnames(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
       
       
-      if (is.numeric(rowData(rv$dataIn1[[length(rv$dataIn1)]])[, rv.widgets$Variablefiltering_cname])) {
+      if (is.numeric(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])) {
         .operator <- DaparToolshed::SymFilteringOperators()
       } else {
         .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
@@ -576,7 +573,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(c(rv.widgets$Variablefiltering_value, rv.widgets$Variablefiltering_cname), {
-      req(rv$dataIn1)
+      req(rv.custom$dataIn1)
       req(rv.widgets$Variablefiltering_value != 'Enter value...')
       req(rv.widgets$Variablefiltering_cname != "None")
       
@@ -598,9 +595,9 @@ PipelineProtein_Filtering_server <- function(id,
       val <- tryCatch({
         
         
-        if (is.numeric(rowData(rv$dataIn1[[length(rv$dataIn1)]])[, rv.widgets$Variablefiltering_cname]) ) {
+        if (is.numeric(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname]) ) {
           as.numeric(value)
-        } else if (!is.numeric(rowData(rv$dataIn1[[length(rv$dataIn1)]])[, rv.widgets$Variablefiltering_cname])){
+        } else if (!is.numeric(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])){
           as.character(value)
         }
       },
@@ -706,11 +703,11 @@ PipelineProtein_Filtering_server <- function(id,
         
         ###########################################
         req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
-        req(rv$dataIn1)
+        req(rv.custom$dataIn1)
         
         tmp <- filterFeaturesOneSE(
-          object = rv$dataIn1,
-          i = length(rv$dataIn1),
+          object = rv.custom$dataIn1,
+          i = length(rv.custom$dataIn1),
           name = paste0("variableFiltered", MagellanNTK::Timestamp()),
           filters = rv.custom$Variablefiltering_funFilter$ll.var
         )
@@ -724,7 +721,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         .html <- rv.custom$Variablefiltering_funFilter$ll.query
         .nbDeleted <- nBefore - nAfter
-        .nbBefore <- nrow(assay(rv$dataIn1[[length(rv$dataIn1)]]))
+        .nbBefore <- nrow(assay(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]))
         .nbAfter <- nrow(assay(tmp[[length(tmp)]]))
         
         rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
@@ -739,19 +736,19 @@ PipelineProtein_Filtering_server <- function(id,
         req(len_diff > 0)
         
         if (len_diff == 2)
-          rv$dataIn2 <- QFeatures::removeAssay(tmp, length(tmp)-1)
+          rv.custom$dataIn2 <- QFeatures::removeAssay(tmp, length(tmp)-1)
         else 
-          rv$dataIn2 <- tmp
+          rv.custom$dataIn2 <- tmp
         
         # Rename the new dataset with the name of the process
-        names(rv$dataIn2)[length(rv$dataIn2)] <- 'Variable_Filtering'
+        names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Variable_Filtering'
         
         
         query <- rv.custom$Variablefiltering_funFilter$ll.query
-        i <- length(rv$dataIn2)
-        .history <- DaparToolshed::paramshistory(rv$dataIn2[[i]])[['Variable_Filtering']]
+        i <- length(rv.custom$dataIn2)
+        .history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
         .history[[paste0('query_', length(.history))]] <- query
-        DaparToolshed::paramshistory(rv$dataIn2[[i]])[['Variable_Filtering']] <- .history
+        DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']] <- .history
         
         
         

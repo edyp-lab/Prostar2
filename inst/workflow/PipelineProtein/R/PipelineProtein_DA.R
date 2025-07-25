@@ -234,7 +234,6 @@ PipelineProtein_DA_server <- function(id,
     #   dataOut$sidebarState <- input$Save_Sidebar
     # })
     
-    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
     
     #####################################################################
     
@@ -397,8 +396,8 @@ PipelineProtein_DA_server <- function(id,
         sidebar = tagList(
           timeline_process_ui(ns('Pairwisecomparison_timeline')),
           tags$div(
-            tags$div(style = .localStyle, uiOutput(ns('Pairwisecomparison_Comparison_UI'))),
-            tags$div(style = .localStyle, uiOutput(ns("pushpval_UI")))
+            uiOutput(ns('Pairwisecomparison_Comparison_UI')),
+            uiOutput(ns("pushpval_UI"))
           )
         ),
         content = div(
@@ -631,21 +630,14 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 2 UI---------------
     output$Pvaluecalibration <- renderUI({
-      
-      .localStyle <- "display:inline-block; 
-        vertical-align: middle; 
-        padding-right: 40px;"
 
-      
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Pvaluecalibration_timeline')),
-          tags$div(
-            tags$div(style = .localStyle, uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))),
-            tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_numericValCalibration_UI"))),
-            tags$div(style = .localStyle, uiOutput(ns("Pvaluecalibration_nBins_UI")))
-          )
+          uiOutput(ns('Pvaluecalibration_calibrationMethod_UI')),
+          uiOutput(ns("Pvaluecalibration_numericValCalibration_UI")),
+          uiOutput(ns("Pvaluecalibration_nBins_UI"))
         ),
         content = div(
           p(tags$strong(
@@ -1078,12 +1070,12 @@ PipelineProtein_DA_server <- function(id,
     
     output$widgets_ui <- renderUI({
       widget <- tags$div(
-        tags$div(style = .localStyle, mod_set_pval_threshold_ui(ns("Title"))),
-        tags$div(style = .localStyle, checkboxInput(ns('FDR_viewAdjPval'), 
+        mod_set_pval_threshold_ui(ns("Title")),
+        checkboxInput(ns('FDR_viewAdjPval'), 
           'View adjusted p-value', 
-          value = rv.widgets$FDR_viewAdjPval)),
-        
-      )
+          value = rv.widgets$FDR_viewAdjPval)
+        )
+
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
       

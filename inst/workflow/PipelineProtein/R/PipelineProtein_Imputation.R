@@ -183,9 +183,6 @@ PipelineProtein_Imputation_server <- function(id,
     #   dataOut$sidebarState <- input$Save_Sidebar
     # })
     
-    
-    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
-    
     observe({
       #Utile for the MEC imputation
       qdata <- SummarizedExperiment::assay(dataIn()[[length(dataIn())]])
@@ -247,18 +244,13 @@ PipelineProtein_Imputation_server <- function(id,
       path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
       includeCSS(path)
       
-      .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
-      
-      
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('POVImputation_timeline')),
-          tags$div(
-            tags$div(style = .localStyle, uiOutput(ns("POVImputation_algorithm_UI"))),
-            tags$div(style = .localStyle, uiOutput(ns("POVImputation_KNN_nbNeighbors_UI"))),
-            tags$div(style = .localStyle, uiOutput(ns("POVImputation_detQuant_UI")))
-          )
+          uiOutput(ns("POVImputation_algorithm_UI")),
+          uiOutput(ns("POVImputation_KNN_nbNeighbors_UI")),
+          uiOutput(ns("POVImputation_detQuant_UI"))
         ),
         content = tagList(
           uiOutput(ns("POVImputation_showDetQuantValues")),
@@ -341,19 +333,15 @@ PipelineProtein_Imputation_server <- function(id,
       req(rv.widgets$POVImputation_algorithm == 'detQuantile')
       
       widget <- tagList(
-        tags$div(style = .localStyle,
-          numericInput(ns("POVImputation_detQuant_quantile"), "Quantile",
+        numericInput(ns("POVImputation_detQuant_quantile"), "Quantile",
             value = rv.widgets$POVImputation_detQuant_quantile,
             step = 0.5, min = 0, max = 100, width = "100px"
-          )
-        ),
-        tags$div(style = .localStyle,
-          numericInput(ns("POVImputation_detQuant_factor"), "Factor",
+          ),
+        numericInput(ns("POVImputation_detQuant_factor"), "Factor",
             value = rv.widgets$POVImputation_detQuant_factor,
             step = 0.1, min = 0, max = 10, width = "100px"
           )
         )
-      )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
       

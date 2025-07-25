@@ -35,8 +35,7 @@ NULL
 #'
 mod_Pept_Imputation_ui <- function(id) {
   ns <- NS(id)
-  .localStyle <- "display:inline-block; vertical-align: top;
-                  padding-right: 20px;"
+
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
@@ -88,7 +87,7 @@ mod_Pept_Imputation_server <- function(id,
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
+   # .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
     # eval(
     #   str2expression(
     #     MagellanNTK::Get_AdditionalModule_Core_Code(
@@ -164,16 +163,14 @@ mod_Pept_Imputation_server <- function(id,
         tags$p("Your dataset does not contains missing values.")
       } else {
         tagList(
-          tags$div(
-            tags$div(style = .localStyle, uiOutput(ns("Imp_warning"))),
-            tags$div(style = .localStyle, uiOutput(ns("Imp_algorithm_UI"))),
-          tags$div(style = .localStyle, uiOutput(ns("Imp_imp4p_UI"))),
-          tags$div(style = .localStyle, uiOutput(ns("Imp_imp4pOpts2_UI"))),
-          tags$div(style = .localStyle, uiOutput(ns("Imp_KNN_nbNeighbors_UI"))),
-          tags$div(style = .localStyle, uiOutput(ns("Imp_detQuant_UI"))),
-          tags$div(style = .localStyle, uiOutput(ns("Imp_MLE_UI"))),
-          tags$div(style = .localStyle, uiOutput(ns("Imp_showDetQuantValues_UI")))
-        ),
+          uiOutput(ns("Imp_warning")),
+          uiOutput(ns("Imp_algorithm_UI")),
+          uiOutput(ns("Imp_imp4p_UI")),
+          uiOutput(ns("Imp_imp4pOpts2_UI")),
+          uiOutput(ns("Imp_KNN_nbNeighbors_UI")),
+          uiOutput(ns("Imp_detQuant_UI")),
+          uiOutput(ns("Imp_MLE_UI")),
+          uiOutput(ns("Imp_showDetQuantValues_UI")),
         # Insert validation button
         uiOutput(ns("mod_Pept_Imputation_btn_validate_ui")),
         htmlOutput("helpForImputation")
@@ -265,13 +262,13 @@ mod_Pept_Imputation_server <- function(id,
       req(rv.widgets$Imp_algorithm == 'detQuantile')
       
       widget <- tagList(
-        tags$div(style = .localStyle,
+        tags$div(
           numericInput(ns("detQuant_quantile"), "Quantile",
             value = rv.widgets$Imp_detQuant_quantile,
             step = 0.5, min = 0, max = 100, width = "100px"
           )
         ),
-        tags$div(style = .localStyle,
+        tags$div(
           numericInput(ns("detQuant_factor"), "Factor",
             value = rv.widgets$Imp_detQuant_factor,
             step = 0.1, min = 0, max = 10, width = "100px"
@@ -288,12 +285,12 @@ mod_Pept_Imputation_server <- function(id,
       
       widget <- tagList(
         
-        tags$div(style = .localStyle,
+        tags$div(
           numericInput(ns("Imp_imp4p_nbiter"), "Iterations",
             value = rv.widgets$Imp_imp4p_nbiter,
             step = 1, min = 1, width = "100px")
         ),
-        tags$div(style = .localStyle,
+        tags$div(
           checkboxInput(ns("Imp_imp4p_withLapala"), "Impute MEC also",
             value = rv.widgets$Imp_imp4p_withLapala)
         )
@@ -310,14 +307,14 @@ mod_Pept_Imputation_server <- function(id,
         "beta" = "beta")
       
       widget <- tagList(
-        tags$div(style = .localStyle,
+        tags$div(
           numericInput(ns("Imp_imp4p_qmin"), "Upper lapala bound",
             value = rv.widgets$Imp_imp4p_qmin,
             step = 0.1, min = 0, max = 100,
             width = "100px"
           )
         ),
-        tags$div(style = .localStyle,
+        tags$div(
           radioButtons(ns("Imp_imp4pLAPALA_distrib"),
             "Distribution type",
             choices = G_imp4PDistributionType_Choices,

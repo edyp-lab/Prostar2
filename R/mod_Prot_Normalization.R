@@ -35,8 +35,6 @@ NULL
 #'
 mod_Prot_Normalization_ui <- function(id) {
   ns <- NS(id)
-  .localStyle <- "display:inline-block; vertical-align: top;
-                  padding-right: 20px;"
   wellPanel(
     # uiOutput for all widgets in this UI
     # This part is mandatory
@@ -47,33 +45,22 @@ mod_Prot_Normalization_ui <- function(id) {
     # For more details, please refer to the dev document.
     
     tagList(
-      div(style = .localStyle,
-        uiOutput(ns("Normalization_btn_validate_ui"))
-      ),
-      div(
-        div(style = .localStyle,
-          uiOutput(ns('Normalization_method_ui'))
-        ),
+      uiOutput(ns("Normalization_btn_validate_ui")),
+      uiOutput(ns('Normalization_method_ui')),
         div(id = "div_Normalization_type_ui",
-          style = .localStyle,
           shinyjs::hidden(uiOutput(ns('Normalization_type_ui')))
         ),
-        div(style = .localStyle,
+        div(
           shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
-          #module_Not_a_numericUI(ns("test_spanLOESS")),
           uiOutput(ns("Normalization_quantile_ui")),
           uiOutput(ns("Normalization_varReduction_ui"))
         ),
-        div(style = .localStyle,
+        div(
           uiOutput(ns('tracking')),
           shinyjs::hidden(uiOutput(ns("Normalization_sync_ui"))
           )
-        )
       ),
       tags$hr()
-      # ,div(style = .style,
-      #   omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
-      # )
       ,fluidRow(
         column(width = 5,
           omXplore::omXplore_density_ui(ns("densityPlot_Norm"))

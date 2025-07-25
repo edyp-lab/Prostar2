@@ -239,26 +239,19 @@ PipelineProtein_Normalization_server <- function(id,
       #   
       #   uiOutput(ns("Prot_Normalization_ui"))
       # )
-      
-      .localStyle <- "display:inline-block; vertical-align: top;
-                  padding-right: 20px;"
-      
-      
+
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
           timeline_process_ui(ns('Normalization_timeline')),
-          tags$div(
-            tags$div(style = .localStyle, uiOutput(ns("Normalization_method_ui"))),
-            tags$div(style = .localStyle, shinyjs::hidden(uiOutput(ns('Normalization_type_ui')))),
-            tags$div(style = .localStyle, shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui')))),
-            tags$div(style = .localStyle, uiOutput(ns("Normalization_quantile_ui"))),
-            tags$div(style = .localStyle, uiOutput(ns("Normalization_varReduction_ui"))),
-            tags$div(style = .localStyle, uiOutput(ns('tracking'))),
-            tags$div(style = .localStyle, shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
-            )
-          )
-        ),
+          uiOutput(ns("Normalization_method_ui")),
+          shinyjs::hidden(uiOutput(ns('Normalization_type_ui'))),
+          shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
+          uiOutput(ns("Normalization_quantile_ui")),
+          uiOutput(ns("Normalization_varReduction_ui")),
+          uiOutput(ns('tracking')),
+          shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
+          ),
         content = fluidRow(
           column(width = 5,
             omXplore::omXplore_density_ui(ns("densityPlot_Norm"))
