@@ -14,9 +14,6 @@
 #'
 #' @examples
 #' \dontrun{
-#' 
-#' shiny::runApp(mod_metacell_tree())
-#' 
 #' data(Exp1_R25_pept, package = 'DaparToolshedData')
 #' shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
 #' 
@@ -40,15 +37,24 @@ mod_metacell_tree_ui <- function(id) {
   ns <- NS(id)
   
   addResourcePath('images', system.file('images', package = 'DaparToolshed'))
-  tagList(
+  fluidPage(
     shinyjs::useShinyjs(),
-    actionButton(ns("openModalBtn"),
+    fluidRow(
+      column(width=6, 
+        actionButton(ns("openModalBtn"),
+          tagList(
             #p('Select tags'),
-            tags$img(src = "images/ds_metacell.png", height = "50px")),
+            tags$img(src = "images/ds_metacell.png", height = "50px"))
+        ),
         shinyBS::bsTooltip(ns("openModalBtn"), "Click to open tags selection tool",
-          "right", options = list(container = "body")),
+          "right", options = list(container = "body"))),
+      column(width=6, uiOutput(ns('selectedNodes'))
+      )
+    ),
+    br(),
     uiOutput(ns('modaltree'))
   )
+  
 }
 
 
@@ -66,7 +72,9 @@ mod_metacell_tree_server <- function(id,
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
   
-
+  #pkgs.require(c("shinyBS", "shinyjs"))
+  
+  
   convertWidgetName <- function(name){
     # This function implements the transformations used to
     # create the names of the checkboxes
@@ -114,15 +122,11 @@ mod_metacell_tree_server <- function(id,
     
     
     Get_bg_color <- function(name){
-      .style <- 'vertical-align: top; background: #bg-color#; color: white; padding: 5px;'
-      
       gsub("#bg-color#", rv$bg_colors[name], .style)
     }
     
     output$modaltree <- renderUI({
-      print('testtestetetsts')
-req(dataIn())
-      div(
+      tagList(
         shinyjs::inlineCSS(css),
         tags$script(paste0('$( document ).ready(function() {
                 $("#', 
@@ -130,13 +134,10 @@ req(dataIn())
           '").on("hidden.bs.modal", function (event) {
                 x = new Date().toLocaleString();
                 Shiny.onInputChange("', ns('lastModalClose'), '",x);});})')),
-        tags$head(
-          tags$style(
-            paste0(".modal-dialog { width: fit-content !important; }"))),
+        tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
         #tags$head(tags$style("#modalExample{ display:none;")),
         
-        shinyBS::bsModal(
-          id = ns("modalExample"),
+        shinyBS::bsModal(ns("modalExample"),
           title = '',
           # tagList(
           #     p('Cells metadata tags'),
@@ -153,15 +154,11 @@ req(dataIn())
                   'Complete subtree' = 'subtree',
                   'Multiple selection' = 'multiple'),
                 width = '150px')),
-            p(paste0('metacell_tree_', DaparToolshed::typeDataset(dataIn()))),
-           plot(1:10),
-            uiOutput(ns('tree')),
-
             div(style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
               actionButton(ns('cleartree'), 'Clear')
             )
-          )
-          
+          ),
+          uiOutput(ns('tree'))
         )
       )
       
@@ -178,7 +175,7 @@ req(dataIn())
     init_tree <- function(){
       req(dataIn())
       req(DaparToolshed::typeDataset(dataIn()))
-      
+      #print('------------ init_tree() ---------------')
       rv$meta <- omXplore::metacell.def(DaparToolshed::typeDataset(dataIn()))
       rv$mapping <- BuildMapping(rv$meta)$names
       rv$bg_colors <- BuildMapping(rv$meta)$colors
@@ -228,8 +225,7 @@ req(dataIn())
     
     
     
-    observeEvent(req(dataIn()), ignoreInit = FALSE, ignoreNULL = TRUE,{
-
+    observeEvent(dataIn(), ignoreInit = FALSE, {
       if (!is.null(DaparToolshed::typeDataset(dataIn())))
         init_tree()
       dataOut$trigger <- as.numeric(Sys.time())
@@ -275,12 +271,14 @@ req(dataIn())
     
     output$tree <- renderUI({
       req(dataIn())
-      div(
-        style = "overflow-y: auto;",
+      div(style = "overflow-y: auto;",
         uiOutput(ns(paste0('metacell_tree_', DaparToolshed::typeDataset(dataIn()))))
       )
     })
-
+    
+    .style <- 'vertical-align: top; background: #bg-color#; color: white; padding: 5px;'
+    
+    
     # Define tree for protein dataset
     output$metacell_tree_protein <- renderUI({
       req(dataIn())
@@ -516,7 +514,12 @@ req(dataIn())
       }
       
     })
+    
+    
+    
+    
     return(reactive({dataOut}))
+    
   })
   
   
@@ -590,7 +593,7 @@ ul {
 #' @rdname metacell-tree
 #' 
 mod_metacell_tree <- function(
-    obj = NULL,
+    obj,
   remoteReset = reactive({0})){
   ui <- fluidPage(
     tagList(
