@@ -196,43 +196,43 @@ PipelineProtein_Filtering_server <- function(id,
     # 
     # eval(str2expression(core))
     
-    
-    
-    timeline_process_server(
-      id = 'Description_timeline',
-      config = PipelineProtein_Filtering_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    
-    timeline_process_server(
-      id = 'Cellmetadatafiltering_timeline',
-      config = PipelineProtein_Filtering_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    timeline_process_server(
-      id = 'Variablefiltering_timeline',
-      config = PipelineProtein_Filtering_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    timeline_process_server(
-      id = 'Save_timeline',
-      config = PipelineProtein_Filtering_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
+    # 
+    # 
+    # timeline_process_server(
+    #   id = 'Description_timeline',
+    #   config = PipelineProtein_Filtering_conf(),
+    #   status = reactive({steps.status()}),
+    #   position = reactive({current.pos()}),
+    #   enabled = reactive({steps.enabled()})
+    # )
+    # 
+    # 
+    # 
+    # timeline_process_server(
+    #   id = 'Cellmetadatafiltering_timeline',
+    #   config = PipelineProtein_Filtering_conf(),
+    #   status = reactive({steps.status()}),
+    #   position = reactive({current.pos()}),
+    #   enabled = reactive({steps.enabled()})
+    # )
+    # 
+    # timeline_process_server(
+    #   id = 'Variablefiltering_timeline',
+    #   config = PipelineProtein_Filtering_conf(),
+    #   status = reactive({steps.status()}),
+    #   position = reactive({current.pos()}),
+    #   enabled = reactive({steps.enabled()})
+    # )
+    # 
+    # 
+    # timeline_process_server(
+    #   id = 'Save_timeline',
+    #   config = PipelineProtein_Filtering_conf(),
+    #   status = reactive({steps.status()}),
+    #   position = reactive({current.pos()}),
+    #   enabled = reactive({steps.enabled()})
+    # )
+    # 
     
     # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
     #   dataOut$sidebarState <- input$Description_Sidebar
@@ -269,7 +269,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = timeline_process_ui(ns('Description_timeline')),
+        sidebar = tagList(),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -313,10 +313,10 @@ PipelineProtein_Filtering_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          div(
-          timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
+          #div(
+          #timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
           uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
-          )
+          #)
         ),
         content = tagList(
           uiOutput(ns('qMetacell_Filter_DT_UI')),
@@ -492,7 +492,7 @@ PipelineProtein_Filtering_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Variablefiltering_timeline')),
+          #timeline_process_ui(ns('Variablefiltering_timeline')),
           uiOutput(ns("Variablefiltering_chooseKeepRemove_ui")),
             uiOutput(ns("Variablefiltering_cname_ui")),
             uiOutput(ns("Variablefiltering_operator_ui")),
@@ -771,7 +771,7 @@ PipelineProtein_Filtering_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Save_timeline'))
+         # timeline_process_ui(ns('Save_timeline'))
         ),
         content = uiOutput(ns('dl_ui'))
       )
