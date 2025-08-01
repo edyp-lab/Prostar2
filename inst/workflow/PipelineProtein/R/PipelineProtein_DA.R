@@ -164,85 +164,6 @@ PipelineProtein_DA_server <- function(id,
       )
     )
     
-    
-    
-    
-    #####################################################################
-    
-    timeline_process_server(
-      id = 'Description_timeline',
-      config = PipelineProtein_DA_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    
-    timeline_process_server(
-      id = 'Pairwisecomparison_timeline',
-      config = PipelineProtein_DA_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    timeline_process_server(
-      id = 'Pvaluecalibration_timeline',
-      config = PipelineProtein_DA_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    timeline_process_server(
-      id = 'FDR_timeline',
-      config = PipelineProtein_DA_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    timeline_process_server(
-      id = 'Save_timeline',
-      config = PipelineProtein_DA_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Description_Sidebar
-    # })
-    # 
-    # observeEvent(input$Pairwisecomparison_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Pairwisecomparison_Sidebar
-    # })
-    # 
-    # observeEvent(input$Pvaluecalibration_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Pvaluecalibration_Sidebar
-    # })
-    # 
-    # observeEvent(input$FDR_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$FDR_Sidebar
-    # })
-    # 
-    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Save_Sidebar
-    # })
-    
-    
-    #####################################################################
-    
-    
- 
-    
-    
-    
-    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -260,7 +181,8 @@ PipelineProtein_DA_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = timeline_process_ui(ns('Description_timeline')),
+        sidebar = tagList(),
+        #timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -394,7 +316,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Pairwisecomparison_timeline')),
+          #timeline_process_ui(ns('Pairwisecomparison_timeline')),
           tags$div(
             uiOutput(ns('Pairwisecomparison_Comparison_UI')),
             uiOutput(ns("pushpval_UI"))
@@ -634,7 +556,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Pvaluecalibration_timeline')),
+         # timeline_process_ui(ns('Pvaluecalibration_timeline')),
           uiOutput(ns('Pvaluecalibration_calibrationMethod_UI')),
           uiOutput(ns("Pvaluecalibration_numericValCalibration_UI")),
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
@@ -1022,7 +944,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('FDR_timeline')),
+          #timeline_process_ui(ns('FDR_timeline')),
           tags$div(
             uiOutput(ns('widgets_ui'))
           )
@@ -1431,7 +1353,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Save_timeline'))
+         # timeline_process_ui(ns('Save_timeline'))
         ),
         content = uiOutput(ns('dl_ui'))
       )

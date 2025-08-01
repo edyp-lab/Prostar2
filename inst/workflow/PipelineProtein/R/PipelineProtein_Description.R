@@ -17,6 +17,8 @@ PipelineProtein_Description_conf <- function(){
 #' @export
 PipelineProtein_Description_ui <- function(id){
   ns <- NS(id)
+
+  
 }
 
 
@@ -30,6 +32,8 @@ PipelineProtein_Description_server <- function(id,
     path = NULL,
     btnEvents = reactive({NULL})
 ){
+  
+
   
   
   
@@ -68,7 +72,7 @@ PipelineProtein_Description_server <- function(id,
         unlist(strsplit(id, '_'))[1], 
         'md', 
         paste0(id, '.md')))
-      
+     
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = NULL,

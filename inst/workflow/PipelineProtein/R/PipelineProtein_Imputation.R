@@ -131,58 +131,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     
-    timeline_process_server(
-      id = 'Description_timeline',
-      config = PipelineProtein_Imputation_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    
-    timeline_process_server(
-      id = 'POVImputation_timeline',
-      config = PipelineProtein_Imputation_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    timeline_process_server(
-      id = 'MECImputation_timeline',
-      config = PipelineProtein_Imputation_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    timeline_process_server(
-      id = 'Save_timeline',
-      config = PipelineProtein_Imputation_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Description_Sidebar
-    # })
-    # 
-    # observeEvent(input$POVImputation_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$POVImputation_Sidebar
-    # })
-    # 
-    # observeEvent(input$MECImputation_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$MECImputation_Sidebar
-    # })
-    # 
-    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Save_Sidebar
-    # })
-    
     observe({
       #Utile for the MEC imputation
       qdata <- SummarizedExperiment::assay(dataIn()[[length(dataIn())]])
@@ -207,7 +155,8 @@ PipelineProtein_Imputation_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = timeline_process_ui(ns('Description_timeline')),
+        sidebar = tagList(),
+        #timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -247,7 +196,7 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('POVImputation_timeline')),
+         # timeline_process_ui(ns('POVImputation_timeline')),
           uiOutput(ns("POVImputation_algorithm_UI")),
           uiOutput(ns("POVImputation_KNN_nbNeighbors_UI")),
           uiOutput(ns("POVImputation_detQuant_UI"))
@@ -481,7 +430,7 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('MECImputation_timeline')),
+          #timeline_process_ui(ns('MECImputation_timeline')),
           if (rv.custom$mv.present) {
             div(
               div(style = .style, uiOutput(ns("MECImputation_chooseImputationMethod_ui"))),
@@ -710,7 +659,7 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Save_timeline'))
+          #timeline_process_ui(ns('Save_timeline'))
         ),
         content = uiOutput(ns('dl_ui'))
       )

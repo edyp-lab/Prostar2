@@ -195,61 +195,7 @@ PipelineProtein_Filtering_server <- function(id,
     # )
     # 
     # eval(str2expression(core))
-    
-    # 
-    # 
-    # timeline_process_server(
-    #   id = 'Description_timeline',
-    #   config = PipelineProtein_Filtering_conf(),
-    #   status = reactive({steps.status()}),
-    #   position = reactive({current.pos()}),
-    #   enabled = reactive({steps.enabled()})
-    # )
-    # 
-    # 
-    # 
-    # timeline_process_server(
-    #   id = 'Cellmetadatafiltering_timeline',
-    #   config = PipelineProtein_Filtering_conf(),
-    #   status = reactive({steps.status()}),
-    #   position = reactive({current.pos()}),
-    #   enabled = reactive({steps.enabled()})
-    # )
-    # 
-    # timeline_process_server(
-    #   id = 'Variablefiltering_timeline',
-    #   config = PipelineProtein_Filtering_conf(),
-    #   status = reactive({steps.status()}),
-    #   position = reactive({current.pos()}),
-    #   enabled = reactive({steps.enabled()})
-    # )
-    # 
-    # 
-    # timeline_process_server(
-    #   id = 'Save_timeline',
-    #   config = PipelineProtein_Filtering_conf(),
-    #   status = reactive({steps.status()}),
-    #   position = reactive({current.pos()}),
-    #   enabled = reactive({steps.enabled()})
-    # )
-    # 
-    
-    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Description_Sidebar
-    # })
-    # 
-    # observeEvent(input$Cellmetadatafiltering_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Cellmetadatafiltering_Sidebar
-    # })
-    # 
-    # observeEvent(input$Variablefiltering_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Variablefiltering_Sidebar
-    # })
-    # 
-    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Save_Sidebar
-    # })
-
+ 
     
     # >>>
     # >>> START ------------- Code for Description UI---------------

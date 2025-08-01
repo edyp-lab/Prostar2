@@ -127,55 +127,6 @@ PipelineProtein_Normalization_server <- function(id,
     # 
     # eval(str2expression(core))
     
-    timeline_process_server(
-      id = 'Description_timeline',
-      config = PipelineProtein_Normalization_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    
-    timeline_process_server(
-      id = 'Normalization_timeline',
-      config = PipelineProtein_Normalization_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-
-    
-    timeline_process_server(
-      id = 'Save_timeline',
-      config = PipelineProtein_Normalization_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Description_Sidebar
-    # })
-    # 
-    # observeEvent(input$Normalization_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Normalization_Sidebar
-    # })
-    # 
-    # 
-    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Save_Sidebar
-    # })
-    # 
-    # 
-    # observeEvent(btnEvents(), ignoreInit = TRUE, {
-    #   
-    #   print(paste0(current.pos(), '__', btnEvents()))
-    # 
-    # }, priority = 10000)
-    
-    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -191,8 +142,8 @@ PipelineProtein_Normalization_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = timeline_process_ui(ns('Description_timeline')),
-        content = tagList(
+        sidebar = div(),
+        content = div(
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -227,23 +178,11 @@ PipelineProtein_Normalization_server <- function(id,
       
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
-      # 
-      # wellPanel(
-      #   # uiOutput for all widgets in this UI
-      #   # This part is mandatory
-      #   # The renderUI() function of each widget is managed by MagellanNTK
-      #   # The dev only have to define a reactive() function for each
-      #   # widget he want to insert
-      #   # Be aware of the naming convention for ids in uiOutput()
-      #   # For more details, please refer to the dev document.
-      #   
-      #   uiOutput(ns("Prot_Normalization_ui"))
-      # )
 
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Normalization_timeline')),
+          #timeline_process_ui(ns('Normalization_timeline')),
           uiOutput(ns("Normalization_method_ui")),
           shinyjs::hidden(uiOutput(ns('Normalization_type_ui'))),
           shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
@@ -252,20 +191,13 @@ PipelineProtein_Normalization_server <- function(id,
           uiOutput(ns('tracking')),
           shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
           ),
-        content = fluidRow(
-          column(width = 5,
-            omXplore::omXplore_density_ui(ns("densityPlot_Norm"))
-          ),
-          column(width = 5,
-            omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
-          ),
-          column(width = 5,
-            highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
+        content = tagList(
+          style = "display: flex;",
+          omXplore::omXplore_density_ui(ns("densityPlot_Norm")),
+          omXplore::omXplore_intensity_ui(ns("boxPlot_Norm")),
+          highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
           )
         )
-      )
-      
-      
     })
     
     ###############################################################
@@ -584,9 +516,7 @@ PipelineProtein_Normalization_server <- function(id,
     output$Save <- renderUI({
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = tagList(
-          timeline_process_ui(ns('Save_timeline'))
-        ),
+        sidebar = tagList(),
         content = uiOutput(ns('dl_ui'))
       )
     })

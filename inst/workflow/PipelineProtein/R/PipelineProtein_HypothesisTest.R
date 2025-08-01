@@ -121,50 +121,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     eval(str2expression(core.code))
     
-    
-    
-    timeline_process_server(
-      id = 'Description_timeline',
-      config = PipelineProtein_HypothesisTest_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    
-    timeline_process_server(
-      id = 'HypothesisTest_timeline',
-      config = PipelineProtein_HypothesisTest_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
 
-    timeline_process_server(
-      id = 'Save_timeline',
-      config = PipelineProtein_HypothesisTest_conf(),
-      status = reactive({steps.status()}),
-      position = reactive({current.pos()}),
-      enabled = reactive({steps.enabled()})
-    )
-    
-    
-    # observeEvent(input$Description_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Description_Sidebar
-    # })
-    # 
-    # observeEvent(input$HypothesisTest_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$HypothesisTest_Sidebar
-    # })
-    # 
-    # observeEvent(input$Save_Sidebar, ignoreNULL = TRUE, {
-    #   dataOut$sidebarState <- input$Save_Sidebar
-    # })
-    # 
-    
-    
     
     
     # Add a new observer to remoteReset to complete the default behaviour
@@ -189,7 +146,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = timeline_process_ui(ns('Description_timeline')),
+        sidebar = tagList(),
+        #timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -229,7 +187,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('HypothesisTest_timeline')),
+          #timeline_process_ui(ns('HypothesisTest_timeline')),
           uiOutput(ns('HypothesisTest_widgets_ui'))),
         content = uiOutput(ns('HypothesisTest_plots_ui'))
       )
@@ -610,7 +568,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          timeline_process_ui(ns('Save_timeline'))
+          #timeline_process_ui(ns('Save_timeline'))
         ),
         content = uiOutput(ns('dl_ui'))
       )

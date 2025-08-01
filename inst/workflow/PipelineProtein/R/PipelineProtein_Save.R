@@ -87,13 +87,7 @@ PipelineProtein_Save_server <- function(id,
       
     })
     
-    # output$Save_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("Save_btn_validate"),
-    #     "Start",
-    #     class = btn_success_color)
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Save'])
-    # })
-    
+
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(btnEvents()=='Save')
