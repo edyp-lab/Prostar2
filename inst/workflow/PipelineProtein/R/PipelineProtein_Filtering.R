@@ -202,10 +202,6 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> 
     
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
-      
-      
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -259,10 +255,7 @@ PipelineProtein_Filtering_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(
-          #div(
-          #timeline_process_ui(ns('Cellmetadatafiltering_timeline')),
           uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
-          #)
         ),
         content = tagList(
           uiOutput(ns('qMetacell_Filter_DT_UI')),
@@ -270,9 +263,6 @@ PipelineProtein_Filtering_server <- function(id,
           uiOutput(ns('Cellmetadatafiltering_plots_ui'))
         )
       )
-      
-      
-      
     })
     
     
@@ -293,9 +283,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
       
-      widget <- div(
-        mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
-      )
+      widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
     })
     

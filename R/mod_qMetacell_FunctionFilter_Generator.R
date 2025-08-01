@@ -20,6 +20,7 @@
 #' @examples
 #' \dontrun{
 #' library(DaparToolshed)
+#' library(shinyBS)
 #' data(Exp1_R25_prot, package ='DaparToolshedData')
 #' obj <- Exp1_R25_prot[[1]]
 #' conds <- colData(Exp1_R25_prot)$Condition
@@ -41,7 +42,6 @@ NULL
 mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    div(
       uiOutput(ns("tree_UI")),
     uiOutput(ns("chooseKeepRemove_ui")),
     uiOutput(ns("chooseScope_ui")),
@@ -49,26 +49,6 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("qMetacellScope_request_ui")),
     uiOutput(ns('Add_btn_UI'))
     )
-    )
-    
- # tagList(
-    # div(
-    #   fluidRow(
-    #     column(2, uiOutput(ns("tree_UI"))),
-    #     column(2, uiOutput(ns("chooseKeepRemove_ui"))),
-    #     column(2, uiOutput(ns("chooseScope_ui"))),
-    #     column(6, uiOutput(ns("qMetacellScope_widgets_set2_ui"))
-    #     )
-    #   ),
-    #   div(
-    #     style = "display:inline-block; 
-    #             vertical-align: middle; align: center;",
-    #     uiOutput(ns("qMetacellScope_request_ui"))
-    #   ),
-    #   uiOutput(ns('Add_btn_UI'))
-    # )
-    # )
-
 }
 
 
@@ -203,12 +183,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
     
     
     output$tree_UI <- renderUI({
-      widget <- div(
-        mod_metacell_tree_ui(ns('tree')))
+      widget <- mod_metacell_tree_ui(ns('tree'))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-    #rv.custom$tmp.tags <- reactive({NULL})
+
     rv.custom$tmp.tags <- mod_metacell_tree_server('tree',
       dataIn = reactive({rv$dataIn}),
       remoteReset = reactive({remoteReset()}),
@@ -216,7 +195,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(id,
     )
     
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
-      
+      print(rv.custom$tmp.tags()$trigger)
       rv.widgets$tag <- rv.custom$tmp.tags()$values
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(

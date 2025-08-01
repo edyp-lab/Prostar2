@@ -14,6 +14,9 @@
 #'
 #' @examples
 #' \dontrun{
+#' library(shinyBS)
+#' library(DaparToolshed)
+#' library(shinyjs)
 #' data(Exp1_R25_pept, package = 'DaparToolshedData')
 #' shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
 #' 
@@ -43,7 +46,7 @@ mod_metacell_tree_ui <- function(id) {
       column(width=6, 
         actionButton(ns("openModalBtn"),
           tagList(
-            #p('Select tags'),
+            p('Select tags'),
             tags$img(src = "images/ds_metacell.png", height = "50px"))
         ),
         shinyBS::bsTooltip(ns("openModalBtn"), "Click to open tags selection tool",
@@ -52,11 +55,8 @@ mod_metacell_tree_ui <- function(id) {
       )
     ),
     br(),
-    div(
-      uiOutput(ns('modaltree'))
+    uiOutput(ns('modaltree'))
     )
-  )
-  
 }
 
 
@@ -136,8 +136,8 @@ mod_metacell_tree_server <- function(id,
           '").on("hidden.bs.modal", function (event) {
                 x = new Date().toLocaleString();
                 Shiny.onInputChange("', ns('lastModalClose'), '",x);});})')),
-        #tags$head(tags$style(paste0("#modalExample { width: fit-content !important;}"))),
-       
+        tags$head(tags$style(paste0("#modalExample { width: fit-content !important;}"))),
+        
         shinyBS::bsModal(ns("modalExample"),
           title = '',
           # tagList(
@@ -159,7 +159,7 @@ mod_metacell_tree_server <- function(id,
               actionButton(ns('cleartree'), 'Clear')
             )
           ),
-          div(uiOutput(ns('tree')))
+          uiOutput(ns('tree'))
         )
       )
       
@@ -176,7 +176,6 @@ mod_metacell_tree_server <- function(id,
     init_tree <- function(){
       req(dataIn())
       req(DaparToolshed::typeDataset(dataIn()))
-      #print('------------ init_tree() ---------------')
       rv$meta <- omXplore::metacell.def(DaparToolshed::typeDataset(dataIn()))
       rv$mapping <- BuildMapping(rv$meta)$names
       rv$bg_colors <- BuildMapping(rv$meta)$colors
@@ -189,13 +188,6 @@ mod_metacell_tree_server <- function(id,
     
     observeEvent(req(remoteReset()), ignoreInit = FALSE, {
       req(dataIn())
-      #print('------------ observeEvent(req(reset()) ---------------')
-      # init_tree()
-      # update_CB()
-      # updateRadioButtons(session, 'checkbox_mode', selected = 'single')
-      # rv$autoChanged <- TRUE
-      # dataOut$trigger <- as.numeric(Sys.time())
-      # dataOut$values <- NULL
       
       if (!is.null(DaparToolshed::typeDataset(dataIn())))
         init_tree()
@@ -203,8 +195,8 @@ mod_metacell_tree_server <- function(id,
       dataOut$values <- NULL
     }) 
     
-    observeEvent(input$openModalBtn,{
-      
+    observeEvent(req(input$openModalBtn),{
+     
       init_tree()
       update_CB()
       updateRadioButtons(session, 'checkbox_mode', selected = 'single')
@@ -217,8 +209,8 @@ mod_metacell_tree_server <- function(id,
     # When OK button is pressed, attempt to load the data set. If successful,
     # remove the modal. If not show another modal, but this time with a failure
     # message.
-    observeEvent(input$lastModalClose,  ignoreInit = FALSE, ignoreNULL = TRUE, {
-      #print('------------ input$lastModalClose ---------------')
+    observeEvent(input$lastModalClose,  ignoreInit = TRUE, ignoreNULL = TRUE, {
+      print('------------ input$lastModalClose ---------------')
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
     })
