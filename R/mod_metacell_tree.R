@@ -14,9 +14,6 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(shinyBS)
-#' library(DaparToolshed)
-#' library(shinyjs)
 #' data(Exp1_R25_pept, package = 'DaparToolshedData')
 #' shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
 #' 
@@ -46,7 +43,7 @@ mod_metacell_tree_ui <- function(id) {
       column(width=6, 
         actionButton(ns("openModalBtn"),
           tagList(
-            p('Select tags'),
+            #p('Select tags'),
             tags$img(src = "images/ds_metacell.png", height = "50px"))
         ),
         shinyBS::bsTooltip(ns("openModalBtn"), "Click to open tags selection tool",
@@ -56,7 +53,8 @@ mod_metacell_tree_ui <- function(id) {
     ),
     br(),
     uiOutput(ns('modaltree'))
-    )
+  )
+  
 }
 
 
@@ -130,13 +128,8 @@ mod_metacell_tree_server <- function(id,
     output$modaltree <- renderUI({
       tagList(
         shinyjs::inlineCSS(css),
-        tags$script(paste0('$( document ).ready(function() {
-                $("#', 
-          ns('modalExample'), 
-          '").on("hidden.bs.modal", function (event) {
-                x = new Date().toLocaleString();
-                Shiny.onInputChange("', ns('lastModalClose'), '",x);});})')),
-        tags$head(tags$style(paste0("#modalExample { width: fit-content !important;}"))),
+        tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
+        tags$head(tags$style(paste0("#", ns('modalExample'), " .modal-footer{ display:none}"))),
         
         shinyBS::bsModal(ns("modalExample"),
           title = '',
@@ -156,7 +149,8 @@ mod_metacell_tree_server <- function(id,
                   'Multiple selection' = 'multiple'),
                 width = '150px')),
             div(style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
-              actionButton(ns('cleartree'), 'Clear')
+              actionButton(ns('cleartree'), 'Clear'),
+              actionButton(ns('validatetree'), 'Validate & close', class = "btn-success")
             )
           ),
           uiOutput(ns('tree'))
@@ -176,6 +170,7 @@ mod_metacell_tree_server <- function(id,
     init_tree <- function(){
       req(dataIn())
       req(DaparToolshed::typeDataset(dataIn()))
+      #print('------------ init_tree() ---------------')
       rv$meta <- omXplore::metacell.def(DaparToolshed::typeDataset(dataIn()))
       rv$mapping <- BuildMapping(rv$meta)$names
       rv$bg_colors <- BuildMapping(rv$meta)$colors
@@ -188,6 +183,13 @@ mod_metacell_tree_server <- function(id,
     
     observeEvent(req(remoteReset()), ignoreInit = FALSE, {
       req(dataIn())
+      #print('------------ observeEvent(req(reset()) ---------------')
+      # init_tree()
+      # update_CB()
+      # updateRadioButtons(session, 'checkbox_mode', selected = 'single')
+      # rv$autoChanged <- TRUE
+      # dataOut$trigger <- as.numeric(Sys.time())
+      # dataOut$values <- NULL
       
       if (!is.null(DaparToolshed::typeDataset(dataIn())))
         init_tree()
@@ -195,8 +197,8 @@ mod_metacell_tree_server <- function(id,
       dataOut$values <- NULL
     }) 
     
-    observeEvent(req(input$openModalBtn),{
-     
+    observeEvent(input$openModalBtn,{
+      
       init_tree()
       update_CB()
       updateRadioButtons(session, 'checkbox_mode', selected = 'single')
@@ -209,13 +211,15 @@ mod_metacell_tree_server <- function(id,
     # When OK button is pressed, attempt to load the data set. If successful,
     # remove the modal. If not show another modal, but this time with a failure
     # message.
-    observeEvent(input$lastModalClose,  ignoreInit = TRUE, ignoreNULL = TRUE, {
-      print('------------ input$lastModalClose ---------------')
+    observeEvent(input$validatetree,  ignoreInit = FALSE, ignoreNULL = TRUE, {
+      shinyjs::runjs(sprintf("$('#%s').modal('hide');", ns("modalExample")))
+      #toggleModal(session, modalId = "modalExample", toggle = "toggle")
+      
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
+      
+      
     })
-    
-    
     
     
     observeEvent(dataIn(), ignoreInit = FALSE, {
