@@ -34,7 +34,7 @@ RUN wget https://cran.rstudio.com/src/base/R-4/R-4.4.1.tar.gz ; \
 
 RUN Rscript -e 'install.packages("BiocManager", repo="https://cran.rstudio.com")'
 
-RUN	Rscript -e 'remotes::install_github("prostarproteomics/omXplore")'
+RUN	Rscript -e 'remotes::install_github("edyp-lab/omXplore")'
 RUN	Rscript -e 'remotes::install_github("edyp-lab/DaparToolshed")'
 RUN	Rscript -e 'remotes::install_github("edyp-lab/DaparToolshedData")'
 RUN	Rscript -e 'remotes::install_github("edyp-lab/MagellanNTK")'
