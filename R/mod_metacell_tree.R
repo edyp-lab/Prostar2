@@ -171,7 +171,7 @@ mod_metacell_tree_server <- function(id,
       req(dataIn())
       req(DaparToolshed::typeDataset(dataIn()))
       #print('------------ init_tree() ---------------')
-      rv$meta <- omXplore::metacell.def(DaparToolshed::typeDataset(dataIn()))
+      rv$meta <- DaparToolshed::metacell.def(DaparToolshed::typeDataset(dataIn()))
       rv$mapping <- BuildMapping(rv$meta)$names
       rv$bg_colors <- BuildMapping(rv$meta)$colors
       

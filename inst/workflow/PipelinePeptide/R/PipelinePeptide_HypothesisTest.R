@@ -269,7 +269,7 @@ PipelinePeptide_HypothesisTest_server <- function(id,
     
     
     output$HypothesisTest_warning_conditions_ui <- renderUI({
-      req(length(unique(omXplore::get_group(rv$dataIn))) > 26)
+      req(length(unique(DaparToolshed::design.qf(rv$dataIn)$Condition)) > 26)
       req(getDesignLevel(MultiAssayExperiment::colData(rv$dataIn)) > 1)
       h3('Limma with this version of Prostar does not handle datasets with 
       more than 26 conditions. Such, the Limma option is desactivated for the 
@@ -568,7 +568,7 @@ PipelinePeptide_HypothesisTest_server <- function(id,
       
       enable <- TRUE
       
-      nConds <-length(unique(omXplore::get_group(rv$dataIn)))
+      nConds <-length(unique(DaparToolshed::design.qf(rv$dataIn)$Condition))
       design <- MultiAssayExperiment::colData(rv$dataIn)
       nLevel <- DaparToolshed::getDesignLevel(design)   
       enable <- (nConds <= 26 && nLevel == 1) ||

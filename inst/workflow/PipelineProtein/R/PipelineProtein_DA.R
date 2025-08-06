@@ -262,15 +262,15 @@ PipelineProtein_DA_server <- function(id,
       
       
       if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
-        .conds <- omXplore::get_group(rv$dataIn)
+        .conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
         ind_virtual_cond2 <- which(.conds != condition1)
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
         #colData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
       } else {
         ind <- c(
-          which(omXplore::get_group(rv$dataIn) == rv.custom$Condition1),
-          which(omXplore::get_group(rv$dataIn) == rv.custom$Condition2)
+          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
+          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
         )
         
         
@@ -361,7 +361,7 @@ PipelineProtein_DA_server <- function(id,
       id = "Pairwisecomparison_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
-      group = reactive({omXplore::get_group(rv$dataIn)}),
+      group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
@@ -1009,7 +1009,7 @@ PipelineProtein_DA_server <- function(id,
       id = "FDR_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({GetComparisons()}),
-      group = reactive({omXplore::get_group(rv$dataIn)}),
+      group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),

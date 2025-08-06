@@ -357,7 +357,7 @@ PipelineProtein_Imputation_server <- function(id,
               
               .tmp <- wrapper.impute.KNN(
                 obj = rv$dataIn[[length(rv$dataIn)]],
-                grp = omXplore::get_group(rv$dataIn),
+                grp = DaparToolshed::design.qf(rv$dataIn)$Condition,
                 K = rv.widgets$POVImputation_KNN_n);
               .param <- list(
                 POVImputation_algorithm = rv.widgets$POVImputation_algorithm,

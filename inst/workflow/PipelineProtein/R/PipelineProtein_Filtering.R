@@ -382,7 +382,7 @@ PipelineProtein_Filtering_server <- function(id,
         id = "plots",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
-        group = reactive({omXplore::get_group(rv$dataIn)})
+        group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition})
       )
       
       

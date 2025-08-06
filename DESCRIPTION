@@ -1,6 +1,6 @@
 Package: Prostar2
 Title: Prostar 2
-Version: 0.99.12
+Version: 0.99.13
 Date: 2025-01-06
 Authors@R: c(person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut')),
                 person('Thomas', 'Burger', email = 'thomas.burger@cea.fr', role = c('aut')))
@@ -9,7 +9,7 @@ Description: This package provides a GUI interface for DAPAR2.
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 4.4.1)
+Depends: R (>= 4.5.0)
 biocViews: MassSpectrometry, Normalization, Preprocessing, R.utils, Proteomics,GO, GUI
 Imports: 
     shiny,
@@ -52,5 +52,5 @@ Suggests:
     rmarkdown
 VignetteBuilder:
     knitr
-URL: https://github.com/edyp-lab/Prostar2
+URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/
 BugReports: https://github.com/edyp-lab/Prostar2/issues

@@ -175,7 +175,7 @@ mod_Metacell_Filtering_server <- function(id,
         id = "plots",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
-        group = reactive({omXplore::get_group(rv$dataIn)})
+        group = reactive({design.qf(rv$dataIn)$Condition})
       )
       
       
@@ -201,7 +201,7 @@ mod_Metacell_Filtering_server <- function(id,
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        conds = reactive({omXplore::get_group(rv$dataIn)}),
+        conds = reactive({design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
         operator = reactive({stats::setNames(nm = SymFilteringOperators())}),

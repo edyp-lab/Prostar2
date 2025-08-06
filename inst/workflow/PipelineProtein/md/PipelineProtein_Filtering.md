@@ -8,7 +8,6 @@ output:
         highlight: tango
         toc: false
         number_sections: FALSE
-        css: style.css
 date: 30 mai 2024
 link-citations: true
 ---

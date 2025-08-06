@@ -402,7 +402,7 @@ PipelinePeptide_Normalization_server <- function(id,
       
       req(obj1)
       req(obj2)
-      protId <- omXplore::get_colID(rv$dataIn[[length(rv$dataIn)]])
+      protId <- DaparToolshed::get_colID(rv$dataIn[[length(rv$dataIn)]])
       
       if (!is.null(selectProt()$indices)) {
         .n <- length(selectProt()$indices)
@@ -418,7 +418,7 @@ PipelinePeptide_Normalization_server <- function(id,
         qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
         qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
-        conds = omXplore::get_group(rv$dataIn),
+        conds = DaparToolshed::design.qf(rv$dataIn)$Condition,
         pal = NULL,
         # Consider only 2% of the entire dataset
         n = .n,
