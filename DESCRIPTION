@@ -46,7 +46,8 @@ Suggests:
     RColorBrewer,
     sass,
     grDevices,
-    stats
+    stats,
+    spsComps
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/

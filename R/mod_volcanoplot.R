@@ -258,8 +258,8 @@ mod_volcanoplot_server <- function(
       data <- getDataForExprs(rv$dataIn, 3)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
 
-      Xspec <- ExtractUniquePeptides(DaparToolshed::adjacencyMatrix(rv$dataIn))
-      Xshared <- DaparToolshed::adjacencyMatrix(rv$dataIn)
+      Xspec <- ExtractUniquePeptides(adjacencyMatrix(rv$dataIn))
+      Xshared <- adjacencyMatrix(rv$dataIn)
 
       i <- which(colnames(Xspec) == prot.indice)
       specificPeptidesIndices <- which(Xspec[, i] == 1)
@@ -324,7 +324,7 @@ mod_volcanoplot_server <- function(
       data <- data[, c(ind, (ind + ncol(data) / 2))]
 
 
-      Xspec <- ExtractUniquePeptides(DaparToolshed::adjacencyMatrix(rv$dataIn))
+      Xspec <- ExtractUniquePeptides(adjacencyMatrix(rv$dataIn))
 
       i <- which(colnames(Xspec) == prot.indice)
       peptidesIndices <- which(Xspec[, i] == 1)
