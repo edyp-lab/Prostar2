@@ -512,7 +512,7 @@ mod_Agregation_server <- function(
     output$mod_dl_ui <- renderUI({
       req(config@mode == "process")
       req(rv$steps.status["Save"] == stepStatus$VALIDATED)
-      MagellanNTK::mod_download_dataset_ui(ns("createQuickLink"))
+      MagellanNTK::download_dataset_ui(ns("createQuickLink"))
     })
 
     output$Save_btn_validate_ui <- renderUI({
