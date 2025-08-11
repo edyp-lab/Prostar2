@@ -1,7 +1,7 @@
 #' @title xxx
 #' @description xxxx
 #' @import DaparToolshed
-#' @import MagellanNTK
+#' @importFrom  MagellanNTK MagellanNTK
 #'
 #' @param wf.name xxx
 #' @param usermod xxx
