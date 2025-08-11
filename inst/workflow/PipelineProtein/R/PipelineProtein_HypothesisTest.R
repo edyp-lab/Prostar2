@@ -74,6 +74,7 @@ PipelineProtein_HypothesisTest_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
+#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -443,8 +444,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         switch(rv.widgets$HypothesisTest_method,
           Limma = {
             DaparToolshed::limmaCompleteTest(
-              qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-              sTab = MultiAssayExperiment::colData(rv$dataIn),
+              qData = assay(rv$dataIn, length(rv$dataIn)),
+              sTab = colData(rv$dataIn),
               comp.type = rv.widgets$HypothesisTest_design
             )
           },

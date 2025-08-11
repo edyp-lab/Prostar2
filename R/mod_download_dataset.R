@@ -9,6 +9,8 @@
 #' @param widget.type Available values are `Button` and `Link` (default).
 #' @param filename internal
 #' @param excel.style xxx
+#' @param remoteReset xxx
+#' @param is.enabled xxx
 #'
 #' @return NA
 #'

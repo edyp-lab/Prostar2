@@ -4,10 +4,11 @@
 #' To be customized
 #'
 #' @param id The id of the module
-#' @param obj An instance of the class `SummarizedExperiment`.
-#' @param reset A boolean which indicates whether to reset the widgets or not.
+#' @param dataIn An instance of the class `SummarizedExperiment`.
+#' @param remoteReset A boolean which indicates whether to reset the widgets or not.
 #' @param verbose A boolean (FALSE as default) which indicates whether to
 #' display more details on the process
+#' @param is.enabled xxx
 #'
 #' @name mod_Pirat
 #'
@@ -51,7 +52,7 @@ mod_Pirat_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer reactiveVal reactiveValues renderUI
 #' selectInput observeEvent withProgress setProgress req reactive renderPlot
-#' @importFrom SummarizedExperiment assay
+#' @import QFeatures
 #' @export
 #' @return A shiny app
 #'
@@ -175,14 +176,14 @@ mod_Pirat_server <- function(
 #' @importFrom shiny reactive shinyApp fluidPage
 #' @return A shiny app
 #'
-mod_Pirat <- function(obj) {
+mod_Pirat <- function(dataIn) {
   ui <- fluidPage(
     mod_Pirat_ui("pirat")
   )
 
   server <- function(input, output, session) {
     mod_Pirat_server("pirat", dataIn = reactive({
-      obj
+      dataIn
     }))
   }
 

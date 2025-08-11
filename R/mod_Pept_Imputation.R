@@ -62,6 +62,8 @@ mod_Pept_Imputation_ui <- function(id) {
 
 
 #' @rdname mod_Pept_Imputation
+#' 
+#' @import Qfeatures
 #'
 #' @export
 #'
@@ -175,7 +177,7 @@ mod_Pept_Imputation_server <- function(
 
     output$Imp_UI <- renderUI({
       # Checks if
-      .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
+      .data <- assay(rv$dataIn[[length(rv$dataIn)]])
       nbEmptyLines <- getNumberOfEmptyLines(.data)
       if (nbEmptyLines > 0) {
         tags$p("Your dataset contains empty lines (fully filled with missing

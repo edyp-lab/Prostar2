@@ -11,6 +11,7 @@
 #' 
 #' @param id xxx
 #' @param dataIn An instance of the class `SummarizedExperiment`
+#' @param obj xxx
 #' @param conds A `character()` which contains the name of the conditions. The
 #' length of this vector must be equal to the number of samples in the assay
 #' (i.e. number of columns in assay(obj))

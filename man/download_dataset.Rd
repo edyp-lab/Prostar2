@@ -42,6 +42,10 @@ download_dataset(dataIn, filename = "myDataset")
 \item{widget.type}{Available values are \code{Button} and \code{Link} (default).}
 
 \item{excel.style}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 }
 \value{
 NA

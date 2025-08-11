@@ -60,6 +60,8 @@ length of this vector must be equal to the number of samples in the assay
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
+
+\item{obj}{xxx}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a

@@ -93,7 +93,6 @@ mod_settings_ui <- function(id) {
 #'
 #' @import highcharter
 #' @importFrom shinyjs onclick toggle
-#' @importFrom magrittr "%>%"
 #'
 #'
 mod_settings_server <- function(
@@ -107,7 +106,7 @@ mod_settings_server <- function(
     is.enabled = reactive({
       TRUE
     })) {
-  requireNamespace(c("colourpicker", "shinyBS"))
+  requireNamespace(c("colourpicker", "shinyBS", 'magrittr'))
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

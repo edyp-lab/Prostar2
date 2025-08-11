@@ -14,6 +14,7 @@
 #' 
 #' @param id xxx
 #' @param object A instance of the class `SummarizedExperiment`
+#' @param dataIn xxx
 #' @param remoteReset xxx
 #' @param is.enabled xxx
 #' 

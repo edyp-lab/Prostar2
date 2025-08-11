@@ -33,14 +33,14 @@ mod_mv_plots_server(
  })
 )
 
-mod_mv_plots(data, grp = NULL, title = NULL, pal = NULL, pattern = NULL)
+mod_mv_plots(data, grp = NULL, mytitle = NULL, pal = NULL, pattern = NULL)
 }
 \arguments{
 \item{id}{xxx}
 
 \item{data}{xxx}
 
-\item{grp}{}
+\item{grp}{xxx}
 
 \item{mytitle}{xxx}
 

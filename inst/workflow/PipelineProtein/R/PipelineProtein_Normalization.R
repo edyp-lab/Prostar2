@@ -61,10 +61,13 @@ PipelineProtein_Normalization_ui <- function(id){
 #' @param steps.status xxx
 #' 
 #' @param current.pos xxx
+#' 
 #'
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
+#' @import omXplore
+#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -317,8 +320,8 @@ PipelineProtein_Normalization_server <- function(id,
       
       
       DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
+        qDataBefore = assay(rv$dataIn, length(rv$dataIn)),
+        qDataAfter = assay(rv$dataIn, length(rv$dataIn)-1),
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
         conds = DaparToolshed::design.qf(rv$dataIn)$Condition,
         pal = NULL,
@@ -380,7 +383,7 @@ PipelineProtein_Normalization_server <- function(id,
       rv.custom$tmpAssay <- NULL
       try({
         .conds <- colData(rv$dataIn)[, "Condition"]
-        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
+        qdata <- assay(rv$dataIn, length(rv$dataIn))
         
         
         switch(rv.widgets$Normalization_method,

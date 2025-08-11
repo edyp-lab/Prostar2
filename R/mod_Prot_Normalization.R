@@ -91,6 +91,8 @@ mod_Prot_Normalization_ui <- function(id) {
 
 
 #' @rdname mod_Prot_Normalization
+#' 
+#' @import QFeatures
 #'
 #' @export
 #'
@@ -133,6 +135,7 @@ mod_Prot_Normalization_server <- function(
     ns <- session$ns
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
 
+    MagellanNTK::pkgs.require('omXplore')
     #
     # core.code <- MagellanNTK::Get_Workflow_Core_Code(
     #   mode = 'process',
@@ -321,8 +324,8 @@ mod_Prot_Normalization_server <- function(
 
 
       DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn) - 1),
+        qDataBefore = assay(rv$dataIn, length(rv$dataIn)),
+        qDataAfter = assay(rv$dataIn, length(rv$dataIn) - 1),
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
         conds = design.qf(rv$dataIn)$Condition,
         pal = NULL,
@@ -394,7 +397,7 @@ mod_Prot_Normalization_server <- function(
       rv.custom$tmpAssay <- NULL
       try({
         .conds <- colData(rv$dataIn)[, "Condition"]
-        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
+        qdata <- assay(rv$dataIn, length(rv$dataIn))
 
 
         switch(rv.widgets$Normalization_method,

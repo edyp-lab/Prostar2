@@ -31,6 +31,8 @@ mod_tracker(dataIn)
 \item{remoteReset}{xxx}
 
 \item{is.enabled}{xxx}
+
+\item{dataIn}{xxx}
 }
 \value{
 NA

@@ -37,10 +37,6 @@ show info from slots in df. The variable this.index refers to the slot
 named index and allows to retrieve the right row to show in the tooltip.}
 
 \item{pal}{xxx}
-
-\item{group}{xxx}
-
-\item{comparison}{xxx}
 }
 \value{
 An interactive volcanoplot
@@ -58,6 +54,7 @@ a point of the scatter plot.
 \examples{
 library(highcharter)
 library(DaparToolshed)
+library(QFeatures)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot
 # Simulate imputation of missing values

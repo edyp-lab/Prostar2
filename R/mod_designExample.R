@@ -8,7 +8,7 @@
 #' @param id xxx
 #' @param n xxx
 #' @param remoteReset xxx
-#' @param is.enebled xxx
+#' @param is.enabled xxx
 #'
 #' @return NA
 #'
@@ -35,7 +35,6 @@ mod_designExample_ui <- function(id) {
 
 #' @rdname design-example
 #' @import shiny
-#' @importFrom magrittr "%>%"
 #' @export
 #'
 mod_designExample_server <- function(
@@ -47,7 +46,7 @@ mod_designExample_server <- function(
     is.enabled = reactive({
       TRUE
     })) {
-  pkgs.require("rhandsontable")
+  MagellanNTK::pkgs.require(c('magrittr', "rhandsontable"))
 
 
   example_2 <- function() {

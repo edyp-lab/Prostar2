@@ -7,7 +7,7 @@
 #' @param mytitle xxx
 #' @param pal xxx
 #' @param pattern xxx
-#' @param grp 
+#' @param grp xxx
 #' @param is.enabled xxx
 #' @param remoteReset xxx
 #'
@@ -191,7 +191,7 @@ mod_mv_plots_server <- function(
 mod_mv_plots <- function(
     data,
     grp = NULL,
-    title = NULL,
+    mytitle = NULL,
     pal = NULL,
     pattern = NULL) {
   ui <- fluidPage(
@@ -209,7 +209,7 @@ mod_mv_plots <- function(
         grp
       }),
       mytitle = reactive({
-        title
+        mytitle
       }),
       pal = reactive({
         pal

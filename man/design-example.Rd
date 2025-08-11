@@ -29,7 +29,7 @@ mod_designExample(n = 1)
 
 \item{remoteReset}{xxx}
 
-\item{is.enebled}{xxx}
+\item{is.enabled}{xxx}
 }
 \value{
 NA

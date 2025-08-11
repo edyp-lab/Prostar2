@@ -69,7 +69,6 @@ mod_buildDesign_ui <- function(id) {
 
 
 #' @rdname build-design
-#' @importFrom magrittr "%>%"
 #' @export
 mod_buildDesign_server <- function(
     id,

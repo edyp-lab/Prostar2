@@ -44,6 +44,10 @@ volcanoplot(dataIn, comparison, group, thlogfc, thpval, tooltip = NULL)
 \item{dataIn}{An instance of the class \code{SummarizedExperiment} containing
 results of hypothesis testing stored as a data.frame in its metadata}
 
+\item{comparison}{xxx}
+
+\item{group}{xxx}
+
 \item{thlogfc}{xxxx}
 
 \item{thpval}{xxx}

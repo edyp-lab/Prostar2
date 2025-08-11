@@ -9,6 +9,8 @@
 #' @param tooltip xxx
 #' @param remoteReset xxx
 #' @param is.enabled xxx
+#' @param comparison xxx
+#' @param group xxx
 #'
 #'
 #' @name volcanoplot
@@ -62,7 +64,6 @@ NULL
 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
-#' @importFrom magrittr "%>%"
 #' @export
 #' @rdname volcanoplot
 #'
@@ -80,6 +81,7 @@ mod_volcanoplot_ui <- function(id) {
 
 #' @export
 #' @rdname volcanoplot
+#' @import QFeatures
 #'
 mod_volcanoplot_server <- function(
     id,
@@ -125,7 +127,7 @@ mod_volcanoplot_server <- function(
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    MagellanNTK::pkgs.require('magrittr')
     # DO NOT MODIFY THIS FUNCTION CALL
     eval(
       str2expression(
@@ -464,7 +466,7 @@ mod_volcanoplot_server <- function(
         if (length(tooltip()) > 0 && sum(is.na(tooltip())) == 0) {
           df <- cbind(
             df,
-            SummarizedExperiment::rowData(rv$dataIn)[tooltip()]
+            rowData(rv$dataIn)[tooltip()]
           )
         }
 

@@ -69,6 +69,7 @@ PipelineProtein_Imputation_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
+#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -133,7 +134,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     observe({
       #Utile for the MEC imputation
-      qdata <- SummarizedExperiment::assay(dataIn()[[length(dataIn())]])
+      qdata <- assay(dataIn()[[length(dataIn())]])
       rv.custom$mv.present <- sum(is.na(qdata)) > 0
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

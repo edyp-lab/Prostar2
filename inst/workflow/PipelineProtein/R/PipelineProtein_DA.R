@@ -39,6 +39,7 @@
 #' library(DaparToolshed)
 #' library(Prostar2)
 #' library(omXplore)
+#' library(QFeatures)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -87,8 +88,8 @@ PipelineProtein_DA_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
-#' @importFrom magrittr "%>%"
 #' @import DaparToolshed
+#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -102,6 +103,7 @@ PipelineProtein_DA_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
+  MagellanNTK::pkgs.require('magrittr')
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -384,7 +386,7 @@ PipelineProtein_DA_server <- function(id,
           MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
         selectInput(ns("Pairwisecomparison_tooltipInfo"),
           label = NULL,
-          choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
+          choices = colnames(rowData(rv$dataIn[[length(rv$dataIn)]])),
           selected = rv.widgets$Pairwisecomparison_tooltipInfo,
           multiple = TRUE,
           selectize = FALSE,
@@ -1047,7 +1049,7 @@ PipelineProtein_DA_server <- function(id,
         rv.custom$thpval
       ))
       
-      rv.custom$nbTotalAnaDiff <- nrow(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]))
+      rv.custom$nbTotalAnaDiff <- nrow(assay(rv$dataIn[[length(rv$dataIn)]]))
       rv.custom$nbSelectedAnaDiff <- NULL
       t <- NULL
       
@@ -1271,7 +1273,7 @@ PipelineProtein_DA_server <- function(id,
       .digits <- 3
       
       pval_table <- data.frame(
-        id = rownames(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])),
+        id = rownames(assay(rv$dataIn[[length(rv$dataIn)]])),
         logFC = round(.logfc, digits = .digits),
         P_Value = .pval,
         Log_PValue = -log10(.pval),
@@ -1304,7 +1306,7 @@ PipelineProtein_DA_server <- function(id,
       
       
       tmp <- as.data.frame(
-        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
+        rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
       )
       names(tmp) <- rv.custom$Pairwisecomparison_tooltipInfo
       pval_table <- cbind(pval_table, tmp)

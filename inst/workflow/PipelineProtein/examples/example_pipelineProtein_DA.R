@@ -9,6 +9,7 @@ library(Prostar2)
 library(DaparToolshed)
 library(bs4Dash)
 library(shinyFeedback)
+library(QFeatures)
 
 options(shiny.fullstacktrace = TRUE)
 

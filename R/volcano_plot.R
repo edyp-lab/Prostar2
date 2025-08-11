@@ -29,8 +29,6 @@
 #' show info from slots in df. The variable this.index refers to the slot
 #' named index and allows to retrieve the right row to show in the tooltip.
 #' @param pal xxx
-#' @param group xxx
-#' @param comparison xxx
 #' 
 #' 
 #' @return An interactive volcanoplot
@@ -38,6 +36,7 @@
 #' @examples
 #' library(highcharter)
 #' library(DaparToolshed)
+#' library(QFeatures)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -74,7 +73,6 @@
 #'   clickFunction = hc_clickFunction
 #' )
 #'
-#' @importFrom magrittr "%>%"
 #' @export
 #'
 #'
@@ -86,6 +84,7 @@ diffAnaVolcanoplot_rCharts <- function(
     clickFunction = NULL,
     pal = NULL) {
   stopifnot(inherits(df, "data.frame"))
+  MagellanNTK::pkgs.require('magrittr')
 
   xtitle <- paste("log2 ( mean(", conditions[2], ") / mean(",
     conditions[1], ") )",

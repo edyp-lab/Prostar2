@@ -22,17 +22,19 @@ mod_Pirat_server(
   verbose = FALSE
 )
 
-mod_Pirat(obj)
+mod_Pirat(dataIn)
 }
 \arguments{
 \item{id}{The id of the module}
 
+\item{dataIn}{An instance of the class \code{SummarizedExperiment}.}
+
+\item{remoteReset}{A boolean which indicates whether to reset the widgets or not.}
+
+\item{is.enabled}{xxx}
+
 \item{verbose}{A boolean (FALSE as default) which indicates whether to
 display more details on the process}
-
-\item{obj}{An instance of the class \code{SummarizedExperiment}.}
-
-\item{reset}{A boolean which indicates whether to reset the widgets or not.}
 }
 \value{
 A shiny app

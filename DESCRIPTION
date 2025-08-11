@@ -34,8 +34,6 @@ Imports:
     sass,
     rhandsontable,
     QFeatures (>= 1.16),
-    SummarizedExperiment,
-    MultiAssayExperiment,
     magrittr,
     methods, 
     tibble,
@@ -44,13 +42,14 @@ Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,
     git::https://github.com/edyp-lab/DaparToolshedData,
-    git::https://github.com/edyp-lab/omXplore
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Suggests: 
     testthat (>= 2.1.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    omXplore,
+    magrittr
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/

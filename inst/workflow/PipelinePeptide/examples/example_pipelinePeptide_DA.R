@@ -4,6 +4,7 @@ library(DaparToolshed)
 library(Prostar2)
 library(omXplore)
 library(DaparToolshed)
+library(QFeatures)
 
 history <- list()
 data(Exp1_R25_pept, package = "DaparToolshedData")
