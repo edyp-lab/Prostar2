@@ -13,7 +13,7 @@ obj <- Exp1_R25_prot
 obj <- NAIsZero(obj, 1)
 obj <- NAIsZero(obj, 2)
 qData <- as.matrix(assay(obj[[2]]))
-sTab <- MultiAssayExperiment::colData(obj)
+sTab <- colData(obj)
 limma <- limmaCompleteTest(qData, sTab, comp.type = "OnevsAll")
 df <- cbind(limma$logFC, limma$P_Value)
 new.dataset <- obj[[length(obj)]]

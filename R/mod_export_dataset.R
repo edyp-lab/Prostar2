@@ -58,7 +58,7 @@ export_dataset_server <- function(id, dataIn) {
 
     download_dataset_server("dl",
       dataIn = reactive({
-        data
+        dataIn
       }),
       extension = c("csv", "xlsx", "qf"),
       filename = reactive({

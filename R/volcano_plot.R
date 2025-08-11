@@ -43,7 +43,7 @@
 #' obj <- DaparToolshed::NAIsZero(obj, 1)
 #' obj <- DaparToolshed::NAIsZero(obj, 2)
 #' qData <- as.matrix(assay(obj[[2]]))
-#' sTab <- MultiAssayExperiment::colData(obj)
+#' sTab <- colData(obj[[2]])
 #' limma <- limmaCompleteTest(qData, sTab)
 #'
 #' df <- data.frame(
@@ -53,7 +53,7 @@
 #' )
 #' colnames(df) <- c("x", "y", "index")
 #' tooltipSlot <- c("Fasta_headers", "Sequence_length")
-#' df <- cbind(df, Biobase::fData(obj)[, tooltipSlot])
+#' df <- cbind(df, colData(obj[[2]])[, tooltipSlot])
 #' colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
 #' if (ncol(df) > 3) {
 #'   colnames(df)[seq.int(from = 4, to = ncol(df))] <-

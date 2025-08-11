@@ -65,13 +65,14 @@ A shiny Module.
 \dontrun{
 library(highcharter)
 library(DaparToolshed)
+library(QFeatures)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot
 # Simulate imputation of missing values
 obj <- DaparToolshed::NAIsZero(obj, 1)
 obj <- DaparToolshed::NAIsZero(obj, 2)
 qData <- as.matrix(assay(obj[[2]]))
-sTab <- MultiAssayExperiment::colData(obj)
+sTab <- colData(obj)
 limma <- limmaCompleteTest(qData, sTab)
 
 df <- data.frame(
@@ -81,7 +82,7 @@ df <- data.frame(
 )
 colnames(df) <- c("x", "y", "index")
 tooltipSlot <- c("Fasta_headers", "Sequence_length")
-df <- cbind(df, Biobase::fData(obj)[, tooltipSlot])
+df <- cbind(df, colData(obj[[2]])[, tooltipSlot])
 colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
 if (ncol(df) > 3) {
   colnames(df)[seq.int(from = 4, to = ncol(df))] <-
