@@ -121,7 +121,7 @@ open_demoDataset_server <- function(
 ##                                                               ##
 ###################################################################
 
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #' @import DaparToolshedData
 #' @importFrom shinyjs useShinyjs disabled 
 #'

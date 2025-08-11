@@ -24,7 +24,7 @@
 NULL
 
 
-#' @import shiny
+#' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @importFrom DaparToolshed write.excel
 #'
 #' @rdname download_dataset
@@ -41,6 +41,7 @@ download_dataset_ui <- function(id) {
 }
 
 #' @rdname download_dataset
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #'
 #' @export
 #'

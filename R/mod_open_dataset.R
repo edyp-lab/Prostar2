@@ -37,7 +37,7 @@ open_dataset_ui <- function(id) {
 #' @rdname open_dataset
 #' @export
 #' @importFrom shinyjs info useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #'
 open_dataset_server <- function(
     id,

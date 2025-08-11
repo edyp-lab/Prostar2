@@ -89,7 +89,7 @@ mod_settings_ui <- function(id) {
 #'
 #' @keywords internal
 #'
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #'
 #' @import highcharter
 #' @importFrom shinyjs onclick toggle

@@ -21,7 +21,7 @@
 NULL
 
 
-#' @import shiny
+#' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr
 #'
 #' @rdname build_report
 #'

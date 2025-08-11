@@ -24,7 +24,7 @@ options(shiny.reactlog = TRUE)
 #' @rdname design-example
 #' @importFrom rhandsontable rHandsontableOutput
 #' @importFrom shiny NS
-#' @import shiny
+#' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr
 #' @export
 #'
 mod_designExample_ui <- function(id) {
@@ -34,7 +34,7 @@ mod_designExample_ui <- function(id) {
 
 
 #' @rdname design-example
-#' @import shiny
+#' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @export
 #'
 mod_designExample_server <- function(

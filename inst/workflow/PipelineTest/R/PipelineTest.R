@@ -70,7 +70,7 @@ PipelineTest_ui <- function(id){
 #' 
 #' @rdname PipelineTest
 #'
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #' @importFrom stats setNames
 #' 
 #' @export

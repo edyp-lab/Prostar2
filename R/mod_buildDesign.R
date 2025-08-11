@@ -22,7 +22,7 @@ NULL
 options(shiny.reactlog = TRUE)
 
 #' @rdname build-design
-#' @import shiny
+#' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr 
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #' @export
 #'

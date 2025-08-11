@@ -35,7 +35,7 @@ NULL
 #' @importFrom shiny NS actionLink tagList radioButtons uiOutput
 #' @importFrom DT dataTableOutput renderDataTable datatable formatStyle styleEqual
 #' @importFrom stats setNames
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @export
 #'
 mod_filtering_example_ui <- function(id) {
@@ -68,9 +68,8 @@ mod_filtering_example_ui <- function(id) {
 
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
-#' @importFrom shiny NS renderUI moduleServer
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @importFrom DaparToolshed typeDataset
 #' @export
 #'
@@ -222,9 +221,8 @@ mod_filtering_example_server <- function(
 
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
-#' @importFrom shiny fluidPage
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
-#' @import shiny
 #' @export
 #'
 mod_filtering_example <- function(

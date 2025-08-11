@@ -22,7 +22,7 @@ NULL
 
 #' @export
 #' @rdname mod_export_dataset
-#' @import shiny
+#' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr reactive
 #'
 export_dataset_ui <- function(id) {
   ns <- NS(id)
@@ -48,7 +48,7 @@ export_dataset_ui <- function(id) {
 #'
 #' @export
 #' @importFrom shinyjs info
-#' @importFrom shiny moduleServer reactiveValues observeEvent
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
 export_dataset_server <- function(id, dataIn) {

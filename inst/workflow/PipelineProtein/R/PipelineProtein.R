@@ -70,7 +70,7 @@ PipelineProtein_ui <- function(id){
 #' 
 #' @rdname PipelineProtein
 #'
-#' @import shiny
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #' @importFrom stats setNames
 #' 
 #' @export
