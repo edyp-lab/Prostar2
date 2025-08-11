@@ -63,7 +63,7 @@ mod_Pept_Imputation_ui <- function(id) {
 
 #' @rdname mod_Pept_Imputation
 #' 
-#' @import Qfeatures
+#' @import QFeatures
 #'
 #' @export
 #'
