@@ -14,8 +14,6 @@ biocViews: MassSpectrometry, Normalization, Preprocessing, R.utils, Proteomics,G
 Imports: 
     shiny,
     R6,
-    processx,
-    attempt,
     shinyalert,
     DT,
     glue,
@@ -49,7 +47,9 @@ Suggests:
     knitr,
     rmarkdown,
     omXplore,
-    magrittr
+    magrittr,
+    attempt,
+    processx
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/
