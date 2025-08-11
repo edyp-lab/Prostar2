@@ -26,6 +26,10 @@ mod_designExample(n = 1)
 \item{id}{xxx}
 
 \item{n}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enebled}{xxx}
 }
 \value{
 NA

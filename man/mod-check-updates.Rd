@@ -2,12 +2,24 @@
 % Please edit documentation in R/mod_check_updates.R
 \name{mod-check-updates}
 \alias{mod-check-updates}
+\alias{mod_checkUpdates_ui}
+\alias{mod_checkUpdates_server}
+\alias{checkUpdates}
 \title{xxxx}
+\usage{
+mod_checkUpdates_ui(id)
+
+mod_checkUpdates_server(id)
+
+checkUpdates()
+}
+\arguments{
+\item{id}{xxx}
+}
 \description{
 xxxxx
 }
 \examples{
 shiny::runApp(checkUpdates())
-
 
 }

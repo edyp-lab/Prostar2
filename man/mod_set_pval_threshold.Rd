@@ -36,7 +36,11 @@ mod_set_pval_threshold(pval_init = 1, fdr = 0, threshold.type = "logpval")
 
 \item{fdr}{xxx}
 
-\item{options}{xxx}
+\item{threshold.type}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 }
 \description{
 A shiny Module.

@@ -1,6 +1,6 @@
 #' @title Volcanoplot of the differential analysis
-#' 
-#' @description 
+#'
+#' @description
 #' #' Plots an interactive volcanoplot after the differential analysis.
 #' Typically, the log of Fold Change is represented on the X-axis and the
 #' log10 of the p-value is drawn on the Y-axis. When the \code{th_pval}
@@ -29,12 +29,16 @@
 #' show info from slots in df. The variable this.index refers to the slot
 #' named index and allows to retrieve the right row to show in the tooltip.
 #' @param pal xxx
+#' @param group xxx
+#' @param comparison xxx
+#' 
+#' 
 #' @return An interactive volcanoplot
 #' @author Samuel Wieczorek
 #' @examples
 #' library(highcharter)
 #' library(DaparToolshed)
-#' data(Exp1_R25_prot, package="DaparToolshedData")
+#' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- DaparToolshed::NAIsZero(obj, 1)
@@ -42,74 +46,76 @@
 #' qData <- as.matrix(assay(obj[[2]]))
 #' sTab <- MultiAssayExperiment::colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
-#' 
+#'
 #' df <- data.frame(
-#'     x = limma$logFC[['25fmol_vs_10fmol_logFC']], 
-#'     y = -log10(limma$P_Value[['25fmol_vs_10fmol_pval']]),
-#'     index = as.character(rownames(obj[[2]])))
+#'   x = limma$logFC[["25fmol_vs_10fmol_logFC"]],
+#'   y = -log10(limma$P_Value[["25fmol_vs_10fmol_pval"]]),
+#'   index = as.character(rownames(obj[[2]]))
+#' )
 #' colnames(df) <- c("x", "y", "index")
 #' tooltipSlot <- c("Fasta_headers", "Sequence_length")
 #' df <- cbind(df, Biobase::fData(obj)[, tooltipSlot])
 #' colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
 #' if (ncol(df) > 3) {
-#'     colnames(df)[seq.int(from = 4, to = ncol(df))] <-
-#'         paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
-#'          sep = "")
+#'   colnames(df)[seq.int(from = 4, to = ncol(df))] <-
+#'     paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
+#'       sep = ""
+#'     )
 #' }
 #' hc_clickFunction <- JS("function(event) {
 #' Shiny.onInputChange('eventPointClicked',
 #' [this.index]+'_'+ [this.series.name]);}")
 #' cond <- c("25fmol", "10fmol")
 #' diffAnaVolcanoplot_rCharts(
-#' df, 
-#' th_pval = 2.5, 
-#' th_logfc = 1, 
-#' conditions = cond, 
-#' clickFunction = hc_clickFunction)
+#'   df,
+#'   th_pval = 2.5,
+#'   th_logfc = 1,
+#'   conditions = cond,
+#'   clickFunction = hc_clickFunction
+#' )
 #'
-#'
-#' 
 #' @importFrom magrittr "%>%"
 #' @export
 #'
 #'
 diffAnaVolcanoplot_rCharts <- function(
     df,
-  th_pval = 1e-60,
-  th_logfc = 0,
-  conditions = NULL,
-  clickFunction = NULL,
-  pal = NULL) {
-  
-  stopifnot(inherits(df, 'data.frame'))
-  
-  xtitle <- paste("log2 ( mean(", conditions[2], ") / mean(", 
-    conditions[1], ") )", sep = "")
-  
+    th_pval = 1e-60,
+    th_logfc = 0,
+    conditions = NULL,
+    clickFunction = NULL,
+    pal = NULL) {
+  stopifnot(inherits(df, "data.frame"))
+
+  xtitle <- paste("log2 ( mean(", conditions[2], ") / mean(",
+    conditions[1], ") )",
+    sep = ""
+  )
+
   if (is.null(clickFunction)) {
     clickFunction <-
       JS("function(event) {
                 Shiny.onInputChange(
-                'eventPointClicked', 
+                'eventPointClicked',
                 [this.index]+'_'+ [this.series.name]);
                 }")
   }
-  
+
   if (is.null(pal)) {
     pal <- list(In = "orange", Out = "gray")
   } else {
     if (length(pal) != 2) {
-      warning("The palette must be a list of two items: In and Out. 
+      warning("The palette must be a list of two items: In and Out.
                 Set to default.")
       pal <- list(In = "orange", Out = "gray")
     }
   }
-  
+
   df <- cbind(df,
     g = ifelse(df$y >= th_pval & abs(df$x) >= th_logfc, "g1", "g2")
   )
-  
-  
+
+
   i_tooltip <- which(startsWith(colnames(df), "tooltip"))
   txt_tooltip <- NULL
   for (i in i_tooltip) {
@@ -117,10 +123,11 @@ diffAnaVolcanoplot_rCharts <- function(
       colnames(df)[i],
       fixed = TRUE
     ),
-      " </b>: {point.", colnames(df)[i], "} <br> ", sep = ""
+    " </b>: {point.", colnames(df)[i], "} <br> ",
+    sep = ""
     )
   }
-  
+
   leftBorder <- data.frame(
     x = c(min(df$x), -th_logfc, -th_logfc),
     y = c(th_pval, th_pval, max(df$y))
@@ -129,10 +136,10 @@ diffAnaVolcanoplot_rCharts <- function(
     x = c(max(df$x), th_logfc, th_logfc),
     y = c(th_pval, th_pval, max(df$y))
   )
-  
+
   title <- NULL
   title <- paste0(conditions[1], "_vs_", conditions[2])
-  
+
   h1 <- highchart() %>%
     hc_add_series(data = df, type = "scatter", hcaes(x, y, group = g)) %>%
     hc_colors(c(pal$In, pal$Out)) %>%
@@ -148,9 +155,9 @@ diffAnaVolcanoplot_rCharts <- function(
       title = list(text = "logFC"),
       plotLines = list(
         list(
-          color = "grey", 
-          width = 1, 
-          value = 0, 
+          color = "grey",
+          width = 1,
+          value = 0,
           zIndex = 5
         )
       )
@@ -172,6 +179,6 @@ diffAnaVolcanoplot_rCharts <- function(
     my_hc_ExportMenu(filename = "volcanoplot") %>%
     hc_add_series(data = leftBorder, type = "line", color = "grey") %>%
     hc_add_series(data = rightBorder, type = "line", color = "grey")
-  
+
   return(h1)
 }

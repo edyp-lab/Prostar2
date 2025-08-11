@@ -37,6 +37,10 @@ show info from slots in df. The variable this.index refers to the slot
 named index and allows to retrieve the right row to show in the tooltip.}
 
 \item{pal}{xxx}
+
+\item{group}{xxx}
+
+\item{comparison}{xxx}
 }
 \value{
 An interactive volcanoplot
@@ -54,7 +58,7 @@ a point of the scatter plot.
 \examples{
 library(highcharter)
 library(DaparToolshed)
-data(Exp1_R25_prot, package="DaparToolshedData")
+data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot
 # Simulate imputation of missing values
 obj <- DaparToolshed::NAIsZero(obj, 1)
@@ -64,30 +68,31 @@ sTab <- MultiAssayExperiment::colData(obj)
 limma <- limmaCompleteTest(qData, sTab)
 
 df <- data.frame(
-    x = limma$logFC[['25fmol_vs_10fmol_logFC']], 
-    y = -log10(limma$P_Value[['25fmol_vs_10fmol_pval']]),
-    index = as.character(rownames(obj[[2]])))
+  x = limma$logFC[["25fmol_vs_10fmol_logFC"]],
+  y = -log10(limma$P_Value[["25fmol_vs_10fmol_pval"]]),
+  index = as.character(rownames(obj[[2]]))
+)
 colnames(df) <- c("x", "y", "index")
 tooltipSlot <- c("Fasta_headers", "Sequence_length")
 df <- cbind(df, Biobase::fData(obj)[, tooltipSlot])
 colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
 if (ncol(df) > 3) {
-    colnames(df)[seq.int(from = 4, to = ncol(df))] <-
-        paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
-         sep = "")
+  colnames(df)[seq.int(from = 4, to = ncol(df))] <-
+    paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
+      sep = ""
+    )
 }
 hc_clickFunction <- JS("function(event) {
 Shiny.onInputChange('eventPointClicked',
 [this.index]+'_'+ [this.series.name]);}")
 cond <- c("25fmol", "10fmol")
 diffAnaVolcanoplot_rCharts(
-df, 
-th_pval = 2.5, 
-th_logfc = 1, 
-conditions = cond, 
-clickFunction = hc_clickFunction)
-
-
+  df,
+  th_pval = 2.5,
+  th_logfc = 1,
+  conditions = cond,
+  clickFunction = hc_clickFunction
+)
 
 }
 \author{

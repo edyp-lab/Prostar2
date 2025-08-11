@@ -1,13 +1,13 @@
 #' @title dl
 #'
 #' @description  A shiny Module.
-#' 
-#' 
+#'
+#'
 #' @param id internal
 #' @param dataIn internal
 #' @param extension Available values are `csv` (default), `qf` and `Excel`.
 #' @param widget.type Available values are `Button` and `Link` (default).
-#' @param name internal
+#' @param filename internal
 #' @param excel.style xxx
 #'
 #' @return NA
@@ -15,7 +15,7 @@
 #' @name download_dataset
 #' @examples
 #' \dontrun{
-#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(download_dataset(Exp1_R25_prot))
 #' }
 #'
@@ -31,9 +31,9 @@ NULL
 download_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    uiOutput(ns('dl_xl')),
-    uiOutput(ns('dl_csv')),
-    uiOutput(ns('dl_raw'))
+    uiOutput(ns("dl_xl")),
+    uiOutput(ns("dl_csv")),
+    uiOutput(ns("dl_raw"))
   )
 }
 
@@ -41,95 +41,98 @@ download_dataset_ui <- function(id) {
 #'
 #' @export
 #'
-download_dataset_server <- function(id,
-  dataIn = reactive({NULL}),
-  extension = c('xlsx', 'qf'),
-  widget.type = 'Link',
-  filename = 'myDataset', 
-  excel.style = NULL,
-  remoteReset = reactive({0}),
-  is.enabled = reactive({TRUE})
-  ) {
+download_dataset_server <- function(
+    id,
+    dataIn = reactive({NULL}),
+    extension = c("xlsx", "qf"),
+    widget.type = "Link",
+    filename = "myDataset",
+    excel.style = NULL,
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     rv <- reactiveValues(
       UI_type = NULL,
       export_file_qf = NULL,
       export_file_xlsx = NULL
     )
-    
-    observeEvent(req(dataIn()), ignoreNULL = TRUE,{
-      
-      
-      rv$export_file_xlsx <- tryCatch({
-     
-        out.xlsx <- tempfile(fileext = ".xlsx")
-        DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
-        out.xlsx
-        
-      },
+
+    observeEvent(req(dataIn()), ignoreNULL = TRUE, {
+      rv$export_file_xlsx <- tryCatch(
+        {
+          out.xlsx <- tempfile(fileext = ".xlsx")
+          DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
+          out.xlsx
+        },
         warning = function(w) w,
         error = function(e) e
       )
-      
-      rv$export_file_qf <- tryCatch({
-        out.qf <- tempfile(fileext = ".qf")
-        saveRDS(dataIn(), file = out.qf)
-        out.qf
-      },
+
+      rv$export_file_qf <- tryCatch(
+        {
+          out.qf <- tempfile(fileext = ".qf")
+          saveRDS(dataIn(), file = out.qf)
+          out.qf
+        },
         warning = function(w) w,
         error = function(e) e
       )
-      
     })
-    
+
     GetType <- reactive({
-      if(length(extension) != length(widget.type)){
-        warning("Widget.type is not correctly configured. As one cannot decide, 
+      if (length(extension) != length(widget.type)) {
+        warning("Widget.type is not correctly configured. As one cannot decide,
             all values are set to default ('Link')")
-        rv$UI_type <- rep('Link', length(extension))
+        rv$UI_type <- rep("Link", length(extension))
       } else {
         rv$UI_type <- widget.type
       }
-      
+
       rv$UI_type
     })
-    
+
 
     output$dl_xl <- renderUI({
-      req('xlsx' %in% extension)
+      req("xlsx" %in% extension)
       req(rv$export_file_xlsx)
-      type <- GetType()[which(extension == 'xlsx')]
-      do.call(paste0('download', type),
+      type <- GetType()[which(extension == "xlsx")]
+      do.call(
+        paste0("download", type),
         list(
-          ns("downloadDataExcel"), 
+          ns("downloadDataExcel"),
           "xlsx",
-          class = if (type=='Button') actionBtnClass else ''
+          class = if (type == "Button") actionBtnClass else ""
         )
       )
     })
-    
+
     output$dl_raw <- renderUI({
-      req('qf' %in% extension)
+      req("qf" %in% extension)
       req(rv$export_file_qf)
-      type <- GetType()[which(extension == 'qf')]
+      type <- GetType()[which(extension == "qf")]
 
-      do.call(paste0('download', type),
+      do.call(
+        paste0("download", type),
         list(
-          ns("downloadDataQf"), 
+          ns("downloadDataQf"),
           "qf",
-          class = if (type=='Button') actionBtnClass else ''
+          class = if (type == "Button") actionBtnClass else ""
         )
       )
     })
-    
 
-    
+
+
     output$downloadDataQf <- downloadHandler(
       filename = function() {
-        #paste ("data-", Sys.Date(), ".qf", sep = "")
-        paste(filename, '.qf', sep = "")
+        # paste ("data-", Sys.Date(), ".qf", sep = "")
+        paste(filename, ".qf", sep = "")
       },
       content = function(file) {
         file.copy(
@@ -138,11 +141,11 @@ download_dataset_server <- function(id,
         )
       }
     )
-    
+
     output$downloadDataExcel <- downloadHandler(
       filename = function() {
-        #paste("data-", Sys.Date(), ".xlsx", sep = "")
-        paste(filename, '.xlsx', sep = "")
+        # paste("data-", Sys.Date(), ".xlsx", sep = "")
+        paste(filename, ".xlsx", sep = "")
       },
       content = function(file) {
         file.copy(
@@ -151,8 +154,7 @@ download_dataset_server <- function(id,
         )
       }
     )
-  }
-  )
+  })
 }
 
 
@@ -162,17 +164,18 @@ download_dataset_server <- function(id,
 #'
 #' @export
 #'
-download_dataset <- function(data, filename = 'myDataset'){
+download_dataset <- function(
+    dataIn, 
+  filename = "myDataset") {
   ui <- download_dataset_ui("dl")
-  
+
   server <- function(input, output, session) {
-    
     download_dataset_server("dl",
-      dataIn = reactive({data}),
-      extension = c('csv', 'xlsx', 'qf'),
+      dataIn = reactive({dataIn}),
+      extension = c("csv", "xlsx", "qf"),
       filename = filename
     )
   }
-  
+
   app <- shiny::shinyApp(ui = ui, server = server)
 }

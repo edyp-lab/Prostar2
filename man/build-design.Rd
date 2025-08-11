@@ -26,6 +26,10 @@ mod_buildDesign(quantCols)
 \item{id}{xxx}
 
 \item{quantCols}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 }
 \value{
 NA

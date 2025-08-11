@@ -21,6 +21,13 @@ convert_dataset_server(
 
 convert_dataset()
 }
+\arguments{
+\item{id}{xxx}
+
+\item{reset}{xxx}
+
+\item{is.enabled}{xxx}
+}
 \description{
 These functions are inspired by the functions run_workflow() in the package
 \code{MagellanNTK}. They wrap the entire workflow into a single function

@@ -1,35 +1,35 @@
 # Module UI
 
 #' @title   open_dataset_ui and open_dataset_server
-#' 
+#'
 #' @description  A shiny Module.
-#' 
+#'
 #' @param id xxx
-#' 
+#'
 #' @name open_dataset
 #'
 #' @keywords internal
-#' 
-#' @examples 
-#'\dontrun{
+#'
+#' @examples
+#' \dontrun{
 #' shiny::runApp(Prostar2::open_dataset())
 #' }
-#' 
+#'
 NULL
 
 
 
 
-#' @export 
+#' @export
 #' @rdname open_dataset
-#' @importFrom shiny NS tagList 
+#' @importFrom shiny NS tagList
 #' @import shinyjs
-#' 
-open_dataset_ui <- function(id){
+#'
+open_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
     fileInput(ns("file"), "Open file", multiple = FALSE),
-    actionButton(ns('load_qf_btn'), 'Load file')
+    actionButton(ns("load_qf_btn"), "Load file")
   )
 }
 
@@ -39,16 +39,18 @@ open_dataset_ui <- function(id){
 #' @importFrom shinyjs info
 #' @import shiny
 #' @import QFeatures
-#' 
+#'
 open_dataset_server <- function(
     id,
-  remoteReset = reactive({0}),
-  is.enabled = reactive({TRUE})
-  ){
-  
-  moduleServer(id, function(input, output, session){
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
+  moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     rv.openqf <- reactiveValues(
       dataRead = NULL,
       dataOut = NULL
@@ -57,24 +59,26 @@ open_dataset_server <- function(
     ## -- Open a MSnset File --------------------------------------------
     observeEvent(input$load_qf_btn, ignoreInit = TRUE, {
       input$file
-      
+
       authorizedExtension <- "qf"
-      
+
       warn.wrong.file <- "Warning : this file is not a QFeatures file !
        Please choose another one."
       tryCatch(
         {
           if (length(grep(GetExtension(input$file$datapath),
-                          authorizedExtension,ignore.case = TRUE)) == 0) {
+            authorizedExtension,
+            ignore.case = TRUE
+          )) == 0) {
             warning(warn.wrong.file)
           } else {
             rv.openqf$dataRead <- readRDS(input$file$datapath)
           }
-          
-          if (!inherits(rv.openqf$dataRead,'QFeatures')) {
+
+          if (!inherits(rv.openqf$dataRead, "QFeatures")) {
             warning(warn.wrong.file)
           }
-          
+
           rv.openqf$dataOut <- rv.openqf$dataRead
         },
         warning = function(w) {
@@ -89,50 +93,48 @@ open_dataset_server <- function(
           # cleanup-code
         }
       )
-      
     })
 
-    reactive({rv.openqf$dataOut})
+    reactive({
+      rv.openqf$dataOut
+    })
   })
-  
 }
 
 
 
 
 
-#' @export 
+#' @export
 #' @rdname open_dataset
-open_dataset <- function(){
-  
-ui <- fluidPage(
-  tagList(
-    open_dataset_ui("qf_file"),
-    textOutput('res')
+open_dataset <- function() {
+  ui <- fluidPage(
+    tagList(
+      open_dataset_ui("qf_file"),
+      textOutput("res")
+    )
   )
-)
 
-server <- function(input, output, session) {
-  rv <- reactiveValues(
-    obj = NULL,
-    result = NULL
-  )
-  
- 
+  server <- function(input, output, session) {
+    rv <- reactiveValues(
+      obj = NULL,
+      result = NULL
+    )
+
+
     rv$result <- open_dataset_server("qf_file")
-  
-  observeEvent(req(rv$result()), {
-    rv$obj <- rv$result()
-  })
-  
-  
-  output$res <- renderText({
-    rv$obj
-    print(rv$obj)
-    paste0('Names of the datasets: ', names(rv$obj))
-  })
-}
 
-app <- shinyApp(ui, server)
+    observeEvent(req(rv$result()), {
+      rv$obj <- rv$result()
+    })
 
+
+    output$res <- renderText({
+      rv$obj
+      print(rv$obj)
+      paste0("Names of the datasets: ", names(rv$obj))
+    })
+  }
+
+  app <- shinyApp(ui, server)
 }

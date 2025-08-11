@@ -36,17 +36,14 @@ mod_Metacell_Filtering(
 \arguments{
 \item{id}{xxx}
 
+\item{dataIn}{xxx}
+
+\item{i}{xxx}
+
 \item{remoteReset}{A \code{ìnteger(1)} xxxx}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
-
-\item{obj}{An instance of the class \code{QFeatures}}
-
-\item{keep_vs_remove}{A character(1) indicating whether to keep or delete
-items. Default value is "delete"}
-
-\item{operator}{xxx}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a
@@ -73,16 +70,15 @@ as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 \dontrun{
 library(Prostar2)
 library(shinyBS)
-data(Exp1_R25_prot, package = 'DaparToolshedData')
+data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
 
 
-data(Exp1_R25_prot, package = 'DaparToolshedData')
-fun <- FunctionFilter('qMetacellWholeLine', 
-cmd = 'delete', 
-pattern = c("Missing","Missing POV", "Missing MEC"))
-
-
+data(Exp1_R25_prot, package = "DaparToolshedData")
+fun <- FunctionFilter("qMetacellWholeLine",
+  cmd = "delete",
+  pattern = c("Missing", "Missing POV", "Missing MEC")
+)
 }
 
 }

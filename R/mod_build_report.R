@@ -1,12 +1,10 @@
 #' @title dl
 #'
 #' @description  A shiny Module.
-#' 
-#' 
+#'
+#'
 #' @param id internal
 #' @param dataIn internal
-#'@param widget.type Available values are `Button` and `Link` (default).
-#' @param name internal
 #' @param filename xxx
 #'
 #' @return NA
@@ -16,10 +14,10 @@
 #' \dontrun{
 #' data(sub_R25)
 #' shiny::runApp(build_report(sub_R25))
-#' 
-#' shiny::runApp(build_report(sub_R25, filename = 'myDataset'))
+#'
+#' shiny::runApp(build_report(sub_R25, filename = "myDataset"))
 #' }
-#' 
+#'
 NULL
 
 
@@ -32,7 +30,7 @@ NULL
 build_report_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3('Build report')
+    h3("Build report")
   )
 }
 
@@ -40,20 +38,21 @@ build_report_ui <- function(id) {
 #'
 #' @export
 #'
-build_report_server <- function(id,
-  dataIn = reactive({NULL}),
-  filename = 'myDataset') {
-  
+build_report_server <- function(
+    id,
+    dataIn = reactive({
+      NULL
+    }),
+    filename = "myDataset") {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     rv <- reactiveValues()
-    
-    observeEvent(dataIn(), ignoreNULL = TRUE,{
-      
+
+    observeEvent(dataIn(), ignoreNULL = TRUE, {
+
     })
-  }
-  )
+  })
 }
 
 
@@ -63,16 +62,17 @@ build_report_server <- function(id,
 #'
 #' @export
 #'
-build_report <- function(data, filename = 'myDataset'){
+build_report <- function(data, filename = "myDataset") {
   ui <- build_report_ui("report")
-  
+
   server <- function(input, output, session) {
-    
     build_report_server("report",
-      dataIn = reactive({data}),
+      dataIn = reactive({
+        data
+      }),
       filename = filename
     )
   }
-  
+
   app <- shiny::shinyApp(ui = ui, server = server)
 }

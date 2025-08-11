@@ -40,11 +40,19 @@ mod_ds_metacell_Histos(obj, group, pal, pattern = NULL, showSelect)
 \arguments{
 \item{id}{xxx}
 
+\item{dataIn}{xxx}
+
+\item{group}{xxx}
+
 \item{pal}{xxx}
 
 \item{pattern}{xxx}
 
 \item{showSelect}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 
 \item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
@@ -56,12 +64,12 @@ xxxx
 }
 \examples{
 \dontrun{
-data(Exp1_R25_prot, package = 'DaparToolshedData')
-grp <- omXplore::get_group(Exp1_R25_prot)
+data(Exp1_R25_prot, package = "DaparToolshedData")
+grp <- design.qf(Exp1_R25_prot)$Condition
 shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))
 
 # Test with pattern already defined
-pat <- c('Missing MEC', 'Missing POV')
+pat <- c("Missing MEC", "Missing POV")
 shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], pattern = pat, group = grp))
 }
 

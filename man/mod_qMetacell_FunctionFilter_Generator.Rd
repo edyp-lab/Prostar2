@@ -44,6 +44,8 @@ mod_qMetacell_FunctionFilter_Generator(
 \arguments{
 \item{id}{xxx}
 
+\item{dataIn}{An instance of the class \code{SummarizedExperiment}}
+
 \item{conds}{A \code{character()} which contains the name of the conditions. The
 length of this vector must be equal to the number of samples in the assay
 (i.e. number of columns in assay(obj))}
@@ -58,8 +60,6 @@ length of this vector must be equal to the number of samples in the assay
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}
-
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
 \value{
 As for all modules used with \code{MagellanNTK}, the return value is a
@@ -83,7 +83,8 @@ of the class \code{SummarizedExperiment})
 \examples{
 \dontrun{
 library(DaparToolshed)
-data(Exp1_R25_prot, package ='DaparToolshedData')
+library(shinyBS)
+data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[[1]]
 conds <- colData(Exp1_R25_prot)$Condition
 

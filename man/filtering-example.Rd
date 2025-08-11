@@ -35,6 +35,8 @@ mod_filtering_example(
 \arguments{
 \item{id}{xxx}
 
+\item{dataIn}{xxx}
+
 \item{indices}{xxx}
 
 \item{operation}{A character(1) that indicates whether to keep or remove
@@ -42,6 +44,10 @@ lines identified by indices. Available values are 'keep' (default)
 or 'delete'}
 
 \item{title}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 
 \item{obj}{An instance of the class \code{SummarizedExperiment}}
 }
@@ -53,7 +59,7 @@ xxxx
 }
 \examples{
 \dontrun{
-data(Exp1_R25_prot, package = 'DaparToolshedData')
+data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[[1]]
 indices <- 1:5
 operation <- "delete"

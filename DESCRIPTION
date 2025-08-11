@@ -35,6 +35,7 @@ Imports:
     rhandsontable,
     QFeatures (>= 1.16),
     SummarizedExperiment,
+    MultiAssayExperiment,
     magrittr,
     methods, 
     tibble,

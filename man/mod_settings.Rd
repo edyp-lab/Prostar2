@@ -21,15 +21,9 @@ mod_settings_server(
 )
 }
 \arguments{
-\item{id}{xxx}
+\item{id}{shiny id}
 
-\item{input}{internal}
-
-\item{output}{internal}
-
-\item{session}{internal}
-
-\item{obj}{xxx}
+\item{dataIn}{xxx}
 }
 \value{
 NA

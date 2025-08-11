@@ -40,11 +40,13 @@ This file (R/config.R) contains a list named def.pipeline in which each element 
 
 ```{r config, eval=FALSE}
 pipeline.defs <- list(
-  peptide= c('module_Peptide_Filtering',
-             'module_Peptide_Normalization',
-             'module_Peptide_Imputation',
-             'module_Peptide_HypothesisTest')
-             )
+  peptide = c(
+    "module_Peptide_Filtering",
+    "module_Peptide_Normalization",
+    "module_Peptide_Imputation",
+    "module_Peptide_HypothesisTest"
+  )
+)
 ```
 
 

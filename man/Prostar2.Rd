@@ -6,6 +6,13 @@
 \usage{
 Prostar2(wf.name = NULL, usermod = "user", verbose = FALSE)
 }
+\arguments{
+\item{wf.name}{xxx}
+
+\item{usermod}{xxx}
+
+\item{verbose}{xxx}
+}
 \description{
 xxxx
 }
@@ -13,9 +20,9 @@ xxxx
 \dontrun{
 library(Prostar2)
 library(DaparToolshed)
-Prostar2('PipelineProtein')
-Prostar2('PipelineProtein', user = 'dev')
-Prostar2('PipelinePeptide')
+Prostar2("PipelineProtein")
+Prostar2("PipelineProtein", user = "dev")
+Prostar2("PipelinePeptide")
 }
 
 }

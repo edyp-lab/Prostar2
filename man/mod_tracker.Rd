@@ -21,12 +21,16 @@ mod_tracker_server(
  })
 )
 
-mod_tracker(obj)
+mod_tracker(dataIn)
 }
 \arguments{
-\item{id}{xxx}
+\item{id}{shiny id}
 
 \item{object}{A instance of the class \code{SummarizedExperiment}}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 }
 \value{
 NA
@@ -45,7 +49,7 @@ Three modes of selection are implemented:
 }
 \examples{
 \dontrun{
-data(Exp1_R25_prot, package = 'DaparToolshedData')
+data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(mod_tracker(Exp1_R25_prot))
 }
 

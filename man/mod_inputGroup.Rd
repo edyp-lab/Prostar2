@@ -31,7 +31,11 @@ mod_inputGroup()
 
 \item{df}{xxx}
 
-\item{quanCols}{A vector of}
+\item{quantCols}{A vector of}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 }
 \value{
 A shiny app

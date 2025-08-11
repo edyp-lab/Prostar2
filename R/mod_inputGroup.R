@@ -1,20 +1,22 @@
 #' @title  Help popover windows
 #'
 #' @description  A shiny Module.
-#' 
+#'
 #' @param id A `character(1)` xxx
 #' @param df xxx
-#' @param quanCols A vector of  
+#' @param quantCols A vector of
+#' @param remoteReset xxx
+#' @param is.enabled xxx
 #'
 #' @name mod_inputGroup
-#' 
+#'
 #' @return A shiny app
 #'
 #' @examples
 #' \dontrun{
 #' shiny::runApp(Prostar2::mod_inputGroup())
 #' }
-#' 
+#'
 NULL
 
 
@@ -26,7 +28,7 @@ NULL
 #'
 mod_inputGroup_ui <- function(id) {
   ns <- NS(id)
-  
+
   tagList(
     uiOutput(ns("inputGroup")),
     uiOutput(ns("checkIdentificationTab"))
@@ -40,26 +42,34 @@ mod_inputGroup_ui <- function(id) {
 #' @export
 #'
 mod_inputGroup_server <- function(
-    id, 
-  df = reactive({NULL}), 
-  quantCols = reactive({NULL}),
-  remoteReset = reactive({0}),
-  is.enabled = reactive({TRUE})
-) {
+    id,
+    df = reactive({
+      NULL
+    }),
+    quantCols = reactive({
+      NULL
+    }),
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
   requireNamespace("shinyBS")
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     rv <- reactiveValues(
       dataOut = NULL
     )
-    
-    
+
+
     shinyOutput <- function(FUN, id, num, ...) {
       inputs <- character(num)
-      for (i in seq_len(num))
+      for (i in seq_len(num)) {
         inputs[i] <- as.character(FUN(paste0(id, i), label = NULL, ...))
+      }
       inputs
     }
 
@@ -67,8 +77,9 @@ mod_inputGroup_server <- function(
     # function for dynamic inputs in DT
     shinyInput <- function(FUN, id, num, ...) {
       inputs <- character(num)
-      for (i in seq_len(num))
+      for (i in seq_len(num)) {
         inputs[i] <- as.character(FUN(paste0(id, i), label = NULL, ...))
+      }
 
       inputs
     }
@@ -81,18 +92,18 @@ mod_inputGroup_server <- function(
         if (is.null(value)) NA else value
       }))
     }
-    
-  
+
+
     #
     #
     # End of extra functions
-    # 
+    #
     output$inputGroup <- renderUI({
       req(quantCols())
       req(df())
       n <- length(quantCols())
 
-     
+
       input_list <- lapply(seq_len(n), function(i) {
         inputName <- ns(paste("input_", i, sep = ""))
         div(
@@ -105,17 +116,16 @@ mod_inputGroup_server <- function(
             style = "align: center;display:inline-block; vertical-align: middle;",
             selectInput(inputName, "",
               choices = c("None", colnames(df())),
-              width = '300px'
+              width = "300px"
             )
           )
         )
       })
       do.call(tagList, input_list)
-     })
-    
-    
-    observeEvent(req(input[["input_1"]]), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    })
 
+
+    observeEvent(req(input[["input_1"]]), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(quantCols())
       req(df())
 
@@ -132,15 +142,15 @@ mod_inputGroup_server <- function(
         updateSelectInput(session, inputName, selected = .select)
       })
     })
-    
-    
-    
+
+
+
     isOk <- reactive({
       req(quantCols())
       req(df())
 
       shinyValue("input_", length(quantCols()))
-      temp <- shinyValue( "input_", length(quantCols()))
+      temp <- shinyValue("input_", length(quantCols()))
 
       res <- NULL
       if (length(which(temp == "None")) > 0) {
@@ -162,28 +172,31 @@ mod_inputGroup_server <- function(
 
       res
     })
-    
 
-    
+
+
     output$checkIdentificationTab <- renderUI({
       req(isOk())
-      if (isOk()$ok)
-            img <- "images/Ok.png"
-          else
-            img <- "images/Problem.png"
+      if (isOk()$ok) {
+        img <- "images/Ok.png"
+      } else {
+        img <- "images/Problem.png"
+      }
 
       tags$div(
         tags$div(
-          tags$div(style = "display:inline-block;",
-            tags$img( src = img,height = 25)
+          tags$div(
+            style = "display:inline-block;",
+            tags$img(src = img, height = 25)
           ),
           tags$div(style = "display:inline-block;", tags$p(isOk()$txt))
         )
       )
     })
-    
-   reactive({rv$dataOut})
-    
+
+    reactive({
+      rv$dataOut
+    })
   })
 }
 
@@ -191,26 +204,27 @@ mod_inputGroup_server <- function(
 
 #' @export
 #' @rdname mod_inputGroup
-#' 
-mod_inputGroup <- function(){
+#'
+mod_inputGroup <- function() {
+  ui <- Prostar2::mod_inputGroup_ui("mod_inputGroup")
 
-ui <- Prostar2::mod_inputGroup_ui("mod_inputGroup")
+  server <- function(input, output, session) {
+    file <- system.file("extdata/Exp1_R25_prot.txt", package = "DaparToolshedData")
+    df <- read.csv(file, header = TRUE, sep = "\t", as.is = T)
 
-server <- function(input, output, session) {
-  
-  file <- system.file('extdata/Exp1_R25_prot.txt', package='DaparToolshedData')
-  df <- read.csv(file, header = TRUE, sep = "\t", as.is = T)
-  
-  Prostar2::mod_inputGroup_server("mod_inputGroup",
-    df = reactive({df}),
-    quantCols = reactive({colnames(df)[49:54]})
-  )
-  #   
-  # observeEvent(toto(), ignoreNULL = FALSE,{
-  #   print(toto())
-  # })
-  
-}
+    Prostar2::mod_inputGroup_server("mod_inputGroup",
+      df = reactive({
+        df
+      }),
+      quantCols = reactive({
+        colnames(df)[49:54]
+      })
+    )
+    #
+    # observeEvent(toto(), ignoreNULL = FALSE,{
+    #   print(toto())
+    # })
+  }
 
-app <- shinyApp(ui = ui, server = server)
+  app <- shinyApp(ui = ui, server = server)
 }

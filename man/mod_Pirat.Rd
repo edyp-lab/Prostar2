@@ -44,22 +44,21 @@ A shiny app
 A shiny app
 }
 \description{
-\subsection{To be customized}{
-}
+To be customized
 }
 \examples{
 \dontrun{
 data(subbouyssie)
 
 # Builds the instance of `SummarizedExperiment`
-obj.se <- pirat2SE(subbouyssie$peptides_ab, subbouyssie$adj, 
-subbouyssie$mask_prot_diff, subbouyssie$mask_pep_diff )
+obj.se <- pirat2SE(
+  subbouyssie$peptides_ab, subbouyssie$adj,
+  subbouyssie$mask_prot_diff, subbouyssie$mask_pep_diff
+)
 
-#Launch the app
+# Launch the app
 app <- mod_Pirat(obj.se)
 shiny::runApp(app)
-
 }
-
 
 }

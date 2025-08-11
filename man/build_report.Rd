@@ -22,10 +22,6 @@ build_report_server(
 \item{dataIn}{internal}
 
 \item{filename}{xxx}
-
-\item{widget.type}{Available values are \code{Button} and \code{Link} (default).}
-
-\item{name}{internal}
 }
 \value{
 NA
@@ -38,7 +34,7 @@ A shiny Module.
 data(sub_R25)
 shiny::runApp(build_report(sub_R25))
 
-shiny::runApp(build_report(sub_R25, filename = 'myDataset'))
+shiny::runApp(build_report(sub_R25, filename = "myDataset"))
 }
 
 }

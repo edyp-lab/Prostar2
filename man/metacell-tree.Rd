@@ -24,7 +24,7 @@ mod_metacell_tree_server(
 )
 
 mod_metacell_tree(
-  obj = NULL,
+  dataIn,
   remoteReset = reactive({
      0
  })
@@ -33,9 +33,11 @@ mod_metacell_tree(
 \arguments{
 \item{id}{xxx}
 
+\item{dataIn}{An instance of the class \code{SummarizedExperiment}}
+
 \item{remoteReset}{xxx}
 
-\item{obj}{An instance of the class \code{SummarizedExperiment}}
+\item{is.enabled}{xxx}
 }
 \value{
 NA
@@ -45,13 +47,10 @@ xxxx
 }
 \examples{
 \dontrun{
-
-shiny::runApp(mod_metacell_tree())
-
-data(Exp1_R25_pept, package = 'DaparToolshedData')
+data(Exp1_R25_pept, package = "DaparToolshedData")
 shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
 
-data(Exp1_R25_prot, package = 'DaparToolshedData')
+data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(mod_metacell_tree(Exp1_R25_prot[[1]]))
 }
 

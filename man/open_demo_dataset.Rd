@@ -32,6 +32,5 @@ A shiny Module.
 shiny::runApp(open_demoDataset())
 }
 
-
 }
 \keyword{internal}

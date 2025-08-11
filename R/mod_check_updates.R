@@ -1,31 +1,31 @@
 #' @title xxxx
 #' @description xxxxx
 #' 
+#' @param id xxx
+#'
 #' @examples
 #' shiny::runApp(checkUpdates())
-#' 
-#' 
+#'
 #' @name mod-check-updates
-#' 
+#'
 NULL
 
 
-GetLocalVersions <- function(pkgs){
-  
-  local.version <- lapply(pkgs, function(x){
+GetLocalVersions <- function(pkgs) {
+  local.version <- lapply(pkgs, function(x) {
     installed.packages()[x, "Version"]
   })
   names(local.version) <- pkgs
-  
+
   local.version
 }
 
-getPackagesVersions <- function(){
+getPackagesVersions <- function() {
   outOfDate <- "(Out of date)"
   dev <- "(Devel)"
-  
+
   bioconductor.version <- GetBioconductorVersions()
-  local.version <- GetLocalVersions(c('Prostar', 'DAPAR', 'DAPARdata'))
+  local.version <- GetLocalVersions(c("Prostar", "DAPAR", "DAPARdata"))
   names <- c(
     as.character(
       tags$a(
@@ -43,15 +43,15 @@ getPackagesVersions <- function(){
       tags$a(href = "http://www.bioconductor.org/packages/release/data/experiment/html/DAPARdata.html", "DAPARdata")
     )
   )
-  
-  
+
+
   df <- data.frame(
     "Name" = names,
     "Installed packages" = unlist(local.version),
     "Bioc release" = unlist(bioconductor.version),
     stringsAsFactors = FALSE
   )
-  
+
   if (!is.null(local.version$Prostar) && !is.null(local.version$DAPAR)) {
     tryCatch(
       {
@@ -76,7 +76,7 @@ getPackagesVersions <- function(){
             sep = " "
           )
         }
-        
+
         compare.dapar <- compareVersion(
           local.version$DAPAR,
           bioconductor.version$DAPAR
@@ -96,7 +96,7 @@ getPackagesVersions <- function(){
             sep = " "
           )
         }
-        
+
         if (compareVersion(
           local.version$DAPARdata,
           bioconductor.version$DAPARdata
@@ -136,18 +136,18 @@ getPackagesVersions <- function(){
       }
     )
   }
-  
+
   df
 }
 
 
-GetBioconductorVersions <- function(){
+GetBioconductorVersions <- function() {
   ll.versions <- list(
     Prostar = "NA",
     DAPAR = "NA",
     DAPARdata = "NA"
   )
-  
+
   DAPARdata.version <- Prostar.version <- DAPAR.version <- NULL
   tryCatch(
     {
@@ -164,7 +164,7 @@ GetBioconductorVersions <- function(){
       ll.versions$DAPARdata <- biocExperiment["DAPARdata", "Version"]
     },
     warning = function(w) {
-      #message(w)
+      # message(w)
       print(w)
       return()
     },
@@ -184,7 +184,7 @@ GetBioconductorVersions <- function(){
       # cleanup-code
     }
   )
-  
+
   ll.versions
 }
 
@@ -197,7 +197,7 @@ GetBioconductorVersions <- function(){
   ))
 }
 
-#' @rdname xxx
+#' @rdname mod-check-updates
 #' @export
 mod_checkUpdates_ui <- function(id) {
   ns <- NS(id)
@@ -207,18 +207,15 @@ mod_checkUpdates_ui <- function(id) {
     br(), br(),
     uiOutput(ns("infoForNewVersions"))
   )
-  
 }
 
 
-#' @rdname xxx
+#' @rdname mod-check-updates
 #' @export
 mod_checkUpdates_server <- function(id) {
-  
-  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     output$tab_versions <- DT::renderDataTable(server = TRUE, {
       dt <- DT::datatable(getPackagesVersions(),
         escape = FALSE,
@@ -233,8 +230,8 @@ mod_checkUpdates_server <- function(id) {
       )
       dt
     })
-    
-    
+
+
     output$infoForNewVersions <- renderUI({
       df <- getPackagesVersions()
       # df <- getPackagesVersions2()
@@ -275,12 +272,11 @@ mod_checkUpdates_server <- function(id) {
         )
       }
     })
-    
-    
-    
-    
+
+
+
+
     output$baseVersions <- renderUI({
-      
       tagList(
         tags$p(R.version.string, style = "font-size: 16px"),
         tags$p(
@@ -293,24 +289,23 @@ mod_checkUpdates_server <- function(id) {
         tags$br()
       )
     })
-    
   })
 }
 
 
 
-#' @rdname xxx
+#' @rdname mod-check-updates
 #' @export
-checkUpdates <- function(){
+checkUpdates <- function() {
   ui <- fluidPage(
     tagList(
-      mod_checkUpdates_ui('updates')
+      mod_checkUpdates_ui("updates")
     )
   )
-  
+
   server <- function(input, output) {
-    mod_checkUpdates_server('updates')
+    mod_checkUpdates_server("updates")
   }
-  
+
   app <- shinyApp(ui = ui, server = server)
 }

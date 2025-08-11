@@ -6,6 +6,14 @@
 #' as to be easily integrated into workflfow compliant with `MagellanNTK`.
 #'
 #' @name mod_Pept_Imputation
+#' 
+#' @param id xxx
+#' @param dataIn An instance of the class `QFeatures`
+#' @param i xx
+#' @param remoteReset A `integer(1)` xxxx
+#' @param is.enabled A `logical(1)` that indicates whether the module is
+#' enabled or disabled. This is a remote command.
+#'
 #'
 #' @return As for all modules used with `MagellanNTK`, the return value is a
 #' `list()` of two items:
@@ -18,11 +26,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' data(Exp1_R25_pept, package="DaparToolshedData")
+#' data(Exp1_R25_pept, package = "DaparToolshedData")
 #' obj <- Exp1_R25_pept[seq_len(100)]
 #' shiny::runApp(mod_Pept_Imputation(obj, 1))
 #' }
-#' 
+#'
 NULL
 
 
@@ -44,30 +52,33 @@ mod_Pept_Imputation_ui <- function(id) {
     # widget he want to insert
     # Be aware of the naming convention for ids in uiOutput()
     # For more details, please refer to the dev document.
-    uiOutput(ns('Imp_UI')),
-    uiOutput(ns('mvplots_ui'))
+    uiOutput(ns("Imp_UI")),
+    uiOutput(ns("mvplots_ui"))
   )
 }
 
 
 
 
-#' @param id xxx
-#' @param obj An instance of the class `QFeatures`
-#' @param remoteReset A `integer(1)` xxxx
-#' @param is.enabled A `logical(1)` that indicates whether the module is
-#' enabled or disabled. This is a remote command.
-#'
+
 #' @rdname mod_Pept_Imputation
 #'
 #' @export
 #'
-mod_Pept_Imputation_server <- function(id,
-  dataIn = reactive({NULL}),
-  i = reactive({NULL}),
-  remoteReset = reactive({0}),
-  is.enabled = reactive({TRUE})) {
-  
+mod_Pept_Imputation_server <- function(
+    id,
+    dataIn = reactive({
+      NULL
+    }),
+    i = reactive({
+      NULL
+    }),
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -79,15 +90,13 @@ mod_Pept_Imputation_server <- function(id,
     Imp_detQuant_quantile = 2.5,
     Imp_detQuant_factor = 1
   )
-  
-  rv.custom.default.values <- list(
-    
-  )
-  
-  
+
+  rv.custom.default.values <- list()
+
+
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-   # .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
+    # .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
     # eval(
     #   str2expression(
     #     MagellanNTK::Get_AdditionalModule_Core_Code(
@@ -96,62 +105,75 @@ mod_Pept_Imputation_server <- function(id,
     #     )
     #   )
     # )
-    
+
     core <- paste0(
       MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_rv_reactiveValues(),
       MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
       MagellanNTK::Get_Code_for_dataOut(),
-      MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
+      MagellanNTK::Get_Code_for_remoteReset(
+        widgets = TRUE,
         custom = TRUE,
-        dataIn = 'dataIn()'),
+        dataIn = "dataIn()"
+      ),
       sep = "\n"
     )
-    
+
     eval(str2expression(core))
-    
-    
+
+
     # observeEvent(req(remoteReset()), ignoreInit = FALSE, {
     #   rv$dataIn <- dataIn()
     #   req(rv$dataIn)
-    #   
+    #
     # })
-    
-    
-    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-      req(dataIn())
-      stopifnot(inherits(dataIn(), 'QFeatures'))
-      rv$dataIn <- dataIn()
-      
-      
-        
-    }, priority = 1000)
-    
-    
-    
+
+
+    observeEvent(dataIn(),
+      ignoreNULL = TRUE,
+      ignoreInit = FALSE,
+      {
+        req(dataIn())
+        stopifnot(inherits(dataIn(), "QFeatures"))
+        rv$dataIn <- dataIn()
+      },
+      priority = 1000
+    )
+
+
+
     output$mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("mvplots"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
-    
+
+
     observe({
       req(rv$dataIn)
-      
+
       mod_mv_plots_server("mvplots",
-        data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        grp = reactive({get_group(rv$dataIn)}),
-        mytitle = reactive({"POV imputation"}),
-        pal = reactive({NULL}),
-        pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
+        data = reactive({
+          rv$dataIn[[length(rv$dataIn)]]
+        }),
+        grp = reactive({
+          get_group(rv$dataIn)
+        }),
+        mytitle = reactive({
+          "POV imputation"
+        }),
+        pal = reactive({
+          NULL
+        }),
+        pattern = reactive({
+          c("Missing", "Missing POV", "Missing MEC")
+        })
       )
     })
-    
-    
-    
+
+
+
     output$Imp_UI <- renderUI({
-      
       # Checks if
       .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
       nbEmptyLines <- getNumberOfEmptyLines(.data)
@@ -171,23 +193,23 @@ mod_Pept_Imputation_server <- function(id,
           uiOutput(ns("Imp_detQuant_UI")),
           uiOutput(ns("Imp_MLE_UI")),
           uiOutput(ns("Imp_showDetQuantValues_UI")),
-        # Insert validation button
-        uiOutput(ns("mod_Pept_Imputation_btn_validate_ui")),
-        htmlOutput("helpForImputation")
-    )
+          # Insert validation button
+          uiOutput(ns("mod_Pept_Imputation_btn_validate_ui")),
+          htmlOutput("helpForImputation")
+        )
       }
     })
-    
-    
+
+
     output$Imp_warning <- renderText({
       req(rv.widgets$Imp_algorithm != "None")
-       
+
       txtForBasics <- "<font color='red'>Please note that none of these
          'Basic methods' impute the MEC (Missing on the Entire Condition) and
          aggregation of peptides won't be possible if MEC data aren't imputed.
           <br>To do so, please choose the 'imp4p' algorithm as imputation
     method and check 'Impute MEC also' option.</font color='red'>"
-      
+
       t <- switch(rv.widgets$Imp_algorithm,
         imp4p = {
           if (isFALSE(rv.widgets$Imp_imp4p_withLapala)) {
@@ -206,13 +228,12 @@ mod_Pept_Imputation_server <- function(id,
         detQuantile = txtForBasics,
         MLE = txtForBasics
       )
-      
+
       HTML(t)
     })
-    
-    
+
+
     output$Imp_algorithm_UI <- renderUI({
-      
       widget <- selectInput(ns("Imp_algorithm"), "Method",
         choices = list(
           "None" = "None",
@@ -226,41 +247,48 @@ mod_Pept_Imputation_server <- function(id,
       )
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
-    
+
+
     output$showDetQuantValues <- renderUI({
       req(rv.widgets$Imp_algorithm == "detQuantile")
-      
-      mod_DetQuantImpValues_server(id = "DetQuantValues_DT",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        quant = reactive({rv.widgets$Imp_detQuant_quantile}),
-        factor = reactive({rv.widgets$Imp_detQuant_factor})
+
+      mod_DetQuantImpValues_server(
+        id = "DetQuantValues_DT",
+        dataIn = reactive({
+          rv$dataIn[[length(rv$dataIn)]]
+        }),
+        quant = reactive({
+          rv.widgets$Imp_detQuant_quantile
+        }),
+        factor = reactive({
+          rv.widgets$Imp_detQuant_factor
+        })
       )
-      
+
       tagList(
         h5("The missing values will be imputed by the following values :"),
         mod_DetQuantImpValues_ui(ns("DetQuantValues_DT"))
       )
     })
-    
-    
-    
+
+
+
     output$Imp_KNN_nbNeighbors_UI <- renderUI({
-      req(rv.widgets$Imp_algorithm == 'KNN')
-      
+      req(rv.widgets$Imp_algorithm == "KNN")
+
       widget <- numericInput(ns("Imp_KNN_nbNeighbors"), "Neighbors",
         value = rv.widgets$Imp_KNN_n, step = 1, min = 0,
         max = max(nrow(rv$dataIn), rv.widgets$Imp_KNN_n),
         width = "100px"
       )
-      
+
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
-    
+
+
     output$Imp_detQuant_UI <- renderUI({
-      req(rv.widgets$Imp_algorithm == 'detQuantile')
-      
+      req(rv.widgets$Imp_algorithm == "detQuantile")
+
       widget <- tagList(
         tags$div(
           numericInput(ns("detQuant_quantile"), "Quantile",
@@ -275,37 +303,39 @@ mod_Pept_Imputation_server <- function(id,
           )
         )
       )
-      
+
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
-    
+
+
     output$Imp_imp4p_UI <- renderUI({
-      req(rv.widgets$Imp_algorithm == 'imp4p')
-      
+      req(rv.widgets$Imp_algorithm == "imp4p")
+
       widget <- tagList(
-        
         tags$div(
           numericInput(ns("Imp_imp4p_nbiter"), "Iterations",
             value = rv.widgets$Imp_imp4p_nbiter,
-            step = 1, min = 1, width = "100px")
+            step = 1, min = 1, width = "100px"
+          )
         ),
         tags$div(
           checkboxInput(ns("Imp_imp4p_withLapala"), "Impute MEC also",
-            value = rv.widgets$Imp_imp4p_withLapala)
+            value = rv.widgets$Imp_imp4p_withLapala
+          )
         )
       )
-      
+
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
-    
+
+
     output$Imp_imp4pOpts2UI <- renderUI({
       req(rv.widgets$Imp_imp4p_withLapala)
       G_imp4PDistributionType_Choices <- c(
-        "uniform" = "unif", 
-        "beta" = "beta")
-      
+        "uniform" = "unif",
+        "beta" = "beta"
+      )
+
       widget <- tagList(
         tags$div(
           numericInput(ns("Imp_imp4p_qmin"), "Upper lapala bound",
@@ -323,32 +353,32 @@ mod_Pept_Imputation_server <- function(id,
         )
       )
     })
-    
+
     output$mod_Pept_Imputation_btn_validate_ui <- renderUI({
-      
       widget <- actionButton(ns("mod_Pept_Imputation_btn_validate"),
-        "Validate step", class = "btn-success")
-      
+        "Validate step",
+        class = "btn-success"
+      )
+
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     # >>> END: Definition of the widgets
-    
-    
+
+
     observeEvent(input$mod_Pept_Imputation_btn_validate, {
-      
       req(rv$dataIn)
       req(rv.widgets$Imp_algorithm != "None")
-      
+
       m <- match.metacell(
         qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       nbPOVBefore <- length(which(m))
-      #browser()
+      # browser()
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.25, detail = "Find MEC blocks")
-        
+
         .tmp <- NULL
         .param <- list()
 
@@ -386,7 +416,6 @@ mod_Pept_Imputation_server <- function(id,
                   lapala = rv.widgets$Imp_imp4p_withLapala
                 )
               }
-              
             },
             detQuantile = {
               incProgress(0.5, detail = "det quantile Imputation")
@@ -394,57 +423,60 @@ mod_Pept_Imputation_server <- function(id,
                 obj = rv$dataIn[[length(rv$dataIn)]],
                 qval = rv.widgets$Imp_detQuant_quantile / 100,
                 factor = rv.widgets$Imp_detQuant_factor,
-                na.type = 'Missing POV')
+                na.type = "Missing POV"
+              )
               .param <- list(
                 algorithm = rv.widgets$Imp_algorithm,
                 qval = rv.widgets$Imp_detQuant_quantile / 100,
                 factor = rv.widgets$Imp_detQuant_factor,
-                na.type = 'Missing POV')
+                na.type = "Missing POV"
+              )
             },
             KNN = {
               incProgress(0.5, detail = "KNN Imputation")
-              
+
               .tmp <- wrapper.impute.KNN(
                 obj = rv$dataIn[[length(rv$dataIn)]],
                 grp = design.qf(rv$dataIn)$Condition,
-                K = rv.widgets$Imp_KNN_n);
+                K = rv.widgets$Imp_KNN_n
+              )
               .param <- list(
                 algorithm = rv.widgets$Imp_algorithm,
                 K = rv.widgets$Imp_KNN_n
               )
-              
             },
             MLE = {
               incProgress(0.5, detail = "MLE Imputation")
-              
+
               .tmp <- wrapper.impute.mle(
                 obj = rv$dataIn[[length(rv$dataIn)]],
                 grp = design.qf(rv$dataIn)$Condition
-                )
+              )
               .param <- list(
                 algorithm = rv.widgets$Imp_algorithm
-                )
-              
+              )
             },
             None = {}
           )
         })
-        
-        if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
-          mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
+
+        if (inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
+          mod_SweetAlert_server(
+            id = "sweetalert_perform_POVimputation_button",
             text = .tmp,
-            type = 'error' )
+            type = "error"
+          )
         } else {
           # sendSweetAlert(
           #   session = session,
           #   title = "Success",
           #   type = "success"
           # )
-          #rv$dataIn[[length(rv$dataIn)]] <- .tmp
+          # rv$dataIn[[length(rv$dataIn)]] <- .tmp
           # incProgress(0.75, detail = 'Reintroduce MEC blocks')
           incProgress(1, detail = "Finalize imputation")
-          
-          
+
+
           m <- match.metacell(qMetacell(.tmp),
             pattern = "Missing POV",
             level = DaparToolshed::typeDataset(.tmp)
@@ -452,21 +484,23 @@ mod_Pept_Imputation_server <- function(id,
           nbPOVAfter <- length(which(m))
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
         }
-        
+
         rv$dataIn <- Prostar2::addDatasets(
           rv$dataIn,
           .tmp,
-          'Imputation')
-        
+          "Imputation"
+        )
+
         paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- .param
-        
+
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
       })
-      
     })
-    
-    return(reactive({dataOut}))
+
+    return(reactive({
+      dataOut
+    }))
   })
 }
 
@@ -475,21 +509,24 @@ mod_Pept_Imputation_server <- function(id,
 
 #' @export
 #' @rdname mod_Pept_Imputation
-#' 
-mod_Pept_Imputation <- function(dataIn, i){
-  ui <- mod_Pept_Imputation_ui('pov')
-  
-  server <- function(input, output, session){
-    
-    res <- mod_Pept_Imputation_server('pov',
-      dataIn = reactive({dataIn}),
-      i = reactive({i}))
-    
+#'
+mod_Pept_Imputation <- function(dataIn, i) {
+  ui <- mod_Pept_Imputation_ui("pov")
+
+  server <- function(input, output, session) {
+    res <- mod_Pept_Imputation_server("pov",
+      dataIn = reactive({
+        dataIn
+      }),
+      i = reactive({
+        i
+      })
+    )
+
     observeEvent(res()$trigger, {
       print(res()$value)
     })
   }
-  
+
   app <- shiny::shinyApp(ui, server)
-  
 }

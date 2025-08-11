@@ -11,7 +11,7 @@ export_dataset_ui(id)
 
 export_dataset_server(id, dataIn)
 
-export_dataset(data)
+export_dataset(dataIn)
 }
 \arguments{
 \item{id}{xxx}

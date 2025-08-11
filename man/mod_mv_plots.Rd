@@ -36,15 +36,21 @@ mod_mv_plots_server(
 mod_mv_plots(data, grp = NULL, title = NULL, pal = NULL, pattern = NULL)
 }
 \arguments{
+\item{id}{xxx}
+
 \item{data}{xxx}
+
+\item{grp}{}
+
+\item{mytitle}{xxx}
 
 \item{pal}{xxx}
 
 \item{pattern}{xxx}
 
-\item{title}{xxx}
+\item{is.enabled}{xxx}
 
-\item{...}{xxx}
+\item{remoteReset}{xxx}
 }
 \description{
 xxx
@@ -53,7 +59,7 @@ xxx
 \dontrun{
 library(DaparToolshed)
 library(highcharter)
-data(Exp1_R25_prot, package = 'DaparToolshedData')
+data(Exp1_R25_prot, package = "DaparToolshedData")
 pattern <- c("Missing POV")
 grp <- design.qf(Exp1_R25_prot)$Condition
 shiny::runApp(mod_mv_plots(obj[[4]], pattern = pattern, grp = grp))

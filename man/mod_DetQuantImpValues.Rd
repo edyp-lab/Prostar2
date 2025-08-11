@@ -32,9 +32,15 @@ mod_DetQuantImpValues(obj)
 \arguments{
 \item{id}{xxx}
 
+\item{dataIn}{xxx}
+
 \item{quant}{xxx}
 
 \item{factor}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{xxx}
 
 \item{obj}{xxx}
 }

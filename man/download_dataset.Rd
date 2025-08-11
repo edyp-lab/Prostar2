@@ -28,9 +28,11 @@ download_dataset_server(
  })
 )
 
-download_dataset(data, filename = "myDataset")
+download_dataset(dataIn, filename = "myDataset")
 }
 \arguments{
+\item{filename}{internal}
+
 \item{id}{internal}
 
 \item{dataIn}{internal}
@@ -40,8 +42,6 @@ download_dataset(data, filename = "myDataset")
 \item{widget.type}{Available values are \code{Button} and \code{Link} (default).}
 
 \item{excel.style}{xxx}
-
-\item{name}{internal}
 }
 \value{
 NA
@@ -51,7 +51,7 @@ A shiny Module.
 }
 \examples{
 \dontrun{
-data(Exp1_R25_prot, package = 'DaparToolshedData')
+data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(download_dataset(Exp1_R25_prot))
 }
 

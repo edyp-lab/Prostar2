@@ -4,10 +4,12 @@
 #' xxxx
 #'
 #' @name build-design
-#' 
+#'
 #' @param id xxx
 #' @param quantCols xxx
-#' 
+#' @param remoteReset xxx
+#' @param is.enabled xxx
+#'
 #' @return NA
 #'
 #' @examples
@@ -17,23 +19,26 @@
 #'
 NULL
 
-options(shiny.reactlog=TRUE) 
+options(shiny.reactlog = TRUE)
 
 #' @rdname build-design
 #' @import shiny
 #' @export
-#' 
+#'
 mod_buildDesign_ui <- function(id) {
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    tags$p("If you do not know how to fill the experimental design, you can
+    tags$p(
+      "If you do not know how to fill the experimental design, you can
             click on the '?' next to each design in the list that appear
             once the conditions are checked or got to the ",
       actionLink(ns("linkToFaq1"), "FAQ", style = "background-color: white"),
-      " page."),
+      " page."
+    ),
     fluidRow(
-      column(width = 6,
+      column(
+        width = 6,
         tags$b("1 - Fill the \"Condition\" column to identify
                 the conditions to compare.")
       ),
@@ -44,18 +49,21 @@ mod_buildDesign_ui <- function(id) {
       column(width = 6, uiOutput(ns("checkDesign")))
     ),
     hr(),
-    tags$div(style = "display:inline-block; vertical-align: top;",
-      uiOutput(ns('UI_reorder'))
-      ),
     tags$div(
-      tags$div(style = "display:inline-block; vertical-align: top;",
+      style = "display:inline-block; vertical-align: top;",
+      uiOutput(ns("UI_reorder"))
+    ),
+    tags$div(
+      tags$div(
+        style = "display:inline-block; vertical-align: top;",
         uiOutput(ns("viewDesign"), width = "100%")
       ),
-      tags$div(style = "display:inline-block; vertical-align: top;",
+      tags$div(
+        style = "display:inline-block; vertical-align: top;",
         shinyjs::hidden(div(id = "showExamples", uiOutput(ns("designExamples"))))
       )
     )
-    #shinyjs::disabled(actionButton(ns('validateDesign'), 'Validate design'))
+    # shinyjs::disabled(actionButton(ns('validateDesign'), 'Validate design'))
   )
 }
 
@@ -63,19 +71,22 @@ mod_buildDesign_ui <- function(id) {
 #' @rdname build-design
 #' @importFrom magrittr "%>%"
 #' @export
-mod_buildDesign_server <- function(id,
-  quantCols,
-  remoteReset = reactive({0}),
-  is.enabled = reactive({TRUE})
-  ) {
-  
-  #requireNamespace("shinyBS")
-  requireNamespace('magrittr')
-  
+mod_buildDesign_server <- function(
+    id,
+    quantCols,
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
+  # requireNamespace("shinyBS")
+  requireNamespace("magrittr")
+
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    
+
+
     rv <- reactiveValues(
       hot = data.frame(
         quantCols = as.character(quantCols),
@@ -85,90 +96,88 @@ mod_buildDesign_server <- function(id,
       conditionsChecked = NULL,
       newOrder = NULL
     )
-    
-    
+
+
     dataOut <- reactiveValues(
       design = NULL
     )
-    
+
     output$UI_reorder <- renderUI({
       widget <- selectInput(ns("convert_reorder"), "Order by conditions ?",
         choices = setNames(nm = c("No", "Yes")),
-        width = "100px")
-      
-      MagellanNTK::toggleWidget(widget, is.enabled() )
-      
-    })
-    
+        width = "100px"
+      )
 
-    
+      MagellanNTK::toggleWidget(widget, is.enabled())
+    })
+
+
+
     color_renderer <- reactive({
       rv$hot$Condition
       conds <- rv$hot$Condition
-      
+
       req(length(conds) > 0)
       if (length(which(conds == "")) == 0) {
         uniqueConds <- unique(conds)
       } else {
         uniqueConds <- unique(conds[-which(conds == "")])
       }
-      
+
       nUniqueConds <- length(uniqueConds)
       pal <- ExtendPalette(nUniqueConds)
-      
+
       txt <- "function (instance, td, row, col, prop, value, cellProperties) {
   Handsontable.renderers.TextRenderer.apply(this, arguments);"
       c <- 1
       for (i in 1:length(conds)) {
-        
-        
         if (conds[i] != "") {
-          txt <- paste0(txt, "if(row==", (i - 1), " && col==",
-                        c, ") {td.style.background = '",
-                        pal[which(conds[i] == uniqueConds)], "';}"
+          txt <- paste0(
+            txt, "if(row==", (i - 1), " && col==",
+            c, ") {td.style.background = '",
+            pal[which(conds[i] == uniqueConds)], "';}"
           )
         }
       }
       txt <- paste0(txt, "}")
-      
+
       return(txt)
     })
-    
-    
-    
+
+
+
     #----------------------------------------------------------
     observeEvent(input$btn_checkConds, {
       input$convert_reorder
-      
+
       # if (length(grep("Bio.Rep", colnames(rv$hot))) > 0) {
       #   return(NULL)
       # }
       req(!("Bio.Rep" %in% colnames(rv$hot)))
 
       if (input$convert_reorder == "Yes") {
-        rv$newOrder <- order(rv$hot[,"Condition"])
+        rv$newOrder <- order(rv$hot[, "Condition"])
         rv$hot <- rv$hot[rv$newOrder, ]
-        
       }
-      
+
       rv$conditionsChecked <- check.conditions(rv$hot$Condition)
     })
-    
-    
-    
-    
-    
+
+
+
+
+
     observeEvent(req(input$linkToFaq1), {
       updateTabsetPanel(session, "navPage", "faqTab")
     })
-    
-    
-    
+
+
+
     #-------------------------------------------------------------
     output$hot <- rhandsontable::renderRHandsontable({
       rv$hot
       input$chooseExpDesign
-      
+
       # if (is.null(rv$hot)) {
       #   rv$hot <- data.frame(
       #     Sample.name = as.character(input$choose_quantitative_columns),
@@ -176,7 +185,7 @@ mod_buildDesign_server <- function(id,
       #     stringsAsFactors = FALSE
       #   )
       # }
-      
+
       hot <- rhandsontable::rhandsontable(
         rv$hot,
         rowHeaders = NULL,
@@ -198,56 +207,61 @@ mod_buildDesign_server <- function(id,
         ) %>%
         rhandsontable::hot_cols(renderer = color_renderer()) %>%
         rhandsontable::hot_col(col = "quantCols", readOnly = TRUE)
-      
+
       if (!is.null(input$chooseExpDesign)) {
         switch(input$chooseExpDesign,
-               FlatDesign = {
-                 if ("Bio.Rep" %in% colnames(rv$hot)) {
-                   hot <- hot %>%
-                     rhandsontable::hot_col(
-                       col = "Bio.Rep",
-                       readOnly = TRUE
-                     )
-                 }
-               },
-               twoLevelsDesign = {
-                 if ("Tech.Rep" %in% colnames(rv$hot)) {
-                   hot <- hot %>%
-                     rhandsontable::hot_col(
-                       col = "Tech.Rep",
-                       readOnly = TRUE
-                     )
-                 }
-               },
-               threeLevelsDesign = {
-                 if ("Analyt.Rep" %in% colnames(rv$hot)) {
-                   hot <- hot %>%
-                     rhandsontable::hot_col(col = "Analyt.Rep", readOnly = TRUE)
-                 }
-               }
+          FlatDesign = {
+            if ("Bio.Rep" %in% colnames(rv$hot)) {
+              hot <- hot %>%
+                rhandsontable::hot_col(
+                  col = "Bio.Rep",
+                  readOnly = TRUE
+                )
+            }
+          },
+          twoLevelsDesign = {
+            if ("Tech.Rep" %in% colnames(rv$hot)) {
+              hot <- hot %>%
+                rhandsontable::hot_col(
+                  col = "Tech.Rep",
+                  readOnly = TRUE
+                )
+            }
+          },
+          threeLevelsDesign = {
+            if ("Analyt.Rep" %in% colnames(rv$hot)) {
+              hot <- hot %>%
+                rhandsontable::hot_col(col = "Analyt.Rep", readOnly = TRUE)
+            }
+          }
         )
       }
       hot
     })
-    
-    
-    
+
+
+
     #--------------------------------------------------------------------------
-    observeEvent(input$hot, {rv$hot <- rhandsontable::hot_to_r(input$hot)})
-    
+    observeEvent(input$hot, {
+      rv$hot <- rhandsontable::hot_to_r(input$hot)
+    })
+
     #----------------------------------------------------------
     output$UI_checkConditions <- renderUI({
       req(rv$hot)
       rv$conditionsChecked
       input$convert_reorder
-      
+
       if ((sum(rv$hot$Condition == "") == 0) && (input$convert_reorder != "None")) {
         tags$div(
-          tags$div(style = "display:inline-block;",
-            actionButton(ns("btn_checkConds"), "Check conditions", 
-              class = "btn btn-primary")
+          tags$div(
+            style = "display:inline-block;",
+            actionButton(ns("btn_checkConds"), "Check conditions",
+              class = "btn btn-primary"
+            )
           ),
-          tags$div(style = "display:inline-block;",
+          tags$div(
+            style = "display:inline-block;",
             if (!is.null(rv$conditionsChecked)) {
               if (isTRUE(rv$conditionsChecked$valid)) {
                 txt <- "<img src=\"images/Ok.png\" height=\"24\"></img>Correct conditions."
@@ -256,9 +270,9 @@ mod_buildDesign_server <- function(id,
               }
               tagList(
                 tags$div(style = "display:inline-block;", HTML(txt)),
-                if (!isTRUE(rv$conditionsChecked$valid))
+                if (!isTRUE(rv$conditionsChecked$valid)) {
                   tags$p(rv$conditionsChecked$warn)
-
+                }
               )
             }
           )
@@ -269,134 +283,136 @@ mod_buildDesign_server <- function(id,
         )
       }
     })
-    
-    
-    
+
+
+
     #--------------------------------------------------------------------------
     output$UI_hierarchicalExp <- renderUI({
       req(rv$conditionsChecked)
       req(rv$conditionsChecked$valid)
-      
-      tagList(
-          div(
-            div(style = "display:inline-block; vertical-align: middle;",
-              tags$b("2 - Choose the type of experimental design and complete it accordingly")
-            ),
-            div(style = "display:inline-block; vertical-align: middle;",
-              tags$button(id = "btn_helpDesign", tags$sup("[?]"),
-                class = "Prostar_tooltip"
-              )
-            )
-          ),
-          radioButtons(ns("chooseExpDesign"), "",
-                       choices = c(
-                         "Flat design (automatic)" = "FlatDesign",
-                         "2 levels design (complete Bio.Rep column)" = "twoLevelsDesign",
-                         "3 levels design (complete Bio.Rep and Tech.Rep columns)" = "threeLevelsDesign"
-                       ),
-                       selected = character(0)
-          )
-        )
 
+      tagList(
+        div(
+          div(
+            style = "display:inline-block; vertical-align: middle;",
+            tags$b("2 - Choose the type of experimental design and complete it accordingly")
+          ),
+          div(
+            style = "display:inline-block; vertical-align: middle;",
+            tags$button(
+              id = "btn_helpDesign", tags$sup("[?]"),
+              class = "Prostar_tooltip"
+            )
+          )
+        ),
+        radioButtons(ns("chooseExpDesign"), "",
+          choices = c(
+            "Flat design (automatic)" = "FlatDesign",
+            "2 levels design (complete Bio.Rep column)" = "twoLevelsDesign",
+            "3 levels design (complete Bio.Rep and Tech.Rep columns)" = "threeLevelsDesign"
+          ),
+          selected = character(0)
+        )
+      )
     })
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     #------------------------------------------------------------------------------
     output$viewDesign <- renderUI({
-      #req(!(rv$designSaved))
-      
+      # req(!(rv$designSaved))
+
       tagList(
         h4("Design"),
         rhandsontable::rHandsontableOutput(ns("hot"))
       )
     })
-    
+
     #------------------------------------------------------------------------------
     output$designExamples <- renderUI({
       req(input$chooseExpDesign)
-      
+
       switch(input$chooseExpDesign,
-             FlatDesign = {
-               tags$p("There is nothing to do for the flat design: the 'Bio.Rep'
+        FlatDesign = {
+          tags$p("There is nothing to do for the flat design: the 'Bio.Rep'
            column is already filled.")
-             },
-             twoLevelsDesign = {
-               tagList(
-                 h4("Example for a 2-levels design"),
-                 Prostar2::mod_designExample_server("buildDesignExampleTwo", 2),
-                 Prostar2::mod_designExample_ui(ns("buildDesignExampleTwo"))
-               )
-             },
-             threeLevelsDesign = {
-               tagList(
-                 h4("Example for a 3-levels design"),
-                 Prostar2::mod_designExample_server("buildDesignExampleThree", 3),
-                 Prostar2::mod_designExample_ui(ns("buildDesignExampleThree"))
-               )
-             }
+        },
+        twoLevelsDesign = {
+          tagList(
+            h4("Example for a 2-levels design"),
+            Prostar2::mod_designExample_server("buildDesignExampleTwo", 2),
+            Prostar2::mod_designExample_ui(ns("buildDesignExampleTwo"))
+          )
+        },
+        threeLevelsDesign = {
+          tagList(
+            h4("Example for a 3-levels design"),
+            Prostar2::mod_designExample_server("buildDesignExampleThree", 3),
+            Prostar2::mod_designExample_ui(ns("buildDesignExampleThree"))
+          )
+        }
       )
     })
-    
-    
+
+
     #------------------------------------------------------------------------------
     observe({
       shinyjs::onclick("btn_helpDesign", {
         shinyjs::toggle(id = "showExamples", anim = TRUE)
       })
     })
-    
+
     #------------------------------------------------------------------------------
     observeEvent(input$chooseExpDesign, {
       rv$hot
       rv$designChecked <- NULL
       switch(input$chooseExpDesign,
-             FlatDesign = {
-               rv$hot <- data.frame(rv$hot[, 1:2],
-                                    Bio.Rep = seq(1:nrow(rv$hot)),
-                                    stringsAsFactors = FALSE
-               )
-             },
-             twoLevelsDesign = {
-               rv$hot <- data.frame(rv$hot[, 1:2],
-                                    Bio.Rep = rep("", nrow(rv$hot)),
-                                    Tech.Rep = seq(1:nrow(rv$hot)),
-                                    stringsAsFactors = FALSE
-               )
-             },
-             threeLevelsDesign = {
-               rv$hot <- data.frame(rv$hot[, 1:2],
-                                    Bio.Rep = rep("", nrow(rv$hot)),
-                                    Tech.Rep = rep("", nrow(rv$hot)),
-                                    Analyt.Rep = seq(1:nrow(rv$hot)),
-                                    stringsAsFactors = FALSE
-               )
-             }
+        FlatDesign = {
+          rv$hot <- data.frame(rv$hot[, 1:2],
+            Bio.Rep = seq(1:nrow(rv$hot)),
+            stringsAsFactors = FALSE
+          )
+        },
+        twoLevelsDesign = {
+          rv$hot <- data.frame(rv$hot[, 1:2],
+            Bio.Rep = rep("", nrow(rv$hot)),
+            Tech.Rep = seq(1:nrow(rv$hot)),
+            stringsAsFactors = FALSE
+          )
+        },
+        threeLevelsDesign = {
+          rv$hot <- data.frame(rv$hot[, 1:2],
+            Bio.Rep = rep("", nrow(rv$hot)),
+            Tech.Rep = rep("", nrow(rv$hot)),
+            Analyt.Rep = seq(1:nrow(rv$hot)),
+            stringsAsFactors = FALSE
+          )
+        }
       )
     })
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
     #--------------------------------------------------------------------------
     observeEvent(input$btn_checkDesign, {
       rv$designChecked <- check.design(rv$hot)
     })
-    
+
     #--------------------------------------------------------------------------
     output$checkDesign <- renderUI({
       req(input$chooseExpDesign)
       rv$designChecked
       req(rv$conditionsChecked)
-      
+
       req(rv$conditionsChecked$valid)
-      
+
       switch(isolate({
         input$chooseExpDesign
       }),
@@ -412,12 +428,14 @@ mod_buildDesign_server <- function(id,
         }
       }
       )
-      
-      
+
+
       tags$div(
-        tags$div(style = "display:inline-block;",
-          actionButton(ns("btn_checkDesign"), "Check design", 
-            class = "btn btn-primary")
+        tags$div(
+          style = "display:inline-block;",
+          actionButton(ns("btn_checkDesign"), "Check design",
+            class = "btn btn-primary"
+          )
         ),
         tags$div(
           style = "display:inline-block;",
@@ -430,14 +448,16 @@ mod_buildDesign_server <- function(id,
               img <- "images/Problem.png"
               txt <- "Invalid design"
             }
-            
-            
+
+
             tagList(
               tags$div(
-                tags$div(style = "display:inline-block;",
+                tags$div(
+                  style = "display:inline-block;",
                   tags$img(src = img, height = 25)
                 ),
-                tags$div(style = "display:inline-block;",
+                tags$div(
+                  style = "display:inline-block;",
                   tags$p(txt)
                 )
               ),
@@ -462,29 +482,31 @@ mod_buildDesign_server <- function(id,
         )
       )
     })
-    
-    
-    
-    
+
+
+
+
     observeEvent(rv$designChecked$valid, {
       dataOut$trigger <- MagellanNTK::Timestamp()
-      if (isTRUE(rv$designChecked$valid))
+      if (isTRUE(rv$designChecked$valid)) {
         dataOut$design <- rv$hot
-      else
+      } else {
         dataOut$design <- NULL
-      
-      if (input$convert_reorder == "Yes")
-        dataOut$order <- rv$newOrder
-      else
-        dataOut$order <- order(rownames(rv$hot))
-      
+      }
 
+      if (input$convert_reorder == "Yes") {
+        dataOut$order <- rv$newOrder
+      } else {
+        dataOut$order <- order(rownames(rv$hot))
+      }
     })
-    
-    
-    reactive({dataOut})
+
+
+    reactive({
+      dataOut
+    })
   })
-} # end of 
+} # end of
 
 
 
@@ -499,25 +521,13 @@ mod_buildDesign_server <- function(id,
 #' @rdname build-design
 #' @export
 mod_buildDesign <- function(quantCols) {
-  
   ui <- fluidPage(
-    mod_buildDesign_ui('buildDesign')
+    mod_buildDesign_ui("buildDesign")
   )
-  
+
   server <- function(input, output, session) {
-    mod_buildDesign_server('buildDesign', quantCols)
+    mod_buildDesign_server("buildDesign", quantCols)
   }
-  
+
   app <- shinyApp(ui, server)
 }
-
-
-
-
-
-
-
-
-
-
-

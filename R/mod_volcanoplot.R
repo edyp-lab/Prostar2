@@ -1,5 +1,3 @@
-
-
 #' @title   popover_for_help_ui and popover_for_help_server
 #' @description  A shiny Module.
 #'
@@ -11,15 +9,15 @@
 #' @param tooltip xxx
 #' @param remoteReset xxx
 #' @param is.enabled xxx
-#' 
-#' 
+#'
+#'
 #' @name volcanoplot
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' library(highcharter)
 #' library(DaparToolshed)
-#' data(Exp1_R25_prot, package="DaparToolshedData")
+#' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- DaparToolshed::NAIsZero(obj, 1)
@@ -27,30 +25,33 @@
 #' qData <- as.matrix(assay(obj[[2]]))
 #' sTab <- MultiAssayExperiment::colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
-#' 
+#'
 #' df <- data.frame(
-#'     x = limma$logFC[['25fmol_vs_10fmol_logFC']], 
-#'     y = -log10(limma$P_Value[['25fmol_vs_10fmol_pval']]),
-#'     index = as.character(rownames(obj[[2]])))
+#'   x = limma$logFC[["25fmol_vs_10fmol_logFC"]],
+#'   y = -log10(limma$P_Value[["25fmol_vs_10fmol_pval"]]),
+#'   index = as.character(rownames(obj[[2]]))
+#' )
 #' colnames(df) <- c("x", "y", "index")
 #' tooltipSlot <- c("Fasta_headers", "Sequence_length")
 #' df <- cbind(df, Biobase::fData(obj)[, tooltipSlot])
 #' colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
 #' if (ncol(df) > 3) {
-#'     colnames(df)[seq.int(from = 4, to = ncol(df))] <-
-#'         paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
-#'          sep = "")
+#'   colnames(df)[seq.int(from = 4, to = ncol(df))] <-
+#'     paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
+#'       sep = ""
+#'     )
 #' }
 #' hc_clickFunction <- JS("function(event) {
 #' Shiny.onInputChange('eventPointClicked',
 #' [this.index]+'_'+ [this.series.name]);}")
 #' cond <- c("25fmol", "10fmol")
 #' diffAnaVolcanoplot_rCharts(
-#' df, 
-#' th_pval = 2.5, 
-#' th_logfc = 1, 
-#' conditions = cond, 
-#' clickFunction = hc_clickFunction)
+#'   df,
+#'   th_pval = 2.5,
+#'   th_logfc = 1,
+#'   conditions = cond,
+#'   clickFunction = hc_clickFunction
+#' )
 #' shiny::runApp(volcanoplot(xxxx))
 #' }
 #'
@@ -68,9 +69,10 @@ NULL
 mod_volcanoplot_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    highcharter::highchartOutput(ns("volcanoPlot_UI"), 
-      width = "600px", height = "600px")
-    #uiOutput(ns("quantiDT"))
+    highcharter::highchartOutput(ns("volcanoPlot_UI"),
+      width = "600px", height = "600px"
+    )
+    # uiOutput(ns("quantiDT"))
   )
 }
 
@@ -81,16 +83,30 @@ mod_volcanoplot_ui <- function(id) {
 #'
 mod_volcanoplot_server <- function(
     id,
-    dataIn = reactive({NULL}),
-    comparison = reactive({NULL}),
-    group = reactive({NULL}),
-    thlogfc = reactive({0}),
-    thpval = reactive({0}),
-    tooltip = reactive({NULL}),
-    remoteReset = reactive({0}),
-    is.enabled = reactive({TRUE})
-    ) {
-  
+    dataIn = reactive({
+      NULL
+    }),
+    comparison = reactive({
+      NULL
+    }),
+    group = reactive({
+      NULL
+    }),
+    thlogfc = reactive({
+      0
+    }),
+    thpval = reactive({
+      0
+    }),
+    tooltip = reactive({
+      NULL
+    }),
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -98,18 +114,18 @@ mod_volcanoplot_server <- function(
     widget2 = NULL,
     widget3 = NULL
   )
-  
-  
+
+
   rv.custom.default.values <- list(
     colorsVolcanoplot = NULL,
     data = NULL,
     conditions = NULL
   )
-  
-  
+
+
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     # DO NOT MODIFY THIS FUNCTION CALL
     eval(
       str2expression(
@@ -119,17 +135,17 @@ mod_volcanoplot_server <- function(
         )
       )
     )
-    
+
 
     observeEvent(dataIn(), {
       rv$dataIn <- dataIn()
       rv.custom$data <- HypothesisTest(dataIn())
     })
-    
-    
+
+
     # output$quantiDT <- renderUI({
     #   req(input$eventPointClicked)
-    #   
+    #
     #   if (omXplore::get_type(rv$dataIn) == "protein") {
     #     if (is.null(omXplore::get_adjacencyMatrix(rv$dataIn))) {
     #       shinyBS::bsCollapse(id = ns("collapseVolcanoInfos"),
@@ -176,28 +192,30 @@ mod_volcanoplot_server <- function(
     #     )
     #   }
     # })
-    
-    
-    
+
+
+
     GetSortingIndices <- reactive({
       req(comparison())
-      
+
       condition1 <- comparison()[1]
       condition2 <- comparison()[2]
       .ind <- which(group() == comparison()[1])
-      
+
       if (length(grep("all", comparison()[2])) == 0) {
         ind <- c(
           which(group() == comparison()[1]),
           which(group() == comparison()[2])
         )
       } else {
-        ind <- c(which(group() == comparison()[1]),
-          c(seq(length(group())))[-.ind])
+        ind <- c(
+          which(group() == comparison()[1]),
+          c(seq(length(group())))[-.ind]
+        )
       }
       ind
     })
-    
+
     GetBorderIndices <- reactive({
       conds <- group()[GetSortingIndices()]
       ## build index for border-formatting
@@ -209,37 +227,37 @@ mod_volcanoplot_server <- function(
       ))
       borders_index
     })
-    
-    
-    
+
+
+
     output$Warning_sharedPeptidesInfos <- renderUI({
       GetDataFor_sharedPeptidesInfos()
       if (nrow(GetDataFor_sharedPeptidesInfos()) > 153) {
         p(MSG_WARNING_SIZE_DT)
       }
     })
-    
-    
-    
-    
+
+
+
+
     GetDataFor_sharedPeptidesInfos <- reactive({
       req(comparison())
       req(rv$dataIn)
       ind <- GetSortingIndices()
       borders_index <- GetBorderIndices()
-      
-      #.ind <- last(grep(pattern = "peptide", names(rv$dataIn)))
-      #prev.dataset <- rv$dataIn[[names(rv$dataIn)[.ind]]]
-      
+
+      # .ind <- last(grep(pattern = "peptide", names(rv$dataIn)))
+      # prev.dataset <- rv$dataIn[[names(rv$dataIn)[.ind]]]
+
       prot <- GetExprsClickedProtein()
       prot.indice <- rownames(prot)
-      
+
       data <- getDataForExprs(rv$dataIn, 3)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
-      
+
       Xspec <- ExtractUniquePeptides(DaparToolshed::adjacencyMatrix(rv$dataIn))
       Xshared <- DaparToolshed::adjacencyMatrix(rv$dataIn)
-      
+
       i <- which(colnames(Xspec) == prot.indice)
       specificPeptidesIndices <- which(Xspec[, i] == 1)
       allPeptidesIndices <- which(Xshared[, i] == 1)
@@ -247,13 +265,13 @@ mod_volcanoplot_server <- function(
       data <- data[peptidesIndices, ]
       data
     })
-    
+
     output$sharedPeptidesInfos <- DT::renderDataTable(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_sharedPeptidesInfos()
       c.tags <- BuildColorStyles(rv$dataIn)$tags
       c.colors <- BuildColorStyles(rv$dataIn)$colors
-      
+
       dt <- DT::datatable(
         data,
         extensions = c("Scroller"),
@@ -278,46 +296,46 @@ mod_volcanoplot_server <- function(
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) %>%
         DT::formatStyle(GetBorderIndices(), borderLeft = "3px solid #000000")
-      
+
       dt
     })
-    
+
     output$Warning_specificPeptidesInfos <- renderUI({
       GetDataFor_specificPeptidesInfos()
       if (nrow(GetDataFor_specificPeptidesInfos()) > 153) {
         p(MSG_WARNING_SIZE_DT)
       }
     })
-    
+
     GetDataFor_specificPeptidesInfos <- reactive({
       req(rv$dataIn)
       ind <- GetSortingIndices()
       borders_index <- GetBorderIndices()
-      #.ind <- last(grep(pattern = "peptide", names(rv$dataIn)))
-      #prev.dataset <- rv$dataIn[[names(rv$dataIn)[.ind]]]
-      
+      # .ind <- last(grep(pattern = "peptide", names(rv$dataIn)))
+      # prev.dataset <- rv$dataIn[[names(rv$dataIn)[.ind]]]
+
       prot <- GetExprsClickedProtein()
       prot.indice <- rownames(prot)
-      
+
       data <- getDataForExprs(rv$dataIn, 3)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
-      
-      
+
+
       Xspec <- ExtractUniquePeptides(DaparToolshed::adjacencyMatrix(rv$dataIn))
-      
+
       i <- which(colnames(Xspec) == prot.indice)
       peptidesIndices <- which(Xspec[, i] == 1)
       data <- data[peptidesIndices, ]
       data
     })
-    
-    
+
+
     output$specificPeptidesInfos <- DT::renderDataTable(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_specificPeptidesInfos()
       c.tags <- BuildColorStyles(rv$dataIn)$tags
       c.colors <- BuildColorStyles(rv$dataIn)$colors
-      
+
       dt <- DT::datatable(
         data,
         extensions = c("Scroller"),
@@ -343,56 +361,56 @@ mod_volcanoplot_server <- function(
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) %>%
         DT::formatStyle(GetBorderIndices(), borderLeft = "3px solid #000000")
-      
+
       dt
     })
-    
-    
+
+
     ## ---------------------------------------------------------
     GetExprsClickedProtein <- reactive({
       req(rv$dataIn)
       req(input$eventPointClicked)
-      
-      
+
+
       ind <- GetSortingIndices()
       # browser()
       this.index <- as.integer(strsplit(input$eventPointClicked, "_")[[1]][1])
       this.series.name <- strsplit(input$eventPointClicked, "_")[[1]][2]
-      
+
       .digits <- 3
       data <- getDataForExprs(rv$dataIn, .digits)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
-      
+
       index.g1 <- which((-log10(rv.custom$data$P_Value) >= thpval()
       ) & (abs(rv.custom$data$logFC) >= as.numeric(thlogfc())))
-      
+
       data.g1 <- data[index.g1, ]
       data.g2 <- data[-index.g1, ]
-      
+
       switch(this.series.name,
         g1 = data <- data.g1[this.index + 1, ],
         g2 = data <- data.g2[this.index + 1, ]
       )
       data
     })
-    
-    
-    
+
+
+
     output$Warning_Infos <- renderUI({
       GetDataFor_Infos()
       if (nrow(GetDataFor_Infos()) > 153) {
         p(MSG_WARNING_SIZE_DT)
       }
     })
-    
-    
-    
-    
+
+
+
+
     GetDataFor_Infos <- reactive({
       data <- GetExprsClickedProtein()
       data
     })
-    
+
     ## -------------------------------------------------------------
     output$Infos <- DT::renderDataTable(server = TRUE, {
       req(rv$dataIn)
@@ -400,7 +418,7 @@ mod_volcanoplot_server <- function(
       data <- GetExprsClickedProtein()
       c.tags <- BuildColorStyles(rv$dataIn)$tags
       c.colors <- BuildColorStyles(rv$dataIn)$colors
-      
+
       dt <- DT::datatable(
         data,
         extensions = c("Scroller"),
@@ -427,53 +445,55 @@ mod_volcanoplot_server <- function(
         DT::formatStyle(borders_index, borderLeft = "3px solid #000000")
       dt
     })
-    
+
     ## ---------------------------------------------------------------------
     output$volcanoPlot_UI <- highcharter::renderHighchart({
       req(rv$dataIn)
       req(comparison())
 
-          withProgress(message = "Building plot...", detail = "", value = 0, {
-          ht <- HypothesisTest(rv$dataIn)
-          prefix <- paste0(comparison()[1], '_vs_', comparison()[2])
+      withProgress(message = "Building plot...", detail = "", value = 0, {
+        ht <- HypothesisTest(rv$dataIn)
+        prefix <- paste0(comparison()[1], "_vs_", comparison()[2])
 
-          df <- data.frame(
-            x = ht[, paste0(prefix, '_logFC')],
-            y = -log10(ht[, paste0(prefix, '_pval')]),
-            index = seq(nrow(ht))
-          )
-          
-          if (length(tooltip()) > 0 && sum(is.na(tooltip())) == 0) {
-            df <- cbind(df, 
-              SummarizedExperiment::rowData(rv$dataIn)[tooltip()])
-          }
-          
-          colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
-          if (ncol(df) > 3) {
-            .range <- seq.int(from = 4, to = ncol(df), by = 1)
-            colnames(df)[.range] <-
-              paste("tooltip_", colnames(df)[.range], sep = "")
-          }
-          
-          
-          clickFun <-
-            shinyjqui::JS(paste0(
-              "function(event) {Shiny.onInputChange('",
-              ns("eventPointClicked"),
-              "', [this.index]+'_'+ [this.series.name]);}"
-            ))
+        df <- data.frame(
+          x = ht[, paste0(prefix, "_logFC")],
+          y = -log10(ht[, paste0(prefix, "_pval")]),
+          index = seq(nrow(ht))
+        )
 
-          diffAnaVolcanoplot_rCharts(
+        if (length(tooltip()) > 0 && sum(is.na(tooltip())) == 0) {
+          df <- cbind(
             df,
-            th_logfc = as.numeric(thlogfc()),
-            th_pval = as.numeric(thpval()),
-            conditions = comparison(),
-            clickFunction = clickFun,
-            pal = rv.custom$colorsVolcanoplot
+            SummarizedExperiment::rowData(rv$dataIn)[tooltip()]
           )
-          })
-        #MagellanNTK::toggleWidget(widget, is.enabled())
+        }
+
+        colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
+        if (ncol(df) > 3) {
+          .range <- seq.int(from = 4, to = ncol(df), by = 1)
+          colnames(df)[.range] <-
+            paste("tooltip_", colnames(df)[.range], sep = "")
+        }
+
+
+        clickFun <-
+          shinyjqui::JS(paste0(
+            "function(event) {Shiny.onInputChange('",
+            ns("eventPointClicked"),
+            "', [this.index]+'_'+ [this.series.name]);}"
+          ))
+
+        diffAnaVolcanoplot_rCharts(
+          df,
+          th_logfc = as.numeric(thlogfc()),
+          th_pval = as.numeric(thpval()),
+          conditions = comparison(),
+          clickFunction = clickFun,
+          pal = rv.custom$colorsVolcanoplot
+        )
       })
+      # MagellanNTK::toggleWidget(widget, is.enabled())
+    })
   })
 }
 
@@ -481,30 +501,41 @@ mod_volcanoplot_server <- function(
 
 #' @export
 #' @rdname volcanoplot
-#' 
+#'
 volcanoplot <- function(
-    dataIn, 
+    dataIn,
     comparison,
-  group, 
-    thlogfc, 
+    group,
+    thlogfc,
     thpval,
-  tooltip = NULL){
-  
+    tooltip = NULL) {
   ui <- fluidPage(
-  mod_volcanoplot_ui("volcano"))
-  
+    mod_volcanoplot_ui("volcano")
+  )
+
   server <- function(input, output) {
     mod_volcanoplot_server(
       id = "volcano",
-      dataIn = reactive({dataIn}),
-      comparison = reactive({comparison}),
-      group = reactive({group}),
-      thlogfc = reactive({thlogfc}),
-      thpval = reactive({thpval}),
-      tooltip = reactive({tooltip})
-     # fdr = reactive({3.8})
-      )
-
+      dataIn = reactive({
+        dataIn
+      }),
+      comparison = reactive({
+        comparison
+      }),
+      group = reactive({
+        group
+      }),
+      thlogfc = reactive({
+        thlogfc
+      }),
+      thpval = reactive({
+        thpval
+      }),
+      tooltip = reactive({
+        tooltip
+      })
+      # fdr = reactive({3.8})
+    )
   }
 
   app <- shiny::shinyApp(ui, server)

@@ -4,39 +4,42 @@
 #' xxxx
 #'
 #' @name filtering-example
-#' 
+#'
 #' @param id xxx
 #' @param obj An instance of the class `SummarizedExperiment`
 #' @param indices xxx
 #' @param operation A character(1) that indicates whether to keep or remove
-#' lines identified by indices. Available values are 'keep' (default) 
+#' lines identified by indices. Available values are 'keep' (default)
 #' or 'delete'
 #' @param title xxx
-#' 
+#' @param dataIn xxx
+#' @param remoteReset xxx
+#' @param is.enabled xxx
+#'
 #' @return NA
 #'
 #' @examples
 #' \dontrun{
-#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot[[1]]
 #' indices <- 1:5
 #' operation <- "delete"
 #' shiny::runApp(mod_filtering_example(obj, indices, operation))
 #' }
-#' 
+#'
 NULL
 
 
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
-#' @importFrom shiny NS actionLink tagList radioButtons uiOutput 
+#' @importFrom shiny NS actionLink tagList radioButtons uiOutput
 #' @importFrom DT dataTableOutput
 #' @import shiny
 #' @export
-#' 
+#'
 mod_filtering_example_ui <- function(id) {
   ns <- NS(id)
-  
+
   tagList(
     actionLink(ns("show_filtering_example"), "Preview filtering"),
     shinyBS::bsModal(ns("example_modal"),
@@ -54,8 +57,7 @@ mod_filtering_example_ui <- function(id) {
       ),
       tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
       tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
-      tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}"))
-      )
+      tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
     )
   )
 }
@@ -65,42 +67,47 @@ mod_filtering_example_ui <- function(id) {
 
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
-#' @importFrom shiny NS renderUI moduleServer 
+#' @importFrom shiny NS renderUI moduleServer
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
 #' @import shiny
 #' @importFrom magrittr "%>%"
 #' @export
-#' 
-mod_filtering_example_server <- function(id, 
-  dataIn = reactive({NULL}), 
-  indices = NULL, 
-  operation = 'keep', 
-  title = 'myTitle',
-  remoteReset = reactive({0}),
-  is.enabled = reactive({TRUE})
-  ) {
+#'
+mod_filtering_example_server <- function(
+    id,
+    dataIn = reactive({
+      NULL
+    }),
+    indices = NULL,
+    operation = "keep",
+    title = "myTitle",
+    remoteReset = reactive({
+      0
+    }),
+    is.enabled = reactive({
+      TRUE
+    })) {
   moduleServer(id, function(input, output, session) {
-    
     ns <- session$ns
-    
+
     output$show_title <- renderUI({
       h3(title())
     })
-    
-    
+
+
     # ###############
     # # options modal
     # jqui_draggable(paste0("#","example_modal"," .modal-content"),
     #                options = list(revert=FALSE)
     # )
     # ###############
-    
+
     # colorsTypeMV = list(MEC = 'orange',
     #                     POV = 'lightblue',
     #                     identified = 'white',
     #                     recovered = 'lightgrey',
     #                     combined = 'red')
-    
+
     legendTypeMV <- list(
       MEC = "Missing in Entire Condition (MEC)",
       POV = "Partially Observed Value (POV)",
@@ -108,8 +115,8 @@ mod_filtering_example_server <- function(id,
       recovered = "Quant. by recovery",
       combined = "Combined tags"
     )
-    
-    
+
+
     rgb2col <- function(rgbmat) {
       ProcessColumn <- function(col) {
         rgb(rgbmat[1, col],
@@ -120,23 +127,23 @@ mod_filtering_example_server <- function(id,
       }
       sapply(1:ncol(rgbmat), ProcessColumn)
     }
-    
-    
-    
+
+
+
     DarkenColors <- function(ColorsHex) {
       # Convert to rgb
       # This is the step where we get the matrix
       ColorsRGB <- col2rgb(ColorsHex)
-      
+
       # Darken colors by lowering values of RGB
       ColorsRGBDark <- round(ColorsRGB * 0.5)
-      
+
       # Convert back to hex
       ColorsHexDark <- rgb2col(ColorsRGBDark)
-      
+
       return(ColorsHexDark)
     }
-    
+
     output$example_tab_filtered <- DT::renderDataTable({
       df <- Build_enriched_qdata(dataIn())
       .colDef <- range.invisible <- NULL
@@ -144,35 +151,35 @@ mod_filtering_example_server <- function(id,
       index2darken <- NULL
       # Darken lines that will be filtered
       if (!is.null(indices()) &&
-          input$run_btn == "simulate filtered dataset") {
+        input$run_btn == "simulate filtered dataset") {
         if (operation() == "keep") {
           index2darken <- (1:nrow(dataIn()))[-indices()]
         } else if (operation() == "delete") {
           index2darken <- indices()
         }
-      }   
-      
-      
-      if (is.enriched){
+      }
+
+
+      if (is.enriched) {
         .style <- BuildColorStyles(DaparToolshed::typeDataset(dataIn()))
         c.tags <- names(.style)
         c.colors <- unlist(.style, use.names = FALSE)
-        
-        range.invisible <- (((ncol(df)-1) / 2) + 2):ncol(df)
-        
+
+        range.invisible <- (((ncol(df) - 1) / 2) + 2):ncol(df)
+
         for (i in index2darken) {
-            df[i, range.invisible] <- paste0("darken_", df[i, range.invisible])
-          }
+          df[i, range.invisible] <- paste0("darken_", df[i, range.invisible])
+        }
         c.tags <- c(c.tags, paste0("darken_", c.tags))
         c.colors <- c(c.colors, DarkenColors(c.colors))
-          
+
         .colDef <- list(
-            list(
-              targets = range.invisible,
-              visible = FALSE
-            )
+          list(
+            targets = range.invisible,
+            visible = FALSE
           )
-        }
+        )
+      }
 
       dt <- DT::datatable(df,
         extensions = c("Scroller"),
@@ -186,19 +193,19 @@ mod_filtering_example_server <- function(id,
           scrollX = 200,
           scrollY = 500,
           scroller = TRUE,
-          server = FALSE
-          ,columnDefs = .colDef
+          server = FALSE,
+          columnDefs = .colDef
         )
       )
 
 
-      if (is.enriched){
+      if (is.enriched) {
         dt <- dt %>%
-        DT::formatStyle(
-          colnames(df)[2:(((ncol(df)-1) / 2) + 1)],
-          colnames(df)[range.invisible],
-          backgroundColor = DT::styleEqual(c.tags, c.colors)
-        )
+          DT::formatStyle(
+            colnames(df)[2:(((ncol(df) - 1) / 2) + 1)],
+            colnames(df)[range.invisible],
+            backgroundColor = DT::styleEqual(c.tags, c.colors)
+          )
       }
 
       dt
@@ -212,51 +219,58 @@ mod_filtering_example_server <- function(id,
 
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
-#' @importFrom shiny fluidPage 
+#' @importFrom shiny fluidPage
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
 #' @import shiny
 #' @export
-#' 
+#'
 mod_filtering_example <- function(
     obj,
     indices = NULL,
-    operation = 'keep',
-    title = 'myTitle'){
-  
-ui <- fluidPage(
-  mod_filtering_example_ui('tree')
-)
+    operation = "keep",
+    title = "myTitle") {
+  ui <- fluidPage(
+    mod_filtering_example_ui("tree")
+  )
 
-server <- function(input, output) {
-  #utils::data('Exp1_R25_prot', package='DAPARdata')
-  #obj <- Exp1_R25_prot[1:20]
-  # filtering.query <- list(
-  #   MetacellTag = c('Missing POV', 'Missing MEC'),
-  #   MetacellFilters = "WholeMatrix",
-  #   KeepRemove = "delete",
-  #   metacell_value_th = 1,
-  #   metacell_percent_th = 0,
-  #   val_vs_percent = "Count",
-  #   metacellFilter_operator = ">="
-  # )
-  
-  
-  # indices <- GetIndices_FunFiltering(
-  #   obj = obj,
-  #   level = omXplore::get_type(obj),
-  #   pattern = filtering.query$MetacellTag,
-  #   type = filtering.query$MetacellFilters,
-  #   percent = filtering.query$val_vs_percent == "Percentage",
-  #   op = filtering.query$metacellFilter_operator,
-  #   th = filtering.query$metacell_value_th)
-  
-  mod_filtering_example_server('tree',
-    dataIn = reactive({obj}),
-    indices = reactive({indices}),
-    operation = reactive({operation}),
-    title = reactive({title}))
-}
+  server <- function(input, output) {
+    # utils::data('Exp1_R25_prot', package='DAPARdata')
+    # obj <- Exp1_R25_prot[1:20]
+    # filtering.query <- list(
+    #   MetacellTag = c('Missing POV', 'Missing MEC'),
+    #   MetacellFilters = "WholeMatrix",
+    #   KeepRemove = "delete",
+    #   metacell_value_th = 1,
+    #   metacell_percent_th = 0,
+    #   val_vs_percent = "Count",
+    #   metacellFilter_operator = ">="
+    # )
 
-app <- shiny::shinyApp(ui = ui, server = server)
 
+    # indices <- GetIndices_FunFiltering(
+    #   obj = obj,
+    #   level = omXplore::get_type(obj),
+    #   pattern = filtering.query$MetacellTag,
+    #   type = filtering.query$MetacellFilters,
+    #   percent = filtering.query$val_vs_percent == "Percentage",
+    #   op = filtering.query$metacellFilter_operator,
+    #   th = filtering.query$metacell_value_th)
+
+    mod_filtering_example_server("tree",
+      dataIn = reactive({
+        obj
+      }),
+      indices = reactive({
+        indices
+      }),
+      operation = reactive({
+        operation
+      }),
+      title = reactive({
+        title
+      })
+    )
+  }
+
+  app <- shiny::shinyApp(ui = ui, server = server)
 }

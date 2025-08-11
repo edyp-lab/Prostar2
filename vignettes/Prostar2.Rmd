@@ -125,7 +125,7 @@ installed.
 Then, execute the following line to get the install directory of Prostar:
 
 ```{r server, eval=FALSE}
-installed.packages()["Prostar","LibPath"]
+installed.packages()["Prostar", "LibPath"]
 ```
 
 The result of this command is now referred as *path_to_Prostar*.

@@ -24,12 +24,14 @@ mod_Prot_Normalization_server(
  })
 )
 
-mod_Prot_Normalization(obj, i)
+mod_Prot_Normalization(dataIn, i)
 }
 \arguments{
 \item{id}{xxx}
 
 \item{dataIn}{An instance of the class \code{QFeatures}}
+
+\item{i}{xxx}
 
 \item{remoteReset}{A \code{integer(1)} xxxx}
 
@@ -57,7 +59,7 @@ as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
 \dontrun{
-data(Exp1_R25_prot, package="DaparToolshedData")
+data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[seq_len(100)]
 mod_Prot_Normalization(obj, 1)
 }
