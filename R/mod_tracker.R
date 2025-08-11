@@ -149,7 +149,7 @@ mod_tracker_server <- function(
 
       widget <- selectInput(ns("listSelect"),
         "Select protein",
-        choices = setNames(nm = rowData(rv$dataIn)[, DaparToolshed::get_colID(rv$dataIn)]),
+        choices = setNames(nm = rowData(rv$dataIn)[, DaparToolshed::idcol(rv$dataIn)]),
         multiple = TRUE,
         selected = rv.widgets$listSelect,
         width = "200px",
@@ -193,7 +193,7 @@ mod_tracker_server <- function(
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- match(
         rv.widgets$listSelect,
-        rowData(rv$dataIn)[[DaparToolshed::get_colID(rv$dataIn)]]
+        rowData(rv$dataIn)[[DaparToolshed::idcol(rv$dataIn)]]
       )
     })
 

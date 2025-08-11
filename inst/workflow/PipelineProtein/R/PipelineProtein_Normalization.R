@@ -307,7 +307,7 @@ PipelineProtein_Normalization_server <- function(id,
       
       req(obj1)
       req(obj2)
-      protId <- DaparToolshed::get_colID(rv$dataIn[[length(rv$dataIn)]])
+      protId <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
       
       if (!is.null(selectProt()$indices)) {
         .n <- length(selectProt()$indices)

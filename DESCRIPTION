@@ -20,15 +20,11 @@ Imports:
     MagellanNTK,
     DaparToolshed,
     DaparToolshedData,
-    Biobase,
-    htmlwidgets,
     BiocManager,
-    sass,
     rhandsontable,
     QFeatures (>= 1.16),
     methods, 
-    tibble,
-    shinyFeedback
+    tibble
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,
@@ -47,7 +43,8 @@ Suggests:
     BiocStyle,
     shinyjqui,
     colourpicker,
-    RColorBrewer
+    RColorBrewer,
+    sass
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/

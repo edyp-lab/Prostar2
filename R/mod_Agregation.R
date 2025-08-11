@@ -255,13 +255,6 @@ mod_Agregation_server <- function(
     })
 
     output$Filterpeptides_ProteinId_ui <- renderUI({
-      # req (is.null(GetProteinId(rv$dataIn))
-      #
-      # widget <- selectInput(ns("Agregation_ProteinId"),
-      # "Choose the protein ID",
-      # choices = c("None", colnames(Biobase::fData(rv$dataIn))),
-      # selected = rv.widgets$Agregation_proteinId)
-      # toggleWidget(rv$steps.enabled['Agregation'], widget )
     })
 
 
