@@ -70,7 +70,6 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @param remoteReset xxx
 #'
 #' @import QFeatures
-#' @importFrom shinyalert shinyalert
 #' @importFrom shinyjs disabled
 #'
 #' @export
@@ -87,7 +86,7 @@ PipelineConvert_Convert_server <- function(id,
   current.pos = reactive({1})
 ) {
   
-  requireNamespace("openxlsx")
+  requireNamespace(c("openxlsx", "shinyalert"))
   
   widgets.default.values <- list(
     SelectFile_software = '',

@@ -7,15 +7,19 @@
 \alias{addDatasets}
 \alias{addDatasets,list-method}
 \title{Datasets processing}
+\usage{
+addDatasets(object, dataset, name)
+
+keepDatasets(object, range = seq(length(object)))
+}
 \arguments{
-\item{object}{An object of class \code{list}.}
+\item{object}{An instance of type list. Must get TRUE to inherits(object, 'list')}
 
-\item{range}{A xxxx}
+\item{dataset}{An instance of class \code{SummarizedExperiment}}
 
-\item{dataset}{\code{character(1)} providing the base with respect to which
-logarithms are computed. Default is log2.}
+\item{name}{the name to associate to the dataset in the final object}
 
-\item{name}{A \code{character(1)} naming the new array name.}
+\item{range}{xxx}
 }
 \value{
 An processed object of the same class as \code{object}.
@@ -33,6 +37,12 @@ are in range
 object (of type list)
 \item \code{Save(object, file)} stores the object to a .RData file
 }
+
+This function appends a dataset in the list with customization
+if necessary
+
+This function deletes the items not included in the
+range parameter
 }
 \details{
 The object must be of type list. Thetwo functions are implemented here for

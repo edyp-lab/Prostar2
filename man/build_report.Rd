@@ -15,6 +15,8 @@ build_report_server(
  }),
   filename = "myDataset"
 )
+
+build_report(dataIn, filename = "myDataset")
 }
 \arguments{
 \item{id}{internal}

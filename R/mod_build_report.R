@@ -58,17 +58,17 @@ build_report_server <- function(
 
 
 
-#' @rdname download_dataset
+#' @rdname build_report
 #'
 #' @export
 #'
-build_report <- function(data, filename = "myDataset") {
+build_report <- function(dataIn, filename = "myDataset") {
   ui <- build_report_ui("report")
 
   server <- function(input, output, session) {
     build_report_server("report",
       dataIn = reactive({
-        data
+        dataIn
       }),
       filename = filename
     )

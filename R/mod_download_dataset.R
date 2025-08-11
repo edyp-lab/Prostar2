@@ -5,7 +5,6 @@
 #'
 #' @param id internal
 #' @param dataIn internal
-#' @param data xxx
 #' @param extension Available values are `csv` (default), `qf` and `Excel`.
 #' @param widget.type Available values are `Button` and `Link` (default).
 #' @param filename internal
