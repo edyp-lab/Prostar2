@@ -27,7 +27,7 @@
 #' @return NA
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(workflowApp("Agregation", verbose = TRUE))
 #' }
 #'

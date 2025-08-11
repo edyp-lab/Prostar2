@@ -17,7 +17,7 @@ Prostar2(wf.name = NULL, usermod = "user", verbose = FALSE)
 xxxx
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(Prostar2)
 library(DaparToolshed)
 Prostar2("PipelineProtein")

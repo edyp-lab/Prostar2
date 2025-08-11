@@ -52,7 +52,7 @@ customizable tooltip appears when the user put the mouse's pointer over
 a point of the scatter plot.
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(highcharter)
 library(DaparToolshed)
 library(QFeatures)

@@ -16,7 +16,7 @@
 #' the code for the process `PipelinePeptide_Imputation` which is part of the pipeline called `PipelinePeptide`.
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')

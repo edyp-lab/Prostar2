@@ -49,7 +49,7 @@ A shiny app
 To be customized
 }
 \examples{
-\dontrun{
+if (interactive()){
 data(subbouyssie)
 
 # Builds the instance of `SummarizedExperiment`

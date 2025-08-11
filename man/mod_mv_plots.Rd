@@ -56,7 +56,7 @@ mod_mv_plots(data, grp = NULL, mytitle = NULL, pal = NULL, pattern = NULL)
 xxx
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(DaparToolshed)
 library(highcharter)
 data(Exp1_R25_prot, package = "DaparToolshedData")

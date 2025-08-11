@@ -10,7 +10,7 @@
 #' 
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(DaparToolshed)
 #' library(MagellanNTK)
 #' library(Prostar2)

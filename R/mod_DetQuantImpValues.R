@@ -16,7 +16,7 @@
 #' @name mod_DetQuantImpValues
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(ft_na)
 #' shiny::runApp(mod_DetQuantImpValues(ft_na[[1]]))
 #' }

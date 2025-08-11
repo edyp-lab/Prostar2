@@ -13,7 +13,7 @@
 #' @return A shiny app
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(Prostar2::mod_inputGroup())
 #' }
 #'
@@ -204,6 +204,7 @@ mod_inputGroup_server <- function(
 
 #' @export
 #' @rdname mod_inputGroup
+#' @importFrom utils read.csv
 #'
 mod_inputGroup <- function() {
   ui <- Prostar2::mod_inputGroup_ui("mod_inputGroup")

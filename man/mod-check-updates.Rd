@@ -20,6 +20,8 @@ checkUpdates()
 xxxxx
 }
 \examples{
+if (interactive()){
 shiny::runApp(checkUpdates())
+}
 
 }

@@ -27,7 +27,7 @@ open_dataset()
 A shiny Module.
 }
 \examples{
-\dontrun{
+if (interactive()){
 shiny::runApp(Prostar2::open_dataset())
 }
 

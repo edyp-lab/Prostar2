@@ -13,7 +13,7 @@
 #' @name mod_set_pval_threshold
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(mod_set_pval_threshold())
 #' }
 #'

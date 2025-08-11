@@ -16,7 +16,7 @@
 #' the code for the process `ProcessPeptide` which is part of the pipeline called `PipelinePeptide`.
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
 #' library(DaparToolshed)
 #' library(omXplore)

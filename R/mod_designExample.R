@@ -13,7 +13,7 @@
 #' @return NA
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(mod_designExample(2))
 #' }
 #'

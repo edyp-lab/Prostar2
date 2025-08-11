@@ -8,7 +8,7 @@
 #' @param verbose xxx
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(Prostar2)
 #' library(DaparToolshed)
 #' Prostar2("PipelineProtein")

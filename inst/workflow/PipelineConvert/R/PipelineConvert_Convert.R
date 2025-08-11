@@ -5,7 +5,7 @@
 #' @name mod_convert
 #' @author Samuel Wieczorek, Manon Gaudin
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data("Exp1_R25_prot", package = "DaparToolshedData")
 #' path <- system.file('workflow/PipelineConvert', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineConvert_Convert", path, dataIn = Exp1_R25_prot))
@@ -71,6 +71,8 @@ PipelineConvert_Convert_ui <- function(id) {
 #'
 #' @import QFeatures
 #' @importFrom shinyjs disabled
+#' @importFom stats setNames
+#' @importFrom utils read.csv
 #'
 #' @export
 #'

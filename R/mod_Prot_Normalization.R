@@ -25,7 +25,7 @@
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot[seq_len(100)]
 #' mod_Prot_Normalization(obj, 1)
@@ -93,6 +93,7 @@ mod_Prot_Normalization_ui <- function(id) {
 #' @rdname mod_Prot_Normalization
 #' 
 #' @import QFeatures
+#' @importFrom stats setNames
 #'
 #' @export
 #'

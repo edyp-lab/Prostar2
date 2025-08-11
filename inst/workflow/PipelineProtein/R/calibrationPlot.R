@@ -16,6 +16,7 @@
 #' @author Samuel Wieczorek
 #'
 #' @examples
+#' if (interactive()){
 #' library(DaparToolshed)
 #' library(QFeatures)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -27,6 +28,7 @@
 #' sTab <- colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' wrapperCalibrationPlot(limma$P_Value[, 1])
+#' }
 #'
 #' @export
 #' 
@@ -59,6 +61,7 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
 #' @author Samuel Wieczorek
 #'
 #' @examples
+#' if (interactive()){
 #' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
@@ -69,6 +72,7 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
 #' sTab <- MultiAssayExperiment::colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' histPValue_HC(limma$P_Value[1])
+#' }
 #'
 #' @export
 #' @import highcharter
@@ -199,6 +203,7 @@ diffAnaComputeFDR <- function(adj.pvals) {
 #' @author Samuel Wieczorek
 #'
 #' @examples
+#' if (interactive()){
 #' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
@@ -211,6 +216,7 @@ diffAnaComputeFDR <- function(adj.pvals) {
 #' df <- data.frame(id = rownames(limma$logFC), logFC = limma$logFC[, 1], pval = limma$P_Value[, 1])
 #' 
 #' diffAnaComputeAdjustedPValues(pval = limma$P_Value[, 1])
+#' }
 #'
 #' @export
 #' 

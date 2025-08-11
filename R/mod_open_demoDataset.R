@@ -7,7 +7,7 @@
 #' @name open_demo_dataset
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(open_demoDataset())
 #' }
 #'

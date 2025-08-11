@@ -33,7 +33,7 @@ These functions are inspired by the functions run_workflow() in the package
 \code{MagellanNTK}. They wrap the entire workflow into a single function
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(DaparToolshed)
 library(MagellanNTK)
 library(Prostar2)

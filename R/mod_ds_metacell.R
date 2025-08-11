@@ -19,7 +19,7 @@
 #' @return NA
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' grp <- design.qf(Exp1_R25_prot)$Condition
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))

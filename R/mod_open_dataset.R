@@ -11,7 +11,7 @@
 #' @keywords internal
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(Prostar2::open_dataset())
 #' }
 #'

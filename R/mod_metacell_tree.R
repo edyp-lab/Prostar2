@@ -13,7 +13,7 @@
 #' @return NA
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(Exp1_R25_pept, package = "DaparToolshedData")
 #' shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
 #'
@@ -66,6 +66,7 @@ mod_metacell_tree_ui <- function(id) {
 #' @import shinyBS
 #' @import highcharter
 #' @import shinyjs
+#' @importFrom stats setNames
 #'
 #' @rdname metacell-tree
 #'

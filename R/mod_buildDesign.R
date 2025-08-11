@@ -13,7 +13,7 @@
 #' @return NA
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' shiny::runApp(mod_buildDesign(letters[seq(6)]))
 #' }
 #'
@@ -70,6 +70,7 @@ mod_buildDesign_ui <- function(id) {
 
 #' @rdname build-design
 #' @export
+#' @importFrom stats setNames
 mod_buildDesign_server <- function(
     id,
     quantCols,

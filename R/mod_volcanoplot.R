@@ -16,7 +16,7 @@
 #' @name volcanoplot
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(highcharter)
 #' library(DaparToolshed)
 #' library(QFeatures)

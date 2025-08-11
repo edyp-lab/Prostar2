@@ -15,7 +15,7 @@
 #'
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(DaparToolshed)
 #' library(highcharter)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -161,8 +161,7 @@ mod_mv_plots_server <- function(
 
     output$plot_showImageNA <- renderImage(
       {
-        # req(wrapper.mvImage(data()))
-
+        MagellanNTK::pkgs.require('grDevices')
         # A temp file to save the output. It will be deleted after
         # renderImage
         # sends it, because deleteFile=TRUE.
@@ -170,7 +169,7 @@ mod_mv_plots_server <- function(
         # browser()
         png(outfile)
         wrapper.mvImage(obj = data(), group = rv$grp)
-        dev.off()
+        grDevices::dev.off()
 
         # Return a list
         list(

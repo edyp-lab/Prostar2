@@ -58,7 +58,7 @@ NA
 xxxx
 }
 \examples{
-\dontrun{
+if (interactive()){
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[[1]]
 indices <- 1:5

@@ -58,7 +58,7 @@ This function is written with specifications of the package \code{MagellanNTK} s
 as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
-\dontrun{
+if (interactive()){
 data(Exp1_R25_pept, package = "DaparToolshedData")
 obj <- Exp1_R25_pept[seq_len(100)]
 shiny::runApp(mod_Pept_Imputation(obj, 1))

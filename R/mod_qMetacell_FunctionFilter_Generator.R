@@ -33,7 +33,7 @@
 #'   - ll.widgets.value: a list of the values of widgets.
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(DaparToolshed)
 #' library(shinyBS)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -72,6 +72,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
 #' @rdname mod_qMetacell_FunctionFilter_Generator
 #'
 #' @export
+#' @importFrom stats setNames
 #'
 mod_qMetacell_FunctionFilter_Generator_server <- function(
     id,

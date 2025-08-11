@@ -46,7 +46,7 @@ mod_set_pval_threshold(pval_init = 1, fdr = 0, threshold.type = "logpval")
 A shiny Module.
 }
 \examples{
-\dontrun{
+if (interactive()){
 shiny::runApp(mod_set_pval_threshold())
 }
 

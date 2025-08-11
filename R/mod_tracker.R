@@ -19,7 +19,7 @@
 #' @param is.enabled xxx
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(mod_tracker(Exp1_R25_prot))
 #' }
@@ -55,6 +55,7 @@ mod_tracker_ui <- function(id) {
 #' @export
 #'
 #' @importFrom shinyjs toggle hidden show hide
+#' @importFrom stats setNames
 #'
 #' @return A `list()` of integers
 #'

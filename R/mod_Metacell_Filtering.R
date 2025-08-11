@@ -27,7 +27,7 @@
 
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(Prostar2)
 #' library(shinyBS)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -78,6 +78,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 #' @rdname mod_Metacell_Filtering
 #'
 #' @export
+#' @importFrom stats setNames
 #'
 mod_Metacell_Filtering_server <- function(
     id,

@@ -10,7 +10,7 @@
 #' @name infos_dataset
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(infos_dataset(Exp1_R25_prot))
 #' }

@@ -11,7 +11,7 @@
 #'
 #' @name build_report
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(sub_R25)
 #' shiny::runApp(build_report(sub_R25))
 #'

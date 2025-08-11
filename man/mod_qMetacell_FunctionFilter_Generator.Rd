@@ -83,7 +83,7 @@ class \code{FunctionFilter} to filter the quantitative metadata of an instance
 of the class \code{SummarizedExperiment})
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(DaparToolshed)
 library(shinyBS)
 data(Exp1_R25_prot, package = "DaparToolshedData")

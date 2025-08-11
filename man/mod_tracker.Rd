@@ -50,7 +50,7 @@ Three modes of selection are implemented:
 }
 }
 \examples{
-\dontrun{
+if (interactive()){
 data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(mod_tracker(Exp1_R25_prot))
 }

@@ -8,7 +8,7 @@
 #' 
 #' @name module_PiplelineTest
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelineTest/R/PipelineTest.R")
 #' path <- system.file('extdata/workflow/PipelineTest', package = 'Prostar2')
 #' shiny::runApp(MagellanNTK::workflowApp("PipelineTest"))

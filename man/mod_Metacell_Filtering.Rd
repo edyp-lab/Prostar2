@@ -67,7 +67,7 @@ This function is written with specifications of the package \code{MagellanNTK} s
 as to be easily integrated into workflfow compliant with \code{MagellanNTK}.
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(Prostar2)
 library(shinyBS)
 data(Exp1_R25_prot, package = "DaparToolshedData")

@@ -28,7 +28,7 @@ open_demoDataset()
 A shiny Module.
 }
 \examples{
-\dontrun{
+if (interactive()){
 shiny::runApp(open_demoDataset())
 }
 

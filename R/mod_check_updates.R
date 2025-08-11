@@ -4,13 +4,16 @@
 #' @param id xxx
 #'
 #' @examples
+#' if (interactive()){
 #' shiny::runApp(checkUpdates())
+#' }
 #'
 #' @name mod-check-updates
 #'
 NULL
 
 
+#' @importFrom utils installed.packages
 GetLocalVersions <- function(pkgs) {
   local.version <- lapply(pkgs, function(x) {
     installed.packages()[x, "Version"]
@@ -20,6 +23,8 @@ GetLocalVersions <- function(pkgs) {
   local.version
 }
 
+
+#' @importFrom utils compareVersion
 getPackagesVersions <- function() {
   outOfDate <- "(Out of date)"
   dev <- "(Devel)"
@@ -141,6 +146,7 @@ getPackagesVersions <- function() {
 }
 
 
+#' @importFrom utils available.packages contrib.url
 GetBioconductorVersions <- function() {
   ll.versions <- list(
     Prostar = "NA",
@@ -212,6 +218,7 @@ mod_checkUpdates_ui <- function(id) {
 
 
 #' @rdname mod-check-updates
+#' @importFrom utils compareVersion installed.packages
 #' @export
 mod_checkUpdates_server <- function(id) {
   moduleServer(id, function(input, output, session) {

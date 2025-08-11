@@ -44,7 +44,7 @@ A shiny app
 A shiny Module.
 }
 \examples{
-\dontrun{
+if (interactive()){
 shiny::runApp(Prostar2::mod_inputGroup())
 }
 

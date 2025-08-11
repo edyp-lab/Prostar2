@@ -62,7 +62,7 @@ results of hypothesis testing stored as a data.frame in its metadata}
 A shiny Module.
 }
 \examples{
-\dontrun{
+if (interactive()){
 library(highcharter)
 library(DaparToolshed)
 library(QFeatures)

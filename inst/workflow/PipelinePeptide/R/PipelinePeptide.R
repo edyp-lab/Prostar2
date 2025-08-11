@@ -8,7 +8,7 @@
 #' 
 #' @name module_PiplelinePeptide
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelinePeptide/R/PipelinePeptide.R")
 #' path <- system.file('extdata/workflow/PipelinePeptide', package = 'Prostar2')
 #' shiny::runApp(MagellanNTK::workflowApp("PipelinePeptide")

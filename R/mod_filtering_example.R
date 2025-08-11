@@ -19,7 +19,7 @@
 #' @return NA
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot[[1]]
 #' indices <- 1:5
@@ -34,6 +34,7 @@ NULL
 #' @importFrom shinyBS bsModal
 #' @importFrom shiny NS actionLink tagList radioButtons uiOutput
 #' @importFrom DT dataTableOutput
+#' @importFrom stats setNames
 #' @import shiny
 #' @export
 #'
@@ -131,9 +132,10 @@ mod_filtering_example_server <- function(
 
 
     DarkenColors <- function(ColorsHex) {
+      MagellanNTK::pkgs.require('grDevices')
       # Convert to rgb
       # This is the step where we get the matrix
-      ColorsRGB <- col2rgb(ColorsHex)
+      ColorsRGB <- grDevices::col2rgb(ColorsHex)
 
       # Darken colors by lowering values of RGB
       ColorsRGBDark <- round(ColorsRGB * 0.5)

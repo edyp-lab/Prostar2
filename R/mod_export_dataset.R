@@ -8,7 +8,7 @@
 #' @name mod_export_dataset
 #'
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' data(lldata)
 #' shiny::runApp(export_dataset(lldata))
 #' }

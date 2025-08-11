@@ -34,7 +34,7 @@
 #' @return An interactive volcanoplot
 #' @author Samuel Wieczorek
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(highcharter)
 #' library(DaparToolshed)
 #' library(QFeatures)

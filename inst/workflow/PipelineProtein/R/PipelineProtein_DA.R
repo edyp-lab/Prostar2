@@ -32,7 +32,7 @@
 #' 
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
 #' library(MagellanNTK)
 #' library(highcharter)
@@ -153,6 +153,7 @@ PipelineProtein_DA_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    MagellanNTK::pkgs.require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(
@@ -774,7 +775,7 @@ PipelineProtein_DA_server <- function(id,
         # Generate a png
         png(outfile, width = 600, height = 500)
         calibrationPlot()
-        dev.off()
+        grDevices::dev.off()
         
         # Return a list
         list(
@@ -879,7 +880,7 @@ PipelineProtein_DA_server <- function(id,
         # Generate a png
         png(outfile, width = 600, height = 500)
         calibrationPlotAll()
-        dev.off()
+        grDevices::dev.off()
         
         # Return a list
         list(

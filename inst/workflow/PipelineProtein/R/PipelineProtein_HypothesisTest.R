@@ -16,7 +16,7 @@
 #' the code for the process `ProcessProtein` which is part of the pipeline called `PipelineProtein`.
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
 #' library(DaparToolshed)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
