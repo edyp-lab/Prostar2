@@ -67,6 +67,7 @@ mod_metacell_tree_ui <- function(id) {
 #' @import highcharter
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
 #' @importFrom stats setNames
+#' @importFrom DaparToolshed typeDataset metacell.def 
 #'
 #' @rdname metacell-tree
 #'

@@ -25,6 +25,7 @@ NULL
 
 
 #' @import shiny
+#' @importFrom DaparToolshed write.excel
 #'
 #' @rdname download_dataset
 #'

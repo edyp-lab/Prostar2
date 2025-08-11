@@ -79,6 +79,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 #'
 #' @export
 #' @importFrom stats setNames
+#' @importFrom DaparToolshed paramshistory
 #'
 mod_Metacell_Filtering_server <- function(
     id,

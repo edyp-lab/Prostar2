@@ -64,6 +64,7 @@ NULL
 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
+#' @importFrom DT dataTableOutput renderDataTable datatable formatStyle styleEqual
 #' @export
 #' @rdname volcanoplot
 #'

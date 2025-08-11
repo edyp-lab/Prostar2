@@ -33,7 +33,7 @@ NULL
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
 #' @importFrom shiny NS actionLink tagList radioButtons uiOutput
-#' @importFrom DT dataTableOutput
+#' @importFrom DT dataTableOutput renderDataTable datatable formatStyle styleEqual
 #' @importFrom stats setNames
 #' @import shiny
 #' @export
@@ -71,6 +71,7 @@ mod_filtering_example_ui <- function(id) {
 #' @importFrom shiny NS renderUI moduleServer
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
 #' @import shiny
+#' @importFrom DaparToolshed typeDataset
 #' @export
 #'
 mod_filtering_example_server <- function(
@@ -141,7 +142,7 @@ mod_filtering_example_server <- function(
       ColorsRGBDark <- round(ColorsRGB * 0.5)
 
       # Convert back to hex
-      ColorsHexDark <- grDevices::rgb2col(ColorsRGBDark)
+      ColorsHexDark <- rgb2col(ColorsRGBDark)
 
       return(ColorsHexDark)
     }

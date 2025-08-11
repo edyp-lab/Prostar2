@@ -56,6 +56,7 @@ mod_tracker_ui <- function(id) {
 #'
 #' @importFrom shinyjs toggle hidden show hide
 #' @importFrom stats setNames
+#' @importFrom DaparToolshed idcol
 #'
 #' @return A `list()` of integers
 #'

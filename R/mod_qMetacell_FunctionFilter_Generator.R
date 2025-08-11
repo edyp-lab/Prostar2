@@ -73,6 +73,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
 #'
 #' @export
 #' @importFrom stats setNames
+#' @importFrom DaparToolshed typeDataset
 #'
 mod_qMetacell_FunctionFilter_Generator_server <- function(
     id,

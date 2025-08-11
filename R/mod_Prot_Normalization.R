@@ -96,6 +96,7 @@ mod_Prot_Normalization_ui <- function(id) {
 #' 
 #' @importFrom stats setNames
 #' @importFrom shinyjs toggle hidden
+#' @importFrom DaparToolshed normalizeMethods idcol compareNormalizationD_HC GlobalQuantileAlignment QuantileCentering SumByColumns LOESS vsn paramshistory
 #'
 #' @export
 #'

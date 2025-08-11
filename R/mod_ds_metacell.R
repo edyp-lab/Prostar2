@@ -61,6 +61,7 @@ mod_ds_metacell_Histos_ui <- function(id) {
 #' @rdname metacell-plots
 #' @export
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show
+#' @importFrom DaparToolshed typeDataset
 #'
 mod_ds_metacell_Histos_server <- function(
     id,

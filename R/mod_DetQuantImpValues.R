@@ -14,6 +14,8 @@
 #' @param is.enabled xxx
 #'
 #' @name mod_DetQuantImpValues
+#' 
+#' @importFrom DT dataTableOutput renderDataTable datatable
 #'
 #' @examples
 #' if (interactive()){

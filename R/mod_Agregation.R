@@ -66,6 +66,8 @@ mod_Agregation_ui <- function(id) {
 #' @importFrom shinyjs toggle hidden
 #' @importFrom utils write.table
 #' @importFrom MagellanNTK Timestamp toggleWidget Get_Workflow_Core_Code
+#' @importFrom DaparToolshed AdjMatFilters
+#' @importFrom DT DTOutput
 #'
 #' @export
 #'
@@ -87,8 +89,7 @@ mod_Agregation_server <- function(
       1
     }),
     verbose = FALSE) {
-  requireNamespace("DT")
-
+  
 
   # This list contains the basic configuration of the process
   config <- list(
