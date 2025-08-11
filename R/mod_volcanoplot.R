@@ -19,7 +19,6 @@
 #' if (interactive()){
 #' library(highcharter)
 #' library(DaparToolshed)
-#' library(QFeatures)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values

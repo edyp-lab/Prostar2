@@ -22,7 +22,6 @@
 #' library(omXplore)
 #' library(shiny)
 #' library(waiter)
-#' library(shinyjs)
 #' library(shinyBS)
 #' library(shinydashboard)
 #' library(shinydashboardPlus)
@@ -82,6 +81,7 @@ PipelinePeptide_Aggregation_ui <- function(id){
 #' @rdname PipelinePeptide
 #' 
 #' @import foreach
+#' @importFrom shinyjs useShinyjs
 #' 
 #' @export
 #' 

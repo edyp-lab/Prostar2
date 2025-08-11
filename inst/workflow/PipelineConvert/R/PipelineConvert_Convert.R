@@ -69,7 +69,7 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @param steps.enabled xxx
 #' @param remoteReset xxx
 #'
-#' @importFrom shinyjs disabled
+#' @importFrom shinyjs disabled info
 #' @importFom stats setNames
 #' @importFrom utils read.csv
 #' @importFrom spsComps addLoader

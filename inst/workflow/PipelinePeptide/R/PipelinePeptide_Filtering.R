@@ -340,7 +340,7 @@ PipelinePeptide_Filtering_server <- function(id,
       req(len_diff > 0)
       
       if (len_diff == 2)
-        rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
+        rv.custom$dataIn2 <- removeAssay(rv.custom$dataIn2, 
           length(rv.custom$dataIn2)-1)
       
       

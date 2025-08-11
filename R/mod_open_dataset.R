@@ -23,7 +23,7 @@ NULL
 #' @export
 #' @rdname open_dataset
 #' @importFrom shiny NS tagList
-#' @import shinyjs
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
 #'
 open_dataset_ui <- function(id) {
   ns <- NS(id)
@@ -36,7 +36,7 @@ open_dataset_ui <- function(id) {
 
 #' @rdname open_dataset
 #' @export
-#' @importFrom shinyjs info
+#' @importFrom shinyjs info useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
 #' @import shiny
 #'
 open_dataset_server <- function(

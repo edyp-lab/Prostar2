@@ -193,7 +193,7 @@ infos_dataset_server <- function(
 
       typeOfData <- typeDataset(.se)
       nLines <- nrow(.se)
-      .nNA <- QFeatures::nNA(.se)
+      .nNA <- nNA(.se)
       percentMV <- round(100 * .nNA$nNA[, "pNA"], digits = 2)
       nEmptyLines <- length(which(.nNA$nNArows[, "nNA"] == ncol(.se)))
 

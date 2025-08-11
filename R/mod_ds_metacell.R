@@ -33,6 +33,7 @@ NULL
 
 #' @rdname metacell-plots
 #' @export
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
 mod_ds_metacell_Histos_ui <- function(id) {
   ns <- NS(id)
@@ -59,6 +60,7 @@ mod_ds_metacell_Histos_ui <- function(id) {
 
 #' @rdname metacell-plots
 #' @export
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
 mod_ds_metacell_Histos_server <- function(
     id,

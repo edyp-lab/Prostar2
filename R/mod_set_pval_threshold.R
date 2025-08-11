@@ -25,7 +25,7 @@ NULL
 #'
 #' @export
 #' @importFrom shiny NS tagList
-#' @importFrom shinyjs inlineCSS useShinyjs
+#' @importFrom shinyjs inlineCSS useShinyjs toggleState
 #' @rdname mod_set_pval_threshold
 #'
 mod_set_pval_threshold_ui <- function(id) {
@@ -68,7 +68,7 @@ mod_set_pval_threshold_ui <- function(id) {
 }
 
 #' @rdname mod_set_pval_threshold
-#'
+#' @importFrom shinyjs inlineCSS useShinyjs toggleState
 #' @export
 #'
 mod_set_pval_threshold_server <- function(

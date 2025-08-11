@@ -21,7 +21,7 @@ NULL
 #' @export
 #' @rdname open_demo_dataset
 #' @importFrom shiny NS tagList
-#' @import shinyjs
+#' @importFrom shinyjs useShinyjs disabled 
 #'
 open_demoDataset_ui <- function(id) {
   ns <- NS(id)
@@ -123,7 +123,7 @@ open_demoDataset_server <- function(
 
 #' @import shiny
 #' @import DaparToolshedData
-#' @import shinyjs
+#' @importFrom shinyjs useShinyjs disabled 
 #'
 #' @export
 #' @rdname open_demo_dataset

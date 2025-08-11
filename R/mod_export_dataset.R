@@ -49,6 +49,7 @@ export_dataset_ui <- function(id) {
 #' @export
 #' @importFrom shinyjs info
 #' @importFrom shiny moduleServer reactiveValues observeEvent
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
 export_dataset_server <- function(id, dataIn) {
   moduleServer(id, function(input, output, session) {

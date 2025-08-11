@@ -1,7 +1,6 @@
 library(omXplore)
 library(shiny)
 library(waiter)
-library(shinyjs)
 library(shinyBS)
 library(highcharter)
 library(MagellanNTK)

@@ -23,6 +23,7 @@ options(shiny.reactlog = TRUE)
 
 #' @rdname build-design
 #' @import shiny
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #' @export
 #'
 mod_buildDesign_ui <- function(id) {

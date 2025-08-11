@@ -1,7 +1,6 @@
 library(omXplore)
 library(shiny)
 library(waiter)
-library(shinyjs)
 library(shinyBS)
 library(highcharter)
 library(MagellanNTK)
@@ -9,8 +8,6 @@ library(Prostar2)
 library(DaparToolshed)
 library(bs4Dash)
 library(shinyFeedback)
-library(QFeatures)
-
 options(shiny.fullstacktrace = TRUE)
 
 history <- list()

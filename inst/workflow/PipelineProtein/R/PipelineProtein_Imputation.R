@@ -69,7 +69,8 @@ PipelineProtein_Imputation_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
-#' 
+#' @importFrom shinyjs useShinyjs
+#'
 #' @export
 #' 
 PipelineProtein_Imputation_server <- function(id,

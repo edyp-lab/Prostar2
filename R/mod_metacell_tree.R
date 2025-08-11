@@ -27,7 +27,7 @@ NULL
 
 #' @import shinyBS
 #' @import highcharter
-#' @import shinyjs
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
 #' @rdname metacell-tree
 #'
@@ -65,7 +65,7 @@ mod_metacell_tree_ui <- function(id) {
 
 #' @import shinyBS
 #' @import highcharter
-#' @import shinyjs
+#' @importFrom shinyjs useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
 #' @importFrom stats setNames
 #'
 #' @rdname metacell-tree

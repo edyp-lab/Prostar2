@@ -74,6 +74,7 @@ PipelineProtein_HypothesisTest_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
+#' @importFrom shinyjs useShinyjs
 #' 
 #' @export
 #' 

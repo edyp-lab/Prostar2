@@ -39,7 +39,6 @@
 #' library(DaparToolshed)
 #' library(Prostar2)
 #' library(omXplore)
-#' library(QFeatures)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
@@ -89,6 +88,7 @@ PipelineProtein_DA_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
+#' @importFrom shinyjs info useShinyjs
 #' 
 #' @export
 #' 

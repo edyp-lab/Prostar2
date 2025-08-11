@@ -1,6 +1,5 @@
 library(omXplore)
 library(shiny)
-library(shinyjs)
 library(shinyBS)
 library(shinydashboard)
 library(shinydashboardPlus)

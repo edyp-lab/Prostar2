@@ -120,7 +120,7 @@ mod_filtering_example_server <- function(
 
     rgb2col <- function(rgbmat) {
       ProcessColumn <- function(col) {
-        rgb(rgbmat[1, col],
+        grDevices::rgb(rgbmat[1, col],
           rgbmat[2, col],
           rgbmat[3, col],
           maxColorValue = 255
@@ -141,7 +141,7 @@ mod_filtering_example_server <- function(
       ColorsRGBDark <- round(ColorsRGB * 0.5)
 
       # Convert back to hex
-      ColorsHexDark <- rgb2col(ColorsRGBDark)
+      ColorsHexDark <- grDevices::rgb2col(ColorsRGBDark)
 
       return(ColorsHexDark)
     }

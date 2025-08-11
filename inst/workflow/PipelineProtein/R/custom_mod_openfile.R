@@ -23,6 +23,7 @@ readFile <- function(name, path){
 
 
 #' @export
+#' @importFrom shinyjs hidden
 custom_openfile_ui <- function(id){
   ns <- NS(id)
   tagList(

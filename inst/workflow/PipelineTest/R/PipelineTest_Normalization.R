@@ -65,6 +65,7 @@ PipelineTest_Normalization_ui <- function(id){
 #' @rdname PipelineTest
 #' 
 #' @importFrom stats setNames rnorm
+#' @importFrom shinyjs useShinyjs
 #' 
 #' @export
 #' 
