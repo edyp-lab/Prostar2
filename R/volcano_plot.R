@@ -34,6 +34,7 @@
 #' @return An interactive volcanoplot
 #' @author Samuel Wieczorek
 #' @examples
+#' \dontrun{
 #' library(highcharter)
 #' library(DaparToolshed)
 #' library(QFeatures)
@@ -72,6 +73,7 @@
 #'   conditions = cond,
 #'   clickFunction = hc_clickFunction
 #' )
+#' }
 #'
 #' @export
 #'

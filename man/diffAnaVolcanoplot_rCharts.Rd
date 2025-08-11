@@ -52,6 +52,7 @@ customizable tooltip appears when the user put the mouse's pointer over
 a point of the scatter plot.
 }
 \examples{
+\dontrun{
 library(highcharter)
 library(DaparToolshed)
 library(QFeatures)
@@ -90,6 +91,7 @@ diffAnaVolcanoplot_rCharts(
   conditions = cond,
   clickFunction = hc_clickFunction
 )
+}
 
 }
 \author{

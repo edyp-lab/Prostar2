@@ -128,7 +128,7 @@ mod_volcanoplot_server <- function(
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    MagellanNTK::pkgs.require('magrittr')
+    MagellanNTK::pkgs.require(c('magrittr', "shinyjqui"))
     # DO NOT MODIFY THIS FUNCTION CALL
     eval(
       str2expression(

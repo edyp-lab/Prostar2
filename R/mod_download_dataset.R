@@ -5,6 +5,7 @@
 #'
 #' @param id internal
 #' @param dataIn internal
+#' @param data xxx
 #' @param extension Available values are `csv` (default), `qf` and `Excel`.
 #' @param widget.type Available values are `Button` and `Link` (default).
 #' @param filename internal
@@ -50,12 +51,8 @@ download_dataset_server <- function(
     widget.type = "Link",
     filename = "myDataset",
     excel.style = NULL,
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 

@@ -31,6 +31,8 @@ download_dataset_server(
 download_dataset(dataIn, filename = "myDataset")
 }
 \arguments{
+\item{data}{xxx}
+
 \item{filename}{internal}
 
 \item{id}{internal}

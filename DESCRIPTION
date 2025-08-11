@@ -32,7 +32,6 @@ Imports:
     sass,
     rhandsontable,
     QFeatures (>= 1.16),
-    magrittr,
     methods, 
     tibble,
     shinyFeedback
@@ -50,7 +49,8 @@ Suggests:
     magrittr,
     attempt,
     processx,
-    BiocStyle
+    BiocStyle,
+    shinyjqui
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/
