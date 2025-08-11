@@ -84,7 +84,7 @@ mod_mv_plots_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-  MagellanNTK::pkgs.require('grDevices')
+  pkgs.require('grDevices')
     rv <- reactiveValues(
       grp = NULL,
       mytitle = NULL,
@@ -107,10 +107,10 @@ mod_mv_plots_server <- function(
         rv$mytitle <- mytitle()
       }
 
-      if (is.null(palette())) {
+      if (is.null(grDevices::palette())) {
         rv$palette <- GetColorsForConditions(grp())
       } else {
-        rv$palette <- palette()
+        rv$palette <- grDevices::palette()
       }
 
       rv$pattern <- pattern()
@@ -161,7 +161,7 @@ mod_mv_plots_server <- function(
 
     output$plot_showImageNA <- renderImage(
       {
-        MagellanNTK::pkgs.require('grDevices')
+        pkgs.require('grDevices')
         # A temp file to save the output. It will be deleted after
         # renderImage
         # sends it, because deleteFile=TRUE.

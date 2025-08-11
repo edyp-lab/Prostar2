@@ -69,7 +69,6 @@ PipelineProtein_Imputation_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
-#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -695,7 +694,7 @@ PipelineProtein_Imputation_server <- function(id,
       req(len_diff > 0)
       
       if (len_diff == 2)
-        rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
+        rv.custom$dataIn2 <- removeAssay(rv.custom$dataIn2, 
           length(rv.custom$dataIn2) - 1)
       
       

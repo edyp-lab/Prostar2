@@ -92,7 +92,6 @@ mod_Prot_Normalization_ui <- function(id) {
 
 #' @rdname mod_Prot_Normalization
 #' 
-#' @import QFeatures
 #' @importFrom stats setNames
 #'
 #' @export
@@ -136,7 +135,7 @@ mod_Prot_Normalization_server <- function(
     ns <- session$ns
     .localStyle <- "display:inline-block; vertical-align: top; padding-right: 20px;"
 
-    MagellanNTK::pkgs.require('omXplore')
+    pkgs.require('omXplore')
     #
     # core.code <- MagellanNTK::Get_Workflow_Core_Code(
     #   mode = 'process',
@@ -148,12 +147,12 @@ mod_Prot_Normalization_server <- function(
     # eval(str2expression(core.code))
 
     core <- paste0(
-      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
-      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
-      MagellanNTK::Get_Code_for_rv_reactiveValues(),
-      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-      MagellanNTK::Get_Code_for_dataOut(),
-      MagellanNTK::Get_Code_for_remoteReset(
+      Get_Code_Declare_widgets(names(widgets.default.values)),
+      Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      Get_Code_for_rv_reactiveValues(),
+      Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      Get_Code_for_dataOut(),
+      Get_Code_for_remoteReset(
         widgets = TRUE,
         custom = TRUE,
         dataIn = "NULL"

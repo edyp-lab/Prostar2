@@ -355,7 +355,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(len_diff > 0)
       
       if (len_diff == 2)
-        rv.custom$dataIn1 <- QFeatures::removeAssay(tmp, length(tmp)-1)
+        rv.custom$dataIn1 <- removeAssay(tmp, length(tmp)-1)
       else
         rv.custom$dataIn1 <- tmp
       
@@ -554,7 +554,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(cname != "None")
       req(Extract_Value(value))
       
-      QFeatures::VariableFilter(
+      VariableFilter(
         field = cname,
         value = Extract_Value(value),
         condition = operator,
@@ -670,7 +670,7 @@ PipelineProtein_Filtering_server <- function(id,
         req(len_diff > 0)
         
         if (len_diff == 2)
-          rv.custom$dataIn2 <- QFeatures::removeAssay(tmp, length(tmp)-1)
+          rv.custom$dataIn2 <- removeAssay(tmp, length(tmp)-1)
         else 
           rv.custom$dataIn2 <- tmp
         

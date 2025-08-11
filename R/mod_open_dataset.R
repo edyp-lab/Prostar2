@@ -38,7 +38,6 @@ open_dataset_ui <- function(id) {
 #' @export
 #' @importFrom shinyjs info
 #' @import shiny
-#' @import QFeatures
 #'
 open_dataset_server <- function(
     id,

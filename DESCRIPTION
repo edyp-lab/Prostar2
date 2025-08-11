@@ -22,7 +22,6 @@ Imports:
     DaparToolshedData,
     BiocManager,
     rhandsontable,
-    QFeatures (>= 1.16),
     methods, 
     tibble
 Remotes:

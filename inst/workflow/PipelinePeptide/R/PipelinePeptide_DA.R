@@ -89,7 +89,6 @@ PipelinePeptide_DA_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
-#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -102,7 +101,7 @@ PipelinePeptide_DA_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
-  MagellanNTK::pkgs.require('magrittr')
+  pkgs.require('magrittr')
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -151,7 +150,7 @@ PipelinePeptide_DA_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    MagellanNTK::pkgs.require('grDevices')
+    pkgs.require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(
@@ -1363,7 +1362,7 @@ PipelinePeptide_DA_server <- function(id,
       
       
       tmp <- as.data.frame(
-        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
+        rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
       )
       names(tmp) <- rv.custom$Pairwisecomparison_tooltipInfo
       pval_table <- cbind(pval_table, tmp)

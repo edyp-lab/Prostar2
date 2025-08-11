@@ -196,7 +196,7 @@ GetBioconductorVersions <- function() {
 
 
 .initComplete <- function() {
-  MagellanNTK::pkgs.require('shinyjqui')
+  pkgs.require('shinyjqui')
   return(shinyjqui::JS(
     "function(settings, json) {",
     "$(this.api().table().header()).css({'background-color': ",

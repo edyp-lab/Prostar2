@@ -67,7 +67,6 @@ PipelineProtein_Normalization_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import omXplore
-#' @import QFeatures
 #' 
 #' @export
 #' 

@@ -89,7 +89,6 @@ PipelineProtein_DA_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
-#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -103,7 +102,7 @@ PipelineProtein_DA_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
-  MagellanNTK::pkgs.require('magrittr')
+  pkgs.require('magrittr')
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -153,7 +152,7 @@ PipelineProtein_DA_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    MagellanNTK::pkgs.require('grDevices')
+    pkgs.require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(
@@ -224,7 +223,7 @@ PipelineProtein_DA_server <- function(id,
       rv$dataIn <- dataIn()
       
       # Adds an assay to work on
-      rv$dataIn <- QFeatures::addAssay(
+      rv$dataIn <- addAssay(
         rv$dataIn, 
         rv$dataIn[[length(rv$dataIn)]], 
         'DA')

@@ -59,7 +59,7 @@ addDatasets <- function(object, dataset, name) {
   stopifnot(inherits(object, "QFeatures"))
   stopifnot(inherits(dataset, "SummarizedExperiment"))
 
-  object <- QFeatures::addAssay(object, dataset, name)
+  object <- addAssay(object, dataset, name)
 
   object
 }
@@ -93,7 +93,7 @@ keepDatasets <- function(object, range = seq(length(object))) {
 
   toRemove <- setdiff.Vector(seq(length(object)), range)
   if (length(toRemove) > 0) {
-    object <- QFeatures::removeAssay(object, toRemove)
+    object <- removeAssay(object, toRemove)
   }
 
   object

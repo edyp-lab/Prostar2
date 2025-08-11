@@ -53,7 +53,6 @@ RUN Rscript -e 'BiocManager::install("markdown")'
 RUN Rscript -e 'BiocManager::install("AnnotationDbi")'
 RUN Rscript -e 'BiocManager::install("clusterProfiler")'
 RUN Rscript -e 'BiocManager::install("R.utils")'
-RUN Rscript -e 'BiocManager::install("graph")'
 RUN Rscript -e 'BiocManager::install("FactoMineR")'
 
 RUN Rscript -e 'BiocManager::install("vsn")'

@@ -46,7 +46,7 @@ mod_designExample_server <- function(
     is.enabled = reactive({
       TRUE
     })) {
-  MagellanNTK::pkgs.require(c('magrittr', "rhandsontable"))
+  pkgs.require(c('magrittr', "rhandsontable"))
 
 
   example_2 <- function() {

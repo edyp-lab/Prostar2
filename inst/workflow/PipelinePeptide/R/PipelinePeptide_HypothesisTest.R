@@ -74,7 +74,6 @@ PipelinePeptide_HypothesisTest_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
-#' @import QFeatures
 #' 
 #' @export
 #' 

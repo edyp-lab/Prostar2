@@ -77,7 +77,7 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
 #'
 #' @export
 #' @import highcharter
-#' @import graphics
+#' @importFrom graphics hist
 #'
 histPValue_HC <- function(pval_ll, bins = 80, pi0 = 1) {
 

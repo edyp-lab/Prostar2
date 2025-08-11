@@ -205,7 +205,7 @@ PipelineTest_Normalization_server <- function(id,
         assay(new.dataset) <- rv.custom$tmpAssay
         DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
-        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
+        rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'Normalization')
         
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES

@@ -93,6 +93,7 @@ mod_settings_ui <- function(id) {
 #'
 #' @import highcharter
 #' @importFrom shinyjs onclick toggle
+#' @importFrom stats rnorm
 #'
 #'
 mod_settings_server <- function(

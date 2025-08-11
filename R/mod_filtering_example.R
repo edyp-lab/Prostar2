@@ -90,7 +90,7 @@ mod_filtering_example_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    MagellanNTK::pkgs.require('magrittr')
+    pkgs.require('magrittr')
     output$show_title <- renderUI({
       h3(title())
     })
@@ -132,7 +132,7 @@ mod_filtering_example_server <- function(
 
 
     DarkenColors <- function(ColorsHex) {
-      MagellanNTK::pkgs.require('grDevices')
+      pkgs.require('grDevices')
       # Convert to rgb
       # This is the step where we get the matrix
       ColorsRGB <- grDevices::col2rgb(ColorsHex)

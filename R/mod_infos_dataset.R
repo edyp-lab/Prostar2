@@ -24,7 +24,6 @@ NULL
 #'
 #' @export
 #' @importFrom shiny NS tagList
-#' @import QFeatures
 #' @importFrom MagellanNTK format_DT_ui format_DT_server
 #'
 infos_dataset_ui <- function(id) {
@@ -75,7 +74,7 @@ infos_dataset_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-  MagellanNTK::pkgs.require('RColorBrewer')
+  pkgs.require('RColorBrewer')
     rv <- reactiveValues(
       dataIn = NULL
     )

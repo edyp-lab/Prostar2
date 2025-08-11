@@ -38,7 +38,6 @@ mod_DetQuantImpValues_ui <- function(id) {
 }
 
 #' @rdname mod_DetQuantImpValues
-#' @import QFeatures
 #' @export
 #'
 mod_DetQuantImpValues_server <- function(
@@ -61,7 +60,7 @@ mod_DetQuantImpValues_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    MagellanNTK::pkgs.require('omXplore')
+    pkgs.require('omXplore')
     
     output$detQuantValues_DT <- DT::renderDataTable(server = TRUE, {
       req(dataIn())

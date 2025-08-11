@@ -69,7 +69,6 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @param steps.enabled xxx
 #' @param remoteReset xxx
 #'
-#' @import QFeatures
 #' @importFrom shinyjs disabled
 #' @importFom stats setNames
 #' @importFrom utils read.csv

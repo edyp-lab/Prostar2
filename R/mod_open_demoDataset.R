@@ -47,7 +47,6 @@ open_demoDataset_ui <- function(id) {
 #'
 #' @importFrom utils data
 #' @importFrom shinyjs info
-#' @import QFeatures
 #'
 open_demoDataset_server <- function(
     id,

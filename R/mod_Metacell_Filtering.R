@@ -309,7 +309,7 @@ mod_Metacell_Filtering_server <- function(
       req(len_diff > 0)
 
       if (len_diff == 2) {
-        rv$dataIn <- QFeatures::removeAssay(tmp, length(tmp) - 1)
+        rv$dataIn <- removeAssay(tmp, length(tmp) - 1)
       } else {
         rv$dataIn <- tmp
       }

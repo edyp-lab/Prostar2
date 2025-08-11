@@ -74,7 +74,6 @@ PipelineProtein_HypothesisTest_ui <- function(id){
 #' 
 #' @importFrom stats setNames rnorm
 #' @import DaparToolshed
-#' @import QFeatures
 #' 
 #' @export
 #' 
@@ -596,7 +595,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       paramshistory(new.dataset) <- rv.custom$history
       
-      rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
+      rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
