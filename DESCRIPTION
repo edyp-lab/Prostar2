@@ -16,7 +16,6 @@ Imports:
     R6,
     shinyalert,
     DT,
-    glue,
     htmltools,
     shinyjs,
     shinyBS,
@@ -24,9 +23,7 @@ Imports:
     MagellanNTK,
     DaparToolshed,
     DaparToolshedData,
-    RColorBrewer,
     Biobase,
-    colourpicker,
     htmlwidgets,
     BiocManager,
     sass,
@@ -50,7 +47,9 @@ Suggests:
     attempt,
     processx,
     BiocStyle,
-    shinyjqui
+    shinyjqui,
+    colourpicker,
+    RColorBrewer
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/

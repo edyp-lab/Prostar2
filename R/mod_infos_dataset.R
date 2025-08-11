@@ -75,7 +75,7 @@ infos_dataset_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-
+  MagellanNTK::pkgs.require('RColorBrewer')
     rv <- reactiveValues(
       dataIn = NULL
     )

@@ -106,7 +106,7 @@ mod_settings_server <- function(
     is.enabled = reactive({
       TRUE
     })) {
-  requireNamespace(c("colourpicker", "shinyBS", 'magrittr'))
+  requireNamespace(c("RColorBrewer", "colourpicker", "shinyBS", 'magrittr'))
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
