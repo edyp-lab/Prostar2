@@ -822,7 +822,7 @@ PipelinePeptide_DA_server <- function(id,
         outfile <- tempfile(fileext = ".png")
         
         # Generate a png
-        png(outfile, width = 600, height = 500)
+        grDevices::png(outfile, width = 600, height = 500)
         calibrationPlot()
         grDevices::dev.off()
         
@@ -927,7 +927,7 @@ PipelinePeptide_DA_server <- function(id,
         outfile <- tempfile(fileext = ".png")
         
         # Generate a png
-        png(outfile, width = 600, height = 500)
+        grDevices::png(outfile, width = 600, height = 500)
         calibrationPlotAll()
         grDevices::dev.off()
         

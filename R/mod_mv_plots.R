@@ -84,7 +84,7 @@ mod_mv_plots_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-
+  MagellanNTK::pkgs.require('grDevices')
     rv <- reactiveValues(
       grp = NULL,
       mytitle = NULL,
@@ -167,7 +167,7 @@ mod_mv_plots_server <- function(
         # sends it, because deleteFile=TRUE.
         outfile <- tempfile(fileext = ".png")
         # browser()
-        png(outfile)
+        grDevices::png(outfile)
         wrapper.mvImage(obj = data(), group = rv$grp)
         grDevices::dev.off()
 

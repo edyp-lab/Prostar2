@@ -73,6 +73,7 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @importFrom shinyjs disabled
 #' @importFom stats setNames
 #' @importFrom utils read.csv
+#' @importFrom spsComps addLoader
 #'
 #' @export
 #'
