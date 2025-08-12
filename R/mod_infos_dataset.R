@@ -14,6 +14,10 @@
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(infos_dataset(Exp1_R25_prot))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 NULL
 
 

@@ -75,6 +75,10 @@
 #' }
 #'
 #' @export
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 #'
 diffAnaVolcanoplot_rCharts <- function(

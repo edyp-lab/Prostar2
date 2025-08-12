@@ -28,6 +28,10 @@
 #' pat <- c("Missing MEC", "Missing POV")
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], pattern = pat, group = grp))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

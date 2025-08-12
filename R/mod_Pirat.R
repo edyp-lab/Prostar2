@@ -26,6 +26,10 @@
 #' app <- mod_Pirat(obj.se)
 #' shiny::runApp(app)
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 #' @return A shiny app
 #'

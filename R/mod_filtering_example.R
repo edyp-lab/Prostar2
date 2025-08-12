@@ -26,6 +26,10 @@
 #' operation <- "delete"
 #' shiny::runApp(mod_filtering_example(obj, indices, operation))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

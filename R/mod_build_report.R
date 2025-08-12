@@ -17,6 +17,10 @@
 #'
 #' shiny::runApp(build_report(sub_R25, filename = "myDataset"))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

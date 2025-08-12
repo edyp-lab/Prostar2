@@ -30,6 +30,10 @@
 #' if (interactive()){
 #' shiny::runApp(workflowApp("Agregation", verbose = TRUE))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

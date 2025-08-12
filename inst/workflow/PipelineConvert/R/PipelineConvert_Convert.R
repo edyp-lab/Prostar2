@@ -23,6 +23,9 @@ options(shiny.fullstacktrace = TRUE,
 
 #' @rdname mod_convert
 #' @export
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #' 
 PipelineConvert_Convert_conf <- function(){
   # This list contains the basic configuration of the process
@@ -52,6 +55,9 @@ PipelineConvert_Convert_conf <- function(){
 #'
 #' @importFrom shiny NS tagList
 #' @import sos
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 #' @return NA
 #'
@@ -73,6 +79,9 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @importFom stats setNames
 #' @importFrom utils read.csv
 #' @importFrom spsComps addLoader
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 #' @export
 #'

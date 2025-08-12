@@ -30,6 +30,10 @@
 #' obj <- Exp1_R25_prot[seq_len(100)]
 #' mod_Prot_Normalization(obj, 1)
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

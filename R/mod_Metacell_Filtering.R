@@ -41,6 +41,9 @@
 #' )
 #' }
 #'
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 NULL
 
 

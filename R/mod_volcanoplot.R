@@ -56,6 +56,10 @@
 #' )
 #' shiny::runApp(volcanoplot(xxxx))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 
@@ -65,6 +69,7 @@ NULL
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
 #' @importFrom DT dataTableOutput renderDataTable datatable formatStyle styleEqual
+#' @importFrom highcharter highchartOutput
 #' @export
 #' @rdname volcanoplot
 #'
@@ -82,6 +87,7 @@ mod_volcanoplot_ui <- function(id) {
 
 #' @export
 #' @rdname volcanoplot
+#' @import MagellanNTK
 #'
 mod_volcanoplot_server <- function(
     id,

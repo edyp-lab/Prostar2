@@ -1,7 +1,16 @@
-
+#' @title xxx
+#' @name PipelineProtein_Save
+#' 
+#' @examples
+#' NULL
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
+#' 
 
 #' @export
-#' 
+#' @rdname PipelineProtein_Save
 PipelineProtein_Save_conf <- function(){
   MagellanNTK::Config(
     fullname = 'PipelineProtein_Save',
@@ -12,12 +21,14 @@ PipelineProtein_Save_conf <- function(){
 
 
 #' @export
+#' @rdname PipelineProtein_Save
 PipelineProtein_Save_ui <- function(id){
   ns <- NS(id)
 }
 
 
 #' @export
+#' @rdname PipelineProtein_Save
 PipelineProtein_Save_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),

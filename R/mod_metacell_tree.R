@@ -20,6 +20,10 @@
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(mod_metacell_tree(Exp1_R25_prot[[1]]))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

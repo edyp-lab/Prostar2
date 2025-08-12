@@ -19,6 +19,9 @@
 #' }
 #'
 #' @name Convert_wrapper
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

@@ -35,8 +35,17 @@
 #' proc_workflowApp("PipelinePeptide_Aggregation", path, dataIn = obj)
 #' }
 #' 
-#' @rdname PipelinePeptide
+#' @name PipelinePeptide
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
+#'
+NULL
+
+
 #' @export
+#' @rdname PipelinePeptide
 #' 
 PipelinePeptide_Aggregation_conf <- function(){
   MagellanNTK::Config(

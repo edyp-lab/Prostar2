@@ -9,6 +9,10 @@
 #' 
 #' @export
 #' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
+#' 
 #' @author Samuel Wieczorek
 #' 
 pkgs.require <- function(ll.deps){

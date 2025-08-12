@@ -16,6 +16,9 @@
 #' @export
 #'
 #' @importFrom shiny NS tagList
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 mod_settings_ui <- function(id) {
   ns <- NS(id)

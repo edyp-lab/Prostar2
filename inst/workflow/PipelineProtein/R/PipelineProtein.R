@@ -18,6 +18,9 @@
 #' 
 #' @example inst/workflow/PipelineProtein/examples/example_pipelineProtein.R
 #' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #' 
 NULL
 

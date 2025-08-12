@@ -1,8 +1,12 @@
+#' @title xxx
+#' @name PipelineProtein_Description
+#' #' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
+#' 
+NULL
 
-###
-###
-###
-
+#' @rdname PipelineProtein_Description
 #' @export
 #' 
 PipelineProtein_Description_conf <- function(){
@@ -15,6 +19,7 @@ PipelineProtein_Description_conf <- function(){
 
 
 #' @export
+#' @rdname PipelineProtein_Description
 PipelineProtein_Description_ui <- function(id){
   ns <- NS(id)
 
@@ -23,6 +28,7 @@ PipelineProtein_Description_ui <- function(id){
 
 
 #' @export
+#' @rdname PipelineProtein_Description
 PipelineProtein_Description_server <- function(id,
     dataIn = reactive({NULL}),
     steps.enabled = reactive({NULL}),

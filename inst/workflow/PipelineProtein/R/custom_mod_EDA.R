@@ -1,5 +1,6 @@
 
 #' @export
+#' @import shiny
 custom_EDA_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -10,6 +11,7 @@ custom_EDA_ui <- function(id){
 }
 
 #' @export
+#' @import shiny
 custom_EDA_server <- function(id, object = reactive({NULL})){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

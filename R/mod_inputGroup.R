@@ -16,6 +16,10 @@
 #' if (interactive()){
 #' shiny::runApp(Prostar2::mod_inputGroup())
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

@@ -43,6 +43,10 @@
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

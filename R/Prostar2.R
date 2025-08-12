@@ -9,7 +9,6 @@
 #' @examples
 #' if (interactive()){
 #' library(Prostar2)
-#' library(DaparToolshed)
 #' Prostar2("PipelineProtein")
 #' Prostar2("PipelineProtein", user = "dev")
 #' Prostar2("PipelinePeptide")
@@ -29,13 +28,26 @@ Prostar2 <- function(
     launch.browser = TRUE
   )
 
+  data(Exp1_R25_prot, package = 'DaparToolshedData')
+  obj <- Exp1_R25_prot
+  
+  # Launch in the Magellan workspace
+  wf.name <- 'PipelineProtein'
+  #wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
   wf.path <- system.file(paste0("workflow/", wf.name), package = "Prostar2")
 
   MagellanNTK::MagellanNTK(
-    obj = NULL,
+    obj = obj,
     workflow.path = wf.path,
     workflow.name = wf.name,
     usermod = usermod,
     verbose = verbose
   )
+  
+  
+  
+  
+  
+  
+  
 }

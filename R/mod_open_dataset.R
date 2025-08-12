@@ -14,6 +14,10 @@
 #' if (interactive()){
 #' shiny::runApp(Prostar2::open_dataset())
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

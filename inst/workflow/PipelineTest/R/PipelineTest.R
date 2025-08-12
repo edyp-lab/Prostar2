@@ -17,7 +17,9 @@
 #' @name PipelineTest
 #' 
 #' @example inst/workflow/PipelineTest/examples/example_pipelineTest.R
-#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #' 
 NULL
 

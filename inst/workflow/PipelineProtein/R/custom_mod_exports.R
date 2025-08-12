@@ -7,6 +7,8 @@
 #' @param object xxx
 #' 
 #' @name default_export_plugin
+#' 
+#' @import shiny
 
 
 #' @export

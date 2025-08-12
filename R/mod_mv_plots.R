@@ -23,6 +23,10 @@
 #' grp <- design.qf(Exp1_R25_prot)$Condition
 #' shiny::runApp(mod_mv_plots(obj[[4]], pattern = pattern, grp = grp))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

@@ -32,6 +32,10 @@
 #' @export
 #' 
 #' @importFrom cp4p calibration.plot
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
+#' 
 #'
 wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
   if (is.null(vPVal)) {
@@ -76,6 +80,9 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
 #' @export
 #' @import highcharter
 #' @importFrom graphics hist
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 histPValue_HC <- function(pval_ll, bins = 80, pi0 = 1) {
 

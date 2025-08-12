@@ -12,6 +12,10 @@
 #' data(lldata)
 #' shiny::runApp(export_dataset(lldata))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 #' @return A list
 #'

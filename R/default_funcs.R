@@ -39,6 +39,7 @@
 #' @name dataset-processing
 #'
 #' @importFrom methods setMethod new
+#' @import QFeatures
 #'
 #'
 NULL

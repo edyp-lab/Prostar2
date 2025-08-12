@@ -4,6 +4,9 @@
 ###
 
 #' @export
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #' 
 PipelineTest_Description_conf <- function(){
   MagellanNTK::Config(
@@ -15,12 +18,18 @@ PipelineTest_Description_conf <- function(){
 
 
 #' @export
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 PipelineTest_Description_ui <- function(id){
   ns <- NS(id)
 }
 
 
 #' @export
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 PipelineTest_Description_server <- function(id,
     dataIn = reactive({NULL}),
     steps.enabled = reactive({NULL}),

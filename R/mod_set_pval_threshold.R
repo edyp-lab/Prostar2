@@ -16,6 +16,10 @@
 #' if (interactive()){
 #' shiny::runApp(mod_set_pval_threshold())
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

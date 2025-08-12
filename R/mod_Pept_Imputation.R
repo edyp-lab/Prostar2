@@ -30,6 +30,10 @@
 #' obj <- Exp1_R25_pept[seq_len(100)]
 #' shiny::runApp(mod_Pept_Imputation(obj, 1))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

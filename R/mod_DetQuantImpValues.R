@@ -4,6 +4,9 @@
 #' @export
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 #' @param id xxx
 #' @param obj xxx

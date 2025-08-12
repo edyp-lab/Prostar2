@@ -16,6 +16,10 @@
 #' if (interactive()){
 #' shiny::runApp(mod_buildDesign(letters[seq(6)]))
 #' }
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 

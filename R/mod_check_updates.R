@@ -9,6 +9,10 @@
 #' }
 #'
 #' @name mod-check-updates
+#' 
+#' @import QFeatures
+#' @import DaparToolshed
+#' @import MagellanNTK
 #'
 NULL
 
