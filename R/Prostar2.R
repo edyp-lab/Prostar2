@@ -25,9 +25,14 @@ Prostar2 <- function(
     shiny.fullstacktrace = TRUE,
     port = 3838,
     host = "127.0.0.1",
-    launch.browser = TRUE
+    launch.browser = FALSE
   )
 
+  
+  require(QFeatures)
+  require(MagellanNTK)
+  
+  
   data(Exp1_R25_prot, package = 'DaparToolshedData')
   obj <- Exp1_R25_prot
   
@@ -39,9 +44,9 @@ Prostar2 <- function(
   MagellanNTK::MagellanNTK(
     obj = obj,
     workflow.path = wf.path,
-    workflow.name = wf.name,
-    usermod = usermod,
-    verbose = verbose
+    workflow.name = wf.name
+   # usermod = usermod,
+   # verbose = verbose
   )
   
   

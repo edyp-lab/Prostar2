@@ -88,6 +88,8 @@ PipelineProtein_Imputation_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
+  
+  pkgs.require(c('QFeatures', 'SummarizedExperiment'))
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -136,10 +138,9 @@ PipelineProtein_Imputation_server <- function(id,
     eval(str2expression(core.code))
     
     
-    
     observe({
       #Utile for the MEC imputation
-      qdata <- assay(dataIn()[[length(dataIn())]])
+      qdata <- SummarizedExperiment::assay(dataIn()[[length(dataIn())]])
       rv.custom$mv.present <- sum(is.na(qdata)) > 0
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

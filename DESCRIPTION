@@ -23,12 +23,13 @@ Imports:
     BiocManager,
     rhandsontable,
     methods, 
-    tibble
+    tibble,
+    QFeatures
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,
     git::https://github.com/edyp-lab/DaparToolshedData,
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
 Suggests: 
     testthat (>= 2.1.0),
