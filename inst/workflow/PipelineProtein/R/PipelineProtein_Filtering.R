@@ -86,6 +86,7 @@ PipelineProtein_Filtering_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   
   # Define default selected values for widgets
@@ -341,7 +342,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       .html <- rv.custom$funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
-      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+      .nbRemaining <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
       
       rv.custom$qMetacell_Filter_SummaryDT <- rbind(
         rv.custom$qMetacell_Filter_SummaryDT ,
@@ -458,7 +459,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Variablefiltering_cname_ui <- renderUI({
       req(rv.custom$dataIn1)
-      .choices <- c("None", colnames(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
+      .choices <- c("None", colnames(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
       
       widget <- selectInput(ns("Variablefiltering_cname"),
         "Column name",
@@ -473,10 +474,10 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Variablefiltering_operator_ui <- renderUI({
       req(rv.custom$dataIn1)
-      req(rv.widgets$Variablefiltering_cname %in% colnames(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
+      req(rv.widgets$Variablefiltering_cname %in% colnames(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
       
       
-      if (is.numeric(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])) {
+      if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])) {
         .operator <- DaparToolshed::SymFilteringOperators()
       } else {
         .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
@@ -531,9 +532,9 @@ PipelineProtein_Filtering_server <- function(id,
       val <- tryCatch({
         
         
-        if (is.numeric(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname]) ) {
+        if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname]) ) {
           as.numeric(value)
-        } else if (!is.numeric(rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])){
+        } else if (!is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])){
           as.character(value)
         }
       },
@@ -657,8 +658,8 @@ PipelineProtein_Filtering_server <- function(id,
         
         .html <- rv.custom$Variablefiltering_funFilter$ll.query
         .nbDeleted <- nBefore - nAfter
-        .nbBefore <- nrow(assay(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]))
-        .nbAfter <- nrow(assay(tmp[[length(tmp)]]))
+        .nbBefore <- nrow(aSummarizedExperiment::ssay(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]))
+        .nbAfter <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
         
         rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
           rv.custom$Variablefiltering_variable_Filter_SummaryDT , 

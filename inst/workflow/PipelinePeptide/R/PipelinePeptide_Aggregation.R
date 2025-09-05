@@ -285,7 +285,7 @@ PipelinePeptide_Aggregation_server <- function(id,
         return(NULL)
       }
       
-      .choices <- colnames(rowData(last_assay(rv$dataIn)))
+      .choices <- colnames(SummarizedExperiment::rowData(last_assay(rv$dataIn)))
       widget <- selectInput(ns("Aggregation_proteinId"),
         "Choose the protein ID",
         choices = c("None", .choices),
@@ -457,7 +457,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation_addRowData_ui <- renderUI({
       widget <- selectInput(ns("Aggregation_addRowData"), 
                             mod_popover_for_help_ui(ns("modulePopover_addRowData")),
-                            colnames(rowData(last_assay(rv$dataIn))),
+                            colnames(SummarizedExperiment::rowData(last_assay(rv$dataIn))),
                             selected = rv.widgets$Aggregation_addRowData,
                             multiple = TRUE
       )
@@ -553,7 +553,7 @@ PipelinePeptide_Aggregation_server <- function(id,
         if (typeDataset(rv$dataIn[[k]]) != "protein")
           i_datapept <- k
       }
-      res <- DaparToolshed::getProteinsStats(rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
+      res <- DaparToolshed::getProteinsStats(SummarizedExperiment::rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
       
       rv.custom$AggregProtStatsPept$desc <- c(
         "Total number of peptides",
@@ -582,7 +582,7 @@ PipelinePeptide_Aggregation_server <- function(id,
         if (typeDataset(rv$dataIn[[k]]) != "protein")
           i_datapept <- k
       }
-      res <- DaparToolshed::getProteinsStats(rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
+      res <- DaparToolshed::getProteinsStats(SummarizedExperiment::rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
       
       rv.custom$AggregProtStatsProt$desc <- c(
         "Total number of proteins",

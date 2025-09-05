@@ -63,6 +63,8 @@ infos_dataset_ui <- function(id) {
 #' @keywords internal
 #'
 #' @importFrom tibble as_tibble
+#' @import SummarizedExperiment
+#' @import S4Vectors
 #'
 infos_dataset_server <- function(
     id,
@@ -138,7 +140,7 @@ infos_dataset_server <- function(
       tagList(
         h3("Dataset summary"),
         p(paste0("Name of analysis:", name$analysis)),
-        p(paste0("Original file:", metadata(rv$dataIn)$file))
+        p(paste0("Original file:", S4Vectors::metadata(rv$dataIn)$file))
       )
     })
 
@@ -157,7 +159,7 @@ infos_dataset_server <- function(
       req(rv$dataIn)
       nb_assay <- length(rv$dataIn)
       names_assay <- unlist(names(rv$dataIn))
-      pipeline <- metadata(rv$dataIn)$pipelineType
+      pipeline <- S4Vectors::metadata(rv$dataIn)$pipelineType
 
       columns <- c(
         "Pipeline Type",
@@ -166,7 +168,7 @@ infos_dataset_server <- function(
       )
 
       vals <- c(
-        if (is.null(metadata(rv$dataIn)$pipelineType)) "-" else metadata(rv$dataIn)$pipelineType,
+        if (is.null(metadata(rv$dataIn)$pipelineType)) "-" else S4Vectors::metadata(rv$dataIn)$pipelineType,
         length(rv$dataIn),
         if (length(rv$dataIn) == 0) {
           "-"
@@ -210,13 +212,13 @@ infos_dataset_server <- function(
       )
 
       if (tolower(typeOfData) == "peptide") {
-        if (length(metadata(.se)$list.matAdj) > 0) {
+        if (length(S4Vectors::metadata(.se)$list.matAdj) > 0) {
           adjMat.txt <- "<span style=\"color: lime\">OK</span>"
         } else {
           adjMat.txt <- "<span style=\"color: red\">Missing</span>"
         }
 
-        if (!is.null(metadata(.se)$list.cc)) {
+        if (!is.null(S4Vectors::metadata(.se)$list.cc)) {
           cc.txt <- "<span style=\"color: lime\">OK</span>"
         } else {
           cc.txt <- "<span style=\"color: red\">Missing</span>"

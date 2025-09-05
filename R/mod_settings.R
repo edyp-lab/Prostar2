@@ -126,7 +126,7 @@ mod_settings_server <- function(
         warning("mod_settings: 'dataIn()' is not of class 'QFeatures'.")
         return(NULL)
       }
-      rv.settings$conditions <- colData(dataIn())[["Condition"]]
+      rv.settings$conditions <- SummarizedExperiment::colData(dataIn())[["Condition"]]
     })
 
 

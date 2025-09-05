@@ -8,6 +8,9 @@ library(Prostar2)
 library(DaparToolshed)
 library(bs4Dash)
 library(shinyFeedback)
+library(SummarizedExperiment)
+
+
 options(shiny.fullstacktrace = TRUE)
 
 history <- list()
@@ -16,7 +19,7 @@ obj <- Exp1_R25_prot
 # Simulate imputation of missing values
 obj <- NAIsZero(obj, 1)
 obj <- NAIsZero(obj, 2)
-qData <- as.matrix(assay(obj[[2]]))
+qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 sTab <- colData(obj)
 limma <- limmaCompleteTest(qData, sTab, comp.type = "OnevsAll")
 df <- cbind(limma$logFC, limma$P_Value)

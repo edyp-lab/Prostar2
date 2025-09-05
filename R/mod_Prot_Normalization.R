@@ -99,6 +99,8 @@ mod_Prot_Normalization_ui <- function(id) {
 #' @rdname mod_Prot_Normalization
 #' 
 #' @importFrom stats setNames
+#' @import S4Vectors
+#' @import SummarizedExperiment
 #' @importFrom shinyjs toggle hidden
 #' @importFrom DaparToolshed normalizeMethods idcol compareNormalizationD_HC GlobalQuantileAlignment QuantileCentering SumByColumns LOESS vsn paramshistory
 #'
@@ -332,8 +334,8 @@ mod_Prot_Normalization_server <- function(
 
 
       DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = assay(rv$dataIn, length(rv$dataIn)),
-        qDataAfter = assay(rv$dataIn, length(rv$dataIn) - 1),
+        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn) - 1),
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
         conds = design.qf(rv$dataIn)$Condition,
         pal = NULL,
@@ -366,7 +368,7 @@ mod_Prot_Normalization_server <- function(
         condition = (rv.widgets$Normalization_method %in% .choice)
       )
 
-      cond <- metadata(rv$dataIn[[length(rv$dataIn)]])[["typeDataset"]] == "protein"
+      cond <- S4Vectors::metadata(rv$dataIn[[length(rv$dataIn)]])[["typeDataset"]] == "protein"
 
       .meths <- DaparToolshed::normalizeMethods("withTracking")
       trackAvailable <- rv.widgets$Normalization_method %in% .meths
@@ -405,7 +407,7 @@ mod_Prot_Normalization_server <- function(
       rv.custom$tmpAssay <- NULL
       try({
         .conds <- colData(rv$dataIn)[, "Condition"]
-        qdata <- assay(rv$dataIn, length(rv$dataIn))
+        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
 
 
         switch(rv.widgets$Normalization_method,
@@ -500,7 +502,7 @@ mod_Prot_Normalization_server <- function(
         dataOut$value <- rv$dataIn
       } else {
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        assay(new.dataset) <- rv.custom$tmpAssay
+        SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
         DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- addAssay(rv$dataIn, new.dataset, "Normalization")

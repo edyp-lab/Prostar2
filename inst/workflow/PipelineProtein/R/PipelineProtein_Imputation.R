@@ -89,7 +89,7 @@ PipelineProtein_Imputation_server <- function(id,
 ){
   
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment'))
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(

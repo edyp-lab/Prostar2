@@ -83,6 +83,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 #' @export
 #' @importFrom stats setNames
 #' @importFrom DaparToolshed paramshistory
+#' @import SummarizedExperiment
 #'
 mod_Metacell_Filtering_server <- function(
     id,
@@ -296,7 +297,7 @@ mod_Metacell_Filtering_server <- function(
 
       .html <- rv.custom$funFilter()$value$ll.query
       .nbDeleted <- nBefore - nAfter
-      .nbRemaining <- nrow(assay(tmp[[length(tmp)]]))
+      .nbRemaining <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
 
       rv.custom$qMetacell_Filter_SummaryDT <- rbind(
         rv.custom$qMetacell_Filter_SummaryDT,

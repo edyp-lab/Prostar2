@@ -86,6 +86,7 @@ of the class \code{SummarizedExperiment})
 if (interactive()){
 library(DaparToolshed)
 library(shinyBS)
+library(SummarizedExperiment)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[[1]]
 conds <- colData(Exp1_R25_prot)$Condition

@@ -70,6 +70,7 @@ mod_Pept_Imputation_ui <- function(id) {
 #' @export
 #' 
 #' @importFrom DaparToolshed typeDataset
+#' @import SummarizedExperiment
 #'
 mod_Pept_Imputation_server <- function(
     id,
@@ -181,7 +182,7 @@ mod_Pept_Imputation_server <- function(
 
     output$Imp_UI <- renderUI({
       # Checks if
-      .data <- assay(rv$dataIn[[length(rv$dataIn)]])
+      .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
       nbEmptyLines <- getNumberOfEmptyLines(.data)
       if (nbEmptyLines > 0) {
         tags$p("Your dataset contains empty lines (fully filled with missing

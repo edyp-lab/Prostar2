@@ -18,12 +18,13 @@
 #' @examples
 #' if (interactive()){
 #' library(DaparToolshed)
+#' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
-#'  <- as.matrix(assay(obj[[2]]))
+#'  <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 #' sTab <- colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' wrapperCalibrationPlot(limma$P_Value[, 1])
@@ -62,13 +63,13 @@ wrapperCalibrationPlot <- function(vPVal, pi0Method = "pounds") {
 #' @examples
 #' if (interactive()){
 #' library(DaparToolshed)
-
+#' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
-#'  <- as.matrix(assay(obj[[2]]))
+#'  <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 #' sTab <- colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' histPValue_HC(limma$P_Value[1])
@@ -205,13 +206,13 @@ diffAnaComputeFDR <- function(adj.pvals) {
 #' @examples
 #' if (interactive()){
 #' library(DaparToolshed)
-
+#' libray(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
-#'  <- as.matrix(assay(obj[[2]]))
+#'  <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 #' sTab <- colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' df <- data.frame(id = rownames(limma$logFC), logFC = limma$logFC[, 1], pval = limma$P_Value[, 1])

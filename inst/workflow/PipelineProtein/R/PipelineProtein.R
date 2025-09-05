@@ -88,6 +88,7 @@ PipelineProtein_server <- function(id,
   ){
 
 
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   
   # Contrary to the simple workflow, there is no widget in this module

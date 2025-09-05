@@ -56,6 +56,8 @@ mod_Pirat_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer reactiveVal reactiveValues renderUI
 #' selectInput observeEvent withProgress setProgress req reactive renderPlot
+#' @import SummarizedExperiment
+#' @import S4Vectors
 #' @export
 #' @return A shiny app
 #'
@@ -102,10 +104,10 @@ mod_Pirat_server <- function(
       }
 
       data(list(
-        peptides_ab = t(assay(dataIn())),
-        adj = metadata(dataIn())$adj,
-        mask_prot_diff = metadata(dataIn())$mask_prot_diff,
-        mask_pep_diff = metadata(dataIn())$mask_pep_diff
+        peptides_ab = t(SummarizedExperiment::assay(dataIn())),
+        adj = S4Vectors::metadata(dataIn())$adj,
+        mask_prot_diff = S4Vectors::metadata(dataIn())$mask_prot_diff,
+        mask_pep_diff = S4Vectors::metadata(dataIn())$mask_pep_diff
       ))
     })
 

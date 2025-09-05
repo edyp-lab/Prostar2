@@ -40,6 +40,7 @@ PipelineProtein_Description_server <- function(id,
 ){
   
 
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   
   

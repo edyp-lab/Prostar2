@@ -96,6 +96,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  
+  
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -252,7 +255,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     output$HypothesisTest_warning_conditions_ui <- renderUI({
       req(rv$dataIn)
       req(length(unique(DaparToolshed::design.qf(rv$dataIn)$Condition)) > 26)
-      req(getDesignLevel(colData(rv$dataIn)) > 1)
+      req(getDesignLevel(SummarizedExperiment::colData(rv$dataIn)) > 1)
       h3('Limma with this version of Prostar does not handle datasets with 
       more than 26 conditions. Such, the Limma option is desactivated for the 
         current dataset')
@@ -453,8 +456,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         switch(rv.widgets$HypothesisTest_method,
           Limma = {
             DaparToolshed::limmaCompleteTest(
-              qData = assay(rv$dataIn, length(rv$dataIn)),
-              sTab = colData(rv$dataIn),
+              qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+              sTab = SummarizedExperiment::colData(rv$dataIn),
               comp.type = rv.widgets$HypothesisTest_design
             )
           },
@@ -535,7 +538,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       enable <- TRUE
       
       nConds <-length(unique(DaparToolshed::design.qf(rv$dataIn)$Condition))
-      design <- colData(rv$dataIn)
+      design <- SummarizedExperiment::colData(rv$dataIn)
       nLevel <- DaparToolshed::getDesignLevel(design)   
       enable <- (nConds <= 26 && nLevel == 1) ||
         (nConds < 10 && (nLevel%in% c(2,3)))

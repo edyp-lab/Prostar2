@@ -72,6 +72,7 @@ mod_Agregation_ui <- function(id) {
 #' @importFrom MagellanNTK Timestamp toggleWidget Get_Workflow_Core_Code
 #' @importFrom DaparToolshed AdjMatFilters
 #' @importFrom DT DTOutput
+#' @import SummarizedExperiment
 #'
 #' @export
 #'

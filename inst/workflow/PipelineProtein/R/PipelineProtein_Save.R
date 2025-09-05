@@ -39,6 +39,7 @@ PipelineProtein_Save_server <- function(id,
 ){
   
   
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # By default, this list is empty for the Save module

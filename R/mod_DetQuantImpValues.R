@@ -32,6 +32,7 @@ NULL
 
 
 #' @rdname mod_DetQuantImpValues
+#' @import SummarizedExperiment
 #' @export
 #'
 mod_DetQuantImpValues_ui <- function(id) {
@@ -71,7 +72,7 @@ mod_DetQuantImpValues_server <- function(
       req(dataIn())
 
       values <- getQuantile4Imp(
-        assay(dataIn()),
+        SummarizedExperiment::assay(dataIn()),
         quant() / 100, factor()
       )
       DT::datatable(as.data.frame(t(values$shiftedImpVal)),

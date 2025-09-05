@@ -65,12 +65,13 @@ A shiny Module.
 if (interactive()){
 library(highcharter)
 library(DaparToolshed)
+library(SummarizedExperiment)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot
 # Simulate imputation of missing values
 obj <- DaparToolshed::NAIsZero(obj, 1)
 obj <- DaparToolshed::NAIsZero(obj, 2)
-qData <- as.matrix(assay(obj[[2]]))
+qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 sTab <- colData(obj)
 limma <- limmaCompleteTest(qData, sTab)
 

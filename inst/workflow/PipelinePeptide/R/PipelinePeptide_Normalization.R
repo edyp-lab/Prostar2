@@ -417,9 +417,9 @@ PipelinePeptide_Normalization_server <- function(id,
       
       
       DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = assay(rv$dataIn, length(rv$dataIn)),
-        qDataAfter = assay(rv$dataIn, length(rv$dataIn)-1),
-        keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
+        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
+        keyId = SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
         conds = DaparToolshed::design.qf(rv$dataIn)$Condition,
         pal = NULL,
         # Consider only 2% of the entire dataset
@@ -447,7 +447,7 @@ PipelinePeptide_Normalization_server <- function(id,
         condition = (rv.widgets$Normalization_method %in% .choice)
       )
       
-      cond <- metadata(rv$dataIn[[length(rv$dataIn)]])[['typeDataset']] == "Peptide"
+      cond <- S4Vectors::metadata(rv$dataIn[[length(rv$dataIn)]])[['typeDataset']] == "Peptide"
       
       .meths <- DaparToolshed::normalizeMethods('withTracking')
       trackAvailable <- rv.widgets$Normalization_method %in% .meths
@@ -493,8 +493,8 @@ PipelinePeptide_Normalization_server <- function(id,
       
       rv.custom$tmpAssay <- NULL
       try({
-        .conds <- colData(rv$dataIn)[, "Condition"]
-        qdata <- assay(rv$dataIn, length(rv$dataIn))
+        .conds <- SummarizedExperiment::colData(rv$dataIn)[, "Condition"]
+        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
         
         
         switch(rv.widgets$Normalization_method,
@@ -595,7 +595,7 @@ PipelinePeptide_Normalization_server <- function(id,
       } else {
         
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        assay(new.dataset) <- rv.custom$tmpAssay
+        SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
         DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'Normalization')

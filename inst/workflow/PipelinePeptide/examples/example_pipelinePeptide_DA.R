@@ -4,6 +4,7 @@ library(DaparToolshed)
 library(Prostar2)
 library(omXplore)
 library(DaparToolshed)
+library(SummarizedExperiment)
 
 history <- list()
 data(Exp1_R25_pept, package = "DaparToolshedData")
@@ -11,7 +12,7 @@ obj <- Exp1_R25_pept
 # Simulate imputation of missing values
 obj <- NAIsZero(obj, 1)
 obj <- NAIsZero(obj, 2)
-qData <- as.matrix(assay(obj[[2]]))
+qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 sTab <- colData(obj)
 limma <- limmaCompleteTest(qData, sTab, comp.type = "OnevsAll")
 df <- cbind(limma$logFC, limma$P_Value)

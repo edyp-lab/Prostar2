@@ -36,6 +36,7 @@ NULL
 #'
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs useShinyjs hidden
+#' @import SummarizedExperiment
 #'
 #' @rdname mod_tracker
 #'

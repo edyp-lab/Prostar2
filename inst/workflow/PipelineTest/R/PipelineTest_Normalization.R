@@ -206,7 +206,7 @@ PipelineTest_Normalization_server <- function(id,
       req(rv$dataIn)
       
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        assay(new.dataset) <- rv.custom$tmpAssay
+        SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
         DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'Normalization')

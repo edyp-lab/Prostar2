@@ -39,12 +39,13 @@
 #' library(DaparToolshed)
 #' library(Prostar2)
 #' library(omXplore)
+#' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
-#' qData <- as.matrix(assay(obj[[2]]))
+#' qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
 #' sTab <- colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' df <- cbind(limma$logFC, limma$P_Value)
@@ -426,7 +427,7 @@ PipelinePeptide_DA_server <- function(id,
         MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
         selectInput(ns("Pairwisecomparison_tooltipInfo"),
           label = NULL,
-          choices = colnames(rowData(rv$dataIn[[length(rv$dataIn)]])),
+          choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
           selected = rv.widgets$Pairwisecomparison_tooltipInfo,
           multiple = TRUE,
           selectize = FALSE,
@@ -1084,7 +1085,7 @@ PipelinePeptide_DA_server <- function(id,
         rv.custom$thpval
       ))
       
-      rv.custom$nbTotalAnaDiff <- nrow(assay(rv$dataIn[[length(rv$dataIn)]]))
+      rv.custom$nbTotalAnaDiff <- nrow(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]))
       rv.custom$nbSelectedAnaDiff <- NULL
       t <- NULL
       
@@ -1332,7 +1333,7 @@ PipelinePeptide_DA_server <- function(id,
       .digits <- 3
       
       pval_table <- data.frame(
-        id = rownames(assay(rv$dataIn[[length(rv$dataIn)]])),
+        id = rownames(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])),
         logFC = round(.logfc, digits = .digits),
         P_Value = .pval,
         Log_PValue = -log10(.pval),
@@ -1365,7 +1366,7 @@ PipelinePeptide_DA_server <- function(id,
       
       
       tmp <- as.data.frame(
-        rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
+        SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
       )
       names(tmp) <- rv.custom$Pairwisecomparison_tooltipInfo
       pval_table <- cbind(pval_table, tmp)
