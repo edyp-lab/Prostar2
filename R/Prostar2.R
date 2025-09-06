@@ -1,7 +1,8 @@
 #' @title xxx
 #' @description xxxx
-#' @importFrom  MagellanNTK MagellanNTK
-#'
+#' @import  MagellanNTK 
+#' @import QFeatures
+#' 
 #' @param wf.name xxx
 #' @param usermod xxx
 #' @param verbose xxx
@@ -29,8 +30,6 @@ Prostar2 <- function(
   )
 
   
-  require(QFeatures)
-  require(MagellanNTK)
   
   
   data(Exp1_R25_prot, package = 'DaparToolshedData')
