@@ -24,7 +24,9 @@ Imports:
     rhandsontable,
     methods, 
     tibble,
-    QFeatures
+    QFeatures,
+    S4Vectors,
+    SummarizedExperiment
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,
