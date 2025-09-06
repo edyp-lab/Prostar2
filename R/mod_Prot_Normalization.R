@@ -406,7 +406,7 @@ mod_Prot_Normalization_server <- function(
 
       rv.custom$tmpAssay <- NULL
       try({
-        .conds <- colData(rv$dataIn)[, "Condition"]
+        .conds <- SummarizedExperiment::colData(rv$dataIn)[, "Condition"]
         qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
 
 

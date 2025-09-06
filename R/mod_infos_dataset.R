@@ -98,15 +98,15 @@ infos_dataset_server <- function(
         dataIn = reactive({
           req((rv$dataIn))
 
-          data.frame(colData(rv$dataIn))
+          data.frame(SummarizedExperiment::colData(rv$dataIn))
         }),
-        max.rows = nrow(colData(rv$dataIn)),
+        max.rows = nrow(SummarizedExperiment::colData(rv$dataIn)),
         hc_style = reactive({
           list(
-            cols = colnames(colData(rv$dataIn)),
-            vals = colnames(colData(rv$dataIn))[2],
-            unique = unique(colData(rv$dataIn)$Condition),
-            pal = RColorBrewer::brewer.pal(3, "Dark2")[seq(length(unique(colData(rv$dataIn)$Condition)))]
+            cols = colnames(SummarizedExperiment::colData(rv$dataIn)),
+            vals = colnames(SummarizedExperiment::colData(rv$dataIn))[2],
+            unique = unique(SummarizedExperiment::colData(rv$dataIn)$Condition),
+            pal = RColorBrewer::brewer.pal(3, "Dark2")[seq(length(unique(SummarizedExperiment::colData(rv$dataIn)$Condition)))]
           )
         })
       )
