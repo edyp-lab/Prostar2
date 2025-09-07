@@ -1,9 +1,8 @@
 
 
 #' @export
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 PipelineTest_Save_conf <- function(){
   MagellanNTK::Config(
     fullname = 'PipelineTest_Save',
@@ -14,9 +13,8 @@ PipelineTest_Save_conf <- function(){
 
 
 #' @export
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 PipelineTest_Save_ui <- function(id){
   ns <- NS(id)
 }

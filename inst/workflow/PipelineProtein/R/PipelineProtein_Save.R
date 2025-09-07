@@ -4,9 +4,8 @@
 #' @examples
 #' NULL
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #' 
 
 #' @export

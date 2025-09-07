@@ -23,9 +23,8 @@
 #' shiny::runApp(workflowApp("PipelineProtein_Imputation", path, dataIn = Exp1_R25_prot))
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #' 
 NULL
 

@@ -58,9 +58,9 @@
 #' shiny::runApp(volcanoplot(xxxx))
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_ui format_DT_server Timestamp toggleWidget mod_popover_for_help_server mod_popover_for_help_ui
 #'
 NULL
 
@@ -88,8 +88,7 @@ mod_volcanoplot_ui <- function(id) {
 
 #' @export
 #' @rdname volcanoplot
-#' @import MagellanNTK
-#' @import SummarizedExperiment
+#' @importFrom SummarizedExperiment rowData assay colData
 #'
 mod_volcanoplot_server <- function(
     id,

@@ -1,8 +1,7 @@
 #' @title xxx
 #' @name PipelineProtein_Description
-#' #' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #' 
 NULL
 

@@ -27,9 +27,9 @@
 #' shiny::runApp(app)
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_server Timestamp toggleWidget
 #'
 #' @return A shiny app
 #'
@@ -56,8 +56,8 @@ mod_Pirat_ui <- function(id) {
 #'
 #' @importFrom shiny moduleServer reactiveVal reactiveValues renderUI
 #' selectInput observeEvent withProgress setProgress req reactive renderPlot
-#' @import SummarizedExperiment
-#' @import S4Vectors
+#' @importFrom SummarizedExperiment rowData assay
+#' @importFrom S4Vectors metadata
 #' @export
 #' @return A shiny app
 #'

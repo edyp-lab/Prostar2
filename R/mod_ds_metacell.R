@@ -29,9 +29,9 @@
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], pattern = pat, group = grp))
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_server Timestamp toggleWidget
 #'
 NULL
 

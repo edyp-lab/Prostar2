@@ -27,9 +27,8 @@
 #' shiny::runApp(workflowApp("PipelineProtein_HypothesisTest", path, dataIn = obj))
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #' 
 #' @name PipelineProtein
 #' 

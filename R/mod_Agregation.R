@@ -31,9 +31,8 @@
 #' shiny::runApp(workflowApp("Agregation", verbose = TRUE))
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #'
 NULL
 
@@ -72,7 +71,7 @@ mod_Agregation_ui <- function(id) {
 #' @importFrom MagellanNTK Timestamp toggleWidget Get_Workflow_Core_Code
 #' @importFrom DaparToolshed AdjMatFilters
 #' @importFrom DT DTOutput
-#' @import SummarizedExperiment
+#' @importFrom SummarizedExperiment rowData
 #'
 #' @export
 #'

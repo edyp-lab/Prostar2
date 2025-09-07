@@ -41,9 +41,9 @@
 #' )
 #' }
 #'
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_server Timestamp toggleWidget
 NULL
 
 
@@ -83,7 +83,7 @@ mod_Metacell_Filtering_ui <- function(id) {
 #' @export
 #' @importFrom stats setNames
 #' @importFrom DaparToolshed paramshistory
-#' @import SummarizedExperiment
+#' @importFrom SummarizedExperiment rowData assay
 #'
 mod_Metacell_Filtering_server <- function(
     id,

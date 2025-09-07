@@ -15,9 +15,9 @@
 #' shiny::runApp(infos_dataset(Exp1_R25_prot))
 #' }
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_ui format_DT_server Timestamp toggleWidget
 NULL
 
 
@@ -28,7 +28,6 @@ NULL
 #'
 #' @export
 #' @importFrom shiny NS tagList
-#' @importFrom MagellanNTK format_DT_ui format_DT_server
 #'
 infos_dataset_ui <- function(id) {
   ns <- NS(id)
@@ -63,8 +62,8 @@ infos_dataset_ui <- function(id) {
 #' @keywords internal
 #'
 #' @importFrom tibble as_tibble
-#' @import SummarizedExperiment
-#' @import S4Vectors
+#' @importFrom SummarizedExperiment rowData assay colData
+#' @importFrom S4Vectors metadata
 #'
 infos_dataset_server <- function(
     id,

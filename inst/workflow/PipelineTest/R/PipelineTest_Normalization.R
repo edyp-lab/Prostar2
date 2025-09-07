@@ -17,9 +17,8 @@
 #' 
 #' @example inst/workflow/PipelineTest/examples/example_PipelineTest_Normalization.R
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 NULL
 
 #' @rdname PipelineTest

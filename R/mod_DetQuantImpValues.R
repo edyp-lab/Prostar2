@@ -4,9 +4,8 @@
 #' @export
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #'
 #' @param id xxx
 #' @param obj xxx
@@ -32,7 +31,7 @@ NULL
 
 
 #' @rdname mod_DetQuantImpValues
-#' @import SummarizedExperiment
+#' @importFrom SummarizedExperiment rowData assay
 #' @export
 #'
 mod_DetQuantImpValues_ui <- function(id) {

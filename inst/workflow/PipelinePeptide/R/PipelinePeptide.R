@@ -18,9 +18,8 @@
 #' 
 #' @example inst/workflow/PipelinePeptide/examples/example_pipelinePeptide.R
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #' 
 NULL
 

@@ -17,9 +17,8 @@
 #' 
 #' @example inst/workflow/PipelineProtein/examples/example_PipelineProtein_Normalization.R
 #' 
-#' @import QFeatures
+#' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @import MagellanNTK
 #' 
 NULL
 

@@ -1,7 +1,6 @@
 #' @title xxx
 #' @description xxxx
-#' @import  MagellanNTK 
-#' @import QFeatures
+#' @importFrom MagellanNTK MagellanNTK
 #' 
 #' @param wf.name xxx
 #' @param usermod xxx
