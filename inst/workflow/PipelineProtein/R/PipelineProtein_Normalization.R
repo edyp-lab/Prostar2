@@ -202,7 +202,6 @@ PipelineProtein_Normalization_server <- function(id,
           shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
           ),
         content = tagList(
-          style = "display: flex;",
           omXplore::omXplore_density_ui(ns("densityPlot_Norm")),
           omXplore::omXplore_intensity_ui(ns("boxPlot_Norm")),
           highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
@@ -539,20 +538,22 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     
-    output$Save_btn_validate_ui <- renderUI({
-      tagList(
-        MagellanNTK::toggleWidget( 
-          actionButton(ns("Save_btn_validate"), "Save",
-            class = "btn-success"),
-          rv$steps.enabled['Save']
-        ),
-        if (config@mode == 'process' && 
-            rv$steps.status['Save'] == stepStatus$VALIDATED) {
-          download_dataset_ui(ns('createQuickLink'))
-        }
-      )
-      
-    })
+    # output$Save_btn_validate_ui <- renderUI({
+    #   tagList(
+    #     MagellanNTK::toggleWidget( 
+    #       actionButton(ns("Save_btn_validate"), "Save",
+    #         class = "btn-success"),
+    #       rv$steps.enabled['Save']
+    #     ),
+    #     if (config@mode == 'process' && 
+    #         rv$steps.status['Save'] == stepStatus$VALIDATED) {
+    #       download_dataset_ui(ns('createQuickLink'))
+    #     }
+    #   )
+    #   
+    # })
+    
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(btnEvents()=='Save')
       

@@ -56,6 +56,7 @@ PipelineProtein_Save_server <- function(id,
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
+    
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
@@ -65,51 +66,54 @@ PipelineProtein_Save_server <- function(id,
     
     eval(str2expression(core.code))
     
+    observeEvent(req(dataIn()), {
+      rv$dataIn <- dataIn()
+    })
+    
+    
     ###### ------------------- Code for Save (step 0) -------------------------    #####
     output$Save <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
-      
-      file <- normalizePath(file.path(
-        system.file('workflow', package = 'Prostar2'),
-        unlist(strsplit(id, '_'))[1], 
-        'md', 
-        paste0(id, '.md')))
-      
-      tagList(
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Save available'),
-        
-        uiOutput(ns('datasetSave_ui'))
-        
-        # Insert validation button
-        #uiOutput(ns('Save_btn_validate_ui'))
+      MagellanNTK::process_layout(
+        ns = NS(id),
+        sidebar = tagList(),
+        content = uiOutput(ns('dl_ui'))
       )
-    })
-    
-    
-    
-    output$datasetSave_ui <- renderUI({
-      # Insert your own code to visualize some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
-      
-    })
-    
 
+    })
     
+    output$dl_ui <- renderUI({
+      req(config@mode == 'process')
+      
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    })
+    
+    # 
+    # output$Save_btn_validate_ui <- renderUI({
+    #   tagList(
+    #     MagellanNTK::toggleWidget( 
+    #       actionButton(ns("Save_btn_validate"), "Save",
+    #         class = "btn-success"),
+    #       rv$steps.enabled['Save']
+    #     ),
+    #     if (config@mode == 'process' && 
+    #         rv$steps.status['Save'] == stepStatus$VALIDATED) {
+    #       download_dataset_ui(ns('createQuickLink'))
+    #     }
+    #   )
+    #   
+    # })
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(btnEvents()=='Save')
-      # In this process, there is no dataset resend to the server
-      # This is why the dataOut$value is set to NULL. This triggers the 
-      # validation of the step but without rebuilds the vector of datasets 
-      # to send
-      rv$dataIn <- dataIn()
+
+      
+      print(rv$dataIn)
+      # Do some stuff
+      # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
+      dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
+      Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
+      
     })
     
     

@@ -75,6 +75,7 @@ addDatasets <- function(object, dataset, name) {
 #' @param range xxx
 #'
 #' @rdname dataset-processing
+#' @importFrom S4Vectors setdiff
 #'
 #' @export
 #'
@@ -92,7 +93,7 @@ keepDatasets <- function(object, range = seq(length(object))) {
     return()
   }
 
-  toRemove <- setdiff.Vector(seq(length(object)), range)
+  toRemove <- S4Vectors::setdiff(seq(length(object)), range)
   if (length(toRemove) > 0) {
     object <- removeAssay(object, toRemove)
   }
