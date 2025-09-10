@@ -4,111 +4,75 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Build-a-pipeline-module tutorial • Prostar2</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cerulean/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
-<script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Build-a-pipeline-module tutorial">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Build-a-pipeline-module tutorial">
 </head>
-<body data-spy="scroll" data-target="#toc">
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <div class="container template-article">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">Prostar2</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.6</span>
-      </span>
-    </div>
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="../reference/index.html">Methods</a>
-</li>
-<li>
-  <a href="../news/index.html">News</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Articles
+    <a class="navbar-brand me-2" href="../index.html">Prostar2</a>
 
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/Prostar2.html">Prostar2</a>
-    </li>
-    <li>
-      <a href="../articles/Build-a-pipeline-module.html">Build a pipeline module</a>
-    </li>
-    <li>
-      <a href="../articles/Create-a-new-pipeline-tutorial.html">Create a new pipeline tutorial</a>
-    </li>
-    <li>
-      <a href="../articles/Prostar_dev_guideline.html">Prostar: dev guideline</a>
-    </li>
-    <li>
-      <a href="../articles/Prostar_workflow_userguide.html">Prostar: workflow userguide</a>
-    </li>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.13</small>
+
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/Prostar2.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="active nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/Build-a-pipeline-module.html">Build-a-pipeline-module tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Create-a-new-pipeline-tutorial.html">Create-a-new-pipeline-tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Prostar_dev_guideline.html">Inside Prostar core</a></li>
+    <li><a class="dropdown-item" href="../articles/Prostar_workflow_tutorial.html">Prostar navigation tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/Prostar_workflow_userguide.html">Inside Prostar core 2</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/samWieczorek/DAPAR2" class="external-link">
-    <span class="fa fa-github"></span>
-
-  </a>
-</li>
-<li>
-  <a href="https://support.bioconductor.org/" class="external-link">
-    <span class="fa fa-users"></span>
-
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/edyp-lab/Prostar2/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
-<!--/.nav-collapse -->
+
+
   </div>
-<!--/.container -->
-</div>
-<!--/.navbar -->
+</nav><div class="container template-article">
 
 
 
-      </header><div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Build-a-pipeline-module tutorial</h1>
+
+<div class="row">
+  <main id="main" class="col-md-9"><div class="page-header">
+
+      <h1>Build-a-pipeline-module tutorial</h1>
                         <h4 data-toc-skip class="author">Samuel
 Wieczorek</h4>
                         
       
-
-      <div class="hidden name"><code>Build-a-pipeline-module.Rmd</code></div>
-
+      <small class="dont-index">Source: <a href="https://github.com/edyp-lab/Prostar2/blob/HEAD/vignettes/Build-a-pipeline-module.Rmd" class="external-link"><code>vignettes/Build-a-pipeline-module.Rmd</code></a></small>
+      <div class="d-none name"><code>Build-a-pipeline-module.Rmd</code></div>
     </div>
 
     
@@ -181,7 +145,7 @@ is the reason why no declaration for the ui of the process module is
 present in this function.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod_pipe_process_ui</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu">NS</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+<span>  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/NS.html" class="external-link">NS</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
 <span>  <span class="fu">mod_navigation_ui</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'nav_pipe_process'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
@@ -216,12 +180,12 @@ navigation module:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span> <span class="co">## Section navigation module</span></span>
 <span>  <span class="co"># Variable to manage the different screens of the module</span></span>
-<span>  <span class="va">r.nav</span> <span class="op">&lt;-</span> <span class="fu">reactiveValues</span><span class="op">(</span></span>
+<span>  <span class="va">r.nav</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues</a></span><span class="op">(</span></span>
 <span>    name <span class="op">=</span> <span class="st">"Foo"</span>,</span>
 <span>    stepsNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Choose assay"</span>, <span class="st">"Change"</span>, <span class="st">"Save"</span><span class="op">)</span>,</span>
-<span>    ll.UI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> screenStep1 <span class="op">=</span> <span class="fu">uiOutput</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"Screen_Process_1"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                  screenStep2 <span class="op">=</span> <span class="fu">uiOutput</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"Screen_Process_2"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>                  screenStep3 <span class="op">=</span> <span class="fu">uiOutput</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"Screen_Process_3"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    ll.UI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> screenStep1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/htmlOutput.html" class="external-link">uiOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"Screen_Process_1"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                  screenStep2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/htmlOutput.html" class="external-link">uiOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"Screen_Process_2"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                  screenStep3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/htmlOutput.html" class="external-link">uiOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"Screen_Process_3"</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    isDone <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>,<span class="fl">3</span><span class="op">)</span>,</span>
 <span>    mandatory <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">TRUE</span>,<span class="fl">3</span><span class="op">)</span>,</span>
@@ -269,7 +233,7 @@ process. In general, it is good to name this list with the prefix ‘rv.’
 followed by the name of the process. For example, for the normalization
 process, one can create a list named ‘rv.norm’.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rv.process</span> <span class="op">&lt;-</span> <span class="fu">reactiveValues</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">rv.process</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"processProtNorm"</span>,</span>
 <span>  dataIn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dataOut <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -309,7 +273,7 @@ will be automatically viewed by the process module.</p>
 <p>When its value is equal to TRUE, all the reactive variables in the
 module process are set to their initial value.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="fu">req</span><span class="op">(</span><span class="va">r.nav</span><span class="op">$</span><span class="va">reset</span><span class="op">)</span>,<span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">r.nav</span><span class="op">$</span><span class="va">reset</span><span class="op">)</span>,<span class="op">{</span></span>
 <span>    </span>
 <span>  <span class="co"># Just for the example: set the widget to its default value</span></span>
 <span>  <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>assay <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -348,7 +312,7 @@ interface of the module is kept disabled.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">useShinyalert</span>(),</span></code></pre></div>
 <p>server part</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="fu">req</span><span class="op">(</span><span class="va">rv.filter</span><span class="op">$</span><span class="va">dataIn</span>, <span class="va">rv.filter</span><span class="op">$</span><span class="va">i</span> <span class="op">)</span>, <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="va">rv.filter</span><span class="op">$</span><span class="va">dataIn</span>, <span class="va">rv.filter</span><span class="op">$</span><span class="va">i</span> <span class="op">)</span>, <span class="op">{</span></span>
 <span>    <span class="va">a</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rv.filter</span><span class="op">$</span><span class="va">dataIn</span><span class="op">)</span> <span class="op">!=</span> <span class="va">rv.filter</span><span class="op">$</span><span class="va">i</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="va">r.nav</span><span class="op">$</span><span class="va">isDone</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">r.nav</span><span class="op">$</span><span class="va">isDone</span><span class="op">)</span><span class="op">]</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">a</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
@@ -373,7 +337,7 @@ interface of the module is kept disabled.</p>
 <span></span>
 <span></span>
 <span></span>
-<span><span class="fu">observe</span><span class="op">(</span><span class="op">{</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="va">input</span><span class="op">$</span><span class="va">shinyalert</span></span>
 <span>    <span class="va">rv.filter</span><span class="op">$</span><span class="va">i</span></span>
 <span>    <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">shinyalert</span><span class="op">)</span><span class="op">)</span><span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
@@ -404,8 +368,8 @@ parameters of the module. This is done by adding an observe function
 where the values of each parameter are used to set the reactive values
 of the module process:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observe</span><span class="op">(</span><span class="op">{</span></span>
-<span>    <span class="fu">req</span><span class="op">(</span><span class="fu">obj</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/req.html" class="external-link">req</a></span><span class="op">(</span><span class="fu">obj</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span> <span class="op">&lt;-</span> <span class="fu">obj</span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -416,7 +380,7 @@ of the module process:</p>
 navigation module (server-side). It cannot be placed above because we
 need both r.nav and rv.process variables</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">callModule</span><span class="op">(</span><span class="va">mod_navigation_server</span>, <span class="st">'nav_pipe_process'</span>, style<span class="op">=</span><span class="fl">2</span>, pages<span class="op">=</span><span class="va">r.nav</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/callModule.html" class="external-link">callModule</a></span><span class="op">(</span><span class="va">mod_navigation_server</span>, <span class="st">'nav_pipe_process'</span>, style<span class="op">=</span><span class="fl">2</span>, pages<span class="op">=</span><span class="va">r.nav</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="calls-to-other-modules">Calls to other modules<a class="anchor" aria-label="anchor" href="#calls-to-other-modules"></a>
@@ -425,9 +389,9 @@ need both r.nav and rv.process variables</p>
 module. For example, if one want to include the module settings, add the
 following line</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rv.process</span><span class="op">$</span><span class="va">settings</span> <span class="op">&lt;-</span> <span class="fu">callModule</span><span class="op">(</span><span class="va">mod_settings_server</span>,</span>
+<code class="sourceCode R"><span><span class="va">rv.process</span><span class="op">$</span><span class="va">settings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/callModule.html" class="external-link">callModule</a></span><span class="op">(</span><span class="va">mod_settings_server</span>,</span>
 <span>                                 <span class="st">"settings"</span>, </span>
-<span>                                 obj <span class="op">=</span> <span class="fu">reactive</span><span class="op">(</span><span class="op">{</span><span class="fu">obj</span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>                                 obj <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span><span class="fu">obj</span><span class="op">(</span><span class="op">)</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="definition-of-the-screens">Definition of the screens<a class="anchor" aria-label="anchor" href="#definition-of-the-screens"></a>
@@ -445,7 +409,7 @@ functions used to make the screen work</p>
 <p>In the first function, one declare a selectInput widget to choose the
 assay on which operations will be done</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">Screen_Process_1</span> <span class="op">&lt;-</span> <span class="fu">renderUI</span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="va">output</span><span class="op">$</span><span class="va">Screen_Process_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="fu">selectInpput</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'selectAssay'</span><span class="op">)</span>, </span>
 <span>                 <span class="st">'Select assay'</span>, </span>
 <span>                 choices<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span><span class="op">)</span>, </span>
@@ -456,7 +420,7 @@ assay on which operations will be done</p>
 observeEvent to watch its value and instanciate the corresponding
 reactive value in the list named <em>rv.process$widgets</em>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">selectAssay</span>, <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">selectAssay</span>, <span class="op">{</span></span>
 <span>    <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">assay</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">selectAssay</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The last function for the screen 1 is used to watch the variable
@@ -467,7 +431,7 @@ module. For that, the first element of the vector r.nav$isDone is set to
 TRUE, telling the navigation process to change the color in the timeline
 (see xxx).</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="fu">observe</span><span class="op">(</span><span class="op">{</span></span>
+<code class="sourceCode R"><span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">assay</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span>        <span class="va">r.nav</span><span class="op">$</span><span class="va">isDone</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
@@ -484,29 +448,29 @@ dataset,</li>
 variable.</li>
 </ul>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span> <span class="va">output</span><span class="op">$</span><span class="va">Screen_Process_2</span> <span class="op">&lt;-</span> <span class="fu">renderUI</span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu">tagList</span><span class="op">(</span></span>
-<span>    <span class="fu">radioButtons</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'operator'</span><span class="op">)</span>, <span class="st">'Choose operator'</span>,</span>
+<code class="sourceCode R"><span> <span class="va">output</span><span class="op">$</span><span class="va">Screen_Process_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/radioButtons.html" class="external-link">radioButtons</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'operator'</span><span class="op">)</span>, <span class="st">'Choose operator'</span>,</span>
 <span>                 choices <span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'addition'</span> <span class="op">=</span> <span class="st">'addition'</span>,</span>
 <span>                               <span class="st">'soustraction'</span> <span class="op">=</span> <span class="st">'soustraction'</span>,</span>
 <span>                               <span class="st">'product'</span> <span class="op">=</span> <span class="st">'product'</span><span class="op">)</span></span>
 <span>    <span class="op">)</span>,</span>
-<span>    <span class="fu">numericInput</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'operand'</span><span class="op">)</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/numericInput.html" class="external-link">numericInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'operand'</span><span class="op">)</span>, </span>
 <span>                 <span class="st">'Choose operand'</span>, </span>
 <span>                 value <span class="op">=</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>, </span>
 <span>                 min<span class="op">=</span><span class="fl">0</span>, </span>
 <span>                 max<span class="op">=</span><span class="fl">10</span><span class="op">)</span>,</span>
-<span>    <span class="fu">actionButton</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'change'</span><span class="op">)</span>, <span class="st">'Apply operator'</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">'change'</span><span class="op">)</span>, <span class="st">'Apply operator'</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>As previously, there are observe functions to update each of the
 widgets reactive values.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">operator</span>, ignoreInit<span class="op">=</span><span class="cn">TRUE</span>,<span class="op">{</span></span>
+<code class="sourceCode R"><span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">operator</span>, ignoreInit<span class="op">=</span><span class="cn">TRUE</span>,<span class="op">{</span></span>
 <span>    <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operator</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">operator</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span>  </span>
-<span>  <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">operand</span>, ignoreInit<span class="op">=</span><span class="cn">TRUE</span>,<span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">operand</span>, ignoreInit<span class="op">=</span><span class="cn">TRUE</span>,<span class="op">{</span></span>
 <span>    <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span> <span class="op">&lt;-</span> <span class="va">input</span><span class="op">$</span><span class="va">operand</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>Here, the validation of the step is not processed by the watching of
@@ -517,14 +481,14 @@ is not yet instantiated because other steps may occur in the module and
 they need a temporary variable. Finally, the vector
 <em>r.nav$isDone</em> is updated.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">change</span>,<span class="op">{</span></span>
+<code class="sourceCode R"><span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">change</span>,<span class="op">{</span></span>
 <span>    </span>
 <span>    <span class="va">tmp</span> <span class="op">&lt;-</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span><span class="op">[[</span><span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">assay</span><span class="op">]</span><span class="op">]</span></span>
 <span>    </span>
 <span>    <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span> <span class="op">(</span><span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operator</span>,</span>
-<span>            addition <span class="op">=</span> <span class="fu">assay</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">assay</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">+</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>,</span>
-<span>            soustraction <span class="op">=</span> <span class="fu">assay</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">assay</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">-</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>,</span>
-<span>            product <span class="op">=</span> <span class="fu">assay</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">assay</span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">*</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span></span>
+<span>            addition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">+</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>,</span>
+<span>            soustraction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">-</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>,</span>
+<span>            product <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span> <span class="op">*</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span></span>
 <span>    <span class="op">)</span></span>
 <span>   </span>
 <span>    <span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span> <span class="op">&lt;-</span> <span class="fu">QFeatures</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/QFeatures/man/QFeatures-class.html" class="external-link">addAssay</a></span><span class="op">(</span><span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span>,</span>
@@ -539,8 +503,8 @@ they need a temporary variable. Finally, the vector
 <p>In this last screen, an actionButton is defined to validate all the
 changes that have been processed in the module.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>  <span class="va">output</span><span class="op">$</span><span class="va">Screen_Process_3</span> <span class="op">&lt;-</span> <span class="fu">renderUI</span><span class="op">(</span><span class="op">{</span></span>
-<span>      <span class="fu">actionButton</span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"save"</span><span class="op">)</span>, <span class="st">"Save"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span>  <span class="va">output</span><span class="op">$</span><span class="va">Screen_Process_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"save"</span><span class="op">)</span>, <span class="st">"Save"</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>The validation is made via a watching function on the value of the
 actionButton. An important point is to set the <em>Params</em> list in
@@ -549,7 +513,7 @@ is a manner to keep in memory all the parameters that have conducted to
 this new assay. Those parameters will also be used in other modules of
 Prostar.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">save</span>,<span class="op">{</span> </span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">save</span>,<span class="op">{</span> </span>
 <span>      <span class="fu">metadata</span><span class="op">(</span><span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span><span class="op">[[</span><span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">assay</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">Params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>                          operand <span class="op">=</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>,</span>
 <span>                          operator <span class="op">=</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operator</span></span>
@@ -584,7 +548,7 @@ label. The other effect is that it enables the ‘Next’ button to go to
 the second step.</li>
 </ol>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">perform1</span>,<span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">perform1</span>,<span class="op">{</span></span>
 <span>    <span class="va">rv.process</span><span class="op">$</span><span class="va">column</span> <span class="op">&lt;-</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widget</span><span class="op">$</span><span class="va">column</span></span>
 <span>    <span class="va">r.nav</span><span class="op">$</span><span class="va">isDone</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
@@ -615,7 +579,7 @@ button</li>
 variable rv.process$dataOut</li>
 </ul>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">change</span>, <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">change</span>, <span class="op">{</span></span>
 <span>  </span>
 <span>  </span>
 <span>  </span>
@@ -629,7 +593,7 @@ them in the metadata of the dataset as a list named Params,</li>
 this step is done.</li>
 </ol>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">observeEvent</span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">save</span>,<span class="op">{</span> </span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">save</span>,<span class="op">{</span> </span>
 <span>    </span>
 <span>      <span class="fu">metadata</span><span class="op">(</span><span class="va">rv.process</span><span class="op">$</span><span class="va">dataIn</span><span class="op">[[</span><span class="va">rv.process</span><span class="op">$</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">Params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        operand <span class="op">=</span> <span class="va">rv.process</span><span class="op">$</span><span class="va">widgets</span><span class="op">$</span><span class="va">operand</span>,</span>
@@ -651,32 +615,25 @@ module.</p>
 <p>The return value of a module is always the reactive value named
 dataOut. It is set at the final step of the module.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu">reactive</span><span class="op">(</span><span class="op">{</span><span class="va">rv.process</span><span class="op">$</span><span class="va">dataOut</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span><span class="va">rv.process</span><span class="op">$</span><span class="va">dataOut</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-  </div>
-
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-
-      </div>
-
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
-      <footer><div class="copyright">
-  <p></p>
-<p>Developed by Samuel Wieczorek, Thomas Burger.</p>
+    <footer><div class="pkgdown-footer-left">
+  <p>Developed by Samuel Wieczorek, Thomas Burger.</p>
 </div>
 
-<div class="pkgdown">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+<div class="pkgdown-footer-right">
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
-
 
 
 

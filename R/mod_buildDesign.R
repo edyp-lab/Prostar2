@@ -23,7 +23,6 @@
 #'
 NULL
 
-options(shiny.reactlog = TRUE)
 
 #' @rdname build-design
 #' @importFrom shiny NS tagList actionLink fluidRow column uiOutput hr 
