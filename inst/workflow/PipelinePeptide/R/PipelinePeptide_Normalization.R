@@ -67,6 +67,7 @@ PipelinePeptide_Normalization_ui <- function(id){
 #' @importFrom stats setNames rnorm
 #' @import omXplore
 #' @importFrom shinyjs hidden useShinyjs toggle
+#' @importFrom QFeatures addAssay
 #' 
 #' @export
 #' 
