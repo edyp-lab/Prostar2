@@ -154,7 +154,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
         'md', 
-        paste0(id, '.md')))
+        paste0(id, '.Rmd')))
 
       MagellanNTK::process_layout(
         ns = NS(id),
