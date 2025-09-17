@@ -15,14 +15,26 @@ link-citations: true
 
 
 
-
 ### Step "Pairwise comparison"
+Select a pairwise comparison of interest. The corresponding volcano plot is displayed.
 
-
+Some proteins may have an excellent p-value, while a too great proportion of their intensity
+values (within the two conditions of interest in this comparison) are in fact imputed values, so
+that they are not trustworthy. To avoid such proteins become false discoveries, it is possible to
+discard them (by forcing their p-value to 1). To do so, fill in the last parameters of the right hand
+side menu, which are similar to the MV filtering options described in Section 3.5.
+4. Click on “Perform p-value push”
 
 ### Step "P-value calibration"
-
+Tune the calibration method, as indicated in [21]
 
 ### Step  "FDR"
+adjust the FDR threshold
+Save any plot/table of interest and move on to the next tab (“Summary”) to have a
+comprehensive overview of the differential analysis parameters.
 
 
+Possibly, go back to Step 1 to process another pairwise comparison. Alternatively, it is possible to
+continue with the current protein list so as to explore the functional profiles of the proteins
+found statistically differentially abundant between the compared conditions (as explained in the
+next section)

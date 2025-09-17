@@ -13,6 +13,46 @@ link-citations: true
 ---
 
 
+Some proteins may be discarded, on the
+basis of several user-defined criteria (number of missing values
+within each or across all the biological condition(s), contaminant database, decoy sequences, etc.).
+
+
+
+This stage aims at filtering out proteins according to their number of missing values, as well as
+according to some information stored in the protein (or feature) metadata.
+1. Click on “Filter data” in the “Data processing” menu.
+2. On the first tab (called "Missing values", see Figure 5), select among the various options which
+proteins should be filtered out or not. The options are the following:
+ None: No filtering, the quantitative data is left unchanged (Note 19).
+ Whole Matrix: proteins that contain in the quantitative dataset (across all conditions) fewer
+non-missing values than a user-defined threshold are deleted;
+ For every condition: proteins that contain fewer non-missing values in each condition than a
+user-defined threshold are removed;
+ At least one condition: proteins that contain fewer non-missing values in at least one
+condition than a user-defined threshold are suppressed;
+3. Visualize the effect of the filtering options without changing the current dataset by clicking on
+"Perform filtering". If the filtering does not produce the expected effect, test another one. To do
+so, simply choose another method in the list and click again on "Perform filtering". The plots are
+automatically updated. This action does not modify the dataset but offers a preview of the
+filtered data. Iterate this step as long as necessary.
+4. Move on to the second tab (called "String based filtering"), where it is possible to filter out
+proteins according to information stored in the metadata.
+5. Among the columns constituting the protein metadata listed in the drop-down menu, select the
+one containing the information (Note 20) of interest (for instance, “Contaminant” or “Reverse”,
+Note 21). Then, specify in each case the prefix chain of characters that identifies the proteins to
+filter (Note 22).
+6. Click on "Perform " to remove the corresponding proteins. A new line appears in the table listing
+all the filters that have been applied.
+7. If another filter must be applied, go back to Step 4.
+8. Once all the filters have been applied, move on to the last tab (called "Visualize and Validate") to
+check the set of filtered out proteins. This visualization tools works similarly as the Data explorer
+(see Section 3.4, Step 4).
+9. Finally, click on "Save filtered dataset". The information related to the type of filtering as well as
+to the chosen options appears in the Session log tab (“Session logs” tab from the “Session logs”
+option in the “Data manager” menu).
+
+
 
 ### Metacell filtering
 

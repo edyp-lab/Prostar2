@@ -17,6 +17,50 @@ link-citations: true
 
 This page describes the computations done with Imputation. 
 By taking into account the very nature of each missing value.
+To maximize the power of the statistical analysis, the
+missing values are imputed. This is achieved with one of the multiple available algorithms that accounts in a specific manner each
+for the specific nature of missing values (missing at random, or
+lower abundance censorship): k Nearest Neighbors (Hastie et al.,
+2001), Maximum Likelihood Estimation (Schafer, 2008), Bayesian
+Principal Component Analysis (Stacklies et al., 2007), Quantile
+Regression to Impute Left-Censored data (Lazar, 2015), etc
+
+
+
+
+
+In protein-level datasets, ProStaR makes it possible to have separate processing for two different
+types of missing values: POV (standing for Partially Observed Value) and MEC (standing for Missing in
+the Entire Condition). All the missing values for a given protein in a given condition are considered
+POV if and only if there is at least one observed value for this protein in this condition. Alternatively,
+if all the intensity values are missing for this protein in this condition, the missing values are
+considered MEC (Note 27).
+1. On the first tab (see Figure 7), select the algorithm to impute POV missing values. According to
+our expertise, we advise to select the SLSA algorithm (Giai Gianetto Q et al., submitted) but other
+methods are also of interest in specific situations.
+2. Tune the parameters of the chosen imputation method.
+3. Click on “Perform Imputation”. It will enables the next tab, on which the result of the imputation
+is shown.
+4. Move on to the second tab and decide how to deal with MEC. As a matter of fact, it is always
+dangerous to impute them, as in absence of any value to rely on, the imputation is arbitrary and
+risks to spoil the dataset with maladjusted values. As an alternative, it is possible to (1) keep the
+MEC as is in the dataset, yet, it may possibly impede further processing, (2) discard them at the
+filter step (see Section 3.5, Step 2) so as to process them separately. However, this will make it
+impossible to include these proteins (and their processing) in the final statistics, such as for
+instance FDR.
+5. If MEC are not going to be imputed, select the imputation method referred to as “None”.
+Otherwise, select the appropriate method. Based on our experience, we advise to use
+detQuantile (Note 28).
+6. Tune the parameters of the MEC imputation method (Note 29).
+7. Click on “Perform Imputation” and move on to the next tab (“Validate & save”).
+8. Observe the influence of the chosen imputation methods on the graphs of the right hand side
+panel. If the result of the imputation does not correspond to the expectations, change the
+imputation methods or their tuning (by going back to Step 1 of this section).
+9. Once the imputation is effective, click on “Save imputation”.
+10. Check that a new version appears in the dataset version dropdown menu, referred to as
+“Imputed - Protein” (Notes 30 and 31).
+
+
 
 
 ### Imputation of 'Partially Over Conditions'

@@ -14,7 +14,20 @@ date: 30 mai 2024
 link-citations: true
 ---
 
-To compute the significance of each protein differential abundance.
+For datasets that do not contain any missing values, or for those where these missing values have
+been imputed, it is possible to test whether each protein is significantly differentially abundant
+between the conditions . To do so, click on “Hypothesis testing” in the “Data processing” menu (see
+Figure 8).
+1. Choose the test contrasts. In case of 2 conditions to compare, there is only one possible contrast.
+However, in case of N > 2 conditions, several pairwise contrasts are possible. Notably, it is
+possible to perform N tests of the “1vsAll” type, or N(N-1)/2 tests of the “1vs1” type.
+2. Then, choose the type of statistical test, between limma [20] or t-test (either Welch or Student).
+This makes appear a density plot representing fold-change (FC) (as many density curves on the
+plot as contrasts).
+3. Thanks to the FC density plot, tune the FC threshold (Note 32).
+4. Run the tests and save the dataset to preserve the results (i.e. all the computed p-values). Then,
+this new dataset, containing the p-values and FC cut-off for the desired contrasts, can be
+explored in the “Differential analysis” tabs available in the “Data mining” menu.
 
 
 

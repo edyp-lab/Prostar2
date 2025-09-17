@@ -64,18 +64,14 @@ infos_dataset_ui <- function(id) {
 #' @importFrom tibble as_tibble
 #' @importFrom SummarizedExperiment rowData assay colData
 #' @importFrom S4Vectors metadata
+#' @importFrom MultiAssayExperiment experiments
+#' @importFrom QFeatures nNA
 #'
 infos_dataset_server <- function(
     id,
-    dataIn = reactive({
-      NULL
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    dataIn = reactive({NULL}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -128,10 +124,6 @@ infos_dataset_server <- function(
     )
 
 
-
-    # observe({browser()})
-
-
     output$title <- renderUI({
       req(rv$dataIn)
       name <- metadata(rv$dataIn)$analysis
@@ -147,9 +139,9 @@ infos_dataset_server <- function(
 
     output$choose_SE_ui <- renderUI({
       req(rv$dataIn)
-      selectInput(ns("selectInputSE"),
+      radioButtons(ns("selectInputSE"),
         "Select a dataset for further information",
-        choices = c("None", names(experiments(rv$dataIn)))
+        choices = names(MultiAssayExperiment::experiments(rv$dataIn))
       )
     })
 
@@ -198,7 +190,7 @@ infos_dataset_server <- function(
 
       typeOfData <- typeDataset(.se)
       nLines <- nrow(.se)
-      .nNA <- nNA(.se)
+      .nNA <- QFeatures::nNA(.se)
       percentMV <- round(100 * .nNA$nNA[, "pNA"], digits = 2)
       nEmptyLines <- length(which(.nNA$nNArows[, "nNA"] == ncol(.se)))
 

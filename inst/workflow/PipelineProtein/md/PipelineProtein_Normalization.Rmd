@@ -14,6 +14,51 @@ link-citations: true
 ---
 
 To correct batch or group effects.
+The protein abundances are rescaled (within or
+between conditions) to account for the variability between the
+analyses. Several algorithms can be used: quantile normalization
+(Bolstad, 2007), abundance normalization, scaling/centering (either globally applied or by condition), etc.
+
+
+
+
+
+The next processing step proposed by ProStaR is data normalization (see Figure 6). Its objective is to
+reduce the biases introduced at any preliminary stage (such as for instance batch effects).
+1. Choose the normalization method among the following ones (Note 24).
+a. None: No normalization is applied
+b. Global quantile alignment: The Quantile of the intensity distributions of all the
+samples are equated, as described in [17].
+c. Column sums: The total intensity values of all the samples are equated. The rationale
+behind is to normalize according to the total amount of biological material within
+each sample.
+d. Quantile Centering: A given quantile of the intensity distribution is used as reference
+(Note 25).
+e. Mean Centering: sample intensity distributions are aligned on their mean intensity
+values (and optionally, the variance distributions are equated to one).
+f. Variance Stabilizing Normalization: A wrapper to the method described in [18].
+g. Loess normalization: The intensity values are normalized by means of a local
+regression model [19] of the difference of intensities as function of the mean
+intensity value (see [20] for implementation details).
+2. Then, for each normalization method, the interface is automatically updated to display the
+method parameters that must be tuned. Notably, for most of the methods, it is necessary to
+indicate whether the method should apply to the entire dataset at once, or whether each
+condition should be normalized independently of the others. For other parameters, which are
+specific to each method, the reader is referred to ProStaR user manual, available through the
+“Help” section of the main menu (Note 26).
+3. Click on “Perform normalization”.
+4. Observe the influence of the normalization method on the graphs of the right hand side panel.
+Optionally, click on “Show plot options”, so as to tune the graphics for a better visualization.
+5. If the result of the normalization does not correspond to the expectations, change the
+normalization method or change its tuning.
+6. Once the normalization is effective, click on “Save normalization”.
+7. Check that a new version appears in the dataset version drop-down menu, referred to as
+“Normalized - Protein”.
+8. Remember that at any time, it is possible to return to the menu “Descriptive statistics” to have a
+refined view of each step of the processing.
+
+
+
 
 ### Methods available
 
