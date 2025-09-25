@@ -176,7 +176,7 @@ PipelineProtein_Imputation_server <- function(id,
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Description')
+      req(grepl('Description', btnEvents()))
       req(dataIn())
       rv$dataIn <- dataIn()
       rv.custom$dataIn1 <- dataIn()
@@ -312,10 +312,13 @@ PipelineProtein_Imputation_server <- function(id,
     # 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='POVImputation')
+      req(grepl('POVImputation', btnEvents()))
       req(rv$dataIn)
       
-
+      if ( is.null(rv$dataIn) || 
+          rv.widgets$POVImputation_algorithm == "None")
+        info(btnVentsMasg)
+      else {
       req(rv.widgets$POVImputation_algorithm != "None")
       m <- match.metacell(
         DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
@@ -417,6 +420,7 @@ PipelineProtein_Imputation_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['POVImputation'] <- stepStatus$VALIDATED
+      }
     })
 
     # <<< END ------------- Code for step 1 UI---------------
@@ -558,8 +562,15 @@ PipelineProtein_Imputation_server <- function(id,
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='MECImputation')
+       
+      req(grepl('MECImputation', btnEvents()))
       
+      if ( is.null(rv.custom$dataIn1) || 
+          rv.widgets$MECImputation_algorithm == "None")
+        info(btnVentsMasg)
+      else {
+        
+        
       req(rv.custom$dataIn1)
       req(rv.widgets$MECImputation_algorithm != "None")
       withProgress(message = "", detail = "", value = 0, {
@@ -654,6 +665,7 @@ PipelineProtein_Imputation_server <- function(id,
         
       })
       
+      }
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -691,7 +703,12 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Save')
+      req(grepl('Save', btnEvents()))
+      
+      
+      if (isTRUE(all.equal(assays(rv$dataIn),assays(rv.custom$dataIn2))))
+        info(btnVentsMasg)
+      else {
       # Do some stuff
       len_start <- length(rv$dataIn)
       len_end <- length(rv.custom$dataIn2)
@@ -718,7 +735,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv.custom$dataIn2}))
-      
+      }
     })
     # <<< END ------------- Code for step 3 UI---------------
     

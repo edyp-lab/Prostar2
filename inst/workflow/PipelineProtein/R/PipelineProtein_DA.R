@@ -215,7 +215,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='Description')
+      req(grepl('Description', btnEvents()))
       
       req(inherits(dataIn(), 'QFeatures'))
       
@@ -542,7 +542,13 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='PairwiseComparison')
+      
+      req(grepl('PairwiseComparison', btnEvents()))
+      
+      
+      if ( rv.widgets$Pairwisecomparison_Comparison == 'None' || is.null(rv$dataIn))
+        info(btnVentsMasg)
+      else {
       #UpdateCompList()
      
       rv.custom$history[['Push pval query']] <- rv.custom$step1_query
@@ -551,6 +557,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Pairwisecomparison"] <- stepStatus$VALIDATED
+      }
     })
     
     
@@ -928,8 +935,12 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='PValuecalibration')
-
+      req(grepl('PValuecalibration', btnEvents()))
+      
+      if (is.null(rv$dataIn))
+        info(btnVentsMasg)
+      else {
+        
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
       # rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
@@ -940,6 +951,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Pvaluecalibration"] <- stepStatus$VALIDATED
+      }
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -1340,7 +1352,12 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-        req(btnEvents()=='FDR') 
+      req(grepl('FDR', btnEvents()))
+      
+      if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
+        info(btnVentsMasg)
+      else {
+        
       rv.custom$history[['th pval']] <- rv.custom$thpval
       rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
       rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
@@ -1349,6 +1366,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["FDR"] <- stepStatus$VALIDATED
+      }
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -1374,7 +1392,12 @@ PipelineProtein_DA_server <- function(id,
     })
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='Save')
+      req(grepl('Save', btnEvents()))
+      
+      if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+        info(btnVentsMasg)
+      else {
+        
       # Do some stuff
       
       last.se <- length(rv$dataIn)
@@ -1395,6 +1418,7 @@ PipelineProtein_DA_server <- function(id,
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv$dataIn}))
       
+      }
     })
     # <<< END ------------- Code for step 3 UI---------------
     

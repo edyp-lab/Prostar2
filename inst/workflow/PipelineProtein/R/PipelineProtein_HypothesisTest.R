@@ -170,7 +170,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     })
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Description')
+      req(grepl('Description', btnEvents()))
       rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -522,20 +522,35 @@ PipelineProtein_HypothesisTest_server <- function(id,
     # })
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='HypothesisTest')
-      # Do some stuff
       
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['HypothesisTest'] <- stepStatus$VALIDATED
+      req(grepl('HypothesisTest', btnEvents()))
+      
+      if ( is.null(rv$dataIn) || is.null(rv.custom$AllPairwiseComp))
+        info(btnVentsMasg)
+      else {
+        # Do some stuff
+        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
+        df <- cbind(rv.custom$AllPairwiseComp$logFC, 
+          rv.custom$AllPairwiseComp$P_Value)
+        DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
+        rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
+      
+        paramshistory(new.dataset) <- rv.custom$history
+        rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
+
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['HypothesisTest'] <- stepStatus$VALIDATED
+        }
     })
+    
+    
     
     enable_Limma <- reactive({
       req(rv$dataIn)
       
       enable <- TRUE
-      
       nConds <-length(unique(DaparToolshed::design.qf(rv$dataIn)$Condition))
       design <- SummarizedExperiment::colData(rv$dataIn)
       nLevel <- DaparToolshed::getDesignLevel(design)   
@@ -596,26 +611,18 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Save')
+      req(grepl('Save', btnEvents()))
       # Do some stuff
-      
-      new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-      df <- cbind(rv.custom$AllPairwiseComp$logFC, 
-        rv.custom$AllPairwiseComp$P_Value)
-      DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
-      rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
-      
-      paramshistory(new.dataset) <- rv.custom$history
-      
-      rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
-      
+      if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+        info(btnVentsMasg)
+      else {
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv$dataIn}))
-      
+      }
     })
     # <<< END ------------- Code for step 3 UI---------------
     

@@ -38,3 +38,6 @@ listBrewerPalettes <- c(
   "RdYlGn (diverging)" = "RdYlGn",
   "Spectral (diverging)" = "Spectral"
 )
+
+#' @export
+btnVentsMasg <- "No parameters are set to processe the dataset. Please adjust them"

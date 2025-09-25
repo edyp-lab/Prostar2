@@ -93,7 +93,7 @@ PipelineProtein_Description_server <- function(id,
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Description')
+      req(grepl('Description', btnEvents()))
       rv$dataIn <- dataIn()
 
       dataOut$trigger <- MagellanNTK::Timestamp()

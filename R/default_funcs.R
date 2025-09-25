@@ -80,7 +80,8 @@ addDatasets <- function(object, dataset, name) {
 #' @export
 #'
 keepDatasets <- function(object, range = seq(length(object))) {
-  stopifnot(is.Magellan.compliant(object))
+  #browser()
+  #stopifnot(is.Magellan.compliant(object))
   if (!is.numeric(range)) {
     stop("Provide numeric range of array to be processed")
   }

@@ -103,17 +103,16 @@ PipelineProtein_Save_server <- function(id,
     #   
     # })
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='Save')
-
-      
-      print(rv$dataIn)
-      # Do some stuff
+      req(grepl('Save', btnEvents()))
+      if (all.equal(assays(rv$dataIn),assays(dataIn())))
+        info(btnVentsMasg)
+      else {# Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
-      
+      }
     })
     
     

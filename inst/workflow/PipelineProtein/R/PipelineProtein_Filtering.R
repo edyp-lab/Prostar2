@@ -225,7 +225,7 @@ PipelineProtein_Filtering_server <- function(id,
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Description')
+      req(grepl('Description', btnEvents()))
       req(inherits(dataIn(), 'QFeatures'))
       
       rv$dataIn <- dataIn()
@@ -408,14 +408,19 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Cellmetadatafiltering')
-      req(rv.custom$dataIn1)
+      req(grepl('Cellmetadatafiltering', btnEvents()))
+      
+      if ( is.null(rv.custom$dataIn1) || !("qMetacellFiltering" %in% names(rv.custom$dataIn2)))
+        info(btnVentsMasg)
+      else {
+        req(rv.custom$dataIn1)
       
       rv.custom$dataIn2 <- rv.custom$dataIn1
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Cellmetadatafiltering"] <- stepStatus$VALIDATED
+      }
     })
     
     
@@ -657,7 +662,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         .html <- rv.custom$Variablefiltering_funFilter$ll.query
         .nbDeleted <- nBefore - nAfter
-        .nbBefore <- nrow(aSummarizedExperiment::ssay(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]))
+        .nbBefore <- nrow(SummarizedExperiment::assay(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]))
         .nbAfter <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
         
         rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
@@ -692,11 +697,16 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Variablefiltering')
+      req(grepl('Variablefiltering', btnEvents()))
       
+
+      if ( is.null(rv.custom$dataIn2) || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
+        info(btnVentsMasg)
+      else {
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Variablefiltering"] <- stepStatus$VALIDATED
+      }
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -724,9 +734,11 @@ PipelineProtein_Filtering_server <- function(id,
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      req(btnEvents()=='Save')
+      req(grepl('Save', btnEvents()))
       
-      
+      if (isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))))
+        info(btnVentsMasg)
+      else {
       # Rename the new dataset with the name of the process
       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
       DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
@@ -741,6 +753,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv.custom$dataIn2}))
+      }
     })
     # <<< END ------------- Code for step 3 UI---------------
     

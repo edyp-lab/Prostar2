@@ -165,7 +165,7 @@ PipelineProtein_Normalization_server <- function(id,
 
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='Description')
+      req(grepl('Description', btnEvents()))
       req(dataIn())
       rv$dataIn <- dataIn()
       
@@ -380,7 +380,15 @@ PipelineProtein_Normalization_server <- function(id,
     # 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='Normalization')
+      req(grepl('Normalization', btnEvents()))
+      
+      
+      if ( is.null(rv$dataIn) ||
+          rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
+        info(btnVentsMasg)
+      else {
+        
+        
       # Do some stuff 
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
@@ -502,6 +510,7 @@ PipelineProtein_Normalization_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Normalization'] <- stepStatus$VALIDATED
+    }
     })
     
     
@@ -555,15 +564,18 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(btnEvents()=='Save')
+      req(grepl('Save', btnEvents()))
       
+      if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+        info(btnVentsMasg)
+      else {
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
-      
+      }
     })
     # <<< END ------------- Code for step 3 UI---------------
     

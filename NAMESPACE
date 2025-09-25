@@ -2,6 +2,7 @@
 
 export(Prostar2)
 export(addDatasets)
+export(btnVentsMasg)
 export(build_report)
 export(build_report_server)
 export(build_report_ui)

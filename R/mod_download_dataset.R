@@ -93,8 +93,8 @@ download_dataset_server <- function(
 
     GetType <- reactive({
       if (length(extension) != length(widget.type)) {
-        warning("Widget.type is not correctly configured. As one cannot decide,
-            all values are set to default ('Link')")
+        # warning("Widget.type is not correctly configured. As one cannot decide,
+        #     all values are set to default ('Link')")
         rv$UI_type <- rep("Link", length(extension))
       } else {
         rv$UI_type <- widget.type
