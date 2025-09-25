@@ -546,7 +546,8 @@ PipelineProtein_DA_server <- function(id,
       req(grepl('PairwiseComparison', btnEvents()))
       
       
-      if ( rv.widgets$Pairwisecomparison_Comparison == 'None' || is.null(rv$dataIn))
+      if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
+        || is.null(rv$dataIn))
         info(btnVentsMasg)
       else {
       #UpdateCompList()

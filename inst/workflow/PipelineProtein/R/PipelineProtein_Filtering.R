@@ -410,7 +410,8 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Cellmetadatafiltering', btnEvents()))
       
-      if ( is.null(rv.custom$dataIn1) || !("qMetacellFiltering" %in% names(rv.custom$dataIn2)))
+      if ( isTRUE(all.equal(assays(rv.custom$dataIn1),assays(dataIn()))) 
+        || !("qMetacellFiltering" %in% names(rv.custom$dataIn1)))
         info(btnVentsMasg)
       else {
         req(rv.custom$dataIn1)
@@ -700,7 +701,8 @@ PipelineProtein_Filtering_server <- function(id,
       req(grepl('Variablefiltering', btnEvents()))
       
 
-      if ( is.null(rv.custom$dataIn2) || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
+      if ( isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))) 
+          || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
         info(btnVentsMasg)
       else {
       dataOut$trigger <- MagellanNTK::Timestamp()
