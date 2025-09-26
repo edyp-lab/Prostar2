@@ -1357,7 +1357,7 @@ PipelineProtein_DA_server <- function(id,
         sidebar = tagList(
          # timeline_process_ui(ns('Save_timeline'))
         ),
-        content = uiOutput(ns('dl_ui'))
+        content = uiOutput(ns('dl_UI'))
       )
     })
     
@@ -1369,9 +1369,9 @@ PipelineProtein_DA_server <- function(id,
     })
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+
       req(grepl('Save', btnEvents()))
       
-      browser()
       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
