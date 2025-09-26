@@ -235,7 +235,7 @@ PipelineProtein_DA_server <- function(id,
       
       rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
-      #browser()
+
       
       # Get logfc threshold from Hypothesis test dataset
       .se <- rv$dataIn[[length(rv$dataIn)]]
@@ -691,8 +691,7 @@ PipelineProtein_DA_server <- function(id,
     output$Pvaluecalibration_calibrationResults <- renderUI({
       req(rv.custom$calibrationRes)
       rv$dataIn
-      
-      
+
       txt <- paste("Non-DA protein proportion = ",
         round(100 * rv.custom$calibrationRes$pi0, digits = 2), "%<br>",
         "DA protein concentration = ",
@@ -702,9 +701,7 @@ PipelineProtein_DA_server <- function(id,
         rv.custom$calibrationRes$unif.under, "<br><br><hr>",
         sep = ""
       )
-       
-      
-      
+
       HTML(txt)
     })
     
@@ -936,7 +933,9 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      req(grepl('PValuecalibration', btnEvents()))
+      
+
+      req(grepl('Pvaluecalibration', btnEvents()))
       
       if (is.null(rv$dataIn))
         info(btnVentsMasg)
@@ -971,42 +970,19 @@ PipelineProtein_DA_server <- function(id,
         ),
         content = div(
           uiOutput(ns("FDR_nbSelectedItems_ui")),
-          withProgress(message = "", detail = "", value = 1, {
+          fluidRow(
+            column(width = 4,
+              withProgress(message = "", detail = "", value = 1, {
             uiOutput(ns('FDR_volcanoplot_UI'))
-          }),
-          downloadButton(ns("FDR_download_SelectedItems_UI"), 
+          })),
+          column(width = 8,
+            downloadButton(ns("FDR_download_SelectedItems_UI"), 
             "Selected final results (Excel file)", class = actionBtnClass),
           DT::DTOutput(ns("FDR_selectedItems_UI"))
+          )
+          )
         )
       )
-      
-      
-      bslib::layout_sidebar(
-        tags$head(tags$style(".sidebar-content {background-color: lightblue; width: 300px;}"),
-          tags$style(".shiny-input-panel {background-color: lightblue;}")
-        ),
-        sidebar = bslib::sidebar(
-          id = ns('FDR_Sidebar'),
-          timeline_process_ui(ns('FDR_timeline')),
-          #hr(style = "border-top: 3px solid #000000;"),
-          #uiOutput(ns("FDR_btn_validate_UI")),
-          inputPanel(
-            uiOutput(ns('widgets_ui'))
-          ),
-          position = "left",
-          padding = c(100, 0)
-        ),
-        
-        uiOutput(ns("FDR_nbSelectedItems_ui")),
-        withProgress(message = "", detail = "", value = 1, {
-          uiOutput(ns('FDR_volcanoplot_UI'))
-        }),
-        downloadButton(ns("FDR_download_SelectedItems_UI"), 
-          "Selected final results (Excel file)", class = actionBtnClass),
-        DT::DTOutput(ns("FDR_selectedItems_UI"))
-      )
-      
-      
     })
     
     
@@ -1395,6 +1371,7 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
       
+      browser()
       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
