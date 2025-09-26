@@ -109,7 +109,19 @@ PipelineProtein_Imputation_server <- function(id,
     tmp.mec = reactive({NULL}),
     tmp.pov = reactive({NULL}),
     history = list(),
-    mv.present = FALSE
+    mv.present = FALSE,
+    POVImputation_SummaryDT = data.frame(
+      operation = "-",
+      nbImputed = "0",
+      TotalMainAssay = '0',
+      stringsAsFactors = FALSE
+    ),
+    MECImputation_SummaryDT = data.frame(
+      operation = "-",
+      nbImputed = "0",
+      TotalMainAssay = '0',
+      stringsAsFactors = FALSE
+    )
   )
   
   
@@ -162,7 +174,6 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(),
-        #timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -181,6 +192,21 @@ PipelineProtein_Imputation_server <- function(id,
       rv$dataIn <- dataIn()
       rv.custom$dataIn1 <- dataIn()
       rv.custom$dataIn2 <- dataIn()
+      
+      rv.custom$POVImputation_SummaryDT <- data.frame(
+        operation = "-",
+        nbImputed = "0",
+        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
+      
+      rv.custom$MECImputation_SummaryDT <- data.frame(
+        operation = "-",
+        nbImputed = "0",
+        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
+      
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -208,6 +234,7 @@ PipelineProtein_Imputation_server <- function(id,
           uiOutput(ns("POVImputation_detQuant_UI"))
         ),
         content = tagList(
+          uiOutput(ns('POVImputation_DT_UI')),
           uiOutput(ns("POVImputation_showDetQuantValues")),
           htmlOutput("helpForImputation"),
           tags$hr(),
@@ -218,17 +245,27 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
     
+    
+    MagellanNTK::format_DT_server("POV_dt", 
+      dataIn = reactive({rv.custom$POVImputation_SummaryDT}))
+    
+    
+    output$POVImputation_DT_UI <- renderUI({
+      req(rv.custom$POVImputation_SummaryDT)
+      MagellanNTK::format_DT_ui(ns("POV_dt"))
+    })
+    
     output$mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("POVImputation_mvplots"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
     })
     
     observe({
-      req(rv$dataIn)
+      req(rv.custom$dataIn1)
       
       mod_mv_plots_server("POVImputation_mvplots",
-        data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        grp = reactive({get_group(rv$dataIn)}),
+        data = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
+        grp = reactive({get_group(rv.custom$dataIn1)}),
         mytitle = reactive({"POV imputation"}),
         pal = reactive({NULL}),
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
@@ -258,7 +295,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       mod_DetQuantImpValues_server(
         id = "POVImputation_DetQuantValues_DT",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
         quant = reactive({rv.widgets$POVImputation_detQuant_quantile}),
         factor = reactive({rv.widgets$POVImputation_detQuant_factor})
       )
@@ -276,7 +313,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       widget <- numericInput(ns("POVImputation_KNN_nbNeighbors"), "Neighbors",
         value = rv.widgets$POVImputation_KNN_n, step = 1, min = 0,
-        max = max(nrow(rv$dataIn), rv.widgets$POVImputation_KNN_n),
+        max = max(nrow(rv.custom$dataIn1), rv.widgets$POVImputation_KNN_n),
         width = "100px"
       )
       
@@ -313,17 +350,17 @@ PipelineProtein_Imputation_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('POVImputation', btnEvents()))
-      req(rv$dataIn)
+      req(rv.custom$dataIn1)
       
-      if ( is.null(rv$dataIn) || 
+      if ( is.null(rv.custom$dataIn1) || 
           rv.widgets$POVImputation_algorithm == "None")
         info(btnVentsMasg)
       else {
       req(rv.widgets$POVImputation_algorithm != "None")
       m <- match.metacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+        DaparToolshed::qMetacell(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]),
         pattern = "Missing POV",
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
       )
       nbPOVBefore <- length(which(m))
       
@@ -336,13 +373,13 @@ PipelineProtein_Imputation_server <- function(id,
         
         try({
           switch(rv.widgets$POVImputation_algorithm,
-            None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
+            None = .tmp <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
             slsa = {
               incProgress(0.5, detail = "slsa Imputation")
               
               .tmp <- wrapper.impute.slsa(
-                obj = rv$dataIn[[length(rv$dataIn)]],
-                design = design.qf(rv$dataIn))
+                obj = rv$dataIn1[[length(rv.custom$dataIn1)]],
+                design = design.qf(rv.custom$dataIn1))
               
               .param <- list(
                 POVImputation_algorithm = rv.widgets$POVImputation_algorithm
@@ -351,7 +388,7 @@ PipelineProtein_Imputation_server <- function(id,
             detQuantile = {
               incProgress(0.5, detail = "det quantile Imputation")
               .tmp <- wrapper.impute.detQuant(
-                obj = rv$dataIn[[length(rv$dataIn)]],
+                obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                 qval = rv.widgets$POVImputation_detQuant_quantile / 100,
                 factor = rv.widgets$POVImputation_detQuant_factor,
                 na.type = 'Missing POV')
@@ -365,8 +402,8 @@ PipelineProtein_Imputation_server <- function(id,
               incProgress(0.5, detail = "KNN Imputation")
               
               .tmp <- wrapper.impute.KNN(
-                obj = rv$dataIn[[length(rv$dataIn)]],
-                grp = DaparToolshed::design.qf(rv$dataIn)$Condition,
+                obj = rv$dataIn1[[length(rv.custom$dataIn1)]],
+                grp = DaparToolshed::design.qf(rv.custom$dataIn1)$Condition,
                 K = rv.widgets$POVImputation_KNN_n);
               .param <- list(
                 POVImputation_algorithm = rv.widgets$POVImputation_algorithm,
@@ -401,12 +438,30 @@ PipelineProtein_Imputation_server <- function(id,
           rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
         }
         
+        
+        
+        
+        
         rv.custom$dataIn1 <- Prostar2::addDatasets(
-          rv$dataIn,
+          rv.custom$dataIn1,
           .tmp,
           'POVImputation')
         
         paramshistory(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]) <- .param
+        
+        
+        # Add infos
+        nBefore <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])
+        nAfter <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
+
+        rv.custom$POVImputation_SummaryDT <- rbind(
+          rv.custom$POVImputation_SummaryDT ,
+          c("POV Imputation",
+            nBefore - nAfter,
+            0,
+            NA)
+          )
+
       })
 
 
@@ -414,7 +469,7 @@ PipelineProtein_Imputation_server <- function(id,
       rv.custom$params.tmp[['Imputation']][['POVImputation']] <- paramshistory(.history)
       
       
-      rv$dataIn2 <- rv$dataIn1
+      rv.custom$dataIn2 <- rv.custom$dataIn1
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
@@ -450,6 +505,8 @@ PipelineProtein_Imputation_server <- function(id,
           }
         ),
         content = tagList(
+          
+          uiOutput(ns("MECImputation_DT_UI")),
           uiOutput(ns("warningMECImputation")),
           uiOutput(ns("MECImputation_showDetQuantValues_ui")),
           tags$hr(),
@@ -465,6 +522,17 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
  
+    
+    MagellanNTK::format_DT_server("MEC_dt", 
+      dataIn = reactive({rv.custom$MECImputation_SummaryDT}))
+    
+    
+    output$MECImputation_DT_UI <- renderUI({
+      req(rv.custom$MECImputation_SummaryDT)
+      MagellanNTK::format_DT_ui(ns("MEC_dt"))
+    })
+    
+    
     output$MECImputation_mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("MECImputation_mvplots"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
@@ -472,10 +540,10 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observe({
-      req(rv.custom$dataIn1)
+      req(rv.custom$dataIn2)
       mod_mv_plots_server("MECImputation_mvplots",
-        data = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
-        grp = reactive({get_group(rv.custom$dataIn1)}),
+        data = reactive({rv.custom$dataIn2[[length(rv.custom$dataIn2)]]}),
+        grp = reactive({get_group(rv.custom$dataIn2)}),
         mytitle = reactive({"MEC imputation"}),
         pal = reactive({NULL}),
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
@@ -498,7 +566,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       mod_DetQuantImpValues_server(
         id = "MECImputation_DetQuantValues_DT",
-        dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
+        dataIn = reactive({rv.custom$dataIn2[[length(rv.custom$dataIn2)]]}),
         quant = reactive({rv.widgets$MECImputation_detQuant_quantile}),
         factor = reactive({rv.widgets$MECImputation_detQuant_factor})
       )
@@ -565,21 +633,21 @@ PipelineProtein_Imputation_server <- function(id,
        
       req(grepl('MECImputation', btnEvents()))
       
-      if ( is.null(rv.custom$dataIn1) || 
+      if ( is.null(rv.custom$dataIn2) || 
           rv.widgets$MECImputation_algorithm == "None")
         info(btnVentsMasg)
       else {
         
         
-      req(rv.custom$dataIn1)
+      req(rv.custom$dataIn2)
       req(rv.widgets$MECImputation_algorithm != "None")
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.25, detail = "Reintroduce MEC")
         
         m <- match.metacell(
-          DaparToolshed::qMetacell(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]),
+          DaparToolshed::qMetacell(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]),
           pattern = "Missing MEC",
-          level = DaparToolshed::typeDataset(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
+          level = DaparToolshed::typeDataset(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])
         )
         nbMECBefore <- length(which(m))
         incProgress(0.75, detail = "MEC Imputation")
@@ -592,12 +660,12 @@ PipelineProtein_Imputation_server <- function(id,
           .param <- list()
           try({
             switch(rv.widgets$MECImputation_algorithm,
-              None = .tmp <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
+              None = .tmp <- rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
               
               detQuantile = {
                 incProgress(0.5, detail = "det quantile Imputation")
                 .tmp <- wrapper.impute.detQuant(
-                  obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
+                  obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
                   qval = rv.widgets$MECImputation_detQuant_quantile / 100,
                   factor = rv.widgets$MECImputation_detQuant_factor,
                   na.type = 'Missing MEC')
@@ -609,7 +677,7 @@ PipelineProtein_Imputation_server <- function(id,
               },
               fixedValue = {
                 .tmp <- wrapper.impute.fixedValue(
-                  obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
+                  obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
                   fixVal = rv.widgets$MECImputation_fixedValue,
                   na.type = "Missing MEC"
                 )
@@ -648,7 +716,7 @@ PipelineProtein_Imputation_server <- function(id,
           
           
           rv.custom$dataIn2 <- Prostar2::addDatasets(
-            rv.custom$dataIn1,
+            rv.custom$dataIn2,
             .tmp,
             'MECImputation')
           
@@ -656,6 +724,21 @@ PipelineProtein_Imputation_server <- function(id,
       
       .history <- rv.custom$dataIn2[[length(rv.custom$dataIn2)]]
       rv.custom$params.tmp[['Imputation']][['MECImputation']] <- paramshistory(.history)
+      
+      
+      
+      # Add infos
+      nBefore <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])
+      nAfter <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
+      
+      rv.custom$MECImputation_SummaryDT <- rbind(
+        rv.custom$MECImputation_SummaryDT ,
+        c("MEC Imputation",
+          nBefore - nAfter,
+          0,
+          NA)
+      )
+      
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

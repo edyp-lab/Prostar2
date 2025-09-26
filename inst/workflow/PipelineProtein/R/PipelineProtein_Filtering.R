@@ -37,6 +37,10 @@
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelineProtein_Filtering", path, dataIn = Exp1_R25_prot))
+#' 
+pipe_workflowApp("PipelineProtein_Filtering", path, dataIn = Exp1_R25_prot)
+
+
 #' }
 #' 
 #' 
@@ -322,12 +326,12 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE,{
-      req(rv$dataIn)
+      req(rv.custom$dataIn1)
       
       
       tmp <- filterFeaturesOneSE(
-        object = rv$dataIn,
-        i = length(rv$dataIn),
+        object = rv.custom$dataIn1,
+        i = length(rv.custom$dataIn1),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$funFilter()$value$ll.fun
       )
@@ -382,9 +386,9 @@ PipelineProtein_Filtering_server <- function(id,
       
       mod_ds_metacell_Histos_server(
         id = "plots",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
-        group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition})
+        group = reactive({DaparToolshed::design.qf(rv.custom$dataIn1)$Condition})
       )
       
       
@@ -464,7 +468,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Variablefiltering_cname_ui <- renderUI({
       req(rv.custom$dataIn1)
-      .choices <- c("None", colnames(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
+      .choices <- c("None", colnames(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])))
       
       widget <- selectInput(ns("Variablefiltering_cname"),
         "Column name",
@@ -478,11 +482,11 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$Variablefiltering_operator_ui <- renderUI({
-      req(rv.custom$dataIn1)
-      req(rv.widgets$Variablefiltering_cname %in% colnames(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])))
+      req(rv.custom$dataIn2)
+      req(rv.widgets$Variablefiltering_cname %in% colnames(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])))
       
       
-      if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])) {
+      if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])[, rv.widgets$Variablefiltering_cname])) {
         .operator <- DaparToolshed::SymFilteringOperators()
       } else {
         .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
@@ -515,7 +519,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     observeEvent(c(rv.widgets$Variablefiltering_value, rv.widgets$Variablefiltering_cname), {
-      req(rv.custom$dataIn1)
+      req(rv.custom$dataIn2)
       req(rv.widgets$Variablefiltering_value != 'Enter value...')
       req(rv.widgets$Variablefiltering_cname != "None")
       
@@ -537,9 +541,9 @@ PipelineProtein_Filtering_server <- function(id,
       val <- tryCatch({
         
         
-        if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname]) ) {
+        if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])[, rv.widgets$Variablefiltering_cname]) ) {
           as.numeric(value)
-        } else if (!is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])[, rv.widgets$Variablefiltering_cname])){
+        } else if (!is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])[, rv.widgets$Variablefiltering_cname])){
           as.character(value)
         }
       },
@@ -645,11 +649,11 @@ PipelineProtein_Filtering_server <- function(id,
         
         ###########################################
         req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
-        req(rv.custom$dataIn1)
+        req(rv.custom$dataIn2)
         
         tmp <- filterFeaturesOneSE(
-          object = rv.custom$dataIn1,
-          i = length(rv.custom$dataIn1),
+          object = rv.custom$dataIn2,
+          i = length(rv.custom$dataIn2),
           name = paste0("variableFiltered", MagellanNTK::Timestamp()),
           filters = rv.custom$Variablefiltering_funFilter$ll.var
         )
@@ -663,7 +667,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         .html <- rv.custom$Variablefiltering_funFilter$ll.query
         .nbDeleted <- nBefore - nAfter
-        .nbBefore <- nrow(SummarizedExperiment::assay(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]))
+        .nbBefore <- nrow(SummarizedExperiment::assay(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]))
         .nbAfter <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
         
         rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
