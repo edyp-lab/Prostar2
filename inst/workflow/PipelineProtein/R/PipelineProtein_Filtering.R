@@ -381,7 +381,7 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     
-    output$plots_ui <- renderUI({
+    output$Cellmetadatafiltering_plots_ui <- renderUI({
       req(rv.custom$funFilter()$value$ll.pattern)
       
       mod_ds_metacell_Histos_server(
