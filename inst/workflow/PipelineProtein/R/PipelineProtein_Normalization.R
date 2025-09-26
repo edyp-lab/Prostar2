@@ -202,10 +202,15 @@ PipelineProtein_Normalization_server <- function(id,
           shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
           ),
         content = tagList(
-          omXplore::omXplore_density_ui(ns("densityPlot_Norm")),
-          omXplore::omXplore_intensity_ui(ns("boxPlot_Norm")),
+          fluidRow(
+            column(width = 6,
+              omXplore::omXplore_density_ui(ns("densityPlot_Norm")),
+          omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
+              ),
+            column(width = 6,
           highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
-          )
+            )
+          ))
         )
     })
     
