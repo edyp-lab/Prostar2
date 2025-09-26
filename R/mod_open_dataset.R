@@ -45,12 +45,8 @@ open_dataset_ui <- function(id) {
 #'
 open_dataset_server <- function(
     id,
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
