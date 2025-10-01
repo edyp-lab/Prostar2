@@ -93,7 +93,7 @@ diffAnaVolcanoplot_rCharts <- function(
     conditions = NULL,
     clickFunction = NULL,
     pal = NULL) {
-  stopifnot(inherits(df, "data.frame"))
+  req(inherits(df, "data.frame"))
   pkgs.require('magrittr')
 
   xtitle <- paste("log2 ( mean(", conditions[2], ") / mean(",

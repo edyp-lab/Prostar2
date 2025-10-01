@@ -169,10 +169,8 @@ mod_Metacell_Filtering_server <- function(
       )
     })
 
-    observeEvent(dataIn(),
-      ignoreInit = FALSE,
-      {
-        stopifnot(inherits(dataIn(), "QFeatures"))
+    observeEvent(dataIn(), ignoreInit = FALSE, {
+        req(inherits(dataIn(), "QFeatures"))
         rv$dataIn <- dataIn()
         rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
           query = "-",

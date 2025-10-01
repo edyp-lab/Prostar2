@@ -57,8 +57,8 @@ NULL
 #'
 #' @export
 addDatasets <- function(object, dataset, name) {
-  stopifnot(inherits(object, "QFeatures"))
-  stopifnot(inherits(dataset, "SummarizedExperiment"))
+  req(inherits(object, "QFeatures"))
+  req(inherits(dataset, "SummarizedExperiment"))
 
   object <- addAssay(object, dataset, name)
 

@@ -137,12 +137,9 @@ mod_Pept_Imputation_server <- function(
     # })
 
 
-    observeEvent(dataIn(),
-      ignoreNULL = TRUE,
-      ignoreInit = FALSE,
-      {
+    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
         req(dataIn())
-        stopifnot(inherits(dataIn(), "QFeatures"))
+        req(inherits(dataIn(), "QFeatures"))
         rv$dataIn <- dataIn()
       },
       priority = 1000

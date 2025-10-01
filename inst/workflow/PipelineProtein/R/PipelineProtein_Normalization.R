@@ -113,6 +113,8 @@ PipelineProtein_Normalization_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    
+    print(paste0("Process id is: ", id))
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
@@ -140,7 +142,9 @@ PipelineProtein_Normalization_server <- function(id,
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
-    
+    observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      print(paste0('new value sdsdsdsdsfor remoteReset(): ', remoteReset()))
+    })
     
     output$Description <- renderUI({
       file <- normalizePath(file.path(

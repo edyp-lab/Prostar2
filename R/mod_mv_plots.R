@@ -97,7 +97,7 @@ mod_mv_plots_server <- function(
     )
 
     observeEvent(req(data()), {
-      stopifnot(inherits(data(), "SummarizedExperiment"))
+      req(inherits(data(), "SummarizedExperiment"))
 
       if (is.null(grp())) {
         rv$grp <- paste0("grp_", seq(ncol(data())))
