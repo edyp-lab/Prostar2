@@ -114,7 +114,6 @@ PipelineProtein_Normalization_server <- function(id,
     ns <- session$ns
     
     
-    print(paste0("Process id is: ", id))
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
@@ -156,8 +155,9 @@ PipelineProtein_Normalization_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = div(),
+        sidebar = ,
         content = div(
+          div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -168,14 +168,19 @@ PipelineProtein_Normalization_server <- function(id,
     })
 
 
+    loader_chunk <- addLoader$new("chunk", type = "spinner", color = "orange")
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
+      
+      loader_chunk$show()
       rv$dataIn <- dataIn()
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
+      loader_chunk$hide()
     })
     
     
@@ -574,16 +579,20 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      
+      loader_inline_DataId <- spsComps::addLoader$new("DataId_btn_validate", color = "blue", method = "inline", type = "spinner")
       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        loader_inline_Save$show()
+
+        
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
+      loader_inline_Save$hide()
       }
     })
     # <<< END ------------- Code for step 3 UI---------------

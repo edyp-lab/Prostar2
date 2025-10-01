@@ -68,10 +68,7 @@ PipelineProtein_Description_server <- function(id,
     
     eval(str2expression(core.code))
     
-    
-    observeEvent(dataIn(), {
-      browser()
-    })
+  
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 
