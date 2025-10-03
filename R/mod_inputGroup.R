@@ -14,7 +14,7 @@
 #'
 #' @examples
 #' if (interactive()){
-#' shiny::runApp(Prostar2::mod_inputGroup())
+#' shiny::runApp(mod_inputGroup())
 #' }
 #' 
 #' @importFrom QFeatures addAssay removeAssay
@@ -64,9 +64,8 @@ mod_inputGroup_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    rv <- reactiveValues(
-      dataOut = NULL
-    )
+    dataOut <- reactiveVal(NULL)
+
 
 
     shinyOutput <- function(FUN, id, num, ...) {
@@ -161,16 +160,16 @@ mod_inputGroup_server <- function(
         txt <- "The identification method is not appropriately defined for
       each sample."
         res <- list(trigger = MagellanNTK::Timestamp(), ok = FALSE, temp = temp, txt = txt)
-        rv$dataOut <- NULL
+        dataOut(NULL)
       } else {
         if (length(temp) != length(unique(temp))) {
           txt <- "There are duplicates in identification columns."
           res <- list(trigger = MagellanNTK::Timestamp(), ok = FALSE, temp = temp, txt = txt)
-          rv$dataOut <- NULL
+          dataOut(NULL)
         } else {
           txt <- "Correct"
           res <- list(trigger = MagellanNTK::Timestamp(), ok = TRUE, temp = temp, txt = txt)
-          rv$dataOut <- temp
+          dataOut(temp)
         }
       }
 
@@ -198,9 +197,7 @@ mod_inputGroup_server <- function(
       )
     })
 
-    reactive({
-      rv$dataOut
-    })
+    return(reactive({dataOut()}))
   })
 }
 
@@ -211,24 +208,24 @@ mod_inputGroup_server <- function(
 #' @importFrom utils read.csv
 #'
 mod_inputGroup <- function() {
-  ui <- Prostar2::mod_inputGroup_ui("mod_inputGroup")
+  ui <- mod_inputGroup_ui("mod_inputGroup")
 
   server <- function(input, output, session) {
     file <- system.file("extdata/Exp1_R25_prot.txt", package = "DaparToolshedData")
     df <- read.csv(file, header = TRUE, sep = "\t", as.is = T)
 
-    Prostar2::mod_inputGroup_server("mod_inputGroup",
-      df = reactive({
-        df
-      }),
-      quantCols = reactive({
-        colnames(df)[49:54]
-      })
+    
+    rv <- reactiveValues(
+      res = NULL
+    )
+    rv$res <- mod_inputGroup_server("mod_inputGroup",
+      df = reactive({df}),
+      quantCols = reactive({colnames(df)[49:54]})
     )
     #
-    # observeEvent(toto(), ignoreNULL = FALSE,{
-    #   print(toto())
-    # })
+    observe({
+      print(rv$res())
+    })
   }
 
   app <- shinyApp(ui = ui, server = server)

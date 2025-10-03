@@ -148,8 +148,7 @@ PipelineConvert_Convert_server <- function(id,
     )
     eval(str2expression(core.code))
     
-    
-    # >>>
+
     # >>> START ------------- Code for Description UI---------------
     
     output$Description <- renderUI({
@@ -173,7 +172,7 @@ PipelineConvert_Convert_server <- function(id,
       
     })
     
-    
+   
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
@@ -739,18 +738,18 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'])
     })
     
+
     
-    observe({
+    output$ExpandFeatData_inputGroup_ui <- renderUI({
+      #req(rv.widgets$ExpandFeatData_quantCols)
+      req(as.logical(rv.widgets$ExpandFeatData_idMethod))
+      
+      
       rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
         df = reactive({rv.custom$tab}),
         quantCols = reactive({rv.widgets$ExpandFeatData_quantCols}),
         is.enabled = reactive({rv$steps.enabled['ExpandFeatData']}))
-    })
-    
-    output$ExpandFeatData_inputGroup_ui <- renderUI({
-      req(rv.widgets$ExpandFeatData_quantCols)
-      req(as.logical(rv.widgets$ExpandFeatData_idMethod))
-      
+
       rv.widgets$ExpandFeatData_quantCols
       mod_inputGroup_ui(ns('inputGroup'))
     })
@@ -791,26 +790,45 @@ PipelineConvert_Convert_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          uiOutput(ns("Design_btn_validate_ui")),
-            uiOutput(ns("Design_designEx_ui")),
-            uiOutput(ns('dl_ui')),
-          uiOutput(ns("Design_designEx_ui"))
-        )
+           uiOutput(ns("Design_designEx_ui")),
+            uiOutput(ns('dl_ui'))
       )
-
+)
     })
     
     
+    # 
+    # observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    #   browser()
+    #   # remove_shiny_inputs <- function(id, .input) {
+    #   #   invisible(
+    #   #     lapply(grep(id, names(.input), value = TRUE), function(i) {
+    #   #       .subset2(.input, "impl")$.values$remove(i)
+    #   #     })
+    #   #   )
+    #   # }
+    #   # 
+    #   # #removeUI(selector = "#module_content")
+    #   # remove_shiny_inputs("designEx", input)
+    # })
+    # 
+    
+    observe({
+      rv.widgets$ExpandFeatData_quantCols
+
+      rv.custom$design <- Prostar2::mod_buildDesign_server(
+      "designEx", 
+      quantCols = reactive({rv.widgets$ExpandFeatData_quantCols}),
+      remoteReset = reactive({remoteReset()}),
+      is.enabled = reactive({rv$steps.enabled['Design']})
+    )
+    })
+    
+
     ## Experiment design -----
     output$Design_designEx_ui <- renderUI({
       req(rv.widgets$ExpandFeatData_quantCols)
       rv.widgets$ExpandFeatData_quantCols
-      
-      rv.custom$design <- Prostar2::mod_buildDesign_server(
-        "designEx", 
-        quantCols = rv.widgets$ExpandFeatData_quantCols,
-        is.enabled = reactive({rv$steps.enabled['Design']})
-      )
       
       mod_buildDesign_ui(ns("designEx"))
     })
@@ -904,7 +922,9 @@ PipelineConvert_Convert_server <- function(id,
         analysis_name <- "myDataset"
       }
       
-      .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
+      .indexForMetacell <- NULL
+      if (!is.null(rv.widgets$ExpandFeatData_inputGroup))
+        .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
       .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
       
       

@@ -40,6 +40,7 @@ mod_buildDesign_ui <- function(id) {
       actionLink(ns("linkToFaq1"), "FAQ", style = "background-color: white"),
       " page."
     ),
+    actionButton(ns('reset'), 'Reset design'),
     fluidRow(
       column(
         width = 6,
@@ -58,16 +59,15 @@ mod_buildDesign_ui <- function(id) {
       uiOutput(ns("UI_reorder"))
     ),
     tags$div(
-      tags$div(
         style = "display:inline-block; vertical-align: top;",
-        uiOutput(ns("viewDesign"), width = "100%")
+        h4("Design"),
+        rhandsontable::rHandsontableOutput(ns("hot")),
+        width = "100%"
       ),
-      tags$div(
+    tags$div(
         style = "display:inline-block; vertical-align: top;",
         shinyjs::hidden(div(id = "showExamples", uiOutput(ns("designExamples"))))
       )
-    )
-    # shinyjs::disabled(actionButton(ns('validateDesign'), 'Validate design'))
   )
 }
 
@@ -77,14 +77,10 @@ mod_buildDesign_ui <- function(id) {
 #' @importFrom stats setNames
 mod_buildDesign_server <- function(
     id,
-    quantCols,
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
-  # requireNamespace("shinyBS")
+    quantCols = reactive({NULL}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
+  
   requireNamespace("magrittr")
 
   moduleServer(id, function(input, output, session) {
@@ -93,8 +89,8 @@ mod_buildDesign_server <- function(
 
     rv <- reactiveValues(
       hot = data.frame(
-        quantCols = as.character(quantCols),
-        Condition = rep("", length(quantCols)),
+        quantCols = as.character(quantCols()),
+        Condition = rep("", length(quantCols())),
         stringsAsFactors = FALSE
       ),
       conditionsChecked = NULL,
@@ -103,9 +99,11 @@ mod_buildDesign_server <- function(
 
 
     dataOut <- reactiveValues(
+      trigger = NULL,
       design = NULL
     )
-
+    
+    
     output$UI_reorder <- renderUI({
       widget <- selectInput(ns("convert_reorder"), "Order by conditions ?",
         choices = setNames(nm = c("No", "Yes")),
@@ -181,7 +179,9 @@ mod_buildDesign_server <- function(
     output$hot <- rhandsontable::renderRHandsontable({
       rv$hot
       input$chooseExpDesign
-
+      print(rv$hot)
+      
+#browser()
       # if (is.null(rv$hot)) {
       #   rv$hot <- data.frame(
       #     Sample.name = as.character(input$choose_quantitative_columns),
@@ -198,8 +198,8 @@ mod_buildDesign_server <- function(
           autoInsertRow = FALSE,
           maxRows = nrow(rv$hot)
         )
-      ) %>%
-        rhandsontable::hot_rows(rowHeights = 30) %>%
+      ) |>
+        rhandsontable::hot_rows(rowHeights = 30) |>
         rhandsontable::hot_context_menu(
           allowRowEdit = TRUE,
           allowColEdit = FALSE,
@@ -208,15 +208,15 @@ mod_buildDesign_server <- function(
           allowRemoveRow = TRUE,
           allowRemoveColumn = FALSE,
           autoInsertRow = FALSE
-        ) %>%
-        rhandsontable::hot_cols(renderer = color_renderer()) %>%
+        ) |>
+        rhandsontable::hot_cols(renderer = color_renderer()) |>
         rhandsontable::hot_col(col = "quantCols", readOnly = TRUE)
 
       if (!is.null(input$chooseExpDesign)) {
         switch(input$chooseExpDesign,
           FlatDesign = {
             if ("Bio.Rep" %in% colnames(rv$hot)) {
-              hot <- hot %>%
+              hot <- hot |>
                 rhandsontable::hot_col(
                   col = "Bio.Rep",
                   readOnly = TRUE
@@ -225,7 +225,7 @@ mod_buildDesign_server <- function(
           },
           twoLevelsDesign = {
             if ("Tech.Rep" %in% colnames(rv$hot)) {
-              hot <- hot %>%
+              hot <- hot |>
                 rhandsontable::hot_col(
                   col = "Tech.Rep",
                   readOnly = TRUE
@@ -234,19 +234,42 @@ mod_buildDesign_server <- function(
           },
           threeLevelsDesign = {
             if ("Analyt.Rep" %in% colnames(rv$hot)) {
-              hot <- hot %>%
+              hot <- hot |>
                 rhandsontable::hot_col(col = "Analyt.Rep", readOnly = TRUE)
             }
           }
         )
       }
+
+      
       hot
     })
 
 
+    
+    observeEvent(remoteReset()+input$reset, ignoreInit = TRUE, ignoreNULL = TRUE,{
 
+      rv$hot <- data.frame(
+        quantCols = as.character(quantCols()),
+        Condition = rep("", length(quantCols())),
+        stringsAsFactors = FALSE
+      )
+      
+      rv$conditionsChecked <- NULL
+      rv$newOrder <- NULL
+      
+      
+      dataOut$trigger <- MagellanNTK::Timestamp()
+      
+      dataOut$design <- data.frame(
+        quantCols = as.character(quantCols()),
+        Condition = rep("", length(quantCols())),
+        stringsAsFactors = FALSE
+      )
+    })
+    
     #--------------------------------------------------------------------------
-    observeEvent(input$hot, {
+    observeEvent(req(input$hot), {
       rv$hot <- rhandsontable::hot_to_r(input$hot)
     })
 
@@ -326,14 +349,14 @@ mod_buildDesign_server <- function(
 
 
     #------------------------------------------------------------------------------
-    output$viewDesign <- renderUI({
-      # req(!(rv$designSaved))
-
-      tagList(
-        h4("Design"),
-        rhandsontable::rHandsontableOutput(ns("hot"))
-      )
-    })
+    # output$viewDesign <- renderUI({
+    #   # req(!(rv$designSaved))
+    # 
+    #   tagList(
+    #     h4("Design"),
+    #     rhandsontable::rHandsontableOutput(ns("hot"))
+    #   )
+    # })
 
     #------------------------------------------------------------------------------
     output$designExamples <- renderUI({
@@ -490,13 +513,14 @@ mod_buildDesign_server <- function(
 
 
 
-    observeEvent(rv$designChecked$valid, {
+    observeEvent(req(rv$designChecked$valid), {
+      req(isTRUE(rv$conditionsChecked$valid))
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
-      if (isTRUE(rv$designChecked$valid)) {
+      
         dataOut$design <- rv$hot
-      } else {
-        dataOut$design <- NULL
-      }
+        #dataOut$design <- NULL
+
 
       if (input$convert_reorder == "Yes") {
         dataOut$order <- rv$newOrder
@@ -506,9 +530,7 @@ mod_buildDesign_server <- function(
     })
 
 
-    reactive({
-      dataOut
-    })
+    return(reactive({dataOut}))
   })
 } # end of
 
@@ -526,11 +548,23 @@ mod_buildDesign_server <- function(
 #' @export
 mod_buildDesign <- function(quantCols) {
   ui <- fluidPage(
+    #actionButton('reset', 'Reset'),
     mod_buildDesign_ui("buildDesign")
   )
 
   server <- function(input, output, session) {
-    mod_buildDesign_server("buildDesign", quantCols)
+    
+    res <- reactiveVal(NULL)
+    
+    observe({
+    res <- mod_buildDesign_server("buildDesign", 
+      quantCols = reactive({quantCols})
+      )
+  })
+ 
+    observeEvent(req(res()$design), ignoreInit = TRUE,{
+      print(res()$design)
+    })
   }
 
   app <- shinyApp(ui, server)
