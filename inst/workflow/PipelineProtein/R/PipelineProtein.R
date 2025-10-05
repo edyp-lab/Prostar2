@@ -110,6 +110,8 @@ PipelineProtein_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
+    
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

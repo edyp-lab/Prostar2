@@ -122,7 +122,8 @@ PipelineProtein_Normalization_server <- function(id,
     )
 
     eval(str2expression(core.code))
-
+    add.resourcePath()
+    
     # core <- paste0(
     #   MagellanNTK::Insert_Call_to_Config(id),
     #   MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),

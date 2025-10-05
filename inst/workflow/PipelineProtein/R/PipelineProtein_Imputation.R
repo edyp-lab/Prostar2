@@ -147,6 +147,7 @@ PipelineProtein_Imputation_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
     
     
     observe({

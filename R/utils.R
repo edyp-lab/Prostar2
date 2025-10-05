@@ -32,3 +32,19 @@ pkgs.require <- function(ll.deps){
   })
 }
 
+
+#' @title Add resource paths
+#' 
+#' @examples 
+#' add.ResourcePath()
+#' 
+#' @export
+#' 
+#' @importFrom shiny addResourcePath
+#' @author Samuel Wieczorek
+#' 
+add.resourcePath <- function(){
+  addResourcePath("www", system.file("app/www", package = "Prostar2"))
+  addResourcePath("images", system.file("app/images", package = "Prostar2"))
+}
+

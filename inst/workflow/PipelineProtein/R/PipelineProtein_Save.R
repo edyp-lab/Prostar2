@@ -65,6 +65,8 @@ PipelineProtein_Save_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
+    
     
     observeEvent(req(dataIn()), {
       rv$dataIn <- dataIn()

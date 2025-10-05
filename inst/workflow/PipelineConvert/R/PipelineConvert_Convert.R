@@ -147,7 +147,7 @@ PipelineConvert_Convert_server <- function(id,
       rv.custom.names = names(rv.custom.default.values)
     )
     eval(str2expression(core.code))
-    
+    add.resourcePath()
 
     # >>> START ------------- Code for Description UI---------------
     

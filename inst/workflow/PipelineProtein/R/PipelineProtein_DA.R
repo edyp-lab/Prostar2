@@ -170,6 +170,7 @@ PipelineProtein_DA_server <- function(id,
         )
       )
     )
+    add.resourcePath()
     
     # >>>
     # >>> START ------------- Code for Description UI---------------

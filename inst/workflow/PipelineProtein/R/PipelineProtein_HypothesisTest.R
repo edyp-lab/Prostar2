@@ -132,6 +132,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
     
 
     

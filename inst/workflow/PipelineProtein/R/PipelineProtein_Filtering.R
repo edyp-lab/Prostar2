@@ -186,6 +186,7 @@ PipelineProtein_Filtering_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
     
     
     # core <- paste0(
