@@ -11,7 +11,7 @@ convert_dataset_ui(id)
 
 convert_dataset_server(
   id,
-  reset = reactive({
+  remoteReset = reactive({
      NULL
  }),
   is.enabled = reactive({
@@ -24,7 +24,7 @@ convert_dataset()
 \arguments{
 \item{id}{xxx}
 
-\item{reset}{xxx}
+\item{remoteReset}{xxx}
 
 \item{is.enabled}{xxx}
 }

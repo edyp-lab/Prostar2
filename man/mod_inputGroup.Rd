@@ -45,7 +45,7 @@ A shiny Module.
 }
 \examples{
 if (interactive()){
-shiny::runApp(Prostar2::mod_inputGroup())
+shiny::runApp(mod_inputGroup())
 }
 
 }

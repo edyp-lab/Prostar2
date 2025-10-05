@@ -5,7 +5,7 @@
 #' `MagellanNTK`. They wrap the entire workflow into a single function
 #'
 #' @param id xxx
-#' @param reset xxx
+#' @param remoteReset xxx
 #' @param is.enabled xxx
 #' 
 #' 
@@ -45,7 +45,7 @@ convert_dataset_ui <- function(id) {
 #'
 convert_dataset_server <- function(
     id,
-    reset = reactive({NULL}),
+    remoteReset = reactive({NULL}),
     is.enabled = reactive({TRUE})) {
   requireNamespace("MagellanNTK")
 
@@ -65,12 +65,14 @@ convert_dataset_server <- function(
     dataOut <- reactiveVal()
     session$userData$workflow.path <- path
 
-    nav_process_server(
+    dataOut(nav_process_server(
       id = "PipelineConvert_Convert",
-      dataIn = reactive({
-        data.frame()
-      })
+      dataIn = reactive({data.frame()}),
+      remoteReset = reactive({remoteReset()})
     )
+    )
+    
+    return(reactive({dataOut()}))
   })
 }
 
@@ -87,9 +89,7 @@ convert_dataset <- function() {
 
   server <- function(input, output, session) {
     rv.core <- reactiveValues(
-      result_convert = reactive({
-        NULL
-      })
+      result_convert = reactive({NULL})
     )
 
 
@@ -102,7 +102,8 @@ convert_dataset <- function() {
     })
 
 
-    observeEvent(req(rv.core$result_convert$dataOut()$trigger), ignoreNULL = TRUE, {
+    
+    observeEvent(req(rv.core$result_convert()$dataOut()$trigger), ignoreNULL = TRUE, {
       print(rv.core$result_convert())
       print(rv.core$result_convert())
     })

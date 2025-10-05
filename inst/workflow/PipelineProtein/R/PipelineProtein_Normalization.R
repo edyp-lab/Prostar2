@@ -549,7 +549,10 @@ PipelineProtein_Normalization_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = tagList(),
-        content = uiOutput(ns('dl_ui'))
+        content = tagList(
+          div(ns('Save_Loader'), width = '100px', weight = '100px'),
+          uiOutput(ns('dl_ui'))
+        )
       )
     })
     
@@ -579,7 +582,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      loader_inline_DataId <- spsComps::addLoader$new("DataId_btn_validate", color = "blue", method = "inline", type = "spinner")
+      loader_inline_Save <- spsComps::addLoader$new("Save_Loader", color = "blue", method = "inline", type = "spinner")
       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {

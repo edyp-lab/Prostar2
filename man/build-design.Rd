@@ -11,7 +11,9 @@ mod_buildDesign_ui(id)
 
 mod_buildDesign_server(
   id,
-  quantCols,
+  quantCols = reactive({
+     NULL
+ }),
   remoteReset = reactive({
      0
  }),

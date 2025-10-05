@@ -162,7 +162,8 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::process_layout(
         ns = NS(id),
         sidebar = div(),
-        content = div(
+        content = tagList(
+          div(id = ns('Description_Loader')),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -172,15 +173,19 @@ PipelineConvert_Convert_server <- function(id,
       
     })
     
-   
+    loader_Description <- spsComps::addLoader$new(ns("Description_Loader"), color = "blue", method = "inline", type = "spinner")
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
+
+      loader_Description$show()
+
       rv$dataIn <- dataIn()
-      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
+      loader_Description$hide()
     })
     
     # <<< END ------------- Code for Description UI---------------
@@ -201,6 +206,7 @@ PipelineConvert_Convert_server <- function(id,
           
         ),
         content = tagList(
+          div(ns('SelectFile_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns('SelectFile_software_ui'), style = "margin-right : 30px;"),
           uiOutput(ns('SelectFile_file_ui'), style = "margin-right : 30px;"),
           uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
@@ -414,18 +420,17 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
-    
-    ## Validation button -----
-    loader_inline_SelectFile <- spsComps::addLoader$new("SelectFile_btn_validate", color = "blue", method = "inline", type = "spinner")
-    
-    
+     
     # >>> END: Definition of the widgets
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('SelectFile', btnEvents()))
       # Do some stuff
       req(rv.widgets$SelectFile_file)
-      loader_inline_SelectFile$show()
+      loader <- spsComps::addLoader$new("SelectFile_Loader", color = "blue", method = "inline", type = "spinner")
+      
+      loader$show()
+      
       
       ext <- GetExtension(rv.widgets$SelectFile_file$name)
       rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
@@ -472,7 +477,7 @@ PipelineConvert_Convert_server <- function(id,
         dataOut$value <- NULL
         rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
       }
-      loader_inline_SelectFile$hide()
+      loader$hide()
     })
     
     # <<< END ------------- Code for step 1 UI---------------
@@ -490,6 +495,7 @@ PipelineConvert_Convert_server <- function(id,
         sidebar = tagList(
           ),
         content = tagList(
+          div(ns('DataId_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns("DataId_btn_validate_ui")),
           uiOutput(ns('DataId_datasetId_ui')),
             uiOutput(ns("DataId_parentProteinID_ui")),
@@ -643,15 +649,19 @@ PipelineConvert_Convert_server <- function(id,
       req(grepl('DataId', btnEvents()))
       # Do some stuff
       req(rv.widgets$DataId_datasetId)
+      loader <- spsComps::addLoader$new("DataId_Loader", color = "blue", method = "inline", type = "spinner")
+      
+      loader$show()
+      
+      
       if(rv.widgets$SelectFile_typeOfData != "protein"){
         req(rv.widgets$DataId_parentProteinID)}
-      loader_inline_DataId$show()
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['DataId'] <- stepStatus$VALIDATED
-      loader_inline_DataId$hide()
+      loader$hide()
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -664,6 +674,7 @@ PipelineConvert_Convert_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
+          div(ns('ExpandFeatData_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns("ExpandFeatData_btn_validate_ui")),
           uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;"),
           uiOutput(ns('ExpandFeatData_idMethod_ui'), style = "margin-right: 30px;"),
@@ -755,18 +766,20 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     
-    ## Validation button -----
-    loader_inline_ExpandFeatData <- spsComps::addLoader$new("ExpandFeatData_btn_validate", color = "blue", method = "inline", type = "spinner")
-    
-    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('ExpandFeatData', btnEvents()))
       
       req(rv.widgets$ExpandFeatData_quantCols)
       req(all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE],
         is.numeric)))
-      if (as.logical(rv.widgets$ExpandFeatData_idMethod)){req(rv.widgets$ExpandFeatData_inputGroup())}
-      loader_inline_ExpandFeatData$show()
+      loader <- spsComps::addLoader$new("ExpandFeatData_Loader", color = "blue", method = "inline", type = "spinner")
+      loader$show()
+      
+      
+      if (as.logical(rv.widgets$ExpandFeatData_idMethod)){
+        req(rv.widgets$ExpandFeatData_inputGroup())
+        }
+
       # Do some stuff
       # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
       # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
@@ -777,7 +790,7 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['ExpandFeatData'] <- stepStatus$VALIDATED
-      loader_inline_ExpandFeatData$hide()
+      loader$hide()
     })
     
     # <<< END ------------- Code for for step 3 UI---------------
@@ -790,7 +803,8 @@ PipelineConvert_Convert_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-           uiOutput(ns("Design_designEx_ui")),
+          div(ns('Design_Loader'), width = '100px', weight = '100px'),
+          uiOutput(ns("Design_designEx_ui")),
             uiOutput(ns('dl_ui'))
       )
 )
@@ -834,14 +848,12 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     
-    ## Validation button -----
-    loader_inline_Design <- spsComps::addLoader$new("Design_btn_validate", color = "blue", method = "inline", type = "spinner")
-    
-    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Design', btnEvents()))
       req(rv.custom$design()$trigger)
-      loader_inline_Design$show()
+      loader <- spsComps::addLoader$new("Design_Loader", color = "blue", method = "inline", type = "spinner")
+      loader$show()
+      
       # Do some stuff
       # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
       # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
@@ -851,7 +863,7 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Design'] <- stepStatus$VALIDATED
-      loader_inline_Design$hide()
+      loader$hide()
     })
     
     # <<< END ------------- Code for for step 4 UI---------------
@@ -865,6 +877,7 @@ PipelineConvert_Convert_server <- function(id,
           ns = NS(id),
           sidebar = tagList(),
           content = tagList(
+            div(ns('Save_Loader'), width = '100px', weight = '100px'),
             uiOutput(ns('dl_ui')),
             uiOutput(ns('Save_infos_ui'))
           )
@@ -897,15 +910,14 @@ PipelineConvert_Convert_server <- function(id,
       )
     })    
     
-    ## Validation button -----
-    loader_inline_Save <- spsComps::addLoader$new("Save_btn_validate", color = "blue", method = "inline", type = "spinner")
-    
-
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
       
-      loader_inline_Save$show()
+      loader <- spsComps::addLoader$new("Save_Loader", color = "blue", method = "inline", type = "spinner")
+      loader$show()
+      
+      
       # Check if the conditions have been reordered or not.
       # If it is the case, the metacells must also be reordered
       # in the same way.
@@ -953,7 +965,7 @@ PipelineConvert_Convert_server <- function(id,
         dataIn = reactive({rv$dataIn}),
         filename = analysis_name)
       
-      loader_inline_Save$hide()
+      loader$hide()
 
     })
     

@@ -40,7 +40,6 @@ mod_buildDesign_ui <- function(id) {
       actionLink(ns("linkToFaq1"), "FAQ", style = "background-color: white"),
       " page."
     ),
-    actionButton(ns('reset'), 'Reset design'),
     fluidRow(
       column(
         width = 6,
@@ -56,7 +55,8 @@ mod_buildDesign_ui <- function(id) {
     hr(),
     tags$div(
       style = "display:inline-block; vertical-align: top;",
-      uiOutput(ns("UI_reorder"))
+      uiOutput(ns("UI_reorder")),
+      actionButton(ns('reset'), 'Reset design')
     ),
     tags$div(
         style = "display:inline-block; vertical-align: top;",
@@ -248,7 +248,7 @@ mod_buildDesign_server <- function(
 
     
     observeEvent(remoteReset()+input$reset, ignoreInit = TRUE, ignoreNULL = TRUE,{
-
+        
       rv$hot <- data.frame(
         quantCols = as.character(quantCols()),
         Condition = rep("", length(quantCols())),
