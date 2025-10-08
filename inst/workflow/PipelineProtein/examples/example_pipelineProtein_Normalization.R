@@ -6,6 +6,7 @@ library(shinydashboardPlus)
 library(highcharter)
 library(MagellanNTK)
 library(Prostar2)
+library(QFeatures)
 
 options(shiny.fullstacktrace = TRUE)
 

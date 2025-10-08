@@ -45,6 +45,7 @@ PipelineProtein_Normalization_conf <- function(){
 #'
 PipelineProtein_Normalization_ui <- function(id){
   ns <- NS(id)
+  shinyjs::useShinyjs()
 }
 
 
@@ -142,9 +143,28 @@ PipelineProtein_Normalization_server <- function(id,
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
-    observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      print(paste0('new value sdsdsdsdsfor remoteReset(): ', remoteReset()))
-    })
+    # observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    #   #browser()
+    #   lapply(names(rv.widgets), function(x){
+    #      shinyjs::reset(x)
+    #      shinyjs::reset(ns(x))
+    #    })
+    # 
+    #    
+    #    updateSelectInput(session, 
+    #      inputId = ns('Normalization_method'), 
+    #      label = "Normalization method", 
+    #      choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())), 
+    #      selected = widgets.default.values$Normalization_method
+    #      )
+    #    
+    #    updateSelectInput(session, 
+    #      inputId = 'Normalization_method', 
+    #      label = "Normalization method", 
+    #      choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())), 
+    #      selected = widgets.default.values$Normalization_method
+    #    )
+    # })
     
     output$Description <- renderUI({
       file <- normalizePath(file.path(
@@ -156,7 +176,7 @@ PipelineProtein_Normalization_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = ,
+        sidebar = tagList(),
         content = div(
           div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
@@ -169,7 +189,7 @@ PipelineProtein_Normalization_server <- function(id,
     })
 
 
-    loader_chunk <- addLoader$new("chunk", type = "spinner", color = "orange")
+    loader_chunk <- spsComps::addLoader$new("chunk", type = "spinner", color = "orange")
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
