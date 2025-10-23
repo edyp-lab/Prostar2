@@ -89,32 +89,15 @@ PipelineProtein_Save_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    # 
-    # output$Save_btn_validate_ui <- renderUI({
-    #   tagList(
-    #     MagellanNTK::toggleWidget( 
-    #       actionButton(ns("Save_btn_validate"), "Save",
-    #         class = "btn-success"),
-    #       rv$steps.enabled['Save']
-    #     ),
-    #     if (config@mode == 'process' && 
-    #         rv$steps.status['Save'] == stepStatus$VALIDATED) {
-    #       download_dataset_ui(ns('createQuickLink'))
-    #     }
-    #   )
-    #   
-    # })
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      if (all.equal(assays(rv$dataIn),assays(dataIn())))
-        info(btnVentsMasg)
-      else {# Do some stuff
+      # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
-      }
     })
     
     

@@ -401,7 +401,7 @@ PipelineProtein_DA_server <- function(id,
         )),
         column(width = 6,
           actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
-          class = actionBtnClass)
+          class = "btn-info")
         )
       )
       
@@ -978,7 +978,10 @@ PipelineProtein_DA_server <- function(id,
           })),
           column(width = 8,
             downloadButton(ns("FDR_download_SelectedItems_UI"), 
-            "Selected final results (Excel file)", class = actionBtnClass),
+            "Selected final results (Excel file)", class = "btn-info"),
+            checkboxInput(ns('FDR_viewAdjPval'), 
+              'View adjusted p-value', 
+              value = rv.widgets$FDR_viewAdjPval),
           DT::DTOutput(ns("FDR_selectedItems_UI"))
           )
           )
@@ -989,10 +992,7 @@ PipelineProtein_DA_server <- function(id,
     
     output$widgets_ui <- renderUI({
       widget <- tags$div(
-        mod_set_pval_threshold_ui(ns("Title")),
-        checkboxInput(ns('FDR_viewAdjPval'), 
-          'View adjusted p-value', 
-          value = rv.widgets$FDR_viewAdjPval)
+        mod_set_pval_threshold_ui(ns("Title"))
         )
 
       

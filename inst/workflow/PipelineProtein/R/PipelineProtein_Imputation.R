@@ -619,16 +619,7 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
     })
     
-    
-
-    # output$MECImputation_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("MECImputation_btn_validate"),
-    #                          "Perform",
-    #                          class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['MECImputation'] )
-    # })
-    
-
+  
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
        

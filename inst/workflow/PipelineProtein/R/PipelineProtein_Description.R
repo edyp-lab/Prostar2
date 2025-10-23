@@ -69,6 +69,7 @@ PipelineProtein_Description_server <- function(id,
     eval(str2expression(core.code))
     add.resourcePath()
   
+    
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 

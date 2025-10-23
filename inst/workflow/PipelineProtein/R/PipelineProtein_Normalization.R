@@ -124,47 +124,7 @@ PipelineProtein_Normalization_server <- function(id,
 
     eval(str2expression(core.code))
     add.resourcePath()
-    
-    # core <- paste0(
-    #   MagellanNTK::Insert_Call_to_Config(id),
-    #   MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
-    #   MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
-    #   MagellanNTK::Get_Code_for_rv_reactiveValues(),
-    #   MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-    #   MagellanNTK::Get_Code_for_dataOut(),
-    #   MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
-    #     custom = TRUE,
-    #     dataIn = 'dataIn()'),
-    #   sep = "\n"
-    # )
-    # 
-    # eval(str2expression(core))
-    
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
-    # observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    #   #browser()
-    #   lapply(names(rv.widgets), function(x){
-    #      shinyjs::reset(x)
-    #      shinyjs::reset(ns(x))
-    #    })
-    # 
-    #    
-    #    updateSelectInput(session, 
-    #      inputId = ns('Normalization_method'), 
-    #      label = "Normalization method", 
-    #      choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())), 
-    #      selected = widgets.default.values$Normalization_method
-    #      )
-    #    
-    #    updateSelectInput(session, 
-    #      inputId = 'Normalization_method', 
-    #      label = "Normalization method", 
-    #      choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())), 
-    #      selected = widgets.default.values$Normalization_method
-    #    )
-    # })
+
     
     output$Description <- renderUI({
       file <- normalizePath(file.path(
@@ -189,19 +149,16 @@ PipelineProtein_Normalization_server <- function(id,
     })
 
 
-    loader_chunk <- spsComps::addLoader$new("chunk", type = "spinner", color = "orange")
-    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
-      
-      loader_chunk$show()
+
       rv$dataIn <- dataIn()
-      
+      print("-------------------------------------------------------")
+      print(dataIn())
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
-      loader_chunk$hide()
     })
     
     
@@ -406,14 +363,6 @@ PipelineProtein_Normalization_server <- function(id,
     )
     
 
-    # output$Normalization_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("Normalization_btn_validate"),
-    #     "Perform",
-    #     class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Normalization'])
-    # })
-    # 
-    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Normalization', btnEvents()))
       
@@ -548,22 +497,7 @@ PipelineProtein_Normalization_server <- function(id,
     }
     })
     
-    
-    
-    # observeEvent(rv.custom$tmp.norm()$value, {
-    #   # Do some stuff
-    #   # Do some stuff
-    #   rv$dataIn <- rv.custom$tmp.norm()$value
-    #   
-    #   #.history <- rv.custom$tmp.norm()$value[[length(rv.custom$tmp.norm()$value)]]
-    #   #rv.custom$params.tmp[['Normalization']] <- paramshistory(.history)
-    #   
-    #   # DO NOT MODIFY THE THREE FOLLOWING LINES
-    #   dataOut$trigger <- MagellanNTK::Timestamp()
-    #   dataOut$value <- NULL
-    #   rv$steps.status['Normalization'] <- stepStatus$VALIDATED
-    # })
-    
+
     
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
@@ -584,39 +518,20 @@ PipelineProtein_Normalization_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    
-    # output$Save_btn_validate_ui <- renderUI({
-    #   tagList(
-    #     MagellanNTK::toggleWidget( 
-    #       actionButton(ns("Save_btn_validate"), "Save",
-    #         class = "btn-success"),
-    #       rv$steps.enabled['Save']
-    #     ),
-    #     if (config@mode == 'process' && 
-    #         rv$steps.status['Save'] == stepStatus$VALIDATED) {
-    #       download_dataset_ui(ns('createQuickLink'))
-    #     }
-    #   )
-    #   
-    # })
-    
+
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      loader_inline_Save <- spsComps::addLoader$new("Save_Loader", color = "blue", method = "inline", type = "spinner")
-      if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
-        loader_inline_Save$show()
-
-        
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
-      loader_inline_Save$hide()
       }
     })
     # <<< END ------------- Code for step 3 UI---------------
