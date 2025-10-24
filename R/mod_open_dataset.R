@@ -58,7 +58,8 @@ open_dataset_server <- function(
     ## -- Open a MSnset File --------------------------------------------
     observeEvent(input$load_qf_btn, ignoreInit = TRUE, {
       input$file
-
+      shiny::withProgress(message = paste0("Loading file", id), {
+        shiny::incProgress(0.5)
       authorizedExtension <- "qf"
 
       warn.wrong.file <- "Warning : this file is not a QFeatures file !
@@ -92,6 +93,7 @@ open_dataset_server <- function(
           # cleanup-code
         }
       )
+      })
     })
 
     reactive({

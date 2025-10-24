@@ -130,6 +130,8 @@ mod_Pirat_server <- function(
     })
 
     shiny::observeEvent(input$run, {
+      
+      
       maxval(GetNbPg())
       shiny::withProgress(
         withCallingHandlers(
@@ -157,16 +159,6 @@ mod_Pirat_server <- function(
       req(data())
       plot_pep_correlations(pep.data = data())
     })
-
-    # observeEvent(input$valid_btn, {
-    #
-    #   dataOut$value <- my_pipeline_llkimpute(bouyssie,  extension = input$extension)
-    #
-    #   print('test')
-    #   dataOut$trigger <- as.numeric(Sys.time())
-    #   dataOut$widgets <- list(extension = input$extension)
-    # })
-
 
     reactive({
       dataOut

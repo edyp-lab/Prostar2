@@ -312,8 +312,10 @@ mod_Prot_Normalization_server <- function(
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
       req(rv$dataIn)
       req(length(rv$dataIn) > 1)
-      # req(names(rv$dataIn)[length(rv$dataIn)] == 'Normalization')
-      obj1 <- rv$dataIn[[length(rv$dataIn)]]
+      withProgress(message = " Build plot", {
+        incProgress(0.5)
+        
+        obj1 <- rv$dataIn[[length(rv$dataIn)]]
       obj2 <- rv$dataIn[[length(rv$dataIn) - 1]]
 
       req(obj1)
@@ -340,6 +342,8 @@ mod_Prot_Normalization_server <- function(
         n = .n,
         subset.view = .subset
       )
+      
+      })
     })
 
 
@@ -395,12 +399,12 @@ mod_Prot_Normalization_server <- function(
     # >>> END: Definition of the widgets
 
     observeEvent(input$Normalization_btn_validate, {
-      # browser()
       # Do some stuff
       req(rv.widgets$Normalization_method)
       req(rv$dataIn)
 
-
+      withProgress(message = "Normalizing", {
+        incProgress(0.5)
       rv.custom$tmpAssay <- NULL
       try({
         .conds <- SummarizedExperiment::colData(rv$dataIn)[, "Condition"]
@@ -508,6 +512,8 @@ mod_Prot_Normalization_server <- function(
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
+    })
+      
     })
 
     return(reactive({

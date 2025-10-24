@@ -140,17 +140,7 @@ mod_Metacell_Filtering_server <- function(
       MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_rv_reactiveValues(),
       MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-      MagellanNTK::Get_Code_for_dataOut()
-      # MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
-      #   custom = TRUE,
-      #   dataIn = 'dataIn()')
-      #   addon = "rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
-      #   query = '-',
-      #   nbDeleted = '0',
-      #   TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
-      #   stringsAsFactors = FALSE
-      # )
-      ,
+      MagellanNTK::Get_Code_for_dataOut(),
       sep = "\n"
     )
 
@@ -277,7 +267,8 @@ mod_Metacell_Filtering_server <- function(
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
 
-
+      shiny::withProgress(message = paste0("Filtering", id), {
+        shiny::incProgress(0.5)
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
@@ -329,7 +320,7 @@ mod_Metacell_Filtering_server <- function(
       .history[[paste0("query_", length(.history))]] <- query
       DaparToolshed::paramshistory(rv$dataIn[[i]])[["Metacell_Filtering"]] <- .history
 
-
+})
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
     })
