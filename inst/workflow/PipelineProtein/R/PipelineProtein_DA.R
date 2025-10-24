@@ -219,7 +219,9 @@ PipelineProtein_DA_server <- function(id,
       req(grepl('Description', btnEvents()))
       
       req(inherits(dataIn(), 'QFeatures'))
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       # Find the assay containing the hypothesis tests comparisons
       .ind <- unlist(lapply(seq(length(dataIn())), function(x){
         if(!is.null(DaparToolshed::HypothesisTest(dataIn()[[x]])))
@@ -249,6 +251,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
+      })
     })
     
     
@@ -545,7 +548,9 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       
       req(grepl('Pairwisecomparison', btnEvents()))
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
      
       if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
         || is.null(rv$dataIn))
@@ -560,6 +565,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$value <- NULL
       rv$steps.status["Pairwisecomparison"] <- stepStatus$VALIDATED
       }
+      })
     })
     
     
@@ -937,7 +943,9 @@ PipelineProtein_DA_server <- function(id,
       
 
       req(grepl('Pvaluecalibration', btnEvents()))
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if (is.null(rv$dataIn))
         info(btnVentsMasg)
       else {
@@ -953,6 +961,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$value <- NULL
       rv$steps.status["Pvaluecalibration"] <- stepStatus$VALIDATED
       }
+      })
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -1331,7 +1340,9 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('FDR', btnEvents()))
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
         info(btnVentsMasg)
       else {
@@ -1345,6 +1356,7 @@ PipelineProtein_DA_server <- function(id,
       dataOut$value <- NULL
       rv$steps.status["FDR"] <- stepStatus$VALIDATED
       }
+      })
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -1373,6 +1385,9 @@ PipelineProtein_DA_server <- function(id,
 
       req(grepl('Save', btnEvents()))
       
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
@@ -1398,6 +1413,7 @@ PipelineProtein_DA_server <- function(id,
         dataIn = reactive({rv$dataIn}))
       
       }
+      })
     })
     # <<< END ------------- Code for step 3 UI---------------
     

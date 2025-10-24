@@ -624,7 +624,9 @@ PipelineProtein_Imputation_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
        
       req(grepl('MECImputation', btnEvents()))
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if ( is.null(rv.custom$dataIn2) || 
           rv.widgets$MECImputation_algorithm == "None")
         info(btnVentsMasg)
@@ -741,6 +743,8 @@ PipelineProtein_Imputation_server <- function(id,
       })
       
       }
+        
+      })
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -766,21 +770,13 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    
-    output$Save_btn_validate_ui <- renderUI({
-      tagList(
-        
-        if (config@mode == 'process' && 
-            rv$steps.status['Save'] == stepStatus$VALIDATED) {
-          download_dataset_ui(ns('createQuickLink'))
-        }
-      )
-    })
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if (isTRUE(all.equal(assays(rv$dataIn),assays(rv.custom$dataIn2))))
         info(btnVentsMasg)
       else {
@@ -811,6 +807,7 @@ PipelineProtein_Imputation_server <- function(id,
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv.custom$dataIn2}))
       }
+      })
     })
     # <<< END ------------- Code for step 3 UI---------------
     

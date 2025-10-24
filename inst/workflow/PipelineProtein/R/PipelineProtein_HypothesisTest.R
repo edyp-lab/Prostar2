@@ -172,10 +172,13 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-      rv$dataIn <- dataIn()
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
+      })
     })
     
     
@@ -486,11 +489,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         }
         
         )
-      
-      
-      
-      
-      
+
       rv.custom$history[['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
       rv.custom$history[['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
       if (rv.widgets$HypothesisTest_method == 'ttests')
@@ -526,6 +525,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       
       req(grepl('HypothesisTest', btnEvents()))
       
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if ( is.null(rv$dataIn) || is.null(rv.custom$AllPairwiseComp))
         info(btnVentsMasg)
       else {
@@ -543,7 +545,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['HypothesisTest'] <- stepStatus$VALIDATED
-        }
+      }
+      })
     })
     
     
@@ -585,12 +588,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     })
     
     # >>> END: Definition of the widgets
-    
-    
-    
-    # <<< END ------------- Code for step 1 UI---------------
-    
-    
+
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
       MagellanNTK::process_layout(
@@ -613,7 +611,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
-      # Do some stuff
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        # Do some stuff
       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
@@ -624,6 +624,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv$dataIn}))
       }
+      })
     })
     # <<< END ------------- Code for step 3 UI---------------
     

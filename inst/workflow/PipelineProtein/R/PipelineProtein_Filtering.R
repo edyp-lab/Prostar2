@@ -187,22 +187,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     eval(str2expression(core.code))
     add.resourcePath()
-    
-    
-    # core <- paste0(
-    #   MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
-    #   MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
-    #   MagellanNTK::Get_Code_for_rv_reactiveValues(),
-    #   MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-    #   MagellanNTK::Get_Code_for_dataOut(),
-    #   MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE,
-    #     custom = TRUE,
-    #     dataIn = 'dataIn()'),
-    #   sep = "\n"
-    # )
-    # 
-    # eval(str2expression(core))
- 
+
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -415,6 +400,9 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Cellmetadatafiltering', btnEvents()))
       
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if ( isTRUE(all.equal(assays(rv.custom$dataIn1),assays(dataIn()))) 
         || !("qMetacellFiltering" %in% names(rv.custom$dataIn1)))
         info(btnVentsMasg)
@@ -427,6 +415,8 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$value <- NULL
       rv$steps.status["Cellmetadatafiltering"] <- stepStatus$VALIDATED
       }
+        shiny::incProgress(1)
+      })
     })
     
     
@@ -705,7 +695,9 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Variablefiltering', btnEvents()))
       
-
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if ( isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))) 
           || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
         info(btnVentsMasg)
@@ -714,6 +706,7 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$value <- NULL
       rv$steps.status["Variablefiltering"] <- stepStatus$VALIDATED
       }
+      })
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -743,6 +736,9 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if (isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))))
         info(btnVentsMasg)
       else {
@@ -761,6 +757,7 @@ PipelineProtein_Filtering_server <- function(id,
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv.custom$dataIn2}))
       }
+      })
     })
     # <<< END ------------- Code for step 3 UI---------------
     

@@ -152,7 +152,9 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
-
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       rv$dataIn <- dataIn()
       print("-------------------------------------------------------")
       print(dataIn())
@@ -161,7 +163,7 @@ PipelineProtein_Normalization_server <- function(id,
       rv$steps.status['Description'] <- stepStatus$VALIDATED
     })
     
-    
+    })
     
     # >>>
     # >>> START ------------- Code for Normalization UI---------------
@@ -366,7 +368,9 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Normalization', btnEvents()))
       
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       if ( is.null(rv$dataIn) ||
           rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
         info(btnVentsMasg)
@@ -496,7 +500,7 @@ PipelineProtein_Normalization_server <- function(id,
       rv$steps.status['Normalization'] <- stepStatus$VALIDATED
     }
     })
-    
+    })
 
     
     # >>> START ------------- Code for step 3 UI---------------
@@ -522,7 +526,10 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-       if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
+        if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # Do some stuff
@@ -533,6 +540,7 @@ PipelineProtein_Normalization_server <- function(id,
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
       }
+      })
     })
     # <<< END ------------- Code for step 3 UI---------------
     

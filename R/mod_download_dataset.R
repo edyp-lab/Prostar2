@@ -70,11 +70,15 @@ download_dataset_server <- function(
     )
 
     observeEvent(req(dataIn()), ignoreNULL = TRUE, {
+      
       rv$export_file_xlsx <- tryCatch(
         {
-          out.xlsx <- tempfile(fileext = ".xlsx")
+          shiny::withProgress(message = paste0("Builds Excel file", id), {
+            shiny::incProgress(0.5)
+            out.xlsx <- tempfile(fileext = ".xlsx")
           DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
           out.xlsx
+          })
         },
         warning = function(w) w,
         error = function(e) e
@@ -82,9 +86,12 @@ download_dataset_server <- function(
 
       rv$export_file_qf <- tryCatch(
         {
-          out.qf <- tempfile(fileext = ".qf")
+          shiny::withProgress(message = paste0("Builds QFeatures file", id), {
+            shiny::incProgress(0.5)
+            out.qf <- tempfile(fileext = ".qf")
           saveRDS(dataIn(), file = out.qf)
           out.qf
+          })
         },
         warning = function(w) w,
         error = function(e) e
