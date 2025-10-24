@@ -173,19 +173,20 @@ PipelineConvert_Convert_server <- function(id,
       
     })
     
-    loader_Description <- spsComps::addLoader$new(ns("Description_Loader"), color = "blue", method = "inline", type = "spinner")
+   # loader_Description <- spsComps::addLoader$new(ns("Description_Loader"), color = "blue", method = "inline", type = "spinner")
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
 
-      loader_Description$show()
-
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
-      loader_Description$hide()
+      })
     })
     
     # <<< END ------------- Code for Description UI---------------
@@ -425,11 +426,10 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('SelectFile', btnEvents()))
-      # Do some stuff
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        # Do some stuff
       req(rv.widgets$SelectFile_file)
-      loader <- spsComps::addLoader$new("SelectFile_Loader", color = "blue", method = "inline", type = "spinner")
-      
-      loader$show()
       
       
       ext <- GetExtension(rv.widgets$SelectFile_file$name)
@@ -477,7 +477,7 @@ PipelineConvert_Convert_server <- function(id,
         dataOut$value <- NULL
         rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
       }
-      loader$hide()
+      })
     })
     
     # <<< END ------------- Code for step 1 UI---------------
@@ -648,10 +648,10 @@ PipelineConvert_Convert_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('DataId', btnEvents()))
       # Do some stuff
-      req(rv.widgets$DataId_datasetId)
-      loader <- spsComps::addLoader$new("DataId_Loader", color = "blue", method = "inline", type = "spinner")
-      
-      loader$show()
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
+        req(rv.widgets$DataId_datasetId)
       
       
       if(rv.widgets$SelectFile_typeOfData != "protein"){
@@ -661,7 +661,7 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['DataId'] <- stepStatus$VALIDATED
-      loader$hide()
+      })
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -768,12 +768,12 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('ExpandFeatData', btnEvents()))
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       req(rv.widgets$ExpandFeatData_quantCols)
       req(all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE],
         is.numeric)))
-      loader <- spsComps::addLoader$new("ExpandFeatData_Loader", color = "blue", method = "inline", type = "spinner")
-      loader$show()
       
       
       if (as.logical(rv.widgets$ExpandFeatData_idMethod)){
@@ -790,7 +790,7 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['ExpandFeatData'] <- stepStatus$VALIDATED
-      loader$hide()
+      })
     })
     
     # <<< END ------------- Code for for step 3 UI---------------
@@ -851,9 +851,9 @@ PipelineConvert_Convert_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Design', btnEvents()))
       req(rv.custom$design()$trigger)
-      loader <- spsComps::addLoader$new("Design_Loader", color = "blue", method = "inline", type = "spinner")
-      loader$show()
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       # Do some stuff
       # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
       # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
@@ -863,7 +863,7 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Design'] <- stepStatus$VALIDATED
-      loader$hide()
+      })
     })
     
     # <<< END ------------- Code for for step 4 UI---------------
@@ -914,10 +914,9 @@ PipelineConvert_Convert_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
       
-      loader <- spsComps::addLoader$new("Save_Loader", color = "blue", method = "inline", type = "spinner")
-      loader$show()
-      
-      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
       # Check if the conditions have been reordered or not.
       # If it is the case, the metacells must also be reordered
       # in the same way.
@@ -965,7 +964,7 @@ PipelineConvert_Convert_server <- function(id,
         dataIn = reactive({rv$dataIn}),
         filename = analysis_name)
       
-      loader$hide()
+      })
 
     })
     
