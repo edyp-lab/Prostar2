@@ -527,8 +527,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      browser()
-print(btnEvents())
+
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         print(paste0(id, ' : shiny::withProgress(message = paste0("Saving process", id), {'))
