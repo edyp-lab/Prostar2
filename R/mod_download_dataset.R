@@ -75,6 +75,7 @@ download_dataset_server <- function(
         {
           shiny::withProgress(message = paste0("Builds Excel file", id), {
             shiny::incProgress(0.5)
+            print(paste0(id, ' : shiny::withProgress(message = paste0("Builds Excel file", id)'))
             out.xlsx <- tempfile(fileext = ".xlsx")
           DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
           out.xlsx
@@ -88,6 +89,7 @@ download_dataset_server <- function(
         {
           shiny::withProgress(message = paste0("Builds QFeatures file", id), {
             shiny::incProgress(0.5)
+            print(paste0(id, ' : shiny::withProgress(message = paste0("Builds QFeatures file", id),'))
             out.qf <- tempfile(fileext = ".qf")
           saveRDS(dataIn(), file = out.qf)
           out.qf

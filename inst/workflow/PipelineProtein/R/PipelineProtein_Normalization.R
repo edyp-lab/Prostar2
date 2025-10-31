@@ -152,11 +152,11 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("xxx process", id), {
         shiny::incProgress(0.5)
         
       rv$dataIn <- dataIn()
-      print("-------------------------------------------------------")
+      print(paste0(id, " : -----------req(grepl('Description', btnEvents()))---------"))
       print(dataIn())
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -368,9 +368,9 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Normalization', btnEvents()))
       
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Normalization process", id), {
         shiny::incProgress(0.5)
-        
+        print(paste0(id, ' : shiny::withProgress(message = paste0("Normalization process", id), {'))
       if ( is.null(rv$dataIn) ||
           rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
         info(btnVentsMasg)
@@ -509,7 +509,6 @@ PipelineProtein_Normalization_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          div(ns('Save_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns('dl_ui'))
         )
       )
@@ -519,16 +518,21 @@ PipelineProtein_Normalization_server <- function(id,
       req(rv$steps.status['Save'] == stepStatus$VALIDATED)
       req(config@mode == 'process')
       
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
+      
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      browser()
+print(btnEvents())
+      shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-        
+        print(paste0(id, ' : shiny::withProgress(message = paste0("Saving process", id), {'))
+        #browser()
         if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
@@ -538,7 +542,6 @@ PipelineProtein_Normalization_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
       }
       })
     })

@@ -60,6 +60,7 @@ open_dataset_server <- function(
       input$file
       shiny::withProgress(message = paste0("Loading file", id), {
         shiny::incProgress(0.5)
+        print('shiny::withProgress(message = paste0("Loading file", id), ')
       authorizedExtension <- "qf"
 
       warn.wrong.file <- "Warning : this file is not a QFeatures file !

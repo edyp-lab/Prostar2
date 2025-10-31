@@ -81,7 +81,6 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @importFrom shinyjs disabled info
 #' @importFom stats setNames
 #' @importFrom utils read.csv
-#' @importFrom spsComps addLoader
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
 #'
@@ -117,7 +116,7 @@ PipelineConvert_Convert_server <- function(id,
     
     ExpandFeatData_idMethod = FALSE,
     ExpandFeatData_quantCols = NULL,
-    ExpandFeatData_inputGroup = NULL,
+    ExpandFeatData_inputGroup = reactive({NULL}),
     
     Save_analysis = NULL,
     Save_description = NULL
@@ -163,7 +162,6 @@ PipelineConvert_Convert_server <- function(id,
         ns = NS(id),
         sidebar = div(),
         content = tagList(
-          div(id = ns('Description_Loader')),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -173,8 +171,7 @@ PipelineConvert_Convert_server <- function(id,
       
     })
     
-   # loader_Description <- spsComps::addLoader$new(ns("Description_Loader"), color = "blue", method = "inline", type = "spinner")
-    
+   
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
@@ -207,7 +204,6 @@ PipelineConvert_Convert_server <- function(id,
           
         ),
         content = tagList(
-          div(ns('SelectFile_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns('SelectFile_software_ui'), style = "margin-right : 30px;"),
           uiOutput(ns('SelectFile_file_ui'), style = "margin-right : 30px;"),
           uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
@@ -495,7 +491,6 @@ PipelineConvert_Convert_server <- function(id,
         sidebar = tagList(
           ),
         content = tagList(
-          div(ns('DataId_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns("DataId_btn_validate_ui")),
           uiOutput(ns('DataId_datasetId_ui')),
             uiOutput(ns("DataId_parentProteinID_ui")),
@@ -642,7 +637,6 @@ PipelineConvert_Convert_server <- function(id,
     
     
     ## Validation button -----
-    loader_inline_DataId <- spsComps::addLoader$new("DataId_btn_validate", color = "blue", method = "inline", type = "spinner")
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -674,7 +668,6 @@ PipelineConvert_Convert_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          div(ns('ExpandFeatData_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns("ExpandFeatData_btn_validate_ui")),
           uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;"),
           uiOutput(ns('ExpandFeatData_idMethod_ui'), style = "margin-right: 30px;"),
@@ -775,7 +768,7 @@ PipelineConvert_Convert_server <- function(id,
       req(all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE],
         is.numeric)))
       
-      
+
       if (as.logical(rv.widgets$ExpandFeatData_idMethod)){
         req(rv.widgets$ExpandFeatData_inputGroup())
         }
@@ -803,7 +796,6 @@ PipelineConvert_Convert_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          div(ns('Design_Loader'), width = '100px', weight = '100px'),
           uiOutput(ns("Design_designEx_ui")),
             uiOutput(ns('dl_ui'))
       )
@@ -877,7 +869,6 @@ PipelineConvert_Convert_server <- function(id,
           ns = NS(id),
           sidebar = tagList(),
           content = tagList(
-            div(ns('Save_Loader'), width = '100px', weight = '100px'),
             uiOutput(ns('dl_ui')),
             uiOutput(ns('Save_infos_ui'))
           )

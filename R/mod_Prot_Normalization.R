@@ -313,6 +313,7 @@ mod_Prot_Normalization_server <- function(
       req(rv$dataIn)
       req(length(rv$dataIn) > 1)
       withProgress(message = " Build plot", {
+        print(paste0(id, ' : normalization : withProgress(message = " Build plot", {'))
         incProgress(0.5)
         
         obj1 <- rv$dataIn[[length(rv$dataIn)]]
@@ -405,6 +406,7 @@ mod_Prot_Normalization_server <- function(
 
       withProgress(message = "Normalizing", {
         incProgress(0.5)
+        print(paste0(id, ' : withProgress(message = "Normalizing", {'))
       rv.custom$tmpAssay <- NULL
       try({
         .conds <- SummarizedExperiment::colData(rv$dataIn)[, "Condition"]
