@@ -93,7 +93,7 @@ PipelineConvert_Convert_ui <- function(id) {
 PipelineConvert_Convert_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
-  remoteReset = reactive({0}),
+  remoteReset = reactive({NULL}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1}),
   btnEvents = reactive({NULL})
