@@ -62,17 +62,20 @@ convert_dataset_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    dataOut <- reactiveVal()
+    rv <- reactiveValues(
+      convert  = reactive({NULL})
+    )
+    
     session$userData$workflow.path <- path
 
-    dataOut(nav_process_server(
+    rv$convert <- nav_process_server(
       id = "PipelineConvert_Convert",
       dataIn = reactive({data.frame()}),
       remoteReset = reactive({remoteReset()})
     )
-    )
     
-    return(reactive({dataOut()}))
+    
+    return(reactive({rv$convert}))
   })
 }
 
@@ -101,11 +104,8 @@ convert_dataset <- function() {
       convert_dataset_ui("Convert")
     })
 
-
-    
-    observeEvent(req(rv.core$result_convert()$dataOut()$trigger), ignoreNULL = TRUE, {
-      print(rv.core$result_convert())
-      print(rv.core$result_convert())
+    observeEvent(rv.core$result_convert()$dataOut()$trigger, {
+      browser()
     })
   }
 
