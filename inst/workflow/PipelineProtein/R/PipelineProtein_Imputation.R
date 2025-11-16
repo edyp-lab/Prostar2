@@ -379,7 +379,7 @@ PipelineProtein_Imputation_server <- function(id,
               incProgress(0.5, detail = "slsa Imputation")
               
               .tmp <- wrapper.impute.slsa(
-                obj = rv$dataIn1[[length(rv.custom$dataIn1)]],
+                obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                 design = design.qf(rv.custom$dataIn1))
               
               .param <- list(
@@ -403,7 +403,7 @@ PipelineProtein_Imputation_server <- function(id,
               incProgress(0.5, detail = "KNN Imputation")
               
               .tmp <- wrapper.impute.KNN(
-                obj = rv$dataIn1[[length(rv.custom$dataIn1)]],
+                obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                 grp = DaparToolshed::design.qf(rv.custom$dataIn1)$Condition,
                 K = rv.widgets$POVImputation_KNN_n);
               .param <- list(
