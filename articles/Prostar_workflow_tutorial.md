@@ -1,0 +1,140 @@
+# Prostar navigation tutorial
+
+## Introduction
+
+This vignette aims to describe how to use the workflow ui to process a
+dataset. The goal is not to describe the different data processing tools
+available in prostar but to explain the behaviour of the user interface
+of what we call ‘Prostar core’.
+
+As explained in xxx, Prostar implements two different levels of data
+processing tools:
+
+- the upper level correspond to a ‘pipeline’ and it deals with the type
+  of data and the level of analysis (peptide, protein, peptidomic,
+  etc..). The description of that can be found here (xxx).
+- the xxx level correspond to the data processing tools (Filtering,
+  Normalization, etc..)
+
+One timeline is used to navigate within each of these levels. They have
+mostly the same behaviour
+
+In Prostar, two timelines are used to navigate \# Specifications
+
+When the class Pipeline is instantiated, there is no dataset loaded yet.
+The two timelines are shown and all their bullets are disabled (as the
+screens). Thus, the user can navigate on all the tools. In general, when
+a step is disabled, the user can show the corresponding screen but
+cannot interact with input widgets.
+
+Common behaviour
+
+The next and previous are always enabled whenever the steps are
+disabled, except in two situations:
+
+- when the current step is the first one, the previous button is
+  disabled,
+- when the current step is the last one, the ‘Next’ button is disabled.
+
+When the user clicks on the previous/next buttons, the current screen
+change.
+
+A few rules form the basis of the workflow engine:
+
+- if the current step is validated, then all the previous ones are
+  disabled. The current dataset is updated with the return value of the
+  current step. The further steps are enabled except if there are some
+  mandatory ones.
+- for any mandatory step which has not been validated yet, all the
+  further steps are disabled,
+- if there are some non validated step before the current one which has
+  been validated, then those steps are tagged as ‘skipped’ and they are
+  disabled.
+
+## Definition of a pipeline
+
+A pipeline is defined by a list of data processing tools in association
+with a tag indicating if the step is mandatory or not. The first step of
+each level is always a description one which explains the algorithms
+implemented in the tool and how to use it.
+
+### Status of the steps
+
+Each step of a given level can have different status. It may be:
+
+- Undone: xxx
+- Skipped: xxxx
+- Validated: xxx
+
+Timeline color code :
+
+- Grey with solid line:
+- Grey with dashed line:
+- Green: the step is validated (the result of the process has been
+  saved)
+- Red: the step is mandatory. All further steps are disabled until the
+  user validate the mandatory one
+
+Plain green circle indicates a validated step. When the colors are
+transparent, it means that the corresponding step is disabled: all
+inputs and the reset button are disabled.
+
+## Datasets
+
+At the beginning, no dataset is loaded in the core engine. When the user
+loads one, it is injected in the core engine. By default, the steps
+receive a NULL value for the dataset. A dataset is loaded in a step only
+when the user is showing it.
+
+However, if the user go to a disabled step in the pipeline level, the
+dataset is not loaded.
+
+## Validating a step
+
+Once validated, a step is disabled and stay in this state until it is
+reseted. Thus, the value of all parameters are kept event if the user
+navigates to other steps.
+
+#### Node level (pipeline)
+
+At a node level (pipeline), each time a step is validated, the
+corresponding dataset is returned to Prostar. This allows the user to
+stop an analysis at any time without loosing its work.
+
+#### Leaf level (data processing tools)
+
+At a leaf level (data processing tools), the resulting dataset is
+returned only when the last step (named ‘Validation’) is validated. In
+this case, the engine does not keep intermediate datasets. Here, the
+datasets are returned to the upper level which is the pipeline.
+
+## Reseting a step
+
+- On a given level, a clic on the ‘Reset’ button will have the following
+  actions:
+
+  - A popup appear to indicate to the user that the data will be erased.
+    He has to agree this information to process,
+  - the current step is set to the first one
+  - the dataset is updated to either the same if the step has not been
+    validated or to the dataset produced by the last validated step,
+  - If the reset is clicked on a ‘node’ level, all the children below
+    this point are also reset. In this case, the info popup is only
+    showed on the node level, not on each children steps.
+
+## Skipping a step
+
+A step is skipped when it has not been validated and a further one is
+validated. Thus, the status of a step with indice i is set to ‘skipped’
+only when a step with indice j \> i is validated. Each skipped step is
+disabled and if it is a node step (a data processing tool in the
+pipeline timeline), then all the subsequent steps of the processing tool
+are also tagged as ‘skipped’ and disabled, event the ‘Reset’ button.
+
+## Navigating through a level
+
+WHen the user navigates in the timelines, the steps previously validated
+are kept in the state they have when they have been validated
+
+By default, when no dataset has been loaded yet, all the steps are
+disabled

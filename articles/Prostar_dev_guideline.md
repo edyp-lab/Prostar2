@@ -1,0 +1,266 @@
+# Inside Prostar core
+
+## Introduction
+
+## Introducing Prostar 2.0
+
+### A collection of modules
+
+## Understanding the source code of workflows
+
+### Initialization of a navigation module instance
+
+At start,
+
+- ‘Reset’: Each process module has a ‘Reset’ button which allows to set
+  all inputs and plots to their default value if the validation button
+  has not been clicked yet. If the process has several steps, the screen
+  returns to the first one.
+- ‘Validate’: Each process module has a ‘Validate’ button which allows
+  to record the new item at the end of the dataset and return the new
+  dataset to Prostar core. After clicking, the screen is not updated:
+  all the inputs keep their current value and the ui is kept to the last
+  step.
+
+The code for the UI is composed of a list a several elements used in the
+navigation module (mod_navigation.R).
+
+``` r
+r.nav <- reactiveValues(
+    name = "test",
+    stepsNames = c("Screen 1", "Screen 2","Screen 3"),
+    ll.UI = list( screenStep1 = uiOutput("screen1"),
+                  screenStep2 = uiOutput("screen2"),
+                  screenStep3 = uiOutput("screen3")),
+    isDone =  c(FALSE, FALSE, FALSE),
+    mandatory =  c(FALSE, TRUE, FALSE),
+    reset = FALSE,
+    skip = NULL,
+    undo = NULL
+    
+  )
+```
+
+- name: the name of the process that is to be managed by the timeline
+  logics,
+- steps: A vector of names for the different steps of the process,
+- ll.UI: a list in which each item is the UI for one of the screens of
+  the process. The length of this list is equal to the length of the
+  variables ‘steps’,
+- isDone: A vector of boolean to indicate whether each step has been run
+  by the user. SO, the length of this vector is also equal to the length
+  of the variables ‘steps’. By default, all the elements are set to
+  FALSE. They are set to TRUE by some a function in the process source
+  code. The communication between the process and the navigation module
+  is possible because of reactivity. So, if at any moment, an element is
+  set to TRUE by the process, then the corresponding tag is colored in
+  green in the timeline; otherwise, the default color is red if the step
+  is mandatory and orange otherwise,
+- isMandatory:
+- actions:
+
+UI Each process UI is composed of one or more screens which correspond
+to the different steps of the process. The navigation between each
+screen is realized by means of buttons placed on the right and the left
+of the navigation UI (the ‘timeline’).
+
+The timeline may take different aspects w.r.t the style applied. The
+principle is to have
+
+Several buttons are available: \* the buttons ‘Prev’ (on the left) and
+‘Next’ ‘on the right’ are always part of the timeline. AT the
+initialization of the process, only the ‘Next’ button is visible and
+disabled
+
+### Logics for processes and datasets
+
+Here are the different rules that exists in Prostar core to deal with
+the different transactions between data processing modules and the
+dataset. The UI of Prostar allows the user to navigate between those two
+lists so as to rerun a process, fix a mistake in its parameters. But, to
+guarantee that the workflow stay consistent with the
+objective/philosophy of Prostar, some rules are implemented.
+
+Each data processing modules and dataset can be seen as a list of
+respectively P and N items. Let i, p be the indices of respectively the
+current item in the dataset list and the current item in the process
+list of the workflow.
+
+The different combination of values for i and p (their relative
+position) determines the behaviour of datasets and processes regarding
+the general philosophy of Prostar.
+
+Without any action of the user on the current item nor process, Prostar
+follows the standard workflow:
+
+- At the beginning of Prostar, i = 1 = N and p = 1
+- after the run of any process p, i = N = p -1 (the process has produced
+  a new item in the dataset)
+
+The user may change either the current item in the dataset or the
+current process to be run. This leads to several situations.
+
+#### Default (standard) behaviour
+
+- The default behaviour one have to see at the end of the execution of
+  the workflow is that it seems to has gone straightforwards in the
+  process list. It means that each process p runs on the item i=N and
+  generates a dataset of N+1 items. If next process to be run is p’,
+  then p’ \> p.
+
+- By default, the behaviour of a module process is to work on the last
+  item of the dataset; the resulting new item is appended to the list of
+  items. Thus, by default, the current indice i is set to the last item
+  of the dataset. For example, if the user starts the workflow with i =
+  1 (+ offset), p = 1, then at the end of the workflow, one must have i
+  = N, p = P with N = P + 1 (+ offset)
+
+- A process cannot be run more than one time on the same item. To avoid
+  that a process be run on the previous result of itself.
+
+But, the user may navigate differently in the process and dataset lists.
+Thus, different situations may occur. Suppose we are after a standard
+run, then p = P, i = N, i = p + 1
+
+#### Reprocess a previous item of the dataset
+
+Suppose i = N and p = P (from the standard workflow). The user can
+change the current item of the dataset (WHAT’S ITS GOAL ?????)
+
+- i \< N (the current item is not the last one of the dataset): Two
+  cases has to be distinguished:
+  - p = P ((the current process is the last process of the workflow):
+    xxx
+  - p \< P (the current process is not the last one of the workflow):
+    xxx
+
+In both cases, one delete all the items of the dataset from i+1 to N
+then the new item (produced by the process) is appended to the dataset
+list.
+
+At the end of this sequence, the current indices must return to their
+normal values (i = N, p = P). That means that the real workflow has been
+modified by the user but the final workflow is like the standard one
+
+#### 
+
+- a l’affichage de l’UI d’un processus déjà exécuté auparavant:
+  - si l’indice courant i est positionné sur le dernier élément du
+    dataset, alors affichage du début du processus,
+  - si i est positionné sur un dataset précédent (i \< N) (le dataset
+    déjà traité par ce processus), alors on n’affiche que la dernière
+    page du processus
+
+### Nomenclature
+
+All the files containing code are stored in the directory R. The modules
+are prefixed with ‘mod\_’
+
+### Test modules
+
+Each module in the directory ‘R’ has a test file, located in
+‘dev/test_dev’.
+
+## Description of the package Prostar
+
+Prostar is built with the \[golem\] package.
+
+## Step 1. A simple Shiny App
+
+Prostar is buil with the shiny framework and use the ‘navbar page menu’
+layout. Previous versions of Prostar used other layouts (such as xxx)
+but the free space on the screen was too small to put all the outputs.
+
+First, let write a simple A
+
+### Workflow files
+
+In each directory of a workflow, there are several type of files (module
+source code, watch modules code, miscellaneous code). As those files are
+dynamically loaded in Prostar (and not at the same time), it is
+necessary to identify in a unique manner each file with its function.
+Two ways are possible to do that: \* build a complex hierarchy of
+directories in which directory correspond to a specific function, \*
+name each source code file with a complex name
+
+Actually, Prostar’s files structure uses the second point. In the
+directory of a workflow, the module’s files are composed of four strings
+separated by a ’\_‘: \* ’mod’ which is the prefix used by the package
+\[golem\] to identify the modules, \* the name of the workflow. It seems
+obvious because we are in the directory of the wf but it is more for the
+eyes of the developer and for make easiest the reading of the name of
+the files, \* the name of the process itself.
+
+For the files containing the code to launch the server part of each
+module, we have prefixed the names by ‘watch\_’
+
+## UI side
+
+The code for the ui side of Prostar is in the file ‘R/app_ui.R’. It
+consists in two main parts: \* a loading page (div id = ‘loading_page’),
+\* the ui of Prostar (‘main_content’)
+
+It is based on the navbarPage layout (see xxx) in the shiny package.
+There are several static menus (and submenus) that are present even if
+no dataset is loaded:
+
+- **Prostar**:
+  - Home:
+  - Global settings:
+  - Release notes:
+  - Check for updates
+- **Data manager**:
+  - Open MSnset: ui to open a dataset previously created by the user,
+  - Convert: through several steps, converts Excel or CSV files
+    containing quantitative data to an object of class QFeatures, which
+    is the format admitted in Prostar,
+  - Demo data
+  - Reload Prostar
+- **Data processing**:
+  - Descriptive statistics:
+- **Help**:
+  - Links:
+  - FAQ:
+  - Bug report
+
+All of these submenus are implemented as modules : there ui parts are
+called her and their server part are called from the server side of
+Prostar (R/app_server.R).
+
+## Server side
+
+The code for the server side of Prostar is in the file ‘R/app_server.R’.
+
+### Declaration of global reactive variables
+
+### Call to server modules
+
+The server-side of all the modules which ui are declared in the app_ui.R
+file are called in this file.
+
+## Load a dataset and corresponding modules
+
+Once a dataset is loaded in prostar (the variable xxx is instanciated),
+Prostar launches the different modules that are part of the pipeline
+previously choosen by the user. The list of modules in that pipeline are
+stored in the file ‘config.R’
+
+### Config.R
+
+This file contains the definition of pipelines, ie the list of
+processing modules included in the pipeline. For example, here is the
+definition for the protein pipeline.
+
+``` r
+pipeline.defs <- list(
+  protein = c('Filtering',
+              'Normalization',
+              'Imputation')
+)
+}
+```
+
+If a developer wants to implement a new pipeline, he has to complete the
+definition while respecting the nomenclature of the items of the list.
+This is very important since Prostar maps theses names with source code
+files.

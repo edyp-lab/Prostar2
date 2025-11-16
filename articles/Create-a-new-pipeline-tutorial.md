@@ -1,0 +1,56 @@
+# Create-a-new-pipeline-tutorial
+
+## Introduction
+
+This vignette explains how to create a new pipeline in the Prostar
+framework. A pipeline is a set of data processes applied to a dataset
+(ie an object of class QFeatures).
+
+A pipeline can be associated with datasets of specific type. Such, the
+use of a certain dataset restraint the set of possible pipelines. For
+example, if the current dataset is a protein one, it can be processed
+only by a protein pipeline.
+
+It is divided in several parts:
+
+1.  Configuration file
+2.  xxx
+3.  xxx
+
+## Configuration file
+
+This file (R/config.R) contains a list named def.pipeline in which each
+element is the definition of one pipeline implemented in Prostar. Here
+is a list with only one element:
+
+``` r
+pipeline.defs <- list(
+  peptide = c(
+    "module_Peptide_Filtering",
+    "module_Peptide_Normalization",
+    "module_Peptide_Imputation",
+    "module_Peptide_HypothesisTest"
+  )
+)
+```
+
+The name of each item (here *peptide*) is the name of the pipeline. It
+is important because it serves asa reference all along the code of
+Prostar. Each element is a vector a processes names with a specific
+nomenclature which has to be respected. Each process name begins with
+the keyword ‘module\_’, followed by the name of the pipeline (here
+‘Peptide’) and ends with the proper name of the process. This complete
+name is also the name of the file containing the code for the process.
+for example, the file ‘module_Peptide_Normalization.R’ contains the code
+for the normalization process over peptides.
+
+## Instanciation of a pipeline
+
+A pipeline is choosen by the user when he loads a dataset (the UI
+proposes a liste a possible pipelines for the type of data).The type of
+pipeline used by the user is set in a variable in the metadata of the
+dataset. Thus, back to Prostar, it is easy to know which pipeline has to
+be activated.
+
+Once a dataset has been loaded in Prostar, subitems are created in the
+menu ‘Data processing’
