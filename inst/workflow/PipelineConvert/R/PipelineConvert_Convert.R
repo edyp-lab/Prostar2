@@ -200,23 +200,25 @@ PipelineConvert_Convert_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = tagList(
-          
-        ),
+        sidebar = tagList(),
         content = tagList(
-          uiOutput(ns('SelectFile_software_ui'), style = "margin-right : 30px;"),
-          uiOutput(ns('SelectFile_file_ui'), style = "margin-right : 30px;"),
-          uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
-          uiOutput(ns('SelectFile_typeOfData_ui'), style = "margin-right : 30px;"),
-          uiOutput(ns('SelectFile_checkDataLogged_ui'), style = "margin-right : 30px;"),
-          uiOutput(ns('SelectFile_replaceAllZeros_ui')),
-            uiOutput(ns('SelectFile_btn_previewfile_ui')),
-            uiOutput(ns('SelectFile_previewfile_ui'), style = "width: 500px, overflow: auto;"),
+          fluidRow(
+            column(width = 5, uiOutput(ns('SelectFile_file_ui'))),
+            column(width = 3, uiOutput(ns('SelectFile_ManageXlsFiles_ui'))),
+            ),
+           fluidRow(
+            column(width = 3, uiOutput(ns('SelectFile_software_ui'))),
+            column(width = 3, uiOutput(ns('SelectFile_typeOfData_ui'))),
+            column(width = 3, uiOutput(ns('SelectFile_checkDataLogged_ui')))
+          ),
+          fluidRow(
+            column(width = 3, uiOutput(ns('SelectFile_replaceAllZeros_ui'))),
+            column(width = 3, uiOutput(ns('SelectFile_btn_previewfile_ui')),
+            column(width = 3, uiOutput(ns('SelectFile_previewfile_ui')))
           )
+            )
+        )
       )
-      
-
-      
     })
     
     
@@ -230,6 +232,7 @@ PipelineConvert_Convert_server <- function(id,
     )
     
     output$SelectFile_software_ui <- renderUI({
+      #req(rv.widgets$SelectFile_file$name)
       widget <- radioButtons(ns("SelectFile_software"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_filesoftware")),
         choices = setNames(nm = c("DIA_NN", "maxquant", "proline")),
@@ -245,7 +248,7 @@ PipelineConvert_Convert_server <- function(id,
     )
     
     output$SelectFile_file_ui <- renderUI({
-      req(rv.widgets$SelectFile_software)
+      #req(rv.widgets$SelectFile_software)
       widget <- fileInput(
         ns("SelectFile_file"), MagellanNTK::mod_popover_for_help_ui(ns("help_chooseFile")),
         multiple = FALSE,
@@ -270,31 +273,15 @@ PipelineConvert_Convert_server <- function(id,
     )
     
     output$SelectFile_ManageXlsFiles_ui <- renderUI({
-      req(rv.widgets$SelectFile_software)
       req(rv.widgets$SelectFile_file)
       req(GetExtension(rv.widgets$SelectFile_file$name) %in% c("xls", "xlsx"))
-      
-      # tryCatch({   
+
       sheets <- c('', DaparToolshed::listSheets(rv.widgets$SelectFile_file$datapath))
       widget <- selectInput(ns("SelectFile_XLSsheets"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_sheets")), 
         choices = sheets, 
         width = "200px",
         selected = rv.widgets$SelectFile_XLSsheets)
-      # },
-      # warning = function(w) {
-      #   shinyjs::info(conditionMessage(w))
-      #   return(NULL)
-      # },
-      # error = function(e) {
-      #   shinyjs::info(conditionMessage(e))
-      #   return(NULL)
-      # },
-      # finally = {
-      #   # cleanup-code
-      # }
-      # )
-      
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'])
     })
     
