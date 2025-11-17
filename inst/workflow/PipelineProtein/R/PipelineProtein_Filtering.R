@@ -203,7 +203,8 @@ PipelineProtein_Filtering_server <- function(id,
       
       MagellanNTK::process_layout(
         ns = NS(id),
-        sidebar = tagList(),
+        sidebar = div(
+        ),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -733,12 +734,13 @@ PipelineProtein_Filtering_server <- function(id,
     
 
     
-    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+    observeEvent(btnEvents(), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
+        browser()
       if (isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))))
         info(btnVentsMasg)
       else {
