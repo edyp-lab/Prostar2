@@ -8,6 +8,8 @@
   : Wrapper to Convert pipeline
 - [`Prostar2()`](https://edyp-lab.github.io/Prostar2/reference/Prostar2.md)
   : xxx
+- [`add.resourcePath()`](https://edyp-lab.github.io/Prostar2/reference/add.resourcePath.md)
+  : Add resource paths
 - [`mod_buildDesign_ui()`](https://edyp-lab.github.io/Prostar2/reference/build-design.md)
   [`mod_buildDesign_server()`](https://edyp-lab.github.io/Prostar2/reference/build-design.md)
   [`mod_buildDesign()`](https://edyp-lab.github.io/Prostar2/reference/build-design.md)
