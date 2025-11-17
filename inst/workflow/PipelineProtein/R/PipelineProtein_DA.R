@@ -1370,16 +1370,16 @@ PipelineProtein_DA_server <- function(id,
         sidebar = tagList(
          # timeline_process_ui(ns('Save_timeline'))
         ),
-        content = uiOutput(ns('dl_UI'))
+        content = tagList()
       )
     })
     
-    output$dl_UI <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    })
+    # output$dl_UI <- renderUI({
+    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    # })
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
 
@@ -1409,8 +1409,8 @@ PipelineProtein_DA_server <- function(id,
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
       
-      Prostar2::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv$dataIn}))
+      # Prostar2::download_dataset_server('createQuickLink', 
+      #   dataIn = reactive({rv$dataIn}))
       
       }
       })

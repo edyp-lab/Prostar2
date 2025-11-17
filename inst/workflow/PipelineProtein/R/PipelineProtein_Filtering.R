@@ -719,24 +719,24 @@ PipelineProtein_Filtering_server <- function(id,
         sidebar = tagList(
          # timeline_process_ui(ns('Save_timeline'))
         ),
-        content = uiOutput(ns('dl_ui'))
+        content = tagList()
       )
       
     })
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    # })
     
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
       if (isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))))
@@ -754,8 +754,8 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
-      Prostar2::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv.custom$dataIn2}))
+      # Prostar2::download_dataset_server('createQuickLink', 
+      #   dataIn = reactive({rv.custom$dataIn2}))
       }
       })
     })
