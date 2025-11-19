@@ -215,12 +215,8 @@ mod_Metacell_Filtering_server <- function(
 
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
-        dataIn = reactive({
-          rv$dataIn[[length(rv$dataIn)]]
-        }),
-        conds = reactive({
-          design.qf(rv$dataIn)$Condition
-        }),
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        conds = reactive({design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({
           stats::setNames(c("Push p-value", "Keep original p-value"), nm = c("delete", "keep"))
         }),
@@ -243,7 +239,6 @@ mod_Metacell_Filtering_server <- function(
       widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-
 
     # output$Quantimetadatafiltering_btn_validate_ui <- renderUI({
     #

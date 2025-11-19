@@ -38,7 +38,7 @@
 #' library(shinyBS)
 #' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
-#' obj <- Exp1_R25_prot[[1]]
+#' obj <- Exp1_R25_prot
 #' conds <- colData(Exp1_R25_prot)$Condition
 #'
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
@@ -67,6 +67,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("chooseScope_ui")),
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
+    uiOutput(ns("show_filtering_preview_ui")),
     uiOutput(ns("Add_btn_UI"))
   )
 }
@@ -84,21 +85,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     id,
     dataIn,
     conds,
-    keep_vs_remove = reactive({
-      setNames(nm = c("delete", "keep"))
-    }),
-    val_vs_percent = reactive({
-      setNames(nm = c("Count", "Percentage"))
-    }),
-    operator = reactive({
-      setNames(nm = SymFilteringOperators())
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
+    val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
+    operator = reactive({setNames(nm = SymFilteringOperators())}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -202,7 +193,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     # })
 
     observeEvent(dataIn(), ignoreNULL = FALSE, {
-        req(inherits(dataIn(), "SummarizedExperiment"))
+        req(inherits(dataIn(), "QFeatures"))
         rv$dataIn <- dataIn()
       },
       priority = 1000
@@ -216,19 +207,12 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
 
     rv.custom$tmp.tags <- mod_metacell_tree_server("tree",
-      dataIn = reactive({
-        rv$dataIn
-      }),
-      remoteReset = reactive({
-        remoteReset()
-      }),
-      is.enabled = reactive({
-        is.enabled()
-      })
+      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      remoteReset = reactive({remoteReset()}),
+      is.enabled = reactive({is.enabled()})
     )
 
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
-      print(rv.custom$tmp.tags()$trigger)
       rv.widgets$tag <- rv.custom$tmp.tags()$values
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(
@@ -303,8 +287,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       tagList(
         fluidRow(
           column(4, MagellanNTK::toggleWidget(widget1, is.enabled())),
-          column(
-            8,
+          column(8,
             MagellanNTK::toggleWidget(widget2, is.enabled()),
             uiOutput(ns("value_ui")),
             uiOutput(ns("percentage_ui"))
@@ -325,7 +308,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       widget <- selectInput(ns("valueTh"),
         MagellanNTK::mod_popover_for_help_ui(ns("value_th_help")),
         choices = getListNbValuesInLines(
-          object = rv$dataIn,
+          object = rv$dataIn[[length(rv$dataIn)]],
           conds = conds(),
           type = rv.widgets$scope
         ),
@@ -474,9 +457,42 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
 
     GuessIndices <- reactive({
-
+      req(rv.custom$ll.fun)
+      
+      browser()
+      tmp <- filterFeaturesOneSE(
+        object = rv$dataIn,
+        i = length(rv$dataIn),
+        name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
+        filters = rv.custom$ll.fun
+      )
+      
+      assaybefore <- assay(tmp[[length(tmp)-1]])
+      assayafter <- assay(tmp[[length(tmp)]])
+      namesbefore <- rownames(assaybefore)
+      namesafter <- rownames(assayafter)
+      diff <- setdiff(namesbefore, namesafter)
+      indices.diff.delete <- match(diff, namesbefore)
+      indices.diff.keep <- match(diff, namesafter)
+      
+      indices.diff.delete
     })
 
+    
+    
+    output$show_filtering_preview_ui <- renderUI({
+      req(BuildFunctionFilter())
+      req(WriteQuery())
+      
+      mod_filtering_example_server(id = "filteringExample",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        indices = reactive({GuessIndices()}),
+        operation = reactive({rv.custom$ll.fun[[1]]@params$operator}),
+        title = reactive({WriteQuery()})
+      )
+      
+      mod_filtering_example_ui(ns("filteringExample"))
+    })
 
     observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
       req(BuildFunctionFilter())
@@ -485,7 +501,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       rv.custom$ll.fun <- list(BuildFunctionFilter())
       rv.custom$ll.query <- list(WriteQuery())
       rv.custom$ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
-
+      browser()
+      
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(
@@ -494,9 +511,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         ll.widgets.value = rv.custom$ll.widgets.value,
         ll.pattern = rv.widgets$tag,
         ll.indices = GetIndices_FunFiltering(
-          obj = rv$dataIn,
+          obj = rv$dataIn[[length(rv$dataIn)]],
           conds = conds(),
-          level = DaparToolshed::typeDataset(rv$dataIn),
+          level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]),
           pattern = rv.custom$ll.fun[[1]]@params$pattern,
           type = rv.widgets$scope,
           percent = rv.custom$ll.fun[[1]]@params$percent,

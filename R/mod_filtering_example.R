@@ -57,12 +57,6 @@ mod_filtering_example_ui <- function(id) {
   #     trigger = ns("show_filtering_example"),
       tagList(
         uiOutput(ns("show_title")),
-        radioButtons(ns("run_btn"), "Example dataset",
-          choices = setNames(
-            nm = c("original dataset", "simulate filtered dataset")
-          )
-        ),
-        DT::dataTableOutput(ns("example_tab_filtered"))
       )
   #     ,
   #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
@@ -84,18 +78,12 @@ mod_filtering_example_ui <- function(id) {
 #'
 mod_filtering_example_server <- function(
     id,
-    dataIn = reactive({
-      NULL
-    }),
+    dataIn = reactive({NULL}),
     indices = NULL,
     operation = "keep",
     title = "myTitle",
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -111,12 +99,6 @@ mod_filtering_example_server <- function(
     #                options = list(revert=FALSE)
     # )
     # ###############
-
-    # colorsTypeMV = list(MEC = 'orange',
-    #                     POV = 'lightblue',
-    #                     identified = 'white',
-    #                     recovered = 'lightgrey',
-    #                     combined = 'red')
 
     legendTypeMV <- list(
       MEC = "Missing in Entire Condition (MEC)",
@@ -182,8 +164,7 @@ mod_filtering_example_server <- function(
       index2darken <- NULL
       
       # Darken lines that will be filtered
-      if (!is.null(indices()) &&
-        input$run_btn == "simulate filtered dataset") {
+      if (!is.null(indices())) {
         if (operation() == "keep") {
           index2darken <- (1:nrow(dataIn()))[-indices()]
         } else if (operation() == "delete") {
