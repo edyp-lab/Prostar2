@@ -14,8 +14,8 @@
 #'
 #' @examples
 #' if (interactive()){
-#' data(Exp1_R25_pept, package = "DaparToolshedData")
-#' shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
+#' data(Exp1_R25_prot, package = "DaparToolshedData")
+#' shiny::runApp(mod_metacell_tree(dataIn = Exp1_R25_prot[[1]]))
 #'
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(mod_metacell_tree(Exp1_R25_prot[[1]]))
@@ -79,15 +79,9 @@ mod_metacell_tree_ui <- function(id) {
 #'
 mod_metacell_tree_server <- function(
     id,
-    dataIn = reactive({
-      NULL
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    dataIn = reactive({NULL}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   # pkgs.require(c("shinyBS", "shinyjs"))
 
 
@@ -148,13 +142,8 @@ mod_metacell_tree_server <- function(
         tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
         shinyBS::bsModal(ns("modalExample"),
           title = "",
-          # tagList(
-          #     p('Cells metadata tags'),
-          #     p('To get help about the organization of those tags, please refer to the FAQ')
-          # ),
           trigger = ns("openModalBtn"),
           size = "large",
-          # popover_for_help_ui(ns("metacellTag_help")),
           div(
             div(
               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
@@ -179,7 +168,48 @@ mod_metacell_tree_server <- function(
       )
     })
 
-
+# 
+#     observeEvent(input$openModalBtn, {
+#       req(dataIn())
+#       
+#   
+#     #observeEvent(input$openModalBtn, {
+#     #output$modaltree <- renderUI({
+#       showModal(modalDialog(
+#           ns("modalExample"),
+#           title = "",
+#           size = "l",
+#         tagList(
+#           shinyjs::inlineCSS(css),
+#           tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
+#           tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
+#           div(
+#             div(
+#               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
+#               p("To get help about the organization of those tags, please refer to the FAQ"),
+#               radioButtons(ns("checkbox_mode"), "",
+#                 choices = c(
+#                   "Single selection" = "single",
+#                   "Complete subtree" = "subtree",
+#                   "Multiple selection" = "multiple"
+#                 ),
+#                 width = "150px"
+#               )
+#             ),
+#             div(
+#               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
+#               actionButton(ns("cleartree"), "Clear"),
+#               actionButton(ns("validatetree"), "Validate & close", class = "btn-success")
+#             )
+#           ),
+#           uiOutput(ns("tree"))
+#         )
+#       )
+#       )
+#     })
+    
+    
+    
     output$selectedNodes <- renderUI({
       req(length(dataOut$values) > 0)
       p(paste0("Selected tags: ", paste0(dataOut$values, collapse = ",")))
@@ -291,11 +321,14 @@ mod_metacell_tree_server <- function(
 
 
     output$tree <- renderUI({
-      req(dataIn())
+      if(is.null(dataIn())){
+        p('dataIn() is NULL')
+      } else {
       div(
         style = "overflow-y: auto;",
         uiOutput(ns(paste0("metacell_tree_", DaparToolshed::typeDataset(dataIn()))))
       )
+      }
     })
 
     .style <- "vertical-align: top; background: #bg-color#; color: white; padding: 5px;"

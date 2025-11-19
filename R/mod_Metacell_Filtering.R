@@ -87,18 +87,10 @@ mod_Metacell_Filtering_ui <- function(id) {
 #'
 mod_Metacell_Filtering_server <- function(
     id,
-    dataIn = reactive({
-      NULL
-    }),
-    i = reactive({
-      1
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    dataIn = reactive({NULL}),
+    i = reactive({1}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list()
@@ -159,7 +151,7 @@ mod_Metacell_Filtering_server <- function(
       )
     })
 
-    observeEvent(dataIn(), ignoreInit = FALSE, {
+    observeEvent(req(dataIn()), ignoreInit = FALSE, {
         req(inherits(dataIn(), "QFeatures"))
         rv$dataIn <- dataIn()
         rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
@@ -179,15 +171,9 @@ mod_Metacell_Filtering_server <- function(
 
       mod_ds_metacell_Histos_server(
         id = "plots",
-        dataIn = reactive({
-          rv$dataIn[[length(rv$dataIn)]]
-        }),
-        pattern = reactive({
-          rv.custom$funFilter()$value$ll.pattern
-        }),
-        group = reactive({
-          design.qf(rv$dataIn)$Condition
-        })
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
+        group = reactive({design.qf(rv$dataIn)$Condition})
       )
 
 
@@ -211,11 +197,11 @@ mod_Metacell_Filtering_server <- function(
 
     observe({
       req(is.enabled())
-      # req(rv$dataIn)
+       req(rv$dataIn)
 
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv$dataIn}),
         conds = reactive({design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({
           stats::setNames(c("Push p-value", "Keep original p-value"), nm = c("delete", "keep"))
@@ -223,15 +209,9 @@ mod_Metacell_Filtering_server <- function(
         val_vs_percent = reactive({
           stats::setNames(nm = c("Count", "Percentage"))
         }),
-        operator = reactive({
-          stats::setNames(nm = SymFilteringOperators())
-        }),
-        remoteReset = reactive({
-          remoteReset()
-        }),
-        is.enabled = reactive({
-          is.enabled()
-        })
+        operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({is.enabled()})
       )
     })
 
@@ -261,7 +241,6 @@ mod_Metacell_Filtering_server <- function(
     observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE, {
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
-      browser()
       shiny::withProgress(message = paste0("Filtering", id), {
         shiny::incProgress(0.5)
       tmp <- filterFeaturesOneSE(
@@ -334,9 +313,7 @@ mod_Metacell_Filtering_server <- function(
 mod_Metacell_Filtering <- function(
     dataIn = NULL,
     i = 1,
-    remoteReset = reactive({
-      0
-    }),
+    remoteReset = reactive({0}),
     is.enabled = TRUE) {
   ui <- tagList(
     actionButton("Reset", "Simulate reset"),
@@ -345,15 +322,9 @@ mod_Metacell_Filtering <- function(
 
   server <- function(input, output, session) {
     res <- mod_Metacell_Filtering_server("query",
-      dataIn = reactive({
-        dataIn
-      }),
-      i = reactive({
-        i
-      }),
-      remoteReset = reactive({
-        remoteReset() + input$Reset
-      })
+      dataIn = reactive({dataIn}),
+      i = reactive({i}),
+      remoteReset = reactive({ remoteReset() + input$Reset})
     )
 
     observeEvent(res()$trigger, {

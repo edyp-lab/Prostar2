@@ -217,6 +217,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
 
     output$tree_UI <- renderUI({
+      #req(rv$dataIn)
       widget <- mod_metacell_tree_ui(ns("tree"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
@@ -582,27 +583,13 @@ mod_qMetacell_FunctionFilter_Generator <- function(
 
   server <- function(input, output, session) {
     res <- mod_qMetacell_FunctionFilter_Generator_server("query",
-      dataIn = reactive({
-        obj
-      }),
-      conds = reactive({
-        conds
-      }),
-      keep_vs_remove = reactive({
-        keep_vs_remove
-      }),
-      val_vs_percent = reactive({
-        val_vs_percent
-      }),
-      operator = reactive({
-        operator
-      }),
-      is.enabled = reactive({
-        is.enabled
-      }),
-      remoteReset = reactive({
-        remoteReset() + input$Reset
-      })
+      dataIn = reactive({obj}),
+      conds = reactive({conds}),
+      keep_vs_remove = reactive({keep_vs_remove}),
+      val_vs_percent = reactive({val_vs_percent}),
+      operator = reactive({operator}),
+      is.enabled = reactive({is.enabled}),
+      remoteReset = reactive({remoteReset() + input$Reset})
     )
 
     observeEvent(res()$trigger, {

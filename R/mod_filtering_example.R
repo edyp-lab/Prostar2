@@ -57,7 +57,7 @@ mod_filtering_example_ui <- function(id) {
 
 #' @rdname filtering-example
 #' @importFrom shinyBS bsModal
-#' @importFrom DT renderDataTable datatable formatStyle styleEqual
+#' @importFrom DT renderDataTable datatable formatStyle styleEqual renderDT DTOutput
 #' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @importFrom DaparToolshed typeDataset
 #' @export
@@ -130,7 +130,7 @@ mod_filtering_example_server <- function(
 
     #output$example_tab_filtered <- DT::renderDataTable({
 
-      output$example_tab_filtered <- renderDT   ({
+      output$example_tab_filtered <- DT::renderDT   ({
         
       df <- omXplore::Build_enriched_qdata(dataIn())
       is.enriched <- !isTRUE(all.equal(dataIn(), df))
