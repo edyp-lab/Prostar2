@@ -459,7 +459,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     GuessIndices <- reactive({
       req(rv.custom$ll.fun)
       
-      browser()
+  
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
@@ -474,16 +474,16 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       diff <- setdiff(namesbefore, namesafter)
       indices.diff.delete <- match(diff, namesbefore)
       indices.diff.keep <- match(diff, namesafter)
-      
+      #browser()
       indices.diff.delete
     })
 
     
     
     output$show_filtering_preview_ui <- renderUI({
-      req(BuildFunctionFilter())
+      req(GuessIndices())
       req(WriteQuery())
-      
+      browser()
       mod_filtering_example_server(id = "filteringExample",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         indices = reactive({GuessIndices()}),
@@ -501,7 +501,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       rv.custom$ll.fun <- list(BuildFunctionFilter())
       rv.custom$ll.query <- list(WriteQuery())
       rv.custom$ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
-      browser()
+      #GuessIndices()
+      #browser()
       
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
@@ -509,17 +510,17 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         ll.fun = rv.custom$ll.fun,
         ll.query = rv.custom$ll.query,
         ll.widgets.value = rv.custom$ll.widgets.value,
-        ll.pattern = rv.widgets$tag,
-        ll.indices = GetIndices_FunFiltering(
-          obj = rv$dataIn[[length(rv$dataIn)]],
-          conds = conds(),
-          level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]),
-          pattern = rv.custom$ll.fun[[1]]@params$pattern,
-          type = rv.widgets$scope,
-          percent = rv.custom$ll.fun[[1]]@params$percent,
-          op = rv.custom$ll.fun[[1]]@params$operator,
-          th = rv.custom$ll.fun[[1]]@params$th
-        )
+        ll.pattern = rv.widgets$tag
+        # ll.indices = GetIndices_FunFiltering(
+        #   obj = rv$dataIn[[length(rv$dataIn)]],
+        #   conds = conds(),
+        #   level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]),
+        #   pattern = rv.custom$ll.fun[[1]]@params$pattern,
+        #   type = rv.widgets$scope,
+        #   percent = rv.custom$ll.fun[[1]]@params$percent,
+        #   op = rv.custom$ll.fun[[1]]@params$operator,
+        #   th = rv.custom$ll.fun[[1]]@params$th
+        # )
       )
     })
 
