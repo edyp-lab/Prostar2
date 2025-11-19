@@ -49,27 +49,19 @@ NULL
 mod_filtering_example_ui <- function(id) {
   ns <- NS(id)
 
-  # tagList(
-  #   actionLink(ns("show_filtering_example"), "Preview filtering"),
-  #   shinyBS::bsModal(ns("example_modal"),
-  #     title = "Example preview of the filtering result.",
-  #     size = "large",
-  #     trigger = ns("show_filtering_example"),
-      tagList(
-        uiOutput(ns("show_title")),
-        # radioButtons(ns("run_btn"), "Example dataset",
-        #   choices = setNames(
-        #     nm = c("original dataset", "simulate filtered dataset")
-        #   )
-        # ),
-        DT::dataTableOutput(ns("example_tab_filtered"))
-      )
-  #     ,
-  #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
-  #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
-  #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
-  #   )
-  # )
+  tagList(
+    # shinyBS::bsModal(
+    # id = ns("example_modal"),
+    #   title = "Example preview of the filtering result.",
+    #   size = "large",
+    #   trigger = ns("show_filtering_example"),
+    #   DT::DTOutput(ns("example_tab_filtered")),
+    #   tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
+    #   tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
+    #   tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
+    # ),
+    actionLink(ns("show_filtering_example"), "Preview filtering")
+  )
 }
 
 
@@ -94,10 +86,6 @@ mod_filtering_example_server <- function(
     ns <- session$ns
 
     pkgs.require('magrittr')
-    output$show_title <- renderUI({
-      h3(title())
-    })
-
 
     # ###############
     # # options modal
@@ -106,6 +94,18 @@ mod_filtering_example_server <- function(
     # )
     # ###############
 
+    
+    observeEvent(input$show_filtering_example, ignoreInit = TRUE, ignoreNULL = TRUE,{
+      showModal(modalDialog(
+        size = "l",
+        DT::DTOutput(ns("example_tab_filtered")),
+        tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
+        tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
+        tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
+      ))
+    })
+    
+    
     legendTypeMV <- list(
       MEC = "Missing in Entire Condition (MEC)",
       POV = "Partially Observed Value (POV)",
@@ -143,8 +143,10 @@ mod_filtering_example_server <- function(
       return(ColorsHexDark)
     }
 
-    output$example_tab_filtered <- DT::renderDataTable({
+    #output$example_tab_filtered <- DT::renderDataTable({
 
+      output$example_tab_filtered <- renderDT   ({
+        
       df <- omXplore::Build_enriched_qdata(dataIn())
       is.enriched <- !isTRUE(all.equal(dataIn(), df))
       colors <- omXplore::custom_metacell_colors()
@@ -152,10 +154,10 @@ mod_filtering_example_server <- function(
        c.colors <- unlist(colors, use.names = FALSE)
        c.tags <- c(c.tags, paste0("darken_", c.tags))
        c.colors <- c(c.colors, DarkenColors(c.colors))
-       
-       
+
+
       range.invisible <- c(((2 + (ncol(df) - 1) / 2)):ncol(df))
-      
+
       .colDef <- if (is.enriched) {
         list(
           list(
@@ -166,7 +168,7 @@ mod_filtering_example_server <- function(
       } else {
         NULL
       }
-      
+
       index2darken <- NULL
 
       # Darken lines that will be filtered
@@ -177,12 +179,12 @@ mod_filtering_example_server <- function(
           index2darken <- indices()
         }
       }
-      
-     
-      for (i in index2darken) 
+
+
+      for (i in index2darken)
         df[i, range.invisible] <- paste0("darken_", df[i, range.invisible])
-        
-        
+
+
       dt <- DT::datatable(df,
         extensions = c("Scroller"),
         options = list(
@@ -235,41 +237,12 @@ mod_filtering_example <- function(
   )
 
   server <- function(input, output) {
-    # utils::data('Exp1_R25_prot', package='DAPARdata')
-    # obj <- Exp1_R25_prot[1:20]
-    # filtering.query <- list(
-    #   MetacellTag = c('Missing POV', 'Missing MEC'),
-    #   MetacellFilters = "WholeMatrix",
-    #   KeepRemove = "delete",
-    #   metacell_value_th = 1,
-    #   metacell_percent_th = 0,
-    #   val_vs_percent = "Count",
-    #   metacellFilter_operator = ">="
-    # )
-
-
-    # indices <- GetIndices_FunFiltering(
-    #   obj = obj,
-    #   level = omXplore::get_type(obj),
-    #   pattern = filtering.query$MetacellTag,
-    #   type = filtering.query$MetacellFilters,
-    #   percent = filtering.query$val_vs_percent == "Percentage",
-    #   op = filtering.query$metacellFilter_operator,
-    #   th = filtering.query$metacell_value_th)
 
     mod_filtering_example_server("tree",
-      dataIn = reactive({
-        obj
-      }),
-      indices = reactive({
-        indices
-      }),
-      operation = reactive({
-        operation
-      }),
-      title = reactive({
-        title
-      })
+      dataIn = reactive({obj}),
+      indices = reactive({indices}),
+      operation = reactive({operation}),
+      title = reactive({title})
     )
   }
 

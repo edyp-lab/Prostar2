@@ -490,6 +490,7 @@ indices
     observe({
       req(GuessIndices())
       req(BuildFunctionFilter())
+      req(rv.custom$ll.widgets.value)
       
        mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
