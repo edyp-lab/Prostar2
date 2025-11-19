@@ -67,7 +67,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("chooseScope_ui")),
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
-    uiOutput(ns("show_filtering_preview_ui")),
+    mod_filtering_example_ui(ns("preview_filtering_query_result")),
     uiOutput(ns("Add_btn_UI"))
   )
 }
@@ -471,38 +471,48 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       assayafter <- assay(tmp[[length(tmp)]])
       namesbefore <- rownames(assaybefore)
       namesafter <- rownames(assayafter)
-      diff <- setdiff(namesbefore, namesafter)
-      indices.diff.delete <- match(diff, namesbefore)
-      indices.diff.keep <- match(diff, namesafter)
-      #browser()
-      indices.diff.delete
+      
+     
+      indices <- 1:length(namesafter)
+      if (rv.custom$ll.fun[[1]]@params$cmd == 'delete'){
+        diff <- setdiff(namesbefore, namesafter)
+        indices <- match(diff, namesbefore)
+      } else {
+        inter <- intersect(namesbefore, namesafter)
+        indices <- match(inter, namesbefore)
+      }
+      
+indices
     })
 
     
     
-    output$show_filtering_preview_ui <- renderUI({
+    observe({
       req(GuessIndices())
-      req(WriteQuery())
-      browser()
-      mod_filtering_example_server(id = "filteringExample",
+      req(BuildFunctionFilter())
+      
+       mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         indices = reactive({GuessIndices()}),
-        operation = reactive({rv.custom$ll.fun[[1]]@params$operator}),
+        operation = reactive({list(BuildFunctionFilter())[[1]]@params$cmd}),
         title = reactive({WriteQuery()})
       )
       
-      mod_filtering_example_ui(ns("filteringExample"))
+      
     })
-
-    observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
-      req(BuildFunctionFilter())
-      req(WriteQuery())
-
+    
+    observeEvent(c(BuildFunctionFilter(), WriteQuery(), reactiveValuesToList(rv.widgets)), {
       rv.custom$ll.fun <- list(BuildFunctionFilter())
       rv.custom$ll.query <- list(WriteQuery())
       rv.custom$ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
-      #GuessIndices()
-      #browser()
+    })
+    
+
+    observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
+      req(rv.custom$ll.fun)
+      req(rv.custom$ll.query)
+      req(rv.custom$ll.widgets.value)
+      
       
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
@@ -524,9 +534,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       )
     })
 
-    return(reactive({
-      dataOut
-    }))
+    return(reactive({dataOut}))
   })
 }
 
