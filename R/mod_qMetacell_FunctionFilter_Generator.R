@@ -472,7 +472,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
 
 
-    GuessIndices <- function(){
+    GuessIndices <- reactive({
       req(rv.custom$ll.fun)
 
       tmp <- filterFeaturesOneSE(
@@ -497,15 +497,26 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         indices <- match(inter, namesbefore)
       }
 indices
-    }
+    })
 
     
     
     
     output$Preview_UI <- renderUI({
-      req(GuessIndices())
+      req(rv.custom$indices)
       req(BuildFunctionFilter())
       req(rv.custom$ll.widgets.value)
+      
+      
+      mod_filtering_example_server(id = "preview_filtering_query_result",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        indices = reactive({GuessIndices()}),
+        operation = reactive({list(BuildFunctionFilter())[[1]]@params$cmd}),
+        title = reactive({WriteQuery()})
+      )
+      
+      
+      
       tagList(
         mod_filtering_example_ui(ns("preview_filtering_query_result")),
         tags$head(tags$style(" .modal-content{ width: 1000px;}"))
@@ -514,20 +525,10 @@ indices
     
     
     observeEvent(input$Preview_btn, ignoreInit = TRUE, {
-      #req(GuessIndices())
-      req(BuildFunctionFilter())
+       req(BuildFunctionFilter())
       req(rv.custom$ll.widgets.value)
-      
-      
-      
-       mod_filtering_example_server(id = "preview_filtering_query_result",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        indices = reactive({GuessIndices()}),
-        operation = reactive({list(BuildFunctionFilter())[[1]]@params$cmd}),
-        title = reactive({WriteQuery()})
-      )
-      
-      
+      rv.custom$indices <- GuessIndices()
+
     })
     
     observeEvent(c(BuildFunctionFilter(), WriteQuery(), reactiveValuesToList(rv.widgets)), {
@@ -542,7 +543,7 @@ indices
       req(rv.custom$ll.query)
       req(rv.custom$ll.widgets.value)
       
-      
+      rv.custom$indices <- GuessIndices()
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(
@@ -550,7 +551,7 @@ indices
         ll.query = rv.custom$ll.query,
         ll.widgets.value = rv.custom$ll.widgets.value,
         ll.pattern = rv.widgets$tag,
-         ll.indices = GuessIndices()
+         ll.indices = rv.custom$indices
       )
     })
 
