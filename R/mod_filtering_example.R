@@ -60,6 +60,7 @@ mod_filtering_example_ui <- function(id) {
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual renderDT DTOutput
 #' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @importFrom DaparToolshed typeDataset
+#' @import shinyjqui
 #' @export
 #'
 mod_filtering_example_server <- function(
@@ -75,19 +76,14 @@ mod_filtering_example_server <- function(
 
     pkgs.require('magrittr')
 
-    # ###############
-    # # options modal
-    # jqui_draggable(paste0("#","example_modal"," .modal-content"),
-    #                options = list(revert=FALSE)
-    # )
-    # ###############
 
     
     output$toto <- renderUI({
-      showModal(modalDialog(
+      showModal(shinyjqui::draggableModalDialog(
         id = ns('example_modal'),
         DT::DTOutput(ns("example_tab_filtered"))
       ))
+
     })
     
     
@@ -127,8 +123,6 @@ mod_filtering_example_server <- function(
 
       return(ColorsHexDark)
     }
-
-    #output$example_tab_filtered <- DT::renderDataTable({
 
       output$example_tab_filtered <- DT::renderDT   ({
         
