@@ -472,7 +472,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
 
 
-    GuessIndices <- reactive({
+    GuessIndices <- function(){
       req(rv.custom$ll.fun)
 
       tmp <- filterFeaturesOneSE(
@@ -496,9 +496,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         inter <- intersect(namesbefore, namesafter)
         indices <- match(inter, namesbefore)
       }
-
 indices
-    })
+    }
 
     
     
@@ -515,9 +514,11 @@ indices
     
     
     observeEvent(input$Preview_btn, ignoreInit = TRUE, {
-      req(GuessIndices())
+      #req(GuessIndices())
       req(BuildFunctionFilter())
       req(rv.custom$ll.widgets.value)
+      
+      
       
        mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
