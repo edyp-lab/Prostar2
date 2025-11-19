@@ -2,6 +2,10 @@
 
 ## All functions
 
+- [`BuildColorStyles()`](https://edyp-lab.github.io/Prostar2/reference/BuildColorStyles.md)
+  : xxxx
+- [`Build_enriched_qdata()`](https://edyp-lab.github.io/Prostar2/reference/Build_enriched_qdata.md)
+  : xxxx
 - [`convert_dataset_ui()`](https://edyp-lab.github.io/Prostar2/reference/Convert_wrapper.md)
   [`convert_dataset_server()`](https://edyp-lab.github.io/Prostar2/reference/Convert_wrapper.md)
   [`convert_dataset()`](https://edyp-lab.github.io/Prostar2/reference/Convert_wrapper.md)

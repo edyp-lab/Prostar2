@@ -75,6 +75,10 @@ NA
 
 ``` r
 if (interactive()){
+library(Prostar2)
+library(shinyBS)
+library(shiny)
+library(DT)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[[1]]
 indices <- 1:5
