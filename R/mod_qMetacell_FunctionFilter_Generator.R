@@ -168,10 +168,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
     
 
-    observeEvent(input$Preview_btn, {
-      
-    })
-    
     MagellanNTK::mod_popover_for_help_server("tag_help",
       title = "Nature of data to filter",
       content = "Define xxx"

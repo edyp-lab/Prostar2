@@ -82,8 +82,6 @@ mod_metacell_tree_server <- function(
     dataIn = reactive({NULL}),
     remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})) {
-  # pkgs.require(c("shinyBS", "shinyjs"))
-
 
   convertWidgetName <- function(name) {
     # This function implements the transformations used to

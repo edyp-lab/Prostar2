@@ -33,10 +33,12 @@
 #' 
 #' @examples
 #' if (interactive()){
+#' library(Prostar2)
 #' library(MagellanNTK)
 #' data(Exp1_R25_prot, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelineProtein_Filtering", path, dataIn = Exp1_R25_prot))
+#' shiny::runApp(proc_workflowApp("PipelineProtein_Filtering", path, dataIn = Exp1_R25_prot))
+#' }
 #' 
 pipe_workflowApp("PipelineProtein_Filtering", path, dataIn = Exp1_R25_prot)
 
@@ -438,6 +440,8 @@ PipelineProtein_Filtering_server <- function(id,
             uiOutput(ns("Variablefiltering_cname_ui")),
             uiOutput(ns("Variablefiltering_operator_ui")),
             uiOutput(ns("Variablefiltering_value_ui")),
+            uiOutput(ns('Variablefiltering_Preview_UI')),
+            uiOutput(ns("Variablefiltering_Preview_btn_UI")),
             uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
         ),
         content = tagList(
@@ -603,48 +607,119 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     
+    
+    
+    GuessIndices <- reactive({
+      req(rv.custom$Variablefiltering_funFilter)
+
+      tmp <- filterFeaturesOneSE(
+        object = rv.custom$dataIn2,
+        i = length(rv.custom$dataIn2),
+        name = paste0("variableFiltered", MagellanNTK::Timestamp()),
+        filters = rv.custom$Variablefiltering_funFilter$ll.var
+      )
+      
+      assaybefore <- assay(tmp[[length(tmp)-1]])
+      assayafter <- assay(tmp[[length(tmp)]])
+      namesbefore <- rownames(assaybefore)
+      namesafter <- rownames(assayafter)
+      
+      
+      indices <- 1:length(namesafter)
+      diff <- setdiff(namesbefore, namesafter)
+      indices <- match(diff, namesbefore)
+      indices
+    })
+    
+    
+    
+    
+    output$Variablefiltering_Preview_UI <- renderUI({
+      req(rv.custom$indices)
+
+      mod_filtering_example_server(id = "preview_filtering_query_result",
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        indices = reactive({rv.custom$indices}),
+        operation = reactive({'delete'}),
+        title = reactive({WriteQuery()})
+      )
+      
+      
+      
+      tagList(
+        mod_filtering_example_ui(ns("preview_filtering_query_result")),
+        tags$head(tags$style(" .modal-content{ width: 1000px;}"))
+      )
+    })
+    
+    
+    
+    output$Variablefiltering_Preview_btn_UI <- renderUI({
+      widget <- actionButton(ns("Variablefiltering_Preview_btn"), "Preview",
+        class = "btn-info"
+      )
+      #MagellanNTK::toggleWidget(widget, TRUE)
+      widget
+    })
+    
+    observeEvent(input$Variablefiltering_Preview_btn, ignoreInit = TRUE, {
+      #req(BuildFunctionFilter())
+      #req(rv.custom$ll.widgets.value)
+      rv.custom$indices <- GuessIndices()
+      
+    })
+    
+    
+    observeEvent(c(rv.widgets$Variablefiltering_value,
+      rv.widgets$Variablefiltering_operator,
+      rv.widgets$Variablefiltering_cname), {
+      
+      
+      rv.custom$Variablefiltering_ll.var <- list(
+        Variablefiltering_BuildVariableFilter(
+          value = rv.widgets$Variablefiltering_value,
+          operator = rv.widgets$Variablefiltering_operator,
+          cname = rv.widgets$Variablefiltering_cname,
+          keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
+      )
+      
+      rv.custom$Variablefiltering_ll.query <- list(
+        Variablefiltering_WriteQuery(
+          value = rv.widgets$Variablefiltering_value,
+          operator = rv.widgets$Variablefiltering_operator,
+          cname = rv.widgets$Variablefiltering_cname,
+          keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
+      )
+      
+      rv.custom$Variablefiltering_ll.widgets.value <- reactiveValuesToList(rv.widgets)
+      ind <- grepl('Variablefiltering', names(rv.custom$Variablefiltering_ll.widgets.value))
+      ind <- which(ind == TRUE)
+      rv.custom$Variablefiltering_ll.widgets.value <- rv.custom$Variablefiltering_ll.widgets.value[ind]
+      
+      
+      rv.custom$Variablefiltering_funFilter <- list(
+        ll.var = rv.custom$Variablefiltering_ll.var,
+        ll.query = rv.custom$Variablefiltering_ll.query,
+        ll.widgets.value = rv.custom$Variablefiltering_ll.widgets.value
+      )
+      
+      })
+    
+    
     observeEvent(input$Variablefiltering_addFilter_btn,
       ignoreInit = FALSE, ignoreNULL = TRUE, {
         
         
-        rv.widgets$Variablefiltering_value
-        rv.widgets$Variablefiltering_operator
-        rv.widgets$Variablefiltering_cname
-        
-        
-        rv.custom$Variablefiltering_ll.var <- list(
-          Variablefiltering_BuildVariableFilter(
-            value = rv.widgets$Variablefiltering_value,
-            operator = rv.widgets$Variablefiltering_operator,
-            cname = rv.widgets$Variablefiltering_cname,
-            keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
-        )
-        
-        rv.custom$Variablefiltering_ll.query <- list(
-          Variablefiltering_WriteQuery(
-            value = rv.widgets$Variablefiltering_value,
-            operator = rv.widgets$Variablefiltering_operator,
-            cname = rv.widgets$Variablefiltering_cname,
-            keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
-        )
-        
-        rv.custom$Variablefiltering_ll.widgets.value <- reactiveValuesToList(rv.widgets)
-        ind <- grepl('Variablefiltering', names(rv.custom$Variablefiltering_ll.widgets.value))
-        ind <- which(ind == TRUE)
-        rv.custom$Variablefiltering_ll.widgets.value <- rv.custom$Variablefiltering_ll.widgets.value[ind]
-        
-        
-        rv.custom$Variablefiltering_funFilter <- list(
-          ll.var = rv.custom$Variablefiltering_ll.var,
-          ll.query = rv.custom$Variablefiltering_ll.query,
-          ll.widgets.value = rv.custom$Variablefiltering_ll.widgets.value
-        )
-        
-        
+        req(rv.widgets$Variablefiltering_value)
+        req(rv.widgets$Variablefiltering_operator)
+        req(rv.widgets$Variablefiltering_cname)
         
         ###########################################
         req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
         req(rv.custom$dataIn2)
+        
+        rv.custom$indices <- GuessIndices()
+        
         
         tmp <- filterFeaturesOneSE(
           object = rv.custom$dataIn2,
@@ -742,8 +817,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-        
-        browser()
+
       if (isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))))
         info(btnVentsMasg)
       else {

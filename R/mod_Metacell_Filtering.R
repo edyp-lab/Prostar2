@@ -183,9 +183,7 @@ mod_Metacell_Filtering_server <- function(
 
 
     MagellanNTK::format_DT_server("dt",
-      dataIn = reactive({
-        rv.custom$qMetacell_Filter_SummaryDT
-      })
+      dataIn = reactive({rv.custom$qMetacell_Filter_SummaryDT})
     )
 
 
@@ -219,23 +217,6 @@ mod_Metacell_Filtering_server <- function(
       widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-
-    # output$Quantimetadatafiltering_btn_validate_ui <- renderUI({
-    #
-    #   req(length(rv.custom$funFilter()$value$ll.fun) > 0)
-    #
-    #   widget <- actionButton(ns("Quantimetadatafiltering_btn_validate"),
-    #     "Perform qMetacell filtering",
-    #     class = "btn-success"
-    #   )
-    #
-    #   MagellanNTK::toggleWidget(widget, is.enabled())
-    # })
-    # >>> END: Definition of the widgets
-
-    # observeEvent(rv.custom$funFilter()$trigger, {
-    #   print('tutu')
-    # })
 
     # observeEvent(input$Quantimetadatafiltering_btn_validate, {
     observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE, {
