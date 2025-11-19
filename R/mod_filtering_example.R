@@ -49,21 +49,7 @@ NULL
 mod_filtering_example_ui <- function(id) {
   ns <- NS(id)
 
-  tagList(
-    # shinyBS::bsModal(
-    # id = ns("example_modal"),
-    #   title = "Example preview of the filtering result.",
-    #   size = "large",
-    #   trigger = ns("show_filtering_example"),
-    #   DT::DTOutput(ns("example_tab_filtered")),
-    #   tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
-    #   tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
-    #   tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
-    # ),
-    actionLink(ns("show_filtering_example"), "Preview filtering"),
-    tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-content{ width: 300px;}")))
-    
-  )
+  uiOutput(ns('toto'))
 }
 
 
@@ -97,14 +83,10 @@ mod_filtering_example_server <- function(
     # ###############
 
     
-    observeEvent(input$show_filtering_example, ignoreInit = TRUE, ignoreNULL = TRUE,{
+    output$toto <- renderUI({
       showModal(modalDialog(
         id = ns('example_modal'),
-        #size = "l",
-        DT::DTOutput(ns("example_tab_filtered")),
-       # tags$head(tags$style(paste0("#", ns("modal-content"), " .modal-footer{ display:none}"))),
-        tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-content{ width: 300px;}"))),
-        #tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
+        DT::DTOutput(ns("example_tab_filtered"))
       ))
     })
     

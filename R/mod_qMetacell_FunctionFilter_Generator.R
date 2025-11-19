@@ -67,7 +67,8 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("chooseScope_ui")),
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
-    uiOutput(ns('preview')),
+    uiOutput(ns('Preview_UI')),
+    uiOutput(ns("Preview_btn_UI")),
     uiOutput(ns("Add_btn_UI"))
   )
 }
@@ -154,10 +155,23 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       widget <- actionButton(ns("BuildFilter_btn"), "Add filter",
         class = "btn-info"
       )
-
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
+    
+    
+    output$Preview_btn_UI <- renderUI({
+      widget <- actionButton(ns("Preview_btn"), "Preview",
+        class = "btn-info"
+      )
+      #MagellanNTK::toggleWidget(widget, TRUE)
+      widget
+    })
+    
 
+    observeEvent(input$Preview_btn, {
+      
+    })
+    
     MagellanNTK::mod_popover_for_help_server("tag_help",
       title = "Nature of data to filter",
       content = "Define xxx"
@@ -460,21 +474,20 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
     GuessIndices <- reactive({
       req(rv.custom$ll.fun)
-      
-  
+
       tmp <- filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$ll.fun
       )
-      
+
       assaybefore <- assay(tmp[[length(tmp)-1]])
       assayafter <- assay(tmp[[length(tmp)]])
       namesbefore <- rownames(assaybefore)
       namesafter <- rownames(assayafter)
-      
-     
+
+
       indices <- 1:length(namesafter)
       if (rv.custom$ll.fun[[1]]@params$cmd == 'delete'){
         diff <- setdiff(namesbefore, namesafter)
@@ -483,14 +496,14 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         inter <- intersect(namesbefore, namesafter)
         indices <- match(inter, namesbefore)
       }
-      
+
 indices
     })
 
     
     
     
-    output$preview <- renderUI({
+    output$Preview_UI <- renderUI({
       req(GuessIndices())
       req(BuildFunctionFilter())
       req(rv.custom$ll.widgets.value)
@@ -501,7 +514,7 @@ indices
     })
     
     
-    observe({
+    observeEvent(input$Preview_btn, ignoreInit = TRUE, {
       req(GuessIndices())
       req(BuildFunctionFilter())
       req(rv.custom$ll.widgets.value)
@@ -535,17 +548,8 @@ indices
         ll.fun = rv.custom$ll.fun,
         ll.query = rv.custom$ll.query,
         ll.widgets.value = rv.custom$ll.widgets.value,
-        ll.pattern = rv.widgets$tag
-        # ll.indices = GetIndices_FunFiltering(
-        #   obj = rv$dataIn[[length(rv$dataIn)]],
-        #   conds = conds(),
-        #   level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]),
-        #   pattern = rv.custom$ll.fun[[1]]@params$pattern,
-        #   type = rv.widgets$scope,
-        #   percent = rv.custom$ll.fun[[1]]@params$percent,
-        #   op = rv.custom$ll.fun[[1]]@params$operator,
-        #   th = rv.custom$ll.fun[[1]]@params$th
-        # )
+        ll.pattern = rv.widgets$tag,
+         ll.indices = GuessIndices()
       )
     })
 
