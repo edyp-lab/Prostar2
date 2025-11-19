@@ -67,7 +67,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("chooseScope_ui")),
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
-    mod_filtering_example_ui(ns("preview_filtering_query_result")),
+    uiOutput(ns('preview')),
     uiOutput(ns("Add_btn_UI"))
   )
 }
@@ -148,6 +148,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     )
     eval(str2expression(core))
 
+    
+    
     output$Add_btn_UI <- renderUI({
       widget <- actionButton(ns("BuildFilter_btn"), "Add filter",
         class = "btn-info"
@@ -485,6 +487,17 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 indices
     })
 
+    
+    
+    
+    output$preview <- renderUI({
+      req(GuessIndices())
+      req(BuildFunctionFilter())
+      req(rv.custom$ll.widgets.value)
+      widget <- mod_filtering_example_ui(ns("preview_filtering_query_result"))
+      
+     widget
+    })
     
     
     observe({
