@@ -266,7 +266,7 @@ mod_Metacell_Filtering_server <- function(
     observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE, {
       req(length(rv.custom$funFilter()$value$ll.fun) > 0)
       req(rv$dataIn)
-
+      browser()
       shiny::withProgress(message = paste0("Filtering", id), {
         shiny::incProgress(0.5)
       tmp <- filterFeaturesOneSE(

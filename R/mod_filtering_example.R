@@ -20,6 +20,10 @@
 #'
 #' @examples
 #' if (interactive()){
+#' library(Prostar2)
+#' library(shinyBS)
+#' library(shiny)
+#' library(DT)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot[[1]]
 #' indices <- 1:5
@@ -45,12 +49,12 @@ NULL
 mod_filtering_example_ui <- function(id) {
   ns <- NS(id)
 
-  tagList(
-    actionLink(ns("show_filtering_example"), "Preview filtering"),
-    shinyBS::bsModal(ns("example_modal"),
-      title = "Example preview of the filtering result.",
-      size = "large",
-      trigger = ns("show_filtering_example"),
+  # tagList(
+  #   actionLink(ns("show_filtering_example"), "Preview filtering"),
+  #   shinyBS::bsModal(ns("example_modal"),
+  #     title = "Example preview of the filtering result.",
+  #     size = "large",
+  #     trigger = ns("show_filtering_example"),
       tagList(
         uiOutput(ns("show_title")),
         radioButtons(ns("run_btn"), "Example dataset",
@@ -59,12 +63,13 @@ mod_filtering_example_ui <- function(id) {
           )
         ),
         DT::dataTableOutput(ns("example_tab_filtered"))
-      ),
-      tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
-      tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
-      tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
-    )
-  )
+      )
+  #     ,
+  #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-footer{ display:none}"))),
+  #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-dialog{ width:1000px}"))),
+  #     tags$head(tags$style(paste0("#", ns("example_modal"), " .modal-body{ min-height:700px}")))
+  #   )
+  # )
 }
 
 
@@ -151,10 +156,31 @@ mod_filtering_example_server <- function(
     }
 
     output$example_tab_filtered <- DT::renderDataTable({
-      df <- Build_enriched_qdata(dataIn())
-      .colDef <- range.invisible <- NULL
-      is.enriched <- !isTRUE(all.equal(df, dataIn()))
+
+      df <- omXplore::Build_enriched_qdata(dataIn())
+      is.enriched <- !isTRUE(all.equal(dataIn(), df))
+      colors <- omXplore::custom_metacell_colors()
+      c.tags <- names(colors)
+       c.colors <- unlist(colors, use.names = FALSE)
+       c.tags <- c(c.tags, paste0("darken_", c.tags))
+       c.colors <- c(c.colors, DarkenColors(c.colors))
+       
+       
+      range.invisible <- c(((2 + (ncol(df) - 1) / 2)):ncol(df))
+      
+      .colDef <- if (is.enriched) {
+        list(
+          list(
+            targets = range.invisible,
+            visible = FALSE
+          )
+        )
+      } else {
+        NULL
+      }
+      
       index2darken <- NULL
+      
       # Darken lines that will be filtered
       if (!is.null(indices()) &&
         input$run_btn == "simulate filtered dataset") {
@@ -164,29 +190,12 @@ mod_filtering_example_server <- function(
           index2darken <- indices()
         }
       }
-
-
-      if (is.enriched) {
-        .style <- BuildColorStyles(DaparToolshed::typeDataset(dataIn()))
-        c.tags <- names(.style)
-        c.colors <- unlist(.style, use.names = FALSE)
-
-        range.invisible <- (((ncol(df) - 1) / 2) + 2):ncol(df)
-
-        for (i in index2darken) {
-          df[i, range.invisible] <- paste0("darken_", df[i, range.invisible])
-        }
-        c.tags <- c(c.tags, paste0("darken_", c.tags))
-        c.colors <- c(c.colors, DarkenColors(c.colors))
-
-        .colDef <- list(
-          list(
-            targets = range.invisible,
-            visible = FALSE
-          )
-        )
-      }
-
+      
+     
+      for (i in index2darken) 
+        df[i, range.invisible] <- paste0("darken_", df[i, range.invisible])
+        
+        
       dt <- DT::datatable(df,
         extensions = c("Scroller"),
         options = list(

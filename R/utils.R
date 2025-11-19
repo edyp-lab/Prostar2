@@ -48,3 +48,61 @@ add.resourcePath <- function(){
   addResourcePath("images", system.file("app/images", package = "Prostar2"))
 }
 
+
+
+
+
+
+#' @title
+#' xxxx
+#'
+#' @description
+#' xxxx
+#'
+#' @param obj.se xx
+#'
+#' @export
+BuildColorStyles <- function(typeDataset) {
+  mc <- DaparToolshed::metacell.def(typeDataset)
+  styles <- setNames(mc$color, nm = mc$node)
+
+  styles
+}
+
+
+
+
+#' @title
+#' xxxx
+#'
+#' @description
+#' xxxx
+#'
+#' @param obj xx
+#' @param digits xxx
+#'
+#' @export
+#'
+Build_enriched_qdata <- function(obj.se, digits = NULL) {
+  if (is.null(digits)) {
+    digits <- 2
+  }
+  
+  test.table <- as.data.frame(round(SummarizedExperiment::assay(obj.se)))
+  if (!is.null(names(DaparToolshed::qMetacell(obj.se)))) { 
+    test.table <- cbind(
+      round(SummarizedExperiment::assay(obj.se), digits = digits),
+      DaparToolshed::qMetacell(obj.se)
+    )
+  } else {
+    test.table <- cbind(
+      test.table,
+      as.data.frame(
+        matrix(rep(NA, ncol(test.table) * nrow(test.table)),
+          nrow = nrow(test.table)
+        )
+      )
+    )
+  }
+  return(test.table)
+}

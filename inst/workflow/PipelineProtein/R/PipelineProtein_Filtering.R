@@ -254,10 +254,13 @@ PipelineProtein_Filtering_server <- function(id,
           uiOutput(ns('qMetacell_Filter_DT_UI')),
           uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
           uiOutput(ns('Cellmetadatafiltering_plots_ui'))
+          #uiOutput(ns('show_example_ui'))
         )
       )
     })
     
+    
+
     
     observe({
       req(rv$steps.enabled["Cellmetadatafiltering"])
