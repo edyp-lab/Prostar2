@@ -441,7 +441,6 @@ PipelineProtein_Filtering_server <- function(id,
             uiOutput(ns("Variablefiltering_operator_ui")),
             uiOutput(ns("Variablefiltering_value_ui")),
             uiOutput(ns('Variablefiltering_Preview_UI')),
-            uiOutput(ns("Variablefiltering_Preview_btn_UI")),
             uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
         ),
         content = tagList(
@@ -624,7 +623,7 @@ PipelineProtein_Filtering_server <- function(id,
       namesbefore <- rownames(assaybefore)
       namesafter <- rownames(assayafter)
       
-      
+ 
       indices <- 1:length(namesafter)
       diff <- setdiff(namesbefore, namesafter)
       indices <- match(diff, namesbefore)
@@ -635,11 +634,11 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$Variablefiltering_Preview_UI <- renderUI({
-      req(rv.custom$indices)
+      req(GuessIndices())
 
       mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        indices = reactive({rv.custom$indices}),
+        indices = reactive({GuessIndices()}),
         operation = reactive({'delete'}),
         title = reactive({WriteQuery()})
       )
@@ -652,23 +651,7 @@ PipelineProtein_Filtering_server <- function(id,
       )
     })
     
-    
-    
-    output$Variablefiltering_Preview_btn_UI <- renderUI({
-      widget <- actionButton(ns("Variablefiltering_Preview_btn"), "Preview",
-        class = "btn-info"
-      )
-      #MagellanNTK::toggleWidget(widget, TRUE)
-      widget
-    })
-    
-    observeEvent(input$Variablefiltering_Preview_btn, ignoreInit = TRUE, {
-      #req(BuildFunctionFilter())
-      #req(rv.custom$ll.widgets.value)
-      rv.custom$indices <- GuessIndices()
-      
-    })
-    
+
     
     observeEvent(c(rv.widgets$Variablefiltering_value,
       rv.widgets$Variablefiltering_operator,
@@ -718,7 +701,7 @@ PipelineProtein_Filtering_server <- function(id,
         req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
         req(rv.custom$dataIn2)
         
-        rv.custom$indices <- GuessIndices()
+        #rv.custom$indices <- GuessIndices()
         
         
         tmp <- filterFeaturesOneSE(
@@ -727,7 +710,7 @@ PipelineProtein_Filtering_server <- function(id,
           name = paste0("variableFiltered", MagellanNTK::Timestamp()),
           filters = rv.custom$Variablefiltering_funFilter$ll.var
         )
-        indices <- rv.custom$Variablefiltering_funFilter$ll.indices
+        #indices <- rv.custom$Variablefiltering_funFilter$ll.indices
         
         # Add infos
         

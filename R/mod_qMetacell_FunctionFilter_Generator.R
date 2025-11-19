@@ -68,7 +68,6 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
     uiOutput(ns('Preview_UI')),
-    uiOutput(ns("Preview_btn_UI")),
     uiOutput(ns("Add_btn_UI"))
   )
 }
@@ -159,13 +158,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
     
     
-    output$Preview_btn_UI <- renderUI({
-      widget <- actionButton(ns("Preview_btn"), "Preview",
-        class = "btn-info"
-      )
-      #MagellanNTK::toggleWidget(widget, TRUE)
-      widget
-    })
+    
     
 
     MagellanNTK::mod_popover_for_help_server("tag_help",
@@ -499,20 +492,18 @@ indices
     
     
     
+    
+    
     output$Preview_UI <- renderUI({
-      req(rv.custom$indices)
+      req(GuessIndices())
       req(BuildFunctionFilter())
-      req(rv.custom$ll.widgets.value)
-      
-      
       mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         indices = reactive({GuessIndices()}),
         operation = reactive({list(BuildFunctionFilter())[[1]]@params$cmd}),
-        title = reactive({WriteQuery()})
+        title = reactive({WriteQuery()}),
+        remoteReset = reactive({input$Preview_btn})
       )
-      
-      
       
       tagList(
         mod_filtering_example_ui(ns("preview_filtering_query_result")),
@@ -520,14 +511,7 @@ indices
       )
     })
     
-    
-    observeEvent(input$Preview_btn, ignoreInit = TRUE, {
-       req(BuildFunctionFilter())
-      req(rv.custom$ll.widgets.value)
-      rv.custom$indices <- GuessIndices()
 
-    })
-    
     observeEvent(c(BuildFunctionFilter(), WriteQuery(), reactiveValuesToList(rv.widgets)), {
       rv.custom$ll.fun <- list(BuildFunctionFilter())
       rv.custom$ll.query <- list(WriteQuery())

@@ -49,7 +49,10 @@ NULL
 mod_filtering_example_ui <- function(id) {
   ns <- NS(id)
 
-  uiOutput(ns('toto'))
+  tagList(
+    uiOutput(ns("Preview_btn_UI")),
+    uiOutput(ns('toto'))
+  )
 }
 
 
@@ -66,7 +69,7 @@ mod_filtering_example_ui <- function(id) {
 mod_filtering_example_server <- function(
     id,
     dataIn = reactive({NULL}),
-    indices = NULL,
+    indices = reactive({NULL}),
     operation = "keep",
     title = "myTitle",
     remoteReset = reactive({0}),
@@ -77,8 +80,16 @@ mod_filtering_example_server <- function(
     pkgs.require('magrittr')
 
 
+    output$Preview_btn_UI <- renderUI({
+      widget <- actionButton(ns("Preview_btn"), "Preview",
+        class = "btn-info"
+      )
+      #MagellanNTK::toggleWidget(widget, TRUE)
+      widget
+    })
     
-    output$toto <- renderUI({
+    
+    observeEvent(input$Preview_btn, {
       showModal(shinyjqui::draggableModalDialog(
         id = ns('example_modal'),
         DT::DTOutput(ns("example_tab_filtered"))
@@ -212,7 +223,9 @@ mod_filtering_example <- function(
     operation = "keep",
     title = "myTitle") {
   ui <- fluidPage(
-    mod_filtering_example_ui("tree")
+    tagList(
+          mod_filtering_example_ui("tree")
+    )
   )
 
   server <- function(input, output) {
