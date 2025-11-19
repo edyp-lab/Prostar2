@@ -494,9 +494,10 @@ indices
       req(GuessIndices())
       req(BuildFunctionFilter())
       req(rv.custom$ll.widgets.value)
-      widget <- mod_filtering_example_ui(ns("preview_filtering_query_result"))
-      
-     widget
+      tagList(
+        mod_filtering_example_ui(ns("preview_filtering_query_result")),
+        tags$head(tags$style(" .modal-content{ width: 1000px;}"))
+      )
     })
     
     
