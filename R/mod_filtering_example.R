@@ -92,7 +92,11 @@ mod_filtering_example_server <- function(
     observeEvent(input$Preview_btn, {
       showModal(shinyjqui::draggableModalDialog(
         id = ns('example_modal'),
-        DT::DTOutput(ns("example_tab_filtered"))
+        DT::DTOutput(ns("example_tab_filtered")),
+        easyClose = TRUE,
+        footer = tagList(
+          modalButton("Fermer")
+        )
       ))
 
     })

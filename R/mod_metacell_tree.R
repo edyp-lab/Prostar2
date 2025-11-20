@@ -52,10 +52,6 @@ mod_metacell_tree_ui <- function(id) {
             # p('Select tags'),
             tags$img(src = "images/ds_metacell.png", height = "50px")
           )
-        ),
-        shinyBS::bsTooltip(ns("openModalBtn"), "Click to open tags selection tool",
-          "right",
-          options = list(container = "body")
         )
       ),
       column(width = 6, uiOutput(ns("selectedNodes")))
@@ -133,15 +129,56 @@ mod_metacell_tree_server <- function(
       gsub("#bg-color#", rv$bg_colors[name], .style)
     }
 
-    output$modaltree <- renderUI({
-      tagList(
-        shinyjs::inlineCSS(css),
-        tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
-        tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
-        shinyBS::bsModal(ns("modalExample"),
+    # output$modaltree2 <- renderUI({
+    #   tagList(
+    #     shinyjs::inlineCSS(css),
+    #     tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
+    #     tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
+    #     shinyBS::bsModal(ns("modalExample"),
+    #       title = "",
+    #       trigger = ns("openModalBtn"),
+    #       size = "large",
+    #       div(
+    #         div(
+    #           style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
+    #           p("To get help about the organization of those tags, please refer to the FAQ"),
+    #           radioButtons(ns("checkbox_mode"), "",
+    #             choices = c(
+    #               "Single selection" = "single",
+    #               "Complete subtree" = "subtree",
+    #               "Multiple selection" = "multiple"
+    #             ),
+    #             width = "150px"
+    #           )
+    #         ),
+    #         div(
+    #           style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
+    #           actionButton(ns("cleartree"), "Clear"),
+    #           actionButton(ns("validatetree"), "Validate & close", class = "btn-success")
+    #         )
+    #       ),
+    #       uiOutput(ns("tree"))
+    #     )
+    #   )
+    # })
+
+# 
+    observeEvent(input$openModalBtn, {
+      
+      #browser()
+      req(dataIn())
+
+
+    #observeEvent(input$openModalBtn, {
+    #output$modaltree <- renderUI({
+      showModal(modalDialog(
+          ns("modalExample"),
           title = "",
-          trigger = ns("openModalBtn"),
-          size = "large",
+          size = "l",
+        tagList(
+          shinyjs::inlineCSS(css),
+          tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
+          tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
           div(
             div(
               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
@@ -164,47 +201,8 @@ mod_metacell_tree_server <- function(
           uiOutput(ns("tree"))
         )
       )
+      )
     })
-
-# 
-#     observeEvent(input$openModalBtn, {
-#       req(dataIn())
-#       
-#   
-#     #observeEvent(input$openModalBtn, {
-#     #output$modaltree <- renderUI({
-#       showModal(modalDialog(
-#           ns("modalExample"),
-#           title = "",
-#           size = "l",
-#         tagList(
-#           shinyjs::inlineCSS(css),
-#           tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
-#           tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
-#           div(
-#             div(
-#               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
-#               p("To get help about the organization of those tags, please refer to the FAQ"),
-#               radioButtons(ns("checkbox_mode"), "",
-#                 choices = c(
-#                   "Single selection" = "single",
-#                   "Complete subtree" = "subtree",
-#                   "Multiple selection" = "multiple"
-#                 ),
-#                 width = "150px"
-#               )
-#             ),
-#             div(
-#               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
-#               actionButton(ns("cleartree"), "Clear"),
-#               actionButton(ns("validatetree"), "Validate & close", class = "btn-success")
-#             )
-#           ),
-#           uiOutput(ns("tree"))
-#         )
-#       )
-#       )
-#     })
     
     
     
@@ -335,7 +333,7 @@ mod_metacell_tree_server <- function(
     # Define tree for protein dataset
     output$metacell_tree_protein <- renderUI({
       req(dataIn())
-      nb <- GetNbTags(dataIn())
+      nb <- DaparToolshed::GetNbTags(dataIn())
       pourcentages <- round(100 * nb / sum(nb), digits = 1)
 
       div(

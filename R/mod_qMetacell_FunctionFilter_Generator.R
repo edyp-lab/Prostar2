@@ -83,7 +83,7 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
 #'
 mod_qMetacell_FunctionFilter_Generator_server <- function(
     id,
-    dataIn,
+    dataIn = reactive({NULL}),
     conds,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
     val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
@@ -197,26 +197,36 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     #   rv$dataIn <- obj()
     # })
 
-    observeEvent(dataIn(), ignoreNULL = FALSE, {
-        req(inherits(dataIn(), "QFeatures"))
+    observeEvent(req(dataIn()), ignoreNULL = FALSE, {
+      #browser()
+      
+      req(inherits(dataIn(), "QFeatures"))
         rv$dataIn <- dataIn()
+        
+        rv.custom$tmp.tags <- mod_metacell_tree_server("tree",
+          dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+          remoteReset = reactive({remoteReset()}),
+          is.enabled = reactive({is.enabled()})
+        )
       },
       priority = 1000
     )
 
 
     output$tree_UI <- renderUI({
-      #req(rv$dataIn)
       widget <- mod_metacell_tree_ui(ns("tree"))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
 
-
-    rv.custom$tmp.tags <- mod_metacell_tree_server("tree",
-      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({is.enabled()})
-    )
+# observe({
+#   req(rv$dataIn)
+#   rv.custom$tmp.tags <- mod_metacell_tree_server("tree",
+#     dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+#     remoteReset = reactive({remoteReset()}),
+#     is.enabled = reactive({is.enabled()})
+#   )
+# })
+    
 
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       rv.widgets$tag <- rv.custom$tmp.tags()$values
