@@ -1729,7 +1729,7 @@ sessionInfo()
 #> [1] BiocStyle_2.38.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] digest_0.6.38       desc_1.4.3          R6_2.6.1           
+#>  [1] digest_0.6.39       desc_1.4.3          R6_2.6.1           
 #>  [4] bookdown_0.45       fastmap_1.2.0       xfun_0.54          
 #>  [7] cachem_1.1.0        knitr_1.50          htmltools_0.5.8.1  
 #> [10] rmarkdown_2.30      lifecycle_1.0.4     cli_3.6.5          
