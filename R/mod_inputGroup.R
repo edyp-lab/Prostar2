@@ -59,7 +59,6 @@ mod_inputGroup_server <- function(
     is.enabled = reactive({
       TRUE
     })) {
-  requireNamespace("shinyBS")
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

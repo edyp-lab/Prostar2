@@ -22,7 +22,6 @@
 #' library(omXplore)
 #' library(shiny)
 #' library(waiter)
-#' library(shinyBS)
 #' library(shinydashboard)
 #' library(shinydashboardPlus)
 #' library(highcharter)

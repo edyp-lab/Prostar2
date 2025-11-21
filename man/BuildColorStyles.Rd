@@ -4,7 +4,7 @@
 \alias{BuildColorStyles}
 \title{xxxx}
 \usage{
-BuildColorStyles(obj.se)
+BuildColorStyles(typeDataset)
 }
 \arguments{
 \item{obj.se}{xx}

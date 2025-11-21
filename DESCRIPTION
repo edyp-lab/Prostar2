@@ -15,7 +15,6 @@ Imports:
     shiny,
     DT,
     shinyjs,
-    shinyBS,
     highcharter,
     MagellanNTK,
     DaparToolshed,

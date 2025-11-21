@@ -21,7 +21,6 @@
 #' @examples
 #' if (interactive()){
 #' library(Prostar2)
-#' library(shinyBS)
 #' library(shiny)
 #' library(DT)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -39,7 +38,6 @@ NULL
 
 
 #' @rdname filtering-example
-#' @importFrom shinyBS bsModal
 #' @importFrom shiny NS actionLink tagList radioButtons uiOutput
 #' @importFrom DT dataTableOutput renderDataTable datatable formatStyle styleEqual
 #' @importFrom stats setNames
@@ -59,7 +57,6 @@ mod_filtering_example_ui <- function(id) {
 
 
 #' @rdname filtering-example
-#' @importFrom shinyBS bsModal
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual renderDT DTOutput
 #' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
 #' @importFrom DaparToolshed typeDataset
@@ -216,7 +213,6 @@ mod_filtering_example_server <- function(
 
 
 #' @rdname filtering-example
-#' @importFrom shinyBS bsModal
 #' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
 #' @importFrom DT renderDataTable datatable formatStyle styleEqual
 #' @export

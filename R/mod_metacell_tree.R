@@ -29,7 +29,6 @@ NULL
 
 
 
-#' @import shinyBS
 #' @import highcharter
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
@@ -63,7 +62,6 @@ mod_metacell_tree_ui <- function(id) {
 
 
 
-#' @import shinyBS
 #' @import highcharter
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
 #' @importFrom stats setNames

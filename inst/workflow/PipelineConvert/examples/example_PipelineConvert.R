@@ -1,6 +1,5 @@
 
 library(shiny)
-library(shinyBS)
 library(shinydashboard)
 library(shinydashboardPlus)
 library(MagellanNTK)
