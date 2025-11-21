@@ -413,7 +413,8 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn1),assays(dataIn()))) 
+      if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn1),
+        SummarizedExperiment::assays(dataIn()))) 
         || !("qMetacellFiltering" %in% names(rv.custom$dataIn1)))
         info(btnVentsMasg)
       else {
