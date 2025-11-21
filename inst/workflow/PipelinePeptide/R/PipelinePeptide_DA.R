@@ -233,7 +233,7 @@ PipelinePeptide_DA_server <- function(id,
       rv$dataIn <- dataIn()
       
       # Adds an assay to work on
-      rv$dataIn <- addAssay(
+      rv$dataIn <- QFeatures::addAssay(
         rv$dataIn, 
         rv$dataIn[[length(rv$dataIn)]], 
         'DA')

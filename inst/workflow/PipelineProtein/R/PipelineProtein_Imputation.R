@@ -489,7 +489,7 @@ PipelineProtein_Imputation_server <- function(id,
       #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
       #includeCSS(path)
       
-      browser()
+      #browser()
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
@@ -777,7 +777,8 @@ PipelineProtein_Imputation_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-        if (isTRUE(all.equal(assays(rv$dataIn),assays(rv.custom$dataIn2))))
+        if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
+          SummarizedExperiment::assays(rv.custom$dataIn2))))
           info(btnVentsMasg)
         else {
           # Do some stuff
@@ -788,7 +789,7 @@ PipelineProtein_Imputation_server <- function(id,
           req(len_diff > 0)
           
           if (len_diff == 2)
-            rv.custom$dataIn2 <- removeAssay(rv.custom$dataIn2, 
+            rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
               length(rv.custom$dataIn2) - 1)
           
           

@@ -508,7 +508,7 @@ mod_Prot_Normalization_server <- function(
         SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
         DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
-        rv$dataIn <- addAssay(rv$dataIn, new.dataset, "Normalization")
+        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, "Normalization")
       }
 
       # DO NOT MODIFY THE THREE FOLLOWING LINES

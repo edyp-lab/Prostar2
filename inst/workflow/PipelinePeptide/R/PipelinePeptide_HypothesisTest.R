@@ -642,7 +642,7 @@ PipelinePeptide_HypothesisTest_server <- function(id,
       
       paramshistory(new.dataset) <- rv.custom$history
       
-      rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
+      rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

@@ -231,7 +231,7 @@ PipelineProtein_DA_server <- function(id,
       rv$dataIn <- dataIn()
       
       # Adds an assay to work on
-      rv$dataIn <- addAssay(
+      rv$dataIn <- QFeatures::addAssay(
         rv$dataIn, 
         rv$dataIn[[length(rv$dataIn)]], 
         'DA')
@@ -1388,7 +1388,7 @@ PipelineProtein_DA_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
         

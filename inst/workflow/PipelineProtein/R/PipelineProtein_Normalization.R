@@ -532,7 +532,7 @@ PipelineProtein_Normalization_server <- function(id,
         shiny::incProgress(0.5)
         print(paste0(id, ' : shiny::withProgress(message = paste0("Saving process", id), {'))
         #browser()
-        if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+        if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # Do some stuff

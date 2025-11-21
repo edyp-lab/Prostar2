@@ -357,7 +357,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(len_diff > 0)
       
       if (len_diff == 2)
-        rv.custom$dataIn1 <- removeAssay(tmp, length(tmp)-1)
+        rv.custom$dataIn1 <- QFeatures::removeAssay(tmp, length(tmp)-1)
       else
         rv.custom$dataIn1 <- tmp
       
@@ -413,7 +413,7 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if ( isTRUE(all.equal(assays(rv.custom$dataIn1),assays(dataIn()))) 
+      if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn1),assays(dataIn()))) 
         || !("qMetacellFiltering" %in% names(rv.custom$dataIn1)))
         info(btnVentsMasg)
       else {
@@ -739,7 +739,7 @@ PipelineProtein_Filtering_server <- function(id,
         req(len_diff > 0)
         
         if (len_diff == 2)
-          rv.custom$dataIn2 <- removeAssay(tmp, length(tmp)-1)
+          rv.custom$dataIn2 <- QFeatures::removeAssay(tmp, length(tmp)-1)
         else 
           rv.custom$dataIn2 <- tmp
         
@@ -764,7 +764,7 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if ( isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))) 
+      if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),assays(dataIn()))) 
           || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
         info(btnVentsMasg)
       else {
@@ -805,7 +805,7 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
 
-      if (isTRUE(all.equal(assays(rv.custom$dataIn2),assays(dataIn()))))
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # Rename the new dataset with the name of the process

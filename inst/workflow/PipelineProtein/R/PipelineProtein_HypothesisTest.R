@@ -539,7 +539,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
       
         paramshistory(new.dataset) <- rv.custom$history
-        rv$dataIn <- addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
+        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
 
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
@@ -614,7 +614,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         # Do some stuff
-      if (isTRUE(all.equal(assays(rv$dataIn),assays(dataIn()))))
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # DO NOT MODIFY THE THREE FOLLOWING LINES
