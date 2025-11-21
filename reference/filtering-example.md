@@ -12,7 +12,9 @@ mod_filtering_example_server(
   dataIn = reactive({
      NULL
  }),
-  indices = NULL,
+  indices = reactive({
+     NULL
+ }),
   operation = "keep",
   title = "myTitle",
   remoteReset = reactive({
@@ -76,7 +78,6 @@ NA
 ``` r
 if (interactive()){
 library(Prostar2)
-library(shinyBS)
 library(shiny)
 library(DT)
 data(Exp1_R25_prot, package = "DaparToolshedData")

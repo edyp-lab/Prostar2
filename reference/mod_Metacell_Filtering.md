@@ -82,7 +82,6 @@ As for all modules used with `MagellanNTK`, the return value is a
 ``` r
 if (interactive()){
 library(Prostar2)
-library(shinyBS)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(mod_Metacell_Filtering(Exp1_R25_prot, 1))
 

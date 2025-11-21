@@ -11,7 +11,9 @@ mod_qMetacell_FunctionFilter_Generator_ui(id)
 
 mod_qMetacell_FunctionFilter_Generator_server(
   id,
-  dataIn,
+  dataIn = reactive({
+     NULL
+ }),
   conds,
   keep_vs_remove = reactive({
      setNames(nm = c("delete", "keep"))
@@ -107,10 +109,9 @@ As for all modules used with `MagellanNTK`, the return value is a
 ``` r
 if (interactive()){
 library(DaparToolshed)
-library(shinyBS)
 library(SummarizedExperiment)
 data(Exp1_R25_prot, package = "DaparToolshedData")
-obj <- Exp1_R25_prot[[1]]
+obj <- Exp1_R25_prot
 conds <- colData(Exp1_R25_prot)$Condition
 
 shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))

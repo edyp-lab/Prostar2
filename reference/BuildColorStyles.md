@@ -5,7 +5,7 @@ xxxx
 ## Usage
 
 ``` r
-BuildColorStyles(obj.se)
+BuildColorStyles(typeDataset)
 ```
 
 ## Arguments

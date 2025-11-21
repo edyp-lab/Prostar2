@@ -54,8 +54,8 @@ NA
 
 ``` r
 if (interactive()){
-data(Exp1_R25_pept, package = "DaparToolshedData")
-shiny::runApp(mod_metacell_tree(Exp1_R25_pept[[1]]))
+data(Exp1_R25_prot, package = "DaparToolshedData")
+shiny::runApp(mod_metacell_tree(dataIn = Exp1_R25_prot[[1]]))
 
 data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(mod_metacell_tree(Exp1_R25_prot[[1]]))
