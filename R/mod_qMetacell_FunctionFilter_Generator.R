@@ -197,13 +197,12 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     # })
 
     observeEvent(req(dataIn()), ignoreNULL = FALSE, {
-      #browser()
       
-      req(inherits(dataIn(), "QFeatures"))
+      req(inherits(dataIn(), "SummarizedExperiment"))
         rv$dataIn <- dataIn()
         
         rv.custom$tmp.tags <- mod_metacell_tree_server("tree",
-          dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+          dataIn = reactive({rv$dataIn}),
           remoteReset = reactive({remoteReset()}),
           is.enabled = reactive({is.enabled()})
         )
@@ -323,7 +322,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       widget <- selectInput(ns("valueTh"),
         MagellanNTK::mod_popover_for_help_ui(ns("value_th_help")),
         choices = getListNbValuesInLines(
-          object = rv$dataIn[[length(rv$dataIn)]],
+          object = rv$dataIn,
           conds = conds(),
           type = rv.widgets$scope
         ),
@@ -474,15 +473,24 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     GuessIndices <- reactive({
       req(rv.custom$ll.fun)
 
+    design.se <- data.frame(
+      quantCols = colnames(rv$dataIn), 
+      Condition = conds())
+    rownames(design.se) <- colnames(rv$dataIn)
+      tmp.se <- DaparToolshed::QFeaturesFromSE(
+        obj.se = rv$dataIn, 
+        colData = design.se, 
+        name = 'myname')
+  
       tmp <- filterFeaturesOneSE(
-        object = rv$dataIn,
-        i = length(rv$dataIn),
+        object = tmp.se,
+        i = length(tmp.se),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$ll.fun
       )
 
-      assaybefore <- assay(tmp[[length(tmp)-1]])
-      assayafter <- assay(tmp[[length(tmp)]])
+      assaybefore <- SummarizedExperiment::assay(tmp[[length(tmp)-1]])
+      assayafter <- SummarizedExperiment::assay(tmp[[length(tmp)]])
       namesbefore <- rownames(assaybefore)
       namesafter <- rownames(assayafter)
 
@@ -507,7 +515,7 @@ indices
       req(GuessIndices())
       req(BuildFunctionFilter())
       mod_filtering_example_server(id = "preview_filtering_query_result",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+        dataIn = reactive({rv$dataIn}),
         indices = reactive({GuessIndices()}),
         operation = reactive({list(BuildFunctionFilter())[[1]]@params$cmd}),
         title = reactive({WriteQuery()}),
@@ -572,7 +580,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
 
   server <- function(input, output, session) {
     res <- mod_qMetacell_FunctionFilter_Generator_server("query",
-      dataIn = reactive({obj}),
+      dataIn = reactive({obj[[length(obj)]]}),
       conds = reactive({conds}),
       keep_vs_remove = reactive({keep_vs_remove}),
       val_vs_percent = reactive({val_vs_percent}),

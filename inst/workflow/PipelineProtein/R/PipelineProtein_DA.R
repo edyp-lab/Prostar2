@@ -259,6 +259,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     Get_Dataset_to_Analyze <- reactive({
+      #browser()
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
       datasetToAnalyze <- NULL
       print('In Get_Dataset_to_Analyze()......')
@@ -277,7 +278,54 @@ PipelineProtein_DA_server <- function(id,
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
         ind_virtual_cond2 <- which(.conds != condition1)
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
-        #colData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
+      } else {
+        ind <- c(
+          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
+          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
+        )
+        
+        
+        # Reduce the size of the variable to be used in volcanoplot
+        # One need the quantitative
+        datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]][, ind]
+      }
+      
+      .logfc <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')
+      .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
+      
+      rv.custom$resAnaDiff <- list(
+        logFC = (rv.custom$res_AllPairwiseComparisons)[, .logfc],
+        P_Value = (rv.custom$res_AllPairwiseComparisons)[, .pval],
+        condition1 = rv.custom$Condition1,
+        condition2 = rv.custom$Condition2
+      )
+      
+      datasetToAnalyze
+    })
+    
+    
+    
+    
+    Get_Dataset_to_Analyze_pushPVAL <- reactive({
+      #browser()
+      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+      datasetToAnalyze <- NULL
+      print('In Get_Dataset_to_Analyze()......')
+      .split <- strsplit(
+        as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
+      )
+      rv.custom$Condition1 <- .split[[1]][1]
+      rv.custom$Condition2 <- .split[[1]][2]
+      
+      rv.custom$filename <- paste0("anaDiff_", rv.custom$Condition1,
+        "_vs_", rv.custom$Condition2, ".xlsx")
+      
+      
+      if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
+        .conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
+        condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
+        ind_virtual_cond2 <- which(.conds != condition1)
+        datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
       } else {
         ind <- c(
           which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
@@ -330,7 +378,7 @@ PipelineProtein_DA_server <- function(id,
           #timeline_process_ui(ns('Pairwisecomparison_timeline')),
           tags$div(
             uiOutput(ns('Pairwisecomparison_Comparison_UI')),
-            uiOutput(ns("pushpval_UI"))
+            uiOutput(ns("Pairwisecomparison_pushpval_UI"))
           )
         ),
         content = div(
@@ -446,20 +494,7 @@ PipelineProtein_DA_server <- function(id,
     )
     
     
-    output$pushpval_UI <- renderUI({
-      req(rv.widgets$Pairwisecomparison_Comparison != "None")
-      
-      widget <- tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
-        div(
-          mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
-        )
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
-      
-      ##############################
-      
-    })
+ 
     
     
     
@@ -476,8 +511,12 @@ PipelineProtein_DA_server <- function(id,
     
     
     observe({
+      req(rv$steps.enabled["Pairwisecomparison"])
+      
+      
       req(rv$dataIn)
-      req(Get_Dataset_to_Analyze())
+      #req(Get_Dataset_to_Analyze_pushPVAL())
+      browser()
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
         dataIn = reactive({Get_Dataset_to_Analyze()}),
@@ -490,8 +529,18 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
+    output$Pairwisecomparison_pushpval_UI <- renderUI({
+      req(rv.widgets$Pairwisecomparison_Comparison != "None")
+      
+      widget <- tagList(
+        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
+        Prostar2::mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
+    })
     
-    observeEvent(req(rv.custom$AnaDiff_indices()$trigger),{
+    
+    observeEvent(req(length(rv.custom$AnaDiff_indices()$value$ll.fun) > 0),{
       .ind <- rv.custom$AnaDiff_indices()$value$ll.indices
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
       

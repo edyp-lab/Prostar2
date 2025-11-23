@@ -614,7 +614,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         # Do some stuff
-      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),assays(dataIn()))))
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
+        SummarizedExperiment::assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # DO NOT MODIFY THE THREE FOLLOWING LINES

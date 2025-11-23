@@ -247,8 +247,6 @@ mod_metacell_tree_server <- function(
       update_CB()
       updateRadioButtons(session, "checkbox_mode", selected = "single")
       rv$autoChanged <- FALSE
-      # dataOut$trigger <- as.numeric(Sys.time())
-      # dataOut$values <- NULL
     })
 
 
@@ -256,9 +254,7 @@ mod_metacell_tree_server <- function(
     # remove the modal. If not show another modal, but this time with a failure
     # message.
     observeEvent(input$validatetree, ignoreInit = FALSE, ignoreNULL = TRUE, {
-      shinyjs::runjs(sprintf("$('#%s').modal('hide');", ns("modalExample")))
-      # toggleModal(session, modalId = "modalExample", toggle = "toggle")
-
+      removeModal(session)
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
     })

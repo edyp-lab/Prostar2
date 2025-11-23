@@ -273,7 +273,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
-        dataIn = reactive({rv$dataIn}),
+        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
@@ -569,7 +569,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(cname != "None")
       req(Extract_Value(value))
       
-      VariableFilter(
+      QFeatures::VariableFilter(
         field = cname,
         value = Extract_Value(value),
         condition = operator,
@@ -623,8 +623,8 @@ PipelineProtein_Filtering_server <- function(id,
         filters = rv.custom$Variablefiltering_funFilter$ll.var
       )
       
-      assaybefore <- assay(tmp[[length(tmp)-1]])
-      assayafter <- assay(tmp[[length(tmp)]])
+      assaybefore <- SummarizedExperiment::assay(tmp[[length(tmp)-1]])
+      assayafter <- SummarizedExperiment::assay(tmp[[length(tmp)]])
       namesbefore <- rownames(assaybefore)
       namesafter <- rownames(assayafter)
       
@@ -765,7 +765,8 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),assays(dataIn()))) 
+      if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
+        SummarizedExperiment::assays(dataIn()))) 
           || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
         info(btnVentsMasg)
       else {
@@ -806,7 +807,8 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
 
-      if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),assays(dataIn()))))
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
+        SummarizedExperiment::assays(dataIn()))))
         info(btnVentsMasg)
       else {
       # Rename the new dataset with the name of the process
