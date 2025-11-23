@@ -414,9 +414,9 @@ updated.
     tmp <- rv.process$dataIn[[rv.process$widgets$assay]]
     
     switch (rv.process$widgets$operator,
-            addition = assay(tmp) <- assay(tmp) + rv.process$widgets$operand,
-            soustraction = assay(tmp) <- assay(tmp) - rv.process$widgets$operand,
-            product = assay(tmp) <- assay(tmp) * rv.process$widgets$operand
+            addition = SummarizedExperiment::assay(tmp) <- SummarizedExperiment::assay(tmp) + rv.process$widgets$operand,
+            soustraction = SummarizedExperiment::assay(tmp) <- SummarizedExperiment::assay(tmp) - rv.process$widgets$operand,
+            product = SummarizedExperiment::assay(tmp) <- SummarizedExperiment::assay(tmp) * rv.process$widgets$operand
     )
    
     rv.process$dataIn <- QFeatures::addAssay(rv.process$dataIn,
