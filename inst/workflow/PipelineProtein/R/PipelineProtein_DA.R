@@ -491,7 +491,6 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(req(length(rv.custom$AnaDiff_indices()$value$ll.fun) > 0),{
       
-      browser()
       .ind <- unlist(rv.custom$AnaDiff_indices()$value$ll.indices)
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
       
