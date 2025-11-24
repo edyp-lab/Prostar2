@@ -76,6 +76,7 @@ mod_filtering_example_server <- function(
 
 
     observeEvent(req(showModal()), {
+
       shiny::showModal(shinyjqui::draggableModalDialog(
         id = ns('example_modal'),
         DT::DTOutput(ns("example_tab_filtered")),
@@ -126,7 +127,7 @@ mod_filtering_example_server <- function(
     }
 
       output$example_tab_filtered <- DT::renderDT({
-        browser()
+
       df <- omXplore::Build_enriched_qdata(dataIn())
       is.enriched <- !isTRUE(all.equal(dataIn(), df))
       colors <- omXplore::custom_metacell_colors()

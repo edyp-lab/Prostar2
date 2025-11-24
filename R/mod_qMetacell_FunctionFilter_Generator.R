@@ -206,14 +206,14 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       rv.widgets$tag <- rv.custom$tmp.tags()$values
-      dataOut$trigger <- as.numeric(Sys.time())
-      dataOut$value <- list(
-        ll.fun = NULL,
-        ll.query = NULL,
-        ll.widgets.value = NULL,
-        ll.pattern = rv.widgets$tag,
-        ll.indices = NULL
-      )
+      # dataOut$trigger <- as.numeric(Sys.time())
+      # dataOut$value <- list(
+      #   ll.fun = NULL,
+      #   ll.query = NULL,
+      #   ll.widgets.value = NULL,
+      #   ll.pattern = rv.widgets$tag,
+      #   ll.indices = NULL
+      # )
     })
 
 
@@ -526,6 +526,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     }
 
     output$Preview_UI <- renderUI({
+      
       tagList(
         mod_filtering_example_ui(ns("preview_filtering_query_result")),
         actionButton(ns("Preview_btn"), "Preview",
@@ -563,15 +564,12 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
 
     observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
+      rv.custom$showmodal <- NULL
+      GetIndicesAndFunction()
       req(rv.custom$ll.fun)
       req(rv.custom$ll.query)
       req(rv.custom$ll.widgets.value)
       
-      GetIndicesAndFunction()
-      
-      
-      #browser()
-      #rv.custom$indices <- GuessIndices()
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(
