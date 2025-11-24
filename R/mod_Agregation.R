@@ -247,7 +247,7 @@ mod_Agregation_server <- function(
       )
 
       ll.filters <- list()
-      rv$dataIn <- filterFeaturesOneSE(
+      rv$dataIn <- DaparToolshed::filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = "adjMatfiltered",

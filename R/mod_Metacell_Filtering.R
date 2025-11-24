@@ -223,7 +223,7 @@ mod_Metacell_Filtering_server <- function(
       req(rv$dataIn)
       shiny::withProgress(message = paste0("Filtering", id), {
         shiny::incProgress(0.5)
-      tmp <- filterFeaturesOneSE(
+      tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv$dataIn,
         i = length(rv$dataIn),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),

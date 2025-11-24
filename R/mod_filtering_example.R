@@ -47,10 +47,7 @@ NULL
 mod_filtering_example_ui <- function(id) {
   ns <- NS(id)
 
-  tagList(
-    uiOutput(ns("Preview_btn_UI")),
-    uiOutput(ns('toto'))
-  )
+  tagList()
 }
 
 
@@ -67,6 +64,7 @@ mod_filtering_example_server <- function(
     id,
     dataIn = reactive({NULL}),
     indices = reactive({NULL}),
+    showModal = reactive({NULL}),
     operation = "keep",
     title = "myTitle",
     remoteReset = reactive({0}),
@@ -74,20 +72,11 @@ mod_filtering_example_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pkgs.require('magrittr')
+    #pkgs.require('magrittr')
 
 
-    output$Preview_btn_UI <- renderUI({
-      widget <- actionButton(ns("Preview_btn"), "Preview",
-        class = "btn-info"
-      )
-      #MagellanNTK::toggleWidget(widget, TRUE)
-      widget
-    })
-    
-    
-    observeEvent(input$Preview_btn, {
-      showModal(shinyjqui::draggableModalDialog(
+    observeEvent(req(showModal()), {
+      shiny::showModal(shinyjqui::draggableModalDialog(
         id = ns('example_modal'),
         DT::DTOutput(ns("example_tab_filtered")),
         easyClose = TRUE,
@@ -136,8 +125,8 @@ mod_filtering_example_server <- function(
       return(ColorsHexDark)
     }
 
-      output$example_tab_filtered <- DT::renderDT   ({
-        
+      output$example_tab_filtered <- DT::renderDT({
+        browser()
       df <- omXplore::Build_enriched_qdata(dataIn())
       is.enriched <- !isTRUE(all.equal(dataIn(), df))
       colors <- omXplore::custom_metacell_colors()
@@ -195,7 +184,7 @@ mod_filtering_example_server <- function(
 
 
       if (is.enriched) {
-        dt <- dt %>%
+        dt <- dt |>
           DT::formatStyle(
             colnames(df)[2:(((ncol(df) - 1) / 2) + 1)],
             colnames(df)[range.invisible],
@@ -224,18 +213,43 @@ mod_filtering_example <- function(
     title = "myTitle") {
   ui <- fluidPage(
     tagList(
-          mod_filtering_example_ui("tree")
+      uiOutput("Preview_UI")
     )
   )
 
   server <- function(input, output) {
 
-    mod_filtering_example_server("tree",
-      dataIn = reactive({obj}),
-      indices = reactive({indices}),
-      operation = reactive({operation}),
-      title = reactive({title})
+    
+    rv.custom <- reactiveValues(
+      showmodal = NULL,
+      indices = 1:4
     )
+    
+    observeEvent(input$Preview_btn, {
+      rv.custom$showmodal <- MagellanNTK::Timestamp()
+    })
+    
+    
+    mod_filtering_example_server(
+      id = "preview_filtering_query_result",
+      dataIn = reactive({obj}),
+      indices = reactive({rv.custom$indices}),
+      showModal = reactive({rv.custom$showmodal}),
+      operation = reactive({operation}),
+    title = reactive({title}),
+      remoteReset = reactive({NULL})
+    )
+    
+    
+    output$Preview_UI <- renderUI({
+      req(indices)
+      
+      tagList(
+        mod_filtering_example_ui("preview_filtering_query_result"),
+        actionButton("Preview_btn", "Preview"),
+        tags$head(tags$style(" .modal-content{ width: 1000px;}"))
+      )
+    })
   }
 
   app <- shiny::shinyApp(ui = ui, server = server)

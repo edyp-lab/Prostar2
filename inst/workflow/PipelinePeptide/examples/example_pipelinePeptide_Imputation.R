@@ -12,8 +12,8 @@ data(Exp1_R25_pept, package = "DaparToolshedData")
 obj <- Exp1_R25_pept
 shiny::runApp(workflowApp("PipelinePeptide_Imputation", path, dataIn = obj))
 
-filter <- FunctionFilter('qMetacellWholeLine', cmd = 'delete', pattern = c("Missing","Missing POV", "Missing MEC"))
-tmp <- filterFeaturesOneSE(obj, 2, 'test', list(filter))
+filter <- DaparToolshed::FunctionFilter('qMetacellWholeLine', cmd = 'delete', pattern = c("Missing","Missing POV", "Missing MEC"))
+tmp <- DaparToolshed::filterFeaturesOneSE(obj, 2, 'test', list(filter))
 shiny::runApp(workflowApp("PipelinePeptide_Imputation", path, dataIn = tmp))
 
 

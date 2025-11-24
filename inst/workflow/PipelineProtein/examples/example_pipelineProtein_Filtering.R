@@ -5,6 +5,7 @@ library(shinydashboardPlus)
 library(highcharter)
 library(MagellanNTK)
 library(Prostar2)
+library(DaparToolshed)
 
 options(shiny.fullstacktrace = TRUE)
 
@@ -15,7 +16,7 @@ wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
 
 
 # Launch in a standalone mode
-shiny::runApp(workflowApp(wf.name, wf.path, dataIn = obj))
+shiny::runApp(proc_workflowApp(wf.name, wf.path, dataIn = obj))
 
 
 # Launch in the Magellan workspace

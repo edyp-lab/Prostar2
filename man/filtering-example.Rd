@@ -17,6 +17,9 @@ mod_filtering_example_server(
   indices = reactive({
      NULL
  }),
+  showModal = reactive({
+     NULL
+ }),
   operation = "keep",
   title = "myTitle",
   remoteReset = reactive({

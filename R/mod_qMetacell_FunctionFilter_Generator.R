@@ -109,7 +109,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     widgets.value = list(),
     tmp.tags = reactive({
       NULL
-    })
+    }),
+    showmodal = NULL
   )
 
 
@@ -125,16 +126,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
-    # eval(
-    #     str2expression(
-    #         MagellanNTK::Get_AdditionalModule_Core_Code(
-    #             w.names = names(widgets.default.values),
-    #             rv.custom.names = names(rv.custom.default.values)
-    #         )
-    #     )
-    # )
-
 
     core <- paste0(
       MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
@@ -190,12 +181,12 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     )
 
 
-    # observeEvent(remoteReset(),{
-    #   #browser()
-    #   dataOut <- list()
-    #   rv$dataIn <- obj()
-    # })
-
+    
+    output$tree_UI <- renderUI({
+      widget <- mod_metacell_tree_ui(ns("tree"))
+      MagellanNTK::toggleWidget(widget, is.enabled())
+    })
+    
     observeEvent(req(dataIn()), ignoreNULL = FALSE, {
       
       req(inherits(dataIn(), "SummarizedExperiment"))
@@ -211,20 +202,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     )
 
 
-    output$tree_UI <- renderUI({
-      widget <- mod_metacell_tree_ui(ns("tree"))
-      MagellanNTK::toggleWidget(widget, is.enabled())
-    })
 
-# observe({
-#   req(rv$dataIn)
-#   rv.custom$tmp.tags <- mod_metacell_tree_server("tree",
-#     dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-#     remoteReset = reactive({remoteReset()}),
-#     is.enabled = reactive({is.enabled()})
-#   )
-# })
-    
 
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       rv.widgets$tag <- rv.custom$tmp.tags()$values
@@ -345,9 +323,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       )
       widget <- sliderInput(ns("percentTh"),
         MagellanNTK::mod_popover_for_help_ui(ns("percentTh_help")),
-        min = 0,
-        max = 100,
-        step = 1,
+        min = 0, max = 100, step = 1,
         value = rv.widgets$percentTh,
         width = "250px"
       )
@@ -406,7 +382,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
 
     output$qMetacellFilter_request_ui <- renderUI({
-      tags$p(paste("You are going to ", WriteQuery()),
+      tags$p(paste("You are about to ", WriteQuery()),
         style = "font-size: small; text-align : center; color: purple;"
       )
     })
@@ -418,17 +394,18 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         rv.widgets$percentThh <- 0
         rv.widgets$valueTh <- 0
         rv.widgets$valPercent <- "Percentage"
-      },
-      priority = 1000
-    )
+      }, priority = 1000)
 
 
 
 
-    BuildFunctionFilter <- reactive({
+    GetIndicesAndFunction <- function(){
       req(rv$dataIn)
       req(rv.widgets$tag != "None")
       req(rv.widgets$scope != "None")
+
+      rv.custom$indices <- NULL
+      rv.custom$ll.fun <- NULL
 
       th <- switch(rv.widgets$valPercent,
         Percentage = rv.widgets$percentTh / 100,
@@ -436,27 +413,40 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       )
 
       ff <- switch(rv.widgets$scope,
-        WholeLine = FunctionFilter("qMetacellWholeLine",
+        WholeLine = {
+          req(rv.widgets$keep_vs_remove)
+          req(rv.widgets$tag != "None")
+          
+          DaparToolshed::FunctionFilter("qMetacellWholeLine",
           cmd = rv.widgets$keep_vs_remove,
-          pattern = rv.widgets$tag
-        ),
-        WholeMatrix = FunctionFilter("qMetacellWholeMatrix",
+          pattern = rv.widgets$tag)
+        }
+        ,
+        WholeMatrix = {
+          req(rv.widgets$keep_vs_remove)
+          req(rv.widgets$tag != "None")
+          req(rv.widgets$valPercent)
+          req(rv.widgets$operator != "None")
+          req(th)
+          
+          DaparToolshed::FunctionFilter("qMetacellWholeMatrix",
           cmd = rv.widgets$keep_vs_remove,
           pattern = rv.widgets$tag,
           percent = rv.widgets$valPercent,
           th = th,
           operator = rv.widgets$operator
-        ),
-        AllCond = FunctionFilter("qMetacellOnConditions",
-          cmd = rv.widgets$keep_vs_remove,
-          mode = rv.widgets$scope,
-          pattern = rv.widgets$tag,
-          conds = conds(),
-          percent = rv.widgets$valPercent,
-          th = th,
-          operator = rv.widgets$operator
-        ),
-        AtLeastOneCond = FunctionFilter("qMetacellOnConditions",
+        )
+          },
+        AllCond = {
+          req(rv.widgets$keep_vs_remove)
+          req(rv.widgets$tag != "None")
+          req(rv.widgets$scope != "None")
+          req(rv.widgets$operator != "None")
+          req(th)
+          req(rv.widgets$valPercent)
+          req(conds())
+          
+          DaparToolshed::FunctionFilter("qMetacellOnConditions",
           cmd = rv.widgets$keep_vs_remove,
           mode = rv.widgets$scope,
           pattern = rv.widgets$tag,
@@ -465,83 +455,123 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           th = th,
           operator = rv.widgets$operator
         )
+          },
+        AtLeastOneCond = {
+          req(rv.widgets$keep_vs_remove)
+          req(rv.widgets$tag != "None")
+          req(rv.widgets$scope != "None")
+          req(rv.widgets$operator != "None")
+          req(th)
+          req(rv.widgets$valPercent)
+          req(conds())
+          
+          DaparToolshed::FunctionFilter("qMetacellOnConditions",
+          cmd = rv.widgets$keep_vs_remove,
+          mode = rv.widgets$scope,
+          pattern = rv.widgets$tag,
+          conds = conds(),
+          percent = rv.widgets$valPercent,
+          th = th,
+          operator = rv.widgets$operator
+        )
+        }
       )
-      ff
-    })
+      
+      # store function filter
+      rv.custom$ll.fun <- ff
 
-
-    GuessIndices <- reactive({
-      req(rv.custom$ll.fun)
-
-    design.se <- data.frame(
-      quantCols = colnames(rv$dataIn), 
-      Condition = conds())
-    rownames(design.se) <- colnames(rv$dataIn)
+      # Build a temporary QFeatures SE to compute indices (protect against small n)
+      
+      design.se <- data.frame(
+        quantCols = colnames(rv$dataIn), 
+        Condition = conds())
+      rownames(design.se) <- colnames(rv$dataIn)
+      
       tmp.se <- DaparToolshed::QFeaturesFromSE(
         obj.se = rv$dataIn, 
         colData = design.se, 
         name = 'myname')
-  
-      tmp <- filterFeaturesOneSE(
+      
+      tmp <- DaparToolshed::filterFeaturesOneSE(
         object = tmp.se,
         i = length(tmp.se),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
-        filters = rv.custom$ll.fun
+        filters = list(rv.custom$ll.fun)
       )
 
-      assaybefore <- SummarizedExperiment::assay(tmp[[length(tmp)-1]])
-      assayafter <- SummarizedExperiment::assay(tmp[[length(tmp)]])
-      namesbefore <- rownames(assaybefore)
-      namesafter <- rownames(assayafter)
-
-
-      indices <- 1:length(namesafter)
-      if (rv.custom$ll.fun[[1]]@params$cmd == 'delete'){
-        diff <- setdiff(namesbefore, namesafter)
-        indices <- match(diff, namesbefore)
-      } else {
-        inter <- intersect(namesbefore, namesafter)
-        indices <- match(inter, namesbefore)
-      }
-indices
-    })
-
-    
-    
-    
-    
-    
-    output$Preview_UI <- renderUI({
-      req(GuessIndices())
-      req(BuildFunctionFilter())
-      mod_filtering_example_server(id = "preview_filtering_query_result",
-        dataIn = reactive({rv$dataIn}),
-        indices = reactive({GuessIndices()}),
-        operation = reactive({list(BuildFunctionFilter())[[1]]@params$cmd}),
-        title = reactive({WriteQuery()}),
-        remoteReset = reactive({input$Preview_btn})
-      )
+      # choose "before" and "after" assays robustly
+      assay_before <- SummarizedExperiment::assay(tmp[[1]])
+      assay_after <- SummarizedExperiment::assay(tmp[[2]])
       
+      names_before <- rownames(assay_before)
+      names_after <- rownames(assay_after)
+
+      #browser()
+      indices <- 1:length(names_after)
+      if (rv.custom$ll.fun@params$cmd == 'delete') {
+        diff <- setdiff(names_before, names_after)
+        indices <- match(diff, names_before)
+        indices <- indices[!is.na(indices)]
+      } else {
+        inter <- intersect(names_before, names_after)
+        indices <- match(inter, names_before)
+        indices <- indices[!is.na(indices)]
+      }
+      
+      
+      rv.custom$indices <- indices
+      #invisible(NULL)
+      
+      
+    }
+
+    output$Preview_UI <- renderUI({
       tagList(
         mod_filtering_example_ui(ns("preview_filtering_query_result")),
+        actionButton(ns("Preview_btn"), "Preview",
+          class = "btn-info"
+        ),
         tags$head(tags$style(" .modal-content{ width: 1000px;}"))
       )
     })
     
+    observeEvent(input$Preview_btn, ignoreInit = TRUE,{
+      
+      GetIndicesAndFunction()
+      rv.custom$showmodal <- MagellanNTK::Timestamp()
+  })
+    
+    observe({
+      req(rv.custom$indices)
+      req(rv.custom$ll.fun)
+      mod_filtering_example_server(id = "preview_filtering_query_result",
+        dataIn = reactive({rv$dataIn}),
+        indices = reactive({rv.custom$indices}),
+        showModal = reactive({rv.custom$showmodal}),
+        operation = reactive({list(rv.custom$ll.fun)[[1]]@params$cmd}),
+        title = reactive({WriteQuery()}),
+        remoteReset = reactive({remoteReset()})
+      )
+    })
+   
+    
 
-    observeEvent(c(BuildFunctionFilter(), WriteQuery(), reactiveValuesToList(rv.widgets)), {
-      rv.custom$ll.fun <- list(BuildFunctionFilter())
+    ## ---- Build-up reactive lists when function built --------------------
+    observeEvent(c(rv.custom$ll.fun, WriteQuery(), reactiveValuesToList(rv.widgets)), {
       rv.custom$ll.query <- list(WriteQuery())
       rv.custom$ll.widgets.value <- list(reactiveValuesToList(rv.widgets))
     })
-    
 
     observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
       req(rv.custom$ll.fun)
       req(rv.custom$ll.query)
       req(rv.custom$ll.widgets.value)
       
-      rv.custom$indices <- GuessIndices()
+      GetIndicesAndFunction()
+      
+      
+      #browser()
+      #rv.custom$indices <- GuessIndices()
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(

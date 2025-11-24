@@ -254,9 +254,10 @@ mod_metacell_tree_server <- function(
     # remove the modal. If not show another modal, but this time with a failure
     # message.
     observeEvent(input$validatetree, ignoreInit = FALSE, ignoreNULL = TRUE, {
-      removeModal(session)
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
+      removeModal(session)
+      
     })
 
 

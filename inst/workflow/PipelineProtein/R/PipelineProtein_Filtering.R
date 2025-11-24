@@ -78,6 +78,7 @@ PipelineProtein_Filtering_ui <- function(id){
 #' @rdname PipelineProtein
 #' 
 #' @importFrom stats setNames rnorm
+#' @importFrom shinyFeedback showFeedbackWarning hideFeedback
 #' 
 #' @export
 #' 
@@ -325,7 +326,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(rv.custom$dataIn1)
       
       
-      tmp <- filterFeaturesOneSE(
+      tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv.custom$dataIn1,
         i = length(rv.custom$dataIn1),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
@@ -527,12 +528,12 @@ PipelineProtein_Filtering_server <- function(id,
       req(rv.widgets$Variablefiltering_cname != "None")
       
       if (is.na(Extract_Value(rv.widgets$Variablefiltering_value))) {
-        showFeedbackWarning(
+        shinyFeedback::showFeedbackWarning(
           inputId = "Variablefiltering_value",
           text = "wrong type of value"
         )  
       } else {
-        hideFeedback("Variablefiltering_value")
+        shinyFeedback::hideFeedback("Variablefiltering_value")
       }
       
     })
@@ -616,7 +617,7 @@ PipelineProtein_Filtering_server <- function(id,
     GuessIndices <- reactive({
       req(rv.custom$Variablefiltering_funFilter)
 
-      tmp <- filterFeaturesOneSE(
+      tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv.custom$dataIn2,
         i = length(rv.custom$dataIn2),
         name = paste0("variableFiltered", MagellanNTK::Timestamp()),
@@ -709,7 +710,7 @@ PipelineProtein_Filtering_server <- function(id,
         #rv.custom$indices <- GuessIndices()
         
         
-        tmp <- filterFeaturesOneSE(
+        tmp <- DaparToolshed::filterFeaturesOneSE(
           object = rv.custom$dataIn2,
           i = length(rv.custom$dataIn2),
           name = paste0("variableFiltered", MagellanNTK::Timestamp()),
