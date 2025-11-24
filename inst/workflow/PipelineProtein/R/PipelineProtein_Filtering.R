@@ -324,15 +324,14 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE,{
       req(rv.custom$dataIn1)
-      
-      
+
       tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv.custom$dataIn1,
         i = length(rv.custom$dataIn1),
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$funFilter()$value$ll.fun
       )
-      indices <- rv.custom$funFilter()$value$ll.indices
+      #indices <- rv.custom$funFilter()$value$ll.indices
       
       
       # Add infos

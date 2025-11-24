@@ -573,11 +573,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       # Append a new FunctionFilter to the list
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$value <- list(
-        ll.fun = rv.custom$ll.fun,
+        ll.fun = list(rv.custom$ll.fun),
         ll.query = rv.custom$ll.query,
         ll.widgets.value = rv.custom$ll.widgets.value,
         ll.pattern = rv.widgets$tag,
-         ll.indices = rv.custom$indices
+         ll.indices = list(rv.custom$indices)
       )
     })
 
