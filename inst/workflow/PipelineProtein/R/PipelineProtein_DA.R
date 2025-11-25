@@ -463,9 +463,8 @@ PipelineProtein_DA_server <- function(id,
     
     observe({
       req(rv$steps.enabled["Pairwisecomparison"])
-      
-      
       req(rv$dataIn)
+      
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
@@ -545,7 +544,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      
+     
       req(grepl('Pairwisecomparison', btnEvents()))
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
@@ -587,18 +586,23 @@ PipelineProtein_DA_server <- function(id,
             paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
           )),
           fluidRow(
-            column(width = 6, fluidRow(style = "height:800px;",
+            column(width = 6,
+              fluidRow(
+              style = "height:800px;",
               imageOutput(ns("calibrationPlotAll"), height = "800px")
-            )),
-            column(width = 6, fluidRow(style = "height:400px;",
-              imageOutput(ns("calibrationPlot"), height = "400px")
+            )
             ),
-              fluidRow(style = "height:400px;", 
-                highcharter::highchartOutput(ns("histPValue")))
+            column(width = 6, 
+              fluidRow(style = "height:400px;",
+              imageOutput(ns("calibrationPlot"), height = "400px")
+            )),
+              fluidRow(style = "height:400px;",
+                highcharter::highchartOutput(ns("histPValue"))
+            )
             )
           )
         )
-      )
+  
       
       
     })
@@ -716,7 +720,7 @@ PipelineProtein_DA_server <- function(id,
     
     calibrationPlot <- reactive({
       #req(rv.widgets$Pvaluecalibration_calibrationMethod != "None")
-      
+
       req(rv.custom$resAnaDiff)
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
@@ -735,7 +739,7 @@ PipelineProtein_DA_server <- function(id,
         t <- t[-toDelete]
       }
       
-      
+   
       l <- NULL
       ll <- NULL
       result <- tryCatch(
@@ -781,6 +785,13 @@ PipelineProtein_DA_server <- function(id,
           # cleanup-code
         }
       )
+      
+      # # → Le plot doit être dans ll$value$plot (cas Prostar/DaparToolshed)
+      #  validate(
+      #   need(!is.null(ll$value$plot), "Aucun plot renvoyé par wrapperCalibrationPlot")
+      # )
+      # 
+      # return(ll$value$plot)
     })
     
     output$calibrationPlot <- renderImage(
@@ -801,8 +812,7 @@ PipelineProtein_DA_server <- function(id,
       deleteFile = TRUE
     )
     
-    
-    
+
     
     output$errMsgCalibrationPlot <- renderUI({
       req(rv.custom$errMsgCalibrationPlot)

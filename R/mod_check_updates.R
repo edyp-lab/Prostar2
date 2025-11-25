@@ -216,7 +216,7 @@ mod_checkUpdates_ui <- function(id) {
   ns <- NS(id)
   tagList(
     uiOutput(ns("baseVersions")),
-    DT::dataTableOutput(ns("tab_versions"), width = "600px"),
+    DT::DTOutput(ns("tab_versions"), width = "600px"),
     br(), br(),
     uiOutput(ns("infoForNewVersions"))
   )
@@ -230,7 +230,7 @@ mod_checkUpdates_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$tab_versions <- DT::renderDataTable(server = TRUE, {
+    output$tab_versions <- DT::renderDT(server = TRUE, {
       dt <- DT::datatable(getPackagesVersions(),
         escape = FALSE,
         rownames = FALSE,

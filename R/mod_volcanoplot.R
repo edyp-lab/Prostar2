@@ -71,7 +71,7 @@ NULL
 
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
-#' @importFrom DT dataTableOutput renderDataTable datatable formatStyle styleEqual
+#' @importFrom DT DTOutput renderDT datatable formatStyle styleEqual
 #' @importFrom highcharter highchartOutput
 #' @export
 #' @rdname volcanoplot
@@ -277,7 +277,7 @@ mod_volcanoplot_server <- function(
       data
     })
 
-    output$sharedPeptidesInfos <- DT::renderDataTable(server = TRUE, {
+    output$sharedPeptidesInfos <- DT::renderDT(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_sharedPeptidesInfos()
       c.tags <- BuildColorStyles(rv$dataIn)$tags
@@ -341,7 +341,7 @@ mod_volcanoplot_server <- function(
     })
 
 
-    output$specificPeptidesInfos <- DT::renderDataTable(server = TRUE, {
+    output$specificPeptidesInfos <- DT::renderDT(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_specificPeptidesInfos()
       c.tags <- BuildColorStyles(rv$dataIn)$tags
@@ -423,7 +423,7 @@ mod_volcanoplot_server <- function(
     })
 
     ## -------------------------------------------------------------
-    output$Infos <- DT::renderDataTable(server = TRUE, {
+    output$Infos <- DT::renderDT(server = TRUE, {
       req(rv$dataIn)
       borders_index <- GetBorderIndices()
       data <- GetExprsClickedProtein()

@@ -61,6 +61,7 @@ NULL
 mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    shinyjs::useShinyjs(),
     uiOutput(ns("tree_UI")),
     uiOutput(ns("chooseKeepRemove_ui")),
     uiOutput(ns("chooseScope_ui")),
@@ -183,7 +184,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
     
     output$tree_UI <- renderUI({
-      widget <- mod_metacell_tree_ui(ns("tree"))
+      widget <- div(mod_metacell_tree_ui(ns("tree")))
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
@@ -520,9 +521,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       
       
       rv.custom$indices <- indices
-      #invisible(NULL)
-      
-      
     }
 
     output$Preview_UI <- renderUI({

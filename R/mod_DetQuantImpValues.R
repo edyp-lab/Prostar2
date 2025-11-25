@@ -17,7 +17,7 @@
 #'
 #' @name mod_DetQuantImpValues
 #' 
-#' @importFrom DT dataTableOutput renderDataTable datatable
+#' @importFrom DT DTOutput renderDT datatable
 #'
 #' @examples
 #' if (interactive()){
@@ -38,7 +38,7 @@ mod_DetQuantImpValues_ui <- function(id) {
   ns <- NS(id)
   tagList(
     h5("The missing values will be imputed by the following values :"),
-    DT::dataTableOutput(ns("detQuantValues_DT"))
+    DT::DTOutput(ns("detQuantValues_DT"))
   )
 }
 
@@ -67,7 +67,7 @@ mod_DetQuantImpValues_server <- function(
 
     pkgs.require('omXplore')
     
-    output$detQuantValues_DT <- DT::renderDataTable(server = TRUE, {
+    output$detQuantValues_DT <- DT::renderDT(server = TRUE, {
       req(dataIn())
 
       values <- getQuantile4Imp(
