@@ -25,7 +25,7 @@ df <- cbind(limma$logFC, limma$P_Value)
 new.dataset <- obj[[length(obj)]]
 HypothesisTest(new.dataset) <- as.data.frame(df)
 history[['HypothesisTest_thlogFC']] <- as.numeric(1)
-paramshistory(new.dataset) <- history
+DaparToolshed::paramshistory(new.dataset) <- history
 
 
 obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')

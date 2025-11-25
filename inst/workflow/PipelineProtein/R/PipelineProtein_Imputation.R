@@ -358,7 +358,7 @@ PipelineProtein_Imputation_server <- function(id,
         info(btnVentsMasg)
       else {
         req(rv.widgets$POVImputation_algorithm != "None")
-        m <- match.metacell(
+        m <- DaparToolshed::match.metacell(
           DaparToolshed::qMetacell(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]),
           pattern = "Missing POV",
           level = DaparToolshed::typeDataset(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
@@ -378,9 +378,9 @@ PipelineProtein_Imputation_server <- function(id,
               slsa = {
                 incProgress(0.5, detail = "slsa Imputation")
                 
-                .tmp <- wrapper.impute.slsa(
+                .tmp <- DaparToolshed::wrapper.impute.slsa(
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
-                  design = design.qf(rv.custom$dataIn1))
+                  design = DaparToolshed::design.qf(rv.custom$dataIn1))
                 
                 .param <- list(
                   POVImputation_algorithm = rv.widgets$POVImputation_algorithm
@@ -388,7 +388,7 @@ PipelineProtein_Imputation_server <- function(id,
               },
               detQuantile = {
                 incProgress(0.5, detail = "det quantile Imputation")
-                .tmp <- wrapper.impute.detQuant(
+                .tmp <- DaparToolshed::wrapper.impute.detQuant(
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                   qval = rv.widgets$POVImputation_detQuant_quantile / 100,
                   factor = rv.widgets$POVImputation_detQuant_factor,
@@ -402,7 +402,7 @@ PipelineProtein_Imputation_server <- function(id,
               KNN = {
                 incProgress(0.5, detail = "KNN Imputation")
                 
-                .tmp <- wrapper.impute.KNN(
+                .tmp <- DaparToolshed::wrapper.impute.KNN(
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                   grp = DaparToolshed::design.qf(rv.custom$dataIn1)$Condition,
                   K = rv.widgets$POVImputation_KNN_n);
@@ -431,7 +431,7 @@ PipelineProtein_Imputation_server <- function(id,
             # incProgress(0.75, detail = 'Reintroduce MEC blocks')
             incProgress(1, detail = "Finalize POV imputation")
             
-            m <- match.metacell(DaparToolshed::qMetacell(.tmp),
+            m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(.tmp),
               pattern = "Missing POV",
               level = DaparToolshed::typeDataset(.tmp)
             )
@@ -448,7 +448,7 @@ PipelineProtein_Imputation_server <- function(id,
             .tmp,
             'POVImputation')
           
-          paramshistory(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]) <- .param
+          DaparToolshed::paramshistory(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]) <- .param
           
           
           # Add infos
@@ -467,7 +467,7 @@ PipelineProtein_Imputation_server <- function(id,
         
         
         .history <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]]
-        rv.custom$params.tmp[['Imputation']][['POVImputation']] <- paramshistory(.history)
+        rv.custom$params.tmp[['Imputation']][['POVImputation']] <- DaparToolshed::paramshistory(.history)
         
         
         rv.custom$dataIn2 <- rv.custom$dataIn1
@@ -638,7 +638,7 @@ PipelineProtein_Imputation_server <- function(id,
           withProgress(message = "", detail = "", value = 0, {
             incProgress(0.25, detail = "Reintroduce MEC")
             
-            m <- match.metacell(
+            m <- DaparToolshed::match.metacell(
               DaparToolshed::qMetacell(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]),
               pattern = "Missing MEC",
               level = DaparToolshed::typeDataset(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])
@@ -658,7 +658,7 @@ PipelineProtein_Imputation_server <- function(id,
                   
                   detQuantile = {
                     incProgress(0.5, detail = "det quantile Imputation")
-                    .tmp <- wrapper.impute.detQuant(
+                    .tmp <- DaparToolshed::wrapper.impute.detQuant(
                       obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
                       qval = rv.widgets$MECImputation_detQuant_quantile / 100,
                       factor = rv.widgets$MECImputation_detQuant_factor,
@@ -670,7 +670,7 @@ PipelineProtein_Imputation_server <- function(id,
                       na.type = 'Missing MEC')
                   },
                   fixedValue = {
-                    .tmp <- wrapper.impute.fixedValue(
+                    .tmp <- DaparToolshed::wrapper.impute.fixedValue(
                       obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
                       fixVal = rv.widgets$MECImputation_fixedValue,
                       na.type = "Missing MEC"
@@ -699,7 +699,7 @@ PipelineProtein_Imputation_server <- function(id,
                 incProgress(1, detail = "Finalize MEC imputation")
                 
                 
-                m <- match.metacell(DaparToolshed::qMetacell(.tmp),
+                m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(.tmp),
                   pattern = "Missing MEC",
                   level = DaparToolshed::typeDataset(.tmp)
                 )
@@ -714,10 +714,10 @@ PipelineProtein_Imputation_server <- function(id,
                 .tmp,
                 'MECImputation')
               
-              paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- .param # Do some stuff
+              DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- .param # Do some stuff
               
               .history <- rv.custom$dataIn2[[length(rv.custom$dataIn2)]]
-              rv.custom$params.tmp[['Imputation']][['MECImputation']] <- paramshistory(.history)
+              rv.custom$params.tmp[['Imputation']][['MECImputation']] <- DaparToolshed::paramshistory(.history)
               
               
               

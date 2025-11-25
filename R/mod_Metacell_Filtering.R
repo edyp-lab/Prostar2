@@ -172,7 +172,7 @@ mod_Metacell_Filtering_server <- function(
         id = "plots",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
-        group = reactive({design.qf(rv$dataIn)$Condition})
+        group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition})
       )
 
 
@@ -199,7 +199,7 @@ mod_Metacell_Filtering_server <- function(
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        conds = reactive({design.qf(rv$dataIn)$Condition}),
+        conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({
           stats::setNames(c("Push p-value", "Keep original p-value"), nm = c("delete", "keep"))
         }),

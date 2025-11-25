@@ -188,7 +188,7 @@ infos_dataset_server <- function(
 
       .se <- rv$dataIn[[input$selectInputSE]]
 
-      typeOfData <- typeDataset(.se)
+      typeOfData <- DaparToolshed::typeDataset(.se)
       nLines <- nrow(.se)
       .nNA <- QFeatures::nNA(.se)
       percentMV <- round(100 * .nNA$nNA[, "pNA"], digits = 2)
@@ -241,12 +241,12 @@ infos_dataset_server <- function(
       # .name <- names(rv$dataIn)
       se_history <- "-"
 
-      if (!is.null(paramshistory(.se))) {
-        se_history <- lapply(paramshistory(.se), function(x) {
+      if (!is.null(DaparToolshed::paramshistory(.se))) {
+        se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
           ConvertListToHtml(paste0(names(x), " = ", x))
         })
 
-        # se_history_values <- lapply(paramshistory(.se), function(x) x)
+        # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
 
         data.frame(
           Name = names(se_history),

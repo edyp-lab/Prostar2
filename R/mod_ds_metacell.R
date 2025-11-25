@@ -21,7 +21,7 @@
 #' @examples
 #' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
-#' grp <- design.qf(Exp1_R25_prot)$Condition
+#' grp <- DaparToolshed::design.qf(Exp1_R25_prot)$Condition
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))
 #'
 #' # Test with pattern already defined
@@ -47,15 +47,15 @@ mod_ds_metacell_Histos_ui <- function(id) {
     fluidRow(
       column(
         width = 4,
-        highchartOutput(ns("histo")), height = "600px"
+        highcharter::highchartOutput(ns("histo")), height = "600px"
       ),
       column(
         width = 4,
-        highchartOutput(ns("histo_per_lines"))
+        highcharter::highchartOutput(ns("histo_per_lines"))
       ),
       column(
         width = 4,
-        highchartOutput(ns("histo_per_lines_per_conds"))
+        highcharter::highchartOutput(ns("histo_per_lines_per_conds"))
       )
     )
   )

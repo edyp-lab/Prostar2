@@ -230,7 +230,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       tagList(
         uiOutput(ns('HypothesisTest_warning_conditions_ui')),
         uiOutput(ns("HypothesisTest_swapConds_ui")),
-        highchartOutput(ns("FoldChangePlot"))
+        highcharter::highchartOutput(ns("FoldChangePlot"))
       )
     }
       
@@ -538,7 +538,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
         rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
       
-        paramshistory(new.dataset) <- rv.custom$history
+        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
 
         # DO NOT MODIFY THE THREE FOLLOWINF LINES

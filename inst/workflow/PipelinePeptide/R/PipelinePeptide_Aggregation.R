@@ -548,7 +548,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       req(rv$dataIn)
       
       for (k in 1:length(rv$dataIn)){
-        if (typeDataset(rv$dataIn[[k]]) != "protein")
+        if (DaparToolshed::typeDataset(rv$dataIn[[k]]) != "protein")
           i_datapept <- k
       }
       res <- DaparToolshed::getProteinsStats(SummarizedExperiment::rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
@@ -577,7 +577,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       req(rv$dataIn)
       
       for (k in 1:length(rv$dataIn)){
-        if (typeDataset(rv$dataIn[[k]]) != "protein")
+        if (DaparToolshed::typeDataset(rv$dataIn[[k]]) != "protein")
           i_datapept <- k
       }
       res <- DaparToolshed::getProteinsStats(SummarizedExperiment::rowData(rv$dataIn[[i_datapept]])[['adjacencyMatrix']])
@@ -701,7 +701,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       rv.custom$history[['Aggregation_topN']] <- as.numeric(rv.widgets$Aggregation_topN)
       rv.custom$history[['Aggregation_addRowData']] <- rv.widgets$Aggregation_addRowData
       
-      paramshistory(rv.custom$temp.aggregate[[length(rv.custom$temp.aggregate)]]) <- rv.custom$history
+      DaparToolshed::paramshistory(rv.custom$temp.aggregate[[length(rv.custom$temp.aggregate)]]) <- rv.custom$history
       
       rv$dataIn <- rv.custom$temp.aggregate 
       

@@ -373,10 +373,10 @@ mod_Pept_Imputation_server <- function(
       req(rv$dataIn)
       req(rv.widgets$Imp_algorithm != "None")
 
-      m <- match.metacell(
+      m <- DaparToolshed::match.metacell(
         qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = typeDataset(rv$dataIn[[length(rv$dataIn)]])
+        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       nbPOVBefore <- length(which(m))
       # browser()
@@ -394,7 +394,7 @@ mod_Pept_Imputation_server <- function(
               if (rv.widgets$Imp_imp4p_withLapala) {
                 .tmp <- wrapper.dapar.impute.mi(
                   obj = rv$dataIn[[length(rv$dataIn)]],
-                  design = design.qf(rv$dataIn),
+                  design = DaparToolshed::design.qf(rv$dataIn),
                   nb.iter = rv.widgets$Imp_imp4p_nbiter,
                   lapala = rv.widgets$Imp_imp4p_withLapala,
                   q.min = rv.widgets$Imp_imp4p_qmin / 100,
@@ -410,7 +410,7 @@ mod_Pept_Imputation_server <- function(
               } else {
                 .tmp <- wrapper.dapar.impute.mi(
                   obj = rv$dataIn[[length(rv$dataIn)]],
-                  design = design.qf(rv$dataIn),
+                  design = DaparToolshed::design.qf(rv$dataIn),
                   nb.iter = rv.widgets$Imp_imp4p_nbiter,
                   lapala = rv.widgets$Imp_imp4p_withLapala
                 )
@@ -441,7 +441,7 @@ mod_Pept_Imputation_server <- function(
 
               .tmp <- wrapper.impute.KNN(
                 obj = rv$dataIn[[length(rv$dataIn)]],
-                grp = design.qf(rv$dataIn)$Condition,
+                grp = DaparToolshed::design.qf(rv$dataIn)$Condition,
                 K = rv.widgets$Imp_KNN_n
               )
               .param <- list(
@@ -454,7 +454,7 @@ mod_Pept_Imputation_server <- function(
 
               .tmp <- wrapper.impute.mle(
                 obj = rv$dataIn[[length(rv$dataIn)]],
-                grp = design.qf(rv$dataIn)$Condition
+                grp = DaparToolshed::design.qf(rv$dataIn)$Condition
               )
               .param <- list(
                 algorithm = rv.widgets$Imp_algorithm
@@ -481,7 +481,7 @@ mod_Pept_Imputation_server <- function(
           incProgress(1, detail = "Finalize imputation")
 
 
-          m <- match.metacell(qMetacell(.tmp),
+          m <- DaparToolshed::match.metacell(qMetacell(.tmp),
             pattern = "Missing POV",
             level = DaparToolshed::typeDataset(.tmp)
           )
@@ -495,7 +495,7 @@ mod_Pept_Imputation_server <- function(
           "Imputation"
         )
 
-        paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- .param
+        DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- .param
 
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn

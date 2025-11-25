@@ -242,11 +242,11 @@ PipelineProtein_DA_server <- function(id,
       
       # Get logfc threshold from Hypothesis test dataset
       .se <- rv$dataIn[[length(rv$dataIn)]]
-      .thlogfc <- paramshistory(.se)[['HypothesisTest_thlogFC']]
+      .thlogfc <- DaparToolshed::paramshistory(.se)[['HypothesisTest_thlogFC']]
       if(!is.null(.thlogfc))
         rv.custom$thlogfc <- .thlogfc
       
-      paramshistory(.se) <- NULL
+      DaparToolshed::paramshistory(.se) <- NULL
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -594,7 +594,7 @@ PipelineProtein_DA_server <- function(id,
               imageOutput(ns("calibrationPlot"), height = "400px")
             ),
               fluidRow(style = "height:400px;", 
-                highchartOutput(ns("histPValue")))
+                highcharter::highchartOutput(ns("histPValue")))
             )
           )
         )
@@ -1394,8 +1394,8 @@ PipelineProtein_DA_server <- function(id,
       # Do some stuff
       
       last.se <- length(rv$dataIn)
-      paramshistory(rv$dataIn[[last.se]]) <- NULL
-      paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
+      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- NULL
+      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
       
      
       # Add the result of pairwise comparison to the coldata

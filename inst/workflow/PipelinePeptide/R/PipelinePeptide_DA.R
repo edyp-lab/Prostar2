@@ -244,11 +244,11 @@ PipelinePeptide_DA_server <- function(id,
       
       # Get logfc threshold from Hypothesis test dataset
       .se <- rv$dataIn[[length(rv$dataIn)]]
-      .thlogfc <- paramshistory(.se)[['HypothesisTest_thlogFC']]
+      .thlogfc <- DaparToolshed::paramshistory(.se)[['HypothesisTest_thlogFC']]
       if(!is.null(.thlogfc))
         rv.custom$thlogfc <- .thlogfc
       
-      paramshistory(.se) <- NULL
+      DaparToolshed::paramshistory(.se) <- NULL
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -274,15 +274,15 @@ PipelinePeptide_DA_server <- function(id,
       
       
       if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
-        .conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
+        .conds <- :DaparToolshed::design.qf(rv$dataIn)$Condition
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
         ind_virtual_cond2 <- which(.conds != condition1)
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
         #colData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
       } else {
         ind <- c(
-          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
-          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
+          which(:DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
+          which(:DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
         )
         
         
@@ -404,7 +404,7 @@ PipelinePeptide_DA_server <- function(id,
       id = "Pairwisecomparison_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
-      group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
+      group = reactive({:DaparToolshed::design.qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
@@ -629,7 +629,7 @@ PipelinePeptide_DA_server <- function(id,
               imageOutput(ns("calibrationPlot"), height = "400px")
             ),
               fluidRow(style = "height:400px;", 
-                highchartOutput(ns("histPValue")))
+                highcharter::highchartOutput(ns("histPValue")))
             )
           )
         )
@@ -1438,8 +1438,8 @@ PipelinePeptide_DA_server <- function(id,
       # Do some stuff
       
       last.se <- length(rv$dataIn)
-      paramshistory(rv$dataIn[[last.se]]) <- NULL
-      paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
+      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- NULL
+      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
       
       
       # Add the result of pairwise comparison to the coldata

@@ -337,7 +337,7 @@ mod_Prot_Normalization_server <- function(
         qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
         qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn) - 1),
         keyId = rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
-        conds = design.qf(rv$dataIn)$Condition,
+        conds = DaparToolshed::design.qf(rv$dataIn)$Condition,
         pal = NULL,
         # Consider only 2% of the entire dataset
         n = .n,

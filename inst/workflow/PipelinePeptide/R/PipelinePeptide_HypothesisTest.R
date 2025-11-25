@@ -259,7 +259,7 @@ PipelinePeptide_HypothesisTest_server <- function(id,
             ),
             tags$hr()
             ,div(style = .style,
-              highchartOutput(ns("FoldChangePlot"), height = "100%")
+              highcharter::highchartOutput(ns("FoldChangePlot"), height = "100%")
             )
             
           )
@@ -640,7 +640,7 @@ PipelinePeptide_HypothesisTest_server <- function(id,
       DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
       rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
       
-      paramshistory(new.dataset) <- rv.custom$history
+      DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
       
       rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
       

@@ -16,7 +16,7 @@
 #'     res = NULL
 #'   )
 #'   ll.tags <- c('None' = 'None', 
-#'   qMetadata.def(typeDataset(ft_na[[1]]))$node)
+#'   qMetadata.def(DaparToolshed::typeDataset(ft_na[[1]]))$node)
 #'   
 #'   rv$res <- foo_server('query', 
 #'   remoteReset = reactive({0}),

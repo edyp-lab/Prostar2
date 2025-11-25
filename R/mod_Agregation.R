@@ -224,7 +224,7 @@ mod_Agregation_server <- function(
         # Insert additional code
 
         uiOutput(ns("Filterpeptides_barplotType_ui")),
-        highchartOutput(ns("peptideBarplot"), width = "400px")
+        highcharter::highchartOutput(ns("peptideBarplot"), width = "400px")
       )
     })
 
@@ -398,7 +398,7 @@ mod_Agregation_server <- function(
 
     output$warningAgregationMethod <- renderUI({
       req(rv$dataIn)
-      m <- match.metacell(qMetacell(rv$dataIn, length(rv$dataIn)),
+      m <- DaparToolshed::match.metacell(qMetacell(rv$dataIn, length(rv$dataIn)),
         pattern = "missing",
         level = "peptide"
       )
