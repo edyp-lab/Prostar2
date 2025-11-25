@@ -505,7 +505,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     
-    # %>% bindCache(
+    # |> bindCache(
     #   rv$dataIn,
     #   rv.widgets$HypothesisTest_method,
     #   rv.widgets$HypothesisTest_design,

@@ -132,8 +132,8 @@ mod_designExample_server <- function(
           autoInsertRow = FALSE,
           maxRows = nrow(data$df)
         )
-      ) %>%
-        rhandsontable::hot_rows(rowHeights = 30) %>%
+      ) |>
+        rhandsontable::hot_rows(rowHeights = 30) |>
         rhandsontable::hot_context_menu(
           allowRowEdit = FALSE,
           allowColEdit = FALSE,
@@ -142,7 +142,7 @@ mod_designExample_server <- function(
           allowRemoveRow = FALSE,
           allowRemoveColumn = FALSE,
           autoInsertRow = FALSE
-        ) %>%
+        ) |>
         rhandsontable::hot_cols(readOnly = TRUE, renderer = data$color_rend)
     })
   })

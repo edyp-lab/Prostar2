@@ -300,12 +300,12 @@ mod_volcanoplot_server <- function(
             )
           )
         )
-      ) %>%
+      ) |>
         DT::formatStyle(
           colnames(data)[1:(ncol(data) / 2)],
           colnames(data)[((ncol(data) / 2) + 1):(ncol(data))],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
-        ) %>%
+        ) |>
         DT::formatStyle(GetBorderIndices(), borderLeft = "3px solid #000000")
 
       dt
@@ -365,12 +365,12 @@ mod_volcanoplot_server <- function(
             )
           )
         )
-      ) %>%
+      ) |>
         DT::formatStyle(
           colnames(data)[1:(ncol(data) / 2)],
           colnames(data)[((ncol(data) / 2) + 1):(ncol(data))],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
-        ) %>%
+        ) |>
         DT::formatStyle(GetBorderIndices(), borderLeft = "3px solid #000000")
 
       dt
@@ -447,12 +447,12 @@ mod_volcanoplot_server <- function(
             )
           )
         )
-      ) %>%
+      ) |>
         DT::formatStyle(
           colnames(data)[1:(ncol(data) / 2)],
           colnames(data)[((ncol(data) / 2) + 1):(ncol(data))],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
-        ) %>%
+        ) |>
         DT::formatStyle(borders_index, borderLeft = "3px solid #000000")
       dt
     })

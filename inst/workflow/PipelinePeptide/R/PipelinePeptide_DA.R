@@ -239,7 +239,7 @@ PipelinePeptide_DA_server <- function(id,
         'DA')
       
       rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
-      rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
+      rv.widgets$Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
       #browser()
       
       # Get logfc threshold from Hypothesis test dataset
@@ -1196,7 +1196,7 @@ PipelinePeptide_DA_server <- function(id,
           columnDefs = .coldefs,
           ordering = !rv.widgets$FDR_viewAdjPval
         )
-      ) %>%
+      ) |>
         DT::formatStyle(
           paste0("isDifferential (",
             as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),

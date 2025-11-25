@@ -94,14 +94,14 @@ histPValue_HC <- function(pval_ll, bins = 80, pi0 = 1) {
   serieInf <- vapply(h$density, function(x) min(pi0, x), numeric(1))
   serieSup <- vapply(h$density, function(x) max(0, x - pi0), numeric(1))
   
-  hc <- highchart() %>%
-    hc_chart(type = "column") %>%
-    hc_add_series(data = serieSup, name = "p-value density") %>%
-    hc_add_series(data = serieInf, name = "p-value density") %>%
-    hc_title(text = "P-value histogram") %>%
-    hc_legend(enabled = FALSE) %>%
-    hc_colors(c("green", "red")) %>%
-    hc_xAxis(title = list(text = "P-value"), categories = h$breaks) %>%
+  hc <- highchart() |>
+    hc_chart(type = "column") |>
+    hc_add_series(data = serieSup, name = "p-value density") |>
+    hc_add_series(data = serieInf, name = "p-value density") |>
+    hc_title(text = "P-value histogram") |>
+    hc_legend(enabled = FALSE) |>
+    hc_colors(c("green", "red")) |>
+    hc_xAxis(title = list(text = "P-value"), categories = h$breaks) |>
     hc_yAxis(
       title = list(text = "Density"),
       plotLines = list(
@@ -111,13 +111,13 @@ histPValue_HC <- function(pval_ll, bins = 80, pi0 = 1) {
           value = pi0, 
           zIndex = 5)
       )
-    ) %>%
+    ) |>
     hc_tooltip(
       headerFormat = "",
       pointFormat = "<b> {series.name} </b>: {point.y} ",
       valueDecimals = 2
-    ) %>%
-    my_hc_ExportMenu(filename = "histPVal") %>%
+    ) |>
+    my_hc_ExportMenu(filename = "histPVal") |>
     hc_plotOptions(
       column = list(
         groupPadding = 0,
@@ -130,7 +130,7 @@ histPValue_HC <- function(pval_ll, bins = 80, pi0 = 1) {
         connectNulls = TRUE,
         marker = list(enabled = FALSE)
       )
-    ) %>%
+    ) |>
     hc_add_annotation(
       labelOptions = list(
         backgroundColor = "transparent",

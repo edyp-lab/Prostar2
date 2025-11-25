@@ -149,17 +149,17 @@ diffAnaVolcanoplot_rCharts <- function(
   title <- NULL
   title <- paste0(conditions[1], "_vs_", conditions[2])
 
-  h1 <- highchart() %>%
-    hc_add_series(data = df, type = "scatter", hcaes(x, y, group = g)) %>%
-    hc_colors(c(pal$In, pal$Out)) %>%
-    my_hc_chart(zoomType = "xy", chartType = "scatter") %>%
-    hc_legend(enabled = FALSE) %>%
+  h1 <- highchart() |>
+    hc_add_series(data = df, type = "scatter", hcaes(x, y, group = g)) |>
+    hc_colors(c(pal$In, pal$Out)) |>
+    my_hc_chart(zoomType = "xy", chartType = "scatter") |>
+    hc_legend(enabled = FALSE) |>
     hc_title(
       text = title,
       margin = 20, align = "center",
       style = list(size = 20, color = "black", useHTML = TRUE)
-    ) %>%
-    hc_yAxis(title = list(text = "-log10(pValue)")) %>%
+    ) |>
+    hc_yAxis(title = list(text = "-log10(pValue)")) |>
     hc_xAxis(
       title = list(text = "logFC"),
       plotLines = list(
@@ -170,8 +170,8 @@ diffAnaVolcanoplot_rCharts <- function(
           zIndex = 5
         )
       )
-    ) %>%
-    hc_tooltip(headerFormat = "", pointFormat = txt_tooltip) %>%
+    ) |>
+    hc_tooltip(headerFormat = "", pointFormat = txt_tooltip) |>
     hc_plotOptions(
       line = list(
         marker = list(enabled = FALSE),
@@ -184,9 +184,9 @@ diffAnaVolcanoplot_rCharts <- function(
           click = clickFunction
         ))
       )
-    ) %>%
-    my_hc_ExportMenu(filename = "volcanoplot") %>%
-    hc_add_series(data = leftBorder, type = "line", color = "grey") %>%
+    ) |>
+    my_hc_ExportMenu(filename = "volcanoplot") |>
+    hc_add_series(data = leftBorder, type = "line", color = "grey") |>
     hc_add_series(data = rightBorder, type = "line", color = "grey")
 
   return(h1)

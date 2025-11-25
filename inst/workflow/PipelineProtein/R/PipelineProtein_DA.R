@@ -237,7 +237,7 @@ PipelineProtein_DA_server <- function(id,
         'DA')
       
       rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
-      rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
+      rv.widgets$Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
 
       
       # Get logfc threshold from Hypothesis test dataset
@@ -1164,7 +1164,7 @@ PipelineProtein_DA_server <- function(id,
           columnDefs = .coldefs,
           ordering = !rv.widgets$FDR_viewAdjPval
         )
-      ) %>%
+      ) |>
         DT::formatStyle(
           paste0("isDifferential (",
             as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
@@ -1387,7 +1387,7 @@ PipelineProtein_DA_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),assays(dataIn()))))
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
         info(btnVentsMasg)
       else {
         
