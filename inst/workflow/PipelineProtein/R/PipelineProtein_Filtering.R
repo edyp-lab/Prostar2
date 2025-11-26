@@ -204,7 +204,7 @@ PipelineProtein_Filtering_server <- function(id,
         paste0(id, '.Rmd')))
       
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = div(
         ),
@@ -248,7 +248,7 @@ PipelineProtein_Filtering_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Cellmetadatafiltering <- renderUI({
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
@@ -437,7 +437,7 @@ PipelineProtein_Filtering_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     
     output$Variablefiltering <- renderUI({
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('Variablefiltering_timeline')),
@@ -782,7 +782,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
          # timeline_process_ui(ns('Save_timeline'))

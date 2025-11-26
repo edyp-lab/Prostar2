@@ -172,7 +172,7 @@ PipelineProtein_Imputation_server <- function(id,
         'md', 
         paste0(id, '.Rmd')))
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
@@ -226,7 +226,7 @@ PipelineProtein_Imputation_server <- function(id,
       path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
       includeCSS(path)
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           # timeline_process_ui(ns('POVImputation_timeline')),
@@ -493,7 +493,7 @@ PipelineProtein_Imputation_server <- function(id,
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('MECImputation_timeline')),
@@ -753,11 +753,9 @@ PipelineProtein_Imputation_server <- function(id,
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          #timeline_process_ui(ns('Save_timeline'))
-        ),
+        sidebar = tagList(),
         content = tagList()
       )
     })

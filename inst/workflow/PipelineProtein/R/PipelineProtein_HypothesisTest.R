@@ -157,7 +157,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         'md', 
         paste0(id, '.Rmd')))
 
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         #timeline_process_ui(ns('Description_timeline')),
@@ -200,7 +200,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         'md', 
         paste0(id, '.md')))
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('HypothesisTest_timeline')),
@@ -591,7 +591,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('Save_timeline'))

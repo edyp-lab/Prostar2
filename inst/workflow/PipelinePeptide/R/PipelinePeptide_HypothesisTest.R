@@ -216,35 +216,42 @@ PipelinePeptide_HypothesisTest_server <- function(id,
       Hypothesis test, you must filter/impute them.")
         } else {
           tagList(
-            div(
+            div(id = ns('div_HypothesisTest_warning_conditions_ui'),
               div(style = .style,
                 uiOutput(ns('HypothesisTest_warning_conditions_ui'))
               ),
-              div(style = .style,
+              div(id = ns('div_HypothesisTest_design_ui'),
+                style = .style,
                 uiOutput(ns('HypothesisTest_design_ui'))
               ),
               
-              div(style = .style,
+              div(id = ns('div_HypothesisTest_method_ui'),
+                style = .style,
                 uiOutput(ns('HypothesisTest_method_ui'))
               ),
               
-              div(style = .style,
+              div(id = ns('div_HypothesisTest_ttestOptions_ui'),
+                style = .style,
                 uiOutput(ns('HypothesisTest_ttestOptions_ui'))
               ),
               
-              div(style = .style,
+              div(id = ns('div_HypothesisTest_thlogFC_ui'),
+                style = .style,
                 uiOutput(ns('HypothesisTest_thlogFC_ui'))
               ),
               
-              tags$div(style = .style,
+              tags$div(id = ns('div_HypothesisTest_correspondingRatio_ui'),
+                style = .style,
                 uiOutput(ns("HypothesisTest_correspondingRatio_ui"))
               ),
               
-              div(style = .style,
+              div(id = ns('div_HypothesisTest_info_Limma_disabled_ui'),
+                style = .style,
                 uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')),
               ),
               tags$hr(),
-              div(style = .style,
+              div(id = ns('div_HypothesisTest_swapConds_ui'),
+                style = .style,
                 uiOutput(ns("HypothesisTest_swapConds_ui"))
               )
             ),
@@ -254,11 +261,13 @@ PipelinePeptide_HypothesisTest_server <- function(id,
             
             
             
-            div(style = .style,
+            div(id = ns('div_HypothesisTest_btn_validate_ui'),
+              style = .style,
               uiOutput(ns("HypothesisTest_btn_validate_ui"))
             ),
             tags$hr()
-            ,div(style = .style,
+            ,div(id = ns('div_FoldChangePlot'),
+              style = .style,
               highcharter::highchartOutput(ns("FoldChangePlot"), height = "100%")
             )
             
@@ -412,10 +421,14 @@ PipelinePeptide_HypothesisTest_server <- function(id,
           strsplit(rv.custom$listNomsComparaison[i], split = "_vs_")
         )
         
-        div(
-          div(style = .style, p(gsub("[()]", "", ll.conds[1]))),
-          div(style = .style, p(gsub("[()]", "", ll.conds[2]))),
-          div(style = .style,
+        div(id = ns('div_showConds'),
+          div(id = ns('div_ll.conds1'),
+            style = .style, p(gsub("[()]", "", ll.conds[1]))),
+          div(id = ns('div_ll.conds2'),
+            style = .style, p(gsub("[()]", "", ll.conds[2]))),
+          div(
+            id = ns('div_compswap'),
+            style = .style,
             checkboxInput(ns(paste0("compswap", i)), "",
               value = rv.custom$swap.history[i])
           )

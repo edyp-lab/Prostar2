@@ -319,12 +319,12 @@ mod_buildDesign_server <- function(
       req(rv$conditionsChecked$valid)
 
       tagList(
-        div(
-          div(
+        div(id = ns('div_UI_hierarchicalExp'),
+          div(id = ns('div_choosetype'),
             style = "display:inline-block; vertical-align: middle;",
             tags$b("2 - Choose the type of experimental design and complete it accordingly")
           ),
-          div(
+          div(id = ns('div_btn_helpDesign'),
             style = "display:inline-block; vertical-align: middle;",
             tags$button(
               id = "btn_helpDesign", tags$sup("[?]"),

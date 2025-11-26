@@ -38,7 +38,7 @@
 #' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
-#' conds <- colData(Exp1_R25_prot)$Condition
+#' conds <- SummarizedExperiment::colData(Exp1_R25_prot)$Condition
 #'
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds))
 #' shiny::runApp(mod_qMetacell_FunctionFilter_Generator(obj, conds, is.enabled = FALSE))
@@ -79,7 +79,6 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
 #'
 #' @export
 #' @importFrom stats setNames
-#' @importFrom DaparToolshed typeDataset
 #'
 mod_qMetacell_FunctionFilter_Generator_server <- function(
     id,
@@ -108,9 +107,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     query = list(),
     fun.list = list(),
     widgets.value = list(),
-    tmp.tags = reactive({
-      NULL
-    }),
+    tmp.tags = reactive({NULL}),
     showmodal = NULL
   )
 
@@ -184,7 +181,9 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
     
     output$tree_UI <- renderUI({
-      widget <- div(mod_metacell_tree_ui(ns("tree")))
+      widget <- div(id = ns('div_tree'),
+        mod_metacell_tree_ui(ns("tree"))
+        )
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     

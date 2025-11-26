@@ -169,7 +169,7 @@ mod_metacell_tree_server <- function(
 
     #observeEvent(input$openModalBtn, {
     #output$modaltree <- renderUI({
-      showModal(modalDialog(
+      shiny::showModal(shiny::modalDialog(
           ns("modalExample"),
           title = "",
           size = "l",
@@ -177,8 +177,8 @@ mod_metacell_tree_server <- function(
           shinyjs::inlineCSS(css),
           tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
           tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
-          div(
-            div(
+          div(id = ns('div_modal_tree_ui'),
+            div(id = ns('div_modal_tree_checkbox_mode'),
               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
               p("To get help about the organization of those tags, please refer to the FAQ"),
               radioButtons(ns("checkbox_mode"), "",
@@ -190,7 +190,7 @@ mod_metacell_tree_server <- function(
                 width = "150px"
               )
             ),
-            div(
+            div(id = ns('div_modal_tree_validatetree'),
               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
               actionButton(ns("cleartree"), "Clear"),
               actionButton(ns("validatetree"), "Validate & close", class = "btn-success")
@@ -315,7 +315,7 @@ mod_metacell_tree_server <- function(
       if(is.null(dataIn())){
         p('dataIn() is NULL')
       } else {
-      div(
+      div(id = ns('div_metacell_tree_'),
         style = "overflow-y: auto;",
         uiOutput(ns(paste0("metacell_tree_", DaparToolshed::typeDataset(dataIn()))))
       )
@@ -331,7 +331,7 @@ mod_metacell_tree_server <- function(
       nb <- DaparToolshed::GetNbTags(dataIn())
       pourcentages <- round(100 * nb / sum(nb), digits = 1)
 
-      div(
+      div(id = ns('div_wtree_protein'),
         class = "wtree",
         tags$ul(
           tags$li(
@@ -449,7 +449,7 @@ mod_metacell_tree_server <- function(
       nb <- GetNbTags(dataIn())
       pourcentages <- round(100 * nb / sum(nb), digits = 1)
 
-      div(
+      div(id = ns('div_wtree_peptide'),
         class = "wtree",
         tags$ul(
           tags$li(

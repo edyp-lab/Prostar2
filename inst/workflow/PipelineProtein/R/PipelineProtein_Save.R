@@ -75,12 +75,11 @@ PipelineProtein_Save_server <- function(id,
     
     ###### ------------------- Code for Save (step 0) -------------------------    #####
     output$Save <- renderUI({
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList()
       )
-
     })
     
     # output$dl_ui <- renderUI({

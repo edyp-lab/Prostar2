@@ -108,13 +108,13 @@ mod_inputGroup_server <- function(
 
       input_list <- lapply(seq_len(n), function(i) {
         inputName <- ns(paste("input_", i, sep = ""))
-        div(
-          div(
+        div(id = ns('div_input_group'),
+          div(id = ns('div_Identification_col'),
             style = "align: center;display:inline-block; vertical-align:
           middle;padding-right: 10px;",
             p(tags$strong(paste0("Identification col. for ", quantCols()[i])))
           ),
-          div(
+          div(id = ns('div_inputName'),
             style = "align: center;display:inline-block; vertical-align: middle;",
             selectInput(inputName, "",
               choices = c("None", colnames(df())),

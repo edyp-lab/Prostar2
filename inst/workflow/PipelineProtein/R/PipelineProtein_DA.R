@@ -187,7 +187,7 @@ PipelineProtein_DA_server <- function(id,
         'md', 
         paste0(id, '.Rmd')))
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         #timeline_process_ui(ns('Description_timeline')),
@@ -331,7 +331,7 @@ PipelineProtein_DA_server <- function(id,
       .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
       
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('Pairwisecomparison_timeline')),
@@ -573,7 +573,7 @@ PipelineProtein_DA_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     output$Pvaluecalibration <- renderUI({
 
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
          # timeline_process_ui(ns('Pvaluecalibration_timeline')),
@@ -979,7 +979,7 @@ PipelineProtein_DA_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     output$FDR <- renderUI({
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('FDR_timeline')),
@@ -1374,11 +1374,9 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-         # timeline_process_ui(ns('Save_timeline'))
-        ),
+        sidebar = tagList(),
         content = tagList()
       )
     })

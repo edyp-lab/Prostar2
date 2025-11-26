@@ -134,7 +134,7 @@ PipelineProtein_Normalization_server <- function(id,
         paste0(id, '.Rmd')))
      
       
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         content = div(
@@ -178,7 +178,7 @@ PipelineProtein_Normalization_server <- function(id,
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
 
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('Normalization_timeline')),
@@ -505,12 +505,10 @@ PipelineProtein_Normalization_server <- function(id,
     
     # >>> START ------------- Code for step 3 UI---------------
     output$Save <- renderUI({
-      MagellanNTK::process_layout(
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
-        content = tagList(
-          #uiOutput(ns('dl_ui'))
-        )
+        content = tagList()
       )
     })
     

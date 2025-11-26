@@ -412,7 +412,7 @@ PipelinePeptide_DA_server <- function(id,
     #})
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
-      widget <- div(
+      widget <- div(id = ns('div_mod_volcanoplot_ui'),
         mod_volcanoplot_ui(ns("Pairwisecomparison_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
@@ -480,7 +480,7 @@ PipelinePeptide_DA_server <- function(id,
       
       widget <- tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
-        div(
+        div(id = ns('div_AnaDiff_query'),
           mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
         )
       )
@@ -853,7 +853,8 @@ PipelinePeptide_DA_server <- function(id,
         )
       }
       
-      div(HTML(txt), style = "color:red")
+      div(id = ns('div_errMsgCalibrationPlot'),
+        HTML(txt), style = "color:red")
     })
     
     
@@ -870,7 +871,8 @@ PipelinePeptide_DA_server <- function(id,
         )
       }
       
-      div(HTML(txt), style = "color:red")
+      div(id = ns('div_errMsgCalibrationPlotAll'),
+        HTML(txt), style = "color:red")
     })
     
     
@@ -1055,7 +1057,7 @@ PipelinePeptide_DA_server <- function(id,
     )
     
     output$FDR_volcanoplot_UI <- renderUI({
-      widget <- div(
+      widget <- div(id = ns('div_FDR_volcano'),
         mod_volcanoplot_ui(ns("FDR_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])

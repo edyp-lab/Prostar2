@@ -60,16 +60,15 @@ mod_Prot_Normalization_ui <- function(id) {
     tagList(
       uiOutput(ns("Normalization_btn_validate_ui")),
       uiOutput(ns("Normalization_method_ui")),
-      div(
-        id = "div_Normalization_type_ui",
+      div(id = "div_Normalization_type_ui",
         shinyjs::hidden(uiOutput(ns("Normalization_type_ui")))
       ),
-      div(
+      div(id = "div_Normalization_quantile_ui",
         shinyjs::hidden(uiOutput(ns("Normalization_spanLOESS_ui"))),
         uiOutput(ns("Normalization_quantile_ui")),
         uiOutput(ns("Normalization_varReduction_ui"))
       ),
-      div(
+      div(id = "div_Normalization_sync_ui",
         uiOutput(ns("tracking")),
         shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
       ),

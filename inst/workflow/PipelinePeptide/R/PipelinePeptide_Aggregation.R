@@ -361,7 +361,8 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       tagList(div(style = "display: inline-block; margin-right: 35px;", 
                   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])),
-              div(style = "display: inline-block; vertical-align: top;",
+              div(id = ns('div_Aggregation_maxiter'),
+                style = "display: inline-block; vertical-align: top;",
                   if(rv.widgets$Aggregation_includeSharedPeptides %in% c("Yes_Simple_Redistribution", "Yes_Iterative_Redistribution")){
                     tagList(
                       MagellanNTK::toggleWidget(widget2, rv$steps.enabled['Aggregation']),
@@ -412,7 +413,8 @@ PipelinePeptide_Aggregation_server <- function(id,
 
       tagList(div(style = "display: inline-block; margin-right: 35px;", 
         MagellanNTK::toggleWidget(widget, rv$steps.enabled['Aggregation'])),
-        div(style = "display: inline-block; vertical-align: top;",
+        div(id = ns('div_Aggregation_topN'),
+          style = "display: inline-block; vertical-align: top;",
             if(rv.widgets$Aggregation_considerPeptides == "topN"){
                  MagellanNTK::toggleWidget(widget2, rv$steps.enabled['Aggregation'])
               }

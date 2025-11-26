@@ -72,7 +72,7 @@ mod_filtering_example_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    #pkgs.require('magrittr')
+    pkgs.require('magrittr')
 
 
     observeEvent(req(showModal()), {

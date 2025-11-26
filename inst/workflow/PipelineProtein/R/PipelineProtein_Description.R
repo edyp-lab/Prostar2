@@ -82,6 +82,7 @@ PipelineProtein_Description_server <- function(id,
         paste0(id, '.Rmd')))
      
       MagellanNTK::process_layout(
+        session,
         ns = NS(id),
         sidebar = NULL,
         content = tagList(
