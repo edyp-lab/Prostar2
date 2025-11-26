@@ -335,12 +335,12 @@ PipelineProtein_DA_server <- function(id,
         ns = NS(id),
         sidebar = tagList(
           #timeline_process_ui(ns('Pairwisecomparison_timeline')),
-          tags$div(
+          tags$div(id = ns('div_Pairwisecomparison_Comparison_UI'),
             uiOutput(ns('Pairwisecomparison_Comparison_UI')),
             uiOutput(ns("Pairwisecomparison_pushpval_UI"))
           )
         ),
-        content = div(
+        content = div(id = ns('div_Pairwisecomparison_tooltipInfo_UI'),
           uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
           uiOutput(ns("Pairwisecomparison_volcano_UI"))
         )
@@ -387,7 +387,7 @@ PipelineProtein_DA_server <- function(id,
     #})
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
-      widget <- div(
+      widget <- div(id = ns('div_Pairwisecomparison_volcano'),
         mod_volcanoplot_ui(ns("Pairwisecomparison_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
@@ -581,7 +581,7 @@ PipelineProtein_DA_server <- function(id,
           uiOutput(ns("Pvaluecalibration_numericValCalibration_UI")),
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
         ),
-        content = div(
+        content = div(id = ns('div_content_Pvaluecalibration'),
           p(tags$strong(
             paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
           )),
@@ -827,7 +827,8 @@ PipelineProtein_DA_server <- function(id,
         )
       }
       
-      div(HTML(txt), style = "color:red")
+      div(id = ns('div_errMsgCalibrationPlot'),
+        HTML(txt), style = "color:red")
     })
     
     
@@ -844,7 +845,8 @@ PipelineProtein_DA_server <- function(id,
         )
       }
       
-      div(HTML(txt), style = "color:red")
+      div(id = ns('div_errMsgCalibrationPlotAll'),
+        HTML(txt), style = "color:red")
     })
     
     
@@ -987,7 +989,7 @@ PipelineProtein_DA_server <- function(id,
             uiOutput(ns('widgets_ui'))
           )
         ),
-        content = div(
+        content = div(id = ns('div_content_FDR'),
           uiOutput(ns("FDR_nbSelectedItems_ui")),
           fluidRow(
             column(width = 4,
@@ -1033,7 +1035,7 @@ PipelineProtein_DA_server <- function(id,
     )
     
     output$FDR_volcanoplot_UI <- renderUI({
-      widget <- div(
+      widget <- div(id = ns('div_FDR_volcano'),
         mod_volcanoplot_ui(ns("FDR_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])

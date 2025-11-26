@@ -137,7 +137,7 @@ PipelineProtein_Normalization_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
-        content = div(
+        content = div(id = ns('div_content'),
           div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)

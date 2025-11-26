@@ -206,8 +206,7 @@ PipelineProtein_Filtering_server <- function(id,
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = div(
-        ),
+        sidebar = div(id = 'div_sidebar_Description'),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)

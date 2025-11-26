@@ -244,13 +244,19 @@ PipelineProtein_HypothesisTest_server <- function(id,
       padding-right: 20px;"
       
       tagList(
-        div(
-          div(style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
-          div(style = .style, uiOutput(ns('HypothesisTest_method_ui'))),
-          div(style = .style, uiOutput(ns('HypothesisTest_ttestOptions_ui'))),
-          div(style = .style, uiOutput(ns('HypothesisTest_thlogFC_ui'))),
-          div(style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
-          div(style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
+        div(id = ns('div_HypothesisTest_widgets_ui'),
+          div(id = ns('div_HypothesisTest_design_ui'),
+            style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
+          div(id = ns('div_HypothesisTest_method_ui'),
+            style = .style, uiOutput(ns('HypothesisTest_method_ui'))),
+          div(id = ns('div_HypothesisTest_ttestOptions_ui'),
+            style = .style, uiOutput(ns('HypothesisTest_ttestOptions_ui'))),
+          div(id = ns('div_HypothesisTest_thlogFC_ui'),
+            style = .style, uiOutput(ns('HypothesisTest_thlogFC_ui'))),
+          div(id = ns('div_HypothesisTest_correspondingRatio_ui'),
+            style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
+          div(id = ns('div_HypothesisTest_info_Limma_disabled_ui'),
+            style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
         )
       )
     })
@@ -382,10 +388,13 @@ PipelineProtein_HypothesisTest_server <- function(id,
           strsplit(rv.custom$listNomsComparaison[i], split = "_vs_")
         )
         
-        div(
-          div(style = .style, p(gsub("[()]", "", ll.conds[1]))),
-          div(style = .style, p(gsub("[()]", "", ll.conds[2]))),
-          div(style = .style,
+        div(id = ns('div_showConds'),
+          div(id = ns('div_ll.conds1'),
+            style = .style, p(gsub("[()]", "", ll.conds[1]))),
+          div(id = ns('div_ll.conds2'),
+            style = .style, p(gsub("[()]", "", ll.conds[2]))),
+          div(id = ns('div_compswap'),
+            style = .style,
             checkboxInput(ns(paste0("compswap", i)), "",
               value = rv.custom$swap.history[i])
           )

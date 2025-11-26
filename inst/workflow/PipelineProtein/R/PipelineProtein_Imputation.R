@@ -498,9 +498,11 @@ PipelineProtein_Imputation_server <- function(id,
         sidebar = tagList(
           #timeline_process_ui(ns('MECImputation_timeline')),
           if (mv.present()) {
-            div(
-              div(style = .style, uiOutput(ns("MECImputation_chooseImputationMethod_ui"))),
-              div(style = .style, uiOutput(ns("MECImputation_Params_ui")))
+            div(id = ns('div_sidebar'),
+              div(id = ns('div_MECImputation_chooseImputationMethod_ui'),
+                style = .style, uiOutput(ns("MECImputation_chooseImputationMethod_ui"))),
+              div(id = ns('div_MECImputation_Params_ui'),
+                style = .style, uiOutput(ns("MECImputation_Params_ui")))
             )
             
           }
@@ -587,7 +589,8 @@ PipelineProtein_Imputation_server <- function(id,
       widget <- switch(rv.widgets$MECImputation_algorithm,
         detQuantile = {
           tagList(
-            div(style = .style,
+            div(id = ns('div_MECImputation_detQuant_quantile'),
+              style = .style,
               numericInput(ns("MECImputation_detQuant_quantile"), "Quantile",
                 value = rv.widgets$MECImputation_detQuant_quantile,
                 step = 0.5,
@@ -595,7 +598,8 @@ PipelineProtein_Imputation_server <- function(id,
                 max = 100,
                 width = "100px"
               )),
-            div(style = .style,
+            div(id = ns('div_MECImputation_detQuant_factor'),
+              style = .style,
               numericInput(ns("MECImputation_detQuant_factor"), "Factor",
                 value = rv.widgets$MECImputation_detQuant_factor,
                 step = 0.1, min = 0, max = 10,
@@ -605,7 +609,8 @@ PipelineProtein_Imputation_server <- function(id,
           )
         },
         fixedValue = {
-          div(style = .style,
+          div(id = ns('div_MECImputation_fixedValue'),
+            style = .style,
             numericInput(ns("MECImputation_fixedValue"), "Fixed value",
               value = rv.widgets$MECImputation_fixedValue,
               step = 0.1, min = 0, max = 100,
