@@ -47,11 +47,8 @@ mod_metacell_tree_ui <- function(id) {
         width = 6,
         actionButton(
           ns("openModalBtn"),
-          tagList(
-            # p('Select tags'),
-            tags$img(src = "images/ds_metacell.png", height = "50px")
-          )
-        )
+          tags$img(src = "images/ds_metacell.png", height = "50px"),
+          style = "padding: 0px; margin: 0px; border: solid 1px gray;")
       ),
       column(width = 6, uiOutput(ns("selectedNodes")))
     ),

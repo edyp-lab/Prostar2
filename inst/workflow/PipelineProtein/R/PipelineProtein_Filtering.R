@@ -760,7 +760,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Variablefiltering', btnEvents()))
-      
+      browser()
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
