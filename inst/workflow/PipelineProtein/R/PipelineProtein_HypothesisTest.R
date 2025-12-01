@@ -538,7 +538,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         shiny::incProgress(0.5)
         
       if ( is.null(rv$dataIn) || is.null(rv.custom$AllPairwiseComp))
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
         # Do some stuff
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
@@ -625,7 +625,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         # Do some stuff
       if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
         SummarizedExperiment::assays(dataIn()))))
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()

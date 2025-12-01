@@ -355,7 +355,7 @@ PipelineProtein_Imputation_server <- function(id,
       
       if ( is.null(rv.custom$dataIn1) || 
           rv.widgets$POVImputation_algorithm == "None")
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
         req(rv.widgets$POVImputation_algorithm != "None")
         m <- DaparToolshed::match.metacell(
@@ -457,10 +457,7 @@ PipelineProtein_Imputation_server <- function(id,
           
           rv.custom$POVImputation_SummaryDT <- rbind(
             rv.custom$POVImputation_SummaryDT ,
-            c("POV Imputation",
-              nBefore - nAfter,
-              0,
-              NA)
+            c("POV Imputation", nBefore - nAfter, 0, NA)
           )
           
         })
@@ -634,7 +631,7 @@ PipelineProtein_Imputation_server <- function(id,
         
         if ( is.null(rv.custom$dataIn2) || 
             rv.widgets$MECImputation_algorithm == "None")
-          info(btnVentsMasg)
+          shinyjs::info(btnVentsMasg)
         else {
           
           
@@ -777,12 +774,12 @@ PipelineProtein_Imputation_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Save process", id), {
         shiny::incProgress(0.5)
         
         if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
           SummarizedExperiment::assays(rv.custom$dataIn2))))
-          info(btnVentsMasg)
+          shinyjs::info(btnVentsMasg)
         else {
           # Do some stuff
           len_start <- length(rv$dataIn)

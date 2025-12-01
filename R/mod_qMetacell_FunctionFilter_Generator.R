@@ -67,8 +67,11 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
     uiOutput(ns("chooseScope_ui")),
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
-    uiOutput(ns('Preview_UI')),
+    div(id = ns('div_buttons'),
+      style = "display:inline-block; vertical-align: top;",
+      uiOutput(ns('Preview_UI')),
     uiOutput(ns("Add_btn_UI"))
+    )
   )
 }
 

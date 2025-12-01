@@ -552,7 +552,7 @@ PipelineProtein_DA_server <- function(id,
      
       if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
         || is.null(rv$dataIn))
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
       #UpdateCompList()
      
@@ -587,20 +587,19 @@ PipelineProtein_DA_server <- function(id,
           )),
           fluidRow(
             column(width = 6,
-              fluidRow(
-              style = "height:800px;",
+              #fluidRow(
+              #style = "height:800px;",
               imageOutput(ns("calibrationPlotAll"), height = "800px")
-            )
+            #)
             ),
             column(width = 6, 
-              fluidRow(style = "height:400px;",
+              #fluidRow(style = "height:400px;",
               imageOutput(ns("calibrationPlot"), height = "400px")
-            )),
-              fluidRow(style = "height:400px;",
+            ),
+              #fluidRow(style = "height:400px;",
                 highcharter::highchartOutput(ns("histPValue"))
             )
             )
-          )
         )
   
       
@@ -958,7 +957,7 @@ PipelineProtein_DA_server <- function(id,
         shiny::incProgress(0.5)
         
       if (is.null(rv$dataIn))
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
         
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
@@ -1355,7 +1354,7 @@ PipelineProtein_DA_server <- function(id,
         shiny::incProgress(0.5)
         
       if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
         
       rv.custom$history[['th pval']] <- rv.custom$thpval
@@ -1398,7 +1397,7 @@ PipelineProtein_DA_server <- function(id,
         shiny::incProgress(0.5)
         
       if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
         
       # Do some stuff

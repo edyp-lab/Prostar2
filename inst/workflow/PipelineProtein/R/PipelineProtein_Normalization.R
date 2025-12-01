@@ -373,7 +373,7 @@ PipelineProtein_Normalization_server <- function(id,
         print(paste0(id, ' : shiny::withProgress(message = paste0("Normalization process", id), {'))
       if ( is.null(rv$dataIn) ||
           rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
-        info(btnVentsMasg)
+        shinyjs::info(btnVentsMasg)
       else {
         
         
@@ -532,7 +532,7 @@ PipelineProtein_Normalization_server <- function(id,
         #browser()
         if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
           SummarizedExperiment::assays(dataIn()))))
-        info(btnVentsMasg)
+          shinyjs::info(btnVentsMasg)
       else {
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
