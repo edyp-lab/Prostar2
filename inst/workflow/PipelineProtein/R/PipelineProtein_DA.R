@@ -587,17 +587,12 @@ PipelineProtein_DA_server <- function(id,
           )),
           fluidRow(
             column(width = 6,
-              #fluidRow(
-              #style = "height:800px;",
               imageOutput(ns("calibrationPlotAll"), height = "800px")
-            #)
             ),
             column(width = 6, 
-              #fluidRow(style = "height:400px;",
               imageOutput(ns("calibrationPlot"), height = "400px")
             ),
-              #fluidRow(style = "height:400px;",
-                highcharter::highchartOutput(ns("histPValue"))
+              highcharter::highchartOutput(ns("histPValue"))
             )
             )
         )

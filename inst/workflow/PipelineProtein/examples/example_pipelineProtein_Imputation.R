@@ -1,0 +1,24 @@
+library(omXplore)
+library(shiny)
+library(shinydashboard)
+library(shinydashboardPlus)
+library(highcharter)
+library(MagellanNTK)
+library(Prostar2)
+library(DaparToolshed)
+
+options(shiny.fullstacktrace = TRUE)
+
+data(Exp1_R25_prot, package = 'DaparToolshedData')
+obj <- Exp1_R25_prot
+wf.name <- 'PipelineProtein_Imputation'
+wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
+
+
+# Launch in a standalone mode
+shiny::runApp(proc_workflowApp(wf.name, wf.path, dataIn = obj))
+
+
+# Launch in the Magellan workspace
+MagellanNTK(Exp1_R25_prot, wf.path, wf.name)
+

@@ -277,7 +277,7 @@ PipelineProtein_Filtering_server <- function(id,
         conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
-        operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
+        operator = reactive({stats::setNames(nm = DaparToolshed::SymFilteringOperators())}),
         remoteReset = reactive({remoteReset()}),
         is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
       )

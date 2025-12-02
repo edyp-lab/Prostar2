@@ -89,7 +89,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     conds,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
     val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
-    operator = reactive({setNames(nm = SymFilteringOperators())}),
+    operator = reactive({setNames(nm = DaparToolshed::SymFilteringOperators())}),
     remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})) {
   # Define default selected values for widgets
@@ -595,7 +595,7 @@ mod_qMetacell_FunctionFilter_Generator <- function(
     conds,
     keep_vs_remove = setNames(nm = c("delete", "keep")),
     val_vs_percent = setNames(nm = c("Count", "Percentage")),
-    operator = setNames(nm = SymFilteringOperators()),
+    operator = setNames(nm = DaparToolshed::SymFilteringOperators()),
     remoteReset = reactive({
       0
     }),
