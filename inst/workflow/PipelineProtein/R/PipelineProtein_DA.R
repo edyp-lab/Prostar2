@@ -396,10 +396,10 @@ PipelineProtein_DA_server <- function(id,
     
     output$Pairwisecomparison_tooltipInfo_UI <- renderUI({
       req(rv$dataIn)
+      req(rv.widgets$Pairwisecomparison_tooltipInfo)
       
-      widget <- fluidRow(
-        column(width = 6,
-          MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
+      widget <- tagList(
+        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
         selectInput(ns("Pairwisecomparison_tooltipInfo"),
           label = NULL,
           choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
@@ -408,11 +408,9 @@ PipelineProtein_DA_server <- function(id,
           selectize = FALSE,
           width = "300px", 
           size = 5
-        )),
-        column(width = 6,
-          actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
+        ),
+        actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
           class = "btn-info")
-        )
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
