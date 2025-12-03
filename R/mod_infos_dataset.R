@@ -230,6 +230,35 @@ infos_dataset_server <- function(
 
 
 
+    
+    Get_QFeatures_History <- reactive({
+      req(rv$dataIn)
+      
+      
+      .se <- rv$dataIn[[input$selectInputSE]]
+      # .name <- names(rv$dataIn)
+      se_history <- "-"
+      
+      if (!is.null(DaparToolshed::paramshistory(.se))) {
+        se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
+          ConvertListToHtml(paste0(names(x), " = ", x))
+        })
+        
+        # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
+        
+        data.frame(
+          Name = names(se_history),
+          History = unlist(se_history)
+        )
+      } else {
+        data.frame(
+          Name = "-",
+          History = "-"
+        )
+      }
+    })
+    
+    
 
     Get_SE_History <- reactive({
       req(rv$dataIn)
