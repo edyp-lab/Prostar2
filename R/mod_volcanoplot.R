@@ -35,18 +35,17 @@
 #'   index = as.character(rownames(obj[[2]]))
 #' )
 #' colnames(df) <- c("x", "y", "index")
-#' tooltipSlot <- c("Fasta_headers", "Sequence_length")
-#' df <- cbind(df, colData(obj[[2]])[, tooltipSlot])
-#' colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
-#' if (ncol(df) > 3) {
-#'   colnames(df)[seq.int(from = 4, to = ncol(df))] <-
-#'     paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
-#'       sep = ""
-#'     )
-#' }
+#' #tooltipSlot <- c("Fasta_headers", "Sequence_length")
+#' #df <- cbind(df, colData(obj[[2]])[, tooltipSlot])
+#' #colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
+#' #if (ncol(df) > 3) {
+#' #  colnames(df)[seq.int(from = 4, to = ncol(df))] <-
+#' #    paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
+#' #      sep = ""
+#' #    )
+#' #}
 #' hc_clickFunction <- JS("function(event) {
-#' Shiny.onInputChange('eventPointClicked',
-#' [this.index]+'_'+ [this.series.name]);}")
+#' Shiny.onInputChange('eventPointClicked',[this.index]+'_'+ [this.series.name]);}")
 #' cond <- c("25fmol", "10fmol")
 #' diffAnaVolcanoplot_rCharts(
 #'   df,
@@ -55,7 +54,14 @@
 #'   conditions = cond,
 #'   clickFunction = hc_clickFunction
 #' )
-#' shiny::runApp(volcanoplot(xxxx))
+#' 
+#' 
+#' shiny::runApp(
+#' volcanoplot(df,
+#'     comparison = "25fmol_vs_10fmol",
+#'     group,
+#'     thlogfc = 2.5,
+#'     thpval = 1))
 #' }
 #' 
 #' @importFrom QFeatures addAssay removeAssay
@@ -81,8 +87,8 @@ mod_volcanoplot_ui <- function(id) {
   tagList(
     highcharter::highchartOutput(ns("volcanoPlot_UI"),
       width = "600px", height = "600px"
-    )
-    # uiOutput(ns("quantiDT"))
+    ),
+    uiOutput(ns("quantiDT"))
   )
 }
 
@@ -94,30 +100,14 @@ mod_volcanoplot_ui <- function(id) {
 #'
 mod_volcanoplot_server <- function(
     id,
-    dataIn = reactive({
-      NULL
-    }),
-    comparison = reactive({
-      NULL
-    }),
-    group = reactive({
-      NULL
-    }),
-    thlogfc = reactive({
-      0
-    }),
-    thpval = reactive({
-      0
-    }),
-    tooltip = reactive({
-      NULL
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    dataIn = reactive({NULL}),
+    comparison = reactive({NULL}),
+    group = reactive({NULL}),
+    thlogfc = reactive({0}),
+    thpval = reactive({0}),
+    tooltip = reactive({NULL}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -154,55 +144,53 @@ mod_volcanoplot_server <- function(
     })
 
 
-    # output$quantiDT <- renderUI({
-    #   req(input$eventPointClicked)
-    #
-    #   if (omXplore::get_type(rv$dataIn) == "protein") {
-    #     if (is.null(omXplore::get_adjacencyMatrix(rv$dataIn))) {
-    #       shinyBS::bsCollapse(id = ns("collapseVolcanoInfos"),
-    #         open = "Protein",
-    #         multiple = TRUE,
-    #         shinyBS::bsCollapsePanel("Protein",
-    #           tagList(
-    #             uiOutput(ns("Warning_Infos")),
-    #             DT::dataTableOutput(ns("Infos"))
-    #           ), style = "info")
-    #       )
-    #     } else {
-    #       shinyBS::bsCollapse(id = ns("collapseVolcanoInfos"),
-    #         open = c("Protein", "Specific peptides", "Shared peptides"),
-    #         multiple = TRUE,
-    #         shinyBS::bsCollapsePanel("Protein",
-    #           tagList(
-    #             uiOutput(ns("Warning_Infos")),
-    #             DT::dataTableOutput(ns("Infos"))
-    #           ), style = "info"),
-    #         shinyBS::bsCollapsePanel("Specific peptides",
-    #           tagList(
-    #             uiOutput(ns("Warning_specificPeptidesInfos")),
-    #             DT::dataTableOutput(ns("specificPeptidesInfos"))
-    #           ), style = "primary"),
-    #         shinyBS::bsCollapsePanel("Shared peptides",
-    #           tagList(
-    #             uiOutput(ns("Warning_sharedPeptidesInfos")),
-    #             DT::dataTableOutput(ns("sharedPeptidesInfos"))
-    #           ), style = "primary")
-    #       )
-    #     }
-    #   } else if (omXplore::get_type(rv$dataIn) == "peptide") {
-    #     shinyBS::bsCollapse(id = ns("collapseVolcanoInfos"),
-    #       open = "Peptide",
-    #       multiple = TRUE,
-    #       shinyBS::bsCollapsePanel("Peptide",
-    #         tagList(
-    #           uiOutput(ns("Warning_Infos")),
-    #           DT::dataTableOutput(ns("Infos"))
-    #         ),
-    #         style = "info"
-    #       )
-    #     )
-    #   }
-    # })
+    output$quantiDT <- renderUI({
+      req(input$eventPointClicked)
+
+      
+#browser()
+      if (DaparToolshed::typeDataset(rv$dataIn) == "protein") {
+        if (!('adjacencymatrix' %in% names(rowData(rv$dataIn)))) {
+          tabsetPanel(id = ns("collapseVolcanoInfos"),
+            shiny::tabPanel("Protein",
+              tagList(
+                uiOutput(ns("Warning_Infos")),
+                DT::DTOutput(ns("Infos"))
+              )
+            )
+          )
+        } else {
+          tabsetPanel(id = ns("collapseVolcanoInfos"),
+           shiny::tabPanel("Protein",
+              tagList(
+                uiOutput(ns("Warning_Infos")),
+                DT::DTOutput(ns("Infos"))
+              )
+             ),
+            shiny::tabPanel("Specific peptides",
+              tagList(
+                uiOutput(ns("Warning_specificPeptidesInfos")),
+                DT::DTOutput(ns("specificPeptidesInfos"))
+              )), 
+            shiny::tabPanel("Shared peptides",
+              tagList(
+                uiOutput(ns("Warning_sharedPeptidesInfos")),
+                DT::DTOutput(ns("sharedPeptidesInfos"))
+              )
+            )
+            )
+        }
+      } else if (omXplore::get_type(rv$dataIn) == "peptide") {
+        tabsetPanel(id = ns("collapseVolcanoInfos"),
+          shiny::tabPanel("Peptide",
+            tagList(
+              uiOutput(ns("Warning_Infos")),
+              DT::DTOutput(ns("Infos"))
+            )
+          )
+        )
+      }
+    })
 
 
 
@@ -263,11 +251,11 @@ mod_volcanoplot_server <- function(
       prot <- GetExprsClickedProtein()
       prot.indice <- rownames(prot)
 
-      data <- getDataForExprs(rv$dataIn, 3)
+      data <- Build_enriched_qdata(rv$dataIn, 3)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
 
-      Xspec <- ExtractUniquePeptides(adjacencyMatrix(rv$dataIn))
-      Xshared <- adjacencyMatrix(rv$dataIn)
+      Xspec <- ExtractUniquePeptides(QFeatures::adjacencyMatrix(rv$dataIn))
+      Xshared <- QFeatures::adjacencyMatrix(rv$dataIn)
 
       i <- which(colnames(Xspec) == prot.indice)
       specificPeptidesIndices <- which(Xspec[, i] == 1)
@@ -328,11 +316,11 @@ mod_volcanoplot_server <- function(
       prot <- GetExprsClickedProtein()
       prot.indice <- rownames(prot)
 
-      data <- getDataForExprs(rv$dataIn, 3)
+      data <- Build_enriched_qdata(rv$dataIn, 3)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
 
 
-      Xspec <- ExtractUniquePeptides(adjacencyMatrix(rv$dataIn))
+      Xspec <- ExtractUniquePeptides(QFeatures::adjacencyMatrix(rv$dataIn))
 
       i <- which(colnames(Xspec) == prot.indice)
       peptidesIndices <- which(Xspec[, i] == 1)
@@ -384,16 +372,21 @@ mod_volcanoplot_server <- function(
 
 
       ind <- GetSortingIndices()
-      # browser()
+   
       this.index <- as.integer(strsplit(input$eventPointClicked, "_")[[1]][1])
       this.series.name <- strsplit(input$eventPointClicked, "_")[[1]][2]
 
       .digits <- 3
-      data <- getDataForExprs(rv$dataIn, .digits)
+      data <- Build_enriched_qdata(rv$dataIn, .digits)
       data <- data[, c(ind, (ind + ncol(data) / 2))]
 
-      index.g1 <- which((-log10(rv.custom$data$P_Value) >= thpval()
-      ) & (abs(rv.custom$data$logFC) >= as.numeric(thlogfc())))
+     
+      nn_logFC <- paste0(comparison()[1], '_vs_', comparison()[2], '_logFC')
+      nn_pval <- paste0(comparison()[1], '_vs_', comparison()[2], '_pval')
+       .dat <- rowData(rv$dataIn)$HypothesisTest
+      
+      index.g1 <- which((-log10(.dat[, nn_pval]) >= thpval()
+      ) & (abs(.dat[, nn_logFC]) >= as.numeric(thlogfc())))
 
       data.g1 <- data[index.g1, ]
       data.g2 <- data[-index.g1, ]
@@ -424,12 +417,31 @@ mod_volcanoplot_server <- function(
 
     ## -------------------------------------------------------------
     output$Infos <- DT::renderDT(server = TRUE, {
+      
       req(rv$dataIn)
+
       borders_index <- GetBorderIndices()
       data <- GetExprsClickedProtein()
-      c.tags <- BuildColorStyles(rv$dataIn)$tags
-      c.colors <- BuildColorStyles(rv$dataIn)$colors
+      
+      
+      colors <- omXplore::custom_metacell_colors()
+      c.tags <- names(colors)
+      c.colors <- unlist(colors, use.names = FALSE)
+     
+      .type <- DaparToolshed::typeDataset(rv$dataIn)
+      c.tags <- names(BuildColorStyles(.type))
+      c.colors <- unname(BuildColorStyles(.type))
 
+      range.invisible <- c(((1 + (ncol(data)) / 2)):ncol(data))
+      
+      .colDef <- list(
+          list(
+            targets = range.invisible,
+            visible = FALSE
+          )
+        )
+        
+   
       dt <- DT::datatable(
         data,
         extensions = c("Scroller"),
@@ -440,17 +452,12 @@ mod_volcanoplot_server <- function(
           displayLength = 20,
           ordering = FALSE,
           header = FALSE,
-          columnDefs = list(
-            list(
-              targets = c(((ncol(data) / 2) + 1):(ncol(data))),
-              visible = FALSE
-            )
-          )
+          columnDefs = .colDef
         )
       ) |>
         DT::formatStyle(
           colnames(data)[1:(ncol(data) / 2)],
-          colnames(data)[((ncol(data) / 2) + 1):(ncol(data))],
+          colnames(data)[range.invisible],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) |>
         DT::formatStyle(borders_index, borderLeft = "3px solid #000000")
@@ -527,24 +534,12 @@ volcanoplot <- function(
   server <- function(input, output) {
     mod_volcanoplot_server(
       id = "volcano",
-      dataIn = reactive({
-        dataIn
-      }),
-      comparison = reactive({
-        comparison
-      }),
-      group = reactive({
-        group
-      }),
-      thlogfc = reactive({
-        thlogfc
-      }),
-      thpval = reactive({
-        thpval
-      }),
-      tooltip = reactive({
-        tooltip
-      })
+      dataIn = reactive({dataIn}),
+      comparison = reactive({comparison}),
+      group = reactive({group}),
+      thlogfc = reactive({thlogfc}),
+      thpval = reactive({thpval}),
+      tooltip = reactive({tooltip})
       # fdr = reactive({3.8})
     )
   }

@@ -635,7 +635,6 @@ mod_metacell_tree_server <- function(
 
 
 
-# This css is adapted from: https://codepen.io/willpower/pen/pJKdej
 css <- "
 * {
     margin: 0;
@@ -692,6 +691,73 @@ ul {
     text-decoration: none;
     width: auto;
 }"
+
+
+# 
+# 
+# # This css is adapted from: https://codepen.io/willpower/pen/pJKdej
+# css <- "
+# /*
+# * {
+#     margin: 0;
+#     padding: 0;
+#     box-sizing: border-box;
+# }
+# 
+# body {
+#     padding: 00px;
+#     font-family: helvetica, arial, sans-serif;
+# }
+# */
+# 
+# .wtree {
+#     margin-top: 30px;
+# }
+# .wtree ul {
+#     list-style-type: none;
+#     margin: -19px 0px 30px 10px;
+# }
+# .wtree li {
+#     list-style-type: none;
+#     margin: 0px 0px -19px 10px;
+#     position: relative;
+# }
+# .wtree li:before {
+#     content: '';
+#     position: absolute;
+#     top: -5px;
+#     left: -25px;
+#     border-left: 1px solid #ddd;
+#     border-bottom: 1px solid #ddd;
+#     width: 20px;
+#     height: 23px;
+# }
+# .wtree li:after {
+#     position: absolute;
+#     content: '';
+#     top: 17px;
+#     left: -25px;
+#     border-left: 1px solid #ddd;
+#     border-top: 1px solid #ddd;
+#     width: 20px;
+#     height: 95%;
+# }
+# .wtree li:last-child:after {
+#     display: none;
+#     padding: 0px 0px 10px 0px;
+# }
+# .wtree li span {
+#     display: inline-block;
+#     border: 0px solid #ddd;
+#     border-radius: 10px;
+#     text-align: center;
+#     vertical-align: middle;
+#     padding: 0px 5px 0px 0px;
+#     color: #888;
+#     text-decoration: none;
+#     width: 250px;
+# }"
+
 
 
 

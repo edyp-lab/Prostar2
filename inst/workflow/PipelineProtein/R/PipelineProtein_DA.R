@@ -1006,7 +1006,6 @@ PipelineProtein_DA_server <- function(id,
       widget <- tags$div(
         mod_set_pval_threshold_ui(ns("Title"))
         )
-
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
       

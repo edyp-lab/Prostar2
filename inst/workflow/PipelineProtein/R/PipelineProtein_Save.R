@@ -82,11 +82,11 @@ PipelineProtein_Save_server <- function(id,
       )
     })
     
-    # output$dl_ui <- renderUI({
-    #   req(config@mode == 'process')
-    #   
-    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    # })
+    output$dl_ui <- renderUI({
+      req(config@mode == 'process')
+
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    })
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -98,7 +98,7 @@ PipelineProtein_Save_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
-      #Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
+      Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({rv$dataIn}))
       })
     })
     

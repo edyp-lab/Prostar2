@@ -307,13 +307,13 @@ mod_Agregation_server <- function(
     })
 
     output$peptideBarplot <- highcharter::renderHighchart({
-      req(adjacencyMatrix(last_assay(rv$dataIn)))
+      req(QFeatures::adjacencyMatrix(last_assay(rv$dataIn)))
       withProgress(
         message = "Rendering plot, pleast wait...",
         detail = "",
         value = 1,
         {
-          X <- adjacencyMatrix(last_assay(rv$dataIn))
+          X <- QFeatures::adjacencyMatrix(last_assay(rv$dataIn))
           if (is.null(X)) {
             .last <- last_assay(rv$dataIn)
             X <- makeAdjacencyMatrix(rowData(.last)[, "Protein_group_IDs"])

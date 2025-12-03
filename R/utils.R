@@ -52,7 +52,6 @@ add.resourcePath <- function(){
 
 
 
-
 #' @title
 #' xxxx
 #'
