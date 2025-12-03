@@ -983,20 +983,16 @@ PipelineProtein_DA_server <- function(id,
         ),
         content = div(id = ns('div_content_FDR'),
           uiOutput(ns("FDR_nbSelectedItems_ui")),
-          fluidRow(
-            column(width = 4,
-              withProgress(message = "", detail = "", value = 1, {
+          withProgress(message = "", detail = "", value = 1, {
             uiOutput(ns('FDR_volcanoplot_UI'))
-          })),
-          column(width = 8,
-            downloadButton(ns("FDR_download_SelectedItems_UI"), 
+          }),
+          downloadButton(ns("FDR_download_SelectedItems_UI"), 
             "Selected final results (Excel file)", class = "btn-info"),
             checkboxInput(ns('FDR_viewAdjPval'), 
               'View adjusted p-value', 
               value = rv.widgets$FDR_viewAdjPval),
           DT::DTOutput(ns("FDR_selectedItems_UI"))
-          )
-          )
+
         )
       )
     })

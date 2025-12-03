@@ -268,8 +268,18 @@ mod_volcanoplot_server <- function(
     output$sharedPeptidesInfos <- DT::renderDT(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_sharedPeptidesInfos()
-      c.tags <- BuildColorStyles(rv$dataIn)$tags
-      c.colors <- BuildColorStyles(rv$dataIn)$colors
+      .type <- DaparToolshed::typeDataset(rv$dataIn)
+      c.tags <- names(BuildColorStyles(.type))
+      c.colors <- unname(BuildColorStyles(.type))
+      
+      range.invisible <- c(((1 + (ncol(data)) / 2)):ncol(data))
+      
+      .colDef <- list(
+        list(
+          targets = range.invisible,
+          visible = FALSE
+        )
+      )
 
       dt <- DT::datatable(
         data,
@@ -281,17 +291,12 @@ mod_volcanoplot_server <- function(
           displayLength = 20,
           ordering = FALSE,
           server = FALSE,
-          columnDefs = list(
-            list(
-              targets = c(((ncol(data) / 2) + 1):(ncol(data))),
-              visible = FALSE
-            )
-          )
+          columnDefs = .colDef
         )
       ) |>
         DT::formatStyle(
           colnames(data)[1:(ncol(data) / 2)],
-          colnames(data)[((ncol(data) / 2) + 1):(ncol(data))],
+          colnames(data)[range.invisible],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) |>
         DT::formatStyle(GetBorderIndices(), borderLeft = "3px solid #000000")
@@ -332,9 +337,20 @@ mod_volcanoplot_server <- function(
     output$specificPeptidesInfos <- DT::renderDT(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_specificPeptidesInfos()
-      c.tags <- BuildColorStyles(rv$dataIn)$tags
-      c.colors <- BuildColorStyles(rv$dataIn)$colors
-
+      
+      
+      .type <- DaparToolshed::typeDataset(rv$dataIn)
+      c.tags <- names(BuildColorStyles(.type))
+      c.colors <- unname(BuildColorStyles(.type))
+      
+      range.invisible <- c(((1 + (ncol(data)) / 2)):ncol(data))
+      
+      .colDef <- list(
+        list(
+          targets = range.invisible,
+          visible = FALSE
+        )
+      )
       dt <- DT::datatable(
         data,
         extensions = c("Scroller"),
@@ -344,19 +360,12 @@ mod_volcanoplot_server <- function(
           blengthChange = FALSE,
           displayLength = 20,
           ordering = FALSE,
-          columnDefs = list(
-            list(
-              targets = c(
-                ((ncol(data) / 2) + 1):(ncol(data))
-              ),
-              visible = FALSE
-            )
-          )
+          columnDefs = .colDef
         )
       ) |>
         DT::formatStyle(
           colnames(data)[1:(ncol(data) / 2)],
-          colnames(data)[((ncol(data) / 2) + 1):(ncol(data))],
+          colnames(data)[range.invisible],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) |>
         DT::formatStyle(GetBorderIndices(), borderLeft = "3px solid #000000")
@@ -423,11 +432,6 @@ mod_volcanoplot_server <- function(
       borders_index <- GetBorderIndices()
       data <- GetExprsClickedProtein()
       
-      
-      colors <- omXplore::custom_metacell_colors()
-      c.tags <- names(colors)
-      c.colors <- unlist(colors, use.names = FALSE)
-     
       .type <- DaparToolshed::typeDataset(rv$dataIn)
       c.tags <- names(BuildColorStyles(.type))
       c.colors <- unname(BuildColorStyles(.type))
