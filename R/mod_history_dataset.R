@@ -71,19 +71,18 @@ history_dataset_server <- function(
     Get_QFeatures_History <- reactive({
       req(rv$dataIn)
       
-      df <- data.frame(
-        Name = "-",
-        History = "-"
-      )
+      df <- NULL
       
       for (i in (names(rv$dataIn))){
         .se <- rv$dataIn[[i]]
         se_history <- "-"
       
         tmp <- data.frame(
-          Name = "-",
+          Process = "-",
+          Step = "-",
           History = "-"
         )
+        
         
       if (!is.null(DaparToolshed::paramshistory(.se))) {
         se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
@@ -91,7 +90,8 @@ history_dataset_server <- function(
         })
         
         tmp <- data.frame(
-          Name = names(se_history),
+          Process = i,
+          Step = names(se_history),
           History = unlist(se_history)
         )
       }

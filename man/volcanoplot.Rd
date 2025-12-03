@@ -81,18 +81,17 @@ df <- data.frame(
   index = as.character(rownames(obj[[2]]))
 )
 colnames(df) <- c("x", "y", "index")
-tooltipSlot <- c("Fasta_headers", "Sequence_length")
-df <- cbind(df, colData(obj[[2]])[, tooltipSlot])
-colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
-if (ncol(df) > 3) {
-  colnames(df)[seq.int(from = 4, to = ncol(df))] <-
-    paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
-      sep = ""
-    )
-}
+#tooltipSlot <- c("Fasta_headers", "Sequence_length")
+#df <- cbind(df, colData(obj[[2]])[, tooltipSlot])
+#colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
+#if (ncol(df) > 3) {
+#  colnames(df)[seq.int(from = 4, to = ncol(df))] <-
+#    paste("tooltip_", colnames(df)[seq.int(from = 4, to = ncol(df))],
+#      sep = ""
+#    )
+#}
 hc_clickFunction <- JS("function(event) {
-Shiny.onInputChange('eventPointClicked',
-[this.index]+'_'+ [this.series.name]);}")
+Shiny.onInputChange('eventPointClicked',[this.index]+'_'+ [this.series.name]);}")
 cond <- c("25fmol", "10fmol")
 diffAnaVolcanoplot_rCharts(
   df,
@@ -101,7 +100,14 @@ diffAnaVolcanoplot_rCharts(
   conditions = cond,
   clickFunction = hc_clickFunction
 )
-shiny::runApp(volcanoplot(xxxx))
+
+
+shiny::runApp(
+volcanoplot(df,
+    comparison = "25fmol_vs_10fmol",
+    group,
+    thlogfc = 2.5,
+    thpval = 1))
 }
 
 }

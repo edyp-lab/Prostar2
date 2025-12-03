@@ -21,7 +21,7 @@ mod_qMetacell_FunctionFilter_Generator_server(
      setNames(nm = c("Count", "Percentage"))
  }),
   operator = reactive({
-     setNames(nm = SymFilteringOperators())
+     setNames(nm = DaparToolshed::SymFilteringOperators())
  }),
   remoteReset = reactive({
      0
@@ -36,7 +36,7 @@ mod_qMetacell_FunctionFilter_Generator(
   conds,
   keep_vs_remove = setNames(nm = c("delete", "keep")),
   val_vs_percent = setNames(nm = c("Count", "Percentage")),
-  operator = setNames(nm = SymFilteringOperators()),
+  operator = setNames(nm = DaparToolshed::SymFilteringOperators()),
   remoteReset = reactive({
      0
  }),
