@@ -116,11 +116,11 @@ PipelineProtein_Description_server <- function(id,
     
 
     output$Description_infos_dataset_UI <- renderUI({
-      req(rv$dataIn)
+      req(rv.custom$result_open_dataset()$dataset)
       
         infos_dataset_server(
             id = "Description_infosdataset",
-            dataIn = reactive({rv$dataIn})
+            dataIn = reactive({rv.custom$result_open_dataset()$dataset})
           )
         
         infos_dataset_ui(id = ns("Description_infosdataset"))
