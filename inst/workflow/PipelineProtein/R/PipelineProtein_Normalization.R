@@ -136,7 +136,9 @@ PipelineProtein_Normalization_server <- function(id,
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
+        sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
+        ),
         content = div(id = ns('div_content'),
           div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
@@ -148,6 +150,15 @@ PipelineProtein_Normalization_server <- function(id,
 
     })
 
+    output$open_dataset_UI <- renderUI({
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf"
+      )
+      
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    })
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
@@ -156,8 +167,9 @@ PipelineProtein_Normalization_server <- function(id,
         shiny::incProgress(0.5)
         
       rv$dataIn <- dataIn()
-      print(paste0(id, " : -----------req(grepl('Description', btnEvents()))---------"))
-      print(dataIn())
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
@@ -507,8 +519,8 @@ PipelineProtein_Normalization_server <- function(id,
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
-        content = tagList()
+        sidebar = tagList(p('test')),
+        content = tagList(p('test'))
       )
     })
     

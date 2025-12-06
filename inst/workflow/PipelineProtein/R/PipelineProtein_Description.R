@@ -47,7 +47,9 @@ PipelineProtein_Description_server <- function(id,
   # By default, this list is empty for the Description module
   # but it can be customized
   widgets.default.values <- NULL
-  rv.custom.default.values <- NULL
+  rv.custom.default.values <- list(
+    result_open_dataset = reactive({NULL})
+    )
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -84,21 +86,54 @@ PipelineProtein_Description_server <- function(id,
       MagellanNTK::process_layout(
         session,
         ns = NS(id),
-        sidebar = NULL,
+        sidebar = tagList(
+          ),
         content = tagList(
+          uiOutput(ns('open_dataset_UI')),
           if (file.exists(file))
             includeMarkdown(file)
           else
             p('No Description available'),
+          uiOutput(ns('Description_infos_dataset_UI'))
         )
       )
     })
     
+    
+    
+    
+    output$open_dataset_UI <- renderUI({
+      #browser()
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+      
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    })
+    
 
+    output$Description_infos_dataset_UI <- renderUI({
+      req(rv$dataIn)
+      
+        infos_dataset_server(
+            id = "Description_infosdataset",
+            dataIn = reactive({rv$dataIn})
+          )
+        
+        infos_dataset_ui(id = ns("Description_infosdataset"))
+      })
+    
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
+      
       rv$dataIn <- dataIn()
-
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+        
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED

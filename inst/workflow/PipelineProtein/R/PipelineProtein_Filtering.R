@@ -122,7 +122,6 @@ PipelineProtein_Filtering_server <- function(id,
     deleted.numeric = NULL,
     tmp.filtering1 = reactive({NULL}),
     tmp.filtering2 = reactive({NULL}),
-    history = list(),
     
     indices = NULL,
     functionFilter = NULL,
@@ -364,7 +363,7 @@ PipelineProtein_Filtering_server <- function(id,
       names(rv.custom$dataIn1)[length(rv.custom$dataIn1)] <- 'qMetacellFiltering'
       
       # Add params
-      #par <- rv.custom$funFilter()$ll.widgets.value
+
       query <- rv.custom$funFilter()$value$ll.query
       i <- length(rv.custom$dataIn1)
       .history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]

@@ -88,7 +88,7 @@ history_dataset_server <- function(
         se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
           ConvertListToHtml(paste0(names(x), " = ", x))
         })
-        
+       # browser()
         tmp <- data.frame(
           Process = i,
           Step = names(se_history),
