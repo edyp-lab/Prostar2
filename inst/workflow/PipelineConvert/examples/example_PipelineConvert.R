@@ -1,18 +1,16 @@
-
+library(omXplore)
 library(shiny)
-library(shinydashboard)
-library(shinydashboardPlus)
+library(waiter)
+library(highcharter)
 library(MagellanNTK)
 library(Prostar2)
 library(DaparToolshed)
-options(shiny.fullstacktrace = TRUE)
+library(bs4Dash)
+library(shinyFeedback)
+library(bslib)
 
-
-data(Exp1_R25_prot, package = 'DaparToolshedData')
-obj <- Exp1_R25_prot
-wf.name <- 'PipelineConvert_Convert'
+obj <- NULL
+wf.name <- 'PipelineConvert'
 wf.path <- system.file('workflow/PipelineConvert', package = 'Prostar2')
-
-proc_workflowApp(wf.name, wf.path, dataIn = Exp1_R25_prot)
-
 MagellanNTK(obj, wf.path, wf.name)
+
