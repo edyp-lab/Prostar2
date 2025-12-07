@@ -130,7 +130,11 @@ PipelineProtein_Description_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
       
-      rv$dataIn <- dataIn()
+      # On envoie un objet vide, fictif car sinon l'etape ne se valide
+      # pas et on ne peut pas faire le convert
+      rv$dataIn <- QFeatures::QFeatures()
+      rv$dataIn <- addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
+      
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
         

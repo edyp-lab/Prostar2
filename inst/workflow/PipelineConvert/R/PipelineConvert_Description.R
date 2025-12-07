@@ -131,7 +131,7 @@ PipelineConvert_Description_server <- function(id,
       
       # On envoie un objet vide, fictif car sinon l'etape ne se valide
       # pas et on ne peut pas faire le convert
-      rv$dataIn <- 3
+      rv$dataIn <- MultiAssayExperiment::MultiAssayExperiment()
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
       browser()

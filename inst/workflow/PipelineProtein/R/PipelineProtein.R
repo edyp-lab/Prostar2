@@ -31,8 +31,8 @@ PipelineProtein_conf <- function(){
   MagellanNTK::Config(
   mode = 'pipeline',
   fullname = 'PipelineProtein',
-  steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest', 'DA'),
-  mandatory = c(FALSE, FALSE, FALSE, FALSE, FALSE)
+  steps = c('Convert', 'Filtering', 'Normalization', 'Imputation', 'HypothesisTest', 'DA'),
+  mandatory = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)
 )
 }
 
