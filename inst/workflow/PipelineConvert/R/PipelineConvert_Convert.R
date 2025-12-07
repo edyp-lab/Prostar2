@@ -917,7 +917,7 @@ PipelineConvert_Convert_server <- function(id,
         .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
       .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
       
-      
+  
       # Create QFeatures dataset file
       rv$dataIn <- DaparToolshed::createQFeatures(
         file = rv.widgets$SelectFile_file$name,

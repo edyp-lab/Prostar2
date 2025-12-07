@@ -103,7 +103,6 @@ PipelineConvert_Description_server <- function(id,
     
     
     output$open_dataset_UI <- renderUI({
-      #browser()
       rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
         id = "open_dataset",
         class = 'QFeatures',
@@ -130,10 +129,12 @@ PipelineConvert_Description_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
       
-      rv$dataIn <- dataIn()
+      # On envoie un objet vide, fictif car sinon l'etape ne se valide
+      # pas et on ne peut pas faire le convert
+      rv$dataIn <- 3
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      
+      browser()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
