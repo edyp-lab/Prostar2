@@ -77,13 +77,14 @@ PipelineConvert_Save_server <- function(id,
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(uiOutput(ns('dl_ui'))),
-        content = tagList()
+        sidebar = tagList(),
+        content = tagList(uiOutput(ns('dl_ui')))
       )
     })
     
     output$dl_ui <- renderUI({
-      req(config@mode == 'pipeline')
+      
+      req(config@mode == 'process')
       
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
