@@ -74,8 +74,6 @@ PipelineConvert_Description_server <- function(id,
     
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
       
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -87,9 +85,10 @@ PipelineConvert_Description_server <- function(id,
         session,
         ns = NS(id),
         sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
         ),
         content = tagList(
-          uiOutput(ns('open_dataset_UI')),
+          
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -113,6 +112,12 @@ PipelineConvert_Description_server <- function(id,
       MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
+    observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
+      #browser()
+      print(rv.custom$result_open_dataset()$trigger)
+      print(rv.custom$result_open_dataset()$dataset)
+    })
+    
     
     output$Description_infos_dataset_UI <- renderUI({
       req(rv.custom$result_open_dataset()$dataset)
@@ -128,9 +133,13 @@ PipelineConvert_Description_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
+      rv.custom$result_open_dataset()$dataset
       
       # On envoie un objet vide, fictif car sinon l'etape ne se valide
       # pas et on ne peut pas faire le convert
+      rv$dataIn <- QFeatures::QFeatures()
+      rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
+      
       rv$dataIn <- MultiAssayExperiment::MultiAssayExperiment()
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset

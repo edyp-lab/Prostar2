@@ -74,17 +74,14 @@ PipelineProtein_Description_server <- function(id,
     
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
-      
+     
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
         'md', 
         paste0(id, '.Rmd')))
      
-      MagellanNTK::process_layout(
-        session,
+      MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
           uiOutput(ns('open_dataset_UI'))
@@ -136,6 +133,7 @@ PipelineProtein_Description_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
       rv.custom$result_open_dataset()$dataset
+      
       # On envoie un objet vide, fictif car sinon l'etape ne se valide
       # pas et on ne peut pas faire le convert
       rv$dataIn <- QFeatures::QFeatures()

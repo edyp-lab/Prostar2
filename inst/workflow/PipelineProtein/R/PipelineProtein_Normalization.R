@@ -101,9 +101,9 @@ PipelineProtein_Normalization_server <- function(id,
   
   rv.custom.default.values <- list(
     tmp.dataset = NULL,
-    #init.dataset = NULL,
     history = NULL,
-    selectProt = reactive({NULL})
+    selectProt = reactive({NULL}),
+    result_open_dataset = reactive({NULL})
     )
   
   ###-------------------------------------------------------------###
@@ -144,32 +144,70 @@ PipelineProtein_Normalization_server <- function(id,
           if (file.exists(file))
             includeMarkdown(file)
           else
-            p('No Description available')
+            p('No Description available'),
+          uiOutput(ns('Description_infos_dataset_UI'))
         )
       )
 
     })
 
+    
+    
     output$open_dataset_UI <- renderUI({
+      req(session$userData$wf_mode == 'process')
+      
       rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
         id = "open_dataset",
         class = 'QFeatures',
-        extension = "qf"
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
       )
       
-      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
+    
+    
+    observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
+      #browser()
+      print(rv.custom$result_open_dataset()$trigger)
+      print(rv.custom$result_open_dataset()$dataset)
+    })
+    
+    
+    output$Description_infos_dataset_UI <- renderUI({
+      req(session$userData$wf_mode == 'process')
+      
+      req(rv.custom$result_open_dataset()$trigger)
+      
+      infos_dataset_server(
+        id = "Description_infosdataset",
+        dataIn = reactive({rv.custom$result_open_dataset()$dataset})
+      )
+      
+      infos_dataset_ui(id = ns("Description_infosdataset"))
+    })
+    
+    
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
+      rv.custom$result_open_dataset()$dataset
       req(dataIn())
+      
+      rv$dataIn <- dataIn()
+      
+      
+      if (session$userData$wf_mode == 'process'){
+      rv$dataIn <- QFeatures::QFeatures()
+      rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
+      
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      }
+  
       shiny::withProgress(message = paste0("xxx process", id), {
         shiny::incProgress(0.5)
         
-      rv$dataIn <- dataIn()
-      if(!is.null(rv.custom$result_open_dataset()$dataset))
-        rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
