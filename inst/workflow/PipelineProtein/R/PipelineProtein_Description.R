@@ -87,9 +87,10 @@ PipelineProtein_Description_server <- function(id,
         session,
         ns = NS(id),
         sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
           ),
         content = tagList(
-          uiOutput(ns('open_dataset_UI')),
+          
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -100,41 +101,48 @@ PipelineProtein_Description_server <- function(id,
     })
     
     
-    
+    rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+      id = "open_dataset",
+      class = 'QFeatures',
+      extension = "qf",
+      remoteReset = reactive({remoteReset()})
+    )
     
     output$open_dataset_UI <- renderUI({
-      #browser()
-      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
-        id = "open_dataset",
-        class = 'QFeatures',
-        extension = "qf",
-        remoteReset = reactive({remoteReset()})
-      )
-      
       MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
 
+    observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
+      #browser()
+      print(rv.custom$result_open_dataset()$trigger)
+      print(rv.custom$result_open_dataset()$dataset)
+    })
+    
+    
     output$Description_infos_dataset_UI <- renderUI({
-      req(rv.custom$result_open_dataset()$dataset)
+      req(rv.custom$result_open_dataset()$trigger)
       
-        infos_dataset_server(
-            id = "Description_infosdataset",
-            dataIn = reactive({rv.custom$result_open_dataset()$dataset})
-          )
-        
-        infos_dataset_ui(id = ns("Description_infosdataset"))
+      infos_dataset_server(
+        id = "Description_infosdataset",
+        dataIn = reactive({rv.custom$result_open_dataset()$dataset})
+      )
+      
+      infos_dataset_ui(id = ns("Description_infosdataset"))
       })
+    
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-      
+      rv.custom$result_open_dataset()$dataset
       # On envoie un objet vide, fictif car sinon l'etape ne se valide
       # pas et on ne peut pas faire le convert
       rv$dataIn <- QFeatures::QFeatures()
-      rv$dataIn <- addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
+      rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
       
+      rv$dataIn <- NULL
+        
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
         

@@ -12,6 +12,7 @@
 #' @examples
 #' if (interactive()){
 #' library(DaparToolshed)
+#' library(MagellanNTK)
 #' library(Prostar2)
 #' library(spsComps)
 #' shiny::runApp(Prostar2::convert_dataset())
@@ -67,6 +68,12 @@ convert_dataset_server <- function(
     )
     
     session$userData$workflow.path <- path
+    session$userData$workflow.name <- "PipelineConvert"
+    session$userData$usermod <- mode
+    #session$userData$verbose <- verbose
+    #session$userData$funcs <- rv.core$funcs
+    
+    
 
     rv$convert <- nav_process_server(
       id = "PipelineConvert_Convert",

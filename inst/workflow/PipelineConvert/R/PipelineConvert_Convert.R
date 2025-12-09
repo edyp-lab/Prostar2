@@ -160,15 +160,16 @@ PipelineConvert_Convert_server <- function(id,
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = div(id = ns('div_process_layout_sidebar')),
-        content = tagList(
+        sidebar = div(id = ns('div_process_layout_sidebar'), p('toto')),
+        content = div(id = ns('div_content'),
+          div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)
           else
             p('No Description available')
         )
       )
-      
+
     })
     
    
@@ -200,24 +201,25 @@ PipelineConvert_Convert_server <- function(id,
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
+        sidebar = tagList(
+          uiOutput(ns('SelectFile_file_ui')),
+          uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
+          uiOutput(ns('SelectFile_software_ui')),
+          uiOutput(ns('SelectFile_typeOfData_ui')),
+          uiOutput(ns('SelectFile_checkDataLogged_ui')),
+          uiOutput(ns('SelectFile_replaceAllZeros_ui')),
+          uiOutput(ns('SelectFile_btn_previewfile_ui')),
+          uiOutput(ns('SelectFile_file_ui')),
+          uiOutput(ns('SelectFile_ManageXlsFiles_ui')),
+          uiOutput(ns('SelectFile_software_ui')),
+          uiOutput(ns('SelectFile_typeOfData_ui')),
+          uiOutput(ns('SelectFile_checkDataLogged_ui')),
+          uiOutput(ns('SelectFile_replaceAllZeros_ui'))
+        ),
         content = tagList(
-          fluidRow(
-            column(width = 5, uiOutput(ns('SelectFile_file_ui'))),
-            column(width = 3, uiOutput(ns('SelectFile_ManageXlsFiles_ui'))),
-            ),
-           fluidRow(
-            column(width = 3, uiOutput(ns('SelectFile_software_ui'))),
-            column(width = 3, uiOutput(ns('SelectFile_typeOfData_ui'))),
-            column(width = 3, uiOutput(ns('SelectFile_checkDataLogged_ui')))
-          ),
-          fluidRow(
-            column(width = 3, uiOutput(ns('SelectFile_replaceAllZeros_ui'))),
-            column(width = 3, uiOutput(ns('SelectFile_btn_previewfile_ui')),
-            column(width = 3, uiOutput(ns('SelectFile_previewfile_ui')))
+          uiOutput(ns('SelectFile_btn_previewfile_ui')),
+          uiOutput(ns('SelectFile_previewfile_ui'))
           )
-            )
-        )
       )
     })
     
@@ -477,13 +479,13 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-          ),
-        content = tagList(
           uiOutput(ns("DataId_btn_validate_ui")),
           uiOutput(ns('DataId_datasetId_ui')),
-            uiOutput(ns("DataId_parentProteinID_ui")),
+          uiOutput(ns("DataId_parentProteinID_ui")),
           uiOutput(ns('helpTextDataID')),
-          uiOutput(ns('DataId_warningNonUniqueID_ui')),
+          uiOutput(ns('DataId_warningNonUniqueID_ui'))
+          ),
+        content = tagList(
           uiOutput(ns("DataId_show_previewdatasetID_ui")),
           uiOutput(ns("DataId_previewdatasetID_ui")),
           uiOutput(ns("DataId_show_previewProteinID_ui"))
@@ -654,9 +656,10 @@ PipelineConvert_Convert_server <- function(id,
     output$ExpandFeatData <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
+        sidebar = tagList(
+          uiOutput(ns("ExpandFeatData_btn_validate_ui"))
+          ),
         content = tagList(
-          uiOutput(ns("ExpandFeatData_btn_validate_ui")),
           uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;"),
           uiOutput(ns('ExpandFeatData_idMethod_ui'), style = "margin-right: 30px;"),
           uiOutput(ns("ExpandFeatData_inputGroup_ui")),

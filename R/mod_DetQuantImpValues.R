@@ -47,21 +47,11 @@ mod_DetQuantImpValues_ui <- function(id) {
 #'
 mod_DetQuantImpValues_server <- function(
     id,
-    dataIn = reactive({
-      NULL
-    }),
-    quant = reactive({
-      1
-    }),
-    factor = reactive({
-      1
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+    dataIn = reactive({NULL}),
+    quant = reactive({1}),
+    factor = reactive({1}),
+    remoteReset = reactive({0}),
+    is.enabled = reactive({TRUE})) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
