@@ -158,7 +158,7 @@ PipelineConvert_Convert_server <- function(id,
         paste0(id, '.Rmd')))
       
       
-      MagellanNTK::process_layout(session,
+      MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = div(id = ns('div_process_layout_sidebar')),
         content = div(id = ns('div_content'),
@@ -198,7 +198,7 @@ PipelineConvert_Convert_server <- function(id,
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
       
-      MagellanNTK::process_layout(session,
+      MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = tagList(
           uiOutput(ns('SelectFile_file_ui')),
@@ -468,7 +468,7 @@ PipelineConvert_Convert_server <- function(id,
       .style <- "display:inline-block; vertical-align: middle; 
       padding-right: 20px;"
       
-      MagellanNTK::process_layout(session,
+      MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = tagList(
           ),
@@ -646,7 +646,7 @@ PipelineConvert_Convert_server <- function(id,
     # >>> START ------------- Code for step 3 UI---------------
     
     output$ExpandFeatData <- renderUI({
-      MagellanNTK::process_layout(session,
+      MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
@@ -774,7 +774,7 @@ PipelineConvert_Convert_server <- function(id,
     # >>> START ------------- Code for step 4 UI---------------
     
     output$Design <- renderUI({
-      MagellanNTK::process_layout(session,
+      MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
@@ -847,7 +847,7 @@ PipelineConvert_Convert_server <- function(id,
     
       
       output$Save <- renderUI({
-        MagellanNTK::process_layout(session,
+        MagellanNTK::process_layout_process(session,
           ns = NS(id),
           sidebar = tagList(),
           content = tagList(
