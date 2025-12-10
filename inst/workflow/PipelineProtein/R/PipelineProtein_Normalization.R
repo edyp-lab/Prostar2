@@ -192,7 +192,7 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       rv.custom$result_open_dataset()$dataset
-      req(dataIn())
+      #req(dataIn())
       
       rv$dataIn <- dataIn()
       

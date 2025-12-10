@@ -79,7 +79,7 @@ PipelineConvert_Convert_ui <- function(id) {
 #' @param remoteReset xxx
 #'
 #' @importFrom shinyjs disabled info
-#' @importFom stats setNames
+#' @importFrom stats setNames
 #' @importFrom utils read.csv
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
@@ -128,6 +128,7 @@ PipelineConvert_Convert_server <- function(id,
     design = NULL,
     name = NULL
   )
+
   
   ### -------------------------------------------------------------###
   ###                                                             ###
@@ -137,19 +138,18 @@ PipelineConvert_Convert_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Insert necessary code which is hosted by MagellanNTK
-    # DO NOT MODIFY THIS LINE
+    
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
       w.names = names(widgets.default.values),
       rv.custom.names = names(rv.custom.default.values)
     )
+    
     eval(str2expression(core.code))
     add.resourcePath()
-
-    # >>> START ------------- Code for Description UI---------------
     
+
     output$Description <- renderUI({
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -161,7 +161,7 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = div(id = ns('div_process_layout_sidebar')),
-        content = tagList(
+        content = div(id = ns('div_content'),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -928,17 +928,23 @@ PipelineConvert_Convert_server <- function(id,
         force.na = rv.widgets$SelectFile_replaceAllZeros,
         software = rv.widgets$SelectFile_software)
       #browser()
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- list(data = rv$dataIn, name = rv.custom$name)
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+    
       
       Prostar2::download_dataset_server('createQuickLink', 
         dataIn = reactive({rv$dataIn}),
         filename = analysis_name)
       
       })
-
+      
+      
+      
+      # DO NOT MODIFY THE THREE FOLLOWINF LINES
+      dataOut$trigger <- MagellanNTK::Timestamp()
+      dataOut$value <- rv$dataIn
+      dataOut$name = rv.custom$name
+      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      
+     
     })
     
     # <<< END ------------- Code for Save UI---------------

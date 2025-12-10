@@ -35,6 +35,7 @@ These functions are inspired by the functions run_workflow() in the package
 \examples{
 if (interactive()){
 library(DaparToolshed)
+library(MagellanNTK)
 library(Prostar2)
 library(spsComps)
 shiny::runApp(Prostar2::convert_dataset())
