@@ -175,15 +175,20 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     output$Description_infos_dataset_UI <- renderUI({
-      req(session$userData$wf_mode == 'process')
+      #req(session$userData$wf_mode == 'process')
       
-      req(rv.custom$result_open_dataset()$trigger)
+      req(rv.custom$result_open_dataset()$trigger || dataIn())
+      
+      if(!is.null(rv.custom$result_open_dataset()$trigger))
+        tmp <- rv.custom$result_open_dataset()$dataset
+      else if (!is.null(dataIn()))
+        tmp <- dataIn()
       
       infos_dataset_server(
         id = "Description_infosdataset",
-        dataIn = reactive({rv.custom$result_open_dataset()$dataset})
+        dataIn = reactive({tmp})
       )
-      
+
       infos_dataset_ui(id = ns("Description_infosdataset"))
     })
     
@@ -197,14 +202,14 @@ PipelineProtein_Normalization_server <- function(id,
       rv$dataIn <- dataIn()
       
       
-      if (session$userData$wf_mode == 'process'){
-      rv$dataIn <- QFeatures::QFeatures()
-      rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
+      #if (session$userData$wf_mode == 'process'){
+      #rv$dataIn <- QFeatures::QFeatures()
+      #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
       
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      }
-  
+     #}
+
       shiny::withProgress(message = paste0("xxx process", id), {
         shiny::incProgress(0.5)
         
