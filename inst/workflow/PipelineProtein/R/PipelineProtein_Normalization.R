@@ -155,7 +155,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     output$open_dataset_UI <- renderUI({
       req(session$userData$wf_mode == 'process')
-      
+      req(is.null(dataIn()))
       rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
         id = "open_dataset",
         class = 'QFeatures',
@@ -165,18 +165,9 @@ PipelineProtein_Normalization_server <- function(id,
       
     MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
-    
-    
-    observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
-      #browser()
-      print(rv.custom$result_open_dataset()$trigger)
-      print(rv.custom$result_open_dataset()$dataset)
-    })
-    
+
     
     output$Description_infos_dataset_UI <- renderUI({
-      #req(session$userData$wf_mode == 'process')
-      
       req(rv.custom$result_open_dataset()$trigger || dataIn())
       
       if(!is.null(rv.custom$result_open_dataset()$trigger))
@@ -197,7 +188,6 @@ PipelineProtein_Normalization_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       rv.custom$result_open_dataset()$dataset
-      #req(dataIn())
       
       rv$dataIn <- dataIn()
       
@@ -563,30 +553,34 @@ PipelineProtein_Normalization_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(p('test')),
-        content = tagList(p('test'))
+        content = tagList(
+          uiOutput(ns('dl_ui'))
+        )
       )
     })
     
-    # output$dl_ui <- renderUI({
-    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-    #   req(config@mode == 'process')
-    #   
-    #   Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
-    #   
-    #   Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
-    # })
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    })
     
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
 
+    
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-        print(paste0(id, ' : shiny::withProgress(message = paste0("Saving process", id), {'))
-        #browser()
-        if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
-          SummarizedExperiment::assays(dataIn()))))
+        
+        tmp <- dataIn()
+        if(is.null(tmp))
+          tmp <- rv.custom$result_open_dataset()$dataset
+          
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
+          SummarizedExperiment::assays(tmp))))
           shinyjs::info(btnVentsMasg)
       else {
       # Do some stuff
@@ -595,6 +589,8 @@ PipelineProtein_Normalization_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
+      
+      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       }
       })
     })
