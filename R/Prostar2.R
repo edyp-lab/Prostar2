@@ -10,8 +10,11 @@
 #' if (interactive()){
 #' library(Prostar2)
 #' Prostar2("PipelineProtein")
-#' Prostar2("PipelineProtein", user = "dev")
-#' Prostar2("PipelinePeptide")
+#' Prostar2("PipelineProtein_Filtering")
+#' Prostar2("PipelineProtein_Normalization")
+#' Prostar2("PipelineProtein_Imputation")
+#' Prostar2("PipelineProtein_HypothesisTest")
+#' Prostar2("PipelineConvert_Convert")
 #' }
 #'
 #' @export
@@ -20,31 +23,17 @@ Prostar2 <- function(
     wf.name = NULL,
     usermod = "user",
     verbose = FALSE) {
-  options(
-    shiny.maxRequestSize = 1024^3,
-    shiny.fullstacktrace = TRUE,
-    port = 3838,
-    host = "127.0.0.1",
-    launch.browser = FALSE
-  )
 
-  
-  
-  
-  data(Exp1_R25_prot, package = 'DaparToolshedData')
-  obj <- Exp1_R25_prot
+  pkgs.require(c('MagellanNTK', 'omXplore'))
   
   # Launch in the Magellan workspace
-  wf.name <- 'PipelineProtein'
-  #wf.path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-  wf.path <- system.file(paste0("workflow/", wf.name), package = "Prostar2")
+  wf.path <- unlist(strsplit(wf.name, '_'))[1]
+  wf.path <- system.file(paste0("workflow/", wf.path), package = "Prostar2")
 
   MagellanNTK::MagellanNTK(
-    obj = obj,
+    obj = NULL,
     workflow.path = wf.path,
     workflow.name = wf.name
-   # usermod = usermod,
-   # verbose = verbose
   )
   
   
