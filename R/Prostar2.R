@@ -14,13 +14,13 @@
 #' Prostar2("PipelineProtein_Normalization")
 #' Prostar2("PipelineProtein_Imputation")
 #' Prostar2("PipelineProtein_HypothesisTest")
-#' Prostar2("PipelineConvert_Convert")
 #' }
 #'
 #' @export
 #'
 Prostar2 <- function(
     wf.name = NULL,
+    convert.name = 'PipelineConvert_Convert',
     usermod = "user",
     verbose = FALSE) {
 
@@ -30,10 +30,15 @@ Prostar2 <- function(
   wf.path <- unlist(strsplit(wf.name, '_'))[1]
   wf.path <- system.file(paste0("workflow/", wf.path), package = "Prostar2")
 
+  convert.path <- unlist(strsplit(convert.name, '_'))[1]
+  convert.path <- system.file(paste0("workflow/", convert.path), package = "Prostar2")
+  
+  
   MagellanNTK::MagellanNTK(
     obj = NULL,
     workflow.path = wf.path,
-    workflow.name = wf.name
+    workflow.name = wf.name,
+    convert.path = convert.path
   )
   
   

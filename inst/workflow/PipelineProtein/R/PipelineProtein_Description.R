@@ -110,19 +110,18 @@ PipelineProtein_Description_server <- function(id,
     })
     
 
-    observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
-      #browser()
-      print(rv.custom$result_open_dataset()$trigger)
-      print(rv.custom$result_open_dataset()$dataset)
-    })
-    
     
     output$Description_infos_dataset_UI <- renderUI({
-      req(rv.custom$result_open_dataset()$trigger)
+      req(rv.custom$result_open_dataset()$trigger || dataIn())
+      
+      if(!is.null(rv.custom$result_open_dataset()$trigger))
+        tmp <- rv.custom$result_open_dataset()$dataset
+      else if (!is.null(dataIn()))
+        tmp <- dataIn()
       
       infos_dataset_server(
         id = "Description_infosdataset",
-        dataIn = reactive({rv.custom$result_open_dataset()$dataset})
+        dataIn = reactive({tmp})
       )
       
       infos_dataset_ui(id = ns("Description_infosdataset"))
@@ -134,12 +133,8 @@ PipelineProtein_Description_server <- function(id,
       req(grepl('Description', btnEvents()))
       rv.custom$result_open_dataset()$dataset
       
-      # On envoie un objet vide, fictif car sinon l'etape ne se valide
-      # pas et on ne peut pas faire le convert
-      rv$dataIn <- QFeatures::QFeatures()
-      rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
-      
       rv$dataIn <- NULL
+
         
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset

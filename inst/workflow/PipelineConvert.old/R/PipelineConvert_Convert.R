@@ -471,12 +471,13 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = tagList(
-          ),
-        content = tagList(
           uiOutput(ns("DataId_btn_validate_ui")),
           uiOutput(ns('DataId_datasetId_ui')),
-            uiOutput(ns("DataId_parentProteinID_ui")),
-          uiOutput(ns('helpTextDataID')),
+          uiOutput(ns("DataId_parentProteinID_ui")),
+          uiOutput(ns('helpTextDataID'))
+          ),
+        content = tagList(
+          
           uiOutput(ns('DataId_warningNonUniqueID_ui')),
           uiOutput(ns("DataId_show_previewdatasetID_ui")),
           uiOutput(ns("DataId_previewdatasetID_ui")),
@@ -866,22 +867,31 @@ PipelineConvert_Convert_server <- function(id,
             placeholder = 'Name of the analysis', width = "400px"),
           textAreaInput(ns('Save_description'), 'Description of the analysis', 
             placeholder = 'Description of the analysis', height = '150px', width = "400px")
-        ),
-        rv$steps.enabled['Save']
+        ), rv$steps.enabled['Save']
       )
     })
     
     ## Save dataset -----
     output$dl_ui <- renderUI({
-      req(config@mode == 'process')
+     # req(config@mode == 'process')
       req(rv$steps.status['Save'] == stepStatus$VALIDATED)
       
-      fluidPage(
-        wellPanel(
-          MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-        )
-      )
+      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+
     })    
+    
+    
+    
+    output$Save_infos_dataset_UI <- renderUI({
+      req(rv$dataIn)
+      infos_dataset_server(
+        id = "Convert_Save_infosdataset",
+        dataIn = reactive({rv$dataIn})
+      )
+      
+      infos_dataset_ui(id = ns("Convert_Save_infosdataset"))
+    })
+    
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -927,13 +937,6 @@ PipelineConvert_Convert_server <- function(id,
         parentProtId = rv.widgets$DataId_parentProteinID,
         force.na = rv.widgets$SelectFile_replaceAllZeros,
         software = rv.widgets$SelectFile_software)
-      #browser()
-    
-      
-      Prostar2::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv$dataIn}),
-        filename = analysis_name)
-      
       })
       
       
@@ -944,6 +947,8 @@ PipelineConvert_Convert_server <- function(id,
       dataOut$name = rv.custom$name
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
+      MagellanNTK::download_dataset_server(paste0(id, '_createQuickLink'), 
+        dataIn = reactive({rv$dataIn}))
      
     })
     

@@ -4,7 +4,12 @@
 \alias{Prostar2}
 \title{xxx}
 \usage{
-Prostar2(wf.name = NULL, usermod = "user", verbose = FALSE)
+Prostar2(
+  wf.name = NULL,
+  convert.name = "PipelineConvert_Convert",
+  usermod = "user",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{wf.name}{xxx}
@@ -20,8 +25,10 @@ xxxx
 if (interactive()){
 library(Prostar2)
 Prostar2("PipelineProtein")
-Prostar2("PipelineProtein", user = "dev")
-Prostar2("PipelinePeptide")
+Prostar2("PipelineProtein_Filtering")
+Prostar2("PipelineProtein_Normalization")
+Prostar2("PipelineProtein_Imputation")
+Prostar2("PipelineProtein_HypothesisTest")
 }
 
 }

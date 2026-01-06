@@ -159,22 +159,71 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
-        #timeline_process_ui(ns('Description_timeline')),
-        content = tagList(
+        sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
+        ),
+        content = div(id = ns('div_content'),
+          div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)
           else
-            p('No Description available')
+            p('No Description available'),
+          uiOutput(ns('Description_infos_dataset_UI'))
         )
       )
     })
     
+    
+    
+    output$open_dataset_UI <- renderUI({
+      req(session$userData$wf_mode == 'process')
+      req(is.null(dataIn()))
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+      
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    })
+    
+    
+    output$Description_infos_dataset_UI <- renderUI({
+      req(rv.custom$result_open_dataset()$trigger || dataIn())
+      
+      if(!is.null(rv.custom$result_open_dataset()$trigger))
+        tmp <- rv.custom$result_open_dataset()$dataset
+      else if (!is.null(dataIn()))
+        tmp <- dataIn()
+      
+      infos_dataset_server(
+        id = "Description_infosdataset",
+        dataIn = reactive({tmp})
+      )
+      
+      infos_dataset_ui(id = ns("Description_infosdataset"))
+    })
+    
+    
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
+      rv.custom$result_open_dataset()$dataset
+      
+      rv$dataIn <- dataIn()
+      
+      
+      #if (session$userData$wf_mode == 'process'){
+      #rv$dataIn <- QFeatures::QFeatures()
+      #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
+      
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
-        rv$dataIn <- dataIn()
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED
