@@ -237,7 +237,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     
     output$Description_infos_dataset_UI <- renderUI({
-      req(rv.custom$result_open_dataset()$trigger || dataIn())
+      req(rv.custom$result_open_dataset()$trigger || !is.null(dataIn()))
       
       if(!is.null(rv.custom$result_open_dataset()$trigger))
         tmp <- rv.custom$result_open_dataset()$dataset
