@@ -378,7 +378,7 @@ mod_volcanoplot_server <- function(
     GetExprsClickedProtein <- reactive({
       req(rv$dataIn)
       req(input$eventPointClicked)
-
+#browser()
 
       ind <- GetSortingIndices()
    
