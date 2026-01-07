@@ -115,6 +115,7 @@ PipelineProtein_Filtering_server <- function(id,
   
   
   rv.custom.default.values <- list(
+    result_open_dataset = reactive({NULL}),
     dataIn1 = NULL,
     dataIn2 = NULL,
     deleted.stringBased = NULL,
@@ -236,31 +237,25 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     
-    output$Description_infos_dataset_UI <- renderUI({
-      req(rv.custom$result_open_dataset()$trigger || !is.null(dataIn()))
-      
-      if(!is.null(rv.custom$result_open_dataset()$trigger))
-        tmp <- rv.custom$result_open_dataset()$dataset
-      else if (!is.null(dataIn()))
-        tmp <- dataIn()
-      
-      infos_dataset_server(
-        id = "Description_infosdataset",
-        dataIn = reactive({tmp})
-      )
-      
-      infos_dataset_ui(id = ns("Description_infosdataset"))
-    })
+
+      output$Description_infos_dataset_UI <- renderUI({
+        req(rv$dataIn)
+        
+        infos_dataset_server(
+          id = "Description_infosdataset",
+          dataIn = reactive({rv$dataIn})
+        )
+        
+        infos_dataset_ui(id = ns("Description_infosdataset"))
+      })
+
     
     
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-      #req(inherits(dataIn(), 'QFeatures'))
-      rv.custom$result_open_dataset()$dataset
       
-     
       
       rv$dataIn <- dataIn()
       
@@ -832,17 +827,19 @@ PipelineProtein_Filtering_server <- function(id,
         sidebar = tagList(
          # timeline_process_ui(ns('Save_timeline'))
         ),
-        content = tagList()
+        content = tagList(
+          uiOutput(ns('dl_ui'))
+        )
       )
       
     })
     
-    # output$dl_ui <- renderUI({
-    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-    #   req(config@mode == 'process')
-    #   
-    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    # })
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    })
     
 
     
@@ -868,8 +865,7 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
-      # Prostar2::download_dataset_server('createQuickLink', 
-      #   dataIn = reactive({rv.custom$dataIn2}))
+      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       }
       })
     })

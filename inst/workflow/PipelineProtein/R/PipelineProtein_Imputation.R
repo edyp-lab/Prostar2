@@ -121,7 +121,8 @@ PipelineProtein_Imputation_server <- function(id,
       nbImputed = "0",
       TotalMainAssay = '0',
       stringsAsFactors = FALSE
-    )
+    ),
+    result_open_dataset = reactive({NULL})
   )
   
   
@@ -208,16 +209,11 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     output$Description_infos_dataset_UI <- renderUI({
-      req(rv.custom$result_open_dataset()$trigger || !is.null(dataIn()))
-      
-      if(!is.null(rv.custom$result_open_dataset()$trigger))
-        tmp <- rv.custom$result_open_dataset()$dataset
-      else if (!is.null(dataIn()))
-        tmp <- dataIn()
+      req(rv$dataIn)
       
       infos_dataset_server(
         id = "Description_infosdataset",
-        dataIn = reactive({tmp})
+        dataIn = reactive({rv$dataIn})
       )
       
       infos_dataset_ui(id = ns("Description_infosdataset"))

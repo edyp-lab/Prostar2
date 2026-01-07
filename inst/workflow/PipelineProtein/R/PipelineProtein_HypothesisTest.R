@@ -108,6 +108,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
   )
   
   rv.custom.default.values <- list(
+    result_open_dataset = reactive({NULL}),
+    
     listNomsComparaison = NULL,
     n = NULL,
     swap.history = NULL,
@@ -190,16 +192,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     output$Description_infos_dataset_UI <- renderUI({
-      req(rv.custom$result_open_dataset()$trigger || !is.null(dataIn()))
-      
-      if(!is.null(rv.custom$result_open_dataset()$trigger))
-        tmp <- rv.custom$result_open_dataset()$dataset
-      else if (!is.null(dataIn()))
-        tmp <- dataIn()
+      req(rv$dataIn)
       
       infos_dataset_server(
         id = "Description_infosdataset",
-        dataIn = reactive({tmp})
+        dataIn = reactive({rv$dataIn})
       )
       
       infos_dataset_ui(id = ns("Description_infosdataset"))
