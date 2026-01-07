@@ -98,14 +98,19 @@ PipelineProtein_Description_server <- function(id,
     })
     
     
-    rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
-      id = "open_dataset",
-      class = 'QFeatures',
-      extension = "qf",
-      remoteReset = reactive({remoteReset()})
-    )
+    
     
     output$open_dataset_UI <- renderUI({
+      req(session$userData$wf_mode == 'process')
+      req(is.null(dataIn()))
+      req(NULL)
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+      
       MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
@@ -125,13 +130,15 @@ PipelineProtein_Description_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-      rv.custom$result_open_dataset()$dataset
-      
+      #rv.custom$result_open_dataset()$dataset
+      req(dataIn())
       rv$dataIn <- dataIn()
 
         
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      
+      #browser()
         
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

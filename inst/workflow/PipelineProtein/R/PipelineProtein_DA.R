@@ -224,7 +224,7 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
-      
+      req(dataIn())
       req(inherits(dataIn(), 'QFeatures'))
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)

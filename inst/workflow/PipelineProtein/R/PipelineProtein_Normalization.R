@@ -156,6 +156,8 @@ PipelineProtein_Normalization_server <- function(id,
     output$open_dataset_UI <- renderUI({
       req(session$userData$wf_mode == 'process')
       req(is.null(dataIn()))
+      req(NULL)
+      
       rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
         id = "open_dataset",
         class = 'QFeatures',
@@ -182,8 +184,8 @@ PipelineProtein_Normalization_server <- function(id,
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
-      rv.custom$result_open_dataset()$dataset
-      
+      #rv.custom$result_open_dataset()$dataset
+      req(dataIn())
       rv$dataIn <- dataIn()
       
       
