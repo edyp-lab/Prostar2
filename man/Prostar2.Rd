@@ -26,6 +26,7 @@ xxxx
 \examples{
 if (interactive()){
 library(Prostar2)
+library(MagellanNTK)
 Prostar2("PipelineProtein")
 Prostar2("PipelineProtein_Filtering")
 Prostar2("PipelineProtein_Normalization")

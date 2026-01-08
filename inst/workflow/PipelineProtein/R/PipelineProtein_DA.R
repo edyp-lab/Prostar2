@@ -266,10 +266,9 @@ PipelineProtein_DA_server <- function(id,
     
     
     Get_Dataset_to_Analyze <- reactive({
-      #browser()
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+      req(rv$dataIn)
       datasetToAnalyze <- NULL
-      print('In Get_Dataset_to_Analyze()......')
       .split <- strsplit(
         as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
       )

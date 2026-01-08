@@ -138,7 +138,7 @@ mod_volcanoplot_server <- function(
     )
 
 
-    observeEvent(dataIn(), {
+    observeEvent(req(dataIn()), {
       rv$dataIn <- dataIn()
       rv.custom$data <- HypothesisTest(dataIn())
     })
@@ -147,8 +147,7 @@ mod_volcanoplot_server <- function(
     output$quantiDT <- renderUI({
       req(input$eventPointClicked)
 
-      
-#browser()
+
       if (DaparToolshed::typeDataset(rv$dataIn) == "protein") {
         if (!('adjacencymatrix' %in% names(rowData(rv$dataIn)))) {
           tabsetPanel(id = ns("collapseVolcanoInfos"),
