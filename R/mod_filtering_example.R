@@ -8,6 +8,7 @@
 #' @param id xxx
 #' @param obj An instance of the class `SummarizedExperiment`
 #' @param indices xxx
+#' @param showModal A boolean
 #' @param operation A character(1) that indicates whether to keep or remove
 #' lines identified by indices. Available values are 'keep' (default)
 #' or 'delete'

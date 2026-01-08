@@ -39,5 +39,5 @@ listBrewerPalettes <- c(
   "Spectral (diverging)" = "Spectral"
 )
 
-#' @export
+
 btnVentsMasg <- "No parameters are set to processe the dataset. Please adjust them"

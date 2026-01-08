@@ -29,6 +29,10 @@ open_dataset_server(
 \item{extension}{xxx}
 
 \item{demo_package}{xxx}
+
+\item{remoteReset}{xxx}
+
+\item{is.enabled}{A boolean}
 }
 \value{
 NA
@@ -37,6 +41,6 @@ NA
 This module allows to change
 }
 \examples{
-shiny::runApp(open_dataset(extension = "df"))
+shiny::runApp(open_dataset())
 
 }

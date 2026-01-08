@@ -44,6 +44,8 @@ mod_filtering_example(
 
 \item{indices}{xxx}
 
+\item{showModal}{A boolean}
+
 \item{operation}{A character(1) that indicates whether to keep or remove
 lines identified by indices. Available values are 'keep' (default)
 or 'delete'}

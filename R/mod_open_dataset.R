@@ -6,11 +6,13 @@
 #' @param class xxx
 #' @param extension xxx
 #' @param demo_package xxx
+#' @param remoteReset xxx
+#' @param is.enabled A boolean
 #'
 #' @name generic_mod_open_dataset
 #'
 #' @examples
-#' shiny::runApp(open_dataset(extension = "df"))
+#' shiny::runApp(open_dataset())
 #'
 #' @return NA
 #'
@@ -291,3 +293,40 @@ open_dataset_server <- function(
   })
 }
 
+
+
+
+
+#' @export
+#' @rdname open_dataset
+open_dataset <- function() {
+  ui <- fluidPage(
+    tagList(
+      open_dataset_ui("qf_file"),
+      textOutput("res")
+    )
+  )
+  
+  server <- function(input, output, session) {
+    rv <- reactiveValues(
+      obj = NULL,
+      result = NULL
+    )
+    
+    
+    rv$result <- open_dataset_server("qf_file")
+    
+    observeEvent(req(rv$result()), {
+      rv$obj <- rv$result()
+    })
+    
+    
+    output$res <- renderText({
+      rv$obj
+      print(rv$obj)
+      paste0("Names of the datasets: ", names(rv$obj))
+    })
+  }
+  
+  app <- shinyApp(ui, server)
+}

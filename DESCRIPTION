@@ -45,7 +45,6 @@ Suggests:
     attempt,
     processx,
     BiocStyle,
-    shinyjqui,
     colourpicker,
     RColorBrewer,
     sass,
