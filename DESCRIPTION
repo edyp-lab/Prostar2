@@ -1,7 +1,7 @@
 Package: Prostar2
 Title: Prostar 2
-Version: 0.99.20
-Date: 2025-10-01
+Version: 0.99.21
+Date: 2026-01-07
 Authors@R: c(person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut')),
                 person('Thomas', 'Burger', email = 'thomas.burger@cea.fr', role = c('aut')))
 Maintainer: Samuel Wieczorek <samuel.wieczorek@cea.fr>
@@ -25,7 +25,11 @@ Imports:
     tibble,
     QFeatures,
     S4Vectors,
-    SummarizedExperiment
+    SummarizedExperiment,
+    MultiAssayExperiment,
+    shinyjqui,
+    BiocGenerics,
+    cp4p
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,

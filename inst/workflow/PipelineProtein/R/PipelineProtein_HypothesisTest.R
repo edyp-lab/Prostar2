@@ -169,8 +169,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
           if (file.exists(file))
             includeMarkdown(file)
           else
-            p('No Description available'),
-          uiOutput(ns('Description_infos_dataset_UI'))
+            p('No Description available')
+          #uiOutput(ns('Description_infos_dataset_UI'))
         )
       )
     })
@@ -193,16 +193,16 @@ PipelineProtein_HypothesisTest_server <- function(id,
     })
     
     
-    output$Description_infos_dataset_UI <- renderUI({
-      req(rv$dataIn)
-      
-      infos_dataset_server(
-        id = "Description_infosdataset",
-        dataIn = reactive({rv$dataIn})
-      )
-      
-      infos_dataset_ui(id = ns("Description_infosdataset"))
-    })
+    # output$Description_infos_dataset_UI <- renderUI({
+    #   req(rv$dataIn)
+    #   
+    #   infos_dataset_server(
+    #     id = "Description_infosdataset",
+    #     dataIn = reactive({rv$dataIn})
+    #   )
+    #   
+    #   infos_dataset_ui(id = ns("Description_infosdataset"))
+    # })
     
     
     
