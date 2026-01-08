@@ -10,7 +10,7 @@ add.resourcePath()
 Add resource paths
 }
 \examples{
-add.ResourcePath()
+add.resourcePath()
 
 }
 \author{

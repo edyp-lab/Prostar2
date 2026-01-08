@@ -7,9 +7,9 @@
 Build_enriched_qdata(obj.se, digits = NULL)
 }
 \arguments{
-\item{digits}{xxx}
+\item{obj.se}{xx}
 
-\item{obj}{xx}
+\item{digits}{xxx}
 }
 \description{
 xxxx

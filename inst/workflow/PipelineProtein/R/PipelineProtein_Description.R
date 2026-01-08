@@ -101,7 +101,7 @@ PipelineProtein_Description_server <- function(id,
     
     
     output$open_dataset_UI <- renderUI({
-      req(session$userData$wf_mode == 'process')
+      req(session$userData$runmode == 'process')
       req(is.null(dataIn()))
       req(NULL)
       rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(

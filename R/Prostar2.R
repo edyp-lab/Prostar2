@@ -3,6 +3,7 @@
 #' @importFrom MagellanNTK MagellanNTK
 #' 
 #' @param wf.name xxx
+#' @param convert.name xxx
 #' @param usermod xxx
 #' @param verbose xxx
 #'

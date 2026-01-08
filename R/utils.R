@@ -36,7 +36,7 @@ pkgs.require <- function(ll.deps){
 #' @title Add resource paths
 #' 
 #' @examples 
-#' add.ResourcePath()
+#' add.resourcePath()
 #' 
 #' @export
 #' 
@@ -58,7 +58,7 @@ add.resourcePath <- function(){
 #' @description
 #' xxxx
 #'
-#' @param obj.se xx
+#' @param typeDataset xx
 #'
 #' @export
 BuildColorStyles <- function(typeDataset) {
@@ -77,7 +77,7 @@ BuildColorStyles <- function(typeDataset) {
 #' @description
 #' xxxx
 #'
-#' @param obj xx
+#' @param obj.se xx
 #' @param digits xxx
 #'
 #' @export

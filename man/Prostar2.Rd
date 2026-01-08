@@ -6,13 +6,15 @@
 \usage{
 Prostar2(
   wf.name = NULL,
-  convert.name = "PipelineConvert_Convert",
+  convert.name = "PipelineProtein_Convert",
   usermod = "user",
   verbose = FALSE
 )
 }
 \arguments{
 \item{wf.name}{xxx}
+
+\item{convert.name}{xxx}
 
 \item{usermod}{xxx}
 

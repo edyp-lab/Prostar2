@@ -178,7 +178,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     output$open_dataset_UI <- renderUI({
-      req(session$userData$wf_mode == 'process')
+      req(session$userData$runmode == 'process')
       req(is.null(dataIn()))
       req(NULL)
       

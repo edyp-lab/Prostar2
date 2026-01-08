@@ -7,7 +7,7 @@
 BuildColorStyles(typeDataset)
 }
 \arguments{
-\item{obj.se}{xx}
+\item{typeDataset}{xx}
 }
 \description{
 xxxx
