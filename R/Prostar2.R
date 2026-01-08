@@ -20,7 +20,7 @@
 #'
 Prostar2 <- function(
     wf.name = NULL,
-    convert.name = 'PipelineConvert_Convert',
+    convert.name = 'PipelineProtein_Convert',
     usermod = "user",
     verbose = FALSE) {
 
