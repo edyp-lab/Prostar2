@@ -196,13 +196,13 @@ diffAnaComputeFDR <- function(adj.pvals) {
 #' @description 
 #' This function is a wrapper to the function adjust.p from the `cp4p` package.
 #'  It returns the FDR corresponding to the p-values of the differential 
-#' analysis. The FDR is computed with the function \code{p.adjust}\{stats\}.
+#' analysis. The FDR is computed with the function p.adjust
 #'
 #' @param pval The result (p-values) of the differential analysis processed
-#' by \code{\link{limmaCompleteTest}}
+#' by limmaCompleteTest
 #'
 #' @param pi0Method The parameter pi0.method of the method adjust.p in the 
-#' package \code{cp4p}
+#' package cp4p
 #'
 #' @return The computed adjusted p-values
 #'

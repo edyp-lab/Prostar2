@@ -8,10 +8,10 @@ diffAnaComputeAdjustedPValues(pval, pi0Method = 1)
 }
 \arguments{
 \item{pval}{The result (p-values) of the differential analysis processed
-by \code{\link{limmaCompleteTest}}}
+by limmaCompleteTest}
 
 \item{pi0Method}{The parameter pi0.method of the method adjust.p in the
-package \code{cp4p}}
+package cp4p}
 }
 \value{
 The computed adjusted p-values
@@ -19,7 +19,7 @@ The computed adjusted p-values
 \description{
 This function is a wrapper to the function adjust.p from the \code{cp4p} package.
 It returns the FDR corresponding to the p-values of the differential
-analysis. The FDR is computed with the function \code{p.adjust}\{stats\}.
+analysis. The FDR is computed with the function p.adjust
 }
 \examples{
 if (interactive()){
