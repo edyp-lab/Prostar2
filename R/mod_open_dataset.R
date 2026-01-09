@@ -12,7 +12,9 @@
 #' @name generic_mod_open_dataset
 #'
 #' @examples
+#' if (interactive()){
 #' shiny::runApp(open_dataset())
+#' }
 #'
 #' @return NA
 #'
@@ -298,7 +300,7 @@ open_dataset_server <- function(
 
 
 #' @export
-#' @rdname open_dataset
+#' @rdname generic_mod_open_dataset
 open_dataset <- function() {
   ui <- fluidPage(
     tagList(

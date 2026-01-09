@@ -412,7 +412,7 @@ PipelineProtein_Normalization_server <- function(id,
       
       shiny::withProgress(message = paste0("Normalization process", id), {
         shiny::incProgress(0.5)
-        print(paste0(id, ' : shiny::withProgress(message = paste0("Normalization process", id), {'))
+
       if ( is.null(rv$dataIn) ||
           rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
         shinyjs::info(btnVentsMasg)

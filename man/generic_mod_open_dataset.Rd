@@ -4,6 +4,7 @@
 \alias{generic_mod_open_dataset}
 \alias{open_dataset_ui}
 \alias{open_dataset_server}
+\alias{open_dataset}
 \title{Change the default functions in \code{MagellanNTK}}
 \usage{
 open_dataset_ui(id)
@@ -20,6 +21,8 @@ open_dataset_server(
      TRUE
  })
 )
+
+open_dataset()
 }
 \arguments{
 \item{id}{xxx}
@@ -41,6 +44,8 @@ NA
 This module allows to change
 }
 \examples{
+if (interactive()){
 shiny::runApp(open_dataset())
+}
 
 }

@@ -1,8 +1,30 @@
+#' @title Global variables
+#' @name globalvariables
+#' 
+NULL
+
+
+#' @rdname globalvariables
+#' @export
 btn_success_color <- "btn-success"
+
+#' @rdname globalvariables
+#' @export
 optionsBtnClass <- "info"
+
+#' @rdname globalvariables
+#' @export
 redBtnClass <- "btn-danger"
+
+#' @rdname globalvariables
+#' @export
 PrevNextBtnClass <- "btn-info"
+
+#' @rdname globalvariables
+#' @export
 actionBtnClass <- "btn-primary"
+
+
 #
 #
 # btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
@@ -19,6 +41,8 @@ actionBtnClass <- "btn-primary"
 # )
 
 
+#' @rdname globalvariables
+#' @export
 listBrewerPalettes <- c(
   "Dark2 (qualit.)" = "Dark2",
   "Accent (qualit.)" = "Accent",
@@ -40,4 +64,6 @@ listBrewerPalettes <- c(
 )
 
 
-btnVentsMasg <- "No parameters are set to processe the dataset. Please adjust them"
+#' @rdname globalvariables
+#' @export
+btnVentsMasg <- "No parameters are set to process the dataset. Please adjust them"
