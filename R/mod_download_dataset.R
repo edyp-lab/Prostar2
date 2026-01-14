@@ -40,8 +40,10 @@ NULL
 download_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    h3('Download dataset'),
+    p("Please be patient after clicking the button, as the file may need some time to be created."),
     uiOutput(ns("dl_xl")),
-    uiOutput(ns("dl_csv")),
+    #uiOutput(ns("dl_csv")),
     uiOutput(ns("dl_raw"))
   )
 }
@@ -53,53 +55,23 @@ download_dataset_ui <- function(id) {
 #'
 download_dataset_server <- function(
     id,
-    dataIn = reactive({NULL}),
-    extension = c("xlsx", "qf"),
-    widget.type = "Link",
-    filename = "myDataset",
-    excel.style = NULL,
-    remoteReset = reactive({0}),
-    is.enabled = reactive({TRUE})) {
+  dataIn = reactive({NULL}),
+  extension = c("xlsx", "qf"),
+  widget.type = c('Button','Button'),
+  filename = "myDataset",
+  excel.style = NULL,
+  remoteReset = reactive({0}),
+  is.enabled = reactive({TRUE})) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     rv <- reactiveValues(
       UI_type = NULL,
       export_file_qf = NULL,
-      export_file_xlsx = NULL
+      export_file_xlsx = NULL,
+      data_save = NULL
     )
-
-    observeEvent(req(dataIn()), ignoreNULL = TRUE, {
-      
-      rv$export_file_xlsx <- tryCatch(
-        {
-          shiny::withProgress(message = paste0("Builds Excel file", id), {
-            shiny::incProgress(0.5)
-            print(paste0(id, ' : shiny::withProgress(message = paste0("Builds Excel file", id)'))
-            out.xlsx <- tempfile(fileext = ".xlsx")
-          DaparToolshed::write.excel(obj = dataIn(), filename = out.xlsx)
-          out.xlsx
-          })
-        },
-        warning = function(w) w,
-        error = function(e) e
-      )
-
-      rv$export_file_qf <- tryCatch(
-        {
-          shiny::withProgress(message = paste0("Builds QFeatures file", id), {
-            shiny::incProgress(0.5)
-            print(paste0(id, ' : shiny::withProgress(message = paste0("Builds QFeatures file", id),'))
-            out.qf <- tempfile(fileext = ".qf")
-          saveRDS(dataIn(), file = out.qf)
-          out.qf
-          })
-        },
-        warning = function(w) w,
-        error = function(e) e
-      )
-    })
-
+    
     GetType <- reactive({
       if (length(extension) != length(widget.type)) {
         # warning("Widget.type is not correctly configured. As one cannot decide,
@@ -108,14 +80,19 @@ download_dataset_server <- function(
       } else {
         rv$UI_type <- widget.type
       }
-
+      
       rv$UI_type
     })
-
-
+    
+    observeEvent(req(dataIn()), ignoreNULL = TRUE, {
+      rv$data_save <- dataIn()
+    })
+    
+    ## Save as .xlsx -----
     output$dl_xl <- renderUI({
       req("xlsx" %in% extension)
-      req(rv$export_file_xlsx)
+      #req(rv$export_file_xlsx)
+      
       type <- GetType()[which(extension == "xlsx")]
       do.call(
         paste0("download", type),
@@ -126,12 +103,37 @@ download_dataset_server <- function(
         )
       )
     })
-
+    
+    output$downloadDataExcel <- downloadHandler(
+      filename = function() {
+        #paste("data-", Sys.Date(), ".xlsx", sep = "")
+        paste(filename, '.xlsx', sep = "")
+      },
+      content = function(file) {
+        rv$export_file_xlsx <- tryCatch({
+          shiny::withProgress(message = paste0("Builds Excel file", id), {
+            shiny::incProgress(0.5)
+            print(paste0(id, ' : shiny::withProgress(message = paste0("Builds Excel file", id)'))
+            out.xlsx <- tempfile(fileext = ".xlsx")
+            DaparToolshed::write.excel(obj = rv$data_save, filename = out.xlsx)
+            out.xlsx
+          })
+        },
+          warning = function(w) w,
+          error = function(e) e
+        )
+        file.copy(from = rv$export_file_xlsx, to = file)
+      }
+    )
+    
+    
+    ## Save as .qf -----
     output$dl_raw <- renderUI({
       req("qf" %in% extension)
-      req(rv$export_file_qf)
+      #req(rv$export_file_qf)
+      
       type <- GetType()[which(extension == "qf")]
-
+      
       do.call(
         paste0("download", type),
         list(
@@ -141,34 +143,29 @@ download_dataset_server <- function(
         )
       )
     })
-
-
-
+    
     output$downloadDataQf <- downloadHandler(
       filename = function() {
         # paste ("data-", Sys.Date(), ".qf", sep = "")
         paste(filename, ".qf", sep = "")
       },
       content = function(file) {
-        file.copy(
-          from = rv$export_file_qf,
-          to = file
+        rv$export_file_qf <- tryCatch({
+          shiny::withProgress(message = paste0("Builds QFeatures file", id), {
+            shiny::incProgress(0.5)
+            print(paste0(id, ' : shiny::withProgress(message = paste0("Builds QFeatures file", id),'))
+            out.qf <- tempfile(fileext = ".qf")
+            saveRDS(rv$data_save, file = out.qf)
+            out.qf
+          })
+        },
+          warning = function(w) w,
+          error = function(e) e
         )
+        file.copy(from = rv$export_file_qf, to = file)
       }
     )
-
-    output$downloadDataExcel <- downloadHandler(
-      filename = function() {
-        # paste("data-", Sys.Date(), ".xlsx", sep = "")
-        paste(filename, ".xlsx", sep = "")
-      },
-      content = function(file) {
-        file.copy(
-          from = rv$export_file_xlsx,
-          to = file
-        )
-      }
-    )
+    
   })
 }
 
@@ -183,7 +180,7 @@ download_dataset <- function(
     dataIn, 
   filename = "myDataset") {
   ui <- download_dataset_ui("dl")
-
+  
   server <- function(input, output, session) {
     download_dataset_server("dl",
       dataIn = reactive({dataIn}),
@@ -191,6 +188,6 @@ download_dataset <- function(
       filename = filename
     )
   }
-
+  
   app <- shiny::shinyApp(ui = ui, server = server)
 }
