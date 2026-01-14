@@ -209,14 +209,16 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       rv.widgets$tag <- rv.custom$tmp.tags()$values
-      # dataOut$trigger <- as.numeric(Sys.time())
-      # dataOut$value <- list(
-      #   ll.fun = NULL,
-      #   ll.query = NULL,
-      #   ll.widgets.value = NULL,
-      #   ll.pattern = rv.widgets$tag,
-      #   ll.indices = NULL
-      # )
+      
+      # Faire un reset des autres widgets
+      
+        rv.widgets[['keep_vs_remove']] <- widgets.default.values[['keep_vs_remove']]
+        rv.widgets[['scope']] <- widgets.default.values[['scope']]
+        rv.widgets[['valPercent']] <- widgets.default.values[['valPercent']]
+        rv.widgets[['operator']] <- widgets.default.values[['operator']]
+        rv.widgets[['valueTh']] <- widgets.default.values[['valueTh']]
+        rv.widgets[['percentTh']] <- widgets.default.values[['percentTh']]
+        
     })
 
 
