@@ -212,11 +212,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       req(dataIn())
       rv$dataIn <- dataIn()
       
-      
-      #if (session$userData$wf_mode == 'process'){
-      #rv$dataIn <- QFeatures::QFeatures()
-      #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
-      
+      browser()
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
       
