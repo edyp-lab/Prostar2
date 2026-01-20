@@ -111,6 +111,7 @@ download_dataset_server <- function(
       },
       content = function(file) {
         rv$export_file_xlsx <- tryCatch({
+          #browser()
           shiny::withProgress(message = paste0("Builds Excel file", id), {
             shiny::incProgress(0.5)
             print(paste0(id, ' : shiny::withProgress(message = paste0("Builds Excel file", id)'))

@@ -559,6 +559,10 @@ PipelineProtein_Normalization_server <- function(id,
     output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == stepStatus$VALIDATED)
       req(config@mode == 'process')
+      rv$dataIn
+      
+      
+      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       
       Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
@@ -576,6 +580,7 @@ PipelineProtein_Normalization_server <- function(id,
         if(is.null(tmp))
           tmp <- rv.custom$result_open_dataset()$dataset
           
+        
       if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
           SummarizedExperiment::assays(tmp))))
           shinyjs::info(btnVentsMasg)
@@ -583,11 +588,12 @@ PipelineProtein_Normalization_server <- function(id,
       # Do some stuff
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       
+       # browser()
+        
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       }
       })
     })
