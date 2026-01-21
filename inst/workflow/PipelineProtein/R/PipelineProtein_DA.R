@@ -997,7 +997,10 @@ PipelineProtein_DA_server <- function(id,
             checkboxInput(ns('FDR_viewAdjPval'), 
               'View adjusted p-value', 
               value = rv.widgets$FDR_viewAdjPval),
-          DT::DTOutput(ns("FDR_selectedItems_UI"))
+          conditionalPanel("true", 
+            DT::DTOutput(ns("FDR_selectedItems_UI")), 
+            style = "display: none;")
+          
 
         )
       )
@@ -1143,7 +1146,7 @@ PipelineProtein_DA_server <- function(id,
     
     output$FDR_selectedItems_UI <- DT::renderDT({
       req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
-      #browser()
+      
       df <- Build_pval_table()
 
       if (rv.widgets$FDR_viewAdjPval){
@@ -1172,14 +1175,13 @@ PipelineProtein_DA_server <- function(id,
           columnDefs = .coldefs,
           ordering = !rv.widgets$FDR_viewAdjPval
         )
-      )
-      # ) |>
-      #   DT::formatStyle(
-      #     paste0("isDifferential (",
-      #       as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
-      #     target = "row",
-      #     backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
-      #   )
+      ) |>
+        DT::formatStyle(
+          paste0("isDifferential (",
+            as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
+          target = "row",
+          backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
+        )
       
     })
     
@@ -1351,7 +1353,7 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('FDR', btnEvents()))
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("COmputing FDR", id), {
         shiny::incProgress(0.5)
         #browser()
       if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
