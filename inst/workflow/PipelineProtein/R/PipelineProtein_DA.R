@@ -1038,6 +1038,7 @@ PipelineProtein_DA_server <- function(id,
     output$FDR_nbSelectedItems_ui <- renderUI({
       rv.custom$thpval
       rv$dataIn
+      #browser()
       req(Build_pval_table())
       
       
@@ -1142,18 +1143,20 @@ PipelineProtein_DA_server <- function(id,
     
     output$FDR_selectedItems_UI <- DT::renderDT({
       req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
+      #browser()
       df <- Build_pval_table()
-      
+
       if (rv.widgets$FDR_viewAdjPval){
         df <- df[order(df$Adjusted_PValue, decreasing=FALSE), ]
         .coldefs <- list(list(width = "200px", targets = "_all"))
       } else {
-        name <- paste0(c('Log_PValue (', 'Adjusted_PValue ('), 
+        name <- paste0(c('Log_PValue (', 'Adjusted_PValue ('),
           as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
         .coldefs <- list(
           list(width = "200px", targets = "_all"),
           list(targets = (match(name, colnames(df)) - 1), visible = FALSE))
       }
+      # 
       
       
       DT::datatable(df,
@@ -1169,18 +1172,20 @@ PipelineProtein_DA_server <- function(id,
           columnDefs = .coldefs,
           ordering = !rv.widgets$FDR_viewAdjPval
         )
-      ) |>
-        DT::formatStyle(
-          paste0("isDifferential (",
-            as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
-          target = "row",
-          backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
-        )
+      )
+      # ) |>
+      #   DT::formatStyle(
+      #     paste0("isDifferential (",
+      #       as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
+      #     target = "row",
+      #     backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
+      #   )
       
     })
     
     
     BuildPairwiseComp_wb <- reactive({
+      #browser()
       DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
       hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
         halign = "CENTER",
@@ -1234,6 +1239,7 @@ PipelineProtein_DA_server <- function(id,
     
     Get_FDR <- reactive({
       req(rv.custom$thpval)
+      #browser()
       req(Build_pval_table())
       
       adj.pval <- Build_pval_table()$Adjusted_PValue
@@ -1250,6 +1256,7 @@ PipelineProtein_DA_server <- function(id,
     # })
     
     Get_Nb_Significant <- reactive({
+      #browser()
       nb <- length(
         which(
           Build_pval_table()[paste0(
@@ -1272,7 +1279,7 @@ PipelineProtein_DA_server <- function(id,
       req(GetCalibrationMethod())
       req(GetComparisons())
       
-      
+      #browser()
       rv.widgets$Pairwisecomparison_Comparison
       ht <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       .logfc <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')]
@@ -1346,7 +1353,7 @@ PipelineProtein_DA_server <- function(id,
       req(grepl('FDR', btnEvents()))
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
-        
+        #browser()
       if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
         shinyjs::info(btnVentsMasg)
       else {
