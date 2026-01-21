@@ -801,18 +801,19 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
-        content = tagList(uiOutput(ns('dl_ui'))
+        content = tagList(
+          #uiOutput(ns('dl_ui'))
       )
       )
     })
     
     # 
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    # 
+    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    # })
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
@@ -849,8 +850,8 @@ PipelineProtein_Imputation_server <- function(id,
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- stepStatus$VALIDATED
           
-           Prostar2::download_dataset_server('createQuickLink', 
-             dataIn = reactive({rv.custom$dataIn2}))
+           # Prostar2::download_dataset_server('createQuickLink', 
+           #   dataIn = reactive({rv.custom$dataIn2}))
         }
       })
     })

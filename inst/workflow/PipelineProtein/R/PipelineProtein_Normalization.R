@@ -187,8 +187,7 @@ PipelineProtein_Normalization_server <- function(id,
       #rv.custom$result_open_dataset()$dataset
       req(dataIn())
       rv$dataIn <- dataIn()
-      
-      
+
       #if (session$userData$wf_mode == 'process'){
       #rv$dataIn <- QFeatures::QFeatures()
       #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
@@ -551,50 +550,48 @@ PipelineProtein_Normalization_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          uiOutput(ns('dl_ui'))
+          #uiOutput(ns('dl_ui'))
         )
       )
     })
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      rv$dataIn
-      
-      
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
-      
-      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
-    })
-    
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    # })
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
 
-    
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-        
-        tmp <- dataIn()
-        if(is.null(tmp))
-          tmp <- rv.custom$result_open_dataset()$dataset
-          
-        
-      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
-          SummarizedExperiment::assays(tmp))))
-          shinyjs::info(btnVentsMasg)
-      else {
-      # Do some stuff
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      
-       # browser()
+      #   browser()
+      #   tmp <- dataIn()
+      #   if(is.null(tmp))
+      #     tmp <- rv.custom$result_open_dataset()$dataset
+      #     
+      #   
+      # if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
+      #     SummarizedExperiment::assays(tmp))))
+      #     shinyjs::info(btnVentsMasg)
+      # else {
+      # # Do some stuff
+      # # DO NOT MODIFY THE THREE FOLLOWINF LINES
+      # 
+      #   
         
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- stepStatus$VALIDATED
+      #browser()
       
-      }
+      
+      #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
+
+      #}
       })
     })
     # <<< END ------------- Code for step 3 UI---------------

@@ -829,18 +829,18 @@ PipelineProtein_Filtering_server <- function(id,
          # timeline_process_ui(ns('Save_timeline'))
         ),
         content = tagList(
-          uiOutput(ns('dl_ui'))
+         # uiOutput(ns('dl_ui'))
         )
       )
       
     })
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      
-      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    # })
     
 
     
@@ -866,7 +866,7 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$value <- rv.custom$dataIn2
       rv$steps.status['Save'] <- stepStatus$VALIDATED
       
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
+      #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       }
       })
     })
