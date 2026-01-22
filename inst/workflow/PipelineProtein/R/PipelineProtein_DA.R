@@ -988,7 +988,7 @@ PipelineProtein_DA_server <- function(id,
         sidebar = tagList(
           #timeline_process_ui(ns('FDR_timeline')),
           tags$div(
-            actionButton(ns("SELECT_INPUT"), "Hide/Show table"),
+            uiOutput(ns('FDR_showHideDT')),
             
             uiOutput(ns('widgets_ui'))
           )
@@ -1013,6 +1013,12 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
+    
+    output$FDR_showHideDT <- renderUI({
+      widget <- actionButton(ns("SELECT_INPUT"), "Hide/Show table")
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
+    })
     
     observeEvent(input$SELECT_INPUT, {
       if (input$SELECT_INPUT %% 2 == 1) 
