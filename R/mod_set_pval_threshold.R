@@ -38,7 +38,6 @@ mod_set_pval_threshold_ui <- function(id) {
     tags$style("#pvalPanel {width: 100%;}"),
     wellPanel(
       id = "pvalPanel",
-      useShinyjs(),
       uiOutput(ns("warn_NULL_fdr_UI")),
       MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pValThreshold")),
       br(),
@@ -51,7 +50,7 @@ mod_set_pval_threshold_ui <- function(id) {
       tags$div(
         style = "align: center;display:inline-block; vertical-align: center;",
         uiOutput(ns("text1_UI")),
-        disabled(uiOutput(ns("text2_UI")))
+        uiOutput(ns("text2_UI"))
       ),
       tags$div(
         style = "align: center;display:inline-block; vertical-align: center;",
@@ -61,7 +60,7 @@ mod_set_pval_threshold_ui <- function(id) {
       br(),
       tags$div(
         style = "align: center;display:inline-block; vertical-align: center; ",
-        actionButton(ns("ApplyThreshold"), "Apply threshold", class = actionBtnClass)
+        uiOutput(ns('ApplyThreshold_UI'))
       ),
       tags$div(
         style = "align: center;display:inline-block; vertical-align: center; padding-left: 20px;",
@@ -77,31 +76,21 @@ mod_set_pval_threshold_ui <- function(id) {
 #'
 mod_set_pval_threshold_server <- function(
     id,
-    pval_init = reactive({
-      1
-    }),
-    fdr = reactive({
-      0
-    }),
-    threshold.type = reactive({
-      "logpval"
-    }),
-    remoteReset = reactive({
-      0
-    }),
-    is.enabled = reactive({
-      TRUE
-    })) {
+  pval_init = reactive({1}),
+  fdr = reactive({0}),
+  threshold.type = reactive({"logpval"}),
+  remoteReset = reactive({0}),
+  is.enabled = reactive({TRUE})) {
   widgets.default.values <- list(
     thresholdType = NULL
   )
-
+  
   rv.custom.default.values <- list()
-
-
+  
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     eval(
       str2expression(
         MagellanNTK::Get_AdditionalModule_Core_Code(
@@ -110,14 +99,14 @@ mod_set_pval_threshold_server <- function(
         )
       )
     )
-
+    
     observeEvent(req(threshold.type()), {
       rv.widgets$thresholdType <- threshold.type()
     })
-
+    
     dataOut <- reactiveVal()
     threshold_type <- reactiveVal("pval")
-
+    
     .head <- "To perform the selection using a FDR threshold of x% : "
     .pt1 <- "Display in the table below the adjusted p-values. The proteins are then automatically sorted by increasing adjusted p-values"
     .pt2 <- "Spot the protein P which has the largest adjusted p-value below x%"
@@ -133,29 +122,37 @@ mod_set_pval_threshold_server <- function(
         "</ul>"
       ))
     )
-
-
-
+    
+    
+    
+    
+    output$ApplyThreshold_UI <- renderUI({
+      widget <- actionButton(ns("ApplyThreshold"), "Apply threshold", class = actionBtnClass)
+      MagellanNTK::toggleWidget(widget, is.enabled())
+    })
+    
     output$warn_NULL_fdr_UI <- renderUI({
       req(is.null(fdr()))
-
+      
       mod_SweetAlert_server("sweetAlert_fdr",
         text = "FDR cannot be computed which this threshold.",
         showClipBtn = TRUE,
         type = "warning"
       )
     })
-
+    
     output$thresholdType_UI <- renderUI({
-      radioButtons(ns("thresholdType"), NULL,
+      widget <- radioButtons(ns("thresholdType"), NULL,
         choices = c("-log10(p-value)" = "logpval", "p-value" = "pval"),
         selected = rv.widgets$thresholdType
       )
+      
+      MagellanNTK::toggleWidget(widget, is.enabled())
     })
-
-
+    
+    
     # observeEvent(input$thresholdType, {threshold_type(input$thresholdType)})
-
+    
     output$showFDR_UI <- renderUI({
       req(fdr())
       txt <- "FDR = NA"
@@ -164,53 +161,57 @@ mod_set_pval_threshold_server <- function(
       }
       p(txt)
     })
-
+    
     output$warn_text1_UI <- renderUI({
       req(0 > as.numeric(input$text2))
       p(style = "color: red;", "Must be greater than 0.")
     })
-
+    
     output$warn_text2_UI <- renderUI({
       req(0 > as.numeric(input$text1) || as.numeric(input$text1) > 1)
       p(style = "color: red;", "Must be between 0 and 1.")
     })
-
+    
     output$text1_UI <- renderUI({
       pval_init()
-      textInput(ns("text2"), NULL,
+      widget <- textInput(ns("text2"), NULL,
         value = -log10(pval_init()),
         width = "100px"
       )
+      
+      MagellanNTK::toggleWidget(widget, is.enabled() && input$thresholdType == "logpval")
     })
-
+    
     output$text2_UI <- renderUI({
       pval_init()
-      textInput(ns("text1"), NULL,
+      widget <- textInput(ns("text1"), NULL,
         value = pval_init(),
         width = "100px"
       )
+      
+      MagellanNTK::toggleWidget(widget, is.enabled() && input$thresholdType == "pval")
     })
-
-    observe({
-      shinyjs::toggleState("text2", condition = input$thresholdType == "logpval")
-      shinyjs::toggleState("text1", condition = input$thresholdType == "pval")
-    })
-
+    
+    # observe({
+    #   shinyjs::toggleState("text2", condition = input$thresholdType == "logpval")
+    #   shinyjs::toggleState("text1", condition = input$thresholdType == "pval")
+    # })
+    
     observeEvent(input$text1, ignoreInit = TRUE, {
       req(input$thresholdType == "pval")
       updateTextInput(session, "text2", value = -log10(as.numeric(input$text1)))
     })
-
+    
     observeEvent(input$text2, ignoreInit = TRUE, {
       req(input$thresholdType == "logpval")
       updateTextInput(session, "text1", value = 10^(-as.numeric((input$text2))))
     })
-
-
+    
+    
     observeEvent(input$ApplyThreshold, {
       dataOut(as.numeric(input$text2))
     })
-
+    
     return(reactive({
       dataOut()
     }))
@@ -224,39 +225,28 @@ mod_set_pval_threshold_server <- function(
 #'
 mod_set_pval_threshold <- function(
     pval_init = 1,
-    fdr = 0,
-    threshold.type = "logpval") {
+  fdr = 0,
+  threshold.type = "logpval") {
   ui <- fluidPage(
     mod_set_pval_threshold_ui("Title")
   )
-
+  
   server <- function(input, output) {
     rv <- reactiveValues(
       logpval = reactive({
         NULL
       })
     )
+    
 
-    # output$test <- renderUI({
     rv$logpval <- mod_set_pval_threshold_server(
       id = "Title",
-      pval_init = reactive({
-        pval_init
-      }),
-      fdr = reactive({
-        fdr
-      }),
-      threshold.type = reactive({
-        threshold.type
-      })
+      pval_init = reactive({pval_init}),
+      fdr = reactive({fdr}),
+      threshold.type = reactive({threshold.type})
     )
 
-    # })
-
-    observeEvent(req(rv$logpval()), {
-      print(rv$logpval())
-    })
   }
-
+  
   app <- shiny::shinyApp(ui, server)
 }
