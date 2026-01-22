@@ -174,6 +174,10 @@ PipelineProtein_DA_server <- function(id,
     )
     add.resourcePath()
     
+    
+    observeEvent(input$rstBtn, {
+      browser()
+    })
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -984,6 +988,8 @@ PipelineProtein_DA_server <- function(id,
         sidebar = tagList(
           #timeline_process_ui(ns('FDR_timeline')),
           tags$div(
+            actionButton(ns("SELECT_INPUT"), "Hide/Show table"),
+            
             uiOutput(ns('widgets_ui'))
           )
         ),
@@ -997,13 +1003,68 @@ PipelineProtein_DA_server <- function(id,
             checkboxInput(ns('FDR_viewAdjPval'), 
               'View adjusted p-value', 
               value = rv.widgets$FDR_viewAdjPval),
-          conditionalPanel("true", 
-            DT::DTOutput(ns("FDR_selectedItems_UI")), 
-            style = "display: none;")
-          
-
+          tabsetPanel(
+            id = ns("hidden_tabs"),
+            type = "hidden",
+            tabPanelBody("panelNULL", NULL),
+            tabPanelBody("panel1", DT::DTOutput(ns("FDR_selectedItems_UI")))
+          )
         )
       )
+    })
+    
+    
+    observeEvent(input$SELECT_INPUT, {
+      if (input$SELECT_INPUT %% 2 == 1) 
+        updateTabsetPanel(session, "hidden_tabs", 
+          selected = paste0("panel1"))
+      else updateTabsetPanel(session, "hidden_tabs", 
+        selected = paste0("panelNULL")
+      )
+      
+      
+    })
+    
+
+    output$FDR_selectedItems_UI <- DT::renderDT({
+      req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
+      rv.custom$df <- Build_pval_table()
+      
+      if (rv.widgets$FDR_viewAdjPval){
+        rv.custom$df <- rv.custom$df[order(rv.custom$df$Adjusted_PValue, decreasing=FALSE), ]
+      }
+      
+      if (rv.widgets$FDR_viewAdjPval){
+        .coldefs <- list(list(width = "200px", targets = "_all"))
+      } else {
+        name <- paste0(c('Log_PValue (', 'Adjusted_PValue ('),
+          as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
+        .coldefs <- list(
+          list(width = "200px", targets = "_all"),
+          list(targets = (match(name, colnames(rv.custom$df)) - 1), visible = FALSE))
+      }
+      
+      DT::datatable(rv.custom$df,
+        escape = FALSE,
+        rownames = FALSE,
+        selection = 'none',
+        options = list(initComplete = initComplete(),
+          dom = "frtip",
+          pageLength = 100,
+          scrollY = 500,
+          scroller = TRUE,
+          server = FALSE,
+          columnDefs = .coldefs,
+          ordering = !rv.widgets$FDR_viewAdjPval
+        )
+      ) |>
+        DT::formatStyle(
+          paste0("isDifferential (",
+            as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
+          target = "row",
+          backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
+        )
+      
     })
     
     
@@ -1039,6 +1100,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$FDR_nbSelectedItems_ui <- renderUI({
+
       rv.custom$thpval
       rv$dataIn
       #browser()
@@ -1110,6 +1172,10 @@ PipelineProtein_DA_server <- function(id,
     
     
     
+    
+    
+    
+    
     #################################################################
     ###### Set code for widgets managment
     ################################################################
@@ -1120,13 +1186,12 @@ PipelineProtein_DA_server <- function(id,
       remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]}))
     
-    
     observeEvent(logpval(), {
       req(logpval())
       tmp <- gsub(",", ".", logpval(), fixed = TRUE)
       
       rv.custom$thpval <- as.numeric(tmp)
-
+      
       th <- Get_FDR() * Get_Nb_Significant()
       
       if (th < 1) {
@@ -1142,48 +1207,6 @@ PipelineProtein_DA_server <- function(id,
       }
     })
     
-    
-    
-    output$FDR_selectedItems_UI <- DT::renderDT({
-      req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
-      
-      df <- Build_pval_table()
-
-      if (rv.widgets$FDR_viewAdjPval){
-        df <- df[order(df$Adjusted_PValue, decreasing=FALSE), ]
-        .coldefs <- list(list(width = "200px", targets = "_all"))
-      } else {
-        name <- paste0(c('Log_PValue (', 'Adjusted_PValue ('),
-          as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
-        .coldefs <- list(
-          list(width = "200px", targets = "_all"),
-          list(targets = (match(name, colnames(df)) - 1), visible = FALSE))
-      }
-      # 
-      
-      
-      DT::datatable(df,
-        escape = FALSE,
-        rownames = FALSE,
-        selection = 'none',
-        options = list(initComplete = initComplete(),
-          dom = "frtip",
-          pageLength = 100,
-          scrollY = 500,
-          scroller = TRUE,
-          server = FALSE,
-          columnDefs = .coldefs,
-          ordering = !rv.widgets$FDR_viewAdjPval
-        )
-      ) |>
-        DT::formatStyle(
-          paste0("isDifferential (",
-            as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
-          target = "row",
-          backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
-        )
-      
-    })
     
     
     BuildPairwiseComp_wb <- reactive({
