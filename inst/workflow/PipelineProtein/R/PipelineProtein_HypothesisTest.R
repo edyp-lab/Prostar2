@@ -210,9 +210,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-      req(dataIn())
+     req(dataIn())
       rv$dataIn <- dataIn()
-      
       
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
@@ -613,7 +612,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         ),
         content = tagList(
           #uiOutput(ns('dl_ui'))
-        )
+          )
       )
     })
     
@@ -631,6 +630,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         # Do some stuff
+        #browser()
       if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
         SummarizedExperiment::assays(dataIn()))))
         shinyjs::info(btnVentsMasg)

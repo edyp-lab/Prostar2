@@ -69,6 +69,7 @@ download_dataset_server <- function(
       data_save = NULL
     )
     
+    
     observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE,{
       rv$data_save <- dataIn()
     })
@@ -77,6 +78,7 @@ download_dataset_server <- function(
     output$dl_xl <- renderUI({
       req("xlsx" %in% extension)
       #req(rv$export_file_xlsx)
+      
       
       do.call(
         paste0("download", 'Button'),
@@ -95,6 +97,7 @@ download_dataset_server <- function(
       },
       content = function(file) {
         rv$export_file_xlsx <- tryCatch({
+          #browser()
           shiny::withProgress(message = paste0("Builds Excel file", id), {
             shiny::incProgress(0.5)
             out.xlsx <- tempfile(fileext = ".xlsx")
@@ -114,6 +117,7 @@ download_dataset_server <- function(
     output$dl_raw <- renderUI({
       req("qf" %in% extension)
       #req(rv$export_file_qf)
+      
       
       do.call(
         paste0("download", 'Button'),

@@ -174,10 +174,10 @@ PipelineProtein_DA_server <- function(id,
     )
     add.resourcePath()
     
+    
     observeEvent(input$rstBtn, {
       browser()
     })
-    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
@@ -989,6 +989,7 @@ PipelineProtein_DA_server <- function(id,
           #timeline_process_ui(ns('FDR_timeline')),
           tags$div(
             uiOutput(ns('FDR_showHideDT')),
+            
             uiOutput(ns('widgets_ui'))
           )
         ),
@@ -1019,17 +1020,18 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
     })
     
-    
     observeEvent(input$SELECT_INPUT, {
       if (input$SELECT_INPUT %% 2 == 1) 
         updateTabsetPanel(session, "hidden_tabs", 
-                          selected = paste0("panel1"))
+          selected = paste0("panel1"))
       else updateTabsetPanel(session, "hidden_tabs", 
-                             selected = paste0("panelNULL")
+        selected = paste0("panelNULL")
       )
+      
+      
     })
     
-    
+
     output$FDR_selectedItems_UI <- DT::renderDT({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
       rv.custom$df <- Build_pval_table()
@@ -1042,34 +1044,35 @@ PipelineProtein_DA_server <- function(id,
         .coldefs <- list(list(width = "200px", targets = "_all"))
       } else {
         name <- paste0(c('Log_PValue (', 'Adjusted_PValue ('),
-                       as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
+          as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
         .coldefs <- list(
           list(width = "200px", targets = "_all"),
           list(targets = (match(name, colnames(rv.custom$df)) - 1), visible = FALSE))
       }
       
       DT::datatable(rv.custom$df,
-                    escape = FALSE,
-                    rownames = FALSE,
-                    selection = 'none',
-                    options = list(initComplete = initComplete(),
-                                   dom = "frtip",
-                                   pageLength = 100,
-                                   scrollY = 500,
-                                   scroller = TRUE,
-                                   server = FALSE,
-                                   columnDefs = .coldefs,
-                                   ordering = !rv.widgets$FDR_viewAdjPval
-                    )
+        escape = FALSE,
+        rownames = FALSE,
+        selection = 'none',
+        options = list(initComplete = initComplete(),
+          dom = "frtip",
+          pageLength = 100,
+          scrollY = 500,
+          scroller = TRUE,
+          server = FALSE,
+          columnDefs = .coldefs,
+          ordering = !rv.widgets$FDR_viewAdjPval
+        )
       ) |>
         DT::formatStyle(
           paste0("isDifferential (",
-                 as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
+            as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
           target = "row",
           backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
         )
       
     })
+    
     
     output$widgets_ui <- renderUI({
       widget <- tags$div(
@@ -1103,8 +1106,10 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$FDR_nbSelectedItems_ui <- renderUI({
+
       rv.custom$thpval
       rv$dataIn
+      #browser()
       req(Build_pval_table())
       
       
@@ -1173,6 +1178,10 @@ PipelineProtein_DA_server <- function(id,
     
     
     
+    
+    
+    
+    
     #################################################################
     ###### Set code for widgets managment
     ################################################################
@@ -1183,13 +1192,12 @@ PipelineProtein_DA_server <- function(id,
       remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]}))
     
-    
     observeEvent(logpval(), {
       req(logpval())
       tmp <- gsub(",", ".", logpval(), fixed = TRUE)
       
       rv.custom$thpval <- as.numeric(tmp)
-
+      
       th <- Get_FDR() * Get_Nb_Significant()
       
       if (th < 1) {
@@ -1206,7 +1214,9 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
+    
     BuildPairwiseComp_wb <- reactive({
+      #browser()
       DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
       hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
         halign = "CENTER",
@@ -1260,6 +1270,7 @@ PipelineProtein_DA_server <- function(id,
     
     Get_FDR <- reactive({
       req(rv.custom$thpval)
+      #browser()
       req(Build_pval_table())
       
       adj.pval <- Build_pval_table()$Adjusted_PValue
@@ -1276,6 +1287,7 @@ PipelineProtein_DA_server <- function(id,
     # })
     
     Get_Nb_Significant <- reactive({
+      #browser()
       nb <- length(
         which(
           Build_pval_table()[paste0(
@@ -1298,7 +1310,7 @@ PipelineProtein_DA_server <- function(id,
       req(GetCalibrationMethod())
       req(GetComparisons())
       
-      
+      #browser()
       rv.widgets$Pairwisecomparison_Comparison
       ht <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       .logfc <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')]
@@ -1372,7 +1384,7 @@ PipelineProtein_DA_server <- function(id,
       req(grepl('FDR', btnEvents()))
       shiny::withProgress(message = paste0("COmputing FDR", id), {
         shiny::incProgress(0.5)
-        
+        #browser()
       if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
         shinyjs::info(btnVentsMasg)
       else {
