@@ -130,7 +130,7 @@ mod_volcanoplot_server <- function(
     # DO NOT MODIFY THIS FUNCTION CALL
     eval(
       str2expression(
-        Get_AdditionalModule_Core_Code(
+        MagellanNTK::Get_AdditionalModule_Core_Code(
           w.names = names(widgets.default.values),
           rv.custom.names = names(rv.custom.default.values)
         )
@@ -284,7 +284,7 @@ mod_volcanoplot_server <- function(
         data,
         extensions = c("Scroller"),
         options = list(
-          initComplete = initComplete(),
+          initComplete = MagellanNTK::initComplete(),
           dom = "frtip",
           blengthChange = FALSE,
           displayLength = 20,
@@ -354,7 +354,7 @@ mod_volcanoplot_server <- function(
         data,
         extensions = c("Scroller"),
         options = list(
-          initComplete = initComplete(),
+          initComplete = MagellanNTK::initComplete(),
           dom = "frtip",
           blengthChange = FALSE,
           displayLength = 20,
@@ -449,7 +449,7 @@ mod_volcanoplot_server <- function(
         data,
         extensions = c("Scroller"),
         options = list(
-          initComplete = initComplete(),
+          initComplete = MagellanNTK::initComplete(),
           dom = "frtip",
           blengthChange = FALSE,
           displayLength = 20,

@@ -12,6 +12,5 @@ output:
 date: 30 mai 2024
 link-citations: true
 ---
-
 Description of the proteic centric pipeline
 

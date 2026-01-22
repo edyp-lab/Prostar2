@@ -7,8 +7,8 @@
 #' @examples
 #' if (interactive()){
 #' data("Exp1_R25_prot", package = "DaparToolshedData")
-#' path <- system.file('workflow/PipelineConvert', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelineConvert_Convert", path, dataIn = Exp1_R25_prot))
+#' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
+#' shiny::runApp(workflowApp("PipelinePeptide_Convert", path, dataIn = Exp1_R25_prot))
 #' }
 #' 
 NULL
@@ -31,10 +31,10 @@ options(shiny.fullstacktrace = TRUE,
 #' format_DT_ui format_DT_server Timestamp toggleWidget 
 #' mod_popover_for_help_server mod_popover_for_help_ui
 #' 
-PipelineConvert_Convert_conf <- function(){
+PipelinePeptide_Convert_conf <- function(){
   # This list contains the basic configuration of the process
   MagellanNTK::Config(
-    fullname = 'PipelineConvert_Convert',
+    fullname = 'PipelinePeptide_Convert',
     # Define the type of module
     mode = 'process',
     # List of all steps of the process
@@ -64,7 +64,7 @@ PipelineConvert_Convert_conf <- function(){
 #'
 #' @return NA
 #'
-PipelineConvert_Convert_ui <- function(id) {
+PipelinePeptide_Convert_ui <- function(id) {
   ns <- NS(id)
 }
 
@@ -90,7 +90,7 @@ PipelineConvert_Convert_ui <- function(id) {
 #'
 #' @return NA
 #'
-PipelineConvert_Convert_server <- function(id,
+PipelinePeptide_Convert_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({NULL}),
@@ -128,7 +128,7 @@ PipelineConvert_Convert_server <- function(id,
     design = NULL,
     name = NULL
   )
-
+  
   
   ### -------------------------------------------------------------###
   ###                                                             ###
@@ -137,6 +137,21 @@ PipelineConvert_Convert_server <- function(id,
   ### -------------------------------------------------------------###
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    
+    core.code <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(
+        widgets = TRUE,
+        custom = TRUE,
+        dataIn = "NULL"
+      ),
+      sep = "\n"
+    )
     
     
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
@@ -149,7 +164,7 @@ PipelineConvert_Convert_server <- function(id,
     eval(str2expression(core.code))
     add.resourcePath()
     
-
+    
     output$Description <- renderUI({
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -171,18 +186,18 @@ PipelineConvert_Convert_server <- function(id,
       
     })
     
-   
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       #req(dataIn())
-
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      
+      shiny::withProgress(message = paste0("Description process", id), {
         shiny::incProgress(0.5)
         
-      rv$dataIn <- dataIn()
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+        rv$dataIn <- dataIn()
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- rv$dataIn
+        rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -207,10 +222,10 @@ PipelineConvert_Convert_server <- function(id,
           uiOutput(ns('SelectFile_typeOfData_ui')),
           uiOutput(ns('SelectFile_checkDataLogged_ui')),
           uiOutput(ns('SelectFile_replaceAllZeros_ui'))
-          ),
+        ),
         content = tagList(
           uiOutput(ns('SelectFile_btn_previewfile_ui')),
-        uiOutput(ns('SelectFile_previewfile_ui'))
+          uiOutput(ns('SelectFile_previewfile_ui'))
         )
       )
     })
@@ -269,7 +284,7 @@ PipelineConvert_Convert_server <- function(id,
     output$SelectFile_ManageXlsFiles_ui <- renderUI({
       req(rv.widgets$SelectFile_file)
       req(GetExtension(rv.widgets$SelectFile_file$name) %in% c("xls", "xlsx"))
-
+      
       sheets <- c('', DaparToolshed::listSheets(rv.widgets$SelectFile_file$datapath))
       widget <- selectInput(ns("SelectFile_XLSsheets"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_sheets")), 
@@ -399,62 +414,62 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['SelectFile'] )
     })
     
-     
+    
     # >>> END: Definition of the widgets
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('SelectFile', btnEvents()))
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("SelectFile process", id), {
         shiny::incProgress(0.5)
         # Do some stuff
-      req(rv.widgets$SelectFile_file)
-      
-      
-      ext <- GetExtension(rv.widgets$SelectFile_file$name)
-      rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
-        split='.', fixed = TRUE))[1]
-      if ((ext %in% c("xls", "xlsx")) && (
-        is.null(rv.widgets$SelectFile_XLSsheets) ||
-          nchar(rv.widgets$SelectFile_XLSsheets) == 0))
-        return(NULL)
-      
-      if (!fileExt.ok()) {
-        shinyjs::info("Warning : this file is not a text nor an Excel file !
+        req(rv.widgets$SelectFile_file)
+        
+        
+        ext <- GetExtension(rv.widgets$SelectFile_file$name)
+        rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
+          split='.', fixed = TRUE))[1]
+        if ((ext %in% c("xls", "xlsx")) && (
+          is.null(rv.widgets$SelectFile_XLSsheets) ||
+            nchar(rv.widgets$SelectFile_XLSsheets) == 0))
+          return(NULL)
+        
+        if (!fileExt.ok()) {
+          shinyjs::info("Warning : this file is not a text nor an Excel file !
      Accepted extensions are .txt, .csv, .tsv, .xls and .xlsx.")
-      } else {
-        tryCatch({
-          
-          #shinyjs::disable("SelectFile_file")
-          f.path <- rv.widgets$SelectFile_file$datapath
-          rv.custom$tab <- switch(ext,
-            txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
-            csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
-            tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
-            xls = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets),
-            xlsx = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets)
-          )
-          
-          colnames(rv.custom$tab) <- gsub(".", "_", colnames(rv.custom$tab), fixed = TRUE)
-          colnames(rv.custom$tab) <- gsub(" ", "_", colnames(rv.custom$tab), fixed = TRUE)
-        },
-          warning = function(w) {
-            shinyjs::info(conditionMessage(w))
-            return(NULL)
+        } else {
+          tryCatch({
+            
+            #shinyjs::disable("SelectFile_file")
+            f.path <- rv.widgets$SelectFile_file$datapath
+            rv.custom$tab <- switch(ext,
+              txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+              csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
+              tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+              xls = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets),
+              xlsx = DaparToolshed::readExcel(f.path, sheet = rv.widgets$SelectFile_XLSsheets)
+            )
+            
+            colnames(rv.custom$tab) <- gsub(".", "_", colnames(rv.custom$tab), fixed = TRUE)
+            colnames(rv.custom$tab) <- gsub(" ", "_", colnames(rv.custom$tab), fixed = TRUE)
           },
-          error = function(e) {
-            shinyjs::info(conditionMessage(e))
-            return(NULL)
-          },
-          finally = {
-            # cleanup-code
-          })
-        
-        
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
-      }
+            warning = function(w) {
+              shinyjs::info(conditionMessage(w))
+              return(NULL)
+            },
+            error = function(e) {
+              shinyjs::info(conditionMessage(e))
+              return(NULL)
+            },
+            finally = {
+              # cleanup-code
+            })
+          
+          
+          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status['SelectFile'] <- MagellanNTK::stepStatus$VALIDATED
+        }
       })
     })
     
@@ -475,14 +490,14 @@ PipelineConvert_Convert_server <- function(id,
           uiOutput(ns('DataId_datasetId_ui')),
           uiOutput(ns("DataId_parentProteinID_ui")),
           uiOutput(ns('helpTextDataID'))
-          ),
+        ),
         content = tagList(
           
           uiOutput(ns('DataId_warningNonUniqueID_ui')),
           uiOutput(ns("DataId_show_previewdatasetID_ui")),
           uiOutput(ns("DataId_previewdatasetID_ui")),
           uiOutput(ns("DataId_show_previewProteinID_ui"))
-          )
+        )
       )
       
     })
@@ -621,23 +636,23 @@ PipelineConvert_Convert_server <- function(id,
     
     ## Validation button -----
     
-
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('DataId', btnEvents()))
       # Do some stuff
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("DataId process", id), {
         shiny::incProgress(0.5)
         
         req(rv.widgets$DataId_datasetId)
-      
-      
-      if(rv.widgets$SelectFile_typeOfData != "protein"){
-        req(rv.widgets$DataId_parentProteinID)}
-      
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['DataId'] <- stepStatus$VALIDATED
+        
+        
+        if(rv.widgets$SelectFile_typeOfData != "protein"){
+          req(rv.widgets$DataId_parentProteinID)}
+        
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['DataId'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -725,7 +740,7 @@ PipelineConvert_Convert_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'])
     })
     
-
+    
     
     output$ExpandFeatData_inputGroup_ui <- renderUI({
       #req(rv.widgets$ExpandFeatData_quantCols)
@@ -736,7 +751,7 @@ PipelineConvert_Convert_server <- function(id,
         df = reactive({rv.custom$tab}),
         quantCols = reactive({rv.widgets$ExpandFeatData_quantCols}),
         is.enabled = reactive({rv$steps.enabled['ExpandFeatData']}))
-
+      
       rv.widgets$ExpandFeatData_quantCols
       mod_inputGroup_ui(ns('inputGroup'))
     })
@@ -744,28 +759,28 @@ PipelineConvert_Convert_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('ExpandFeatData', btnEvents()))
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("ExpandFeatData process", id), {
         shiny::incProgress(0.5)
         
-      req(rv.widgets$ExpandFeatData_quantCols)
-      req(all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE],
-        is.numeric)))
-      
-
-      if (as.logical(rv.widgets$ExpandFeatData_idMethod)){
-        req(rv.widgets$ExpandFeatData_inputGroup())
+        req(rv.widgets$ExpandFeatData_quantCols)
+        req(all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE],
+          is.numeric)))
+        
+        
+        if (as.logical(rv.widgets$ExpandFeatData_idMethod)){
+          req(rv.widgets$ExpandFeatData_inputGroup())
         }
-
-      # Do some stuff
-      # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
-      # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
-      #                                     dataset = new.dataset,
-      #                                     name = paste0('temp_',id))
-      # 
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['ExpandFeatData'] <- stepStatus$VALIDATED
+        
+        # Do some stuff
+        # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
+        # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
+        #                                     dataset = new.dataset,
+        #                                     name = paste0('temp_',id))
+        # 
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['ExpandFeatData'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -780,9 +795,9 @@ PipelineConvert_Convert_server <- function(id,
         sidebar = tagList(),
         content = tagList(
           uiOutput(ns("Design_designEx_ui")),
-            uiOutput(ns('dl_ui'))
+          uiOutput(ns('dl_ui'))
+        )
       )
-)
     })
     
     
@@ -804,16 +819,16 @@ PipelineConvert_Convert_server <- function(id,
     
     observe({
       rv.widgets$ExpandFeatData_quantCols
-
+      
       rv.custom$design <- Prostar2::mod_buildDesign_server(
-      "designEx", 
-      quantCols = reactive({rv.widgets$ExpandFeatData_quantCols}),
-      remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({rv$steps.enabled['Design']})
-    )
+        "designEx", 
+        quantCols = reactive({rv.widgets$ExpandFeatData_quantCols}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({rv$steps.enabled['Design']})
+      )
     })
     
-
+    
     ## Experiment design -----
     output$Design_designEx_ui <- renderUI({
       req(rv.widgets$ExpandFeatData_quantCols)
@@ -826,18 +841,18 @@ PipelineConvert_Convert_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Design', btnEvents()))
       req(rv.custom$design()$trigger)
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Design process", id), {
         shiny::incProgress(0.5)
         
-      # Do some stuff
-      # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
-      # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
-      #                                     dataset = new.dataset,
-      #                                     name = paste0('temp_',id))
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['Design'] <- stepStatus$VALIDATED
+        # Do some stuff
+        # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
+        # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
+        #                                     dataset = new.dataset,
+        #                                     name = paste0('temp_',id))
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['Design'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -846,18 +861,18 @@ PipelineConvert_Convert_server <- function(id,
     
     # >>> START ------------- Code for Save UI---------------
     
-      
-      output$Save <- renderUI({
-        MagellanNTK::process_layout_process(session,
-          ns = NS(id),
-          sidebar = tagList(),
-          content = tagList(
-            uiOutput(ns('dl_ui')),
-            uiOutput(ns('Save_infos_ui'))
-          )
+    
+    output$Save <- renderUI({
+      MagellanNTK::process_layout_process(session,
+        ns = NS(id),
+        sidebar = tagList(),
+        content = tagList(
+          uiOutput(ns('dl_ui')),
+          uiOutput(ns('Save_infos_ui'))
         )
-      })
-
+      )
+    })
+    
     
     ## Name and description -----
     output$Save_infos_ui <- renderUI({
@@ -873,11 +888,11 @@ PipelineConvert_Convert_server <- function(id,
     
     ## Save dataset -----
     output$dl_ui <- renderUI({
-     # req(config@mode == 'process')
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      # req(config@mode == 'process')
+      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-
+      MagellanNTK::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+      
     })    
     
     
@@ -897,58 +912,60 @@ PipelineConvert_Convert_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
       
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Save process", id), {
         shiny::incProgress(0.5)
         
-      # Check if the conditions have been reordered or not.
-      # If it is the case, the metacells must also be reordered
-      # in the same way.
-      #rv.custom$design
-      
-      # Reorder columns before creating QFeatures object
-      # print(rv.custom$design()$design)
-      # print(rv.custom$design()$order)
-      # as.data.frame(rv.custom$design()$design)
-      
-      if (input$Save_analysis != ""){
-        analysis_name <- rv.widgets$Save_analysis
-      }else{
-        analysis_name <- "myDataset"
-      }
-      
-      .indexForMetacell <- NULL
-      if (!is.null(rv.widgets$ExpandFeatData_inputGroup))
-        .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
-      .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
-      
-  
-      # Create QFeatures dataset file
-      rv$dataIn <- DaparToolshed::createQFeatures(
-        file = rv.widgets$SelectFile_file$name,
-        data = rv.custom$tab, 
-        sample = as.data.frame(rv.custom$design()$design),
-        indQData = .indQData,
-        keyId = rv.widgets$DataId_datasetId,
-        analysis = rv.widgets$Save_analysis,
-        description = rv.widgets$Save_description,
-        logData = rv.widgets$SelectFile_checkDataLogged == 'no',
-        indexForMetacell = .indexForMetacell,
-        typeDataset = rv.widgets$SelectFile_typeOfData,
-        parentProtId = rv.widgets$DataId_parentProteinID,
-        force.na = rv.widgets$SelectFile_replaceAllZeros,
-        software = rv.widgets$SelectFile_software)
+        # Check if the conditions have been reordered or not.
+        # If it is the case, the metacells must also be reordered
+        # in the same way.
+        #rv.custom$design
+        
+        # Reorder columns before creating QFeatures object
+        # print(rv.custom$design()$design)
+        # print(rv.custom$design()$order)
+        # as.data.frame(rv.custom$design()$design)
+        
+        if (input$Save_analysis != ""){
+          analysis_name <- rv.widgets$Save_analysis
+        }else{
+          analysis_name <- "myDataset"
+        }
+        
+        .indexForMetacell <- NULL
+        if (!is.null(rv.widgets$ExpandFeatData_inputGroup))
+          .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
+        .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
+        
+        
+        # Create QFeatures dataset file
+        rv$dataIn <- DaparToolshed::createQFeatures(
+          file = rv.widgets$SelectFile_file$name,
+          data = rv.custom$tab, 
+          sample = as.data.frame(rv.custom$design()$design),
+          indQData = .indQData,
+          keyId = rv.widgets$DataId_datasetId,
+          analysis = rv.widgets$Save_analysis,
+          description = rv.widgets$Save_description,
+          logData = rv.widgets$SelectFile_checkDataLogged == 'no',
+          indexForMetacell = .indexForMetacell,
+          typeDataset = rv.widgets$SelectFile_typeOfData,
+          parentProtId = rv.widgets$DataId_parentProteinID,
+          force.na = rv.widgets$SelectFile_replaceAllZeros,
+          software = rv.widgets$SelectFile_software)
       })
-      
       
       
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       dataOut$name = rv.custom$name
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), 
+      
+      MagellanNTK::download_dataset_server(paste0(id, '_createQuickLink'), 
         dataIn = reactive({rv$dataIn}))
+      
+      
      
     })
     

@@ -153,8 +153,7 @@ PipelineProtein_Filtering_server <- function(id,
     Variablefiltering_variable_Filter_SummaryDT = data.frame(
       Variablefiltering_query = NA,
       Variablefiltering_nbDeleted = NA,
-      Variablefiltering_TotalBeforeFiltering = NA,
-      Variablefiltering_TotalAfterFiltering = NA,
+      Variablefiltering_TotalMainAssay = NA,
       stringsAsFactors = FALSE
     ),
     
@@ -210,7 +209,7 @@ PipelineProtein_Filtering_server <- function(id,
           uiOutput(ns('open_dataset_UI'))
           ),
         content = div(id = ns('div_content'),
-          div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
+          #div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -274,10 +273,16 @@ PipelineProtein_Filtering_server <- function(id,
         stringsAsFactors = FALSE
       )
       
+      rv.custom$Variablefiltering_variable_Filter_SummaryDT <- data.frame(
+        Variablefiltering_query = "-",
+        Variablefiltering_nbDeleted = "0",
+        Variablefiltering_TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
@@ -463,9 +468,16 @@ PipelineProtein_Filtering_server <- function(id,
       
       rv.custom$dataIn2 <- rv.custom$dataIn1
       
+      rv.custom$Variablefiltering_variable_Filter_SummaryDT <- data.frame(
+        Variablefiltering_query = "-",
+        Variablefiltering_nbDeleted = "0",
+        Variablefiltering_TotalMainAssay = nrow(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]),
+        stringsAsFactors = FALSE
+      )
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status["Cellmetadatafiltering"] <- stepStatus$VALIDATED
+      rv$steps.status["Cellmetadatafiltering"] <- MagellanNTK::stepStatus$VALIDATED
       }
         shiny::incProgress(1)
       })
@@ -656,6 +668,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     GuessIndices <- reactive({
       req(rv.custom$Variablefiltering_funFilter)
+      print("guesswhat")
 
       tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv.custom$dataIn2,
@@ -681,6 +694,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Variablefiltering_Preview_UI <- renderUI({
       req(GuessIndices())
+      print("dedans")
 
       mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
@@ -771,7 +785,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
           rv.custom$Variablefiltering_variable_Filter_SummaryDT , 
-          c(.html, .nbDeleted, .nbBefore, .nbAfter))
+          c(.html, .nbDeleted, .nbAfter))
         
         # Keeps only the last filtered SE
         len_start <- length(dataIn())
@@ -813,7 +827,7 @@ PipelineProtein_Filtering_server <- function(id,
       else {
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status["Variablefiltering"] <- stepStatus$VALIDATED
+      rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED
       }
       })
     })
@@ -829,18 +843,18 @@ PipelineProtein_Filtering_server <- function(id,
          # timeline_process_ui(ns('Save_timeline'))
         ),
         content = tagList(
-          uiOutput(ns('dl_ui'))
+         # uiOutput(ns('dl_ui'))
         )
       )
       
     })
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      
-      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    # })
     
 
     
@@ -864,9 +878,9 @@ PipelineProtein_Filtering_server <- function(id,
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv.custom$dataIn2
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
+      #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       }
       })
     })

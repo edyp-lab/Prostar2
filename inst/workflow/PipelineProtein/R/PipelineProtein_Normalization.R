@@ -188,7 +188,6 @@ PipelineProtein_Normalization_server <- function(id,
       req(dataIn())
       rv$dataIn <- dataIn()
       
-      
       #if (session$userData$wf_mode == 'process'){
       #rv$dataIn <- QFeatures::QFeatures()
       #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
@@ -202,7 +201,7 @@ PipelineProtein_Normalization_server <- function(id,
         
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     })
@@ -539,7 +538,7 @@ PipelineProtein_Normalization_server <- function(id,
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status['Normalization'] <- stepStatus$VALIDATED
+      rv$steps.status['Normalization'] <- MagellanNTK::stepStatus$VALIDATED
     }
     })
     })
@@ -551,24 +550,23 @@ PipelineProtein_Normalization_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          uiOutput(ns('dl_ui'))
+          #uiOutput(ns('dl_ui'))
         )
       )
     })
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      
-      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    # })
     
 
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
 
-    
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
@@ -585,9 +583,9 @@ PipelineProtein_Normalization_server <- function(id,
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
+      #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
       }
       })
     })

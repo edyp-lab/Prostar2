@@ -32,21 +32,20 @@
 #' 
 #' 
 #' @examples
-#' if (interactive()){
+#' \dontrun{
 #' library(MagellanNTK)
 #' library(MagellanNTK)
 #' library(highcharter)
 #' library(DaparToolshed)
 #' library(Prostar2)
 #' library(omXplore)
-#' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
 #' qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
-#' sTab <- colData(obj)
+#' sTab <- MultiAssayExperiment::colData(obj)
 #' limma <- limmaCompleteTest(qData, sTab)
 #' df <- cbind(limma$logFC, limma$P_Value)
 #' new.dataset <- obj[[length(obj)]]
@@ -59,8 +58,6 @@
 #' 
 #' @author Samuel Wieczorek
 #' 
-#' @importFrom QFeatures addAssay removeAssay
-#' @import DaparToolshed
 #' 
 NULL
 
@@ -90,8 +87,8 @@ PipelinePeptide_DA_ui <- function(id){
 #' @rdname PipelinePeptide
 #' 
 #' @importFrom stats setNames rnorm
+#' @importFrom magrittr "%>%"
 #' @import DaparToolshed
-#' @importFrom shinyjs inlineCSS useShinyjs toggleState info
 #' 
 #' @export
 #' 
@@ -100,11 +97,14 @@ PipelinePeptide_DA_server <- function(id,
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
-  current.pos = reactive({1})
+  current.pos = reactive({1}),
+  btnEvents = reactive({NULL})
 ){
   
   requireNamespace('DaparToolshed')
-  pkgs.require('magrittr')
+  
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -118,6 +118,8 @@ PipelinePeptide_DA_server <- function(id,
   
   
   rv.custom.default.values <- list(
+    result_open_dataset = reactive({NULL}),
+    
     tmp.dataIn = NULL,
     resAnaDiff = NULL,
     res_AllPairwiseComparisons = NULL,
@@ -153,7 +155,6 @@ PipelinePeptide_DA_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pkgs.require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(
@@ -166,12 +167,11 @@ PipelinePeptide_DA_server <- function(id,
         )
       )
     )
-    
+    add.resourcePath()
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
-    
     
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 
@@ -181,48 +181,27 @@ PipelinePeptide_DA_server <- function(id,
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
         'md', 
-        paste0(id, '.md')))
+        paste0(id, '.Rmd')))
       
-      
-      tagList(
-        ### In this example, the md file is found in the extdata/module_examples 
-        ### directory but with a real app, it should be provided by the package 
-        ### which contains the UI for the different steps of the process module.
-        ### system.file(xxx)
-        
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_UI')),
-        
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        
-        # Used to show some information about the dataset which is loaded
-        # This function must be provided by the package of the process module
-        uiOutput(ns('datasetDescription_UI'))
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(),
+        #timeline_process_ui(ns('Description_timeline')),
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Description available')
+        )
       )
     })
     
-    output$datasetDescription_UI <- renderUI({
-      # Insert your own code to visualize some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
+    
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Description')
       
-    })
-    
-    output$Description_btn_validate_UI <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-        "Start",
-        class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
-    
-    
-    observeEvent(input$Description_btn_validate, {
-      
-      req(dataIn())
+      req(inherits(dataIn(), 'QFeatures'))
       
       # Find the assay containing the hypothesis tests comparisons
       .ind <- unlist(lapply(seq(length(dataIn())), function(x){
@@ -239,23 +218,21 @@ PipelinePeptide_DA_server <- function(id,
         'DA')
       
       rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
-      rv.widgets$Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
+      rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
       #browser()
       
       # Get logfc threshold from Hypothesis test dataset
       .se <- rv$dataIn[[length(rv$dataIn)]]
-      .thlogfc <- DaparToolshed::paramshistory(.se)[['HypothesisTest_thlogFC']]
+      .thlogfc <- paramshistory(.se)[['HypothesisTest_thlogFC']]
       if(!is.null(.thlogfc))
         rv.custom$thlogfc <- .thlogfc
       
-      DaparToolshed::paramshistory(.se) <- NULL
+      paramshistory(.se) <- NULL
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
-    
-    
     
     
     
@@ -270,19 +247,19 @@ PipelinePeptide_DA_server <- function(id,
       rv.custom$Condition2 <- .split[[1]][2]
       
       rv.custom$filename <- paste0("anaDiff_", rv.custom$Condition1,
-        "_vs_", rv.custom$Condition2, ".xlsx")
+                                   "_vs_", rv.custom$Condition2, ".xlsx")
       
       
       if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
-        .conds <- :DaparToolshed::design.qf(rv$dataIn)$Condition
+        .conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
         ind_virtual_cond2 <- which(.conds != condition1)
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
         #colData(datasetToAnalyze)$Condition[ind_virtual_cond2] <- "virtual_cond_2"
       } else {
         ind <- c(
-          which(:DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
-          which(:DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
+          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
+          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
         )
         
         
@@ -320,28 +297,23 @@ PipelinePeptide_DA_server <- function(id,
     
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$Pairwisecomparison <- renderUI({
+      shinyjs::useShinyjs()
+      
       .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        tagList(
-          # Insert validation button
-          uiOutput(ns("Pairwisecomparison_btn_validate_UI")),
+      
+      
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          #timeline_process_ui(ns('Pairwisecomparison_timeline')),
           tags$div(
-            tags$div(style = .style, 
-              uiOutput(ns('Pairwisecomparison_Comparison_UI')))
-          ),
-          uiOutput(ns("pushpval_UI")),
-          tags$hr(),
-          tags$div(
-            tags$div(style = .style, uiOutput(ns("Pairwisecomparison_volcano_UI"))),
-            tags$div(style = .style, uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
+            uiOutput(ns('Pairwisecomparison_Comparison_UI')),
+            uiOutput(ns("pushpval_UI"))
           )
+        ),
+        content = div(
+          uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
+          uiOutput(ns("Pairwisecomparison_volcano_UI"))
         )
       )
     })
@@ -404,7 +376,7 @@ PipelinePeptide_DA_server <- function(id,
       id = "Pairwisecomparison_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
-      group = reactive({:DaparToolshed::design.qf(rv$dataIn)$Condition}),
+      group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
@@ -412,7 +384,7 @@ PipelinePeptide_DA_server <- function(id,
     #})
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
-      widget <- div(id = ns('div_mod_volcanoplot_ui'),
+      widget <- div(
         mod_volcanoplot_ui(ns("Pairwisecomparison_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
@@ -422,19 +394,22 @@ PipelinePeptide_DA_server <- function(id,
     output$Pairwisecomparison_tooltipInfo_UI <- renderUI({
       req(rv$dataIn)
       
-      widget <- tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
-        selectInput(ns("Pairwisecomparison_tooltipInfo"),
-          label = NULL,
-          choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
-          selected = rv.widgets$Pairwisecomparison_tooltipInfo,
-          multiple = TRUE,
-          selectize = FALSE,
-          width = "300px", 
-          size = 5
-        ),
-        actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
-          class = actionBtnClass)
+      widget <- fluidRow(
+        column(width = 6,
+               MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_volcanoTooltip")),
+               selectInput(ns("Pairwisecomparison_tooltipInfo"),
+                           label = NULL,
+                           choices = colnames(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])),
+                           selected = rv.widgets$Pairwisecomparison_tooltipInfo,
+                           multiple = TRUE,
+                           selectize = FALSE,
+                           width = "300px", 
+                           size = 5
+               )),
+        column(width = 6,
+               actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
+                            class = actionBtnClass)
+        )
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
@@ -456,7 +431,7 @@ PipelinePeptide_DA_server <- function(id,
       title = h3("Push p-value"),
       content = "This functionality is useful in case of multiple pairwise comparisons 
               (more than 2 conditions): At the filtering step, a given analyte X
-              (either peptide or Peptide) may have been kept because it contains
+              (either peptide or protein) may have been kept because it contains
               very few missing values in a given condition (say Cond. A), even
               though it contains (too) many of them in all other conditions
               (say Cond B and C only contains 'MEC' type missing values).
@@ -480,7 +455,7 @@ PipelinePeptide_DA_server <- function(id,
       
       widget <- tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
-        div(id = ns('div_AnaDiff_query'),
+        div(
           mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
         )
       )
@@ -560,18 +535,12 @@ PipelinePeptide_DA_server <- function(id,
     }
     
     
-    output$Pairwisecomparison_btn_validate_UI <- renderUI({
-      widget <- actionButton(ns("Pairwisecomparison_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget,  rv$steps.enabled["Pairwisecomparison"])
-    })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$Pairwisecomparison_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='PairwiseComparison')
       #UpdateCompList()
       
       rv.custom$history[['Push pval query']] <- rv.custom$step1_query
@@ -579,7 +548,7 @@ PipelinePeptide_DA_server <- function(id,
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status["Pairwisecomparison"] <- stepStatus$VALIDATED
+      rv$steps.status["Pairwisecomparison"] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
@@ -589,51 +558,33 @@ PipelinePeptide_DA_server <- function(id,
     # >>> START ------------- Code for step 2 UI---------------
     output$Pvaluecalibration <- renderUI({
       
-      .style <- "display:inline-block; 
-        vertical-align: middle; 
-        padding-right: 40px;"
-      wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        
-        tagList(
-          # Insert validation button
-          uiOutput(ns("Pvaluecalibration_btn_validate_UI")),
-          tags$div(
-            tags$div(style = .style,
-              uiOutput(ns('Pvaluecalibration_calibrationMethod_UI'))
-            ),
-            tags$div(style = .style,
-              uiOutput(ns("Pvaluecalibration_numericValCalibration_UI"))
-            ),
-            tags$div(style = .style,
-              uiOutput(ns("nBins_UI"))
-            ),
-            tags$div(style = .style,
-              p(tags$strong(
-                paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
-              ))
-            )
-          ),
-          tags$hr(),
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          # timeline_process_ui(ns('Pvaluecalibration_timeline')),
+          uiOutput(ns('Pvaluecalibration_calibrationMethod_UI')),
+          uiOutput(ns("Pvaluecalibration_numericValCalibration_UI")),
+          uiOutput(ns("Pvaluecalibration_nBins_UI"))
+        ),
+        content = div(
+          p(tags$strong(
+            paste0("value of pi0: ", round(as.numeric(rv.custom$pi0), digits = 2))
+          )),
           fluidRow(
             column(width = 6, fluidRow(style = "height:800px;",
-              imageOutput(ns("calibrationPlotAll"), height = "800px")
+                                       imageOutput(ns("calibrationPlotAll"), height = "800px")
             )),
             column(width = 6, fluidRow(style = "height:400px;",
-              imageOutput(ns("calibrationPlot"), height = "400px")
+                                       imageOutput(ns("calibrationPlot"), height = "400px")
             ),
-              fluidRow(style = "height:400px;", 
-                highcharter::highchartOutput(ns("histPValue")))
+            fluidRow(style = "height:400px;", 
+                     highchartOutput(ns("histPValue")))
             )
           )
         )
       )
+      
+      
     })
     
     
@@ -727,7 +678,7 @@ PipelinePeptide_DA_server <- function(id,
     
     
     
-    output$calibrationResults <- renderUI({
+    output$Pvaluecalibration_calibrationResults <- renderUI({
       req(rv.custom$calibrationRes)
       rv$dataIn
       
@@ -824,9 +775,9 @@ PipelinePeptide_DA_server <- function(id,
         outfile <- tempfile(fileext = ".png")
         
         # Generate a png
-        grDevices::png(outfile, width = 600, height = 500)
+        png(outfile, width = 600, height = 500)
         calibrationPlot()
-        grDevices::dev.off()
+        dev.off()
         
         # Return a list
         list(
@@ -853,8 +804,7 @@ PipelinePeptide_DA_server <- function(id,
         )
       }
       
-      div(id = ns('div_errMsgCalibrationPlot'),
-        HTML(txt), style = "color:red")
+      div(HTML(txt), style = "color:red")
     })
     
     
@@ -871,8 +821,7 @@ PipelinePeptide_DA_server <- function(id,
         )
       }
       
-      div(id = ns('div_errMsgCalibrationPlotAll'),
-        HTML(txt), style = "color:red")
+      div(HTML(txt), style = "color:red")
     })
     
     
@@ -931,9 +880,9 @@ PipelinePeptide_DA_server <- function(id,
         outfile <- tempfile(fileext = ".png")
         
         # Generate a png
-        grDevices::png(outfile, width = 600, height = 500)
+        png(outfile, width = 600, height = 500)
         calibrationPlotAll()
-        grDevices::dev.off()
+        dev.off()
         
         # Return a list
         list(
@@ -962,24 +911,12 @@ PipelinePeptide_DA_server <- function(id,
       
     })
     
-    
-    
-    
-    output$Pvaluecalibration_btn_validate_UI <- renderUI({
-      widget <- actionButton(ns("Pvaluecalibration_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"])
-    })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$Pvaluecalibration_btn_validate, {
-      
-      
-      
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='PValuecalibration')
       
       rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
       rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
@@ -990,7 +927,7 @@ PipelinePeptide_DA_server <- function(id,
       # 
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status["Pvaluecalibration"] <- stepStatus$VALIDATED
+      rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -998,49 +935,34 @@ PipelinePeptide_DA_server <- function(id,
     
     # >>> START ------------- Code for step 2 UI---------------
     output$FDR <- renderUI({
-      widget <- wellPanel(
-        # uiOutput for all widgets in this UI
-        # This part is mandatory
-        # The renderUI() function of each widget is managed by MagellanNTK
-        # The dev only have to define a reactive() function for each
-        # widget he want to insert
-        # Be aware of the naming convention for ids in uiOutput()
-        # For more details, please refer to the dev document.
-        tagList(
-          # Insert validation button
-          uiOutput(ns("FDR_btn_validate_UI")),
-          fluidRow(
-            column(width = 5,
-              mod_set_pval_threshold_ui(ns("Title")),
-              uiOutput(ns("nbSelectedItems"))
-              #actionButton(ns('validate_pval'), "Validate threshold", class = actionBtnClass)
-            ),
-            column(width = 7,
-              withProgress(message = "", detail = "", value = 1, {
-                uiOutput(ns('FDR_volcanoplot_UI'))
-              })
-            )
-          ),
-          tags$hr(),
-          fluidRow(
-            column(width = 4,
-              checkboxInput(ns('FDR_viewAdjPval'), 
-                'View adjusted p-value', 
-                value = rv.widgets$FDR_viewAdjPval)
-            ),
-            column(width = 4,
-              downloadButton(ns("FDR_download_SelectedItems_UI"), 
-                "Selected final results (Excel file)", class = actionBtnClass)
-            )
-          ),
+      
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+            uiOutput(ns('widgets_ui'))
+        ),
+        content = div(
+          uiOutput(ns("FDR_nbSelectedItems_ui")),
+          withProgress(message = "", detail = "", value = 1, {
+            uiOutput(ns('FDR_volcanoplot_UI'))
+          }),
+          downloadButton(ns("FDR_download_SelectedItems_UI"), 
+                         "Selected final results (Excel file)", class = actionBtnClass),
           DT::DTOutput(ns("FDR_selectedItems_UI"))
         )
+      )
+    })
+    
+    output$widgets_ui <- renderUI({
+      widget <- tags$div(
+        mod_set_pval_threshold_ui(ns("Title")),
+        checkboxInput(ns('FDR_viewAdjPval'), 
+                      'View adjusted p-value', 
+                      value = rv.widgets$FDR_viewAdjPval)
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
     })
-    
-    
     
     #-------------------------------------------------------------------
     #
@@ -1057,14 +979,14 @@ PipelinePeptide_DA_server <- function(id,
     )
     
     output$FDR_volcanoplot_UI <- renderUI({
-      widget <- div(id = ns('div_FDR_volcano'),
+      widget <- div(
         mod_volcanoplot_ui(ns("FDR_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
     })
     
     
-    output$nbSelectedItems <- renderUI({
+    output$FDR_nbSelectedItems_ui <- renderUI({
       rv.custom$thpval
       rv$dataIn
       req(Build_pval_table())
@@ -1170,7 +1092,7 @@ PipelinePeptide_DA_server <- function(id,
     
     
     output$FDR_selectedItems_UI <- DT::renderDT({
-      req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
+      req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
       df <- Build_pval_table()
       
       if (rv.widgets$FDR_viewAdjPval){
@@ -1198,7 +1120,7 @@ PipelinePeptide_DA_server <- function(id,
           columnDefs = .coldefs,
           ordering = !rv.widgets$FDR_viewAdjPval
         )
-      ) |>
+      ) %>%
         DT::formatStyle(
           paste0("isDifferential (",
             as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
@@ -1291,34 +1213,10 @@ PipelinePeptide_DA_server <- function(id,
       nb
     })
     
-    # observe({
-    #   req(Get_FDR())
-    #   req(Get_Nb_Significant())
-    #   
-    #   th <- Get_FDR() * Get_Nb_Significant()
-    #   
-    #   if (th < 1) {
-    #     warntxt <- paste0("With such a dataset size (",
-    #       Get_Nb_Significant(), " selected discoveries), an FDR of ",
-    #       round(100 * Get_FDR(), digits = 2),
-    #       "% should be cautiously interpreted as strictly less than one
-    #     discovery (", round(th, digits = 2), ") is expected to be false"
-    #     )
-    #     mod_errorModal_server('warn_FDR',
-    #       title = 'Warning',
-    #       text = warntxt)
-    #   }
-    #   
-    # })
-    
-    
-    
-    
-    
     
     
     Build_pval_table <- reactive({
-      req(rv$steps.status["Pvaluecalibration"] == stepStatus$VALIDATED)
+      req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.custom$thlogfc)
       req(rv.custom$thpval)
       req(rv$dataIn)
@@ -1384,19 +1282,12 @@ PipelinePeptide_DA_server <- function(id,
     }
     
     
-    output$FDR_btn_validate_UI <- renderUI({
-      widget <- actionButton(ns("FDR_btn_validate"),
-        "Validate step",
-        class = "btn-success"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
-    })
     # >>> END: Definition of the widgets
     
     
     
-    observeEvent(input$FDR_btn_validate, {
-      
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='FDR') 
       rv.custom$history[['th pval']] <- rv.custom$thpval
       rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
       rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
@@ -1404,7 +1295,7 @@ PipelinePeptide_DA_server <- function(id,
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status["FDR"] <- stepStatus$VALIDATED
+      rv$steps.status["FDR"] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     # <<< END ------------- Code for step 2 UI---------------
@@ -1413,35 +1304,29 @@ PipelinePeptide_DA_server <- function(id,
     
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
-      tagList(
-        # Insert validation button
-        # This line is necessary. DO NOT MODIFY
-        uiOutput(ns('Save_btn_validate_UI')),
-        uiOutput(ns('dl_UI'))
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          # timeline_process_ui(ns('Save_timeline'))
+        ),
+        content = uiOutput(ns('dl_ui'))
       )
     })
     
     output$dl_UI <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       
       MagellanNTK::download_dataset_ui(ns('createQuickLink'))
     })
     
-    output$Save_btn_validate_UI <- renderUI({
-      MagellanNTK::toggleWidget(
-        actionButton(ns("Save_btn_validate"), "Save",
-          class = "btn-success"),
-        rv$steps.enabled['Save']
-      )
-    })
-    
-    observeEvent(input$Save_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(btnEvents()=='Save')
       # Do some stuff
       
       last.se <- length(rv$dataIn)
-      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- NULL
-      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
+      paramshistory(rv$dataIn[[last.se]]) <- NULL
+      paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
       
       
       # Add the result of pairwise comparison to the coldata
@@ -1451,7 +1336,7 @@ PipelinePeptide_DA_server <- function(id,
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
       
       Prostar2::download_dataset_server('createQuickLink', 

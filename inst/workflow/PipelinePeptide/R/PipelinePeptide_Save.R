@@ -23,10 +23,11 @@ PipelinePeptide_Save_server <- function(id,
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
-  current.pos = reactive({1})
+  current.pos = reactive({1}),
+  btnEvents = reactive({NULL})
 ){
   
-  
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # By default, this list is empty for the Save module
@@ -52,6 +53,7 @@ PipelinePeptide_Save_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
     
     ###### ------------------- Code for Save (step 0) -------------------------    #####
     output$Save <- renderUI({
@@ -62,39 +64,24 @@ PipelinePeptide_Save_server <- function(id,
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
         'md', 
-        paste0(id, '.md')))
+        paste0(id, '.Rmd')))
       
-      tagList(
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Save available'),
-        
-        uiOutput(ns('datasetSave_ui')),
-        
-        # Insert validation button
-        uiOutput(ns('Save_btn_validate_ui'))
+      
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = NULL,
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Save available'),
+        )
       )
     })
     
-    
-    
-    output$datasetSave_ui <- renderUI({
-      # Insert your own code to visualize some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
-      
-    })
-    
-    output$Save_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Save_btn_validate"),
-        "Start",
-        class = btn_success_color)
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Save'])
-    })
-    
-    
-    observeEvent(input$Save_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(grepl('Save', btnEvents()))
+      req(inherits(dataIn(), 'QFeatures'))
       # In this process, there is no dataset resend to the server
       # This is why the dataOut$value is set to NULL. This triggers the 
       # validation of the step but without rebuilds the vector of datasets 
@@ -102,7 +89,7 @@ PipelinePeptide_Save_server <- function(id,
       rv$dataIn <- dataIn()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     

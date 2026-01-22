@@ -8,10 +8,11 @@ demo_package: DaparToolshedData
 # Customizable core functions
 
 convert_dataset: Prostar2
-open_dataset: MagellanNTK
-open_demoDataset: MagellanNTK
+open_dataset: Prostar2
+open_demoDataset: Prostar2
 view_dataset: omXplore
 infos_dataset: Prostar2
+history_dataset: Prostar2
 download_dataset: Prostar2
 build_report: Prostar2
 addDatasets: Prostar2

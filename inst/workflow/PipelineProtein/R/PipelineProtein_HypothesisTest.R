@@ -113,7 +113,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
     listNomsComparaison = NULL,
     n = NULL,
     swap.history = NULL,
-    AllPairwiseComp = NULL
+    AllPairwiseComp = NULL,
+    logFC_onevsall = NULL,
+    logFC_onevsone = NULL
   )
   
   ###-------------------------------------------------------------###
@@ -208,24 +210,31 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-     # rv.custom$result_open_dataset()$dataset
       req(dataIn())
       rv$dataIn <- dataIn()
       
-      
-      #if (session$userData$wf_mode == 'process'){
-      #rv$dataIn <- QFeatures::QFeatures()
-      #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
       
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
       
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
+        
+        tmp_onevsone <- DaparToolshed::limmaCompleteTest(
+          qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+          sTab = SummarizedExperiment::colData(rv$dataIn),
+          comp.type = "OnevsOne" )
+        rv.custom$logFC_onevsone <- tmp_onevsone$logFC
+        
+        tmp_onevsall <- DaparToolshed::limmaCompleteTest(
+          qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+          sTab = SummarizedExperiment::colData(rv$dataIn),
+          comp.type = "OnevsAll" )
+        rv.custom$logFC_onevsall <- tmp_onevsall$logFC
 
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -238,15 +247,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
     # >>>> -------------------- STEP 1 : Global UI ------------------------------------
     output$HypothesisTest <- renderUI({
       shinyjs::useShinyjs()
-      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      #includeCSS(path)
-      
-      
-      file <- normalizePath(file.path(
-        system.file('workflow', package = 'Prostar2'),
-        unlist(strsplit(id, '_'))[1], 
-        'md', 
-        paste0(id, '.md')))
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
@@ -260,7 +260,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     output$HypothesisTest_plots_ui <- renderUI({
-      
       req(rv$dataIn)
 
       m <- DaparToolshed::match.metacell(
@@ -271,18 +270,14 @@ PipelineProtein_HypothesisTest_server <- function(id,
       NA.count <- length(which(m))
 
       if (NA.count > 0) {
-      
       tags$p("Your dataset contains missing values. Before using the
       Hypothesis test, you must filter/impute them.")
-    } else {
-      tagList(
-        uiOutput(ns('HypothesisTest_warning_conditions_ui')),
-        uiOutput(ns("HypothesisTest_swapConds_ui")),
-        highcharter::highchartOutput(ns("FoldChangePlot"))
-      )
-    }
-      
-      
+      } else {
+        tagList(
+          uiOutput(ns('HypothesisTest_warning_conditions_ui')),
+          uiOutput(ns("HypothesisTest_swapConds_ui")),
+          highcharter::highchartOutput(ns("FoldChangePlot")) )
+      }
     })
     
     
@@ -344,8 +339,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
     })
     
-    
-    
     output$HypothesisTest_ttestOptions_ui <- renderUI({
       req(rv.widgets$HypothesisTest_method == "ttests")
       widget <- radioButtons(ns("HypothesisTest_ttestOptions"), 
@@ -357,8 +350,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
     })
     
-    
-    
     output$HypothesisTest_thlogFC_ui <- renderUI({
       widget <- textInput(ns("HypothesisTest_thlogFC"),
         "log(FC) threshold",
@@ -368,67 +359,44 @@ PipelineProtein_HypothesisTest_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
     })
     
-    
-    
     output$HypothesisTest_correspondingRatio_ui <- renderUI({
       ratio <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
       p("(FC = ", 2^(ratio), ")")
     })
     
     
-    
-    observeEvent(
-      c(
-        req(rv.widgets$HypothesisTest_method != 'None'), 
-        req(rv.widgets$HypothesisTest_design != 'None'),
-        if (rv.widgets$HypothesisTest_method == 'ttests')
-          req(rv.widgets$HypothesisTest_ttestOptions != "None")
-      ), {
-        req(rv$dataIn)
+    observeEvent(req(rv.widgets$HypothesisTest_design != 'None'), {
+      req(rv$dataIn)
+      # Get logFC
+      if(rv.widgets$HypothesisTest_design == "OnevsOne"){
+        rv.custom$logFC <- rv.custom$logFC_onevsone
+      } else if(rv.widgets$HypothesisTest_design == "OnevsAll") {
+        rv.custom$logFC <- rv.custom$logFC_onevsall
+      }
+      # Get comparison names
+      rv.custom$listNomsComparaison <- colnames(rv.custom$logFC)
+      rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = '_logFC'))
+      # Get number of comparison 
+      rv.custom$n <- ncol(rv.custom$logFC)
+      rv.custom$swap.history <- rep(0, rv.custom$n)   
+    })
 
+    output$FoldChangePlot <- highcharter::renderHighchart({
+      req(rv.custom$logFC) 
+      
+      withProgress(message = "Computing plot...", detail = "", value = 0.5, {
         rv.widgets$HypothesisTest_thlogFC <- as.numeric(
           rv.widgets$HypothesisTest_thlogFC)
         
-        ComputeComparisons()
-        if(is.null(rv.custom$AllPairwiseComp)){
-          
-          print(rv.custom$AllPairwiseCompMsg)
-         
-          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
-            text = rv.custom$AllPairwiseCompMsg,
-            type = 'error' )
-        } 
-        else if(inherits(rv.custom$AllPairwiseComp, "try-error")) {
-          
-          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
-            text = rv.custom$AllPairwiseComp[[1]],
-            type = 'error' )
-        } else {
-          rv.custom$n <- ncol(rv.custom$AllPairwiseComp$logFC)
-          rv.custom$swap.history <- rep(0, rv.custom$n)
-        }
-      })
-    
-
-    
-    output$FoldChangePlot <- highcharter::renderHighchart({
-      req(rv.custom$AllPairwiseComp$logFC)
-      
-      withProgress(message = "Computing plot...", detail = "", value = 0.5, {
-        
         DaparToolshed::hc_logFC_DensityPlot(
-          df_logFC = as.data.frame(rv.custom$AllPairwiseComp$logFC),
+          df_logFC = as.data.frame(rv.custom$logFC),
           th_logFC = as.numeric(rv.widgets$HypothesisTest_thlogFC)
         )
       })
     })
     
-    
-    
     output$showConds <- renderUI({
-      req(rv.custom$AllPairwiseComp)
-      .style <- "align: center; display:inline-block; vertical-align: middle;
-      padding-right: 50px; padding-bottom: 50px;"
+      req(rv.custom$listNomsComparaison)
       
       #browser()
       widget <- lapply(seq_len(rv.custom$n), function(i) {
@@ -437,21 +405,20 @@ PipelineProtein_HypothesisTest_server <- function(id,
         )
         
         div(id = ns('div_showConds'),
-          div(id = ns('div_ll.conds1'),
-            style = .style, p(gsub("[()]", "", ll.conds[1]))),
-          div(id = ns('div_ll.conds2'),
-            style = .style, p(gsub("[()]", "", ll.conds[2]))),
-          div(id = ns('div_compswap'),
-            style = .style,
-            checkboxInput(ns(paste0("compswap", i)), "",
-              value = rv.custom$swap.history[i])
-          )
+            style = "margin-bottom: -15px;",
+            div(id = ns('div_compswap'),
+                style = "display: inline-block; margin-right: 10px;",
+                checkboxInput(ns(paste0("compswap", i)), "",
+                              value = rv.custom$swap.history[i],
+                              width = "100%") ),
+            div(id = ns('div_ll.conds1'),
+                style = "display: inline-block;", 
+                paste0(gsub("[()]", "", ll.conds[1]), "   VS   ",gsub("[()]", "", ll.conds[2])) )
         )
       })
       
       do.call(tagList, widget)
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
-      
     })
     
     
@@ -462,24 +429,20 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv.custom$swap.history <- GetSwapShinyValue()
       #if (length(ind.swap) > 0) {
       # for (i in ind.swap) {
-      current.comp <- colnames(rv.custom$AllPairwiseComp$logFC)[ind.swap]
+      current.comp <- colnames(rv.custom$logFC)[ind.swap]
       
       # Swap comparisons names
       ll <- unlist(strsplit(current.comp, split = "_"))
       tmp.cond1 <- gsub("[( )]", "", ll[1])
       tmp.cond2 <- gsub("[( )]", "", ll[3])
       tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
-      tmp.pval <- paste0( "(",  tmp.cond2, ")_vs_(", tmp.cond1, ")_pval" )
-       
-      #tmp.logFC <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_logFC" )
-      #tmp.pval <- paste0(tmp.cond2, "_vs_", tmp.cond1, "_pval" )
       
-      colnames(rv.custom$AllPairwiseComp$logFC)[ind.swap] <- tmp.logFC
-      colnames(rv.custom$AllPairwiseComp$P_Value)[ind.swap] <- tmp.pval
+      
+      colnames(rv.custom$logFC)[ind.swap] <- tmp.logFC 
       
       # Swap logFC values
-      .logFC <- rv.custom$AllPairwiseComp$logFC
-      rv.custom$AllPairwiseComp$logFC[, ind.swap] <- -.logFC[, ind.swap]
+      .logFC <- rv.custom$logFC
+      rv.custom$logFC[, ind.swap] <- -.logFC[, ind.swap]
     })
     
     GetSwapShinyValue <- reactive({
@@ -504,34 +467,27 @@ PipelineProtein_HypothesisTest_server <- function(id,
         pattern = "Missing",
         level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
         )
-      
       req(length(which(m)) == 0)
       
       rv.custom$AllPairwiseComp <- NULL
       rv.custom$AllPairwiseCompMsg <- NULL
    
-      
-      
       rv.custom$AllPairwiseComp <- tryCatch({
         switch(rv.widgets$HypothesisTest_method,
           Limma = {
             DaparToolshed::limmaCompleteTest(
               qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
               sTab = SummarizedExperiment::colData(rv$dataIn),
-              comp.type = rv.widgets$HypothesisTest_design
-            )
+              comp.type = rv.widgets$HypothesisTest_design )
           },
           ttests = {
             rv.custom$AllPairwiseComp <- DaparToolshed::compute_t_tests(
               obj = rv$dataIn,
               i = length(rv$dataIn),
               contrast = rv.widgets$HypothesisTest_design,
-              type = rv.widgets$HypothesisTest_ttestOptions
-            )
-            
-          }
-        )
-      },
+              type = rv.widgets$HypothesisTest_ttestOptions )
+          })
+        },
         warning = function(w) {
           msg <- w
           rv.custom$AllPairwiseCompMsg <- w$message
@@ -543,68 +499,18 @@ PipelineProtein_HypothesisTest_server <- function(id,
           },
         finally = {
           # cleanup-code
-        }
-        
-        )
+        })
 
       rv.custom$history[['HypothesisTest_method']] <- rv.widgets$HypothesisTest_method
       rv.custom$history[['HypothesisTest_design']] <- rv.widgets$HypothesisTest_design
       if (rv.widgets$HypothesisTest_method == 'ttests')
         rv.custom$history[['HypothesisTest_ttestOptions']] <- rv.widgets$HypothesisTest_ttestOptions
       
-      
       if(!is.null(rv.custom$AllPairwiseComp)){
       rv.custom$listNomsComparaison <- colnames(rv.custom$AllPairwiseComp$logFC)
       rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = '_logFC'))
       }
-      
     }) 
-    
-    
-    
-    # |> bindCache(
-    #   rv$dataIn,
-    #   rv.widgets$HypothesisTest_method,
-    #   rv.widgets$HypothesisTest_design,
-    #   rv.widgets$HypothesisTest_ttestOptions
-    # )
-    
-    
-    # output$HypothesisTest_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("HypothesisTest_btn_validate"),
-    #     "Validate step",
-    #     class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
-    #   
-    # })
-    
-    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      
-      req(grepl('HypothesisTest', btnEvents()))
-      
-      shiny::withProgress(message = paste0("Reseting process", id), {
-        shiny::incProgress(0.5)
-        
-      if ( is.null(rv$dataIn) || is.null(rv.custom$AllPairwiseComp))
-        shinyjs::info(btnVentsMasg)
-      else {
-        # Do some stuff
-        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        df <- cbind(rv.custom$AllPairwiseComp$logFC, 
-          rv.custom$AllPairwiseComp$P_Value)
-        DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
-        rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
-      
-        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
-        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
-
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status['HypothesisTest'] <- stepStatus$VALIDATED
-      }
-      })
-    })
     
     
     
@@ -633,8 +539,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       )
     })
     
-    
-    
+
     output$HypothesisTest_swapConds_ui <- renderUI({
       widget <- tagList(
         h3("Swap conditions"),
@@ -642,6 +547,59 @@ PipelineProtein_HypothesisTest_server <- function(id,
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
+    })
+    
+    
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(grepl('HypothesisTest', btnEvents()))
+      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
+      if ( is.null(rv$dataIn) || rv.widgets$HypothesisTest_method == "None" || rv.widgets$HypothesisTest_design == "None" || 
+           (rv.widgets$HypothesisTest_method == 'ttests' && rv.widgets$HypothesisTest_ttestOptions == "None"))
+        shinyjs::info(btnVentsMasg)
+      else {
+        req(rv$dataIn)
+        
+        rv.widgets$HypothesisTest_thlogFC <- as.numeric(
+          rv.widgets$HypothesisTest_thlogFC)
+        
+        ComputeComparisons()
+        if(is.null(rv.custom$AllPairwiseComp)){
+          
+          print(rv.custom$AllPairwiseCompMsg)
+          
+          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
+                                             text = rv.custom$AllPairwiseCompMsg,
+                                             type = 'error' )
+        } 
+        else if(inherits(rv.custom$AllPairwiseComp, "try-error")) {
+          
+          MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
+                                             text = rv.custom$AllPairwiseComp[[1]],
+                                             type = 'error' )
+        } else {
+          rv.custom$n <- ncol(rv.custom$AllPairwiseComp$logFC)
+          rv.custom$swap.history <- rep(0, rv.custom$n)
+        }
+        
+        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
+        df <- cbind(rv.custom$AllPairwiseComp$logFC, 
+          rv.custom$AllPairwiseComp$P_Value)
+        DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
+        rv.custom$history[['HypothesisTest_thlogFC']] <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
+      
+        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
+        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
+
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['HypothesisTest'] <- MagellanNTK::stepStatus$VALIDATED
+      }
+      })
     })
     
     # >>> END: Definition of the widgets
@@ -653,17 +611,19 @@ PipelineProtein_HypothesisTest_server <- function(id,
         sidebar = tagList(
           #timeline_process_ui(ns('Save_timeline'))
         ),
-        content = tagList(uiOutput(ns('dl_ui')))
+        content = tagList(
+          #uiOutput(ns('dl_ui'))
+        )
       )
     })
     
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    # 
+    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    # })
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
@@ -678,9 +638,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
-      Prostar2::download_dataset_server('createQuickLink',
-        dataIn = reactive({rv$dataIn}))
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+      # Prostar2::download_dataset_server('createQuickLink',
+      #   dataIn = reactive({rv$dataIn}))
       }
       })
     })

@@ -62,7 +62,7 @@ open_dataset_server <- function(
     chooseSource = "customDataset",
     file = character(0),
     load_dataset_btn = 0,
-    pkg = "None",
+    pkg = NULL,
     demoDataset = "None"
   )
   
@@ -70,7 +70,8 @@ open_dataset_server <- function(
     remoteReset = NULL,
     dataRead = NULL,
     name = "default.name",
-    packages = NULL
+    packages = NULL,
+    error_msg = ""
   )
   
   dataOut <- reactiveValues(
@@ -155,19 +156,25 @@ open_dataset_server <- function(
       tagList(
         uiOutput(ns("choosePkg")),
         uiOutput(ns("chooseDemoDataset")),
-        uiOutput(ns("linktoDemoPdf"))
+        #uiOutput(ns("linktoDemoPdf"))
+        uiOutput(ns('error_msg_ui')),
+        uiOutput(ns("load_btn_UI"))
       )
     })
     
-    
-    
-    
-    # output$load_btn_UI <- renderUI({
-    #   req(rv.widgets$file)
-    #     widget <- actionButton(ns("load_dataset_btn"), "Load file")
-    #     MagellanNTK::toggleWidget(widget, is.enabled())
-    # })
-    
+    output$error_msg_ui <- renderUI({
+      req(rv.custom$error_msg)
+      
+      tags$p(style = "color: red;", rv.custom$error_msg)
+    })
+
+    output$load_btn_UI <- renderUI({
+      req(rv.widgets$demoDataset)
+      req(rv.widgets$pkg)
+      
+        widget <- actionButton(ns("load_dataset_btn"), "Load file")
+        MagellanNTK::toggleWidget(widget, is.enabled())
+    })
     
     
     output$choosePkg <- renderUI({
@@ -175,7 +182,7 @@ open_dataset_server <- function(
       
       shiny::withProgress(message = "", detail = "", value = 0.5, {
         shiny::incProgress(0.5, detail = paste0("Searching for ", class, " datasets"))
-        rv.custom$packages <- GetListDatasets(class, demo_package)
+        rv.custom$packages <- MagellanNTK::GetListDatasets(class, demo_package)
       })
       
       
@@ -209,29 +216,25 @@ open_dataset_server <- function(
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
+    # observe({
+    #   req(rv.widgets$chooseSource)
+    #   req(rv.widgets$pkg)
+    #   req(rv.widgets$file)
+    #   
+    #   cond1 <- rv.widgets$chooseSource == "customDataset" && !is.null(rv.widgets$file$datapath)
+    #   cond2 <- rv.widgets$chooseSource == "packageDataset" && !is.null(rv.widgets$pkg) && rv.widgets$pkg != ""
+    #   
+    #   shinyjs::toggleState("load_dataset_btn", condition = cond1 || cond2)
+    # })
     
     
-    observe({
-      req(rv.widgets$chooseSource)
-      req(rv.widgets$pkg)
-      req(rv.widgets$file)
-      
-      cond1 <- rv.widgets$chooseSource == "customDataset" && !is.null(rv.widgets$file$datapath)
-      cond2 <- rv.widgets$chooseSource == "packageDataset" && !is.null(rv.widgets$pkg) && rv.widgets$pkg != ""
-      
-      shinyjs::toggleState("load_dataset_btn", condition = cond1 || cond2)
-    })
+    # output$linktoDemoPdf <- renderUI({
+    #   req(rv.widgets$demoDataset)
+    #   req(rv.widgets$chooseSource == "packageDataset")
+    # })
+
     
-    
-    output$linktoDemoPdf <- renderUI({
-      req(rv.widgets$demoDataset)
-      req(rv.widgets$chooseSource == "packageDataset")
-    })
-    
-    
-    
-    observeEvent( input$file, {
-      
+    observeEvent(input$file,{
       #browser()
       rv.widgets$file <- input$file
       rv.custom$dataRead <- NULL
@@ -258,23 +261,35 @@ open_dataset_server <- function(
       dataOut$dataset <- rv.custom$dataRead
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$name <- rv.custom$name
-      
     })
     
     
     
     # Part of open custom dataset
     ## -- Open a  File --------------------------------------------
-    observeEvent(req(rv.widgets$demoDataset != "None"), ignoreInit = FALSE, {
+    observeEvent(rv.widgets$load_dataset_btn, ignoreInit = FALSE, {
+      req(rv.widgets$demoDataset != "None")
       
+      rv.custom$error_msg <- ""
+      shinyjs::toggleState("load_dataset_btn")
       utils::data(list = rv.widgets$demoDataset, package = rv.widgets$pkg)
       rv.custom$name <- rv.widgets$demoDataset
-      rv.custom$dataRead <- BiocGenerics::get(rv.widgets$demoDataset)
-      #rv.custom$remoteReset <- rv.custom$remoteReset + 1
-      
-      dataOut$dataset <- rv.custom$dataRead
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$name <- rv.custom$name
+      shiny::withProgress(message = paste0("Getting dataset ", rv.widgets$demoDataset), {
+        shiny::incProgress(0.5)
+        print(paste0(rv.widgets$demoDataset, ' : shiny::withProgress(message = paste0("Builds Excel file", rv.widgets$demoDataset)'))
+        tryCatch({
+          rv.custom$dataRead <- DaparToolshedData::GetData(rv.widgets$demoDataset)
+          #rv.custom$remoteReset <- rv.custom$remoteReset + 1
+          
+          dataOut$dataset <- rv.custom$dataRead
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$name <- rv.custom$name
+        }, 
+        error = function(e) {message("Error: Unable to download the requested dataset. Please check your internet connection and try again.")
+          rv.custom$error_msg <- "Error: Unable to download the requested dataset. Please check your internet connection and try again."}
+        )
+      })
+      shinyjs::toggleState("load_dataset_btn")
     })
     
     output$Description_infos_dataset_UI <- renderUI({

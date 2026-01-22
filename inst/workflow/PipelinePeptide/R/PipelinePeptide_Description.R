@@ -27,16 +27,19 @@ PipelinePeptide_Description_server <- function(id,
     remoteReset = reactive({0}),
     steps.status = reactive({NULL}),
     current.pos = reactive({1}),
-    path = NULL
+    path = NULL,
+    btnEvents = reactive({NULL})
 ){
   
-  
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # By default, this list is empty for the Description module
   # but it can be customized
   widgets.default.values <- NULL
-  rv.custom.default.values <- NULL
+  rv.custom.default.values <- list(
+    result_open_dataset = reactive({NULL})
+  )
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -56,6 +59,7 @@ PipelinePeptide_Description_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
     
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
@@ -66,43 +70,47 @@ PipelinePeptide_Description_server <- function(id,
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
         'md', 
-        paste0(id, '.md')))
+        paste0(id, '.Rmd')))
       
-      tagList(
-        if (file.exists(file))
-          includeMarkdown(file)
-        else
-          p('No Description available'),
-        
-        uiOutput(ns('datasetDescription_ui')),
-        
-        # Insert validation button
-        uiOutput(ns('Description_btn_validate_ui'))
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
+        ),
+        content = tagList(
+          if (file.exists(file))
+            includeMarkdown(file)
+          else
+            p('No Description available'),
+        )
       )
     })
     
-    
-    
-    output$datasetDescription_ui <- renderUI({
-      # Insert your own code to vizualise some information
-      # about your dataset. It will appear once the 'Start' button
-      # has been clicked
+    output$open_dataset_UI <- renderUI({
+      req(session$userData$runmode == 'process')
+      req(is.null(dataIn()))
+      req(NULL)
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
       
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
-    output$Description_btn_validate_ui <- renderUI({
-      widget <- actionButton(ns("Description_btn_validate"),
-                             "Start",
-                             class = "btn-success")
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    })
-    
-    
-    observeEvent(input$Description_btn_validate, {
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(grepl('Description', btnEvents()))
+      req(dataIn())
       rv$dataIn <- dataIn()
+      
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     

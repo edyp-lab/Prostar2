@@ -80,10 +80,11 @@ mod_filtering_example_server <- function(
 
       shiny::showModal(shinyjqui::draggableModalDialog(
         id = ns('example_modal'),
-        DT::DTOutput(ns("example_tab_filtered")),
+        tagList(tags$head(tags$style(paste0(".modal-content:has(#", ns("example_modal"), ") {width: 1000px !important;}"))),
+        DT::DTOutput(ns("example_tab_filtered"))),
         easyClose = TRUE,
         footer = tagList(
-          modalButton("Fermer")
+          modalButton("Close")
         )
       ))
 

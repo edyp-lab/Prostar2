@@ -37,19 +37,17 @@ NULL
 #'
 mod_mv_plots_ui <- function(id) {
   ns <- NS(id)
-  .style <- "display:inline-block; vertical-align: top; padding-right: 20px;"
+  .style <- "display:inline-block; vertical-align: top;"
   tagList(
     tags$div(
-      tags$div(
-        style = .style,
-        highcharter::highchartOutput(ns("plot_viewNAbyMean"), width = "600px")
-      ),
-      tags$div(
-        style = .style,
-        tagList(
-          uiOutput(ns("WarnForImageNA")),
-          imageOutput(ns("plot_showImageNA"), width = "600px")
-        )
+      style = .style,
+      highcharter::highchartOutput(ns("plot_viewNAbyMean"), width = "600px")
+    ),
+    tags$div(
+      style = .style,
+      tagList(
+        uiOutput(ns("WarnForImageNA")),
+        imageOutput(ns("plot_showImageNA"), width = "600px")
       )
     )
   )

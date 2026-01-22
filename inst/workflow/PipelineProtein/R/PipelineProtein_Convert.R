@@ -140,12 +140,12 @@ PipelineProtein_Convert_server <- function(id,
     
     
     core.code <- paste0(
-      Get_Code_Declare_widgets(names(widgets.default.values)),
-      Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
-      Get_Code_for_rv_reactiveValues(),
-      Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-      Get_Code_for_dataOut(),
-      Get_Code_for_remoteReset(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(
         widgets = TRUE,
         custom = TRUE,
         dataIn = "NULL"
@@ -197,7 +197,7 @@ PipelineProtein_Convert_server <- function(id,
         rv$dataIn <- dataIn()
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
-        rv$steps.status['Description'] <- stepStatus$VALIDATED
+        rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -468,7 +468,7 @@ PipelineProtein_Convert_server <- function(id,
           # DO NOT MODIFY THE THREE FOLLOWINF LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
-          rv$steps.status['SelectFile'] <- stepStatus$VALIDATED
+          rv$steps.status['SelectFile'] <- MagellanNTK::stepStatus$VALIDATED
         }
       })
     })
@@ -652,7 +652,7 @@ PipelineProtein_Convert_server <- function(id,
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
-        rv$steps.status['DataId'] <- stepStatus$VALIDATED
+        rv$steps.status['DataId'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -780,7 +780,7 @@ PipelineProtein_Convert_server <- function(id,
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
-        rv$steps.status['ExpandFeatData'] <- stepStatus$VALIDATED
+        rv$steps.status['ExpandFeatData'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -852,7 +852,7 @@ PipelineProtein_Convert_server <- function(id,
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
-        rv$steps.status['Design'] <- stepStatus$VALIDATED
+        rv$steps.status['Design'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -889,7 +889,7 @@ PipelineProtein_Convert_server <- function(id,
     ## Save dataset -----
     output$dl_ui <- renderUI({
       # req(config@mode == 'process')
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
+      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       
       MagellanNTK::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
       
@@ -959,10 +959,10 @@ PipelineProtein_Convert_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       dataOut$name = rv.custom$name
-      rv$steps.status['Save'] <- stepStatus$VALIDATED
+      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
       
-      MagellanNTK::download_dataset_server(paste0(id, '_createQuickLink'), 
+      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), 
         dataIn = reactive({rv$dataIn}))
       
       

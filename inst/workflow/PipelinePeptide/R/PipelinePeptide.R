@@ -8,18 +8,16 @@
 #' 
 #' @name module_PiplelinePeptide
 #' @examples
-#' if (interactive()){
+#' \dontrun{
 #' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelinePeptide/R/PipelinePeptide.R")
 #' path <- system.file('extdata/workflow/PipelinePeptide', package = 'Prostar2')
 #' shiny::runApp(MagellanNTK::workflowApp("PipelinePeptide")
 #' }
 #' 
-#' @name PipelineProtein
+#' @name PipelinePeptide
 #' 
 #' @example inst/workflow/PipelinePeptide/examples/example_pipelinePeptide.R
 #' 
-#' @importFrom QFeatures addAssay removeAssay
-#' @import DaparToolshed
 #' 
 NULL
 
@@ -31,8 +29,8 @@ PipelinePeptide_conf <- function(){
   MagellanNTK::Config(
   mode = 'pipeline',
   fullname = 'PipelinePeptide',
-  steps = c('Filtering', 'Normalization', 'Imputation', 'Aggregation', 'HypothesisTest', 'DA'),
-  mandatory = c(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE)
+  steps = c('Filtering', 'Normalization', 'Imputation', 'Aggregation', 'DifferentialAnalysis'),
+  mandatory = c(FALSE, FALSE, FALSE, TRUE, FALSE)
 )
 }
 
@@ -72,7 +70,7 @@ PipelinePeptide_ui <- function(id){
 #' 
 #' @rdname PipelineProtein
 #'
-#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
+#' @import shiny
 #' @importFrom stats setNames
 #' 
 #' @export
@@ -85,9 +83,8 @@ PipelinePeptide_server <- function(id,
   current.pos = reactive({1}),
   path = NULL
   ){
-
-
   
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Contrary to the simple workflow, there is no widget in this module
   # because all the widgets are provided by the simple workflows.
@@ -109,6 +106,7 @@ PipelinePeptide_server <- function(id,
     )
     
     eval(str2expression(core.code))
+    add.resourcePath()
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

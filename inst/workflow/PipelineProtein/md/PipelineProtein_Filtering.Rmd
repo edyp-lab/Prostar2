@@ -11,51 +11,44 @@ output:
 date: 30 mai 2024
 link-citations: true
 ---
+# Filtering
+The `Filtering` step aims to remove proteins irrelevant to the analysis. Some proteins may correspond to contaminants or decoy sequences, while others may contain too many missing values to be reliably quantified. Filtering is performed using the quantitative data tags (`Cell metadata filtering`) or the metadata, which include all non-quantitative variables from the original dataset (`Variable filtering`). 
 
+This step is based on defining queries based on user-selected parameters, such as the number of missing values within or across biological conditions, contaminant annotations, or decoy flags, to either retain or discard selected proteins. Multiple filtering steps can be applied sequentially, with each filter operating on the dataset produced by the previous one.
 
-Some proteins may be discarded, on the
-basis of several user-defined criteria (number of missing values
-within each or across all the biological condition(s), contaminant database, decoy sequences, etc.).
+***
 
+### Cell metadata filtering
+The `Cell metadata filtering` step uses the quantitative data tags, which allows to filter proteins base on the type of value (e.g. missing values). For more information about these tag and how they are created, please refer to the FAQ. 
 
+The left side of the interface allows you to select the settings for the filters to be created.
+The table in the middle summarizes all the filters applied, as well as the number of proteins removed by each of them. Each filter is applied using the data resulting from the previous query. 
+When a tag is selected, graphs describing the distribution of values associated with this tag in the different samples and conditions appear below the table.
 
-This stage aims at filtering out proteins according to their number of missing values, as well as
-according to some information stored in the protein (or feature) metadata.
-1. Click on “Filter data” in the “Data processing” menu.
-2. On the first tab (called "Missing values", see Figure 5), select among the various options which
-proteins should be filtered out or not. The options are the following:
- None: No filtering, the quantitative data is left unchanged (Note 19).
- Whole Matrix: proteins that contain in the quantitative dataset (across all conditions) fewer
-non-missing values than a user-defined threshold are deleted;
- For every condition: proteins that contain fewer non-missing values in each condition than a
-user-defined threshold are removed;
- At least one condition: proteins that contain fewer non-missing values in at least one
-condition than a user-defined threshold are suppressed;
-3. Visualize the effect of the filtering options without changing the current dataset by clicking on
-"Perform filtering". If the filtering does not produce the expected effect, test another one. To do
-so, simply choose another method in the list and click again on "Perform filtering". The plots are
-automatically updated. This action does not modify the dataset but offers a preview of the
-filtered data. Iterate this step as long as necessary.
-4. Move on to the second tab (called "String based filtering"), where it is possible to filter out
-proteins according to information stored in the metadata.
-5. Among the columns constituting the protein metadata listed in the drop-down menu, select the
-one containing the information (Note 20) of interest (for instance, “Contaminant” or “Reverse”,
-Note 21). Then, specify in each case the prefix chain of characters that identifies the proteins to
-filter (Note 22).
-6. Click on "Perform " to remove the corresponding proteins. A new line appears in the table listing
-all the filters that have been applied.
-7. If another filter must be applied, go back to Step 4.
-8. Once all the filters have been applied, move on to the last tab (called "Visualize and Validate") to
-check the set of filtered out proteins. This visualization tools works similarly as the Data explorer
-(see Section 3.4, Step 4).
-9. Finally, click on "Save filtered dataset". The information related to the type of filtering as well as
-to the chosen options appears in the Session log tab (“Session logs” tab from the “Session logs”
-option in the “Data manager” menu).
+##### Details of settings :
+###### **`Tag tree`**
+At first, the only parameter shown is the tag tree. Click on it to open a window where you can select the tags to use for the desired query. At least one tag must be selected to access the other settings.
+The buttons at the top of the window allow you to choose between selecting a single tag at a time, an entire branch at once, or multiple tags regardless of their branch. Then click on the button to the left of each tag you want to select.
+To confirm your selection, click on `Validate & close`.
+
+###### **`Type of filter operation`**
+This allows to choose whether the lines identified by the query are to be kept or deleted. 
+Either `Delete` to remove the proteins identified, or `Keep` to keep them and instead removes all those that do not match the query.
+
+###### **`Scope`**
+This parameter allows you to define how to take into account the tags chosen within a given protein.
+The possible options are as follows:
+
+- `None` : No filter is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
+- `Whole Line` : Proteins containing only the selected tags. As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `Whole Matrix` : Takes into account tags across all conditions for a given protein.
+- `For every condition` : ...
+- `At least one condition` : ...
 
 
 
-### Metacell filtering
+***
 
+### Variable filtering
 
-### Column filtering
 

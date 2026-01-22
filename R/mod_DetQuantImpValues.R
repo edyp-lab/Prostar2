@@ -67,7 +67,7 @@ mod_DetQuantImpValues_server <- function(
       DT::datatable(as.data.frame(t(values$shiftedImpVal)),
         rownames = FALSE,
         options = list(
-          initComplete = initComplete(),
+          initComplete = MagellanNTK::initComplete(),
           dom = "t",
           bLengthChange = FALSE
         )

@@ -113,13 +113,13 @@ PipelineProtein_Imputation_server <- function(id,
     POVImputation_SummaryDT = data.frame(
       operation = "-",
       nbImputed = "0",
-      TotalMainAssay = '0',
+      TotalMissingValues = '0',
       stringsAsFactors = FALSE
     ),
     MECImputation_SummaryDT = data.frame(
       operation = "-",
       nbImputed = "0",
-      TotalMainAssay = '0',
+      TotalMissingValues = '0',
       stringsAsFactors = FALSE
     ),
     result_open_dataset = reactive({NULL})
@@ -240,21 +240,21 @@ PipelineProtein_Imputation_server <- function(id,
       rv.custom$POVImputation_SummaryDT <- data.frame(
         operation = "-",
         nbImputed = "0",
-        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        TotalMissingValues = QFeatures::nNA(rv$dataIn[[length(rv$dataIn)]])$nNA[, "nNA"],
         stringsAsFactors = FALSE
       )
       
       rv.custom$MECImputation_SummaryDT <- data.frame(
         operation = "-",
         nbImputed = "0",
-        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        TotalMissingValues = QFeatures::nNA(rv$dataIn[[length(rv$dataIn)]])$nNA[, "nNA"],
         stringsAsFactors = FALSE
       )
       
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- stepStatus$VALIDATED
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
@@ -345,7 +345,7 @@ PipelineProtein_Imputation_server <- function(id,
       )
       
       tagList(
-        h5("The POV will be imputed by the following values :"),
+        #h5("The POV will be imputed by the following values :"),
         mod_DetQuantImpValues_ui(ns("POVImputation_DetQuantValues_DT"))
       )
     })
@@ -495,27 +495,31 @@ PipelineProtein_Imputation_server <- function(id,
           
           
           # Add infos
-          nBefore <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])
-          nAfter <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
+          nBefore <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])$nNA[, "nNA"]
+          nAfter <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])$nNA[, "nNA"]
           
           rv.custom$POVImputation_SummaryDT <- rbind(
             rv.custom$POVImputation_SummaryDT ,
-            c("POV Imputation", nBefore - nAfter, 0, NA)
+            c("POV Imputation", nBefore - nAfter, nAfter, NA)
           )
           
+          .history <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]]
+          rv.custom$params.tmp[['Imputation']][['POVImputation']] <- DaparToolshed::paramshistory(.history)
+          
+          rv.custom$dataIn2 <- rv.custom$dataIn1
+          
+          rv.custom$MECImputation_SummaryDT <- data.frame(
+            operation = "-",
+            nbImputed = "0",
+            TotalMissingValues = nAfter,
+            stringsAsFactors = FALSE
+          )
         })
-        
-        
-        .history <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]]
-        rv.custom$params.tmp[['Imputation']][['POVImputation']] <- DaparToolshed::paramshistory(.history)
-        
-        
-        rv.custom$dataIn2 <- rv.custom$dataIn1
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
-        rv$steps.status['POVImputation'] <- stepStatus$VALIDATED
+        rv$steps.status['POVImputation'] <- MagellanNTK::stepStatus$VALIDATED
       }
     })
     
@@ -615,7 +619,7 @@ PipelineProtein_Imputation_server <- function(id,
       )
       
       tagList(
-        h5("The MEC will be imputed by the following values :"),
+        #h5("The MEC will be imputed by the following values :"),
         mod_DetQuantImpValues_ui(ns("MECImputation_DetQuantValues_DT"))
       )
     })
@@ -623,7 +627,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     output$MECImputation_Params_ui <- renderUI({
-      req(rv.widgets$MECImputation_algorithm)
+      req(rv.widgets$MECImputation_algorithm != "None")
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
       widget <- switch(rv.widgets$MECImputation_algorithm,
@@ -765,30 +769,25 @@ PipelineProtein_Imputation_server <- function(id,
               rv.custom$params.tmp[['Imputation']][['MECImputation']] <- DaparToolshed::paramshistory(.history)
               
               
-              
               # Add infos
-              nBefore <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])
-              nAfter <- nrow(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
+              nBefore <- QFeatures::nNA(rv.custom$dataIn2[[length(rv.custom$dataIn2) - 1]])$nNA[, "nNA"]
+              nAfter <- QFeatures::nNA(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])$nNA[, "nNA"]
               
               rv.custom$MECImputation_SummaryDT <- rbind(
                 rv.custom$MECImputation_SummaryDT ,
                 c("MEC Imputation",
                   nBefore - nAfter,
-                  0,
+                  nAfter,
                   NA)
               )
               
-              
-              # DO NOT MODIFY THE THREE FOLLOWINF LINES
-              dataOut$trigger <- MagellanNTK::Timestamp()
-              dataOut$value <- NULL
-              rv$steps.status['MECImputation'] <- stepStatus$VALIDATED
-            })
-            
+            })  
+            # DO NOT MODIFY THE THREE FOLLOWINF LINES
+            dataOut$trigger <- MagellanNTK::Timestamp()
+            dataOut$value <- NULL
+            rv$steps.status['MECImputation'] <- MagellanNTK::stepStatus$VALIDATED
           })
-          
         }
-        
       })
     })
     
@@ -801,18 +800,19 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
-        content = tagList(uiOutput(ns('dl_ui'))
+        content = tagList(
+          #uiOutput(ns('dl_ui'))
       )
       )
     })
     
     # 
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == stepStatus$VALIDATED)
-      req(config@mode == 'process')
-
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    # 
+    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+    # })
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
@@ -847,10 +847,10 @@ PipelineProtein_Imputation_server <- function(id,
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
-          rv$steps.status['Save'] <- stepStatus$VALIDATED
+          rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
-           Prostar2::download_dataset_server('createQuickLink', 
-             dataIn = reactive({rv.custom$dataIn2}))
+           # Prostar2::download_dataset_server('createQuickLink', 
+           #   dataIn = reactive({rv.custom$dataIn2}))
         }
       })
     })

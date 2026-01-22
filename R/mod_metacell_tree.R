@@ -167,13 +167,13 @@ mod_metacell_tree_server <- function(
     #observeEvent(input$openModalBtn, {
     #output$modaltree <- renderUI({
       shiny::showModal(shiny::modalDialog(
-          ns("modalExample"),
+          #ns("modalExample"),
           title = "",
           size = "l",
         tagList(
           shinyjs::inlineCSS(css),
-          tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
-          tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
+          tags$head(tags$style(paste0(".modal-dialog {width: fit-content !important; z-index: 1000;}"))),
+          tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{display:none}"))),
           div(id = ns('div_modal_tree_ui'),
             div(id = ns('div_modal_tree_checkbox_mode'),
               style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
@@ -636,6 +636,7 @@ mod_metacell_tree_server <- function(
 
 
 css <- "
+/*
 * {
     margin: 0;
     padding: 0;
@@ -646,35 +647,39 @@ body {
     padding: 00px;
     font-family: helvetica, arial, sans-serif;
 }
+*/
 
-ul {
-    margin: -10px 0px 30px 20px;
+.wtree {
+    margin-top: 30px;
 }
-
+.wtree ul {
+    list-style-type: none;
+    margin: -19px 0px 30px 10px;
+}
 .wtree li {
     list-style-type: none;
-    margin: 0px 0 -10px 10px;
+    margin: 0px 0px -19px 10px;
     position: relative;
 }
 .wtree li:before {
     content: '';
     position: absolute;
-    top: -15px;
+    top: -5px;
     left: -25px;
     border-left: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
     width: 20px;
-    height: 30px;
+    height: 23px;
 }
 .wtree li:after {
     position: absolute;
     content: '';
-    top: 15px;
+    top: 17px;
     left: -25px;
     border-left: 1px solid #ddd;
     border-top: 1px solid #ddd;
     width: 20px;
-    height: 100%;
+    height: 95%;
 }
 .wtree li:last-child:after {
     display: none;
@@ -689,7 +694,7 @@ ul {
     padding: 0px 5px 0px 0px;
     color: #888;
     text-decoration: none;
-    width: auto;
+    width: 250px;
 }"
 
 

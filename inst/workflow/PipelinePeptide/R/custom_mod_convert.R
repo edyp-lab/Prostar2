@@ -1,5 +1,6 @@
 
 #' @export
+#' @import shiny
 mod_convert_ui <- function(id){
   ns <- NS(id)
   tagList(
@@ -9,6 +10,7 @@ mod_convert_ui <- function(id){
 }
 
 #' @export
+#' @import shiny
 mod_convert_server <- function(id, file, path){
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

@@ -205,20 +205,25 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     )
 
 
-
-
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       rv.widgets$tag <- rv.custom$tmp.tags()$values
       
       # Faire un reset des autres widgets
+      rv.widgets[['keep_vs_remove']] <- widgets.default.values[['keep_vs_remove']]
+      rv.widgets[['scope']] <- widgets.default.values[['scope']]
+      rv.widgets[['valPercent']] <- widgets.default.values[['valPercent']]
+      rv.widgets[['operator']] <- widgets.default.values[['operator']]
+      rv.widgets[['valueTh']] <- widgets.default.values[['valueTh']]
+      rv.widgets[['percentTh']] <- widgets.default.values[['percentTh']]
       
-        rv.widgets[['keep_vs_remove']] <- widgets.default.values[['keep_vs_remove']]
-        rv.widgets[['scope']] <- widgets.default.values[['scope']]
-        rv.widgets[['valPercent']] <- widgets.default.values[['valPercent']]
-        rv.widgets[['operator']] <- widgets.default.values[['operator']]
-        rv.widgets[['valueTh']] <- widgets.default.values[['valueTh']]
-        rv.widgets[['percentTh']] <- widgets.default.values[['percentTh']]
-        
+      dataOut$trigger <- as.numeric(Sys.time())
+      dataOut$value <- list(
+        ll.fun = NULL,
+        ll.query = NULL,
+        ll.widgets.value = NULL,
+        ll.pattern = rv.widgets$tag,
+        ll.indices = NULL
+      )
     })
 
 
@@ -263,7 +268,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       req(rv.widgets$tag != "None")
 
       MagellanNTK::mod_popover_for_help_server("chooseValPercent_help",
-        title = paste("#/% of values to ", rv.widgets$keep_vs_remove),
+        title = "Threshold Type",
         content = "Define xxx"
       )
 
@@ -274,7 +279,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       )
 
       widget2 <- selectInput(ns("operator"),
-        "Choose operator",
+        "Operator",
         choices = operator(),
         selected = rv.widgets$operator,
         width = "100px"
@@ -298,7 +303,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       req(rv.widgets$valPercent == "Count")
       req(!(rv.widgets$scope %in% c("None", "WholeLine")))
       MagellanNTK::mod_popover_for_help_server("value_th_help",
-        title = "Count threshold",
+        title = "Threshold",
         content = "Define xxx"
       )
 
@@ -323,7 +328,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       req(!(rv.widgets$scope %in% c("None", "WholeLine")))
 
       MagellanNTK::mod_popover_for_help_server("percentTh_help",
-        title = "Percentage threshold",
+        title = "Threshold",
         content = "Define xxx"
       )
       widget <- sliderInput(ns("percentTh"),
@@ -409,8 +414,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       req(rv.widgets$tag != "None")
       req(rv.widgets$scope != "None")
 
-      rv.custom$indices <- NULL
-      rv.custom$ll.fun <- NULL
+      #rv.custom$indices <- NULL
+      #rv.custom$ll.fun <- NULL
 
       th <- switch(rv.widgets$valPercent,
         Percentage = rv.widgets$percentTh / 100,
@@ -420,7 +425,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       ff <- switch(rv.widgets$scope,
         WholeLine = {
           req(rv.widgets$keep_vs_remove)
-          req(rv.widgets$tag != "None")
           
           DaparToolshed::FunctionFilter("qMetacellWholeLine",
           cmd = rv.widgets$keep_vs_remove,
@@ -429,7 +433,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         ,
         WholeMatrix = {
           req(rv.widgets$keep_vs_remove)
-          req(rv.widgets$tag != "None")
           req(rv.widgets$valPercent)
           req(rv.widgets$operator != "None")
           req(th)
@@ -444,8 +447,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           },
         AllCond = {
           req(rv.widgets$keep_vs_remove)
-          req(rv.widgets$tag != "None")
-          req(rv.widgets$scope != "None")
           req(rv.widgets$operator != "None")
           req(th)
           req(rv.widgets$valPercent)
@@ -463,8 +464,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           },
         AtLeastOneCond = {
           req(rv.widgets$keep_vs_remove)
-          req(rv.widgets$tag != "None")
-          req(rv.widgets$scope != "None")
           req(rv.widgets$operator != "None")
           req(th)
           req(rv.widgets$valPercent)
@@ -528,33 +527,61 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     }
 
     output$Preview_UI <- renderUI({
-      
       tagList(
         mod_filtering_example_ui(ns("preview_filtering_query_result")),
         actionButton(ns("Preview_btn"), "Preview",
           class = "btn-info"
-        ),
-        tags$head(tags$style(" .modal-content{ width: 1000px;}"))
+        )
       )
     })
     
     observeEvent(input$Preview_btn, ignoreInit = TRUE,{
+      req(rv$dataIn)
       
-      GetIndicesAndFunction()
-      rv.custom$showmodal <- MagellanNTK::Timestamp()
-  })
-    
-    observe({
-      req(rv.custom$indices)
-      req(rv.custom$ll.fun)
-      mod_filtering_example_server(id = "preview_filtering_query_result",
-        dataIn = reactive({rv$dataIn}),
-        indices = reactive({rv.custom$indices}),
-        showModal = reactive({rv.custom$showmodal}),
-        operation = reactive({list(rv.custom$ll.fun)[[1]]@params$cmd}),
-        title = reactive({WriteQuery()}),
-        remoteReset = reactive({remoteReset()})
-      )
+      if (rv.widgets$tag == "None" || rv.widgets$scope == "None"){
+        
+        shiny::showModal(shiny::modalDialog(
+          id = ns('preview_nofilter'),
+          title = "No preview available",
+          tagList(tags$head(tags$style(paste0(".modal-content:has(#", ns('preview_nofilter'), ") {width: 500px !important;}"))),
+            "Please select a tag and scope to access the preview of the filtered results."
+          ),
+          easyClose = TRUE,
+          size = "l",
+          footer = tagList(
+            modalButton("Close")
+          )
+        ))
+      } else {
+        GetIndicesAndFunction()
+        
+        if (length(rv.custom$indices) == 0){
+          shiny::showModal(shiny::modalDialog(
+            id = ns('preview_noindices'),
+            title = "No preview available",
+            tagList(tags$head(tags$style(paste0(".modal-content:has(#", ns('preview_noindices'), ") {width: 500px !important;}"))),
+              "No lines are affected by this filter."
+            ),
+            easyClose = TRUE,
+            size = "l",
+            footer = tagList(
+              modalButton("Close")
+            )
+          ))
+        } else {
+          rv.custom$showmodal <- MagellanNTK::Timestamp()
+          req(rv.custom$indices)
+          req(rv.custom$ll.fun)
+          mod_filtering_example_server(id = "preview_filtering_query_result",
+            dataIn = reactive({rv$dataIn}),
+            indices = reactive({rv.custom$indices}),
+            showModal = reactive({rv.custom$showmodal}),
+            operation = reactive({list(rv.custom$ll.fun)[[1]]@params$cmd}),
+            title = reactive({WriteQuery()}),
+            remoteReset = reactive({remoteReset()})
+          )
+        }
+      }
     })
    
     
