@@ -109,7 +109,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
   
   rv.custom.default.values <- list(
     result_open_dataset = reactive({NULL}),
-    
+    containsNA = FALSE,
     listNomsComparaison = NULL,
     n = NULL,
     swap.history = NULL,
@@ -139,22 +139,12 @@ PipelineProtein_HypothesisTest_server <- function(id,
     add.resourcePath()
     
 
-    
-    
-    # Add a new observer to remoteReset to complete the default behaviour
-    observeEvent(remoteReset(), {
-      
-    })
-    
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
     
     
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
-      
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -179,20 +169,20 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     
     
-    output$open_dataset_UI <- renderUI({
-      req(session$userData$runmode == 'process')
-      req(is.null(dataIn()))
-      req(NULL)
-      
-      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
-        id = "open_dataset",
-        class = 'QFeatures',
-        extension = "qf",
-        remoteReset = reactive({remoteReset()})
-      )
-      
-      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
-    })
+    # output$open_dataset_UI <- renderUI({
+    #   req(session$userData$runmode == 'process')
+    #   req(is.null(dataIn()))
+    #   req(NULL)
+    #   
+    #   rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+    #     id = "open_dataset",
+    #     class = 'QFeatures',
+    #     extension = "qf",
+    #     remoteReset = reactive({remoteReset()})
+    #   )
+    #   
+    #   MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    # })
     
     
     # output$Description_infos_dataset_UI <- renderUI({
@@ -206,16 +196,32 @@ PipelineProtein_HypothesisTest_server <- function(id,
     #   infos_dataset_ui(id = ns("Description_infosdataset"))
     # })
     
-    
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
      req(dataIn())
+
+     m <- DaparToolshed::match.metacell(
+       DaparToolshed::qMetacell(dataIn()[[length(dataIn())]]),
+       pattern = c("Missing", "Missing POV", "Missing MEC"),
+       level = DaparToolshed::typeDataset(dataIn()[[length(dataIn())]])
+     )
+     
+     rv.custom$containsNA <- length(which(m)) > 0
+     
+     if (rv.custom$containsNA){
+       warntxt <- "The dataset contains missing values.
+        It must be first filtered or imputed."
+       MagellanNTK::mod_errorModal_server('warn_NA',
+         title = 'Warning',
+         text = warntxt)
+     } else {
+     
       rv$dataIn <- dataIn()
       
-      if(!is.null(rv.custom$result_open_dataset()$dataset))
-        rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      
+      # if(!is.null(rv.custom$result_open_dataset()$dataset))
+      #   rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      # 
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
@@ -235,6 +241,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
+      
+     }
     })
     
     
@@ -261,22 +269,22 @@ PipelineProtein_HypothesisTest_server <- function(id,
     output$HypothesisTest_plots_ui <- renderUI({
       req(rv$dataIn)
 
-      m <- DaparToolshed::match.metacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-      )
-      NA.count <- length(which(m))
-
-      if (NA.count > 0) {
-      tags$p("Your dataset contains missing values. Before using the
-      Hypothesis test, you must filter/impute them.")
-      } else {
+      # m <- DaparToolshed::match.metacell(
+      #   DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+      #   pattern = c("Missing", "Missing POV", "Missing MEC"),
+      #   level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+      # )
+      # NA.count <- length(which(m))
+      # 
+      # if (NA.count > 0) {
+      # tags$p("Your dataset contains missing values. Before using the
+      # Hypothesis test, you must filter/impute them.")
+      # } else {
         tagList(
           uiOutput(ns('HypothesisTest_warning_conditions_ui')),
           uiOutput(ns("HypothesisTest_swapConds_ui")),
           highcharter::highchartOutput(ns("FoldChangePlot")) )
-      }
+      #}
     })
     
     
@@ -322,7 +330,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         selected = rv.widgets$HypothesisTest_design,
         width = "150px"
       )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+          !isTRUE(rv.custom$containsNA))
     })
     
     output$HypothesisTest_method_ui <- renderUI({
@@ -335,7 +344,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         selected = rv.widgets$HypothesisTest_method,
         width = "150px"
       )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+          !isTRUE(rv.custom$containsNA))
     })
     
     output$HypothesisTest_ttestOptions_ui <- renderUI({
@@ -346,7 +356,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         selected = rv.widgets$HypothesisTest_ttestOptions,
         width = "150px"
       )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+          !isTRUE(rv.custom$containsNA))
     })
     
     output$HypothesisTest_thlogFC_ui <- renderUI({
@@ -355,7 +366,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         value = rv.widgets$HypothesisTest_thlogFC,
         width = "150px"
       )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+          !isTRUE(rv.custom$containsNA))
     })
     
     output$HypothesisTest_correspondingRatio_ui <- renderUI({
@@ -417,7 +429,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
       })
       
       do.call(tagList, widget)
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'])
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+          !isTRUE(rv.custom$containsNA))
     })
     
     
@@ -456,17 +469,12 @@ PipelineProtein_HypothesisTest_server <- function(id,
     ### Computation of comparisons selected in the variable
     # 'rv$widgets$hypothesisTest$design'
     ComputeComparisons <- reactive({
+      
       req(rv.widgets$HypothesisTest_method != "None")
       req(rv.widgets$HypothesisTest_design != "None")
       if (rv.widgets$HypothesisTest_method == 'ttests')
         req(rv.widgets$HypothesisTest_ttestOptions != "None")
       
-      m <- DaparToolshed::match.metacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = "Missing",
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-        )
-      req(length(which(m)) == 0)
       
       rv.custom$AllPairwiseComp <- NULL
       rv.custom$AllPairwiseCompMsg <- NULL
@@ -545,15 +553,16 @@ PipelineProtein_HypothesisTest_server <- function(id,
         uiOutput(ns("showConds")),
       )
       
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest']  &&
+          !isTRUE(rv.custom$containsNA))
     })
     
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('HypothesisTest', btnEvents()))
-      
-      shiny::withProgress(message = paste0("Reseting process", id), {
+     
+      shiny::withProgress(message = paste0("Computing Hypothesis Test", id), {
         shiny::incProgress(0.5)
         
       if ( is.null(rv$dataIn) || rv.widgets$HypothesisTest_method == "None" || rv.widgets$HypothesisTest_design == "None" || 
@@ -568,8 +577,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
         ComputeComparisons()
         if(is.null(rv.custom$AllPairwiseComp)){
           
-          print(rv.custom$AllPairwiseCompMsg)
-          
           MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_PerformLogFCPlot',
                                              text = rv.custom$AllPairwiseCompMsg,
                                              type = 'error' )
@@ -583,6 +590,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
           rv.custom$n <- ncol(rv.custom$AllPairwiseComp$logFC)
           rv.custom$swap.history <- rep(0, rv.custom$n)
         }
+        
+        
         
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
         df <- cbind(rv.custom$AllPairwiseComp$logFC, 

@@ -187,7 +187,7 @@ infos_dataset_server <- function(
 
 
       .se <- rv$dataIn[[input$selectInputSE]]
-
+req(.se)
       typeOfData <- DaparToolshed::typeDataset(.se)
       nLines <- nrow(.se)
       .nNA <- QFeatures::nNA(.se)
@@ -236,7 +236,7 @@ infos_dataset_server <- function(
       
       
       .se <- rv$dataIn[[input$selectInputSE]]
-      # .name <- names(rv$dataIn)
+      req(.se)
       se_history <- "-"
       
       if (!is.null(DaparToolshed::paramshistory(.se))) {
@@ -267,7 +267,9 @@ infos_dataset_server <- function(
 
 
       .se <- rv$dataIn[[input$selectInputSE]]
-      # .name <- names(rv$dataIn)
+      req(.se)
+      
+      
       se_history <- "-"
 
       if (!is.null(DaparToolshed::paramshistory(.se))) {
