@@ -139,9 +139,13 @@ infos_dataset_server <- function(
 
     output$choose_SE_ui <- renderUI({
       req(rv$dataIn)
+      
+      .choices <- names(MultiAssayExperiment::experiments(rv$dataIn))
+      .selected <- .choices[length(.choices)]
       radioButtons(ns("selectInputSE"),
         "Select a dataset for further information",
-        choices = names(MultiAssayExperiment::experiments(rv$dataIn))
+        choices = .choices,
+        selected = .selected
       )
     })
 

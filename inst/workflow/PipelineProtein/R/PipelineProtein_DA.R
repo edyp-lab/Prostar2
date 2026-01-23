@@ -539,18 +539,7 @@ PipelineProtein_DA_server <- function(id,
       }
     }
     
-    
-    # output$Pairwisecomparison_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("Pairwisecomparison_btn_validate"),
-    #     "Validate step",
-    #     class = "btn-success"
-    #   )
-    #   MagellanNTK::toggleWidget(widget,  rv$steps.enabled["Pairwisecomparison"])
-    # })
-    # >>> END: Definition of the widgets
-    
-    
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
      
       req(grepl('Pairwisecomparison', btnEvents()))
@@ -938,23 +927,10 @@ PipelineProtein_DA_server <- function(id,
       
     })
     
-    
-    
-    
-    # output$Pvaluecalibration_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("Pvaluecalibration_btn_validate"),
-    #     "Validate step",
-    #     class = "btn-success"
-    #   )
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"])
-    # })
-    # >>> END: Definition of the widgets
-    
-    
+
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       
-
       req(grepl('Pvaluecalibration', btnEvents()))
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
@@ -1150,14 +1126,7 @@ PipelineProtein_DA_server <- function(id,
       B <- A - length(rv.custom$pushed)
       C <- rv.custom$nbSelectedAnaDiff
       D <- ( A - C)
-      # 
-      # txt <- paste("Total number of ", rv$typeOfDataset, "(s) = ", A , "<br>",
-      #   "\t <em>Total remaining after push p-values = ", B , "</em><br>",
-      #     paste("Number of selected ", rv$typeOfDataset, "(s) = ", C, sep=''),
-      #     paste("Number of non selected ", rv$typeOfDataset, "(s) = ", D, sep = ''),
-      #     sep = ""
-      # )
-      
+
       rv.custom$history[['Total number']] <- A
       rv.custom$history[['Total remaining after push p-values']] <- B
       rv.custom$history[['Number of selected']] <- C
@@ -1216,7 +1185,6 @@ PipelineProtein_DA_server <- function(id,
     
     
     BuildPairwiseComp_wb <- reactive({
-      #browser()
       DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
       hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
         halign = "CENTER",
@@ -1270,7 +1238,6 @@ PipelineProtein_DA_server <- function(id,
     
     Get_FDR <- reactive({
       req(rv.custom$thpval)
-      #browser()
       req(Build_pval_table())
       
       adj.pval <- Build_pval_table()$Adjusted_PValue
@@ -1281,13 +1248,9 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$FDR <- as.numeric(fdr)
       as.numeric(fdr)
     })
-    
-    # observeEvent(input$validate_pval,{
-    #   
-    # })
+
     
     Get_Nb_Significant <- reactive({
-      #browser()
       nb <- length(
         which(
           Build_pval_table()[paste0(
@@ -1310,7 +1273,6 @@ PipelineProtein_DA_server <- function(id,
       req(GetCalibrationMethod())
       req(GetComparisons())
       
-      #browser()
       rv.widgets$Pairwisecomparison_Comparison
       ht <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       .logfc <- ht[, paste0(rv.widgets$Pairwisecomparison_Comparison, '_logFC')]
@@ -1369,17 +1331,6 @@ PipelineProtein_DA_server <- function(id,
     }
     
     
-    # output$FDR_btn_validate_UI <- renderUI({
-    #   widget <- actionButton(ns("FDR_btn_validate"),
-    #     "Validate step",
-    #     class = "btn-success"
-    #   )
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
-    # })
-    # >>> END: Definition of the widgets
-    
-    
-    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('FDR', btnEvents()))
       shiny::withProgress(message = paste0("COmputing FDR", id), {
@@ -1400,11 +1351,7 @@ PipelineProtein_DA_server <- function(id,
       }
       })
     })
-    
-    # <<< END ------------- Code for step 2 UI---------------
-    
-    
-    
+
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
@@ -1414,12 +1361,6 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-    # output$dl_UI <- renderUI({
-    #   req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
-    #   req(config@mode == 'process')
-    #   
-    #   MagellanNTK::download_dataset_ui(ns('createQuickLink'))
-    # })
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
 

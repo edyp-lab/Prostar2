@@ -81,6 +81,8 @@ mod_set_pval_threshold_server <- function(
   threshold.type = reactive({"logpval"}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
+  
+  
   widgets.default.values <- list(
     thresholdType = NULL
   )
@@ -151,8 +153,6 @@ mod_set_pval_threshold_server <- function(
     })
     
     
-    # observeEvent(input$thresholdType, {threshold_type(input$thresholdType)})
-    
     output$showFDR_UI <- renderUI({
       req(fdr())
       txt <- "FDR = NA"
@@ -173,7 +173,7 @@ mod_set_pval_threshold_server <- function(
     })
     
     output$text1_UI <- renderUI({
-      pval_init()
+      req(pval_init())
       widget <- textInput(ns("text2"), NULL,
         value = -log10(pval_init()),
         width = "100px"
@@ -183,7 +183,7 @@ mod_set_pval_threshold_server <- function(
     })
     
     output$text2_UI <- renderUI({
-      pval_init()
+      req(pval_init())
       widget <- textInput(ns("text1"), NULL,
         value = pval_init(),
         width = "100px"
@@ -191,11 +191,7 @@ mod_set_pval_threshold_server <- function(
       
       MagellanNTK::toggleWidget(widget, is.enabled() && input$thresholdType == "pval")
     })
-    
-    # observe({
-    #   shinyjs::toggleState("text2", condition = input$thresholdType == "logpval")
-    #   shinyjs::toggleState("text1", condition = input$thresholdType == "pval")
-    # })
+
     
     observeEvent(input$text1, ignoreInit = TRUE, {
       req(input$thresholdType == "pval")
@@ -208,7 +204,8 @@ mod_set_pval_threshold_server <- function(
     })
     
     
-    observeEvent(input$ApplyThreshold, {
+    observeEvent(req(input$ApplyThreshold), {
+      #browser()
       dataOut(as.numeric(input$text2))
     })
     
