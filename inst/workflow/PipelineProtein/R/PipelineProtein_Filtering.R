@@ -413,7 +413,7 @@ PipelineProtein_Filtering_server <- function(id,
       #.history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
       #.history[[paste0('query_', length(.history))]] <- query
       
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Metacell_Filtering', 'query', query)
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Cellmetadatafiltering', 'query', query)
       DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']])
         ,rv.custom$history)
     })
