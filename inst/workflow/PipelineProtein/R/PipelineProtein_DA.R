@@ -226,35 +226,35 @@ PipelineProtein_DA_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      # Find the assay containing the hypothesis tests comparisons
-      .ind <- unlist(lapply(seq(length(dataIn())), function(x){
-        if(!is.null(DaparToolshed::HypothesisTest(dataIn()[[x]])))
-          x
-      }))
-      #rv$dataIn <- dataIn()[[.ind]]
-      rv$dataIn <- dataIn()
-      
-      # Adds an assay to work on
-      rv$dataIn <- QFeatures::addAssay(
-        rv$dataIn, 
-        rv$dataIn[[length(rv$dataIn)]], 
-        'DA')
-      
-      rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
-      rv.widgets$Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
-
-      
-      # Get logfc threshold from Hypothesis test dataset
-      .se <- rv$dataIn[[length(rv$dataIn)]]
-      .thlogfc <- DaparToolshed::paramshistory(.se)[['HypothesisTest_thlogFC']]
-      if(!is.null(.thlogfc))
-        rv.custom$thlogfc <- .thlogfc
-      
-      DaparToolshed::paramshistory(.se) <- NULL
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+        # Find the assay containing the hypothesis tests comparisons
+        .ind <- unlist(lapply(seq(length(dataIn())), function(x){
+          if(!is.null(DaparToolshed::HypothesisTest(dataIn()[[x]])))
+            x
+        }))
+        #rv$dataIn <- dataIn()[[.ind]]
+        rv$dataIn <- dataIn()
+        
+        # Adds an assay to work on
+        rv$dataIn <- QFeatures::addAssay(
+          rv$dataIn, 
+          rv$dataIn[[length(rv$dataIn)]], 
+          'DA')
+        
+        rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
+        rv.widgets$Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
+        
+        
+        # Get logfc threshold from Hypothesis test dataset
+        .se <- rv$dataIn[[length(rv$dataIn)]]
+        .thlogfc <- DaparToolshed::paramshistory(.se)[['HypothesisTest_thlogFC']]
+        if(!is.null(.thlogfc))
+          rv.custom$thlogfc <- .thlogfc
+        
+        #DaparToolshed::paramshistory(.se) <- NULL
+        
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- rv$dataIn
+        rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
     
@@ -349,8 +349,8 @@ PipelineProtein_DA_server <- function(id,
         )
       )
       
-
-
+      
+      
     })
     
     
@@ -376,7 +376,7 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
     })
     
-
+    
     
     Prostar2::mod_volcanoplot_server(
       id = "Pairwisecomparison_volcano",
@@ -507,14 +507,14 @@ PipelineProtein_DA_server <- function(id,
         
         DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
         rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Number of pushed values to 1', length(indices_to_push))
-
+        #rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Number of pushed values to 1', length(indices_to_push))
+        
         
         n <- length(rv.custom$resAnaDiff$P_Value)
         rv.custom$pushed <- seq(n)[indices_to_push]
         rv.custom$resAnaDiff$pushed <- length(indices_to_push)
         rv.custom$step1_query <- rv.custom$AnaDiff_indices()$value$ll.query
-
+        
       }
     })
     
@@ -533,26 +533,26 @@ PipelineProtein_DA_server <- function(id,
       }
     }
     
-
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-     
+      
       req(grepl('Pairwisecomparison', btnEvents()))
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-     
-      if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
-        || is.null(rv$dataIn))
-        shinyjs::info(btnVentsMasg)
-      else {
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
-      
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["Pairwisecomparison"] <- MagellanNTK::stepStatus$VALIDATED
-      }
+        
+        if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
+          || is.null(rv$dataIn))
+          shinyjs::info(btnVentsMasg)
+        else {
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
+          
+          
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status["Pairwisecomparison"] <- MagellanNTK::stepStatus$VALIDATED
+        }
       })
     })
     
@@ -562,11 +562,11 @@ PipelineProtein_DA_server <- function(id,
     
     # >>> START ------------- Code for step 2 UI---------------
     output$Pvaluecalibration <- renderUI({
-
+      
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-         # timeline_process_ui(ns('Pvaluecalibration_timeline')),
+          # timeline_process_ui(ns('Pvaluecalibration_timeline')),
           uiOutput(ns('Pvaluecalibration_calibrationMethod_UI')),
           uiOutput(ns("Pvaluecalibration_numericValCalibration_UI")),
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
@@ -582,11 +582,11 @@ PipelineProtein_DA_server <- function(id,
             column(width = 6, 
               imageOutput(ns("calibrationPlot"), height = "400px")
             ),
-              highcharter::highchartOutput(ns("histPValue"))
-            )
-            )
+            highcharter::highchartOutput(ns("histPValue"))
+          )
         )
-  
+      )
+      
       
       
     })
@@ -685,7 +685,7 @@ PipelineProtein_DA_server <- function(id,
     output$Pvaluecalibration_calibrationResults <- renderUI({
       req(rv.custom$calibrationRes)
       rv$dataIn
-
+      
       txt <- paste("Non-DA protein proportion = ",
         round(100 * rv.custom$calibrationRes$pi0, digits = 2), "%<br>",
         "DA protein concentration = ",
@@ -695,7 +695,7 @@ PipelineProtein_DA_server <- function(id,
         rv.custom$calibrationRes$unif.under, "<br><br><hr>",
         sep = ""
       )
-
+      
       HTML(txt)
     })
     
@@ -704,7 +704,7 @@ PipelineProtein_DA_server <- function(id,
     
     calibrationPlot <- reactive({
       #req(rv.widgets$Pvaluecalibration_calibrationMethod != "None")
-
+      
       req(rv.custom$resAnaDiff)
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
@@ -723,7 +723,7 @@ PipelineProtein_DA_server <- function(id,
         t <- t[-toDelete]
       }
       
-   
+      
       l <- NULL
       ll <- NULL
       result <- tryCatch(
@@ -796,7 +796,7 @@ PipelineProtein_DA_server <- function(id,
       deleteFile = TRUE
     )
     
-
+    
     
     output$errMsgCalibrationPlot <- renderUI({
       req(rv.custom$errMsgCalibrationPlot)
@@ -920,29 +920,37 @@ PipelineProtein_DA_server <- function(id,
       
     })
     
-
+    
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       
       req(grepl('Pvaluecalibration', btnEvents()))
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Runninf P-value calibration", id), {
         shiny::incProgress(0.5)
         
-      if (is.null(rv$dataIn))
-        shinyjs::info(btnVentsMasg)
-      else {
-        
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
-        
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
-      }
+        if (is.null(rv$dataIn))
+          shinyjs::info(btnVentsMasg)
+        else {
+          
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
+          
+          if (!is.null(rv.custom$calibrationRes$pi0))
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
+          
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
+          
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
+          
+          if (!is.null(rv.custom$calibrationRes$pi0))
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
+          
+          if (!is.null(rv.custom$calibrationRes$h1.concentration))
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
+          
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
+        }
       })
     })
     
@@ -957,21 +965,20 @@ PipelineProtein_DA_server <- function(id,
         sidebar = tagList(
           #timeline_process_ui(ns('FDR_timeline')),
           tags$div(
-            uiOutput(ns('FDR_showHideDT')),
-            
-            uiOutput(ns('widgets_ui'))
+            uiOutput(ns('FDR_showHideDT_UI')),
+            uiOutput(ns('FDR_widgets_ui'))
           )
         ),
         content = div(id = ns('div_content_FDR'),
-          uiOutput(ns("FDR_nbSelectedItems_ui")),
+           uiOutput(ns("FDR_nbSelectedItems_ui")),
           withProgress(message = "", detail = "", value = 1, {
             uiOutput(ns('FDR_volcanoplot_UI'))
           }),
-          downloadButton(ns("FDR_download_SelectedItems_UI"), 
+          downloadButton(ns("FDR_download_SelectedItems_UI"),
             "Selected final results (Excel file)", class = "btn-info"),
-            checkboxInput(ns('FDR_viewAdjPval'), 
-              'View adjusted p-value', 
-              value = rv.widgets$FDR_viewAdjPval),
+          checkboxInput(ns('FDR_viewAdjPval'),
+            'View adjusted p-value',
+            value = rv.widgets$FDR_viewAdjPval),
           tabsetPanel(
             id = ns("hidden_tabs"),
             type = "hidden",
@@ -983,7 +990,7 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    output$FDR_showHideDT <- renderUI({
+    output$FDR_showHideDT_UI <- renderUI({
       widget <- actionButton(ns("SELECT_INPUT"), "Hide/Show table")
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
@@ -1000,7 +1007,7 @@ PipelineProtein_DA_server <- function(id,
       
     })
     
-
+    
     output$FDR_selectedItems_UI <- DT::renderDT({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
       rv.custom$df <- Build_pval_table()
@@ -1043,10 +1050,10 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    output$widgets_ui <- renderUI({
+    output$FDR_widgets_ui <- renderUI({
       widget <- tags$div(
         mod_set_pval_threshold_ui(ns("Title"))
-        )
+      )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
       
@@ -1075,7 +1082,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$FDR_nbSelectedItems_ui <- renderUI({
-
+      
       rv.custom$thpval
       rv$dataIn
       #browser()
@@ -1119,13 +1126,13 @@ PipelineProtein_DA_server <- function(id,
       B <- A - length(rv.custom$pushed)
       C <- rv.custom$nbSelectedAnaDiff
       D <- ( A - C)
-
-
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total number', A)
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total remaining after push p-values', B)
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of selected', C)
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of non selected', D)
       
+      # browser()
+      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total number', A)
+      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total remaining after push p-values', B)
+      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of selected', C)
+      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of non selected', D)
+      # 
       
       
       div(id="bloc_page",
@@ -1242,7 +1249,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$FDR <- as.numeric(fdr)
       as.numeric(fdr)
     })
-
+    
     
     Get_Nb_Significant <- reactive({
       nb <- length(
@@ -1257,7 +1264,7 @@ PipelineProtein_DA_server <- function(id,
       nb
     })
     
-
+    
     
     Build_pval_table <- reactive({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
@@ -1330,20 +1337,20 @@ PipelineProtein_DA_server <- function(id,
       shiny::withProgress(message = paste0("COmputing FDR", id), {
         shiny::incProgress(0.5)
         #browser()
-      if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
-        shinyjs::info(btnVentsMasg)
-      else {
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
-     
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["FDR"] <- MagellanNTK::stepStatus$VALIDATED
-      }
+        if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
+          shinyjs::info(btnVentsMasg)
+        else {
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
+          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
+          
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status["FDR"] <- MagellanNTK::stepStatus$VALIDATED
+        }
       })
     })
-
+    
     # >>> START ------------- Code for step 'Save' UI---------------
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
@@ -1353,39 +1360,39 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-
+      
       req(grepl('Save', btnEvents()))
       
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
-      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
-        shinyjs::info(btnVentsMasg)
-      else {
-        
-      # Do some stuff
-      
-      last.se <- length(rv$dataIn)
-      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- NULL
-      DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rv.custom$history
-      
-     
-      # Add the result of pairwise comparison to the coldata
-     DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
-     
-
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-      
-      
-      # Prostar2::download_dataset_server('createQuickLink', 
-      #   dataIn = reactive({rv$dataIn}))
-      
-      }
+        if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
+          shinyjs::info(btnVentsMasg)
+        else {
+          
+          # Do some stuff
+          
+          last.se <- length(rv$dataIn)
+          DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- NULL
+          DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[last.se]]), rv.custom$history)
+          
+          
+          # Add the result of pairwise comparison to the coldata
+          DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
+          
+          
+          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- rv$dataIn
+          rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+          
+          
+          # Prostar2::download_dataset_server('createQuickLink', 
+          #   dataIn = reactive({rv$dataIn}))
+          
+        }
       })
     })
     # <<< END ------------- Code for step 3 UI---------------

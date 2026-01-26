@@ -73,7 +73,7 @@ history_dataset_server <- function(
       req(rv$dataIn)
       
       df <- NULL
-      
+      #browser()
       for (i in (names(rv$dataIn))){
         .se <- rv$dataIn[[i]]
         se_history <- DaparToolshed::paramshistory(rv$dataIn[[i]])

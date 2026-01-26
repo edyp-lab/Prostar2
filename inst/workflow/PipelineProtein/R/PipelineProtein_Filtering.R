@@ -414,7 +414,8 @@ PipelineProtein_Filtering_server <- function(id,
       #.history[[paste0('query_', length(.history))]] <- query
       
       rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Metacell_Filtering', 'query', query)
-      DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rv.custom$history
+      DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']])
+        ,rv.custom$history)
     })
     
     
@@ -802,7 +803,8 @@ PipelineProtein_Filtering_server <- function(id,
         #.history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
         rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Variable filtering', 'query', rv.custom$Variablefiltering_ll.query)
         
-        DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rv.custom$history
+        DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]),
+          rv.custom$history)
         
       })
     
@@ -867,11 +869,7 @@ PipelineProtein_Filtering_server <- function(id,
         else {
           # Rename the new dataset with the name of the process
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
-          DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
-            c(DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]), 
-              reactiveValuesToList(rv.widgets))
-          
-          
+
           # DO NOT MODIFY THE THREE FOLLOWINF LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2

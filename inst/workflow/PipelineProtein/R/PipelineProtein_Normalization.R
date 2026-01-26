@@ -438,7 +438,7 @@ PipelineProtein_Normalization_server <- function(id,
           
           GlobalQuantileAlignment = {
             rv.custom$tmpAssay <- DaparToolshed::GlobalQuantileAlignment(qdata)
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
             
           },
           
@@ -516,7 +516,6 @@ PipelineProtein_Normalization_server <- function(id,
         )
       })
       
-     
       
       if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
         
@@ -528,7 +527,6 @@ PipelineProtein_Normalization_server <- function(id,
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
       } else {
-        
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
         SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history

@@ -488,7 +488,8 @@ PipelineProtein_Imputation_server <- function(id,
             rv.custom$dataIn1,
             .tmp,
             'POVImputation')
-          DaparToolshed::paramshistory(rv.custom$dataIn1[['POVImputation']]) <- rv.custom$history
+          DaparToolshed::paramshistory(rv.custom$dataIn1[['POVImputation']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['POVImputation']]),
+            rv.custom$history)
           
           # Add infos
           nBefore <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])$nNA[, "nNA"]
@@ -760,7 +761,8 @@ PipelineProtein_Imputation_server <- function(id,
                 .tmp,
                 'MECImputation')
               
-              DaparToolshed::paramshistory(rv.custom$dataIn2[['MECImputation']]) <- rv.custom$history
+              DaparToolshed::paramshistory(rv.custom$dataIn2[['MECImputation']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['MECImputation']]),
+                rv.custom$history)
               
               
               # DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- .param # Do some stuff
@@ -836,12 +838,12 @@ PipelineProtein_Imputation_server <- function(id,
             rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
               length(rv.custom$dataIn2) - 1)
           
-          
+          #browser()
           # Rename the new dataset with the name of the process
           i <- length(rv.custom$dataIn2)
           names(rv.custom$dataIn2)[i] <- 'Imputation'
-          DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]) <- 
-            rv.custom$params.tmp
+          #DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]),
+          #  rv.custom$params.tmp)
           
           
           # DO NOT MODIFY THE THREE FOLLOWING LINES
