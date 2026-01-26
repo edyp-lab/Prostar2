@@ -313,8 +313,6 @@ PipelineProtein_Filtering_server <- function(id,
     
     observe({
       req(rv$steps.enabled["Cellmetadatafiltering"])
-      #browser()
-      
       req(rv$dataIn)
       
       
@@ -377,8 +375,6 @@ PipelineProtein_Filtering_server <- function(id,
         name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
         filters = rv.custom$funFilter()$value$ll.fun
       )
-      #indices <- rv.custom$funFilter()$value$ll.indices
-      
       
       # Add infos
       nBefore <- nrow(tmp[[length(tmp) - 1]])
@@ -460,7 +456,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn1),
           SummarizedExperiment::assays(dataIn()))) 
-          || !("qMetacellFiltering" %in% names(rv.custom$dataIn1)))
+          || !("Cellmetadatafiltering" %in% names(rv.custom$dataIn1)))
           shinyjs::info(btnVentsMasg)
         else {
           req(rv.custom$dataIn1)
@@ -693,7 +689,6 @@ PipelineProtein_Filtering_server <- function(id,
     
     output$Variablefiltering_Preview_UI <- renderUI({
       req(GuessIndices())
-      print("dedans")
       
       mod_filtering_example_server(id = "preview_filtering_query_result",
         dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
@@ -815,12 +810,13 @@ PipelineProtein_Filtering_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Variablefiltering', btnEvents()))
       
+
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
         if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
           SummarizedExperiment::assays(dataIn()))) 
-          || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
+          || !("Variablefiltering" %in% names(rv.custom$dataIn2)))
           shinyjs::info(btnVentsMasg)
         else {
           
