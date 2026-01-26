@@ -143,7 +143,7 @@ PipelineProtein_Filtering_server <- function(id,
       stringsAsFactors = FALSE
     ), 
     df = data.frame(),
-    history = list(),
+    history = MagellanNTK::InitializeHistory(),
     
     
     # Variable Filtering variables
@@ -189,7 +189,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     eval(str2expression(core.code))
     add.resourcePath()
-
+    
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -258,7 +258,7 @@ PipelineProtein_Filtering_server <- function(id,
       req(dataIn())
       
       rv$dataIn <- dataIn()
-      
+      browser()
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
       
@@ -408,18 +408,18 @@ PipelineProtein_Filtering_server <- function(id,
         rv.custom$dataIn1 <- tmp
       
       # Rename the new dataset with the name of the process
-      names(rv.custom$dataIn1)[length(rv.custom$dataIn1)] <- 'qMetacellFiltering'
+      names(rv.custom$dataIn1)[length(rv.custom$dataIn1)] <- 'Cellmetadatafiltering'
       
       # Add params
 
       query <- rv.custom$funFilter()$value$ll.query
       i <- length(rv.custom$dataIn1)
-      .history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
-      
-      .history[[paste0('query_', length(.history))]] <- query
-      DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']] <- .history
-      
-      #rv.custom$dataIn2 <-rv$dataIn
+      #.history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
+      #.history[[paste0('query_', length(.history))]] <- query
+
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Metacell_Filtering', 'query', query)
+      browser()
+      DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rv.custom$history
     })
     
     
@@ -800,16 +800,15 @@ PipelineProtein_Filtering_server <- function(id,
           rv.custom$dataIn2 <- tmp
         
         # Rename the new dataset with the name of the process
-        names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Variable_Filtering'
+        names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Variablefiltering'
         
         
         query <- rv.custom$Variablefiltering_funFilter$ll.query
         i <- length(rv.custom$dataIn2)
-        .history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
-        .history[[paste0('query_', length(.history))]] <- query
-        DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']] <- .history
+        #.history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Variable_Filtering', 'query', rv.custom$Variablefiltering_ll.query)
         
-        
+        DaparToolshed::paramshistory(rv.custom$dataIn2[['Variable_Filtering']]) <- rv.custom$history
         
       })
     
@@ -825,6 +824,9 @@ PipelineProtein_Filtering_server <- function(id,
           || !("Variable_Filtering" %in% names(rv.custom$dataIn2)))
         shinyjs::info(btnVentsMasg)
       else {
+        
+         
+        
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED

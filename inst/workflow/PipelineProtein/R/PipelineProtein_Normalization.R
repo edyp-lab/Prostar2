@@ -101,7 +101,7 @@ PipelineProtein_Normalization_server <- function(id,
   
   rv.custom.default.values <- list(
     tmp.dataset = NULL,
-    history = NULL,
+    history = MagellanNTK::InitializeHistory(),
     selectProt = reactive({NULL}),
     result_open_dataset = reactive({NULL})
     )
@@ -124,7 +124,8 @@ PipelineProtein_Normalization_server <- function(id,
 
     eval(str2expression(core.code))
     add.resourcePath()
-
+    #rv.custom$history <- MagellanNTK::InitializeHistory(widgets.default.values)
+    
     
     output$Description <- renderUI({
       file <- normalizePath(file.path(
@@ -428,7 +429,7 @@ PipelineProtein_Normalization_server <- function(id,
         .conds <- SummarizedExperiment::colData(rv$dataIn)[, "Condition"]
         qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
         
-        
+       
         switch(rv.widgets$Normalization_method,
           
           G_noneStr = {
@@ -454,10 +455,10 @@ PipelineProtein_Normalization_server <- function(id,
               subset.norm = selectProt()$indices, 
               quantile = quant)
             
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_quantile']] <- quant
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$indices
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'quantile', quant)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
           },
           
           MeanCentering = {
@@ -469,11 +470,12 @@ PipelineProtein_Normalization_server <- function(id,
               subset.norm = selectProt()$indices
             )
             
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_varReduction']] <- rv.widgets$Normalization_varReduction
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$indices
             
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'varReduction', rv.widgets$Normalization_varReduction)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
+
           },
           SumByColumns = {
             rv.custom$tmpAssay <- DaparToolshed::SumByColumns(
@@ -483,9 +485,9 @@ PipelineProtein_Normalization_server <- function(id,
               subset.norm = selectProt()$indices
             )
             
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['subset.norm']] <- selectProt()$indices
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
             
           },
           LOESS = {
@@ -496,9 +498,9 @@ PipelineProtein_Normalization_server <- function(id,
               span = as.numeric(rv.widgets$Normalization_spanLOESS)
             )
             
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            rv.custom$history[['Normalization_spanLOESS']] <- as.numeric(rv.widgets$Normalization_spanLOESS)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'spanLOESS', as.numeric(rv.widgets$Normalization_spanLOESS))
             
           },
           vsn = {
@@ -508,14 +510,13 @@ PipelineProtein_Normalization_server <- function(id,
               type = rv.widgets$Normalization_type
             )
             
-            rv.custom$history[['Normalization_method']] <- rv.widgets$Normalization_method
-            rv.custom$history[['Normalization_type']] <- rv.widgets$Normalization_type
-            
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
           }
         )
       })
       
-      
+     
       
       if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
         
@@ -530,10 +531,10 @@ PipelineProtein_Normalization_server <- function(id,
         
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
         SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
-        DaparToolshed::paramshistory(new.dataset) <- NULL
         DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       }
+      
       
       # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
@@ -582,7 +583,7 @@ PipelineProtein_Normalization_server <- function(id,
       # # DO NOT MODIFY THE THREE FOLLOWINF LINES
       # 
       #   
-        
+     
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

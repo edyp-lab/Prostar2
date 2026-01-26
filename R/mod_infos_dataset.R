@@ -233,67 +233,67 @@ req(.se)
     })
 
 
-
-    
-    Get_QFeatures_History <- reactive({
-      req(rv$dataIn)
-      
-      
-      .se <- rv$dataIn[[input$selectInputSE]]
-      req(.se)
-      se_history <- "-"
-      
-      if (!is.null(DaparToolshed::paramshistory(.se))) {
-        se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
-          ConvertListToHtml(paste0(names(x), " = ", x))
-        })
-        
-        # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
-        
-        data.frame(
-          Name = names(se_history),
-          History = unlist(se_history)
-        )
-      } else {
-        data.frame(
-          Name = "-",
-          History = "-"
-        )
-      }
-    })
-    
-    
-
-    Get_SE_History <- reactive({
-      req(rv$dataIn)
-      req(input$selectInputSE != "None")
-      input$selectInputSE
-
-
-      .se <- rv$dataIn[[input$selectInputSE]]
-      req(.se)
-      
-      
-      se_history <- "-"
-
-      if (!is.null(DaparToolshed::paramshistory(.se))) {
-        se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
-          ConvertListToHtml(paste0(names(x), " = ", x))
-        })
-
-        # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
-
-        data.frame(
-          Name = names(se_history),
-          History = unlist(se_history)
-        )
-      } else {
-        data.frame(
-          Name = "-",
-          History = "-"
-        )
-      }
-    })
+# 
+#     
+#     Get_QFeatures_History <- reactive({
+#       req(rv$dataIn)
+#       
+#       
+#       .se <- rv$dataIn[[input$selectInputSE]]
+#       req(.se)
+#       se_history <- "-"
+#       
+#       if (!is.null(DaparToolshed::paramshistory(.se))) {
+#         se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
+#           ConvertListToHtml(paste0(names(x), " = ", x))
+#         })
+#         
+#         # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
+#         
+#         data.frame(
+#           Name = names(se_history),
+#           History = unlist(se_history)
+#         )
+#       } else {
+#         data.frame(
+#           Name = "-",
+#           History = "-"
+#         )
+#       }
+#     })
+#     
+#     
+# 
+#     Get_SE_History <- reactive({
+#       req(rv$dataIn)
+#       req(input$selectInputSE != "None")
+#       input$selectInputSE
+# 
+# 
+#       .se <- rv$dataIn[[input$selectInputSE]]
+#       req(.se)
+#       
+#       
+#       se_history <- "-"
+# 
+#       if (!is.null(DaparToolshed::paramshistory(.se))) {
+#         se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
+#           ConvertListToHtml(paste0(names(x), " = ", x))
+#         })
+# 
+#         # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
+# 
+#         data.frame(
+#           Name = names(se_history),
+#           History = unlist(se_history)
+#         )
+#       } else {
+#         data.frame(
+#           Name = "-",
+#           History = "-"
+#         )
+#       }
+#     })
 
 
 
@@ -335,21 +335,21 @@ req(.se)
       })
     )
 
-    MagellanNTK::format_DT_server("history",
-      dataIn = reactive({
-        Get_SE_History()
-      })
-    )
+    # MagellanNTK::format_DT_server("history",
+    #   dataIn = reactive({
+    #     Get_SE_History()
+    #   })
+    # )
 
     output$show_SE_ui <- renderUI({
       req(input$selectInputSE != "None")
       req(rv$dataIn)
 
       tagList(
-        MagellanNTK::format_DT_ui(ns("dt2")),
-        br(),
+        MagellanNTK::format_DT_ui(ns("dt2"))
+       # br(),
         # uiOutput(ns('info'))
-        MagellanNTK::format_DT_ui(ns("history"))
+        #MagellanNTK::format_DT_ui(ns("history"))
       )
     })
 

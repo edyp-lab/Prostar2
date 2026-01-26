@@ -126,7 +126,8 @@ PipelineProtein_Convert_server <- function(id,
     tab = NULL,
     previewtab = NULL,
     design = NULL,
-    name = NULL
+    name = NULL,
+    history = MagellanNTK::InitializeHistory()
   )
   
   
@@ -138,12 +139,13 @@ PipelineProtein_Convert_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    
+  
     core.code <- paste0(
       MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_rv_reactiveValues(),
       MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      #MagellanNTK::Get_Code_for_Initialize_History(widgets.default.values),
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(
         widgets = TRUE,

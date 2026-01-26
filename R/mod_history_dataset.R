@@ -57,6 +57,7 @@ history_dataset_server <- function(
   dataIn = reactive({NULL}),
   remoteReset = reactive({0}),
   is.enabled = reactive({TRUE})) {
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -75,32 +76,13 @@ history_dataset_server <- function(
       
       for (i in (names(rv$dataIn))){
         .se <- rv$dataIn[[i]]
-        se_history <- "-"
-      
-        tmp <- data.frame(
-          Process = "-",
-          Step = "-",
-          History = "-"
-        )
+        se_history <- DaparToolshed::paramshistory(rv$dataIn[[i]])
         
-        
-      if (!is.null(DaparToolshed::paramshistory(.se))) {
-        se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
-          ConvertListToHtml(paste0(names(x), " = ", x))
-        })
-       # browser()
-        tmp <- data.frame(
-          Process = i,
-          Step = names(se_history),
-          History = unlist(se_history)
-        )
-      }
-        
-        df <- rbind(df, tmp)
+      if (!is.null(se_history))
+        df <- rbind(df, se_history)
       }
       
-      
-      df
+      return(df)
     })
     
     

@@ -143,8 +143,8 @@ PipelineProtein_DA_server <- function(id,
     AnaDiff_indices = reactive({NULL}),
     dataToAnalyze = NULL,
     Condition1 = NULL,
-    Condition2 = NULL, 
-    history = list(),
+    Condition2 = NULL,
+    history = MagellanNTK::InitializeHistory(),
     step1_query = '-'
   )
   
@@ -174,19 +174,12 @@ PipelineProtein_DA_server <- function(id,
     )
     add.resourcePath()
     
-    
-    observeEvent(input$rstBtn, {
-      browser()
-    })
     # >>>
     # >>> START ------------- Code for Description UI---------------
     # >>> 
     
     
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
-      
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -514,7 +507,8 @@ PipelineProtein_DA_server <- function(id,
         
         DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
         rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
-        rv.custom$history[['Number of pushed values to 1']] <- length(indices_to_push)
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Number of pushed values to 1', length(indices_to_push))
+
         
         n <- length(rv.custom$resAnaDiff$P_Value)
         rv.custom$pushed <- seq(n)[indices_to_push]
@@ -551,10 +545,9 @@ PipelineProtein_DA_server <- function(id,
         || is.null(rv$dataIn))
         shinyjs::info(btnVentsMasg)
       else {
-      #UpdateCompList()
-     
-      rv.custom$history[['Push pval query']] <- rv.custom$step1_query
-      rv.custom$history[['Comparison']] <- GetComparisons()
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
+      
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -939,13 +932,13 @@ PipelineProtein_DA_server <- function(id,
         shinyjs::info(btnVentsMasg)
       else {
         
-      rv.custom$history[['Calibration method']] <- GetCalibrationMethod()
-      rv.custom$history[['pi0']] <- rv.custom$calibrationRes$pi0
-      # rv.custom$history[['h1.concentration']] <- rv.custom$calibrationRes$h1.concentration
-      # rv.custom$history[['Uniformity underestimation']] <- rv.custom$calibrationRes$unif.under
-      # rv.custom$history[['Non-DA protein proportion']] <- round(100 * rv.custom$calibrationRes$pi0, digits = 2)
-      # rv.custom$history[['DA protein concentration']] <- round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2)
-      # 
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
+        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
+        
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
@@ -1127,11 +1120,12 @@ PipelineProtein_DA_server <- function(id,
       C <- rv.custom$nbSelectedAnaDiff
       D <- ( A - C)
 
-      rv.custom$history[['Total number']] <- A
-      rv.custom$history[['Total remaining after push p-values']] <- B
-      rv.custom$history[['Number of selected']] <- C
-      rv.custom$history[['Number of non selected']] <- D
-     
+
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total number', A)
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total remaining after push p-values', B)
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of selected', C)
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of non selected', D)
+      
       
       
       div(id="bloc_page",
@@ -1339,12 +1333,10 @@ PipelineProtein_DA_server <- function(id,
       if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
         shinyjs::info(btnVentsMasg)
       else {
-        
-      rv.custom$history[['th pval']] <- rv.custom$thpval
-      rv.custom$history[['% FDR']] <- round(100 * Get_FDR(), digits = 2)
-      rv.custom$history[['Nb significant']] <- Get_Nb_Significant()
-
-
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
+      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
+     
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status["FDR"] <- MagellanNTK::stepStatus$VALIDATED

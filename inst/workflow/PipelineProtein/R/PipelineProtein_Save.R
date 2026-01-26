@@ -43,8 +43,10 @@ PipelineProtein_Save_server <- function(id,
   # Define default selected values for widgets
   # By default, this list is empty for the Save module
   # but it can be customized
-  widgets.default.values <- NULL
-  rv.custom.default.values <- NULL
+  widgets.default.values <- list()
+  rv.custom.default.values <- list(
+    history = MagellanNTK::InitializeHistory()
+    )
   
   ###-------------------------------------------------------------###
   ###                                                             ###

@@ -48,7 +48,8 @@ PipelineProtein_Description_server <- function(id,
   # but it can be customized
   widgets.default.values <- NULL
   rv.custom.default.values <- list(
-    result_open_dataset = reactive({NULL})
+    result_open_dataset = reactive({NULL}),
+    history = MagellanNTK::InitializeHistory()
     )
   
   ###-------------------------------------------------------------###
@@ -70,7 +71,8 @@ PipelineProtein_Description_server <- function(id,
     
     eval(str2expression(core.code))
     add.resourcePath()
-  
+    
+    
     
     ###### ------------------- Code for Description (step 0) -------------------------    #####
     output$Description <- renderUI({
