@@ -505,7 +505,7 @@ PipelineProtein_DA_server <- function(id,
         
         .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
         
-        DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1
+        DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1.00000000001
         rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
         #rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Number of pushed values to 1', length(indices_to_push))
         
@@ -659,9 +659,13 @@ PipelineProtein_DA_server <- function(id,
       
       t <- NULL
       method <- NULL
+      # t <- rv.custom$resAnaDiff$P_Value
+      # t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
+      # toDelete <- which(t == 1)
+      
       t <- rv.custom$resAnaDiff$P_Value
-      t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
-      toDelete <- which(t == 1)
+      toDelete <- which(t > 1)
+      
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
@@ -716,9 +720,12 @@ PipelineProtein_DA_server <- function(id,
       
       t <- NULL
       method <- NULL
+      # t <- rv.custom$resAnaDiff$P_Value
+      # t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
+      # toDelete <- which(t == 1)
       t <- rv.custom$resAnaDiff$P_Value
-      t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
-      toDelete <- which(t == 1)
+      toDelete <- which(t > 1)
+      
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
@@ -851,9 +858,12 @@ PipelineProtein_DA_server <- function(id,
       
       t <- NULL
       method <- NULL
+      # t <- rv.custom$resAnaDiff$P_Value
+      # t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
+      # toDelete <- which(t == 1)
       t <- rv.custom$resAnaDiff$P_Value
-      t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
-      toDelete <- which(t == 1)
+      toDelete <- which(t > 1)
+      
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
@@ -1241,11 +1251,25 @@ PipelineProtein_DA_server <- function(id,
       req(rv.custom$thpval)
       req(Build_pval_table())
       
+      # adj.pval <- Build_pval_table()$Adjusted_PValue
+      # logpval <- Build_pval_table()$Log_PValue
+      # upitems_logpval <- which(logpval >= rv.custom$thpval)
+      # 
+      # fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
+      
       adj.pval <- Build_pval_table()$Adjusted_PValue
       logpval <- Build_pval_table()$Log_PValue
+      .logfc <- Build_pval_table()$logFC
+      
+      
       upitems_logpval <- which(logpval >= rv.custom$thpval)
+      upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
+      upitems_logpval <- setdiff(upitems_logpval, upItems_logfcinf)
       
       fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
+      
+      
+      
       rv.custom$FDR <- as.numeric(fdr)
       as.numeric(fdr)
     })
@@ -1297,13 +1321,24 @@ PipelineProtein_DA_server <- function(id,
       )
       pval_table[signifItems,'isDifferential'] <- 1
       
-      upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
-      upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
-      rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
-        .pval[upItems_logFC],
-        GetCalibrationMethod())
-      pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+      # upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
+      # upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
+      # rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+      #   .pval[upItems_logFC],
+      #   GetCalibrationMethod())
+      # pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
       
+      upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
+      #push to 1 proteins with logFC under threshold
+      pval_pushfc <- .pval
+      upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
+      upItems_pushepval <- which(.pval > 1)
+      upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
+      pval_pushfc[upItems_logfcinf] <- 1
+      rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+        pval_pushfc[-upItems_pushepval],
+        GetCalibrationMethod())
+      pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
       
       
       # Set only significant values
