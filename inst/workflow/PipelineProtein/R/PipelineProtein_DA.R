@@ -1248,26 +1248,31 @@ PipelineProtein_DA_server <- function(id,
     
     
     Get_FDR <- reactive({
+      
+      
       req(rv.custom$thpval)
+      req(rv.custom$thlogfc)
       req(Build_pval_table())
       
-      # adj.pval <- Build_pval_table()$Adjusted_PValue
-      # logpval <- Build_pval_table()$Log_PValue
-      # upitems_logpval <- which(logpval >= rv.custom$thpval)
-      # 
-      # fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
+      #  adj.pval <- Build_pval_table()$Adjusted_PValue
+      #  logpval <- Build_pval_table()$Log_PValue
+      #  upitems_logpval <- which(logpval >= rv.custom$thpval)
+      # # 
+      #  fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
       
+   ##########################################################################
+   ##################Code de Manon #################################
       adj.pval <- Build_pval_table()$Adjusted_PValue
       logpval <- Build_pval_table()$Log_PValue
       .logfc <- Build_pval_table()$logFC
-      
-      
+
+
       upitems_logpval <- which(logpval >= rv.custom$thpval)
       upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
       upitems_logpval <- setdiff(upitems_logpval, upItems_logfcinf)
-      
+
       fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
-      
+       ##########################################################################
       
       
       rv.custom$FDR <- as.numeric(fdr)
@@ -1321,24 +1326,27 @@ PipelineProtein_DA_server <- function(id,
       )
       pval_table[signifItems,'isDifferential'] <- 1
       
-      # upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
-      # upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
-      # rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
-      #   .pval[upItems_logFC],
-      #   GetCalibrationMethod())
-      # pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+       upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
+       upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
+       rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(.pval[upItems_logFC],
+         GetCalibrationMethod())
+       pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
       
-      upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
-      #push to 1 proteins with logFC under threshold
-      pval_pushfc <- .pval
-      upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
-      upItems_pushepval <- which(.pval > 1)
-      upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
-      pval_pushfc[upItems_logfcinf] <- 1
-      rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
-        pval_pushfc[-upItems_pushepval],
-        GetCalibrationMethod())
-      pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+      
+      ##################################################################
+      ################# Code de Manon    ###############
+      # upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
+      # #push to 1 proteins with logFC under threshold
+      # pval_pushfc <- .pval
+      # upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
+      # upItems_pushepval <- which(.pval > 1)
+      # upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
+      # pval_pushfc[upItems_logfcinf] <- 1
+      # rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+      #   pval_pushfc[-upItems_pushepval],
+      #   GetCalibrationMethod())
+      # pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+      ##################################################################
       
       
       # Set only significant values

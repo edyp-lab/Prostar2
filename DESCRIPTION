@@ -1,6 +1,6 @@
 Package: Prostar2
 Title: Prostar 2
-Version: 0.99.22
+Version: 0.99.23
 Date: 2026-01-07
 Authors@R: c(person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut'),
       comment = c(ORCID="0000-0002-5016-1203")),
