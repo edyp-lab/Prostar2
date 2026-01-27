@@ -92,7 +92,7 @@ PipelineProtein_Convert_ui <- function(id) {
 #'
 PipelineProtein_Convert_server <- function(id,
   dataIn = reactive({NULL}),
-  steps.enabled = reactive({NULL}),
+  steps.enabled = reactive({TRUE}),
   remoteReset = reactive({NULL}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1}),
