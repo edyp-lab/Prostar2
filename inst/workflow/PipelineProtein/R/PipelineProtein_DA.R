@@ -1326,26 +1326,36 @@ PipelineProtein_DA_server <- function(id,
       )
       pval_table[signifItems,'isDifferential'] <- 1
       
-       upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
-       upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
-       rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(.pval[upItems_logFC],
-         GetCalibrationMethod())
-       pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+       #upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
+       #upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
+       #rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(.pval[upItems_logFC],
+       #  GetCalibrationMethod())
+       #pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
       
       
       ##################################################################
       ################# Code de Manon    ###############
-      # upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
-      # #push to 1 proteins with logFC under threshold
-      # pval_pushfc <- .pval
-      # upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
-      # upItems_pushepval <- which(.pval > 1)
-      # upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
-      # pval_pushfc[upItems_logfcinf] <- 1
-      # rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
-      #   pval_pushfc[-upItems_pushepval],
-      #   GetCalibrationMethod())
-      # pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+       upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
+       #push to 1 proteins with logFC under threshold
+       pval_pushfc <- .pval
+       upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
+       upItems_pushepval <- which(.pval > 1)
+       upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
+       if (length(upItems_logfcinf) != 0){
+         pval_pushfc[upItems_logfcinf] <- 1
+       }  
+       if (length(upItems_pushepval) != 0){
+         pval_pushfc <- pval_pushfc[-upItems_pushepval]
+       }
+       rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+         pval_pushfc,
+         GetCalibrationMethod())
+       if (length(upItems_pushepval) != 0){
+         pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+       } else {
+         pval_table[, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+       }
+       
       ##################################################################
       
       
