@@ -1096,7 +1096,6 @@ PipelineProtein_DA_server <- function(id,
       
       rv.custom$thpval
       rv$dataIn
-      #browser()
       req(Build_pval_table())
       
       
@@ -1390,7 +1389,7 @@ PipelineProtein_DA_server <- function(id,
       req(grepl('FDR', btnEvents()))
       shiny::withProgress(message = paste0("COmputing FDR", id), {
         shiny::incProgress(0.5)
-        #browser()
+
         if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
           shinyjs::info(btnVentsMasg)
         else {

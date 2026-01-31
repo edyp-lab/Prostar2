@@ -153,16 +153,10 @@ mod_volcanoplot_server <- function(
     observeEvent(input$eventPointClicked, {
       rv.custom$eventPointClicked <- input$eventPointClicked
     })
-    
-    observeEvent(remoteReset(), {
-      
-      #browser()
-      rv.custom$clickFun <- NULL
-    })
+
 
     output$quantiDT <- renderUI({
       req(rv.custom$eventPointClicked)
-#browser()
 
       if (DaparToolshed::typeDataset(rv$dataIn) == "protein") {
         if (!('adjacencymatrix' %in% names(rowData(rv$dataIn)))) {
@@ -430,15 +424,6 @@ mod_volcanoplot_server <- function(
       }
     })
 
-
-
-
-    # GetDataFor_Infos <- reactive({
-    #   #browser()
-    #   req(rv.custom$dataGetExprsClickedProtein)
-    #   data <- rv.custom$dataGetExprsClickedProtein
-    #   data
-    # })
 
     ## -------------------------------------------------------------
     output$Infos <- DT::renderDT(server = TRUE, {
