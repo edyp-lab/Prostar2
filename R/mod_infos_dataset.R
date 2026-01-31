@@ -152,9 +152,10 @@ infos_dataset_server <- function(
 
     Get_QFeatures_summary <- reactive({
       req(rv$dataIn)
+      #browser()
       nb_assay <- length(rv$dataIn)
       names_assay <- unlist(names(rv$dataIn))
-      pipeline <- S4Vectors::metadata(rv$dataIn)$pipelineType
+      pipeline <- S4Vectors::metadata(rv$dataIn)$name.pipeline
 
       columns <- c(
         "Pipeline Type",
@@ -163,7 +164,7 @@ infos_dataset_server <- function(
       )
 
       vals <- c(
-        if (is.null(metadata(rv$dataIn)$pipelineType)) "-" else S4Vectors::metadata(rv$dataIn)$pipelineType,
+        if (is.null(pipeline)) "-" else pipeline,
         length(rv$dataIn),
         if (length(rv$dataIn) == 0) {
           "-"

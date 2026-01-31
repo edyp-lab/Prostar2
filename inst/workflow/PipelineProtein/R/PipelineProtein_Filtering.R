@@ -869,7 +869,7 @@ PipelineProtein_Filtering_server <- function(id,
         else {
           # Rename the new dataset with the name of the process
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
-
+          S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
           # DO NOT MODIFY THE THREE FOLLOWINF LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2

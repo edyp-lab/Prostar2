@@ -581,7 +581,7 @@ PipelineProtein_Normalization_server <- function(id,
       # # DO NOT MODIFY THE THREE FOLLOWINF LINES
       # 
       #   
-     
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

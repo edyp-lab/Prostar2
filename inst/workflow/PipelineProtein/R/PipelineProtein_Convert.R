@@ -953,10 +953,12 @@ PipelineProtein_Convert_server <- function(id,
           typeDataset = rv.widgets$SelectFile_typeOfData,
           parentProtId = rv.widgets$DataId_parentProteinID,
           force.na = rv.widgets$SelectFile_replaceAllZeros,
-          software = rv.widgets$SelectFile_software)
+          software = rv.widgets$SelectFile_software,
+          name.pipeline = "PipelineProtein"
+        )
       })
       
-      
+      S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

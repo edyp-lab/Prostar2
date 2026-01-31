@@ -647,7 +647,9 @@ PipelineProtein_HypothesisTest_server <- function(id,
         SummarizedExperiment::assays(dataIn()))))
         shinyjs::info(btnVentsMasg)
       else {
-      # DO NOT MODIFY THE THREE FOLLOWING LINES
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
+        
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

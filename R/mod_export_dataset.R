@@ -98,9 +98,7 @@ export_dataset <- function(dataIn) {
 
   server <- function(input, output, session) {
     export_dataset_server("export",
-      dataIn = reactive({
-        dataIn
-      })
+      dataIn = reactive({dataIn})
     )
   }
 

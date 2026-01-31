@@ -842,10 +842,7 @@ PipelineProtein_Imputation_server <- function(id,
           # Rename the new dataset with the name of the process
           i <- length(rv.custom$dataIn2)
           names(rv.custom$dataIn2)[i] <- 'Imputation'
-          #DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]),
-          #  rv.custom$params.tmp)
-          
-          
+          S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
