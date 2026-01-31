@@ -120,9 +120,15 @@ mod_volcanoplot_server <- function(
   rv.custom.default.values <- list(
     colorsVolcanoplot = NULL,
     data = NULL,
-    conditions = NULL
+    conditions = NULL,
+    clickFun = NULL,
+    eventPointClicked = NULL
   )
-
+ 
+  
+  MSG_WARNING_SIZE_DT <- "The size of the table is too big to be exported with
+    the buttons below (only the first 154 rows will be exported). It is advised
+    to use the Export tool of Prostar."
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -143,10 +149,20 @@ mod_volcanoplot_server <- function(
       rv.custom$data <- HypothesisTest(dataIn())
     })
 
+    
+    observeEvent(input$eventPointClicked, {
+      rv.custom$eventPointClicked <- input$eventPointClicked
+    })
+    
+    observeEvent(remoteReset(), {
+      
+      #browser()
+      rv.custom$clickFun <- NULL
+    })
 
     output$quantiDT <- renderUI({
-      req(input$eventPointClicked)
-
+      req(rv.custom$eventPointClicked)
+#browser()
 
       if (DaparToolshed::typeDataset(rv$dataIn) == "protein") {
         if (!('adjacencymatrix' %in% names(rowData(rv$dataIn)))) {
@@ -244,10 +260,7 @@ mod_volcanoplot_server <- function(
       ind <- GetSortingIndices()
       borders_index <- GetBorderIndices()
 
-      # .ind <- last(grep(pattern = "peptide", names(rv$dataIn)))
-      # prev.dataset <- rv$dataIn[[names(rv$dataIn)[.ind]]]
-
-      prot <- GetExprsClickedProtein()
+      prot <- rv.custom$dataGetExprsClickedProtein
       prot.indice <- rownames(prot)
 
       data <- Build_enriched_qdata(rv$dataIn, 3)
@@ -267,6 +280,7 @@ mod_volcanoplot_server <- function(
     output$sharedPeptidesInfos <- DT::renderDT(server = TRUE, {
       req(rv$dataIn)
       data <- GetDataFor_sharedPeptidesInfos()
+      req(data)
       .type <- DaparToolshed::typeDataset(rv$dataIn)
       c.tags <- names(BuildColorStyles(.type))
       c.colors <- unname(BuildColorStyles(.type))
@@ -317,7 +331,7 @@ mod_volcanoplot_server <- function(
       # .ind <- last(grep(pattern = "peptide", names(rv$dataIn)))
       # prev.dataset <- rv$dataIn[[names(rv$dataIn)[.ind]]]
 
-      prot <- GetExprsClickedProtein()
+      prot <- rv.custom$dataGetExprsClickedProtein
       prot.indice <- rownames(prot)
 
       data <- Build_enriched_qdata(rv$dataIn, 3)
@@ -374,19 +388,20 @@ mod_volcanoplot_server <- function(
 
 
     ## ---------------------------------------------------------
-    GetExprsClickedProtein <- reactive({
+    #GetExprsClickedProtein <- bindEvent({
+    observeEvent(rv.custom$eventPointClicked, {
       req(rv$dataIn)
-      req(input$eventPointClicked)
-#browser()
+      req(rv.custom$eventPointClicked)
 
+      rv.custom$dataGetExprsClickedProtein <- NULL
       ind <- GetSortingIndices()
    
-      this.index <- as.integer(strsplit(input$eventPointClicked, "_")[[1]][1])
-      this.series.name <- strsplit(input$eventPointClicked, "_")[[1]][2]
+      this.index <- as.integer(strsplit(rv.custom$eventPointClicked, "_")[[1]][1])
+      this.series.name <- strsplit(rv.custom$eventPointClicked, "_")[[1]][2]
 
       .digits <- 3
-      data <- Build_enriched_qdata(rv$dataIn, .digits)
-      data <- data[, c(ind, (ind + ncol(data) / 2))]
+      rv.custom$dataGetExprsClickedProtein <- Build_enriched_qdata(rv$dataIn, .digits)
+      #data <- data[, c(ind, (ind + ncol(data) / 2))]
 
      
       nn_logFC <- paste0(comparison()[1], '_vs_', comparison()[2], '_logFC')
@@ -396,21 +411,21 @@ mod_volcanoplot_server <- function(
       index.g1 <- which((-log10(.dat[, nn_pval]) >= thpval()
       ) & (abs(.dat[, nn_logFC]) >= as.numeric(thlogfc())))
 
-      data.g1 <- data[index.g1, ]
-      data.g2 <- data[-index.g1, ]
+      data.g1 <- rv.custom$dataGetExprsClickedProtein[index.g1, ]
+      data.g2 <- rv.custom$dataGetExprsClickedProtein[-index.g1, ]
 
       switch(this.series.name,
-        g1 = data <- data.g1[this.index + 1, ],
-        g2 = data <- data.g2[this.index + 1, ]
+        g1 = rv.custom$dataGetExprsClickedProtein <- data.g1[this.index + 1, ],
+        g2 = rv.custom$dataGetExprsClickedProtein <- data.g2[this.index + 1, ]
       )
-      data
+      #rv.custom$data
     })
 
 
 
     output$Warning_Infos <- renderUI({
-      GetDataFor_Infos()
-      if (nrow(GetDataFor_Infos()) > 153) {
+      req(rv.custom$dataGetExprsClickedProtein)
+      if (nrow(rv.custom$dataGetExprsClickedProtein) > 153) {
         p(MSG_WARNING_SIZE_DT)
       }
     })
@@ -418,18 +433,20 @@ mod_volcanoplot_server <- function(
 
 
 
-    GetDataFor_Infos <- reactive({
-      data <- GetExprsClickedProtein()
-      data
-    })
+    # GetDataFor_Infos <- reactive({
+    #   #browser()
+    #   req(rv.custom$dataGetExprsClickedProtein)
+    #   data <- rv.custom$dataGetExprsClickedProtein
+    #   data
+    # })
 
     ## -------------------------------------------------------------
     output$Infos <- DT::renderDT(server = TRUE, {
       
       req(rv$dataIn)
-
+req(rv.custom$dataGetExprsClickedProtein)
       borders_index <- GetBorderIndices()
-      data <- GetExprsClickedProtein()
+      data <- rv.custom$dataGetExprsClickedProtein
       
       .type <- DaparToolshed::typeDataset(rv$dataIn)
       c.tags <- names(BuildColorStyles(.type))
@@ -497,7 +514,7 @@ mod_volcanoplot_server <- function(
         }
 
 
-        clickFun <-
+        rv.custom$clickFun <-
           shinyjqui::JS(paste0(
             "function(event) {Shiny.onInputChange('",
             ns("eventPointClicked"),
@@ -509,7 +526,7 @@ mod_volcanoplot_server <- function(
           th_logfc = as.numeric(thlogfc()),
           th_pval = as.numeric(thpval()),
           conditions = comparison(),
-          clickFunction = clickFun,
+          clickFunction = rv.custom$clickFun,
           pal = rv.custom$colorsVolcanoplot
         )
       })

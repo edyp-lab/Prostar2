@@ -88,10 +88,17 @@ Build_enriched_qdata <- function(obj.se, digits = NULL) {
   }
   
   test.table <- as.data.frame(round(SummarizedExperiment::assay(obj.se)))
+  
   if (!is.null(names(DaparToolshed::qMetacell(obj.se)))) { 
+   
+    colnames.data <- colnames(SummarizedExperiment::assay(obj.se))
+    colnames.metadata <- colnames(DaparToolshed::qMetacell(obj.se))
+    colnames.metadata <- gsub('metacell_', '', colnames.metadata)
+    .ind2keep <- which(colnames.metadata %in% colnames.data)
+    
     test.table <- cbind(
       round(SummarizedExperiment::assay(obj.se), digits = digits),
-      DaparToolshed::qMetacell(obj.se)
+      DaparToolshed::qMetacell(obj.se)[ ,.ind2keep]
     )
   } else {
     test.table <- cbind(

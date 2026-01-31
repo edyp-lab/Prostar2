@@ -1074,15 +1074,16 @@ PipelineProtein_DA_server <- function(id,
     Prostar2::mod_volcanoplot_server(
       id = "FDR_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
-      comparison = reactive({GetComparisons()}),
+      comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
       group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
-      remoteReset = reactive({0}),
+      remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({rv$steps.enabled["FDR"]})
     )
     
+
     output$FDR_volcanoplot_UI <- renderUI({
       widget <- div(id = ns('div_FDR_volcano'),
         mod_volcanoplot_ui(ns("FDR_volcano"))
