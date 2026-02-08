@@ -788,10 +788,10 @@ PipelineProtein_Filtering_server <- function(id,
         # Rename the new dataset with the name of the process
         names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Variablefiltering'
         
-        
+      
         query <- rv.custom$Variablefiltering_funFilter$ll.query
         i <- length(rv.custom$dataIn2)
-        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variable filtering', 'query', rv.custom$Variablefiltering_ll.query)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
         
         DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]),
           rv.custom$history)
@@ -861,7 +861,7 @@ PipelineProtein_Filtering_server <- function(id,
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
           
-          #browser()
+
           # DO NOT MODIFY THE THREE FOLLOWINF LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2

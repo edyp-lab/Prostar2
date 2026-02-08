@@ -488,8 +488,7 @@ PipelineProtein_Imputation_server <- function(id,
             rv.custom$dataIn1,
             .tmp,
             'POVImputation')
-          DaparToolshed::paramshistory(rv.custom$dataIn1[['POVImputation']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['POVImputation']]),
-            rv.custom$history)
+          
           
           # Add infos
           nBefore <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])$nNA[, "nNA"]
@@ -499,9 +498,6 @@ PipelineProtein_Imputation_server <- function(id,
             rv.custom$POVImputation_SummaryDT ,
             c("POV Imputation", nBefore - nAfter, nAfter, NA)
           )
-          
-          .history <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]]
-          rv.custom$params.tmp[['Imputation']][['POVImputation']] <- DaparToolshed::paramshistory(.history)
           
           rv.custom$dataIn2 <- rv.custom$dataIn1
           
@@ -530,7 +526,7 @@ PipelineProtein_Imputation_server <- function(id,
       #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
       #includeCSS(path)
       
-      #browser()
+
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
@@ -692,7 +688,7 @@ PipelineProtein_Imputation_server <- function(id,
             nbMECBefore <- length(which(m))
             incProgress(0.75, detail = "MEC Imputation")
             
-            #browser()
+
             withProgress(message = "", detail = "", value = 0, {
               incProgress(0.25, detail = "Find MEC blocks")
               
@@ -760,16 +756,7 @@ PipelineProtein_Imputation_server <- function(id,
                 rv.custom$dataIn2,
                 .tmp,
                 'MECImputation')
-              
-              DaparToolshed::paramshistory(rv.custom$dataIn2[['MECImputation']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['MECImputation']]),
-                rv.custom$history)
-              
-              
-              # DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- .param # Do some stuff
-              # 
-              # .history <- rv.custom$dataIn2[[length(rv.custom$dataIn2)]]
-              # rv.custom$params.tmp[['Imputation']][['MECImputation']] <- DaparToolshed::paramshistory(.history)
-              # 
+
               
               # Add infos
               nBefore <- QFeatures::nNA(rv.custom$dataIn2[[length(rv.custom$dataIn2) - 1]])$nNA[, "nNA"]
@@ -818,7 +805,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      #browser()
       req(grepl('Save', btnEvents()))
       
       shiny::withProgress(message = paste0("Save process", id), {
@@ -839,11 +825,14 @@ PipelineProtein_Imputation_server <- function(id,
             rv.custom$dataIn2 <- QFeatures::removeAssay(rv.custom$dataIn2, 
               length(rv.custom$dataIn2) - 1)
           
-          #browser()
           # Rename the new dataset with the name of the process
           i <- length(rv.custom$dataIn2)
           names(rv.custom$dataIn2)[i] <- 'Imputation'
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
+          browser()
+          DaparToolshed::paramshistory(rv.custom$dataIn2) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2),
+            rv.custom$history)
+          
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2

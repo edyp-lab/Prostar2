@@ -159,8 +159,6 @@ mod_metacell_tree_server <- function(
 
 # 
     observeEvent(input$openModalBtn, {
-      
-      #browser()
       req(dataIn())
 
 

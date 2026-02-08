@@ -786,22 +786,6 @@ PipelineConvert_Convert_server <- function(id,
     })
     
     
-    # 
-    # observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-    #   browser()
-    #   # remove_shiny_inputs <- function(id, .input) {
-    #   #   invisible(
-    #   #     lapply(grep(id, names(.input), value = TRUE), function(i) {
-    #   #       .subset2(.input, "impl")$.values$remove(i)
-    #   #     })
-    #   #   )
-    #   # }
-    #   # 
-    #   # #removeUI(selector = "#module_content")
-    #   # remove_shiny_inputs("designEx", input)
-    # })
-    # 
-    
     observe({
       rv.widgets$ExpandFeatData_quantCols
 

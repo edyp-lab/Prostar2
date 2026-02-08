@@ -642,7 +642,6 @@ PipelineProtein_DA_server <- function(id,
     
     
     histPValue <- reactive({
-      #browser()
       req(rv.custom$resAnaDiff)
       req(rv.custom$pi0)
       req(rv.widgets$Pvaluecalibration_nBinsHistpval)
@@ -1136,15 +1135,7 @@ PipelineProtein_DA_server <- function(id,
       B <- A - length(rv.custom$pushed)
       C <- rv.custom$nbSelectedAnaDiff
       D <- ( A - C)
-      
-      # browser()
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total number', A)
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total remaining after push p-values', B)
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of selected', C)
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of non selected', D)
-      # 
-      
-      
+
       div(id="bloc_page",
         style = "background-color: lightgrey; width: 300px",
         p(paste("Total number of ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
@@ -1153,7 +1144,6 @@ PipelineProtein_DA_server <- function(id,
         p(paste("Number of selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
         p(paste("Number of non selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", D, sep = ''))
       )
-      #HTML(txt)
     })
     
     

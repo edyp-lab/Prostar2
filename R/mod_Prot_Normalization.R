@@ -173,11 +173,8 @@ mod_Prot_Normalization_server <- function(
 
 
     observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE, {
-        # req(dataIn())
         req(inherits(dataIn(), "QFeatures"))
         rv$dataIn <- dataIn()
-
-        # browser()
       },
       priority = 1000
     )

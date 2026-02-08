@@ -71,17 +71,7 @@ history_dataset_server <- function(
 
     Get_QFeatures_History <- reactive({
       req(rv$dataIn)
-      
-      df <- NULL
-      #browser()
-      for (i in (names(rv$dataIn))){
-        .se <- rv$dataIn[[i]]
-        se_history <- DaparToolshed::paramshistory(rv$dataIn[[i]])
-        
-      if (!is.null(se_history))
-        df <- rbind(df, se_history)
-      }
-      
+      df <- DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]])
       return(df)
     })
     

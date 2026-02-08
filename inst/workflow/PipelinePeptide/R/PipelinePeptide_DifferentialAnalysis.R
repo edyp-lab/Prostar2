@@ -1190,7 +1190,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv.widgets$Scenario_choice == "Cluster")
       req(Build_pval_table()$Adjusted_PValue)
       
-      # browser()
+
       visualizeClusters(
         dat = rv.custom$centered_means,
         clust_model = as.factor(rv.custom$res_clusters),

@@ -205,7 +205,7 @@ mod_set_pval_threshold_server <- function(
     
     
     observeEvent(req(input$ApplyThreshold), {
-      #browser()
+
       dataOut(as.numeric(input$text2))
     })
     

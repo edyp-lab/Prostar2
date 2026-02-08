@@ -140,7 +140,7 @@ PipelineProtein_Description_server <- function(id,
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
       
-      #browser()
+
       rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Description', 'Description', 'Initialization', '-')
       
       for (i in names(rv$dataIn))

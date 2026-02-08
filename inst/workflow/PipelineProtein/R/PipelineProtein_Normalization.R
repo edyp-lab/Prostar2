@@ -525,11 +525,18 @@ PipelineProtein_Normalization_server <- function(id,
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- rv$dataIn
+        dataOut$value <- NULL
       } else {
         new.dataset <- rv$dataIn[[length(rv$dataIn)]]
         SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
-        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
+        #browser()
+        
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
+        
+        DaparToolshed::paramshistory(new.dataset) <- rbind(DaparToolshed::paramshistory(new.dataset),
+          rv.custom$history)
+        
+        
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
       }
       
@@ -567,20 +574,7 @@ PipelineProtein_Normalization_server <- function(id,
 
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-      #   browser()
-      #   tmp <- dataIn()
-      #   if(is.null(tmp))
-      #     tmp <- rv.custom$result_open_dataset()$dataset
-      #     
-      #   
-      # if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
-      #     SummarizedExperiment::assays(tmp))))
-      #     shinyjs::info(btnVentsMasg)
-      # else {
-      # # Do some stuff
-      # # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      # 
-      #   
+      
         S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn

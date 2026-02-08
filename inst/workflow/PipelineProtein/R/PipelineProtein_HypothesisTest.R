@@ -410,7 +410,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     output$showConds <- renderUI({
       req(rv.custom$listNomsComparaison)
       
-      #browser()
+
       widget <- lapply(seq_len(rv.custom$n), function(i) {
         ll.conds <- unlist(
           strsplit(rv.custom$listNomsComparaison[i], split = "_vs_")
@@ -602,7 +602,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'HypothesisTest', 'HypothesisTest', 'thlogFC', as.numeric(rv.widgets$HypothesisTest_thlogFC))
         
-        DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
+        DaparToolshed::paramshistory(new.dataset) <- rbind(DaparToolshed::paramshistory(new.dataset),
+          rv.custom$history)
         rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
 
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
@@ -642,7 +643,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         # Do some stuff
-        #browser()
+
       if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
         SummarizedExperiment::assays(dataIn()))))
         shinyjs::info(btnVentsMasg)
