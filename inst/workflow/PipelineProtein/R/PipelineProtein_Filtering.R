@@ -283,6 +283,7 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+      #browser()
     })
     
     
@@ -470,6 +471,7 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Cellmetadatafiltering"] <- MagellanNTK::stepStatus$VALIDATED
+          #browser()
         }
         shiny::incProgress(1)
       })
@@ -817,6 +819,7 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED
+          #browser()
         }
       })
     })
@@ -853,10 +856,10 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
-        # if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
-        #   SummarizedExperiment::assays(dataIn()))))
-        #   shinyjs::info(btnVentsMasg)
-        # else {
+        if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
+          SummarizedExperiment::assays(dataIn()))))
+          shinyjs::info(btnVentsMasg)
+        else {
           # Rename the new dataset with the name of the process
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
@@ -866,9 +869,9 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-          
+          #browser()
           #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
-        #}
+        }
       })
     })
     # <<< END ------------- Code for step 3 UI---------------

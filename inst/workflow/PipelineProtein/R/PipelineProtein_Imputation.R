@@ -83,7 +83,6 @@ PipelineProtein_Imputation_server <- function(id,
   remoteReset = reactive({0}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1}),
-  path = NULL,
   btnEvents = reactive({NULL})
 ){
   
@@ -152,12 +151,10 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     mv.present <- reactive({
-      #Utile for the MEC imputation
+      #Useful for the MEC imputation
       qdata <- SummarizedExperiment::assay(dataIn()[[length(dataIn())]])
       rv.custom$mv.present <- sum(is.na(qdata)) > 0
       rv.custom$mv.present
-      #dataOut$trigger <- MagellanNTK::Timestamp()
-      #dataOut$value <- rv$dataIn
     })
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -165,9 +162,6 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
-      
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -381,16 +375,7 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
       
     })
-    
-    
-    # output$POVImputation_btn_validate_ui <- renderUI({
-    #   widget <- actionButton(ns("POVImputation_btn_validate"),
-    #     "Perform",
-    #     class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['POVImputation'])
-    # })
-    # 
-    
+
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('POVImputation', btnEvents()))
       req(rv.custom$dataIn1)
@@ -463,13 +448,6 @@ PipelineProtein_Imputation_server <- function(id,
               text = .tmp,
               type = 'error' )
           } else {
-            # sendSweetAlert(
-            #   session = session,
-            #   title = "Success",
-            #   type = "success"
-            # )
-            #rv$dataIn[[length(rv$dataIn)]] <- .tmp
-            # incProgress(0.75, detail = 'Reintroduce MEC blocks')
             incProgress(1, detail = "Finalize POV imputation")
             
             m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(.tmp),
@@ -732,13 +710,6 @@ PipelineProtein_Imputation_server <- function(id,
                   text = .tmp,
                   type = 'error' )
               } else {
-                # sendSweetAlert(
-                #   session = session,
-                #   title = "Success",
-                #   type = "success"
-                # )
-                #rv$dataIn[[length(rv$dataIn)]] <- .tmp
-                # incProgress(0.75, detail = 'Reintroduce MEC blocks')
                 incProgress(1, detail = "Finalize MEC imputation")
                 
                 
@@ -829,10 +800,9 @@ PipelineProtein_Imputation_server <- function(id,
           i <- length(rv.custom$dataIn2)
           names(rv.custom$dataIn2)[i] <- 'Imputation'
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
-          browser()
-          DaparToolshed::paramshistory(rv.custom$dataIn2) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2),
+         
+          DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]),
             rv.custom$history)
-          
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2

@@ -124,7 +124,6 @@ PipelineProtein_Normalization_server <- function(id,
 
     eval(str2expression(core.code))
     add.resourcePath()
-    #rv.custom$history <- MagellanNTK::InitializeHistory(widgets.default.values)
     
     
     output$Description <- renderUI({
@@ -154,20 +153,20 @@ PipelineProtein_Normalization_server <- function(id,
 
     
     
-    output$open_dataset_UI <- renderUI({
-      req(session$userData$runmode == 'process')
-      req(is.null(dataIn()))
-      req(NULL)
-     
-      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
-        id = "open_dataset",
-        class = 'QFeatures',
-        extension = "qf",
-        remoteReset = reactive({remoteReset()})
-      )
-      
-    MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
-    })
+    # output$open_dataset_UI <- renderUI({
+    #   req(session$userData$runmode == 'process')
+    #   req(is.null(dataIn()))
+    #   req(NULL)
+    #  
+    #   rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+    #     id = "open_dataset",
+    #     class = 'QFeatures',
+    #     extension = "qf",
+    #     remoteReset = reactive({remoteReset()})
+    #   )
+    #   
+    # MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    # })
 
     
     # output$Description_infos_dataset_UI <- renderUI({
@@ -189,16 +188,14 @@ PipelineProtein_Normalization_server <- function(id,
       req(dataIn())
       rv$dataIn <- dataIn()
 
-      #if (session$userData$wf_mode == 'process'){
-      #rv$dataIn <- QFeatures::QFeatures()
-      #rv$dataIn <- QFeatures::addAssay(rv$dataIn, SummarizedExperiment::SummarizedExperiment(), name = 'tmp')
-      
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
-     #}
 
       shiny::withProgress(message = paste0("xxx process", id), {
         shiny::incProgress(0.5)
+        
+        
+        rv.custom$dataIn <- rv$dataIn
         
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -249,21 +246,21 @@ PipelineProtein_Normalization_server <- function(id,
     
     selectProt <- omXplore::plots_tracking_server(
       id = "tracker",
-      dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+      dataIn = reactive({rv.custom$dataIn[[length(rv.custom$dataIn)]]}),
       remoteReset = reactive({remoteReset()})
     )
     
     omXplore::omXplore_intensity_server("boxPlot_Norm",
-      dataIn = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)}),
+      dataIn = reactive({rv.custom$dataIn}),
+      i = reactive({length(rv.custom$dataIn)}),
       track.indices = reactive({selectProt()$indices}),
       remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({rv$steps.enabled["Normalization"]})
     )
     
     omXplore::omXplore_density_server("densityPlot_Norm", 
-      dataIn = reactive({rv$dataIn}),
-      i = reactive({length(rv$dataIn)})
+      dataIn = reactive({rv.custom$dataIn}),
+      i = reactive({length(rv.custom$dataIn)})
     )
     
     
@@ -341,15 +338,15 @@ PipelineProtein_Normalization_server <- function(id,
     
     
     output$viewComparisonNorm_hc <- highcharter::renderHighchart({
-      req(rv$dataIn)
-      req(length(rv$dataIn) > 1)
-      #req(names(rv$dataIn)[length(rv$dataIn)] == 'Normalization')
-      obj1 <- rv$dataIn[[length(rv$dataIn)]]
-      obj2 <- rv$dataIn[[length(rv$dataIn)-1]]
+      req(rv.custom$dataIn)
+      req(length(rv.custom$dataIn) > 1)
+      
+      obj1 <- rv.custom$dataIn[[length(rv.custom$dataIn)]]
+      obj2 <- rv.custom$dataIn[[length(rv.custom$dataIn)-1]]
       
       req(obj1)
       req(obj2)
-      protId <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
+      protId <- DaparToolshed::idcol(rv.custom$dataIn[[length(rv.custom$dataIn)]])
       
       if (!is.null(selectProt()$indices)) {
         .n <- length(selectProt()$indices)
@@ -362,10 +359,10 @@ PipelineProtein_Normalization_server <- function(id,
       
       
       DaparToolshed::compareNormalizationD_HC(
-        qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
-        qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
-        keyId = SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
-        conds = DaparToolshed::design.qf(rv$dataIn)$Condition,
+        qDataBefore = SummarizedExperiment::assay(rv.custom$dataIn, length(rv.custom$dataIn)),
+        qDataAfter = SummarizedExperiment::assay(rv.custom$dataIn, length(rv.custom$dataIn)-1),
+        keyId = SummarizedExperiment::rowData(rv.custom$dataIn[[length(rv.custom$dataIn)]])[, protId],
+        conds = DaparToolshed::design.qf(rv.custom$dataIn)$Condition,
         pal = NULL,
         # Consider only 2% of the entire dataset
         n = .n,
@@ -375,7 +372,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     observeEvent(rv.widgets$Normalization_method, {
       req(rv.widgets$Normalization_method)
-      req(rv$dataIn)
+      req(rv.custom$dataIn)
       shinyjs::toggle("Normalization_btn_validate",
         condition = rv.widgets$Normalization_method != "None")
       
@@ -389,7 +386,7 @@ PipelineProtein_Normalization_server <- function(id,
         condition = (rv.widgets$Normalization_method %in% .choice)
       )
       
-      cond <- S4Vectors::metadata(rv$dataIn[[length(rv$dataIn)]])[['typeDataset']] == "protein"
+      cond <- S4Vectors::metadata(rv.custom$dataIn[[length(rv.custom$dataIn)]])[['typeDataset']] == "protein"
       
       .meths <- DaparToolshed::normalizeMethods('withTracking')
       trackAvailable <- rv.widgets$Normalization_method %in% .meths
@@ -413,7 +410,7 @@ PipelineProtein_Normalization_server <- function(id,
       shiny::withProgress(message = paste0("Normalization process", id), {
         shiny::incProgress(0.5)
 
-      if ( is.null(rv$dataIn) ||
+      if ( is.null(rv.custom$dataIn) ||
           rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
         shinyjs::info(btnVentsMasg)
       else {
@@ -421,23 +418,24 @@ PipelineProtein_Normalization_server <- function(id,
         
       # Do some stuff 
       req(rv.widgets$Normalization_method)
-      req(rv$dataIn)
+      req(rv.custom$dataIn)
       
       
       rv.custom$tmpAssay <- NULL
+      .tmp <- NULL
       try({
-        .conds <- SummarizedExperiment::colData(rv$dataIn)[, "Condition"]
-        qdata <- SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn))
+        .conds <- SummarizedExperiment::colData(rv.custom$dataIn)[, "Condition"]
+        qdata <- SummarizedExperiment::assay(rv.custom$dataIn, length(rv.custom$dataIn))
         
        
         switch(rv.widgets$Normalization_method,
           
           G_noneStr = {
-            rv.custom$tmpAssay <- rv$dataIn[[length(rv$dataIn)]]
+            .tmp <- rv.custom$dataIn[[length(rv.custom$dataIn)]]
           },
           
           GlobalQuantileAlignment = {
-            rv.custom$tmpAssay <- DaparToolshed::GlobalQuantileAlignment(qdata)
+            .tmp <- DaparToolshed::GlobalQuantileAlignment(qdata)
             rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
             
           },
@@ -448,7 +446,7 @@ PipelineProtein_Normalization_server <- function(id,
               quant <- as.numeric(rv.widgets$Normalization_quantile)
             }
             
-            rv.custom$tmpAssay <- DaparToolshed::QuantileCentering(
+            .tmp <- DaparToolshed::QuantileCentering(
               qData = qdata, 
               conds = .conds, 
               type = rv.widgets$Normalization_type, 
@@ -462,7 +460,7 @@ PipelineProtein_Normalization_server <- function(id,
           },
           
           MeanCentering = {
-            rv.custom$tmpAssay <- DaparToolshed::MeanCentering(
+            .tmp<- DaparToolshed::MeanCentering(
               qData = qdata, 
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -478,7 +476,7 @@ PipelineProtein_Normalization_server <- function(id,
 
           },
           SumByColumns = {
-            rv.custom$tmpAssay <- DaparToolshed::SumByColumns(
+            .tmp <- DaparToolshed::SumByColumns(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -491,7 +489,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           LOESS = {
-            rv.custom$tmpAssay <- DaparToolshed::LOESS(
+            .tmp <- DaparToolshed::LOESS(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type,
@@ -504,7 +502,7 @@ PipelineProtein_Normalization_server <- function(id,
             
           },
           vsn = {
-            rv.custom$tmpAssay <- DaparToolshed::vsn(
+            .tmp <- DaparToolshed::vsn(
               qData = qdata,
               conds = .conds,
               type = rv.widgets$Normalization_type
@@ -517,27 +515,17 @@ PipelineProtein_Normalization_server <- function(id,
       })
       
       
-      if(inherits(rv.custom$tmpAssay, "try-error") || is.null(rv.custom$tmpAssay)) {
+      if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
         
         MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_normalization',
-          text = rv.custom$tmpAssay[[1]],
+          text = .tmp[[1]],
           type = 'error' )
-        
-        # DO NOT MODIFY THE THREE FOLLOWING LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
       } else {
-        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
-        SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
-        #browser()
-        
-        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
-        
-        DaparToolshed::paramshistory(new.dataset) <- rbind(DaparToolshed::paramshistory(new.dataset),
-          rv.custom$history)
+        new.dataset <- rv.custom$dataIn[[length(rv.custom$dataIn)]]
+        SummarizedExperiment::assay(new.dataset) <- .tmp
         
         
-        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
+        rv.custom$dataIn <- QFeatures::addAssay(rv.custom$dataIn, new.dataset, 'Normalization')
       }
       
       
@@ -574,14 +562,23 @@ PipelineProtein_Normalization_server <- function(id,
 
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-      
-        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
+        if (isTRUE(all.equal(SummarizedExperiment::assays(dataIn()),
+          SummarizedExperiment::assays(rv.custom$dataIn))))
+          shinyjs::info(btnVentsMasg)
+        else {
+        S4Vectors::metadata(rv.custom$dataIn)$name.pipeline <- 'PipelineProtein'
+        
+        
+        DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]),
+          rv.custom$history)
+        
+        
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- rv.custom$dataIn
       rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
       #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
-      #}
+      }
       })
     })
     # <<< END ------------- Code for step 3 UI---------------
