@@ -201,7 +201,7 @@ PipelineProtein_Normalization_server <- function(id,
         shiny::incProgress(0.5)
         
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
@@ -438,7 +438,7 @@ PipelineProtein_Normalization_server <- function(id,
           
           GlobalQuantileAlignment = {
             rv.custom$tmpAssay <- DaparToolshed::GlobalQuantileAlignment(qdata)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
             
           },
           
@@ -455,10 +455,10 @@ PipelineProtein_Normalization_server <- function(id,
               subset.norm = selectProt()$indices, 
               quantile = quant)
             
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'quantile', quant)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'quantile', quant)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
           },
           
           MeanCentering = {
@@ -471,10 +471,10 @@ PipelineProtein_Normalization_server <- function(id,
             )
             
             
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'varReduction', rv.widgets$Normalization_varReduction)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'varReduction', rv.widgets$Normalization_varReduction)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
 
           },
           SumByColumns = {
@@ -485,9 +485,9 @@ PipelineProtein_Normalization_server <- function(id,
               subset.norm = selectProt()$indices
             )
             
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'subset.norm', selectProt()$indices)
             
           },
           LOESS = {
@@ -498,9 +498,9 @@ PipelineProtein_Normalization_server <- function(id,
               span = as.numeric(rv.widgets$Normalization_spanLOESS)
             )
             
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'spanLOESS', as.numeric(rv.widgets$Normalization_spanLOESS))
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'spanLOESS', as.numeric(rv.widgets$Normalization_spanLOESS))
             
           },
           vsn = {
@@ -510,8 +510,8 @@ PipelineProtein_Normalization_server <- function(id,
               type = rv.widgets$Normalization_type
             )
             
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'method', rv.widgets$Normalization_method)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Normalization', 'Normalization', 'type', rv.widgets$Normalization_type)
           }
         )
       })

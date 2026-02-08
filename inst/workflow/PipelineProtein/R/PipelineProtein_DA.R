@@ -253,7 +253,7 @@ PipelineProtein_DA_server <- function(id,
         #DaparToolshed::paramshistory(.se) <- NULL
         
         dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- rv$dataIn
+        dataOut$value <- NULL
         rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
@@ -545,8 +545,8 @@ PipelineProtein_DA_server <- function(id,
           || is.null(rv$dataIn))
           shinyjs::info(btnVentsMasg)
         else {
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
           
           
           dataOut$trigger <- MagellanNTK::Timestamp()
@@ -942,20 +942,20 @@ PipelineProtein_DA_server <- function(id,
           shinyjs::info(btnVentsMasg)
         else {
           
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
           
           if (!is.null(rv.custom$calibrationRes$pi0))
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
           
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
           
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
           
           if (!is.null(rv.custom$calibrationRes$pi0))
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
           
           if (!is.null(rv.custom$calibrationRes$h1.concentration))
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
           
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
@@ -1393,9 +1393,9 @@ PipelineProtein_DA_server <- function(id,
         if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
           shinyjs::info(btnVentsMasg)
         else {
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
           
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL

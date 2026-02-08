@@ -59,6 +59,7 @@ Prostar2("PipelineProtein_Filtering")
 Prostar2("PipelineProtein_Normalization")
 Prostar2("PipelineProtein_Imputation")
 Prostar2("PipelineProtein_HypothesisTest")
+Prostar2("PipelineProtein_DA")
 ```
 
 

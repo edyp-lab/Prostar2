@@ -252,7 +252,7 @@ PipelineProtein_Imputation_server <- function(id,
       )
       
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
@@ -424,7 +424,7 @@ PipelineProtein_Imputation_server <- function(id,
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                   design = DaparToolshed::design.qf(rv.custom$dataIn1))
                 
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
 
               },
               detQuantile = {
@@ -435,10 +435,10 @@ PipelineProtein_Imputation_server <- function(id,
                   factor = rv.widgets$POVImputation_detQuant_factor,
                   na.type = 'Missing POV')
                 
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'qval', rv.widgets$POVImputation_detQuant_quantile / 100)
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'factor', rv.widgets$POVImputation_detQuant_factor)
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'na.type', 'Missing POV')
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'qval', rv.widgets$POVImputation_detQuant_quantile / 100)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'factor', rv.widgets$POVImputation_detQuant_factor)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'na.type', 'Missing POV')
                 
 
               },
@@ -449,8 +449,8 @@ PipelineProtein_Imputation_server <- function(id,
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                   grp = DaparToolshed::design.qf(rv.custom$dataIn1)$Condition,
                   K = rv.widgets$POVImputation_KNN_n);
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
-                rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'K', rv.widgets$POVImputation_KNN_n)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'K', rv.widgets$POVImputation_KNN_n)
 
               },
               None = {}
@@ -710,10 +710,10 @@ PipelineProtein_Imputation_server <- function(id,
                       factor = rv.widgets$MECImputation_detQuant_factor,
                       na.type = 'Missing MEC')
                     
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'qval', rv.widgets$MECImputation_detQuant_quantile / 100)
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'factor', rv.widgets$MECImputation_detQuant_factor)
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'qval', rv.widgets$MECImputation_detQuant_quantile / 100)
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'factor', rv.widgets$MECImputation_detQuant_factor)
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
 
                   },
                   fixedValue = {
@@ -722,9 +722,9 @@ PipelineProtein_Imputation_server <- function(id,
                       fixVal = rv.widgets$MECImputation_fixedValue,
                       na.type = "Missing MEC"
                     )
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'fixVal', rv.widgets$MECImputation_fixedValue)
-                    rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'fixVal', rv.widgets$MECImputation_fixedValue)
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
 
                   },
                   None = {}
@@ -818,6 +818,7 @@ PipelineProtein_Imputation_server <- function(id,
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      #browser()
       req(grepl('Save', btnEvents()))
       
       shiny::withProgress(message = paste0("Save process", id), {

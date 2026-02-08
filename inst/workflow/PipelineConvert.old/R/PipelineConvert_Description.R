@@ -143,7 +143,7 @@ PipelineConvert_Description_server <- function(id,
       rv$dataIn <- MultiAssayExperiment::MultiAssayExperiment()
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      browser()
+      #browser()
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED

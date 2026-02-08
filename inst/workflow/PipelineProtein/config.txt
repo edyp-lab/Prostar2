@@ -16,7 +16,9 @@ download_dataset: Prostar2
 build_report: Prostar2
 addDatasets: Prostar2
 keepDatasets: Prostar2
-
+InitializeHistory: Prostar2
+Add2History: Prostar2
+GetHistory: Prostar2
 
 
 # UI options

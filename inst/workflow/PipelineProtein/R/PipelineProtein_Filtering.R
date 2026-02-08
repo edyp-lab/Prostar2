@@ -281,7 +281,7 @@ PipelineProtein_Filtering_server <- function(id,
       )
       
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
@@ -303,7 +303,6 @@ PipelineProtein_Filtering_server <- function(id,
           uiOutput(ns('qMetacell_Filter_DT_UI')),
           uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
           uiOutput(ns('Cellmetadatafiltering_plots_ui'))
-          #uiOutput(ns('show_example_ui'))
         )
       )
     })
@@ -409,11 +408,8 @@ PipelineProtein_Filtering_server <- function(id,
       # Add params
       
       query <- rv.custom$funFilter()$value$ll.query
-      #i <- length(rv.custom$dataIn1)
-      #.history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
-      #.history[[paste0('query_', length(.history))]] <- query
       
-      rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Cellmetadatafiltering', 'query', query)
+      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Cellmetadatafiltering', 'query', query)
       DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']])
         ,rv.custom$history)
     })
@@ -664,8 +660,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     GuessIndices <- reactive({
       req(rv.custom$Variablefiltering_funFilter)
-      print("guesswhat")
-      
+       
       tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv.custom$dataIn2,
         i = length(rv.custom$dataIn2),
@@ -756,16 +751,12 @@ PipelineProtein_Filtering_server <- function(id,
         req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
         req(rv.custom$dataIn2)
         
-        #rv.custom$indices <- GuessIndices()
-        
-        
         tmp <- DaparToolshed::filterFeaturesOneSE(
           object = rv.custom$dataIn2,
           i = length(rv.custom$dataIn2),
           name = paste0("variableFiltered", MagellanNTK::Timestamp()),
           filters = rv.custom$Variablefiltering_funFilter$ll.var
         )
-        #indices <- rv.custom$Variablefiltering_funFilter$ll.indices
         
         # Add infos
         
@@ -800,8 +791,7 @@ PipelineProtein_Filtering_server <- function(id,
         
         query <- rv.custom$Variablefiltering_funFilter$ll.query
         i <- length(rv.custom$dataIn2)
-        #.history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
-        rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'Filtering', 'Variable filtering', 'query', rv.custom$Variablefiltering_ll.query)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variable filtering', 'query', rv.custom$Variablefiltering_ll.query)
         
         DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]),
           rv.custom$history)
@@ -863,20 +853,22 @@ PipelineProtein_Filtering_server <- function(id,
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
-        if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
-          SummarizedExperiment::assays(dataIn()))))
-          shinyjs::info(btnVentsMasg)
-        else {
+        # if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
+        #   SummarizedExperiment::assays(dataIn()))))
+        #   shinyjs::info(btnVentsMasg)
+        # else {
           # Rename the new dataset with the name of the process
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelineProtein'
+          
+          #browser()
           # DO NOT MODIFY THE THREE FOLLOWINF LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
           #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({rv$dataIn}))
-        }
+        #}
       })
     })
     # <<< END ------------- Code for step 3 UI---------------

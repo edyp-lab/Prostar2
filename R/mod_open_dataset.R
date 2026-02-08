@@ -258,6 +258,8 @@ open_dataset_server <- function(
           error = function(e) {return(NULL)}
         )
       }
+
+        
       dataOut$dataset <- rv.custom$dataRead
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$name <- rv.custom$name
