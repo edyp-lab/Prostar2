@@ -112,11 +112,11 @@ PipelineConvert_Description_server <- function(id,
       MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
-    observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
-      #browser()
-      print(rv.custom$result_open_dataset()$trigger)
-      print(rv.custom$result_open_dataset()$dataset)
-    })
+    # observeEvent(rv.custom$result_open_dataset()$trigger, ignoreNULL = FALSE, {
+    #   #browser()
+    #   print(rv.custom$result_open_dataset()$trigger)
+    #   print(rv.custom$result_open_dataset()$dataset)
+    # })
     
     
     output$Description_infos_dataset_UI <- renderUI({
@@ -143,7 +143,7 @@ PipelineConvert_Description_server <- function(id,
       rv$dataIn <- MultiAssayExperiment::MultiAssayExperiment()
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      browser()
+
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- stepStatus$VALIDATED

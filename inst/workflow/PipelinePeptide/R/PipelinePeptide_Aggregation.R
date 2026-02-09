@@ -16,25 +16,15 @@
 #' the code for the process `ProcessPeptide` which is part of the pipeline called `PipelinePeptide`.
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
-#' library(DaparToolshed)
-#' library(omXplore)
-#' library(shiny)
-#' library(waiter)
-#' library(shinyjs)
-#' library(shinyBS)
-#' library(shinydashboard)
-#' library(shinydashboardPlus)
-#' library(highcharter)
-#' library(Prostar2)
-#' data(Exp1_R25_pept, package = "DaparToolshedData")
-#' obj <- Exp1_R25_pept
-#' # Simulate imputation of missing values
-#' obj <- NAIsZero(obj, 1)
+#' data(Exp2_R100_pept, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' proc_workflowApp("PipelinePeptide_Aggregation", path, dataIn = obj)
+#' shiny::runApp(proc_workflowApp("PipelinePeptide_Aggregation", path, dataIn = Exp2_R100_pept))
 #' }
+#' 
+#' @importFrom QFeatures addAssay removeAssay
+#' @import DaparToolshed
 #' 
 #' @rdname PipelinePeptide
 #' @export
@@ -82,9 +72,11 @@ PipelinePeptide_Aggregation_ui <- function(id){
 #' @rdname PipelinePeptide
 #' 
 #' @import foreach
+#' @importFrom stats setNames rnorm
+#' @import DaparToolshed
+#' @importFrom shinyjs useShinyjs
 #' 
 #' @export
-#' @importFrom DaparToolshed typeDataset
 #' 
 PipelinePeptide_Aggregation_server <- function(id,
   dataIn = reactive({NULL}),
@@ -112,6 +104,7 @@ PipelinePeptide_Aggregation_server <- function(id,
   rv.custom.default.values <- list(
     result_open_dataset = reactive({NULL}),
     
+    history = MagellanNTK::InitializeHistory(),
     nbEmptyLines = NULL,
     temp.aggregate = NULL,
     AggregProtStatsPept = NULL,
@@ -138,11 +131,11 @@ PipelinePeptide_Aggregation_server <- function(id,
     eval(str2expression(core.code))
     add.resourcePath()
     
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
-    
-    
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -152,16 +145,18 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
-        content = tagList(
-          if (file.exists(file))
-            includeMarkdown(file)
-          else
-            p('No Description available')
+        sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
+        ),
+        content = div(id = ns('div_content'),
+                      #div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
+                      if (file.exists(file))
+                        includeMarkdown(file)
+                      else
+                        p('No Description available')
         )
       )
     })
-    
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
@@ -169,17 +164,24 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       rv$dataIn <- dataIn()
       
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+      if(!is.null(rv.custom$result_open_dataset()$dataset)) {
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset}
+      
+      shiny::withProgress(message = paste0("xxx process", id), {
+        shiny::incProgress(0.5)
+      
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+      })
     })
     
     
-    # >>>
-    # >>> START ------------- Code for Aggregation UI---------------
-    # >>> 
-    
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #-----------------------------AGGREGATION-----------------------------------
+    #
+    ###########################################################################-
     output$Aggregation <- renderUI({
       shinyjs::useShinyjs()
       
@@ -208,7 +210,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation_warning_ui <- renderUI({
       req(rv$dataIn)
       
-      .data <- last_assay(rv$dataIn)
+      .data <- DaparToolshed::last_assay(rv$dataIn)
       m <- DaparToolshed::match.metacell(
         DaparToolshed::qMetacell(.data),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
@@ -228,7 +230,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       req(rv$dataIn)
       
       .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
-      rv.custom$nbEmptyLines <- getNumberOfEmptyLines(.data)
+      rv.custom$nbEmptyLines <- DaparToolshed::getNumberOfEmptyLines(.data)
       if (rv.custom$nbEmptyLines > 0) {
         tags$p(style = "color: red;",
                tags$b("Warning:"), "Your dataset contains empty lines (fully filled with missing values). 
@@ -238,12 +240,12 @@ PipelinePeptide_Aggregation_server <- function(id,
     })
     
     output$Aggregation_chooseProteinId_ui <- renderUI({
-      
-      if (!is.null(DaparToolshed::parentProtId(last_assay(rv$dataIn)))) {
+      req(rv$dataIn)
+      if (!is.null(DaparToolshed::parentProtId(DaparToolshed::last_assay(rv$dataIn)))) {
         return(NULL)
       }
       
-      .choices <- colnames(SummarizedExperiment::rowData(last_assay(rv$dataIn)))
+      .choices <- colnames(SummarizedExperiment::rowData(DaparToolshed::last_assay(rv$dataIn)))
       widget <- selectInput(ns("Aggregation_proteinId"),
         "Choose the protein ID",
         choices = c("None", .choices),
@@ -415,9 +417,11 @@ PipelinePeptide_Aggregation_server <- function(id,
                                 )
     )
     output$Aggregation_addRowData_ui <- renderUI({
+      req(rv$dataIn)
+      
       widget <- selectInput(ns("Aggregation_addRowData"), 
                             MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_addRowData")),
-                            colnames(SummarizedExperiment::rowData(last_assay(rv$dataIn))),
+                            colnames(SummarizedExperiment::rowData(DaparToolshed::last_assay(rv$dataIn))),
                             selected = rv.widgets$Aggregation_addRowData,
                             multiple = TRUE
       )
@@ -521,41 +525,47 @@ PipelinePeptide_Aggregation_server <- function(id,
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Aggregation', btnEvents()))
-      req(dataIn())
-      req(rv.custom$nbEmptyLines == 0)
+      #req(dataIn())
       
-      withProgress(message = "", detail = "", value = 0, {
-        incProgress(0.5, detail = "Aggregation processing")
-      # Do some stuff
-      rv.custom$temp.aggregate <- DaparToolshed::RunAggregation(
-        qf = rv$dataIn,
-        includeSharedPeptides = rv.widgets$Aggregation_includeSharedPeptides,
-        operator = rv.widgets$Aggregation_operator,
-        considerPeptides = rv.widgets$Aggregation_considerPeptides,
-        adjMatrix = 'adjacencyMatrix',
-        ponderation = rv.widgets$Aggregation_ponderation,
-        n = rv.widgets$Aggregation_topN,
-        aggregated_col = rv.widgets$Aggregation_addRowData,
-        max_iter = rv.widgets$Aggregation_maxiter
-        )
-     
-      })
-      
-      if(is.null(rv.custom$temp.aggregate$issues)){
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status['Aggregation'] <- MagellanNTK::stepStatus$VALIDATED
+      if (is.null(rv$dataIn) ||
+          rv.custom$nbEmptyLines != 0){
+        shinyjs::info(btnVentsMasg)
       } else {
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status['Aggregation'] <- MagellanNTK::stepStatus$VALIDATED
+        withProgress(message = "", detail = "", value = 0, {
+          incProgress(0.5, detail = "Aggregation processing")
+          # Do some stuff
+          rv.custom$temp.aggregate <- DaparToolshed::RunAggregation(
+          qf = rv$dataIn,
+          includeSharedPeptides = rv.widgets$Aggregation_includeSharedPeptides,
+          operator = rv.widgets$Aggregation_operator,
+          considerPeptides = rv.widgets$Aggregation_considerPeptides,
+          adjMatrix = 'adjacencyMatrix',
+          ponderation = rv.widgets$Aggregation_ponderation,
+          n = rv.widgets$Aggregation_topN,
+          aggregated_col = rv.widgets$Aggregation_addRowData,
+          max_iter = rv.widgets$Aggregation_maxiter
+          )
+       
+  
+          if(is.null(rv.custom$temp.aggregate$issues)){
+            dataOut$trigger <- MagellanNTK::Timestamp()
+            dataOut$value <- NULL
+            rv$steps.status['Aggregation'] <- MagellanNTK::stepStatus$VALIDATED
+          } else {
+            dataOut$trigger <- MagellanNTK::Timestamp()
+            dataOut$value <- NULL
+            rv$steps.status['Aggregation'] <- MagellanNTK::stepStatus$VALIDATED
+          }
+        })
       }
     })
     
     
-    # <<< END ------------- Code for step 1 UI---------------
-
-    # >>> START ------------- Code for step 2 UI---------------
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
@@ -568,23 +578,8 @@ PipelinePeptide_Aggregation_server <- function(id,
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
-    
-    # output$Save_btn_validate_ui <- renderUI({
-    #   tagList(
-    #     MagellanNTK::toggleWidget( 
-    #       actionButton(ns("Save_btn_validate"), "Validate step",
-    #         class = "btn-success"),
-    #       rv$steps.enabled['Save']
-    #     ),
-    #     if (config@mode == 'process' && 
-    #         rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED) {
-    #       download_dataset_ui(ns('createQuickLink'))
-    #     }
-    #   )
-    #   
-    # })
     
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -592,36 +587,37 @@ PipelinePeptide_Aggregation_server <- function(id,
       
       req(rv.custom$temp.aggregate)
       
-      rv.custom$history[['Aggregation_includeSharedPeptides']] <- rv.widgets$Aggregation_includeSharedPeptides
-      rv.custom$history[['Aggregation_operator']] <- rv.widgets$Aggregation_operator
-      rv.custom$history[['Aggregation_considerPeptides']] <- rv.widgets$Aggregation_considerPeptides
-      rv.custom$history[['Aggregation_proteinId']] <- rv.widgets$Aggregation_proteinId
-      rv.custom$history[['Aggregation_topN']] <- as.numeric(rv.widgets$Aggregation_topN)
-      rv.custom$history[['Aggregation_addRowData']] <- rv.widgets$Aggregation_addRowData
-      
-      paramshistory(rv.custom$temp.aggregate[[length(rv.custom$temp.aggregate)]]) <- rv.custom$history
-      
-      rv$dataIn <- rv.custom$temp.aggregate 
-      names(rv$dataIn)[length(rv$dataIn)] <- 'Aggregation'
-      
-      ###TEMPORARY !!!!!!!!!
-      rv$dataIn <- QFeatures::zeroIsNA(rv$dataIn, length(rv$dataIn))
-      rv$dataIn <- QFeatures::filterNA(rv$dataIn, pNA = 0.99, length(rv$dataIn))
-      SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[which(is.na(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])))] <- 0
-      ###!!!!!!!!!
-      
-      # DO NOT MODIFY THE THREE FOLLOWING LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-      
-      Prostar2::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv$dataIn}))
-      
+      shiny::withProgress(message = paste0("Saving process", id), {
+        shiny::incProgress(0.5)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Aggregation', 'Aggregation', 'includeSharedPeptides', rv.widgets$Aggregation_includeSharedPeptides)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Aggregation', 'Aggregation', 'operator', rv.widgets$Aggregation_operator)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Aggregation', 'Aggregation', 'considerPeptides', rv.widgets$Aggregation_considerPeptides)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Aggregation', 'Aggregation', 'proteinId', rv.widgets$Aggregation_proteinId)
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Aggregation', 'Aggregation', 'topN', as.numeric(rv.widgets$Aggregation_topN))
+        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Aggregation', 'Aggregation', 'addRowData', rv.widgets$Aggregation_addRowData)
+        DaparToolshed::paramshistory(rv.custom$temp.aggregate[[length(rv.custom$temp.aggregate)]]) <- rv.custom$history
+        rv$dataIn <- rv.custom$temp.aggregate 
+        names(rv$dataIn)[length(rv$dataIn)] <- 'Aggregation'
+        
+        ###TEMPORARY !!!!!!!!!
+        rv$dataIn <- QFeatures::zeroIsNA(rv$dataIn, length(rv$dataIn))
+        rv$dataIn <- QFeatures::filterNA(rv$dataIn, pNA = 0.99, length(rv$dataIn))
+        SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[which(is.na(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])))] <- 0
+        ###!!!!!!!!!
+        
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
+        
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- rv$dataIn
+        rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+        
+        Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+      })
     })
-    # <<< END ------------- Code for step 2 UI---------------
-
     
+    # <<< end ------------------------------------------------------------------
+
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))

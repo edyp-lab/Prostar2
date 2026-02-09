@@ -351,7 +351,6 @@ PipelinePeptide_HypothesisTest_server <- function(id,
       .style <- "align: center; display:inline-block; vertical-align: middle;
       padding-right: 50px; padding-bottom: 50px;"
       
-      #browser()
       widget <- lapply(seq_len(rv.custom$n), function(i) {
         ll.conds <- unlist(
           strsplit(rv.custom$listNomsComparaison[i], split = "_vs_")

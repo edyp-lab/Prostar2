@@ -96,15 +96,9 @@ open_dataset_server <- function(
     
     
     observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      #browser()
-      
       lapply(names(rv.widgets), function(x){
         rv.widgets[[x]] <- widgets.default.values[[x]]
       })
-      
-      # lapply(names(rv.custom), function(x){
-      #   rv.custom[[x]] <- rv.custom.default.values[[x]]
-      # })
       
       rv.custom$dataRead <- NULL
       rv.custom$remoteReset <- remoteReset()
@@ -235,7 +229,6 @@ open_dataset_server <- function(
 
     
     observeEvent(input$file,{
-      #browser()
       rv.widgets$file <- input$file
       rv.custom$dataRead <- NULL
       tryCatch({
@@ -258,6 +251,8 @@ open_dataset_server <- function(
           error = function(e) {return(NULL)}
         )
       }
+
+      
       dataOut$dataset <- rv.custom$dataRead
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$name <- rv.custom$name
@@ -294,7 +289,6 @@ open_dataset_server <- function(
     
     output$Description_infos_dataset_UI <- renderUI({
       
-     # browser()
       req(rv.custom$dataRead)
       
       infos_dataset_server(

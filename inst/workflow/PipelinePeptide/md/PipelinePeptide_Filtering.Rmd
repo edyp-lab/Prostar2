@@ -1,17 +1,16 @@
 ---
 title: "Workflow Peptide: Filtering"
 abstract: >
-  This page describes the computations done with Filtering.
+  The page describe the Filtering step of the Peptide Worflow.
 
 output:
     BiocStyle::html_document:
         highlight: tango
         toc: false
         number_sections: FALSE
-date: 30 mai 2024
+date: 27 January 2026
 link-citations: true
 ---
-
 # Filtering
 
 The `Filtering` step aims to remove peptides irrelevant to the analysis. Some peptides may correspond to contaminants or decoy sequences, while others may contain too many missing values to be reliably quantified. Filtering is performed using the quantitative data tags (`Cell metadata filtering`) or the metadata, which include all non-quantitative variables from the original dataset (`Variable filtering`). 
@@ -24,11 +23,11 @@ This step is based on defining queries based on user-selected parameters, such a
 
 The `Cell metadata filtering` step uses the quantitative data tags, which allows to filter peptides base on the type of value (e.g. missing values). For more information about these tag and how they are created, please refer to the FAQ. 
 
-The left side of the interface allows you to select the settings for the filters to be created.
+The left side of the interface allows you to select the settings for the filters to be created. To visualize the effect of the filtering options without applying the query, click on `Preview`. A window will open containing the quantitative dataset with greyed out lines corresponding to the peptides that the options selected would filter out. Once pleased with the selected options, click `Add filter` to apply the query to the data.
 The table in the middle summarizes all the filters applied, as well as the number of peptides removed by each of them. Each filter is applied using the data resulting from the previous query. 
 When a tag is selected, graphs describing the distribution of values associated with this tag in the different samples and conditions appear below the table.
 
-##### Details of settings :
+##### Description of parameters and options :
 ###### **`Tag tree`**
 At first, the only parameter shown is the tag tree. Click on it to open a window where you can select the tags to use for the desired query. At least one tag must be selected to access the other settings.
 The buttons at the top of the window allow you to choose between selecting a single tag at a time, an entire branch at once, or multiple tags regardless of their branch. Then click on the button to the left of each tag you want to select.
@@ -39,159 +38,82 @@ This allows to choose whether the lines identified by the query are to be kept o
 Either `Delete` to remove the peptides identified, or `Keep` to keep them and instead removes all those that do not match the query.
 
 ###### **`Scope`**
-This parameter allows you to define how to take into account the tags chosen within a given peptide.
+This parameter defines how the selected tags are taken into account within a given peptide.
 The possible options are as follows:
 
 - `None` : No filter is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
-- `Whole Line` : Peptides containing only the selected tags. As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `Whole Line` : Applies to peptides containing only the selected tags. As no other parameters are needed for this option, no additional settings are displayed upon selection.
 - `Whole Matrix` : Takes into account tags across all conditions for a given peptide.
+- `For every condition` : The filter only applies if all criteria are met in every conditions without exception.
+- `At least one condition` : The filter only applies if all criteria are met in at least one condition.
 
+###### **`Operator`**
+This specifies the algebric operator used to select lines associated with the threshold value.
+The possible options are as follows:
 
-- `For every condition` : 
+- `<=` : Less than or equal to threshold value.
+- `<` : Stricly less than threshold value.
+- `>=` : Greater than or equal to threshold value.
+- `>` : Stricly greater than threshold value.
+- `==` : Equal to threshold value.
+- `!=` : Not equal to threshold value.
 
-peptides that contain fewer non-missing values in each condition than a user-defined threshold are removed
+###### **`Threshold Type`**
+This parameter determines the type of the threshold value.
+Either `Count` for an integer, or `Percentage` for a percentage.
 
-For every condition: The lines for which each condition contain less quantitative value than a user-defined threshold are deleted; 
-"Every condition": The concerned lines are those for which each condition contains a certain number of cells with the label of interest. 
+###### **`Threshold`**
+The threshold value to apply for the query. The way the value is selected depends on what was picked for  `Threshold Type`.
+If, for Threshold Type, `Count` is selected, a dropdown-menu proposes a list of integers. Values range from 0 to either the number of samples (if `Scope` is set to `Whole Matrix`) or the number of samples from the condition with the fewest samples (if `Scope` is `For every condition` or `At least one condition`).
+Otherwise, if `Percentage` is selected, a slider is used to select a percentage value ranging from 0 to 100.
 
-- `At least one condition` : peptides that contain fewer non-missing values in at least one condition than a user-defined threshold are suppressed
-
-At least one condition: The lines for which at least one condition contain less quantitative value than a user-defined threshold are deleted.
-"At least one condition": The concerned lines are those for which at least one condition contains a certain number of cells with the label of interest.
-
-
-
-
-###### Operator
-
-
-###### Threshold Type
-
-
-###### Threshold
-
-
-
-
-
-
-2. On the first tab (called "Missing values", see Figure 5), select among the various options which
-peptides should be filtered out or not. The options are the following:
- None: No filtering, the quantitative data is left unchanged (Note 19).
- Whole Matrix: peptides that contain in the quantitative dataset (across all conditions) fewer
-non-missing values than a user-defined threshold are deleted;
- For every condition: peptides that contain fewer non-missing values in each condition than a
-user-defined threshold are removed;
- At least one condition: peptides that contain fewer non-missing values in at least one
-condition than a user-defined threshold are suppressed;
-3. Visualize the effect of the filtering options without changing the current dataset by clicking on
-"Perform filtering". If the filtering does not produce the expected effect, test another one. To do
-so, simply choose another method in the list and click again on "Perform filtering". The plots are
-automatically updated. This action does not modify the dataset but offers a preview of the
-filtered data. Iterate this step as long as necessary.
-
-(c) The Scope menu allows to consider either the entire experimental design, or to apply the filtering
-query on each group of samples (condition) separately. The available scopes are the following:
-"None": No filtering, the dataset is left unchanged, so directly go to next step String-based filtering (see
-Subheading 3.6, Step 3). "Whole matrix": The lines (across all conditions) which cell metadata
-contain a certain number of labels fitting with the user-defined formula are flagged. "Whole line":
-lines containing only the labels referred to in the queries are concerned. This is a special case of
-the "Whole matrix" scope leading to shortcut queries (e.g., to straightforwardly remove lines with
-only missing values). "Every condition": The concerned lines are those for which each condition
-contains a certain number of cells with the label of interest. "At least one condition": The
-concerned lines are those for which at least one condition contains a certain number of cells with the
-label of interest.
-(d) Whenever a scope is selected (except for the "Whole line" option), a series of three dropdown-menus
-are displayed to refine the query by setting conditions on the number of labels: Nature of the threshold
-allows to choose whether to select lines on the basis of an absolute counting, or on a percentage (see
-Note 23). Then, Operator defines the algebric operator used to select lines associated with a threshold
-value ( Threshold ). If the threshold value is a percentage, the value must be a decimal number between
-0 and 1. If it is a count value, the dropdown-menu proposes a list of several integers depending
-on the chosen scope: If the scope is equal to "Whole matrix", then the range of the threshold is
-from 0 to the total number of samples. If the scope is "For each condition" or "At Least One
-Condition", the possible values are the integers between 0 and the minimum amount of samples in
-all the conditions (i.e., the number of samples in the “smallest” condition).
-(e) Clicking on Preview filtering button displays a popup window showing the quantitative table of a random
-subset of the dataset (see Figure 10). This can be useful to better understand the behavior of the fitlers.
-(f) Visualize the effect of the filtering options without changing the current dataset by clicking on
-Perform filtering ; the barplots are the same as in the tab Descriptive Statistics Quantification nature (see
-Subheading 3.4). If the filtering does not produce the expected effect, test another one. To do so,
-simply choose another method in the list and click again on Perform filtering . The plots are automatically
-updated. This action does not modify the dataset but offers a preview of the filtered data. Iterate thisstep as long as necessary. Each time a preview is run, a short summary is added in the table above the
-plots.
-
-
-
-
-
+***
 
 ### Variable filtering
 
-Column filtering
- metadata, which include all non-quantitative variables from the original dataset (Variable filtering). 
+The `Variable filtering` step uses the dataset metadata, which include all non-quantitative variables from the original dataset.
+
+The left side of the interface allows you to select the settings for the filters to be created. Once pleased with the selected options, click `Add filter` to apply the query to the data.
+The table in the middle summarizes all the filters applied, as well as the number of peptides removed by each of them. Each filter is applied using the data resulting from the previous query.
 
 ##### Details of settings :
 ###### **`Type of filter operation`**
 This allows to choose whether the lines identified by the query are to be kept or deleted. 
-Either `Delete` to remove the peptides identified, or `Keep` to keep them and instead removes all those that do not match the query.
+Only `Delete` is available.
 
 ###### **`Column name`**
-
+This parameter specifies the column to be used for the query. A dropdown-menu containing the name of all metadata columns allows the selection.
+No filter can be applied if `None` is selected.
 
 ###### **`Operator`**
+This specifies the operator used to select lines associated with the threshold value. The proposed operator are differents whether the column selected contains numeric data or strings.
 
+*For numeric data :*
+
+- `None` : No filter is applied.
+- `<=` : Less than or equal to the specified value.
+- `<` : Stricly less than the specified value.
+- `>=` : Greater than or equal to the specified value.
+- `>` : Stricly greater than the specified value.
+- `==` : Equal to the specified value.
+- `!=` : Not equal to the specified value.
+
+*For strings :*
+
+- `None` : No filter is applied.
+- `==` : Identical to the specified value.
+- `!=` : Different from the specified value.
+- `startsWith` : String starting with the specified value.
+- `endsWith` : String ending with the specified value.
+- `contains` : String containing the specified value.
 
 ###### **`Value`**
+The value used to apply the query. If the column selected contains numeric data, the value should be numerical as well. Otherwise, it can be either a string or numerical.
 
+***
 
+### Save
 
-
-
-############################################################################################################
-4. Move on to the second tab (called "String based filtering"), where it is possible to filter out
-peptides according to information stored in the metadata.
-5. Among the columns constituting the peptide metadata listed in the drop-down menu, select the
-one containing the information (Note 20) of interest (for instance, “Contaminant” or “Reverse”,
-Note 21). Then, specify in each case the prefix chain of characters that identifies the peptides to
-filter (Note 22).
-6. Click on "Perform " to remove the corresponding peptides. A new line appears in the table listing
-all the filters that have been applied.
-7. If another filter must be applied, go back to Step 4.
-8. Once all the filters have been applied, move on to the last tab (called "Visualize and Validate") to
-check the set of filtered out peptides. This visualization tools works similarly as the Data explorer
-(see Section 3.4, Step 4).
-9. Finally, click on "Save filtered dataset". The information related to the type of filtering as well as
-to the chosen options appears in the Session log tab (“Session logs” tab from the “Session logs”
-option in the “Data manager” menu).
-############################################################################################################
-3. Move on to the second tab ( String-based filtering ), where it is possible to filter out peptides according to
-information stored as alpha-numerical strings in the peptide metadata (see Note 24):
-(a) Among the columns constituting the peptide metadata listed in the dropdown-menu, select the one
-containing the information (see Note 25) of interest, e.g., "Contaminant" or "Reverse", (see Note
-26). Then, specify in each case the prefix chain of characters that identifies the peptides to filter (see
-Note 27).
-(b) Click on Perform to remove the corresponding peptides. A new line appears in the table listing all the
-filters that have been applied (see Figure 9).
-(c) If other filters are necessary, iterate the above sub-steps.
-4. Move on to the third tab ( Numerical filtering ), where it is possible to filter out peptides according to information
-stored as numerical values in the peptide metadata:
-(a) As for the filter on the first tab, fill the dropdown-menus to built a query that select the lines concerned
-by the filter. The first one lists the name of the columns in the metadata and tries to guess the one with
-numerical values.
-(b) Click on Perform to remove the corresponding peptides. A new line appears in the table listing all the
-filters that have been applied.
-(c) If other filters are necessary, iterate the above sub-steps.
-5. Once all the filters have been applied, move on to the last tab ( Visualize and Validate ) to check the set of
-filtered out peptides. This visualization tools works similarly as the Data explorer (see Subheading 3.4, Step
-3).
-6. Finally, click on Save filtered dataset . The new dataset is accessible and referred as "Filtered.peptide"
-in the version dropdown-menu (see Subheading 3.7)
-############################################################################################################
-To visualize the effect of the filtering options (without saving the changes or impacting the current dataset), just click on . If the filtering does not produce the expected effect, it is possible to test another one. To do so, one simply has to choose another method in the list and click again on . The plots are automatically updated. This action does not modify the dataset but offers a preview of the filtered data. The user can visualize as many times he/she wants several filtering options.
-
-Afterward, proceed to the , where it is possible to filter out proteins according to information stored in the metadata. To do so: Among the columns constituting the protein metadata listed in the drop-down menu, select the one containing the information of interest (for instance, Contaminant or Reverse). Then, specify in each case the prefix chain of characters that identifies the proteins to filter. Click on to remove the corresponding proteins. A new line appears in the table listing all the filters that have been applied. If other string-based filters must be applied, iterate the same process as many times as necessary.
-
-Once the filtering is appropriately tuned,go to the last tab (called ) (see Figure~), to visualize the set of analytes that have been filtered. Finally, click on . A new dataset is created; it becomes the new current dataset and its name appears in the dropdown menu upper right corner of the screen. All plots and tables available in are automatically updated.
-############################################################################################################
-To apply a filter based on tags, the FunctionFilter() function should be used. The functions QFeatures::filterFeature() and QFeatures::VariableFilter() can be used to create filters from metadata.
-Doing so creates the filter but does not apply them to the data. All created filters can be applied at once using the filterFeaturesOneSE() function, which will perform filtering on the assay indicated by i and create a new assay with the filtered peptides.
+Click on `Run` on the left side to validate the step. 
+The filtered dataset can be downloaded through the `xlsx` or `qf` button, depending on the desired file type.
+It is possible to visualize the filtered data, as well as viewing all informations related to the filters applied, by clicking the `EDA` button on the right side of the timeline.

@@ -268,7 +268,6 @@ mod_tracker <- function(dataIn) {
     )
 
     observeEvent(rv$res()$trigger, {
-      # browser()
       print(rv$res()$value)
     })
   }

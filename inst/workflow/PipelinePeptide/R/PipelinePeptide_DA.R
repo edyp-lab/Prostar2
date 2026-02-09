@@ -219,7 +219,6 @@ PipelinePeptide_DA_server <- function(id,
       
       rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
       rv.widgets$Pairwisecomparison_tooltipInfo <- idcol(rv$dataIn[[length(rv$dataIn)]])
-      #browser()
       
       # Get logfc threshold from Hypothesis test dataset
       .se <- rv$dataIn[[length(rv$dataIn)]]
@@ -638,7 +637,7 @@ PipelinePeptide_DA_server <- function(id,
     
     
     histPValue <- reactive({
-      #browser()
+
       req(rv.custom$resAnaDiff)
       req(rv.custom$pi0)
       req(rv.widgets$Pvaluecalibration_nBinsHistpval)

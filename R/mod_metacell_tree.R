@@ -116,7 +116,8 @@ mod_metacell_tree_server <- function(
       tags = NULL,
       mapping = NULL,
       bg_colors = NULL,
-      autoChanged = FALSE
+      autoChanged = FALSE, 
+      tmpbtnval = ifelse(is.null(input$openModalBtn), 0, input$openModalBtn)
     )
 
 
@@ -159,10 +160,13 @@ mod_metacell_tree_server <- function(
 
 # 
     observeEvent(input$openModalBtn, {
-      
-      #browser()
       req(dataIn())
-
+      req(input$openModalBtn != rv$tmpbtnval)
+      rv$tmpbtnval <- input$openModalBtn
+      init_tree()
+      update_CB()
+      updateRadioButtons(session, "checkbox_mode", selected = "single")
+      rv$autoChanged <- FALSE
 
     #observeEvent(input$openModalBtn, {
     #output$modaltree <- renderUI({
@@ -239,12 +243,6 @@ mod_metacell_tree_server <- function(
       dataOut$values <- NULL
     })
 
-    observeEvent(input$openModalBtn, {
-      init_tree()
-      update_CB()
-      updateRadioButtons(session, "checkbox_mode", selected = "single")
-      rv$autoChanged <- FALSE
-    })
 
 
     # When OK button is pressed, attempt to load the data set. If successful,

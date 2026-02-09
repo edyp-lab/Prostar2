@@ -510,7 +510,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       names_before <- rownames(assay_before)
       names_after <- rownames(assay_after)
 
-      #browser()
       indices <- 1:length(names_after)
       if (rv.custom$ll.fun@params$cmd == 'delete') {
         diff <- setdiff(names_before, names_after)

@@ -152,7 +152,6 @@ infos_dataset_server <- function(
 
     Get_QFeatures_summary <- reactive({
       req(rv$dataIn)
-      #browser()
       nb_assay <- length(rv$dataIn)
       names_assay <- unlist(names(rv$dataIn))
       pipeline <- S4Vectors::metadata(rv$dataIn)$name.pipeline
@@ -192,7 +191,7 @@ infos_dataset_server <- function(
 
 
       .se <- rv$dataIn[[input$selectInputSE]]
-req(.se)
+      req(.se)
       typeOfData <- DaparToolshed::typeDataset(.se)
       nLines <- nrow(.se)
       .nNA <- QFeatures::nNA(.se)

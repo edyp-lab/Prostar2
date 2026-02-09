@@ -168,7 +168,6 @@ mod_mv_plots_server <- function(
         # renderImage
         # sends it, because deleteFile=TRUE.
         outfile <- tempfile(fileext = ".png")
-        # browser()
         grDevices::png(outfile)
         wrapper.mvImage(obj = data(), group = rv$grp)
         grDevices::dev.off()

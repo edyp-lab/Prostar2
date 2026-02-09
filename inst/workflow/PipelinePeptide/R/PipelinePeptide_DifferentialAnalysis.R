@@ -32,33 +32,23 @@
 #' 
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
-#' library(MagellanNTK)
-#' library(highcharter)
 #' library(DaparToolshed)
-#' library(Prostar2)
-#' library(omXplore)
-#' data(Exp1_R25_prot, package = "DaparToolshedData")
-#' obj <- Exp1_R25_prot
+#' data(Exp2_R100_pept, package = "DaparToolshedData")
+#' obj <- Exp2_R100_pept
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
-#' qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
-#' sTab <- MultiAssayExperiment::colData(obj)
-#' limma <- limmaCompleteTest(qData, sTab)
-#' df <- cbind(limma$logFC, limma$P_Value)
-#' new.dataset <- obj[[length(obj)]]
-#' DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
-#' obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
 #' shiny::runApp(workflowApp("PipelinePeptide_DifferentialAnalysis", path, dataIn = obj))
 #' }
 #' 
 #' 
-#' @author Samuel Wieczorek
+#' @author Manon Gaudin
 #' 
-#' 
+#' @importFrom QFeatures addAssay removeAssay
+#' @import DaparToolshed
 NULL
 
 #' @rdname PipelinePeptide
@@ -89,9 +79,9 @@ PipelinePeptide_DifferentialAnalysis_ui <- function(id){
 #' @importFrom stats setNames rnorm
 #' @importFrom magrittr "%>%"
 #' @import DaparToolshed
+#' @importFrom shinyjs info useShinyjs
 #' 
 #' @export
-#' @importFrom DaparToolshed typeDataset
 #' 
 PipelinePeptide_DifferentialAnalysis_server <- function(id,
   dataIn = reactive({NULL}),
@@ -103,6 +93,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
+  pkgs.require('magrittr')
   
   pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
@@ -129,7 +120,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   rv.custom.default.values <- list(
     result_open_dataset = reactive({NULL}),
     
-    history = list(),
+    history = MagellanNTK::InitializeHistory(),
     res_pval_FC = NULL,
     res_pval_FC_complete = NULL,
     res_pval_FC_stacked = NULL,
@@ -152,6 +143,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     FDR = NULL
   )
   
+  orangeProstar <- "#E97D5E"
+  
   ###-------------------------------------------------------------###
   ###                                                             ###
   ### ------------------- MODULE SERVER --------------------------###
@@ -160,6 +153,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    pkgs.require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
@@ -172,10 +166,11 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     eval(str2expression(core.code))
     add.resourcePath()
     
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
-    
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 
       #   'md', paste0(id, '.md')))
@@ -205,17 +200,20 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(grepl('Description', btnEvents()))
       req(inherits(dataIn(), 'QFeatures'))
       
-      rv$dataIn <- dataIn()
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        rv$dataIn <- dataIn()
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+      })
     })
 
-    # >>>
-    # >>> START ------------- Code for step 1 UI---------------
-    # >>> 
-    
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #--------------------------------SCENARIO-----------------------------------
+    #
+    ###########################################################################-
     output$Scenario <- renderUI({
       shinyjs::useShinyjs()
       
@@ -269,56 +267,62 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Scenario', btnEvents()))
       req(rv$dataIn)
-      req(rv.widgets$Scenario_choice %in% c("Contrast", "Cluster", "Aggregation"))
-      req(rv.widgets$Scenario_method %in% c("ANOVA", "Limma"))
       
-      if (rv.widgets$Scenario_choice == "Contrast"){
-        if (rv.widgets$Scenario_method == "ANOVA"){
-          anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
-          rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
+      if (is.null(rv$dataIn) ||
+          !(rv.widgets$Scenario_choice %in% c("Contrast", "Cluster", "Aggregation")) ||
+          !(rv.widgets$Scenario_method %in% c("ANOVA", "Limma"))) {
+        shinyjs::info(btnVentsMasg)
+        
+      } else {
+        if (rv.widgets$Scenario_choice == "Contrast"){
+          if (rv.widgets$Scenario_method == "ANOVA"){
+            anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
+            rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
+            
+          }else if (rv.widgets$Scenario_method == "Limma"){
+            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), design.qf(rv$dataIn), comp.type="OnevsOne")
+          }
           
-        }else if (rv.widgets$Scenario_method == "Limma"){
-          rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), design.qf(rv$dataIn), comp.type="OnevsOne")
+          rv.custom$res_pval_FC_stacked$logFC <- data.frame(Stacked_logFC = unlist(rv.custom$res_pval_FC$logFC, use.names = FALSE))
+          rv.custom$res_pval_FC_stacked$P_Value <- data.frame(Stacked_pval = unlist(rv.custom$res_pval_FC$P_Value, use.names = FALSE))
+          rv.custom$Scenario_constratnames <- sub("_logFC$", "", colnames(rv.custom$res_pval_FC$logFC))
+          
+        }else if (rv.widgets$Scenario_choice == "Cluster"){
+          if (rv.widgets$Scenario_method == "ANOVA"){
+            anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
+            rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "Omnibus")
+            
+          }else if (rv.widgets$Scenario_method == "Limma"){
+            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), design.qf(rv$dataIn), comp.type="anova1way")
+          }
+          
+        }else if (rv.widgets$Scenario_choice == "Aggregation"){
+          if (rv.widgets$Scenario_method == "ANOVA"){
+            anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
+            rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
+            
+          }else if (rv.widgets$Scenario_method == "Limma"){
+            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), design.qf(rv$dataIn), comp.type="OnevsOne")
+          }
         }
         
-        rv.custom$res_pval_FC_stacked$logFC <- data.frame(Stacked_logFC = unlist(rv.custom$res_pval_FC$logFC, use.names = FALSE))
-        rv.custom$res_pval_FC_stacked$P_Value <- data.frame(Stacked_pval = unlist(rv.custom$res_pval_FC$P_Value, use.names = FALSE))
-        rv.custom$Scenario_constratnames <- sub("_logFC$", "", colnames(rv.custom$res_pval_FC$logFC))
+        .history <- rv.custom$history[['Scenario']]
+        .history[['Scenario']] <- rv.widgets$Scenario_choice
+        .history[['Method']] <- rv.widgets$Scenario_method
+        rv.custom$history[['Scenario']] <- .history
         
-      }else if (rv.widgets$Scenario_choice == "Cluster"){
-        if (rv.widgets$Scenario_method == "ANOVA"){
-          anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
-          rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "Omnibus")
-          
-        }else if (rv.widgets$Scenario_method == "Limma"){
-          rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), design.qf(rv$dataIn), comp.type="anova1way")
-        }
-        
-      }else if (rv.widgets$Scenario_choice == "Aggregation"){
-        if (rv.widgets$Scenario_method == "ANOVA"){
-          anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
-          rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
-          
-        }else if (rv.widgets$Scenario_method == "Limma"){
-          rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), design.qf(rv$dataIn), comp.type="OnevsOne")
-        }
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status["Scenario"] <- MagellanNTK::stepStatus$VALIDATED
       }
-      
-      .history <- rv.custom$history[['Scenario']]
-      .history[['Scenario']] <- rv.widgets$Scenario_choice
-      .history[['Method']] <- rv.widgets$Scenario_method
-      rv.custom$history[['Scenario']] <- .history
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["Scenario"] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
-    # <<< END ------------- Code for step 1 UI---------------
-    
-    
-    # >>>> -------------------- STEP 2 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #-----------------------------FOLD CHANGE-----------------------------------
+    #
+    ###########################################################################-
     output$Foldchange <- renderUI({
       shinyjs::useShinyjs()
       
@@ -407,8 +411,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         tagList(
           uiOutput(ns('Foldchange_warning_conditions_ui')),
           uiOutput(ns("Foldchange_swapConds_ui")),
-          highchartOutput(ns("Foldchange_Plot")),
-          highchartOutput(ns("FoldchangeStacked_Plot"))
+          highcharter::highchartOutput(ns("Foldchange_Plot")),
+          highcharter::highchartOutput(ns("FoldchangeStacked_Plot"))
         )
       }
     })
@@ -445,91 +449,103 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Foldchange', btnEvents()))
       
-      if (rv.widgets$Foldchange_contrastchoice == "Stacked"){
-        rv.custom$contrast_list <- rep(rv.custom$Scenario_constratnames,  
-                                       rep(nrow(rv$dataIn[[length(rv$dataIn)]]),length(colnames(rv.custom$res_pval_FC$logFC))))
-        rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
-        rv.custom$res_pval_FC <- rv.custom$res_pval_FC_stacked
-        rv.custom$comparison <- "stacked"
+      if (is.null(rv$dataIn)) {
+        shinyjs::info(btnVentsMasg)
         
-        
-        all_conditions <- DaparToolshed::design.qf(rv$dataIn)$Condition
-        max_sample_cond <- max(unlist(lapply(unique(all_conditions), function(x) length(which(all_conditions == x)))))
-        rv.custom$cond <- rep(c("cond1", "cond2"), c(max_sample_cond, max_sample_cond))
-        
-        assay_contr_list <- list()
-        meta_contr_list <- list()
-        for (contraste_name in rv.custom$Scenario_constratnames){
-          names_condition <- unlist(strsplit(as.character(contraste_name), "_vs_"))
+      } else {
+        if (rv.widgets$Foldchange_contrastchoice == "Stacked"){
+          rv.custom$contrast_list <- rep(rv.custom$Scenario_constratnames,  
+                                         rep(nrow(rv$dataIn[[length(rv$dataIn)]]),length(colnames(rv.custom$res_pval_FC$logFC))))
+          rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
+          rv.custom$res_pval_FC <- rv.custom$res_pval_FC_stacked
+          rv.custom$comparison <- "stacked"
           
-          assay_list <- list()
-          meta_list <- list()
-          for (contrast_cond in names_condition){
-            index_cond <- which(all_conditions == contrast_cond)
-            assay_cond <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, index_cond]
-            meta_cond <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])$qMetacell[, index_cond]
+          
+          all_conditions <- DaparToolshed::design.qf(rv$dataIn)$Condition
+          max_sample_cond <- max(unlist(lapply(unique(all_conditions), function(x) length(which(all_conditions == x)))))
+          rv.custom$cond <- rep(c("cond1", "cond2"), c(max_sample_cond, max_sample_cond))
+          
+          assay_contr_list <- list()
+          meta_contr_list <- list()
+          for (contraste_name in rv.custom$Scenario_constratnames){
+            names_condition <- unlist(strsplit(as.character(contraste_name), "_vs_"))
             
-            diff_nb_sample_cond <- max_sample_cond - length(index_cond) 
-            if (diff_nb_sample_cond != 0){
-              add_col <- as.data.frame(matrix(NA, nrow = nrow(assay_cond), ncol = diff_nb_sample_cond)) 
-              assay_cond <- cbind(assay_cond, add_col)
-              meta_cond <- cbind(meta_cond, add_col)
+            assay_list <- list()
+            meta_list <- list()
+            for (contrast_cond in names_condition){
+              index_cond <- which(all_conditions == contrast_cond)
+              assay_cond <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, index_cond]
+              meta_cond <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])$qMetacell[, index_cond]
+              
+              diff_nb_sample_cond <- max_sample_cond - length(index_cond) 
+              if (diff_nb_sample_cond != 0){
+                add_col <- as.data.frame(matrix(NA, nrow = nrow(assay_cond), ncol = diff_nb_sample_cond)) 
+                assay_cond <- cbind(assay_cond, add_col)
+                meta_cond <- cbind(meta_cond, add_col)
+              }
+              
+              assay_list[[contrast_cond]] <- assay_cond
+              meta_list[[contrast_cond]] <- meta_cond
             }
+            assay_cond_contr <- do.call(cbind, assay_list)
+            meta_cond_contr <- do.call(cbind, meta_list)
+            colnames(assay_cond_contr) <- paste0("c", rep(1:2, each = max_sample_cond), "_", rep(1:max_sample_cond, times = 2)) 
+            colnames(meta_cond_contr) <- paste0("metacell_", colnames(assay_cond_contr))
             
-            assay_list[[contrast_cond]] <- assay_cond
-            meta_list[[contrast_cond]] <- meta_cond
-          }
-          assay_cond_contr <- do.call(cbind, assay_list)
-          meta_cond_contr <- do.call(cbind, meta_list)
-          colnames(assay_cond_contr) <- paste0("c", rep(1:2, each = max_sample_cond), "_", rep(1:max_sample_cond, times = 2)) 
-          colnames(meta_cond_contr) <- paste0("metacell_", colnames(assay_cond_contr))
+            assay_contr_list[[contraste_name]] <- assay_cond_contr
+            meta_contr_list[[contraste_name]] <- meta_cond_contr
+          } 
+          assay_contr <- do.call(rbind, assay_contr_list)
+          meta_contr <- do.call(rbind, meta_contr_list)
           
-          assay_contr_list[[contraste_name]] <- assay_cond_contr
-          meta_contr_list[[contraste_name]] <- meta_cond_contr
-        } 
-        assay_contr <- do.call(rbind, assay_contr_list)
-        meta_contr <- do.call(rbind, meta_contr_list)
+          rv.custom$push_pval_data <- SummarizedExperiment::SummarizedExperiment(assay_contr)
+          SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- meta_contr
+          DaparToolshed::idcol(rv.custom$push_pval_data) <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
+          SummarizedExperiment::rowData(rv.custom$push_pval_data)[, DaparToolshed::idcol(rv.custom$push_pval_data)] <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])]
+          DaparToolshed::typeDataset(rv.custom$push_pval_data) <- DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+          
+          rv.custom$res_pval_tmp <- rv.custom$res_pval_FC$P_Value
+          
+          .history <- rv.custom$history[['Foldchange']]
+          .history[['Contrast_Type']] <- rv.widgets$Foldchange_contrastchoice
+          .history[['Foldchange_Threshold']] <- rv.widgets$Foldchange_thlogFC
+          rv.custom$history[['Foldchange']] <- .history
+          
+        } else if (rv.widgets$Foldchange_contrastchoice == "Unique") {
+          rv.custom$res_pval_FC$P_Value <- rv.custom$res_pval_FC$P_Value[, paste0(rv.widgets$Foldchange_uniquechoice, "_pval"), FALSE]
+          rv.custom$res_pval_FC$logFC <- rv.custom$res_pval_FC$logFC[, paste0(rv.widgets$Foldchange_uniquechoice, "_logFC"), FALSE]
+          rv.custom$comparison <- rv.widgets$Foldchange_uniquechoice
+          
+          names_condition <- unlist(strsplit(as.character(rv.widgets$Foldchange_uniquechoice), "_vs_"))
+          col_cond <- which(DaparToolshed::design.qf(rv$dataIn)$Condition %in% names_condition)
+          rv.custom$push_pval_data <- rv$dataIn[[length(rv$dataIn)]][, col_cond]
+          SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell[, col_cond]
+          DaparToolshed::idcol(rv.custom$push_pval_data) <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
+          DaparToolshed::typeDataset(rv.custom$push_pval_data) <- DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+          SummarizedExperiment::rowData(rv.custom$push_pval_data)[, DaparToolshed::idcol(rv.custom$push_pval_data)] <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])]
+          rv.custom$cond <- DaparToolshed::design.qf(rv$dataIn)$Condition[col_cond]
+          
+          rv.custom$res_pval_tmp <- rv.custom$res_pval_FC$P_Value
+          
+          .history <- rv.custom$history[['Foldchange']]
+          .history[['Contrast_Type']] <- rv.widgets$Foldchange_contrastchoice
+          .history[['Contrast_Choice']] <- rv.widgets$Foldchange_uniquechoice
+          .history[['Foldchange_Threshold']] <- rv.widgets$Foldchange_thlogFC
+          rv.custom$history[['Foldchange']] <- .history
+        }
         
-        rv.custom$push_pval_data <- SummarizedExperiment::SummarizedExperiment(assay_contr)
-        SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- meta_contr
-        DaparToolshed::typeDataset(rv.custom$push_pval_data) <- DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-        
-        rv.custom$res_pval_tmp <- rv.custom$res_pval_FC$P_Value
-        
-        .history <- rv.custom$history[['Foldchange']]
-        .history[['Contrast_Type']] <- rv.widgets$Foldchange_contrastchoice
-        .history[['Foldchange_Threshold']] <- rv.widgets$Foldchange_thlogFC
-        rv.custom$history[['Foldchange']] <- .history
-        
-      } else if (rv.widgets$Foldchange_contrastchoice == "Unique") {
-        rv.custom$res_pval_FC$P_Value <- rv.custom$res_pval_FC$P_Value[, paste0(rv.widgets$Foldchange_uniquechoice, "_pval"), FALSE]
-        rv.custom$res_pval_FC$logFC <- rv.custom$res_pval_FC$logFC[, paste0(rv.widgets$Foldchange_uniquechoice, "_logFC"), FALSE]
-        rv.custom$comparison <- rv.widgets$Foldchange_uniquechoice
-        
-        names_condition <- unlist(strsplit(as.character(rv.widgets$Foldchange_uniquechoice), "_vs_"))
-        col_cond <- which(DaparToolshed::design.qf(rv$dataIn)$Condition %in% names_condition)
-        rv.custom$push_pval_data <- rv$dataIn[[length(rv$dataIn)]][, col_cond]
-        SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell[, col_cond]
-        rv.custom$cond <- DaparToolshed::design.qf(rv$dataIn)$Condition[col_cond]
-        
-        rv.custom$res_pval_tmp <- rv.custom$res_pval_FC$P_Value
-        
-        .history <- rv.custom$history[['Foldchange']]
-        .history[['Contrast_Type']] <- rv.widgets$Foldchange_contrastchoice
-        .history[['Contrast_Choice']] <- rv.widgets$Foldchange_uniquechoice
-        .history[['Foldchange_Threshold']] <- rv.widgets$Foldchange_thlogFC
-        rv.custom$history[['Foldchange']] <- .history
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status["Foldchange"] <- MagellanNTK::stepStatus$VALIDATED
       }
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["Foldchange"] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
-    # <<< END ------------- Code for step 2 UI---------------
-
-    # >>>> -------------------- STEP 3 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #-----------------------------FINE TUNING-----------------------------------
+    #
+    ###########################################################################-
     output$Finetuning <- renderUI({
       shinyjs::useShinyjs()
       
@@ -552,12 +568,12 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     output$Finetuning_pushpval_ui <- renderUI({
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
-      
+
       req(rv.custom$pushPval_SummaryDT)
       MagellanNTK::format_DT_ui(ns("dt"))
     })
-    
-    MagellanNTK::format_DT_server("dt", 
+
+    MagellanNTK::format_DT_server("dt",
                                   dataIn = reactive({rv.custom$pushPval_SummaryDT}))
     
     output$Finetuning_pushpval_param_ui <- renderUI({
@@ -566,9 +582,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       
       widget <- tagList(
         MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
-        div(
-          mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
-        )
+        Prostar2::mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Finetuning"])
     })
@@ -609,26 +623,28 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     }
 
     observe({
-      req(rv$dataIn)
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
+      req(rv.custom$push_pval_data)
+      req(rv.custom$res_pval_tmp)
+      rv.custom$res_pval_tmp
       
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
-        dataIn = reactive(rv.custom$push_pval_data),
+        dataIn = reactive({rv.custom$push_pval_data}),
         conds = reactive({rv.custom$cond}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
-        operator = reactive({stats::setNames(nm = SymFilteringOperators())}),
-        remoteReset = reactive({remoteReset()}),
+        operator = reactive({stats::setNames(nm = DaparToolshed::SymFilteringOperators())}),
+        remoteReset = reactive({0}),
         is.enabled = reactive({rv$steps.enabled["Finetuning"]})
       )
     })
 
-    observeEvent(req(rv.custom$AnaDiff_indices()$trigger),{
+    observeEvent(req(length(rv.custom$AnaDiff_indices()$value$ll.fun) > 0),{
       req(rv.custom$res_pval_tmp)
       
-      .ind <- rv.custom$AnaDiff_indices()$value$ll.indices
+      .ind <- unlist(rv.custom$AnaDiff_indices()$value$ll.indices)
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
 
       if (length(.ind) > 0 && length(.ind) <= nrow(rv.custom$res_pval_tmp)) {
@@ -637,8 +653,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         }else if (.cmd == 'keep'){
           indices_to_push <- seq_len(nrow(rv.custom$res_pval_tmp))[-(.ind)]
         }
-        
-        rv.custom$res_pval_tmp[indices_to_push, ] <- 1
+        rv.custom$res_pval_tmp[indices_to_push, ] <- 1.00000000001
         nbPushed <- length(indices_to_push)
         
         query <- rv.custom$AnaDiff_indices()$value$ll.query
@@ -719,124 +734,131 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Finetuning', btnEvents()))
       
-      if (rv.widgets$Scenario_choice == "Contrast"){
-        rv.custom$res_pval_FC$P_Value <- rv.custom$res_pval_tmp
+      if (is.null(rv$dataIn)) {
+        shinyjs::info(btnVentsMasg)
         
-      } else if (rv.widgets$Scenario_choice == "Cluster"){
-        rv.custom$comparison <- "omnibus_cluster"
-        
-        conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
-        prot_prof <- switch(rv.widgets$Finetuning_cluster_protprofile,
-               Mean = sapply(unique(conds), function(c) 
-                 rowMeans(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, conds == c, drop = FALSE], 
-                          na.rm = TRUE)),
-               Median = sapply(unique(conds), function(c) 
-                 rowMedians(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, conds == c, drop = FALSE], 
-                          na.rm = TRUE))
-        )
-        
-        if (length(unique(conds)) == 2) {
-          means <- rowMeans(prot_prof) 
-          rv.custom$centered_means <- prot_prof - means 
-          if (rv.widgets$Finetuning_cluster_nbclust == 1){
-            rv.custom$res_clusters <- as.integer(rep_len(1, nrow(prot_prof)))
-          }else{
-            difference <- prot_prof[, 1] - prot_prof[, 2]
-            rv.custom$res_clusters <- as.integer(ifelse(difference > 0, 1, 2))
-          }
-        } else if (length(unique(conds)) > 2) {
-          standards <- prot_prof
-          for (i in 1:nrow(standards)) {
-            standards[i, ] <- (standards[i, ] - mean(standards[i, ], na.rm = TRUE))/sd(standards[i, 
-            ], na.rm = TRUE)
-          }
-          rv.custom$centered_means <- standards
+      } else {
+        if (rv.widgets$Scenario_choice == "Contrast"){
+          rv.custom$res_pval_FC$P_Value <- rv.custom$res_pval_tmp
           
-          rv.custom$res_clusters <- switch(rv.widgets$Finetuning_cluster_method,
-                 affinityProp = {model <- apcluster::apcluster(apcluster::negDistMat(r = 2), 
-                                                               standards)
-                                 clust_num <- 0
-                                 cluster <- rep(0, nrow(standards))
-                                 for (clust in model@clusters){
-                                   clust_num <- clust_num + 1
-                                   cluster[clust] <- clust_num
-                                 }
-                                 cluster
-                 },
-                 affinityPropReduced = {model <- apcluster::apcluster(apcluster::negDistMat(r = 2), 
-                                                                      standards, q = 0)
-                                        clust_num <- 0
-                                        cluster <- rep(0, nrow(standards))
-                                        for (clust in model@clusters){
-                                          clust_num <- clust_num + 1
-                                          cluster[clust] <- clust_num
-                                        }
-                                        cluster
-                 },
-                 kmeans = {
-                   if (is.null(rv.widgets$Finetuning_cluster_nbclust)) {
-                   gap_cluster <- cluster::clusGap(as.matrix(standards), 
-                                                     FUNcluster = stats::kmeans, 
-                                                     nstart = 20, 
-                                                     K.max = 10, 
-                                                     d.power = 2, 
-                                                     B = 500)
-                   best_k <- cluster::maxSE(gap_cluster$Tab[, "gap"],
-                                            gap_cluster$Tab[, "SE.sim"],
-                                            method = "Tibs2001SEmax"
-                   )
-                   cluster <- stats::kmeans(standards,
-                                            centers = best_k,
-                                            nstart = 25)
-                   cluster$cluster
-                 } else if (rv.widgets$Finetuning_cluster_nbclust > 1) {
-                   best_k <- rv.widgets$Finetuning_cluster_nbclust
-                   cluster <- stats::kmeans(standards,
-                                            centers = best_k, 
-                                            nstart = 25)
-                   cluster$cluster
-                 } else { # corresponds to the case k = 1 so no need for clustering
-                   as.integer(rep_len(1, nrow(standards)))
-                 }
-                })
+        } else if (rv.widgets$Scenario_choice == "Cluster"){
+          rv.custom$comparison <- "omnibus_cluster"
+          
+          conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
+          prot_prof <- switch(rv.widgets$Finetuning_cluster_protprofile,
+                 Mean = sapply(unique(conds), function(c) 
+                   rowMeans(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, conds == c, drop = FALSE], 
+                            na.rm = TRUE)),
+                 Median = sapply(unique(conds), function(c) 
+                   rowMedians(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, conds == c, drop = FALSE], 
+                            na.rm = TRUE))
+          )
+          
+          if (length(unique(conds)) == 2) {
+            means <- rowMeans(prot_prof) 
+            rv.custom$centered_means <- prot_prof - means 
+            if (rv.widgets$Finetuning_cluster_nbclust == 1){
+              rv.custom$res_clusters <- as.integer(rep_len(1, nrow(prot_prof)))
+            }else{
+              difference <- prot_prof[, 1] - prot_prof[, 2]
+              rv.custom$res_clusters <- as.integer(ifelse(difference > 0, 1, 2))
+            }
+          } else if (length(unique(conds)) > 2) {
+            standards <- prot_prof
+            for (i in 1:nrow(standards)) {
+              standards[i, ] <- (standards[i, ] - mean(standards[i, ], na.rm = TRUE))/sd(standards[i, 
+              ], na.rm = TRUE)
+            }
+            rv.custom$centered_means <- standards
+            
+            rv.custom$res_clusters <- switch(rv.widgets$Finetuning_cluster_method,
+                   affinityProp = {model <- apcluster::apcluster(apcluster::negDistMat(r = 2), 
+                                                                 standards)
+                                   clust_num <- 0
+                                   cluster <- rep(0, nrow(standards))
+                                   for (clust in model@clusters){
+                                     clust_num <- clust_num + 1
+                                     cluster[clust] <- clust_num
+                                   }
+                                   cluster
+                   },
+                   affinityPropReduced = {model <- apcluster::apcluster(apcluster::negDistMat(r = 2), 
+                                                                        standards, q = 0)
+                                          clust_num <- 0
+                                          cluster <- rep(0, nrow(standards))
+                                          for (clust in model@clusters){
+                                            clust_num <- clust_num + 1
+                                            cluster[clust] <- clust_num
+                                          }
+                                          cluster
+                   },
+                   kmeans = {
+                     if (is.null(rv.widgets$Finetuning_cluster_nbclust)) {
+                     gap_cluster <- cluster::clusGap(as.matrix(standards), 
+                                                       FUNcluster = stats::kmeans, 
+                                                       nstart = 20, 
+                                                       K.max = 10, 
+                                                       d.power = 2, 
+                                                       B = 500)
+                     best_k <- cluster::maxSE(gap_cluster$Tab[, "gap"],
+                                              gap_cluster$Tab[, "SE.sim"],
+                                              method = "Tibs2001SEmax"
+                     )
+                     cluster <- stats::kmeans(standards,
+                                              centers = best_k,
+                                              nstart = 25)
+                     cluster$cluster
+                   } else if (rv.widgets$Finetuning_cluster_nbclust > 1) {
+                     best_k <- rv.widgets$Finetuning_cluster_nbclust
+                     cluster <- stats::kmeans(standards,
+                                              centers = best_k, 
+                                              nstart = 25)
+                     cluster$cluster
+                   } else { # corresponds to the case k = 1 so no need for clustering
+                     as.integer(rep_len(1, nrow(standards)))
+                   }
+                  })
+          }
+          
+          .history <- rv.custom$history[['Clustering']]
+          .history[['Clustering_Method']] <- rv.widgets$Finetuning_cluster_method
+          .history[['Number_of_Clusters']] <- unique(rv.custom$res_clusters)
+          .history[['Protein_Profile_Method']] <- rv.widgets$Finetuning_cluster_protprofile
+          rv.custom$history[['Clustering']] <- .history
+          
+        } else if (rv.widgets$Scenario_choice == "Aggregation") {
+          rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
+          rv.custom$comparison <- "aggregated"
+          nb_contr <- ncol(rv.custom$res_pval_FC$P_Value)
+          
+          if (rv.widgets$Finetuning_aggreg_method == "Most significant FC"){
+            best.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, min)
+            sidak.pval <- 1-(1-best.pval)^nb_contr
+            
+          }else if (rv.widgets$Finetuning_aggreg_method == "Worst FC"){
+            worst.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, max)
+            sidak.pval <- worst.pval^nb_contr
+          }
+          
+          rv.custom$res_pval_FC$P_Value <- sidak.pval
+          
+          .history <- rv.custom$history[['Aggregation']]
+          .history[['Aggregation_Method']] <- rv.widgets$Finetuning_aggreg_method
+          rv.custom$history[['Aggregation']] <- .history
         }
         
-        .history <- rv.custom$history[['Clustering']]
-        .history[['Clustering_Method']] <- rv.widgets$Finetuning_cluster_method
-        .history[['Number_of_Clusters']] <- unique(rv.custom$res_clusters)
-        .history[['Protein_Profile_Method']] <- rv.widgets$Finetuning_cluster_protprofile
-        rv.custom$history[['Clustering']] <- .history
-        
-      } else if (rv.widgets$Scenario_choice == "Aggregation") {
-        rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
-        rv.custom$comparison <- "aggregated"
-        nb_contr <- ncol(rv.custom$res_pval_FC$P_Value)
-        
-        if (rv.widgets$Finetuning_aggreg_method == "Most significant FC"){
-          best.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, min)
-          sidak.pval <- 1-(1-best.pval)^nb_contr
-          
-        }else if (rv.widgets$Finetuning_aggreg_method == "Worst FC"){
-          worst.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, max)
-          sidak.pval <- worst.pval^nb_contr
-        }
-        
-        rv.custom$res_pval_FC$P_Value <- sidak.pval
-        
-        .history <- rv.custom$history[['Aggregation']]
-        .history[['Aggregation_Method']] <- rv.widgets$Finetuning_aggreg_method
-        rv.custom$history[['Aggregation']] <- .history
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status["Finetuning"] <- MagellanNTK::stepStatus$VALIDATED
       }
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["Finetuning"] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
-    # <<< END ------------- Code for step 3 UI---------------
-    
-    # >>>> -------------------- STEP 4 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #--------------------------PVALUE CALIBRATION-------------------------------
+    #
+    ###########################################################################-
     output$Pvaluecalibration <- renderUI({
       shinyjs::useShinyjs()
       
@@ -848,7 +870,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
         ),
         content = tagList(
-          highchartOutput(ns("histPValue")),
+          highcharter::highchartOutput(ns("histPValue")),
           imageOutput(ns("calibrationPlotAll"), height = "800px"),
           imageOutput(ns("calibrationPlot"), height = "400px")
           # p(tags$strong(
@@ -925,7 +947,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           t <- t[which(abs(rv.custom$res_pval_FC$logFC) >= rv.widgets$Foldchange_thlogFC)]
         }
       }
-      toDelete <- which(t == 1)
+      toDelete <- which(t > 1)
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
@@ -958,7 +980,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           t <- t[which(abs(rv.custom$res_pval_FC$logFC) >= rv.widgets$Foldchange_thlogFC)]
         }
       }
-      toDelete <- which(t == 1)
+      toDelete <- which(t > 1)
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
@@ -966,7 +988,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       l <- NULL
       result <- tryCatch(
         {
-          l <- catchToList(wrapperCalibrationPlot(t, "ALL"))
+          l <- MagellanNTK::catchToList(wrapperCalibrationPlot(t, "ALL"))
           .warns <- l$warnings[grep("Warning:", l$warnings)]
           rv.custom$errMsgCalibrationPlotAll <- .warns
         },
@@ -1036,7 +1058,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           t <- t[which(abs(rv.custom$res_pval_FC$logFC) >= rv.widgets$Foldchange_thlogFC)]
         }
       }
-      toDelete <- which(t == 1)
+      toDelete <- which(t > 1)
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
@@ -1048,7 +1070,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           if ((rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value") &&
               !is.null(rv.widgets$Pvaluecalibration_numericValCalibration)) {
 
-            ll <- catchToList(
+            ll <- MagellanNTK::catchToList(
               wrapperCalibrationPlot(
                 t,
                 rv.widgets$Pvaluecalibration_numericValCalibration
@@ -1057,11 +1079,11 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
-            ll <- catchToList(wrapperCalibrationPlot(t, 1))
+            ll <- MagellanNTK::catchToList(wrapperCalibrationPlot(t, 1))
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else {
-            ll <- catchToList(
+            ll <- MagellanNTK::catchToList(
               wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
             )
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
@@ -1141,20 +1163,27 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Pvaluecalibration', btnEvents()))
       
-      .history <- rv.custom$history[['Pvaluecalibration']]
-      .history[['Calibration_Method']] <- GetCalibrationMethod()
-      .history[['pi0']] <- rv.custom$pi0
-      rv.custom$history[['Pvaluecalibration']] <- .history
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
+      if (is.null(rv$dataIn)) {
+        shinyjs::info(btnVentsMasg)
+        
+      } else {
+        .history <- rv.custom$history[['Pvaluecalibration']]
+        .history[['Calibration_Method']] <- GetCalibrationMethod()
+        .history[['pi0']] <- rv.custom$pi0
+        rv.custom$history[['Pvaluecalibration']] <- .history
+        
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
+      }
     })
     
     
-    # <<< END ------------- Code for step 4 UI---------------
-    
-    # >>>> -------------------- STEP 5 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #-----------------------------FDR CONTROL-----------------------------------
+    #
+    ###########################################################################-
     output$FDRcontrol <- renderUI({
       shinyjs::useShinyjs()
       
@@ -1190,7 +1219,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv.widgets$Scenario_choice == "Cluster")
       req(Build_pval_table()$Adjusted_PValue)
       
-      # browser()
+
       visualizeClusters(
         dat = rv.custom$centered_means,
         clust_model = as.factor(rv.custom$res_clusters),
@@ -1226,12 +1255,12 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     
     # Prostar2::mod_volcanoplot_server(
     #   id = "FDR_volcano",
-    #   dataIn = reactive({Get_Dataset_to_Analyze()}), ####
+    #   dataIn = reactive({Get_Dataset_to_Analyze()}), !!!
     #   comparison = reactive({GetComparisons()}),
     #   group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
     #   thlogfc = reactive({rv.widgets$Foldchange_thlogFC}),
     #   thpval = reactive({rv.custom$FDRcontrol_thpval}),
-    #   tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}), ####
+    #   tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}), !!!
     #   remoteReset = reactive({remoteReset()}),
     #   is.enabled = reactive({rv$steps.enabled["FDRcontrol"]})
     # )
@@ -1369,7 +1398,10 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       
       adj.pval <- Build_pval_table()$Adjusted_PValue
       logpval <- Build_pval_table()$Log_PValue
+      .logfc <- Build_pval_table()$logFC
       upitems_logpval <- which(logpval >= rv.custom$FDRcontrol_thpval)
+      upItems_logfcinf <- which(abs(.logfc) < rv.widgets$Foldchange_thlogFC)
+      upitems_logpval <- setdiff(upitems_logpval, upItems_logfcinf)
       
       fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
       rv.custom$FDR <- as.numeric(fdr)
@@ -1427,12 +1459,25 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         pval_table[signifItems,'isDifferential'] <- 1
         
         upItems_pval <- which(-log10(.pval) >= rv.custom$FDRcontrol_thpval)
-        upItems_logFC <- which(abs(.logfc) >= rv.widgets$Foldchange_thlogFC)
-        
+        #push to 1 proteins with logFC under threshold
+        pval_pushfc <- .pval
+        upItems_logfcinf <- which(abs(.logfc) < rv.widgets$Foldchange_thlogFC)
+        upItems_pushepval <- which(.pval > 1)
+        upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
+        if (length(upItems_logfcinf) != 0){
+          pval_pushfc[upItems_logfcinf] <- 1
+        }  
+        if (length(upItems_pushepval) != 0){
+          pval_pushfc <- pval_pushfc[-upItems_pushepval]
+        }
         rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
-          .pval[upItems_logFC],
+          pval_pushfc,
           GetCalibrationMethod())
-        pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+        if (length(upItems_pushepval) != 0){
+          pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+        } else {
+          pval_table[, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+        }
         
       }else{
         signifItems <- which(pval_table$Log_PValue >= rv.custom$FDRcontrol_thpval)
@@ -1478,24 +1523,29 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('FDRcontrol', btnEvents()))
       
-      .history <- rv.custom$history[['FDRcontrol']]
-      .history[['FDR_Threshold']] <- rv.custom$FDRcontrol_thpval
-      rv.custom$history[['FDRcontrol']] <- .history
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status["FDRcontrol"] <- MagellanNTK::stepStatus$VALIDATED
+      if (is.null(rv$dataIn)) {
+        shinyjs::info(btnVentsMasg)
+        
+      } else {
+        .history <- rv.custom$history[['FDRcontrol']]
+        .history[['FDR_Threshold']] <- rv.custom$FDRcontrol_thpval
+        rv.custom$history[['FDRcontrol']] <- .history
+        
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status["FDRcontrol"] <- MagellanNTK::stepStatus$VALIDATED
+      }
     })
     
-    # <<< END ------------- Code for step 5 UI---------------
-    
-    # >>> START ------------- Code for step 'Save' UI---------------
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          # timeline_process_ui(ns('Save_timeline'))
-        ),
+        sidebar = tagList(),
         content = uiOutput(ns('dl_ui'))
       )
     })
@@ -1504,26 +1554,31 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
       # Do some stuff
       
-      
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-      
-      
-      Prostar2::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv$dataIn}))
-      
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
+        shinyjs::info(btnVentsMasg)
+      else {
+        shiny::withProgress(message = paste0("Saving process", id), {
+          shiny::incProgress(0.5)
+          
+          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- rv$dataIn
+          rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+          
+          
+          Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+        })
+      }
     })
-    # <<< END ------------- Code for step save UI---------------
     
+    # <<< end ------------------------------------------------------------------
 
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

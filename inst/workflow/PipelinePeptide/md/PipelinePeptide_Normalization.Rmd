@@ -1,74 +1,102 @@
 ---
 title: "Workflow Peptide: Normalization"
 abstract: >
-  This page describes the computations done with Normalization.
+  The page describe the Normalization step of the Peptide Worflow.
 
 output:
     BiocStyle::html_document:
         highlight: tango
         toc: false
         number_sections: FALSE
-        css: style.css
-date: 30 mai 2024
+date: 30 January 2026
 link-citations: true
 ---
+# Normalization
 
-To correct batch or group effects.
-The peptide abundances are rescaled (within or
-between conditions) to account for the variability between the
-analyses. Several algorithms can be used: quantile normalization
-(Bolstad, 2007), abundance normalization, scaling/centering (either globally applied or by condition), etc.
+The `Normalization` step reduces biases introduced at any preliminary stage, as to make samples more comparable. Though not a full batch effect correction method (which can be required depending on the experimental design), it can limit some simple batch effects. During this step, peptide abundances are essentially rescaled between samples of the same conditions or of all conditions.
+
+This step allows the selection of a normalization method from several available options, which are described below. If the chosen normalization method is not satisfactory, it is always possible to reset the step and start again. 
+
+***
+
+### Normalization
+
+The `Normalization` step offers a number of different normalization method, that are described below. The parameters to be defined vary depending on the selected method.
+
+The left side of the interface is used to select the normalization method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the normalization to the data.
+The central area of the interface displays multiple graphs showing the intensity distributions for each sample.
+...(description de chaque graph)
+
+If the normalization outcome is unsatisfactory, click “Reset” to return to the initial state and adjust the normalization method or its parameters.
 
 
 
 
+Observe the influence of the normalization method on the graphs of the right hand side panel.
+The compareNormalizationD_HC() function provides a way to visually compare the quantitative data before and after normalization. This plot shows the influence of the normalization method.
+To visualize the influence of the normalization, three plots are displayed (see Figure~): The first two plots are those of the tab of the (see Section~). The last one depicts the distortion induced by the chosen normalization method on each sample.
+Observe the influence of the normalization method on the plots of the lower side panel. The middle graph
+can be switched from violin plot to box plot.
+Observe the influence of the normalization method on the graphs. 
 
 
-Its objective is to reduce the biases introduced at any preliminary stage (such as for instance batch effects).
-1. Choose the normalization method (see "Methods available" below for a description of each method).
-2. Then, for each normalization method, the interface is automatically updated to display the
-method parameters that must be tuned. Notably, for most of the methods, it is necessary to
+
+##### Description of parameters and options :
+###### **`Normalization method`**
+Select for the drop-down menu the normalization method to be used. It is worth noting that each method has its own set of parameters, which are described further below.
+
+The possible options are as follows:
+
+- `None` : No normalization method is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
+- `GlobalQuantileAlignment` : Aligns the quantiles of intensity distributions across all samples. (This method should be used cautiously, as it imposes a high-impact normalization. Broadly speaking, the abundances are replaced by their order statistics). As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `SumByColumns` : Normalizes each abundance value by the total abundance of its corresponding sample. Un-logged intensities are used for processing. This method assumes the total amount of biological material is equal in all the samples.
+- `QuantileCentering` : Aligns the intensity distributions to a specific quantile, e.g., the median or a lower quantile, either across all samples or within each condition.
+- `MeanCentering` : Aligns the intensity distributions to their means, either across all samples or within each condition. Optionally, unit variance can be enforced.
+- `LOESS` : Applies a cyclic LOESS normalization, either across all samples or within each condition. The intensity values are normalized by means of a local regression model of the difference of intensities as function of the median intensity value (Cleveland, 1979) (see Smyth (2005) for implementation details).
+- `vsn` : Applies the Variance Stabilization Normalization method, either across all samples or within each condition (Huber et al., 2002).
+
+###### **`Normalization type`**
+...
+`overall`  `within conditions`
+
+Notably, for most of the methods, it is necessary to
 indicate whether the method should apply to the entire dataset at once, or whether each
-condition should be normalized independently of the others. For other parameters, which are
-specific to each method, the reader is referred to ProStaR user manual (see the “Manual” section of the Workflow menu).
-3. Click on “Do X” or “Do X & proceed”.
-4. Observe the influence of the normalization method on the graphs of the right hand side panel.
-5. If the result of the normalization does not correspond to the expectations, click on “Reset” to reload the step and change the normalization method or its tuning.
-6. Once the normalization is effective, go to the “Save” step and click on “Do X” or “Do X & proceed”.
-7. The new version of the dataset, comprised of all previous assays as well as now a "Normalization" assay, is available for download if wanted.
-8. Remember that at any time, it is possible to return to the menu “Vizualize data” to have a
-refined view of each step of the processing.
+condition should be normalized independently of the others. 
+Notably, for most of the methods, it is necessary to indicate whether the method should apply to the entire dataset at once (the tuning), or whether each condition should be normalized independently of the others (the tuning).
+for most of the methods (in fact, all of them, but "Global quantile alignment"), it is necessary to
+indicate whether the method should apply to the entire dataset at once ("overall" option), or whether each
+condition should be normalized independently of the others ("within conditions" option).
+The type argument allows to indicate whether the method is applied to the entire dataset at once ("overall") or whether each condition is normalized independently ("within conditions").
+
+
+Include variance reduction
+...
+
+###### **`Normalization quantile`**
+...
+Only for ... method
+
+###### **`Type of selection`**
+...
+
+
+The possible options are as follows:
+
+- `None` : ...
+- `List` : ... `Select protein`
+- `Random` : ... `Random`
+- `Column` : ... `Column of rowData`
+
+
+Synchronise with selection above
+...
 
 
 
+***
 
+### Save
 
-
-### Methods available
-
-**GlobalQuantileAlignment**
-
-This method proposes a normalization of important magnitude that should be cautiously used. It proposes to align the quantiles of all the replicates as described in [Other ref. 1]; practically it amounts to replace abundances by order statistics.
-
-**QuantileCentering**
-
-These methods propose to shift the sample distributions (either all of them at once, or within each condition at a time) to align a specific quantile: the median (under the assumption that up-regulations and down-regulations are equally frequent), the 15% quantile (under the assumption that the signal/noise ratio is roughly the same in all the samples), or any other user's choice.
-
-**MeanCentering**
-
-These methods propose to shift the sample distributions (either all of them at once, or within each condition at a time) to align their means. It is also possible to force unit variance (or not).
-
-
-**SumByColumns**
-
-These methods propose normalizations of important magnitude that should be cautiously used. It operates on the original scale (not the log2 one) and propose to normalize each abundance by the total abundance of the sample (so as to focus on the analyte proportions among each sample).
-
-
-**LOESS**
-
-This method proposes to apply a cyclic LOESS [Other ref. 4, 5] normalization to the data (either all of them at once, or on each condition independently). It relates to a combination of multiple regression models. The user can tune the regression span (an higher span smooths the fit more, while a lower span captures more trends).
-
-
-**vsn**
-
-This method proposes to apply the Variance Stabilization Normalization method [Other ref. 6] to the data (either all of them at once, or on each condition independently). No specific parameters required.
+Click on `Run` on the left side to validate the step. 
+The normalized dataset can be downloaded through the `xlsx` or `qf` button, depending on the desired file type.
+It is possible to visualize the normalized data, as well as viewing all informations related to the normalization applied, by clicking the `EDA` button on the right side of the timeline.

@@ -253,7 +253,7 @@ PipelineProtein_DA_server <- function(id,
         #DaparToolshed::paramshistory(.se) <- NULL
         
         dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- rv$dataIn
+        dataOut$value <- NULL
         rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
     })
@@ -465,11 +465,21 @@ PipelineProtein_DA_server <- function(id,
     observe({
       req(rv$steps.enabled["Pairwisecomparison"])
       req(rv$dataIn)
+      .split <- strsplit(
+        as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_"
+      )
+      tmpCond1 <- .split[[1]][1]
+      tmpCond2 <- .split[[1]][2]
+      compcond <- c(tmpCond1, tmpCond2)
+      idxcond <- which(DaparToolshed::design.qf(rv$dataIn)$Condition %in% compcond)
+      
+      datapush <- rv$dataIn[[length(rv$dataIn)]][, idxcond]
+      SummarizedExperiment::rowData(datapush)$qMetacell <- SummarizedExperiment::rowData(datapush)$qMetacell[, idxcond]
       
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
-        dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-        conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
+        dataIn = reactive({datapush}),
+        conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition[idxcond]}),
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
@@ -545,8 +555,8 @@ PipelineProtein_DA_server <- function(id,
           || is.null(rv$dataIn))
           shinyjs::info(btnVentsMasg)
         else {
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
           
           
           dataOut$trigger <- MagellanNTK::Timestamp()
@@ -642,7 +652,6 @@ PipelineProtein_DA_server <- function(id,
     
     
     histPValue <- reactive({
-      #browser()
       req(rv.custom$resAnaDiff)
       req(rv.custom$pi0)
       req(rv.widgets$Pvaluecalibration_nBinsHistpval)
@@ -738,7 +747,7 @@ PipelineProtein_DA_server <- function(id,
           if ((rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value") &&
               !is.null(rv.widgets$Pvaluecalibration_numericValCalibration)) {
             
-            ll <- catchToList(
+            ll <- MagellanNTK::catchToList(
               wrapperCalibrationPlot(
                 t,
                 rv.widgets$Pvaluecalibration_numericValCalibration
@@ -747,11 +756,11 @@ PipelineProtein_DA_server <- function(id,
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
-            ll <- catchToList(wrapperCalibrationPlot(t, 1))
+            ll <- MagellanNTK::catchToList(wrapperCalibrationPlot(t, 1))
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else {
-            ll <- catchToList(
+            ll <- MagellanNTK::catchToList(
               wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
             )
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
@@ -871,7 +880,7 @@ PipelineProtein_DA_server <- function(id,
       l <- NULL
       result <- tryCatch(
         {
-          l <- catchToList(wrapperCalibrationPlot(t, "ALL"))
+          l <- MagellanNTK::catchToList(wrapperCalibrationPlot(t, "ALL"))
           .warns <- l$warnings[grep("Warning:", l$warnings)]
           rv.custom$errMsgCalibrationPlotAll <- .warns
         },
@@ -942,20 +951,20 @@ PipelineProtein_DA_server <- function(id,
           shinyjs::info(btnVentsMasg)
         else {
           
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
           
           if (!is.null(rv.custom$calibrationRes$pi0))
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
           
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
           
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
           
           if (!is.null(rv.custom$calibrationRes$pi0))
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * rv.custom$calibrationRes$pi0, digits = 2))
           
           if (!is.null(rv.custom$calibrationRes$h1.concentration))
-            rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
+            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2))
           
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
@@ -1040,7 +1049,7 @@ PipelineProtein_DA_server <- function(id,
         escape = FALSE,
         rownames = FALSE,
         selection = 'none',
-        options = list(initComplete = initComplete(),
+        options = list(initComplete = MagellanNTK::initComplete(),
           dom = "frtip",
           pageLength = 100,
           scrollY = 500,
@@ -1136,15 +1145,7 @@ PipelineProtein_DA_server <- function(id,
       B <- A - length(rv.custom$pushed)
       C <- rv.custom$nbSelectedAnaDiff
       D <- ( A - C)
-      
-      # browser()
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total number', A)
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Total remaining after push p-values', B)
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of selected', C)
-      # rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Number of non selected', D)
-      # 
-      
-      
+
       div(id="bloc_page",
         style = "background-color: lightgrey; width: 300px",
         p(paste("Total number of ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
@@ -1153,7 +1154,6 @@ PipelineProtein_DA_server <- function(id,
         p(paste("Number of selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
         p(paste("Number of non selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", D, sep = ''))
       )
-      #HTML(txt)
     })
     
     
@@ -1339,19 +1339,19 @@ PipelineProtein_DA_server <- function(id,
        #push to 1 proteins with logFC under threshold
        pval_pushfc <- .pval
        upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
-       upItems_pushepval <- which(.pval > 1)
-       upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushepval)
+       upItems_pushedpval <- which(.pval > 1)
+       upItems_logfcinf <- setdiff(upItems_logfcinf, upItems_pushedpval)
        if (length(upItems_logfcinf) != 0){
          pval_pushfc[upItems_logfcinf] <- 1
        }  
-       if (length(upItems_pushepval) != 0){
-         pval_pushfc <- pval_pushfc[-upItems_pushepval]
+       if (length(upItems_pushedpval) != 0){
+         pval_pushfc <- pval_pushfc[-upItems_pushedpval]
        }
        rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
          pval_pushfc,
          GetCalibrationMethod())
-       if (length(upItems_pushepval) != 0){
-         pval_table[-upItems_pushepval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
+       if (length(upItems_pushedpval) != 0){
+         pval_table[-upItems_pushedpval, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
        } else {
          pval_table[, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
        }
@@ -1393,9 +1393,9 @@ PipelineProtein_DA_server <- function(id,
         if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
           shinyjs::info(btnVentsMasg)
         else {
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
-          rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
           
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
@@ -1409,10 +1409,18 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
-        content = tagList()
+        content = tagList(
+          uiOutput(ns('dl_ui'))
+        )
       )
     })
     
+    output$dl_UI <- renderUI({
+      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    })
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       
@@ -1441,10 +1449,7 @@ PipelineProtein_DA_server <- function(id,
           dataOut$value <- rv$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
-          
-          # Prostar2::download_dataset_server('createQuickLink', 
-          #   dataIn = reactive({rv$dataIn}))
-          
+          Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
         }
       })
     })

@@ -1,8 +1,11 @@
+#' @title xxx
+#' @name PipelinePeptide_Description
+#' @importFrom QFeatures addAssay removeAssay
+#' @import DaparToolshed
+#' 
+NULL
 
-###
-###
-###
-
+#' @rdname PipelinePeptide_Description
 #' @export
 #' 
 PipelinePeptide_Description_conf <- function(){
@@ -15,12 +18,14 @@ PipelinePeptide_Description_conf <- function(){
 
 
 #' @export
+#' @rdname PipelinePeptide_Description
 PipelinePeptide_Description_ui <- function(id){
   ns <- NS(id)
 }
 
 
 #' @export
+#' @rdname PipelinePeptide_Description
 PipelinePeptide_Description_server <- function(id,
     dataIn = reactive({NULL}),
     steps.enabled = reactive({NULL}),
@@ -38,7 +43,8 @@ PipelinePeptide_Description_server <- function(id,
   # but it can be customized
   widgets.default.values <- NULL
   rv.custom.default.values <- list(
-    result_open_dataset = reactive({NULL})
+    result_open_dataset = reactive({NULL}),
+    history = MagellanNTK::InitializeHistory()
   )
   
   ###-------------------------------------------------------------###
@@ -61,10 +67,12 @@ PipelinePeptide_Description_server <- function(id,
     eval(str2expression(core.code))
     add.resourcePath()
     
-    ###### ------------------- Code for Description (step 0) -------------------------    #####
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
       
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -108,16 +116,22 @@ PipelinePeptide_Description_server <- function(id,
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
       
+      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Description', 'Description', 'Initialization', '-')
+      
+      for (i in names(rv$dataIn))
+        DaparToolshed::paramshistory(rv$dataIn[[i]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[i]]),
+                                                              rv.custom$history)
+      
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
+    # <<< end ------------------------------------------------------------------
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-    
   }
   )
 }

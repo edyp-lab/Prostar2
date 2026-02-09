@@ -379,7 +379,6 @@ mod_Pept_Imputation_server <- function(
         level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
       nbPOVBefore <- length(which(m))
-      # browser()
       withProgress(message = "", detail = "", value = 0, {
         incProgress(0.25, detail = "Find MEC blocks")
 

@@ -179,16 +179,6 @@ mod_buildDesign_server <- function(
     output$hot <- rhandsontable::renderRHandsontable({
       rv$hot
       input$chooseExpDesign
-      print(rv$hot)
-      
-#browser()
-      # if (is.null(rv$hot)) {
-      #   rv$hot <- data.frame(
-      #     Sample.name = as.character(input$choose_quantitative_columns),
-      #     Condition = rep("", length(input$choose_quantitative_columns)),
-      #     stringsAsFactors = FALSE
-      #   )
-      # }
 
       hot <- rhandsontable::rhandsontable(
         rv$hot,

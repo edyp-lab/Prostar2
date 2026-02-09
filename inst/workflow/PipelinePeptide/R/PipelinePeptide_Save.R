@@ -1,7 +1,15 @@
-
+#' @title xxx
+#' @name PipelinePeptide_Save
+#' 
+#' @examples
+#' NULL
+#' 
+#' @importFrom QFeatures addAssay removeAssay
+#' @import DaparToolshed
+#' 
 
 #' @export
-#' 
+#' @rdname PipelineProtein_Save
 PipelinePeptide_Save_conf <- function(){
   MagellanNTK::Config(
     fullname = 'PipelinePeptide_Save',
@@ -12,12 +20,14 @@ PipelinePeptide_Save_conf <- function(){
 
 
 #' @export
+#' @rdname PipelineProtein_Save
 PipelinePeptide_Save_ui <- function(id){
   ns <- NS(id)
 }
 
 
 #' @export
+#' @rdname PipelineProtein_Save
 PipelinePeptide_Save_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
@@ -32,8 +42,10 @@ PipelinePeptide_Save_server <- function(id,
   # Define default selected values for widgets
   # By default, this list is empty for the Save module
   # but it can be customized
-  widgets.default.values <- NULL
-  rv.custom.default.values <- NULL
+  widgets.default.values <- list()
+  rv.custom.default.values <- list(
+    history = MagellanNTK::InitializeHistory()
+  )
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -55,10 +67,16 @@ PipelinePeptide_Save_server <- function(id,
     eval(str2expression(core.code))
     add.resourcePath()
     
-    ###### ------------------- Code for Save (step 0) -------------------------    #####
+    observeEvent(req(dataIn()), {
+      rv$dataIn <- dataIn()
+    })
+    
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
-      # file <- normalizePath(file.path(session$userData$workflow.path, 
-      #   'md', paste0(id, '.md')))
       
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -69,8 +87,9 @@ PipelinePeptide_Save_server <- function(id,
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = NULL,
+        sidebar = tagList(),
         content = tagList(
+          uiOutput(ns('dl_ui')),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -79,19 +98,31 @@ PipelinePeptide_Save_server <- function(id,
       )
     })
     
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'pipeline')
+      
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    })
+    
+    
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
       req(inherits(dataIn(), 'QFeatures'))
-      # In this process, there is no dataset resend to the server
-      # This is why the dataOut$value is set to NULL. This triggers the 
-      # validation of the step but without rebuilds the vector of datasets 
-      # to send
-      rv$dataIn <- dataIn()
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+      shiny::withProgress(message = paste0("Saving all processes", id), {
+        shiny::incProgress(0.5)
+        
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
+        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- rv$dataIn
+        rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+        
+        Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({dataOut$value}))
+      })
     })
     
+    # <<< end ------------------------------------------------------------------
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

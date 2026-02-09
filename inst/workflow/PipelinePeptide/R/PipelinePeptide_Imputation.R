@@ -16,13 +16,17 @@
 #' the code for the process `PipelinePeptide_Imputation` which is part of the pipeline called `PipelinePeptide`.
 #' 
 #' @examples
-#' \dontrun{
+#' if (interactive()){
 #' library(MagellanNTK)
-#' data(Exp1_R25_prot, package = 'DaparToolshedData')
+#' data(Exp2_R100_pept, package = 'DaparToolshedData')
 #' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelinePeptide_Imputation", path, dataIn = Exp1_R25_prot))
+#' shiny::runApp(proc_workflowApp("PipelinePeptide_Imputation", path, dataIn = Exp2_R100_pept))
 #' }
 #' 
+#' @importFrom QFeatures addAssay removeAssay
+#' @import DaparToolshed
+#' 
+NULL
 
 #' @rdname PipelinePeptide
 #' @export
@@ -69,6 +73,7 @@ PipelinePeptide_Imputation_ui <- function(id){
 #' @rdname PipelinePeptide
 #' 
 #' @importFrom stats setNames rnorm
+#' @importFrom shinyjs useShinyjs
 #' 
 #' @export
 #' 
@@ -96,7 +101,7 @@ PipelinePeptide_Imputation_server <- function(id,
   rv.custom.default.values <- list(
     result_open_dataset = reactive({NULL}),
     
-    history = list(),
+    history = MagellanNTK::InitializeHistory(),
     Pirat_dataformat = NULL,
     Pirat_showlog = FALSE
   )
@@ -120,11 +125,11 @@ PipelinePeptide_Imputation_server <- function(id,
     add.resourcePath()
     
     
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
-    
-    
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
       # file <- normalizePath(file.path(session$userData$workflow.path, 
       #   'md', paste0(id, '.md')))
@@ -135,18 +140,34 @@ PipelinePeptide_Imputation_server <- function(id,
         'md', 
         paste0(id, '.Rmd')))
       
-      
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(),
-        #timeline_process_ui(ns('Description_timeline')),
-        content = tagList(
-          if (file.exists(file))
-            includeMarkdown(file)
-          else
-            p('No Description available')
+        sidebar = tagList(
+          uiOutput(ns('open_dataset_UI'))
+        ),
+        content = div(id = ns('div_content'),
+                      #div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
+                      if (file.exists(file))
+                        includeMarkdown(file)
+                      else
+                        p('No Description available')
+                      #uiOutput(ns('Description_infos_dataset_UI'))
         )
       )
+    })
+    
+    output$open_dataset_UI <- renderUI({
+      req(session$userData$runmode == 'process')
+      req(is.null(dataIn()))
+      req(NULL)
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+      
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
     
@@ -155,25 +176,30 @@ PipelinePeptide_Imputation_server <- function(id,
       req(dataIn())
       rv$dataIn <- dataIn()
       
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      
       rv.custom$Pirat_dataformat <- list(
         peptides_ab = t(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])),
         adj = as.matrix(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])$adjacencyMatrix)
       ) 
       
       dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
+      dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
     })
     
     
     
-    # >>>
-    # >>> START ------------- Code for step 1 UI---------------
-    # >>> 
-    
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #------------------------------IMPUTATION-----------------------------------
+    #
+    ###########################################################################-
     output$Imputation <- renderUI({
       shinyjs::useShinyjs()
+      path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
+      includeCSS(path)
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
@@ -223,7 +249,7 @@ PipelinePeptide_Imputation_server <- function(id,
       req(rv.widgets$Imp_algorithm == "Pirat")
       req(!is.null(input$pirat_plot_reload_btn) | input$pirat_plot_reload_btn == 0)
       
-      plot_pep_correlations(pep.data = rv.custom$Pirat_dataformat)
+      Pirat::plot_pep_correlations(pep.data = rv.custom$Pirat_dataformat)
     })
     
     
@@ -303,11 +329,11 @@ PipelinePeptide_Imputation_server <- function(id,
             ### Show custom message in console
             if (console_message) message_console(m$message, level = "INFO", info_text = paste0(prefix, "INFO"), color_info = color_info)
             ### Get message
-            if (!(m$message %in% c("\r", "\n", ""))){
-              new_notification <- glue("<b>[{paste0(prefix, 'INFO')}]</b> <i>{format(Sys.time(), '%d-%m-%Y %X')}</i> — {m$message}")
+            if (!all(m$message %in% c("\r", "\n", ""))){
+              new_notification <- paste0("<b>[", prefix, "INFO]</b> <i>", format(Sys.time(), "%d-%m-%Y %X"), "</i> — ", m$message)
               current_notifications <- notifications()
-              if (new_first) current_notifications <- c(glue('<span style="color: {color_info}">{new_notification}</span>'), current_notifications)
-              else current_notifications <- c(current_notifications, glue('<span style="color: {color_info}">{new_notification}</span>'))
+              if (new_first) current_notifications <- c(paste0('<span style="color: ', color_info, '">', new_notification, '</span>'), current_notifications)
+              else current_notifications <- c(current_notifications, paste0('<span style="color: ', color_info, '">', new_notification, '</span>'))
               notifications(current_notifications) # Update list of messages
               ### Show message in app
               if (!is.null(id_notif)) shinyjs::html(id_notif, paste("<ul>", paste("<li>", current_notifications, "</li>", collapse = ""), "</ul>"))
@@ -319,11 +345,11 @@ PipelinePeptide_Imputation_server <- function(id,
             ### Show custom message in console
             if (console_message) message_console(m$message, level = "WARNING", warning_text = paste0(prefix, "WARNING"), color_warning = color_warning)
             ### Get message
-            if (!(m$message %in% c("\r", "\n", ""))){
-              new_notification <- glue("<b>[{paste0(prefix, 'WARNING')}]</b> <i>{format(Sys.time(), '%d-%m-%Y %X')}</i> — {m$message}")
+            if (!all(m$message %in% c("\r", "\n", ""))){
+              new_notification <- paste0("<b>[", prefix, "WARNING]</b> <i>", format(Sys.time(), "%d-%m-%Y %X"), "</i> — ", m$message)
               current_notifications <- notifications()
-              if (new_first) current_notifications <- c(glue('<span style="color: {color_warning}">{new_notification}</span>'), current_notifications)
-              else current_notifications <- c(current_notifications, glue('<span style="color: {color_warning}">{new_notification}</span>'))
+              if (new_first) current_notifications <- c(paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'), current_notifications)
+              else current_notifications <- c(current_notifications, paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'))
               notifications(current_notifications) # Update list of messages
               ### Show message in app
               if (!is.null(id_notif)) shinyjs::html(id_notif, paste("<ul>", paste("<li>", current_notifications, "</li>", collapse = ""), "</ul>"))
@@ -335,11 +361,11 @@ PipelinePeptide_Imputation_server <- function(id,
             ### Show custom message in console
             if (console_message) message_console(m$message, level = "ERROR", error_text = paste0(prefix, "ERROR"), color_error = color_error)
             ### Get message
-            if (!(m$message %in% c("\r", "\n", ""))){
-              new_notification <- glue("<b>[{paste0(prefix, 'ERROR')}]</b> <i>{format(Sys.time(), '%d-%m-%Y %X')}</i> — {m$message}")
+            if (!all(m$message %in% c("\r", "\n", ""))){
+              new_notification <- paste0("<b>[", prefix, "ERROR]</b> <i>", format(Sys.time(), "%d-%m-%Y %X"), "</i> — ", m$message)
               current_notifications <- notifications()
-              if (new_first) current_notifications <- c(glue('<span style="color: {color_error}">{new_notification}</span>'), current_notifications)
-              else current_notifications <- c(current_notifications, glue('<span style="color: {color_error}">{new_notification}</span>'))
+              if (new_first) current_notifications <- c(paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'), current_notifications)
+              else current_notifications <- c(current_notifications, paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'))
               notifications(current_notifications) # Update list of messages
               ### Show message in app
               if (!is.null(id_notif)) shinyjs::html(id_notif, paste("<ul>", paste("<li>", current_notifications, "</li>", collapse = ""), "</ul>"))
@@ -396,7 +422,7 @@ PipelinePeptide_Imputation_server <- function(id,
                            level
       )
       # Create message
-      msg <- if(!(msg %in% c("\r", "\n", ""))) glue("[{level_text}] {format(Sys.time(), '%d-%m-%Y %X')} — {msg}")
+      msg <- if(!(msg %in% c("\r", "\n", ""))){ paste0("[", level_text, "] ", format(Sys.time(), "%d-%m-%Y %X"), " — ", msg)}
       # Show custom message in console depending on message type
       switch(toupper(level),
              "INFO" = message(print_color(msg, color_info)),
@@ -406,25 +432,12 @@ PipelinePeptide_Imputation_server <- function(id,
       )
     }
     
-    # output$Imp_warning <- renderUI({
-    #   req(rv$dataIn)
-    #   
-    #   .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
-    #   nbEmptyLines <- getNumberOfEmptyLines(.data)
-    #   if (nbEmptyLines > 0) {
-    #     tags$p(style = "color: red;",
-    #            tags$b("Warning:"), "Your dataset contains empty lines (fully filled with missing values). 
-    #            Please remove them using the filtering step."
-    #     )
-    #   }
-    # })
-    
     
     output$Imp_UI <- renderUI({
       # Checks if
       req(rv$dataIn)
       .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
-      nbEmptyLines <- getNumberOfEmptyLines(.data)
+      nbEmptyLines <- DaparToolshed::getNumberOfEmptyLines(.data)
       if (nbEmptyLines > 0) {
         tags$p("Your dataset contains empty lines (fully filled with missing
     values). In order to use the imputation tool, you must delete them by
@@ -476,7 +489,7 @@ PipelinePeptide_Imputation_server <- function(id,
           step = 1
         )
         # MCAR input
-        widget3 <- awesomeCheckbox(ns("Pirat_mcar"), 
+        widget3 <- shinyWidgets::awesomeCheckbox(ns("Pirat_mcar"), 
                                    "MCAR", 
                                    value = rv.widgets$Pirat_mcar
         )
@@ -515,102 +528,86 @@ PipelinePeptide_Imputation_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Imputation', btnEvents()))
       req(rv$dataIn)
-      req(rv.widgets$Imp_algorithm != "None")
 
-      # m <- match.metacell(
-      #   qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-      #   pattern = c("Missing", "Missing POV", "Missing MEC"),
-      #   level = typeDataset(rv$dataIn[[length(rv$dataIn)]])
-      # )
-      # nbPOVBefore <- length(which(m))
-      
-      withProgress(message = "", detail = "", value = 0, {
-        incProgress(0.25, detail = "Initializing imputation")
-
-        .tmp <- NULL
-        .param <- list()
-
-        try({
-          switch(rv.widgets$Imp_algorithm,
-                 None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
-                 Pirat = {
-                   incProgress(0.5, detail = "Pirat imputation")
-                   rv.custom$Pirat_showlog <- TRUE
-                   Pirat_logtxt <- show_log_console(prefix = "PIRAT", id_notif = "notif_message", console_message = FALSE, {
-                     Pirat_dataimput <- my_pipeline_llkimpute(rv.custom$Pirat_dataformat,
-                                                   alpha.factor = rv.widgets$Pirat_alpha.factor,
-                                                   rna.cond.mask = NULL, #if extension == 'T' only
-                                                   pep.cond.mask = NULL, #if extension == 'T' only
-                                                   extension = rv.widgets$Pirat_extension,
-                                                   mcar = rv.widgets$Pirat_mcar,
-                                                   max.pg.size.pirat.t = rv.widgets$Pirat_max.pg.size.pirat.t, #if extension == 'T' only
-                                                   verbose = TRUE)
-                   })
-                   .param <- list(
-                     algorithm = rv.widgets$Imp_algorithm,
-                     extension = rv.widgets$Pirat_extension,
-                     alpha.factor = rv.widgets$Pirat_alpha.factor,
-                     mcar = rv.widgets$Pirat_mcar#,
+      if (is.null(rv$dataIn) || 
+           rv.widgets$Imp_algorithm == "None"){
+        shinyjs::info(btnVentsMasg)
+      } else {
+        withProgress(message = "", detail = "", value = 0, {
+          incProgress(0.25, detail = "Initializing imputation")
+  
+          .tmp <- NULL
+          .param <- list()
+  
+          try({
+            switch(rv.widgets$Imp_algorithm,
+                   None = .tmp <- rv$dataIn[[length(rv$dataIn)]],
+                   Pirat = {
+                     incProgress(0.5, detail = "Pirat imputation")
+                     rv.custom$Pirat_showlog <- TRUE
+                     Pirat_logtxt <- show_log_console(prefix = "PIRAT", id_notif = "notif_message", console_message = FALSE, {
+                       Pirat_dataimput <- Pirat::my_pipeline_llkimpute(rv.custom$Pirat_dataformat,
+                                                     alpha.factor = rv.widgets$Pirat_alpha.factor,
+                                                     rna.cond.mask = NULL, #if extension == 'T' only
+                                                     pep.cond.mask = NULL, #if extension == 'T' only
+                                                     extension = rv.widgets$Pirat_extension,
+                                                     mcar = rv.widgets$Pirat_mcar,
+                                                     max.pg.size.pirat.t = rv.widgets$Pirat_max.pg.size.pirat.t, #if extension == 'T' only
+                                                     verbose = TRUE)
+                     })
+                     
+                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'algorithm', rv.widgets$Imp_algorithm)
+                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'extension', rv.widgets$Pirat_extension)
+                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'alpha.factor', rv.widgets$Pirat_alpha.factor)
+                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'mcar', rv.widgets$Pirat_mcar)
                      #rna.cond.mask = NULL, 
                      #pep.cond.mask = NULL,
                      #max.pg.size.pirat.t = rv.widgets$Pirat_max.pg.size.pirat.t
-                   )
-                   
-                   .tmp <- rv$dataIn[[length(rv$dataIn)]] 
-                   SummarizedExperiment::assay(.tmp, withDimnames=FALSE) <- t(Pirat_dataimput$data.imputed)
-                 }
-          )
+                     
+                     .tmp <- rv$dataIn[[length(rv$dataIn)]] 
+                     SummarizedExperiment::assay(.tmp, withDimnames=FALSE) <- t(Pirat_dataimput$data.imputed)
+                   }
+            )
+          })
+  
+          if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
+            mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
+                                  text = .tmp,
+                                  type = 'error' )
+          } else {
+            incProgress(1, detail = "Finalizing imputation")
+            .tmp <- DaparToolshed::UpdateMetacellAfterImputation(.tmp)
+        
+            rv$dataIn <- Prostar2::addDatasets(
+              rv$dataIn,
+              .tmp,
+              'Imputation')
+            DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- rv.custom$history
+            names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
+          }
         })
-
-        if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
-          mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
-                                text = .tmp,
-                                type = 'error' )
-        } else {
-          # sendSweetAlert(
-          #   session = session,
-          #   title = "Success",
-          #   type = "success"
-          # )
-          #rv$dataIn[[length(rv$dataIn)]] <- .tmp
-          
-          incProgress(1, detail = "Finalizing imputation")
-
-          # m <- match.metacell(qMetacell(.tmp),
-          #                     pattern = "Missing POV",
-          #                     level = DaparToolshed::typeDataset(.tmp)
-          # )
-          # nbPOVAfter <- length(which(m))
-          # rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
-        }
-      
-        rv$dataIn <- Prostar2::addDatasets(
-          rv$dataIn,
-          .tmp,
-          'Imputation')
-        paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- .param
-        names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
-      })
-      
-      # DO NOT MODIFY THE THREE FOLLOWING LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- NULL
-      rv$steps.status['Imputation'] <- MagellanNTK::stepStatus$VALIDATED
+        
+        req(Pirat_dataimput$data.imputed)
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- NULL
+        rv$steps.status['Imputation'] <- MagellanNTK::stepStatus$VALIDATED
+      }
     })
 
-    # <<< END ------------- Code for step 1 UI---------------
-    
-    
-    
-    # >>> START ------------- Code for step 3 UI---------------
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
-     
+      
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          #timeline_process_ui(ns('Save_timeline'))
-        ),
-        content = uiOutput(ns('dl_ui'))
+        sidebar = tagList(),
+        content = tagList(
+          uiOutput(ns('dl_ui'))
+        )
       )
     })
     
@@ -619,37 +616,28 @@ PipelinePeptide_Imputation_server <- function(id,
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       
-      MagellanNTK::download_dataset_ui(ns('createQuickLink'))
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
-    
-    output$Save_btn_validate_ui <- renderUI({
-      tagList(
-        
-        if (config@mode == 'process' && 
-            rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED) {
-          download_dataset_ui(ns('createQuickLink'))
-        }
-      )
-    })
     
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       req("Imputation" %in% names(rv$dataIn))
-      # Do some stuff
       
-      # DO NOT MODIFY THE THREE FOLLOWING LINES
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      dataOut$value <- rv$dataIn
-      rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-      
-      Prostar2::download_dataset_server('createQuickLink', 
-        dataIn = reactive({rv$dataIn}))
-      
+      shiny::withProgress(message = paste0("Saving process", id), {
+        shiny::incProgress(0.5)
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
+        
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
+        dataOut$trigger <- MagellanNTK::Timestamp()
+        dataOut$value <- rv$dataIn
+        rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+        
+        Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+      })
     })
-    # <<< END ------------- Code for step 3 UI---------------
     
-    
+    # <<< end ------------------------------------------------------------------
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
