@@ -99,7 +99,7 @@ open_dataset_server <- function(
       lapply(names(rv.widgets), function(x){
         rv.widgets[[x]] <- widgets.default.values[[x]]
       })
-      
+
       rv.custom$dataRead <- NULL
       rv.custom$remoteReset <- remoteReset()
       # rv.widgets$file <- NULL
@@ -252,7 +252,7 @@ open_dataset_server <- function(
         )
       }
 
-      
+
       dataOut$dataset <- rv.custom$dataRead
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$name <- rv.custom$name
@@ -288,7 +288,7 @@ open_dataset_server <- function(
     })
     
     output$Description_infos_dataset_UI <- renderUI({
-      
+
       req(rv.custom$dataRead)
       
       infos_dataset_server(

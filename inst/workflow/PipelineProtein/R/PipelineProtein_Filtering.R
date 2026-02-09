@@ -284,6 +284,7 @@ PipelineProtein_Filtering_server <- function(id,
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+      #browser()
     })
     
     
@@ -471,6 +472,7 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Cellmetadatafiltering"] <- MagellanNTK::stepStatus$VALIDATED
+          #browser()
         }
         shiny::incProgress(1)
       })
@@ -782,10 +784,9 @@ PipelineProtein_Filtering_server <- function(id,
         
         # Rename the new dataset with the name of the process
         names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Variablefiltering'
-        
+
         query <- rv.custom$Variablefiltering_funFilter$ll.query
         i <- length(rv.custom$dataIn2)
-        #.history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
         
         DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]),
@@ -811,6 +812,7 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED
+          #browser()
         }
       })
     })
@@ -859,7 +861,6 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-          
           Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
         }
       })

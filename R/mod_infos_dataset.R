@@ -152,6 +152,7 @@ infos_dataset_server <- function(
 
     Get_QFeatures_summary <- reactive({
       req(rv$dataIn)
+
       nb_assay <- length(rv$dataIn)
       names_assay <- unlist(names(rv$dataIn))
       pipeline <- S4Vectors::metadata(rv$dataIn)$name.pipeline

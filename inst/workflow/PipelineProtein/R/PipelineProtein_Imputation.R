@@ -466,7 +466,6 @@ PipelineProtein_Imputation_server <- function(id,
             rv.custom$dataIn1,
             .tmp,
             'POVImputation')
-
           
           # Add infos
           nBefore <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])$nNA[, "nNA"]
@@ -802,6 +801,7 @@ PipelineProtein_Imputation_server <- function(id,
           
           DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[[i]]),
                                                                    rv.custom$history)
+          
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
