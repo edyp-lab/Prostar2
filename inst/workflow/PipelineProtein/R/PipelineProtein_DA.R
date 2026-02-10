@@ -243,10 +243,12 @@ PipelineProtein_DA_server <- function(id,
         rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
         rv.widgets$Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
         
-        
-        # Get logfc threshold from Hypothesis test dataset
         .se <- rv$dataIn[[length(rv$dataIn)]]
-        .thlogfc <- DaparToolshed::paramshistory(.se)[['HypothesisTest_thlogFC']]
+        .history <- DaparToolshed::paramshistory(.se)
+        
+        .ind_logFC <- which(.history[, 'Parameter'] == 'thlogFC')
+        # Get logfc threshold from Hypothesis test dataset
+        .thlogfc <- .history[.ind_logFC, 'Value']
         if(!is.null(.thlogfc))
           rv.custom$thlogfc <- .thlogfc
         
@@ -556,7 +558,9 @@ PipelineProtein_DA_server <- function(id,
           shinyjs::info(btnVentsMasg)
         else {
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
-          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', GetComparisons())
+
+          .comparisons2Txt <- Get_Pairwisecomparison_Names()
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', .comparisons2Txt)
           
           
           dataOut$trigger <- MagellanNTK::Timestamp()
@@ -1249,7 +1253,7 @@ PipelineProtein_DA_server <- function(id,
     
     Get_FDR <- reactive({
       
-      
+      browser()
       req(rv.custom$thpval)
       req(rv.custom$thlogfc)
       req(Build_pval_table())
@@ -1276,7 +1280,7 @@ PipelineProtein_DA_server <- function(id,
       
       
       rv.custom$FDR <- as.numeric(fdr)
-      as.numeric(fdr)
+      as.numeric(rv.custom$FDR)
     })
     
     
@@ -1436,7 +1440,6 @@ PipelineProtein_DA_server <- function(id,
           # Do some stuff
           
           last.se <- length(rv$dataIn)
-          DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- NULL
           DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[last.se]]), rv.custom$history)
           
           

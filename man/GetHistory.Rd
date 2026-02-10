@@ -2,22 +2,22 @@
 % Please edit documentation in R/utils.R
 \name{GetHistory}
 \alias{GetHistory}
-\title{Get the last validated step before current position.}
+\title{Get the history of an assay.}
 \usage{
 GetHistory(dataIn, x)
 }
 \arguments{
-\item{dataIn}{xxx}
+\item{dataIn}{An instance of the \code{SummarizedExperiment} class}
 
-\item{x}{xxxx}
+\item{x}{A \code{character} which is the name of an assay in the dataIn}
 }
 \value{
-A \code{integer(1)}
+A \code{data.frame()}
 }
 \description{
-This function returns the indice of the last validated step before
-the current step.
+Get the history of an assay.
 }
 \examples{
 NULL
+
 }

@@ -29,31 +29,31 @@ Add2History <- function(history, process, step.name, param.name, value){
 
 
 
-
-#' @title Get the last validated step before current position.
+#' @title Get the history of an assay.
 #'
-#' @description This function returns the indice of the last validated step before
-#' the current step.
-#'
-#' @param dataIn xxx
-#' @param x xxxx
-#' @return A `integer(1)`
+#' @param dataIn An instance of the `SummarizedExperiment` class
+#' @param x A `character` which is the name of an assay in the dataIn
+#' @return A `data.frame()`
 #'
 #' @export
 #' @examples
 #' NULL
+#' 
 GetHistory <- function(dataIn, x){
-  
-  history <- NULL
-  
-  if (x %in% c('Description', 'Save')){
     history <- NULL
-  } else if (x %in% names(dataIn)){
-    history <- DaparToolshed::paramshistory(dataIn[[x]])
+    
+    if (x == 'Description'){
+      if ('Convert' %in% names(dataIn))
+        history <- DaparToolshed::paramshistory(dataIn[['Convert']])
+     } else if (x == 'Save'){
+      history <- NULL
+    } else if (x %in% names(dataIn)){
+      history <- DaparToolshed::paramshistory(dataIn[[x]])
+    }
+
+    return(history)
   }
-  
-  return(history)
-}
+
 
 
 

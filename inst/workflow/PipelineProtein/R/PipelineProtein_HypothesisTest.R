@@ -590,8 +590,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'HypothesisTest', 'HypothesisTest', 'thlogFC', as.numeric(rv.widgets$HypothesisTest_thlogFC))
         
-        DaparToolshed::paramshistory(new.dataset) <- rbind(DaparToolshed::paramshistory(new.dataset),
-                                                           rv.custom$history)
+        
         rv.custom$dataIn <- QFeatures::addAssay(rv.custom$dataIn, new.dataset, 'HypothesisTest')
 
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
@@ -612,18 +611,18 @@ PipelineProtein_HypothesisTest_server <- function(id,
           #timeline_process_ui(ns('Save_timeline'))
         ),
         content = tagList(
-          uiOutput(ns('dl_ui'))
+          #uiOutput(ns('dl_ui'))
           )
       )
     })
     
     
-    output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
-      req(config@mode == 'process')
-      
-      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
-    })
+    # output$dl_ui <- renderUI({
+    #   req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+    #   req(config@mode == 'process')
+    #   
+    #   Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    # })
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
@@ -638,12 +637,18 @@ PipelineProtein_HypothesisTest_server <- function(id,
         else {
           S4Vectors::metadata(rv.custom$dataIn)$name.pipeline <- 'PipelineProtein'
             
+          
+         
+          DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]),
+            rv.custom$history)
+          
+          
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
-          Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+          #Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
         }
       })
     })
