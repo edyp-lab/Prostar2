@@ -248,7 +248,7 @@ PipelineProtein_DA_server <- function(id,
         
         .ind_logFC <- which(.history[, 'Parameter'] == 'thlogFC')
         # Get logfc threshold from Hypothesis test dataset
-        .thlogfc <- .history[.ind_logFC, 'Value']
+        .thlogfc <- as.numeric(.history[.ind_logFC, 'Value'])
         if(!is.null(.thlogfc))
           rv.custom$thlogfc <- .thlogfc
         
@@ -1252,8 +1252,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     Get_FDR <- reactive({
-      
-      browser()
+
       req(rv.custom$thpval)
       req(rv.custom$thlogfc)
       req(Build_pval_table())
