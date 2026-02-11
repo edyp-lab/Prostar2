@@ -111,13 +111,13 @@ PipelineProtein_Imputation_server <- function(id,
     mv.present = FALSE,
     POVImputation_SummaryDT = data.frame(
       operation = "-",
-      nbImputed = "0",
+      nbPOVImputed = "0",
       TotalMissingValues = '0',
       stringsAsFactors = FALSE
     ),
     MECImputation_SummaryDT = data.frame(
       operation = "-",
-      nbImputed = "0",
+      nbMECImputed = "0",
       TotalMissingValues = '0',
       stringsAsFactors = FALSE
     ),
@@ -233,17 +233,19 @@ PipelineProtein_Imputation_server <- function(id,
       
       rv.custom$POVImputation_SummaryDT <- data.frame(
         operation = "-",
-        nbImputed = "0",
+        nbPOVImputed = "0",
         TotalMissingValues = QFeatures::nNA(rv$dataIn[[length(rv$dataIn)]])$nNA[, "nNA"],
         stringsAsFactors = FALSE
       )
+      colnames(rv.custom$POVImputation_SummaryDT) <- c('Operation', 'POV imputed', 'Total missing values')
       
       rv.custom$MECImputation_SummaryDT <- data.frame(
         operation = "-",
-        nbImputed = "0",
+        nbMECImputed = "0",
         TotalMissingValues = QFeatures::nNA(rv$dataIn[[length(rv$dataIn)]])$nNA[, "nNA"],
         stringsAsFactors = FALSE
       )
+      colnames(rv.custom$MECImputation_SummaryDT) <- c('Operation', 'MEC imputed', 'Total missing values')
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- NULL
@@ -480,7 +482,7 @@ PipelineProtein_Imputation_server <- function(id,
           
           rv.custom$MECImputation_SummaryDT <- data.frame(
             operation = "-",
-            nbImputed = "0",
+            nbMECImputed = "0",
             TotalMissingValues = nAfter,
             stringsAsFactors = FALSE
           )

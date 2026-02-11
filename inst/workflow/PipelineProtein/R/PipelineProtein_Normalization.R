@@ -266,7 +266,7 @@ PipelineProtein_Normalization_server <- function(id,
     output$Normalization_method_ui <- renderUI({
       widget <- selectInput(
         ns('Normalization_method'),
-        "Normalization method",
+        "Method",
         choices = setNames(nm = c("None", DaparToolshed::normalizeMethods())),
         selected = rv.widgets$Normalization_method,
         width = '180px'
@@ -277,7 +277,7 @@ PipelineProtein_Normalization_server <- function(id,
     
     output$Normalization_type_ui <- renderUI({
       widget <- selectInput(ns('Normalization_type'),
-        "Normalization type",
+        "Type",
         choices = stats::setNames(
           nm = c("overall", "within conditions")),
         selected = rv.widgets$Normalization_type,
