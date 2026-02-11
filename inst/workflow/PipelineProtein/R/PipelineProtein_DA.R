@@ -346,8 +346,10 @@ PipelineProtein_DA_server <- function(id,
           )
         ),
         content = div(id = ns('div_Pairwisecomparison_tooltipInfo_UI'),
-          uiOutput(ns("Pairwisecomparison_volcano_UI")),
-          uiOutput(ns("Pairwisecomparison_tooltipInfo_UI"))
+          fluidRow(
+            column(width = 4, uiOutput(ns("Pairwisecomparison_volcano_UI"))),
+            column(width = 8, uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
+        )
         )
       )
       
