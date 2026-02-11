@@ -412,7 +412,7 @@ mod_volcanoplot_server <- function(
         g1 = rv.custom$dataGetExprsClickedProtein <- data.g1[this.index + 1, ],
         g2 = rv.custom$dataGetExprsClickedProtein <- data.g2[this.index + 1, ]
       )
-      #rv.custom$data
+
     })
 
 
@@ -515,8 +515,10 @@ req(rv.custom$dataGetExprsClickedProtein)
           pal = rv.custom$colorsVolcanoplot
         )
       })
-      # MagellanNTK::toggleWidget(widget, is.enabled())
+
     })
+    
+    
   })
 }
 

@@ -346,8 +346,8 @@ PipelineProtein_DA_server <- function(id,
           )
         ),
         content = div(id = ns('div_Pairwisecomparison_tooltipInfo_UI'),
-          uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")),
-          uiOutput(ns("Pairwisecomparison_volcano_UI"))
+          uiOutput(ns("Pairwisecomparison_volcano_UI")),
+          uiOutput(ns("Pairwisecomparison_tooltipInfo_UI"))
         )
       )
       
@@ -389,7 +389,7 @@ PipelineProtein_DA_server <- function(id,
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
     )
-    #})
+
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
       widget <- div(id = ns('div_Pairwisecomparison_volcano'),
