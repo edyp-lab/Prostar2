@@ -18,6 +18,8 @@
 #' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' shiny::runApp(download_dataset(Exp1_R25_prot))
+#' 
+#' shiny::runApp(download_dataset())
 #' }
 #' 
 #' @importFrom QFeatures addAssay removeAssay
@@ -40,13 +42,8 @@ download_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
     h3('Download dataset'),
-    p("Please be patient after clicking the button, as the file may need some time to be created."),
-    div(style = "display: inline-block;",
-      uiOutput(ns("dl_xl"))
-      ),
-      div(style = "display: inline-block; margin-left: 10px;",
-    uiOutput(ns("dl_raw"))
-      )
+    uiOutput(ns('nodataset_ui')),
+    uiOutput(ns('buttons_ui'))
   )
 }
 
@@ -72,8 +69,26 @@ download_dataset_server <- function(
       data_save = NULL
     )
     
+    output$nodataset_ui <- renderUI({
+      req(is.null(rv$data_save))
+      p('No dataset available')
+    })
     
-    observeEvent(dataIn(), ignoreNULL = TRUE, ignoreInit = FALSE,{
+    output$buttons_ui <- renderUI({
+      req(rv$data_save)
+      tagList(
+        p("Please be patient after clicking the button, as the file may need some time to be created."),
+      div(style = "display: inline-block;",
+        uiOutput(ns("dl_xl"))
+      ),
+      div(style = "display: inline-block; margin-left: 10px;",
+        uiOutput(ns("dl_raw"))
+      )
+      )
+
+    })
+    
+    observeEvent(req(dataIn()), ignoreNULL = TRUE, ignoreInit = FALSE,{
       rv$data_save <- dataIn()
     })
     
@@ -163,7 +178,7 @@ download_dataset_server <- function(
 #' @export
 #'
 download_dataset <- function(
-    dataIn, 
+    dataIn = NULL, 
   filename = "myDataset") {
   ui <- download_dataset_ui("dl")
   
