@@ -24,7 +24,7 @@ download_dataset_server(
  })
 )
 
-download_dataset(dataIn, filename = "myDataset")
+download_dataset(dataIn = NULL, filename = "myDataset")
 }
 \arguments{
 \item{id}{internal}
@@ -51,6 +51,8 @@ A shiny Module.
 if (interactive()){
 data(Exp1_R25_prot, package = "DaparToolshedData")
 shiny::runApp(download_dataset(Exp1_R25_prot))
+
+shiny::runApp(download_dataset())
 }
 
 }

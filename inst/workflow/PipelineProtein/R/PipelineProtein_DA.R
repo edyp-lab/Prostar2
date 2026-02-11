@@ -753,7 +753,7 @@ PipelineProtein_DA_server <- function(id,
           if ((rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value") &&
               !is.null(rv.widgets$Pvaluecalibration_numericValCalibration)) {
             
-            ll <- MagellanNTK::catchToList(
+            ll <- catchToList(
               wrapperCalibrationPlot(
                 t,
                 rv.widgets$Pvaluecalibration_numericValCalibration
@@ -762,11 +762,11 @@ PipelineProtein_DA_server <- function(id,
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
-            ll <- MagellanNTK::catchToList(wrapperCalibrationPlot(t, 1))
+            ll <- catchToList(wrapperCalibrationPlot(t, 1))
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else {
-            ll <- MagellanNTK::catchToList(
+            ll <- catchToList(
               wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
             )
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
@@ -886,7 +886,7 @@ PipelineProtein_DA_server <- function(id,
       l <- NULL
       result <- tryCatch(
         {
-          l <- MagellanNTK::catchToList(wrapperCalibrationPlot(t, "ALL"))
+          l <- catchToList(wrapperCalibrationPlot(t, "ALL"))
           .warns <- l$warnings[grep("Warning:", l$warnings)]
           rv.custom$errMsgCalibrationPlotAll <- .warns
         },
