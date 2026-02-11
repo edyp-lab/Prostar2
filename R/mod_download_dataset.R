@@ -41,9 +41,12 @@ download_dataset_ui <- function(id) {
   tagList(
     h3('Download dataset'),
     p("Please be patient after clicking the button, as the file may need some time to be created."),
-    uiOutput(ns("dl_xl")),
-    #uiOutput(ns("dl_csv")),
+    div(style = "display: inline-block;",
+      uiOutput(ns("dl_xl"))
+      ),
+      div(style = "display: inline-block; margin-left: 10px;",
     uiOutput(ns("dl_raw"))
+      )
   )
 }
 

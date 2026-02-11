@@ -666,14 +666,19 @@ PipelineProtein_Convert_server <- function(id,
     output$ExpandFeatData <- renderUI({
       MagellanNTK::process_layout_process(session,
         ns = NS(id),
-        sidebar = tagList(),
+        sidebar = tagList(
+          uiOutput(ns('ExpandFeatData_idMethod_ui'))
+        ),
         content = tagList(
-          uiOutput(ns("ExpandFeatData_btn_validate_ui")),
-          uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;"),
-          uiOutput(ns('ExpandFeatData_idMethod_ui'), style = "margin-right: 30px;"),
-          uiOutput(ns("ExpandFeatData_inputGroup_ui")),
           uiOutput(ns("ExpandFeatData_warningNegValues_ui")),
-          uiOutput(ns("ExpandFeatData_warningNonNum_ui"))
+          uiOutput(ns("ExpandFeatData_warningNonNum_ui")),
+          fluidRow(
+          column(width = 4,
+            uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;")),
+            column(width = 8,
+              uiOutput(ns("ExpandFeatData_inputGroup_ui"))
+            )
+          )
         )
       )
       
@@ -730,7 +735,6 @@ PipelineProtein_Convert_server <- function(id,
       content = "...")
     
     output$ExpandFeatData_idMethod_ui <- renderUI({
-      req(rv.widgets$ExpandFeatData_quantCols)
       
       widget <- radioButtons(ns("ExpandFeatData_idMethod"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_ExpandFeatData_idMethod")),
@@ -739,15 +743,14 @@ PipelineProtein_Convert_server <- function(id,
           "Yes" = TRUE),
         selected = rv.widgets$ExpandFeatData_idMethod)
       
+      cond <- rv$steps.enabled['ExpandFeatData'] && !is.null(rv.widgets$ExpandFeatData_quantCols)
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'])
     })
     
     
     
     output$ExpandFeatData_inputGroup_ui <- renderUI({
-      #req(rv.widgets$ExpandFeatData_quantCols)
       req(as.logical(rv.widgets$ExpandFeatData_idMethod))
-      
       
       rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
         df = reactive({rv.custom$tab}),

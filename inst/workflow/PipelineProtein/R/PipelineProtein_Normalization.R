@@ -374,9 +374,11 @@ PipelineProtein_Normalization_server <- function(id,
       req(rv.custom$dataIn)
       shinyjs::toggle("Normalization_btn_validate",
         condition = rv.widgets$Normalization_method != "None")
-      
-      shinyjs::toggle("spanLOESS",
+
+      shinyjs::toggle("Normalization_spanLOESS_ui",
         condition = rv.widgets$Normalization_method == "LOESS")
+      
+      
       
       .choice <- c("QuantileCentering", "MeanCentering", "SumByColumns", 
         "LOESS", "vsn")
