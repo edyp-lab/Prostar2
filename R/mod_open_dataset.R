@@ -33,11 +33,11 @@ open_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    div(style = "display: inline-block; margin-right: 10px;",
+    div(style = "display: inline-block; margin-right: 10px;vertical-align: top;margin-top: 0px;",
       uiOutput(ns('chooseSource_UI'))),
-    div(style = "display: inline-block; margin-right: 10px;",
+    div(style = "display: inline-block; margin-right: 10px;vertical-align: top;margin-top: 0px;",
       uiOutput(ns("customDataset_UI"))),
-    div(style = "display: inline-block; margin-right: 10px;",
+    div(style = "display: inline-block; margin-right: 10px;vertical-align: top;margin-top: 0px;",
       uiOutput(ns("packageDataset_UI"))),
     uiOutput(ns('Description_infos_dataset_UI'))
   )
