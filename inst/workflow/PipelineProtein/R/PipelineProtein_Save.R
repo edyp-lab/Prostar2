@@ -76,48 +76,40 @@ PipelineProtein_Save_server <- function(id,
     
     
     ###### ------------------- Code for Save (step 0) -------------------------    #####
+   
+    
     output$Save <- renderUI({
-      
-      file <- normalizePath(file.path(
-        system.file('workflow', package = 'Prostar2'),
-        unlist(strsplit(id, '_'))[1], 
-        'md', 
-        paste0(id, '.Rmd')))
-      
-      
       MagellanNTK::process_layout(session,
-                                  ns = NS(id),
-                                  sidebar = tagList(),
-                                  content = tagList(
-                                    uiOutput(ns('dl_ui')),
-                                    if (file.exists(file))
-                                      includeMarkdown(file)
-                                    else
-                                      p('No Save available'),
-                                  )
+        ns = NS(id),
+        sidebar = tagList(),
+        content = tagList(
+          uiOutput(ns('dl_ui'))
+        )
       )
     })
     
     output$dl_ui <- renderUI({
-      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
-      req(config@mode == 'pipeline')
+
+      req(unname(rv$steps.status['Save']) == MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'process')
       
       Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
 
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      
       req(grepl('Save', btnEvents()))
       shiny::withProgress(message = paste0("Saving all processes", id), {
         shiny::incProgress(0.5)
         
         S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
         rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-        
-        Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({dataOut$value}))
+
+        Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
       })
     })
     

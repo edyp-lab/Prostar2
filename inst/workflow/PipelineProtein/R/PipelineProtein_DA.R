@@ -395,6 +395,7 @@ PipelineProtein_DA_server <- function(id,
     
     output$Pairwisecomparison_volcano_UI <- renderUI({
       widget <- div(id = ns('div_Pairwisecomparison_volcano'),
+        style = "height: 500px;",
         mod_volcanoplot_ui(ns("Pairwisecomparison_volcano"))
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
@@ -1183,7 +1184,7 @@ PipelineProtein_DA_server <- function(id,
       tmp <- gsub(",", ".", logpval(), fixed = TRUE)
       
       rv.custom$thpval <- as.numeric(tmp)
-      
+     
       th <- Get_FDR() * Get_Nb_Significant()
       
       if (th < 1) {
@@ -1276,7 +1277,13 @@ PipelineProtein_DA_server <- function(id,
       upItems_logfcinf <- which(abs(.logfc) < rv.custom$thlogfc)
       upitems_logpval <- setdiff(upitems_logpval, upItems_logfcinf)
 
-      fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
+     
+      if (length(adj.pval[upitems_logpval]) > 0){
+        fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
+      } else {
+        fdr <- 1
+      }
+      
        ##########################################################################
       
       
@@ -1420,7 +1427,7 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-    output$dl_UI <- renderUI({
+    output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       

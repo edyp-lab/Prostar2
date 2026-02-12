@@ -861,6 +861,7 @@ PipelineProtein_Filtering_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+          
           Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
         }
       })

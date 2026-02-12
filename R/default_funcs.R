@@ -100,3 +100,121 @@ keepDatasets <- function(object, range = seq(length(object))) {
 
   object
 }
+
+#' @title
+#' Datasets processing
+#'
+#' @description
+#' This manual page describes manipulation methods using [list] objects. In
+# 'the following functions, if `object` is of class `list`, and optional array
+#' index or name `i` can be specified to define the array (by name of
+#' index) on which to operate.
+#'
+#' The following functions are currently available:
+#'
+#' - `keepDatasets(object, range)` keep datasets in object which
+#' are in range
+#'
+#' - `addDatasets(object, dataset, name)` add the 'dataset' to the
+#' object (of type list)
+#'
+#' - `Save(object, file)` stores the object to a .RData file
+#'
+#' @details
+#' The object must be of type list. Thetwo functions are implemented here for
+# 'a simple list. For other dataset classes, their implementation must be part
+#' of the package which uses MagellanNTK
+#'
+#' @param object An object of class `list`.
+#'
+#' @param range A xxxx
+#'
+#' @param dataset `character(1)` providing the base with respect to which
+#'     logarithms are computed. Default is log2.
+#'
+#' @param name A `character(1)` naming the new array name.
+#'
+#' @return An processed object of the same class as `object`.
+#'
+#' @aliases keepDatasets keepDatasets,list-method
+#' @aliases addDatasets addDatasets,list-method
+#'
+#' @name dataset-processing
+#'
+#' @importFrom methods setMethod new
+#'
+#'
+NULL
+
+
+
+
+#' @title Get a subset of a `QFeatures` object
+#' @description This function deletes the items not included in the
+#' range parameter. It is a cutomized function which replaces the default
+#' `keepDatasets()` function of the package MagellanNTK
+#' @param object An instance of the `QFeatures` class
+#' @param range A veftor of integer which correspond to the indices of
+#' assays to keep in the final object
+#'
+#' @rdname dataset-processing
+#' 
+#' @return An instance of the `QFeatures` class
+#'
+#' @export
+#'
+keepDatasets <- function(object, range = seq(length(object))) {
+  stopifnot(inherits(object, "QFeatures"))
+  
+  object[, , range]
+}
+
+
+
+
+#' @title
+#' Datasets processing
+#'
+#' @description
+#' This manual page describes manipulation methods using [list] objects. In
+# 'the following functions, if `object` is of class `list`, and optional array
+#' index or name `i` can be specified to define the array (by name of
+#' index) on which to operate.
+#'
+#' The following functions are currently available:
+#'
+#' - `keepDatasets(object, range)` keep datasets in object which
+#' are in range
+#'
+#' - `addDatasets(object, dataset, name)` add the 'dataset' to the
+#' object (of type list)
+#'
+#' - `Save(object, file)` stores the object to a .RData file
+#'
+#' @details
+#' The object must be of type list. Thetwo functions are implemented here for
+# 'a simple list. For other dataset classes, their implementation must be part
+#' of the package which uses MagellanNTK
+#'
+#' @param object An object of class `list`.
+#'
+#' @param range A xxxx
+#'
+#' @param dataset `character(1)` providing the base with respect to which
+#'     logarithms are computed. Default is log2.
+#'
+#' @param name A `character(1)` naming the new array name.
+#'
+#' @return An processed object of the same class as `object`.
+#'
+#' @aliases keepDatasets keepDatasets,list-method
+#' @aliases addDatasets addDatasets,list-method
+#'
+#' @name dataset-processing
+#'
+#' @importFrom methods setMethod new
+#'
+#'
+NULL
+
+

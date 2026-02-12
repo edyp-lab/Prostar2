@@ -204,7 +204,7 @@ mod_set_pval_threshold_server <- function(
     })
     
     
-    observeEvent(req(input$ApplyThreshold), {
+    observeEvent(req(input$ApplyThreshold), ignoreInit = FALSE,{
 
       dataOut(as.numeric(input$text2))
     })

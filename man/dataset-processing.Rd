@@ -11,17 +11,26 @@
 addDatasets(object, dataset, name)
 
 keepDatasets(object, range = seq(length(object)))
+
+keepDatasets(object, range = seq(length(object)))
 }
 \arguments{
-\item{object}{An instance of type list. Must get TRUE to inherits(object, 'list')}
+\item{object}{An object of class \code{list}.}
 
-\item{dataset}{An instance of class \code{SummarizedExperiment}}
+\item{dataset}{\code{character(1)} providing the base with respect to which
+logarithms are computed. Default is log2.}
 
-\item{name}{the name to associate to the dataset in the final object}
+\item{name}{A \code{character(1)} naming the new array name.}
 
-\item{range}{xxx}
+\item{range}{A xxxx}
 }
 \value{
+An processed object of the same class as \code{object}.
+
+An processed object of the same class as \code{object}.
+
+An instance of the \code{QFeatures} class
+
 An processed object of the same class as \code{object}.
 }
 \description{
@@ -43,8 +52,44 @@ if necessary
 
 This function deletes the items not included in the
 range parameter
+
+This manual page describes manipulation methods using \link{list} objects. In
+index or name \code{i} can be specified to define the array (by name of
+index) on which to operate.
+
+The following functions are currently available:
+\itemize{
+\item \code{keepDatasets(object, range)} keep datasets in object which
+are in range
+\item \code{addDatasets(object, dataset, name)} add the 'dataset' to the
+object (of type list)
+\item \code{Save(object, file)} stores the object to a .RData file
+}
+
+This function deletes the items not included in the
+range parameter. It is a cutomized function which replaces the default
+\code{keepDatasets()} function of the package MagellanNTK
+
+This manual page describes manipulation methods using \link{list} objects. In
+index or name \code{i} can be specified to define the array (by name of
+index) on which to operate.
+
+The following functions are currently available:
+\itemize{
+\item \code{keepDatasets(object, range)} keep datasets in object which
+are in range
+\item \code{addDatasets(object, dataset, name)} add the 'dataset' to the
+object (of type list)
+\item \code{Save(object, file)} stores the object to a .RData file
+}
 }
 \details{
+The object must be of type list. Thetwo functions are implemented here for
+of the package which uses MagellanNTK
+
+The object must be of type list. Thetwo functions are implemented here for
+of the package which uses MagellanNTK
+
 The object must be of type list. Thetwo functions are implemented here for
 of the package which uses MagellanNTK
 }
