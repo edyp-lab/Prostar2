@@ -9,7 +9,8 @@
 #' @param pattern xxx
 #' @param grp xxx
 #' @param is.enabled xxx
-#' @param remoteReset xxx
+#' @param remoteReset A `logical(1)` which acts as a remote command to reset
+#' the module to its default values. Default is FALSE.
 #'
 #' @name mod_mv_plots
 #'

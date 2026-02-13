@@ -6,7 +6,8 @@
 #'
 #' @param id xxx
 #' @param dataIn An instance of the class `SummarizedExperiment`
-#' @param remoteReset xxx
+#' @param remoteReset A `logical(1)` which acts as a remote command to reset
+#' the module to its default values. Default is FALSE.
 #' @param is.enabled xxx
 #' @name metacell-tree
 #'

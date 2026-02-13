@@ -13,12 +13,6 @@ mod_set_pval_threshold_server(
   pval_init = reactive({
      1
  }),
-  fdr = reactive({
-     0
- }),
-  threshold.type = reactive({
-     "logpval"
- }),
   remoteReset = reactive({
      0
  }),
@@ -27,26 +21,26 @@ mod_set_pval_threshold_server(
  })
 )
 
-mod_set_pval_threshold(pval_init = 1, fdr = 0, threshold.type = "logpval")
+mod_set_pval_threshold(pval_init = 1)
 }
 \arguments{
-\item{id}{xxx}
+\item{id}{A \code{charcater()} for the shiny module id}
 
 \item{pval_init}{xxx}
 
-\item{fdr}{xxx}
-
-\item{threshold.type}{xxx}
-
-\item{remoteReset}{xxx}
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
+the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{xxx}
+
+\item{fdr}{xxx}
 }
 \description{
 A shiny Module.
 }
 \examples{
 if (interactive()){
+library(Prostar2)
 shiny::runApp(mod_set_pval_threshold())
 }
 

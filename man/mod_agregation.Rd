@@ -36,14 +36,14 @@ mod_Agregation_server(
 \item{steps.enabled}{A \code{logical()} which indicates whether each step is
 enabled or disabled in the UI.}
 
-\item{remoteReset}{A \code{logical(1)} which acts asa a remote command to reset
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
 the module to its default values. Default is FALSE.}
 
 \item{steps.status}{A \code{logical()} which indicates the status of each step
 which can be either 'validated', 'undone' or 'skipped'.
 enabled or disabled in the UI.}
 
-\item{current.pos}{A \code{interger(1)} which acts as a remote command to make
+\item{current.pos}{A \code{integer(1)} which acts as a remote command to make
 a step active in the timeline. Default is 1.}
 
 \item{verbose}{A \code{logical(1)} to indicates whether run and debug infos must

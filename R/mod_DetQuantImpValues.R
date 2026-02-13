@@ -12,7 +12,8 @@
 #' @param quant xxx
 #' @param factor xxx
 #' @param dataIn xxx
-#' @param remoteReset xxx
+#' @param remoteReset A `logical(1)` which acts as a remote command to reset
+#' the module to its default values. Default is FALSE.
 #' @param is.enabled xxx
 #'
 #' @name mod_DetQuantImpValues

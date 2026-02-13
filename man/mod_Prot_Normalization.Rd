@@ -33,7 +33,8 @@ mod_Prot_Normalization(dataIn, i)
 
 \item{i}{xxx}
 
-\item{remoteReset}{A \code{integer(1)} xxxx}
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
+the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{A \code{logical(1)} that indicates whether the module is
 enabled or disabled. This is a remote command.}

@@ -13,7 +13,8 @@
 #' @param showSelect xxx
 #' @param dataIn xxx
 #' @param group xxx
-#' @param remoteReset xxx
+#' @param remoteReset A `logical(1)` which acts as a remote command to reset
+#' the module to its default values. Default is FALSE.
 #' @param is.enabled xxx
 #'
 #' @return NA

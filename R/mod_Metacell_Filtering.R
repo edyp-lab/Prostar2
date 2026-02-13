@@ -21,7 +21,8 @@
 #' @param i xxx
 #' @param dataIn xxx
 #' @param id xxx
-#' @param remoteReset A `ìnteger(1)` xxxx
+#' @param remoteReset A `logical(1)` which acts as a remote command to reset
+#' the module to its default values. Default is FALSE.
 #' @param is.enabled A `logical(1)` that indicates whether the module is
 #' enabled or disabled. This is a remote command.
 

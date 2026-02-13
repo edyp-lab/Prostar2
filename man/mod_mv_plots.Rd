@@ -50,7 +50,8 @@ mod_mv_plots(data, grp = NULL, mytitle = NULL, pal = NULL, pattern = NULL)
 
 \item{is.enabled}{xxx}
 
-\item{remoteReset}{xxx}
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
+the module to its default values. Default is FALSE.}
 }
 \description{
 xxx

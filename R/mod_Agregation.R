@@ -52,12 +52,12 @@ mod_Agregation_ui <- function(id) {
 #' @param dataIn An instance of the class `QFeatures`
 #' @param steps.enabled A `logical()` which indicates whether each step is
 #' enabled or disabled in the UI.
-#' @param remoteReset A `logical(1)` which acts asa a remote command to reset
+#' @param remoteReset A `logical(1)` which acts as a remote command to reset
 #' the module to its default values. Default is FALSE.
 #' @param steps.status A `logical()` which indicates the status of each step
 #' which can be either 'validated', 'undone' or 'skipped'.
 #' enabled or disabled in the UI.
-#' @param current.pos A `interger(1)` which acts as a remote command to make
+#' @param current.pos A `integer(1)` which acts as a remote command to make
 #'  a step active in the timeline. Default is 1.
 #' @param verbose A `logical(1)` to indicates whether run and debug infos must
 #' be printed in the console. Default is FALSE.

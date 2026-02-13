@@ -346,10 +346,10 @@ PipelineProtein_DA_server <- function(id,
           )
         ),
         content = div(id = ns('div_Pairwisecomparison_tooltipInfo_UI'),
-          fluidRow(
-            column(width = 4, uiOutput(ns("Pairwisecomparison_volcano_UI"))),
-            column(width = 8, uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
-        )
+          div(style = "display: inline-block; vertical-align: top;", 
+            uiOutput(ns("Pairwisecomparison_volcano_UI"))),
+          div(style = "display: inline-block; vertical-align: top;", 
+            uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
         )
       )
       
@@ -989,10 +989,11 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-          #timeline_process_ui(ns('FDR_timeline')),
           tags$div(
-            uiOutput(ns('FDR_showHideDT_UI')),
-            uiOutput(ns('FDR_widgets_ui'))
+            uiOutput(ns('FDR_widgets_ui')),
+            uiOutput(ns('showFDR_UI')),
+            br(),
+            uiOutput(ns('FDR_showHideDT_UI'))
           )
         ),
         content = div(id = ns('div_content_FDR'),
@@ -1078,13 +1079,24 @@ PipelineProtein_DA_server <- function(id,
     
     output$FDR_widgets_ui <- renderUI({
       widget <- tags$div(
-        mod_set_pval_threshold_ui(ns("Title"))
+        mod_set_pval_threshold_ui(ns("Title")),
+        
+        
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
       
     })
     
+    
+    output$showFDR_UI <- renderUI({
+      req(Get_FDR())
+      txt <- "FDR = NA"
+      if (!is.infinite(Get_FDR())) {
+        txt <- paste0("FDR = ", round(100 * Get_FDR(), digits = 2), " %")
+      }
+      h3(txt)
+    })
     #-------------------------------------------------------------------
     #
     Prostar2::mod_volcanoplot_server(
@@ -1119,17 +1131,14 @@ PipelineProtein_DA_server <- function(id,
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide"
       )
-      #req(length(which(m)) > 0)
-      
+
       p <- Build_pval_table()
       upItemsPVal <- NULL
       upItemsLogFC <- NULL
       
       
       upItemsLogFC <- which(abs(p$logFC) >= as.numeric(rv.custom$thlogfc))
-      upItemsPVal <- which(-log10(p$P_Value) >= as.numeric(
-        rv.custom$thpval
-      ))
+      upItemsPVal <- which(-log10(p$P_Value) >= as.numeric(rv.custom$thpval))
       
       rv.custom$nbTotalAnaDiff <- nrow(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]))
       rv.custom$nbSelectedAnaDiff <- NULL
@@ -1154,8 +1163,9 @@ PipelineProtein_DA_server <- function(id,
       D <- ( A - C)
 
       div(id="bloc_page",
-        style = "background-color: lightgrey; width: 300px",
-        p(paste("Total number of ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
+        style = "width: 400px",
+        p(paste("Total number of ", 
+          DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", A, sep = '' )),
         tags$em(p(style = "padding:0 0 0 20px;", 
           paste("Total remaining after push p-values = ", B, sep=''))),
         p(paste("Number of selected ", DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]]), "(s) = ", C, sep = '')),
@@ -1175,7 +1185,7 @@ PipelineProtein_DA_server <- function(id,
     
     logpval <- Prostar2::mod_set_pval_threshold_server(id = "Title",
       pval_init = reactive({10^(-rv.custom$thpval)}),
-      fdr = reactive({Get_FDR()}),
+      #fdr = reactive({Get_FDR()}),
       remoteReset = reactive({0}),
       is.enabled = reactive({rv$steps.enabled["FDR"]}))
     

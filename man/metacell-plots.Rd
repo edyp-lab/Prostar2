@@ -50,7 +50,8 @@ mod_ds_metacell_Histos(obj, group, pal, pattern = NULL, showSelect)
 
 \item{showSelect}{xxx}
 
-\item{remoteReset}{xxx}
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
+the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{xxx}
 

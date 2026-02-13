@@ -33,7 +33,8 @@ open_dataset()
 
 \item{demo_package}{xxx}
 
-\item{remoteReset}{xxx}
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
+the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{A boolean}
 }

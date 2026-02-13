@@ -27,7 +27,8 @@ mod_designExample(n = 1)
 
 \item{n}{xxx}
 
-\item{remoteReset}{xxx}
+\item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
+the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{xxx}
 }
