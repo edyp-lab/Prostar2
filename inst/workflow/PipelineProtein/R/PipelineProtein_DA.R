@@ -1186,7 +1186,7 @@ PipelineProtein_DA_server <- function(id,
     logpval <- Prostar2::mod_set_pval_threshold_server(id = "Title",
       pval_init = reactive({10^(-rv.custom$thpval)}),
       #fdr = reactive({Get_FDR()}),
-      remoteReset = reactive({0}),
+      remoteReset = reactive({remoteReset()}),
       is.enabled = reactive({rv$steps.enabled["FDR"]}))
     
     observeEvent(logpval(), {
