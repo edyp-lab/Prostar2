@@ -1,5 +1,5 @@
 #' @title xxx
-#' @name PipelinePeptide_Save
+#' @name PipelinePeptideSC_Save
 #' 
 #' @examples
 #' NULL
@@ -9,10 +9,10 @@
 #' 
 
 #' @export
-#' @rdname PipelinePeptide_Save
-PipelinePeptide_Save_conf <- function(){
+#' @rdname PipelinePeptideSC_Save
+PipelinePeptideSC_Save_conf <- function(){
   MagellanNTK::Config(
-    fullname = 'PipelinePeptide_Save',
+    fullname = 'PipelinePeptideSC_Save',
     mode = 'process'
   )
 }
@@ -20,15 +20,15 @@ PipelinePeptide_Save_conf <- function(){
 
 
 #' @export
-#' @rdname PipelinePeptide_Save
-PipelinePeptide_Save_ui <- function(id){
+#' @rdname PipelinePeptideSC_Save
+PipelinePeptideSC_Save_ui <- function(id){
   ns <- NS(id)
 }
 
 
 #' @export
-#' @rdname PipelinePeptide_Save
-PipelinePeptide_Save_server <- function(id,
+#' @rdname PipelinePeptideSC_Save
+PipelinePeptideSC_Save_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
@@ -112,7 +112,7 @@ PipelinePeptide_Save_server <- function(id,
       shiny::withProgress(message = paste0("Saving all processes", id), {
         shiny::incProgress(0.5)
         
-        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
         # DO NOT MODIFY THE THREE FOLLOWINF LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn

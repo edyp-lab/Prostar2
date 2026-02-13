@@ -7,8 +7,8 @@
 #' @examples
 #' if (interactive()){
 #' data("Exp1_R25_prot", package = "DaparToolshedData")
-#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelineProtein_Convert", path, dataIn = Exp1_R25_prot))
+#' path <- system.file('workflow/PipelinePeptideSC', package = 'Prostar2')
+#' shiny::runApp(workflowApp("PipelinePeptideSC_Convert", path, dataIn = Exp1_R25_prot))
 #' }
 #' 
 NULL
@@ -31,10 +31,10 @@ options(shiny.fullstacktrace = TRUE,
 #' format_DT_ui format_DT_server Timestamp toggleWidget 
 #' mod_popover_for_help_server mod_popover_for_help_ui
 #' 
-PipelineProtein_Convert_conf <- function(){
+PipelinePeptideSC_Convert_conf <- function(){
   # This list contains the basic configuration of the process
   MagellanNTK::Config(
-    fullname = 'PipelineProtein_Convert',
+    fullname = 'PipelinePeptideSC_Convert',
     # Define the type of module
     mode = 'process',
     # List of all steps of the process
@@ -64,7 +64,7 @@ PipelineProtein_Convert_conf <- function(){
 #'
 #' @return NA
 #'
-PipelineProtein_Convert_ui <- function(id) {
+PipelinePeptideSC_Convert_ui <- function(id) {
   ns <- NS(id)
 }
 
@@ -91,9 +91,9 @@ PipelineProtein_Convert_ui <- function(id) {
 #'
 #' @return NA
 #'
-PipelineProtein_Convert_server <- function(id,
+PipelinePeptideSC_Convert_server <- function(id,
   dataIn = reactive({NULL}),
-  steps.enabled = reactive({TRUE}),
+  steps.enabled = reactive({NULL}),
   remoteReset = reactive({NULL}),
   steps.status = reactive({NULL}),
   current.pos = reactive({1}),
@@ -127,8 +127,7 @@ PipelineProtein_Convert_server <- function(id,
     tab = NULL,
     previewtab = NULL,
     design = NULL,
-    name = NULL,
-    history = MagellanNTK::InitializeHistory()
+    name = NULL
   )
   
   
@@ -140,13 +139,12 @@ PipelineProtein_Convert_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-  
+    
     core.code <- paste0(
       MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
       MagellanNTK::Get_Code_for_rv_reactiveValues(),
       MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
-      #MagellanNTK::Get_Code_for_Initialize_History(widgets.default.values),
       MagellanNTK::Get_Code_for_dataOut(),
       MagellanNTK::Get_Code_for_remoteReset(
         widgets = TRUE,
@@ -667,19 +665,14 @@ PipelineProtein_Convert_server <- function(id,
     output$ExpandFeatData <- renderUI({
       MagellanNTK::process_layout_process(session,
         ns = NS(id),
-        sidebar = tagList(
-          uiOutput(ns('ExpandFeatData_idMethod_ui'))
-        ),
+        sidebar = tagList(),
         content = tagList(
+          uiOutput(ns("ExpandFeatData_btn_validate_ui")),
+          uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;"),
+          uiOutput(ns('ExpandFeatData_idMethod_ui'), style = "margin-right: 30px;"),
+          uiOutput(ns("ExpandFeatData_inputGroup_ui")),
           uiOutput(ns("ExpandFeatData_warningNegValues_ui")),
-          uiOutput(ns("ExpandFeatData_warningNonNum_ui")),
-          fluidRow(
-          column(width = 4,
-            uiOutput(ns("ExpandFeatData_quantCols_ui"), style = "margin-right: 30px;")),
-            column(width = 8,
-              uiOutput(ns("ExpandFeatData_inputGroup_ui"))
-            )
-          )
+          uiOutput(ns("ExpandFeatData_warningNonNum_ui"))
         )
       )
       
@@ -736,6 +729,7 @@ PipelineProtein_Convert_server <- function(id,
       content = "...")
     
     output$ExpandFeatData_idMethod_ui <- renderUI({
+      req(rv.widgets$ExpandFeatData_quantCols)
       
       widget <- radioButtons(ns("ExpandFeatData_idMethod"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_ExpandFeatData_idMethod")),
@@ -744,14 +738,15 @@ PipelineProtein_Convert_server <- function(id,
           "Yes" = TRUE),
         selected = rv.widgets$ExpandFeatData_idMethod)
       
-      cond <- rv$steps.enabled['ExpandFeatData'] && !is.null(rv.widgets$ExpandFeatData_quantCols)
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'])
     })
     
     
     
     output$ExpandFeatData_inputGroup_ui <- renderUI({
+      #req(rv.widgets$ExpandFeatData_quantCols)
       req(as.logical(rv.widgets$ExpandFeatData_idMethod))
+      
       
       rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
         df = reactive({rv.custom$tab}),
@@ -806,6 +801,22 @@ PipelineProtein_Convert_server <- function(id,
       )
     })
     
+    
+    # 
+    # observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+    #   browser()
+    #   # remove_shiny_inputs <- function(id, .input) {
+    #   #   invisible(
+    #   #     lapply(grep(id, names(.input), value = TRUE), function(i) {
+    #   #       .subset2(.input, "impl")$.values$remove(i)
+    #   #     })
+    #   #   )
+    #   # }
+    #   # 
+    #   # #removeUI(selector = "#module_content")
+    #   # remove_shiny_inputs("designEx", input)
+    # })
+    # 
     
     observe({
       rv.widgets$ExpandFeatData_quantCols
@@ -941,12 +952,10 @@ PipelineProtein_Convert_server <- function(id,
           typeDataset = rv.widgets$SelectFile_typeOfData,
           parentProtId = rv.widgets$DataId_parentProteinID,
           force.na = rv.widgets$SelectFile_replaceAllZeros,
-          software = rv.widgets$SelectFile_software,
-          name.pipeline = "PipelineProtein"
-        )
+          software = rv.widgets$SelectFile_software)
       })
       
-      S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
+      
       # DO NOT MODIFY THE THREE FOLLOWINF LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
@@ -954,7 +963,7 @@ PipelineProtein_Convert_server <- function(id,
       rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
       
       
-      Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), 
+      MagellanNTK::download_dataset_server(paste0(id, '_createQuickLink'), 
         dataIn = reactive({rv$dataIn}))
       
       

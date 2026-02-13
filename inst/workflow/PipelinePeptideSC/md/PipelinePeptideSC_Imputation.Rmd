@@ -1,0 +1,49 @@
+---
+title: "Workflow PeptideSC: Imputation"
+abstract: >
+  This page describes the computations done with Imputation.
+
+output:
+    BiocStyle::html_document:
+        highlight: tango
+        thme: sandstone
+        toc: false
+        number_sections: TRUE
+        css: style.css
+date: 30 mai 2024
+link-citations: true
+---
+
+
+This page describes the computations done with Imputation. 
+By taking into account the very nature of each missing value.
+To maximize the power of the statistical analysis, the
+missing values are imputed. This is achieved with one of the multiple available algorithms that accounts in a specific manner each
+for the specific nature of missing values (missing at random, or
+lower abundance censorship): Pirat (Etourneau et al.,
+2024), etc
+
+
+
+
+
+In peptide-level datasets, all missing values are imputed with the same process independantly of their type.
+1. Choose the imputation method (see "Methods available" below for a description of each method).
+2. Then, for each imputation method, the interface is automatically updated to display the
+method parameters that must be tuned, as well as graphs specific to the selected method. For explanation of the different parameters, the reader is referred to ProStaR user manual (see the “Manual” section of the Workflow menu).
+3. Click on “Do X” or “Do X & proceed”.
+4. Observe the influence of the imputation method on the graphs of the right hand side panel.
+5. If the result of the imputation does not correspond to the expectations, click on “Reset” to reload the step and change the imputation method or its tuning.
+6. Once the imputation is effective, go to the “Save” step and click on “Do X” or “Do X & proceed”.
+7. The new version of the dataset, comprised of all previous assays as well as now a "Imputation" assay, is available for download if wanted.
+8. Remember that at any time, it is possible to return to the menu “Vizualize data” to have a
+refined view of each step of the processing.
+
+
+
+
+### Methods available
+
+**Pirat**
+
+Pirat enables the imputation of missing values (either MNARs or MCARs) in bottom-up LC-MS/MS proteomics data using a penalized maximum likelihood strategy. It does not require any parameter tuning, it models the instrument censorship from the data available. It accounts for sibling peptides correlations and it can leverage complementary transcriptomics measurements. (see Etourneau et al., 2024)

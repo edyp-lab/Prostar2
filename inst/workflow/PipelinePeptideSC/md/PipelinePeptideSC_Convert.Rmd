@@ -1,0 +1,14 @@
+---
+title: "Workflow PeptideSC: Convert"
+abstract: >
+  The page describes the Convert tool of the Single-Cell Peptide Worflow.
+
+output:
+    BiocStyle::html_document:
+        highlight: tango
+        toc: false
+        number_sections: FALSE
+date: 27 January 2026
+link-citations: true
+---
+# Convert

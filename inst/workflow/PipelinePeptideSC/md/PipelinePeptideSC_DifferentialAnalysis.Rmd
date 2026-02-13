@@ -1,0 +1,33 @@
+---
+title: "Differential analysis"
+abstract: >
+  This page describes the computations done with Differential Analysis.
+
+output:
+    BiocStyle::html_document:
+        highlight: tango
+        toc: false
+        number_sections: FALSE
+        css: style.css
+date: 30 mai 2024
+link-citations: true
+---
+
+
+
+
+### Step "Scenario"
+
+
+### Step "Fold-change"
+
+
+### Step  "Fine tuning"
+
+
+### Step "P-value calibration"
+
+
+### Step  "FDR control"
+
+

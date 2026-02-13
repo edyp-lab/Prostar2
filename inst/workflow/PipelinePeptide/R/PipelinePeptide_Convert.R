@@ -272,7 +272,7 @@ PipelinePeptide_Convert_server <- function(id,
     fileExt.ok <- reactive({
       req(rv.widgets$SelectFile_file$name)
       authorizedExts <- c("txt", "csv", "tsv", "xls", "xlsx")
-      ext <- GetExtension(rv.widgets$SelectFile_file$name)
+      ext <- MagellanNTK::GetExtension(rv.widgets$SelectFile_file$name)
       !is.na(match(ext, authorizedExts))
     })
     
@@ -284,7 +284,7 @@ PipelinePeptide_Convert_server <- function(id,
     
     output$SelectFile_ManageXlsFiles_ui <- renderUI({
       req(rv.widgets$SelectFile_file)
-      req(GetExtension(rv.widgets$SelectFile_file$name) %in% c("xls", "xlsx"))
+      req(MagellanNTK::GetExtension(rv.widgets$SelectFile_file$name) %in% c("xls", "xlsx"))
       
       sheets <- c('', DaparToolshed::listSheets(rv.widgets$SelectFile_file$datapath))
       widget <- selectInput(ns("SelectFile_XLSsheets"), 
@@ -318,7 +318,7 @@ PipelinePeptide_Convert_server <- function(id,
     observeEvent(input$SelectFile_btn_previewfile, {
       req(rv.widgets$SelectFile_file)
       
-      ext <- GetExtension(rv.widgets$SelectFile_file$name)
+      ext <- MagellanNTK::GetExtension(rv.widgets$SelectFile_file$name)
       rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
         split='.', fixed = TRUE))[1]
       if ((ext %in% c("xls", "xlsx")) && (
@@ -426,7 +426,7 @@ PipelinePeptide_Convert_server <- function(id,
         req(rv.widgets$SelectFile_file)
         
         
-        ext <- GetExtension(rv.widgets$SelectFile_file$name)
+        ext <- MagellanNTK::GetExtension(rv.widgets$SelectFile_file$name)
         rv.custom$name <- unlist(strsplit(rv.widgets$SelectFile_file$name, 
           split='.', fixed = TRUE))[1]
         if ((ext %in% c("xls", "xlsx")) && (

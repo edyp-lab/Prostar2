@@ -1,7 +1,7 @@
 ---
-title: "Workflow Peptide: Description"
+title: "Workflow PeptideSC: Description"
 abstract: >
-  The page describe the different steps of the Peptide Worflow.
+  The page describe the different steps of the Single-Cell Peptide Worflow.
 
 output:
     BiocStyle::html_document:

@@ -12,22 +12,22 @@
 #' This convention is important because MagellanNTK call the different
 #' server and ui functions by building dynamically their name.
 #' 
-#' In this example, `PipelinePeptide_Normalization_ui()` and `PipelinePeptide_Normalization_server()` define
-#' the code for the process `ProcessPeptide` which is part of the pipeline called `PipelinePeptide`.
+#' In this example, `PipelinePeptideSC_Normalization_ui()` and `PipelinePeptideSC_Normalization_server()` define
+#' the code for the process `ProcessPeptideSC` which is part of the pipeline called `PipelinePeptideSC`.
 #' 
-#' @example inst/workflow/PipelinePeptide/examples/example_PipelinePeptide_Normalization.R
+#' @example inst/workflow/PipelinePeptideSC/examples/example_PipelinePeptideSC_Normalization.R
 #' 
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
 #' 
 NULL
 
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' @export
 #' 
-PipelinePeptide_Normalization_conf <- function(){
+PipelinePeptideSC_Normalization_conf <- function(){
   MagellanNTK::Config(
-    fullname = 'PipelinePeptide_Normalization',
+    fullname = 'PipelinePeptideSC_Normalization',
     mode = 'process',
     steps = c('Normalization'),
     mandatory = c(FALSE)
@@ -37,13 +37,13 @@ PipelinePeptide_Normalization_conf <- function(){
 
 #' @param id xxx
 #' 
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' 
 #' @author Samuel Wieczorek
 #' 
 #' @export
 #'
-PipelinePeptide_Normalization_ui <- function(id){
+PipelinePeptideSC_Normalization_ui <- function(id){
   ns <- NS(id)
   shinyjs::useShinyjs()
 }
@@ -66,7 +66,7 @@ PipelinePeptide_Normalization_ui <- function(id){
 #' 
 #' @param current.pos xxx
 #'
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' 
 #' @importFrom stats setNames rnorm
 #' @import omXplore
@@ -75,7 +75,7 @@ PipelinePeptide_Normalization_ui <- function(id){
 #' 
 #' @export
 #' 
-PipelinePeptide_Normalization_server <- function(id,
+PipelinePeptideSC_Normalization_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),
@@ -539,7 +539,7 @@ PipelinePeptide_Normalization_server <- function(id,
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
-        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
+        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptideSC'
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()

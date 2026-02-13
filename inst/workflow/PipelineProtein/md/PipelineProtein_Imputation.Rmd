@@ -1,69 +1,99 @@
 ---
-title: "Missing values imputation"
+title: "Workflow Protein: Imputation"
 abstract: >
-  This page describes the computations done with Imputation.
+  The page describe the Imputation step of the Protein Worflow.
 
 output:
     BiocStyle::html_document:
         highlight: tango
-        thme: sandstone
         toc: false
-        number_sections: TRUE
-        css: style.css
-date: 30 mai 2024
+        number_sections: FALSE
+date: 12 February 2026
 link-citations: true
 ---
+# Imputation
+
+The `Imputation` step imputes missing values to produce a complete dataset. Theorically, imputation effectively creates estimated measurements rather than true experimental observations and should therefore be avoided whenever possible. In practice, most algorithms required subsequently cannot handle missing values, and even methods that claim robustness to missing data typically rely on implicit or explicit imputation, offering no real alternative. Therefore, this is a step that should not be overlooked and requires caution.
+Imputed values use a different color code and tags than observed values, making it possible to track which proteins have been imputed.
+
+This step allows the selection of a imputation method from several available options, which are described below. The imputation process is divided into two parts to account for the nature of the missing values (POV or MEC).
+
+***
+
+### POV Imputation
+
+The `POV Imputation` step offers a number of different imputation method, that are described below. The parameters to be defined vary depending on the selected method. Only missing values identified as “POV” (Partially Observed Values) are imputed at this stage. A value is classified as a POV if at least one observation exists for that protein within the same condition.
+
+The left side of the interface is used to select the imputation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the imputation to the data.
+The table in the middle summarizes the number of missing values. After the imputation is applied, a second line summarizing the number of values imputed. If the `Det quantile` is selected, a second table will show under the first one indicating the values that will be used for the imputation.
+The first graph under below the tables displays density plots showing the distribution of partially observed values for each condition. The x-axis corresponds to the mean intensity of a protein in a condition, while the y-axis indicates the number of observed values for that protein under the same condition. In general, it can be observed that the distribution tends to shift towards higher values when fewer missing values are present. This is a sign that at least some of the missing values originate from proteins that are below the lower limit of the mass spectrometer. 
+The second graph is a heatmap of the proteins mean value according to their distribution of missing values across the conditions. Each line corresponds a protein, that have been reordered so as to cluster the proteins that have a similar amount of missing values distributed in the same way over the conditions. Likewise, the columns do not depicts a specific sample but rather any sample belonging to the given condition, as the samples have been reordered to focus on patterns of missing values. Each line is colored to represent the mean abundance value within each condition : red indicates high intensities and yellow low intensities. 
+
+##### Description of parameters and options :
+###### **`Algorithm for POV`**
+Select for the drop-down menu the imputation method to be used. It is worth noting that each method has its own set of parameters, which are described further below.
+
+The possible options are as follows:
+
+- `None` : No imputation method is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
+- `slsa` : Standing for Structured Least Square Adaptative. This is a regression based imputation method which account for a possible hierachical design. As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `Det quantile` : This method imputes each missing value within a sample using a fixed deterministic value, typically chosen as a low quantile of that sample’s intensity distribution. When selected, a table will appear in the central part indicating the values that will be used for the imputation.
+- `KNN` : Standing for K-nearest neighbors. It proposes to estimate each missing value by the mean of the observed values of other proteins with a similar intensity pattern, called neighbors.
+
+###### **`Quantile`**
+*Available only for the `Det quantile` method.*
+
+This parameter indicate the quantile used as the reference value. The value must be a float between 0 and 100.
+
+###### **`Factor`**
+*Available only for the `Det quantile` method.*
+
+This corresponds to the multiplying factor to apply to the chosen quantile value. The value must be a float.
+
+###### **`Neighbors`**
+*Available only for the `KNN` method.*
+
+This corresponds to the number of neighbors to account for when using the KNN imputation method.
 
 
-This page describes the computations done with Imputation. 
-By taking into account the very nature of each missing value.
-To maximize the power of the statistical analysis, the
-missing values are imputed. This is achieved with one of the multiple available algorithms that accounts in a specific manner each
-for the specific nature of missing values (missing at random, or
-lower abundance censorship): k Nearest Neighbors (Hastie et al.,
-2001), Maximum Likelihood Estimation (Schafer, 2008), Bayesian
-Principal Component Analysis (Stacklies et al., 2007), Quantile
-Regression to Impute Left-Censored data (Lazar, 2015), etc
+***
 
+### MEC Imputation
+The `MEC Imputation` step offers a number of different imputation method, that are described below. The parameters to be defined vary depending on the selected method. Only missing values identified as “MEC” (Missing in the Entire Condition) are imputed at this stage. A value is classified as a MEC if all the intensity values are missing for this protein in the condition considered. Imputing these values is inherently risky, as the absence of observed data makes any imputation arbitrary and may introduce poorly adjusted values into the dataset. Alternatively, MEC can be left unchanged, although this may hinder subsequent processing, or they can be removed during the filtering step and handled separately. However, excluding them in this way prevents their inclusion in downstream statistical analyses.
 
+The left side of the interface is used to select the imputation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the imputation to the data.
+The table in the middle summarizes the number of missing values. After the imputation is applied, a second line summarizing the number of values imputed. If the `Det quantile` is selected, a second table will show under the first one indicating the values that will be used for the imputation.
+The first graph under below the tables displays density plots showing the distribution of partially observed values for each condition. The x-axis corresponds to the mean intensity of a protein in a condition, while the y-axis indicates the number of observed values for that protein under the same condition. In general, it can be observed that the distribution tends to shift towards higher values when fewer missing values are present. This is a sign that at least some of the missing values originate from proteins that are below the lower limit of the mass spectrometer. 
+The second graph is a heatmap of the proteins mean value according to their distribution of missing values across the conditions. Each line corresponds a protein, that have been reordered so as to cluster the proteins that have a similar amount of missing values distributed in the same way over the conditions. Likewise, the columns do not depicts a specific sample but rather any sample belonging to the given condition, as the samples have been reordered to focus on patterns of missing values. Each line is colored to represent the mean abundance value within each condition : red indicates high intensities and yellow low intensities. 
 
+###### **`Algorithm for MEC`**
+Select for the drop-down menu the imputation method to be used. It is worth noting that each method has its own set of parameters, which are described further below.
 
+The possible options are as follows:
 
-In protein-level datasets, ProStaR makes it possible to have separate processing for two different
-types of missing values: POV (standing for Partially Observed Value) and MEC (standing for Missing in
-the Entire Condition). All the missing values for a given protein in a given condition are considered
-POV if and only if there is at least one observed value for this protein in this condition. Alternatively,
-if all the intensity values are missing for this protein in this condition, the missing values are
-considered MEC (Note 27).
-1. On the first tab (see Figure 7), select the algorithm to impute POV missing values. According to
-our expertise, we advise to select the SLSA algorithm (Giai Gianetto Q et al., submitted) but other
-methods are also of interest in specific situations.
-2. Tune the parameters of the chosen imputation method.
-3. Click on “Perform Imputation”. It will enables the next tab, on which the result of the imputation
-is shown.
-4. Move on to the second tab and decide how to deal with MEC. As a matter of fact, it is always
-dangerous to impute them, as in absence of any value to rely on, the imputation is arbitrary and
-risks to spoil the dataset with maladjusted values. As an alternative, it is possible to (1) keep the
-MEC as is in the dataset, yet, it may possibly impede further processing, (2) discard them at the
-filter step (see Section 3.5, Step 2) so as to process them separately. However, this will make it
-impossible to include these proteins (and their processing) in the final statistics, such as for
-instance FDR.
-5. If MEC are not going to be imputed, select the imputation method referred to as “None”.
-Otherwise, select the appropriate method. Based on our experience, we advise to use
-detQuantile (Note 28).
-6. Tune the parameters of the MEC imputation method (Note 29).
-7. Click on “Perform Imputation” and move on to the next tab (“Validate & save”).
-8. Observe the influence of the chosen imputation methods on the graphs of the right hand side
-panel. If the result of the imputation does not correspond to the expectations, change the
-imputation methods or their tuning (by going back to Step 1 of this section).
-9. Once the imputation is effective, click on “Save imputation”.
-10. Check that a new version appears in the dataset version dropdown menu, referred to as
-“Imputed - Protein” (Notes 30 and 31).
+- `None` : No imputation method is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
+- `Det quantile` : This method imputes each missing value within a sample using a fixed deterministic value, typically chosen as a low quantile of that sample’s intensity distribution. When selected, a table will appear in the central part indicating the values that will be used for the imputation.
+- `Fixed value` : Impute all MEC with a specific value. While simple, this method should be used carefully as it may lead to important data distortion.
 
+###### **`Quantile`**
+*Available only for the `Det quantile` method.*
 
+This parameter indicate the quantile used as the reference value. The value must be a float between 0 and 100.
 
+###### **`Factor`**
+*Available only for the `Det quantile` method.*
 
-### Imputation of 'Partially Over Conditions'
+This corresponds to the multiplying factor to apply to the chosen quantile value. The value must be a float.
 
-### Imputation of 'Missing on Entire Condition'
+###### **`Fixed value`**
+*Available only for the `Fixed value` method.*
 
+This specifies the fixed value used to impute all MEC.
+
+***
+
+### Save
+
+Click on `Run` on the left side to validate the step. 
+The imputed dataset can be downloaded through the `xlsx` or `qf` button, depending on the desired file type.
+It is possible to visualize the imputed data, as well as viewing all informations related to the imputation applied, by clicking the `EDA` button on the right side of the timeline.

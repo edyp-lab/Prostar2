@@ -1,0 +1,119 @@
+---
+title: "Workflow PeptideSC: Filtering"
+abstract: >
+  The page describe the Filtering step of the Single-Cell Peptide Worflow.
+
+output:
+    BiocStyle::html_document:
+        highlight: tango
+        toc: false
+        number_sections: FALSE
+date: 27 January 2026
+link-citations: true
+---
+# Filtering
+
+The `Filtering` step aims to remove peptides irrelevant to the analysis. Some peptides may correspond to contaminants or decoy sequences, while others may contain too many missing values to be reliably quantified. Filtering is performed using the quantitative data tags (`Cell metadata filtering`) or the metadata, which include all non-quantitative variables from the original dataset (`Variable filtering`). 
+
+This step is based on defining queries based on user-selected parameters, such as the number of missing values within or across biological conditions, contaminant annotations, or decoy flags, to either retain or discard selected peptides. Multiple filtering steps can be applied sequentially, with each filter operating on the dataset produced by the previous one.
+
+***
+
+### Cell metadata filtering
+
+The `Cell metadata filtering` step uses the quantitative data tags, which allows to filter peptides base on the type of value (e.g. missing values). For more information about these tag and how they are created, please refer to the FAQ. 
+
+The left side of the interface allows you to select the settings for the filters to be created. To visualize the effect of the filtering options without applying the query, click on `Preview`. A window will open containing the quantitative dataset with greyed out lines corresponding to the peptides that the options selected would filter out. Once pleased with the selected options, click `Add filter` to apply the query to the data.
+The table in the middle summarizes all the filters applied, as well as the number of peptides removed by each of them. Each filter is applied using the data resulting from the previous query. 
+When a tag is selected, graphs describing the distribution of values associated with this tag in the different samples and conditions appear below the table.
+
+##### Description of parameters and options :
+###### **`Tag tree`**
+At first, the only parameter shown is the tag tree. Click on it to open a window where you can select the tags to use for the desired query. At least one tag must be selected to access the other settings.
+The buttons at the top of the window allow you to choose between selecting a single tag at a time, an entire branch at once, or multiple tags regardless of their branch. Then click on the button to the left of each tag you want to select.
+To confirm your selection, click on `Validate & close`.
+
+###### **`Type of filter operation`**
+This allows to choose whether the lines identified by the query are to be kept or deleted. 
+Either `Delete` to remove the peptides identified, or `Keep` to keep them and instead removes all those that do not match the query.
+
+###### **`Scope`**
+This parameter defines how the selected tags are taken into account within a given peptide.
+The possible options are as follows:
+
+- `None` : No filter is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
+- `Whole Line` : Applies to peptides containing only the selected tags. As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `Whole Matrix` : Takes into account tags across all conditions for a given peptide.
+- `For every condition` : The filter only applies if all criteria are met in every conditions without exception.
+- `At least one condition` : The filter only applies if all criteria are met in at least one condition.
+
+###### **`Operator`**
+This specifies the algebric operator used to select lines associated with the threshold value.
+The possible options are as follows:
+
+- `<=` : Less than or equal to threshold value.
+- `<` : Stricly less than threshold value.
+- `>=` : Greater than or equal to threshold value.
+- `>` : Stricly greater than threshold value.
+- `==` : Equal to threshold value.
+- `!=` : Not equal to threshold value.
+
+###### **`Threshold Type`**
+This parameter determines the type of the threshold value.
+Either `Count` for an integer, or `Percentage` for a percentage.
+
+###### **`Threshold`**
+The threshold value to apply for the query. The way the value is selected depends on what was picked for  `Threshold Type`.
+If, for Threshold Type, `Count` is selected, a dropdown-menu proposes a list of integers. Values range from 0 to either the number of samples (if `Scope` is set to `Whole Matrix`) or the number of samples from the condition with the fewest samples (if `Scope` is `For every condition` or `At least one condition`).
+Otherwise, if `Percentage` is selected, a slider is used to select a percentage value ranging from 0 to 100.
+
+***
+
+### Variable filtering
+
+The `Variable filtering` step uses the dataset metadata, which include all non-quantitative variables from the original dataset.
+
+The left side of the interface allows you to select the settings for the filters to be created. Once pleased with the selected options, click `Add filter` to apply the query to the data.
+The table in the middle summarizes all the filters applied, as well as the number of peptides removed by each of them. Each filter is applied using the data resulting from the previous query.
+
+##### Details of settings :
+###### **`Type of filter operation`**
+This allows to choose whether the lines identified by the query are to be kept or deleted. 
+Only `Delete` is available.
+
+###### **`Column name`**
+This parameter specifies the column to be used for the query. A dropdown-menu containing the name of all metadata columns allows the selection.
+No filter can be applied if `None` is selected.
+
+###### **`Operator`**
+This specifies the operator used to select lines associated with the threshold value. The proposed operator are differents whether the column selected contains numeric data or strings.
+
+*For numeric data :*
+
+- `None` : No filter is applied.
+- `<=` : Less than or equal to the specified value.
+- `<` : Stricly less than the specified value.
+- `>=` : Greater than or equal to the specified value.
+- `>` : Stricly greater than the specified value.
+- `==` : Equal to the specified value.
+- `!=` : Not equal to the specified value.
+
+*For strings :*
+
+- `None` : No filter is applied.
+- `==` : Identical to the specified value.
+- `!=` : Different from the specified value.
+- `startsWith` : String starting with the specified value.
+- `endsWith` : String ending with the specified value.
+- `contains` : String containing the specified value.
+
+###### **`Value`**
+The value used to apply the query. If the column selected contains numeric data, the value should be numerical as well. Otherwise, it can be either a string or numerical.
+
+***
+
+### Save
+
+Click on `Run` on the left side to validate the step. 
+The filtered dataset can be downloaded through the `xlsx` or `qf` button, depending on the desired file type.
+It is possible to visualize the filtered data, as well as viewing all informations related to the filters applied, by clicking the `EDA` button on the right side of the timeline.

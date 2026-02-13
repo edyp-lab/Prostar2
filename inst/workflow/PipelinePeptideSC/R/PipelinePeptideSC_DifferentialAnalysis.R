@@ -12,10 +12,10 @@
 #' This convention is important because MagellanNTK call the different
 #' server and ui functions by building dynamically their name.
 #' 
-#' In this example, `PipelinePeptide_DifferentialAnalysis_UI()` and `PipelinePeptide_DifferentialAnalysis_server()` define
-#' the code for the process `PipelinePeptide` which is part of the pipeline called `PipelinePeptide`.
+#' In this example, `PipelinePeptideSC_DifferentialAnalysis_UI()` and `PipelinePeptideSC_DifferentialAnalysis_server()` define
+#' the code for the process `PipelinePeptideSC` which is part of the pipeline called `PipelinePeptideSC`.
 #'
-#' @name PipelinePeptide
+#' @name PipelinePeptideSC
 #' 
 #' @param id xxx
 #' @param dataIn The dataset
@@ -40,8 +40,8 @@
 #' # Simulate imputation of missing values
 #' obj <- NAIsZero(obj, 1)
 #' obj <- NAIsZero(obj, 2)
-#' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelinePeptide_DifferentialAnalysis", path, dataIn = obj))
+#' path <- system.file('workflow/PipelinePeptideSC', package = 'Prostar2')
+#' shiny::runApp(workflowApp("PipelinePeptideSC_DifferentialAnalysis", path, dataIn = obj))
 #' }
 #' 
 #' 
@@ -51,12 +51,12 @@
 #' @import DaparToolshed
 NULL
 
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' @export
 #' 
-PipelinePeptide_DifferentialAnalysis_conf <- function(){
+PipelinePeptideSC_DifferentialAnalysis_conf <- function(){
   MagellanNTK::Config(
-    fullname = 'PipelinePeptide_DifferentialAnalysis',
+    fullname = 'PipelinePeptideSC_DifferentialAnalysis',
     mode = 'process',
     steps = c("Scenario", "Fold-change", "Fine tuning", "P-value calibration", "FDR control"),
     mandatory = c(TRUE, TRUE, TRUE, TRUE, TRUE)
@@ -64,17 +64,17 @@ PipelinePeptide_DifferentialAnalysis_conf <- function(){
 }
 
 
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' 
 #' @export
 #'
-PipelinePeptide_DifferentialAnalysis_ui <- function(id){
+PipelinePeptideSC_DifferentialAnalysis_ui <- function(id){
   ns <- NS(id)
 }
 
 
 
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' 
 #' @importFrom stats setNames rnorm
 #' @importFrom magrittr "%>%"
@@ -83,7 +83,7 @@ PipelinePeptide_DifferentialAnalysis_ui <- function(id){
 #' 
 #' @export
 #' 
-PipelinePeptide_DifferentialAnalysis_server <- function(id,
+PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),

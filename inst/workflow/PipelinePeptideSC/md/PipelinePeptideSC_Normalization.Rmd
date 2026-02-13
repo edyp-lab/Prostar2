@@ -1,7 +1,7 @@
 ---
-title: "Workflow Peptide: Normalization"
+title: "Workflow PeptideSC: Normalization"
 abstract: >
-  The page describe the Normalization step of the Peptide Worflow.
+  The page describe the Normalization step of the Single-Cell Peptide Worflow.
 
 output:
     BiocStyle::html_document:

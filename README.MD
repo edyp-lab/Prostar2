@@ -1,62 +1,30 @@
 
-# Prostar <img src="./logo.png" width=100 alt="Stan Logo"/>
-
-
+# Prostar
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![years in bioc](http://bioconductor.org/shields/years-in-bioc/Prostar.svg)](https://bioconductor.org/packages/release/bioc/html/Prostar.html)
-[![bioc downloads](http://bioconductor.org/shields/downloads/Prostar.svg)](https://bioconductor.org/packages/stats/bioc/Prostar/)
 
-Release: [![build release](http://bioconductor.org/shields/build/release/bioc/Prostar.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/Prostar/)
-Devel: [![build devel](http://bioconductor.org/shields/build/devel/bioc/Prostar.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/Prostar/)
+Prostar2 is a package which provides all the necessary functions to analyze quantitative data from label-free proteomics experiments. 
+Contrarily to most other similar R packages, it is endowed with rich and user-friendly graphical interfaces, so that no programming skill is required.
 
+
+## Install Prostar2
+
+Prostar2 is currently available only through github. 
 
 ```r
-library(prostar)
-prostar()
+devtools::install_github("edyp-lab/Prostar2", force=TRUE)
 ```
 
-## Install of the standalone version
+
+## Launch Prostar2
+
+Prostar2 provides dedicated workflows for protein-level, peptide-level, and single-cell data.
 
 ```r
-cd ~; mkdir rlib
-mkdir rlib/www
-chmod -R 777 rlib/www
+library(Prostar2)
+library(MagellanNTK)
+library(DaparToolshed)
+library(omXplore)
 
-R CMD INSTALL Prostar_0.97.0.tar.gz --library=rlib
-```
-
-If you would prefer to install the package from R, do this:
-
-## From CRAN
-```r
-install.packages("Prostar", lib="~/rlib")
-```
-
-## Example of a small size protein dataset.
-Copy/paste to format your own dataset.
-See user manual (page 7) for details.
-
-
-```r
-id	IntCond1	IntCond1	IntCond2	IntCond2
-0	40679000	33460000	23513000	47514000
-1	22472000	20529000	18878000	27066000
-2	24181000	22307000	21765000	29650000
-3	17831000	15288000	21161000	24255000
-4	25557000	29942000	22358000	22992000
-5	NA	NA	NA	NA
-6	26948000	20690000	20022000	32127000
-7	145130000	152030000	161860000	174660000
-8	3750600	3680100	9091600	3803000
-9	2288700000	2308300000	2457900000	2481200000
-10	56216000	56733000	57767000	57121000
-11	55116000	55531000	55141000	55985000
-12	NA	NA	NA	10604000
-13	NA	24846000	21564000	19663000
-14	43910000	41853000	42121000	53375000
-15	64318000	64018000	69304000	68975000
-16	33044000	30683000	44981000	30866000
-17	154570000	160330000	161860000	170290000
-18	67461000	65409000	63535000	64638000
+Prostar2("PipelineProtein")
 ```

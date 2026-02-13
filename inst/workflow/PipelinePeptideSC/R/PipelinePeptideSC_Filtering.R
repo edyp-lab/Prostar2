@@ -1,0 +1,852 @@
+#' @title Shiny example process module.
+#'
+#' @description
+#' This module contains the configuration informations for the corresponding pipeline.
+#' It is called by the nav_pipeline module of the package MagellanNTK
+#' 
+#' The name of the server and ui functions are formatted with keywords separated by '_', as follows:
+#' * first string `mod`: indicates that it is a Shiny module
+#' * `pipeline name` is the name of the pipeline to which the process belongs
+#' * `process name` is the name of the process itself
+#' 
+#' This convention is important because MagellanNTK call the different
+#' server and ui functions by building dynamically their name.
+#' 
+#' In this example, `PipelinePeptideSC_Filtering_ui()` and `PipelinePeptideSC_Filtering_server()` define
+#' the code for the process `PipelinePeptideSC` which is part of the pipeline called `PipelinePeptideSC`.
+#'
+#' @name PipelinePeptideSC
+#' 
+#' @param id xxx
+#' @param dataIn The dataset
+#' @param steps.enabled A vector of boolean which has the same length of the steps
+#' of the pipeline. This information is used to enable/disable the widgets. It is not
+#' a communication variable between the caller and this module, thus there is no
+#' corresponding output variable
+#' @param remoteReset It is a remote command to reset the module. A boolean that
+#' indicates is the pipeline has been reseted by a program of higher level
+#' Basically, it is the program which has called this module
+#' @param steps.status xxx
+#' @param current.pos xxx
+#' @param path xxx
+#' 
+#' 
+#' @examples
+#' if (interactive()){
+#' library(Prostar2)
+#' library(MagellanNTK)
+#' data(Exp2_R100_pept, package = 'DaparToolshedData')
+#' path <- system.file('workflow/PipelinePeptideSC', package = 'Prostar2')
+#' shiny::runApp(proc_workflowApp("PipelinePeptideSC_Filtering", path, dataIn = Exp2_R100_pept))
+#' }
+#' 
+#' @importFrom QFeatures addAssay removeAssay
+#' @import DaparToolshed
+#' 
+NULL
+
+#' @rdname PipelinePeptideSC
+#' @export
+#' 
+PipelinePeptideSC_Filtering_conf <- function(){
+  MagellanNTK::Config(
+    fullname = 'PipelinePeptideSC_Filtering',
+    mode = 'process',
+    steps = c("Cell metadata filtering", "Variable filtering"),
+    mandatory = c(FALSE, FALSE)
+  )
+}
+
+
+#' @rdname PipelinePeptideSC
+#' 
+#' @export
+#'
+PipelinePeptideSC_Filtering_ui <- function(id){
+  ns <- NS(id)
+}
+
+
+
+#' @rdname PipelinePeptideSC
+#' 
+#' @importFrom stats setNames rnorm
+#' @importFrom shinyFeedback showFeedbackWarning hideFeedback
+#' 
+#' @export
+#' 
+PipelinePeptideSC_Filtering_server <- function(id,
+  dataIn = reactive({NULL}),
+  steps.enabled = reactive({NULL}),
+  remoteReset = reactive({0}),
+  steps.status = reactive({NULL}),
+  current.pos = reactive({1}),
+  path = NULL,
+  btnEvents = reactive({NULL})
+){
+  
+  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  
+  # Define default selected values for widgets
+  # This is only for simple workflows
+  widgets.default.values <- list(
+    Cellmetadatafiltering_tag = "None",
+    Cellmetadatafiltering_scope = "None",
+    Cellmetadatafiltering_keep_vs_remove = "delete",
+    Cellmetadatafiltering_valueTh = 0,
+    Cellmetadatafiltering_percentTh = 0,
+    Cellmetadatafiltering_valPercent = "Count",
+    Cellmetadatafiltering_operator = "None",
+    
+    
+    Variablefiltering_cname = "None",
+    Variablefiltering_value = NA,
+    Variablefiltering_keep_vs_remove = "delete",
+    Variablefiltering_operator = "None"
+  )
+  
+  
+  rv.custom.default.values <- list(
+    result_open_dataset = reactive({NULL}),
+    dataIn1 = NULL,
+    dataIn2 = NULL,
+    deleted.stringBased = NULL,
+    deleted.metacell = NULL,
+    deleted.numeric = NULL,
+    tmp.filtering1 = reactive({NULL}),
+    tmp.filtering2 = reactive({NULL}),
+    
+    indices = NULL,
+    functionFilter = NULL,
+    query = list(),
+    fun.list = list(),
+    widgets.value = list(),
+    tmp.tags = reactive({NULL}),
+    indices = NULL,
+    Filtering = NULL,
+    query = list(),
+    fun.list = list(),
+    widgets.value = list(),
+    funFilter = reactive({NULL}),
+    qMetacell_Filter_SummaryDT = data.frame(
+      query = "-",
+      nbDeleted = "0",
+      TotalMainAssay = '0',
+      stringsAsFactors = FALSE
+    ), 
+    df = data.frame(),
+    history = MagellanNTK::InitializeHistory(),
+    
+    
+    # Variable Filtering variables
+    # indices = NULL,
+    Variablefiltering_query = list(),
+    Variablefiltering_widgets.value = list(),
+    Variablefiltering_variable_Filter_SummaryDT = data.frame(
+      Variablefiltering_query = NA,
+      Variablefiltering_nbDeleted = NA,
+      Variablefiltering_TotalMainAssay = NA,
+      stringsAsFactors = FALSE
+    ),
+    
+    Variablefiltering_ll.var = list(),
+    Variablefiltering_ll.query = list(),
+    Variablefiltering_ll.widgets.value = list()
+  )
+  
+  GetFiltersScope <- function()
+    c("Whole Line" = "WholeLine",
+      "Whole matrix" = "WholeMatrix",
+      "For every condition" = "AllCond",
+      "At least one condition" = "AtLeastOneCond"
+    )
+  
+  ###-------------------------------------------------------------###
+  ###                                                             ###
+  ### ------------------- MODULE SERVER --------------------------###
+  ###                                                             ###
+  ###-------------------------------------------------------------###
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+    # Insert necessary code which is hosted by MagellanNTK
+    # DO NOT MODIFY THIS LINE
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
+      mode = 'process',
+      name = id,
+      w.names = names(widgets.default.values),
+      rv.custom.names = names(rv.custom.default.values)
+    )
+    
+    eval(str2expression(core.code))
+    add.resourcePath()
+    
+    
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
+    output$Description <- renderUI({
+      file <- normalizePath(file.path(
+        system.file('workflow', package = 'Prostar2'),
+        unlist(strsplit(id, '_'))[1], 
+        'md', 
+        paste0(id, '.Rmd')))
+      
+      
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = div(id = 'div_sidebar_Description',
+                      uiOutput(ns('open_dataset_UI'))
+        ),
+        content = div(id = ns('div_content'),
+                      #div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
+                      if (file.exists(file))
+                        includeMarkdown(file)
+                      else
+                        p('No Description available')
+                      #uiOutput(ns('Description_infos_dataset_UI'))
+        )
+      )
+    })
+    
+    
+    output$open_dataset_UI <- renderUI({
+      req(session$userData$runmode == 'process')
+      req(is.null(dataIn()))
+      req(NULL)
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+      
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    })
+    
+    
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(grepl('Description', btnEvents()))
+      req(dataIn())
+      req(inherits(dataIn(), 'QFeatures'))
+      
+      rv$dataIn <- dataIn()
+      
+      if(!is.null(rv.custom$result_open_dataset()$dataset))
+        rv$dataIn <- rv.custom$result_open_dataset()$dataset
+      
+      rv.custom$dataIn1 <- rv$dataIn
+      rv.custom$dataIn2 <- rv$dataIn
+      
+      rv.custom$qMetacell_Filter_SummaryDT <- data.frame(
+        query = "-",
+        nbDeleted = "0",
+        TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
+      
+      rv.custom$Variablefiltering_variable_Filter_SummaryDT <- data.frame(
+        Variablefiltering_query = "-",
+        Variablefiltering_nbDeleted = "0",
+        Variablefiltering_TotalMainAssay = nrow(rv$dataIn[[length(rv$dataIn)]]),
+        stringsAsFactors = FALSE
+      )
+      
+      dataOut$trigger <- MagellanNTK::Timestamp()
+      dataOut$value <- NULL
+      rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+    })
+    
+    
+    
+    ###########################################################################-
+    #
+    #------------------------CELL METADATA FILTERING----------------------------
+    #
+    ###########################################################################-
+    output$Cellmetadatafiltering <- renderUI({
+      
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          uiOutput(ns("Cellmetadatafiltering_buildQuery_ui"))
+        ),
+        content = tagList(
+          uiOutput(ns('qMetacell_Filter_DT_UI')),
+          uiOutput(ns("Cellmetadatafiltering_qMetacell_Filter_DT")),
+          uiOutput(ns('Cellmetadatafiltering_plots_ui'))
+        )
+      )
+    })
+    
+    
+    observe({
+      req(rv$steps.enabled["Cellmetadatafiltering"])
+      req(rv.custom$dataIn1)
+      
+      rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
+        id = "query",
+        dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
+        conds = reactive({DaparToolshed::design.qf(rv.custom$dataIn1)$Condition}),
+        keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
+        val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
+        operator = reactive({stats::setNames(nm = DaparToolshed::SymFilteringOperators())}),
+        remoteReset = reactive({remoteReset()}),
+        is.enabled = reactive({rv$steps.enabled["Cellmetadatafiltering"]})
+      )
+    })
+    
+    output$Cellmetadatafiltering_buildQuery_ui <- renderUI({
+      widget <- mod_qMetacell_FunctionFilter_Generator_ui(ns("query"))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    })
+    
+    
+    
+    MagellanNTK::mod_popover_for_help_server("tag_help",
+                                             title = "Nature of data to filter",
+                                             content = "Define xxx"
+    )
+    
+    
+    help.txt1 <- "To filter the missing values, the choice of the lines to 
+        be kept is made by different options:
+    <ul>
+    <li><strong>None</strong>: No filtering, the quantitative data is left 
+    unchanged.</li>
+    <li><strong>(Remove) Empty lines</strong>: All the lines with 100% of 
+    missing values are filtered out.</li>
+    <li><strong>Whole Matrix</strong>: The lines (across all conditions) 
+    which contain less quantitative value than a user-defined threshold are 
+    kept;</li>
+    <li><strong>For every condition</strong>: The lines for which each 
+    condition contain less quantitative value than a user-defined threshold 
+    are deleted;</li>
+    <li><strong>At least one condition</strong>: The lines for which at least 
+    one condition contain less quantitative value than a user-defined 
+    threshold are deleted.</li>
+    </ul>"
+    
+    MagellanNTK::mod_popover_for_help_server("filterScope_help",
+                                             title = "Scope",
+                                             content = HTML(help.txt1)
+    )
+    
+    
+    observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE,{
+      req(rv.custom$dataIn1)
+      
+      tmp <- DaparToolshed::filterFeaturesOneSE(
+        object = rv.custom$dataIn1,
+        i = length(rv.custom$dataIn1),
+        name = paste0("qMetacellFiltered", MagellanNTK::Timestamp()),
+        filters = rv.custom$funFilter()$value$ll.fun
+      )
+      #indices <- rv.custom$funFilter()$value$ll.indices
+      
+      
+      # Add infos
+      nBefore <- nrow(tmp[[length(tmp) - 1]])
+      nAfter <- nrow(tmp[[length(tmp)]])
+      
+      
+      .html <- rv.custom$funFilter()$value$ll.query
+      .nbDeleted <- nBefore - nAfter
+      .nbRemaining <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
+      
+      rv.custom$qMetacell_Filter_SummaryDT <- rbind(
+        rv.custom$qMetacell_Filter_SummaryDT ,
+        c(.html, .nbDeleted, .nbRemaining))
+      
+      
+      
+      # Keeps only the last filtered SE
+      len_start <- length(dataIn())
+      len_end <- length(tmp)
+      len_diff <- len_end - len_start
+      
+      req(len_diff > 0)
+      
+      if (len_diff == 2)
+        rv.custom$dataIn1 <- QFeatures::removeAssay(tmp, length(tmp)-1)
+      else
+        rv.custom$dataIn1 <- tmp
+      
+      # Rename the new dataset with the name of the process
+      names(rv.custom$dataIn1)[length(rv.custom$dataIn1)] <- 'Cellmetadatafiltering'
+      
+      # Add params
+      query <- rv.custom$funFilter()$value$ll.query
+      #i <- length(rv.custom$dataIn1)
+      #.history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
+      #.history[[paste0('query_', length(.history))]] <- query
+      
+      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Cellmetadatafiltering', 'query', query)
+      DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']])
+                                                                                          ,rv.custom$history)
+    })
+    
+    
+    output$Cellmetadatafiltering_plots_ui <- renderUI({
+      req(rv.custom$funFilter()$value$ll.pattern)
+      
+      mod_ds_metacell_Histos_server(
+        id = "plots",
+        dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
+        pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
+        group = reactive({DaparToolshed::design.qf(rv.custom$dataIn1)$Condition})
+      )
+      
+      
+      widget <- mod_ds_metacell_Histos_ui(ns("plots"))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Cellmetadatafiltering"])
+    })
+    
+    
+    MagellanNTK::format_DT_server("dt", 
+                                  dataIn = reactive({rv.custom$qMetacell_Filter_SummaryDT}))
+    
+    
+    output$qMetacell_Filter_DT_UI <- renderUI({
+      req(rv.custom$qMetacell_Filter_SummaryDT)
+      MagellanNTK::format_DT_ui(ns("dt"))
+    })
+    
+    
+    # >>> END: Definition of the widgets
+    
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(grepl('Cellmetadatafiltering', btnEvents()))
+      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
+        if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn1),
+                              SummarizedExperiment::assays(dataIn()))) 
+             || !("Cellmetadatafiltering" %in% names(rv.custom$dataIn1)))
+          shinyjs::info(btnVentsMasg)
+        else {
+          req(rv.custom$dataIn1)
+          
+          rv.custom$dataIn2 <- rv.custom$dataIn1
+          
+          rv.custom$Variablefiltering_variable_Filter_SummaryDT <- data.frame(
+            Variablefiltering_query = "-",
+            Variablefiltering_nbDeleted = "0",
+            Variablefiltering_TotalMainAssay = nrow(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]),
+            stringsAsFactors = FALSE
+          )
+          
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status["Cellmetadatafiltering"] <- MagellanNTK::stepStatus$VALIDATED
+        }
+        shiny::incProgress(1)
+      })
+    })
+    
+    
+    ###########################################################################-
+    #
+    #--------------------------VARIABLE FILTERING-------------------------------
+    #
+    ###########################################################################-
+    output$Variablefiltering <- renderUI({
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          #timeline_process_ui(ns('Variablefiltering_timeline')),
+          uiOutput(ns("Variablefiltering_chooseKeepRemove_ui")),
+          uiOutput(ns("Variablefiltering_cname_ui")),
+          uiOutput(ns("Variablefiltering_operator_ui")),
+          uiOutput(ns("Variablefiltering_value_ui")),
+          uiOutput(ns('Variablefiltering_Preview_UI')),
+          uiOutput(ns("Variablefiltering_addFilter_btn_ui"))
+        ),
+        content = tagList(
+          uiOutput(ns("Variablefiltering_DT_UI"))
+        )
+      )
+      
+    })
+    
+    
+    
+    output$Variablefiltering_chooseKeepRemove_ui <- renderUI({
+      
+      widget <- radioButtons(ns("Variablefiltering_keep_vs_remove"),
+                             "Type of filter operation",
+                             choices = rv.widgets$Variablefiltering_keep_vs_remove,
+                             selected = rv.widgets$Variablefiltering_keep_vs_remove
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Variablefiltering"])
+    })
+    
+    
+    
+    output$Variablefiltering_cname_ui <- renderUI({
+      req(rv.custom$dataIn2)
+      .choices <- c("None", colnames(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])))
+      
+      widget <- selectInput(ns("Variablefiltering_cname"),
+                            "Column name",
+                            choices = stats::setNames(.choices, nm = .choices),
+                            selected = rv.widgets$Variablefiltering_cname,
+                            width = "200px"
+      )
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Variablefiltering"])
+    })
+    
+    
+    output$Variablefiltering_operator_ui <- renderUI({
+      req(rv.custom$dataIn2)
+      req(rv.widgets$Variablefiltering_cname %in% colnames(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])))
+      
+      
+      if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])[, rv.widgets$Variablefiltering_cname])) {
+        .operator <- DaparToolshed::SymFilteringOperators()
+      } else {
+        .operator <- c("==", "!=", "startsWith", "endsWith", "contains")
+      }
+      
+      .operator = c("None" = "None", .operator)
+      
+      widget <- selectInput(ns("Variablefiltering_operator"),
+                            "operator",
+                            choices = stats::setNames(nm = .operator),
+                            selected = rv.widgets$Variablefiltering_operator,
+                            width = "100px"
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Variablefiltering"])
+    })
+    
+    
+    output$Variablefiltering_value_ui <- renderUI({
+      
+      widget <- textInput(ns("Variablefiltering_value"),
+                          "value",
+                          placeholder = 'Enter value...',
+                          width = "100px"
+                          #value = rv.widgets$value
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Variablefiltering"])
+    })
+    
+    
+    
+    
+    observeEvent(c(rv.widgets$Variablefiltering_value, rv.widgets$Variablefiltering_cname), {
+      req(rv.custom$dataIn2)
+      req(rv.widgets$Variablefiltering_value != 'Enter value...')
+      req(rv.widgets$Variablefiltering_cname != "None")
+      
+      if (is.na(Extract_Value(rv.widgets$Variablefiltering_value))) {
+        shinyFeedback::showFeedbackWarning(
+          inputId = "Variablefiltering_value",
+          text = "wrong type of value"
+        )  
+      } else {
+        shinyFeedback::hideFeedback("Variablefiltering_value")
+      }
+      
+    })
+    
+    
+    
+    Extract_Value <- function(value){
+      val <- NULL
+      val <- tryCatch({
+        
+        
+        if (is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])[, rv.widgets$Variablefiltering_cname]) ) {
+          as.numeric(value)
+        } else if (!is.numeric(SummarizedExperiment::rowData(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])[, rv.widgets$Variablefiltering_cname])){
+          as.character(value)
+        }
+      },
+      warning = function(w){NA},
+      error = function(e) NA
+      )
+      return(val)
+    }
+    
+    
+    
+    Variablefiltering_BuildVariableFilter <- function(
+    value = NULL,
+    operator = NULL,
+    cname = NULL,
+    keep_vs_remove = NULL){
+      
+      req(value != 'Enter value...')
+      req(operator != "None")
+      req(cname != "None")
+      req(Extract_Value(value))
+      
+      QFeatures::VariableFilter(
+        field = cname,
+        value = Extract_Value(value),
+        condition = operator,
+        not = keep_vs_remove == "delete"
+      )
+    }
+    
+    
+    Variablefiltering_WriteQuery <- function(
+    value = NULL,
+    operator = NULL,
+    cname = NULL,
+    keep_vs_remove = NULL){
+      
+      
+      value <- Extract_Value(value)
+      query <- paste0(
+        keep_vs_remove, " values for which ",
+        cname, " ", operator, " ", value)
+      query
+      
+    }
+    
+    
+    
+    output$Variablefiltering_addFilter_btn_ui <- renderUI({
+      widget <- actionButton(ns("Variablefiltering_addFilter_btn"), "Add filter",
+                             class = "btn-info")
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Variablefiltering"])
+    })
+    
+    
+    output$Variablefiltering_DT_UI <- renderUI({
+      MagellanNTK::format_DT_server("Variablefiltering_dt", 
+                                    dataIn = reactive({rv.custom$Variablefiltering_variable_Filter_SummaryDT}))
+      
+      MagellanNTK::format_DT_ui(ns("Variablefiltering_dt"))
+    })
+    
+    
+    GuessIndices <- reactive({
+      req(rv.custom$Variablefiltering_funFilter)
+      print("guesswhat")
+      
+      tmp <- DaparToolshed::filterFeaturesOneSE(
+        object = rv.custom$dataIn2,
+        i = length(rv.custom$dataIn2),
+        name = paste0("variableFiltered", MagellanNTK::Timestamp()),
+        filters = rv.custom$Variablefiltering_funFilter$ll.var
+      )
+      
+      assaybefore <- SummarizedExperiment::assay(tmp[[length(tmp)-1]])
+      assayafter <- SummarizedExperiment::assay(tmp[[length(tmp)]])
+      namesbefore <- rownames(assaybefore)
+      namesafter <- rownames(assayafter)
+      
+      
+      indices <- 1:length(namesafter)
+      diff <- setdiff(namesbefore, namesafter)
+      indices <- match(diff, namesbefore)
+      indices
+    })
+    
+    
+    output$Variablefiltering_Preview_UI <- renderUI({
+      req(GuessIndices())
+      print("dedans")
+      
+      mod_filtering_example_server(id = "preview_filtering_query_result",
+                                   dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
+                                   indices = reactive({GuessIndices()}),
+                                   operation = reactive({'delete'}),
+                                   title = reactive({WriteQuery()})
+      )
+      
+      
+      
+      tagList(
+        mod_filtering_example_ui(ns("preview_filtering_query_result")),
+        tags$head(tags$style(" .modal-content{ width: 1000px;}"))
+      )
+    })
+    
+    
+    observeEvent(c(rv.widgets$Variablefiltering_value,
+                   rv.widgets$Variablefiltering_operator,
+                   rv.widgets$Variablefiltering_cname), {
+                     
+                     
+                     rv.custom$Variablefiltering_ll.var <- list(
+                       Variablefiltering_BuildVariableFilter(
+                         value = rv.widgets$Variablefiltering_value,
+                         operator = rv.widgets$Variablefiltering_operator,
+                         cname = rv.widgets$Variablefiltering_cname,
+                         keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
+                     )
+                     
+                     rv.custom$Variablefiltering_ll.query <- list(
+                       Variablefiltering_WriteQuery(
+                         value = rv.widgets$Variablefiltering_value,
+                         operator = rv.widgets$Variablefiltering_operator,
+                         cname = rv.widgets$Variablefiltering_cname,
+                         keep_vs_remove = rv.widgets$Variablefiltering_keep_vs_remove)
+                     )
+                     
+                     rv.custom$Variablefiltering_ll.widgets.value <- reactiveValuesToList(rv.widgets)
+                     ind <- grepl('Variablefiltering', names(rv.custom$Variablefiltering_ll.widgets.value))
+                     ind <- which(ind == TRUE)
+                     rv.custom$Variablefiltering_ll.widgets.value <- rv.custom$Variablefiltering_ll.widgets.value[ind]
+                     
+                     
+                     rv.custom$Variablefiltering_funFilter <- list(
+                       ll.var = rv.custom$Variablefiltering_ll.var,
+                       ll.query = rv.custom$Variablefiltering_ll.query,
+                       ll.widgets.value = rv.custom$Variablefiltering_ll.widgets.value
+                     )
+                     
+                   })
+    
+    
+    observeEvent(input$Variablefiltering_addFilter_btn,
+                 ignoreInit = FALSE, ignoreNULL = TRUE, {
+                   
+       req(rv.widgets$Variablefiltering_value)
+       req(rv.widgets$Variablefiltering_operator)
+       req(rv.widgets$Variablefiltering_cname)
+       
+       ########################################### -
+       req(length(rv.custom$Variablefiltering_funFilter$ll.var) > 0)
+       req(rv.custom$dataIn2)
+       
+       #rv.custom$indices <- GuessIndices()
+       
+       
+       tmp <- DaparToolshed::filterFeaturesOneSE(
+         object = rv.custom$dataIn2,
+         i = length(rv.custom$dataIn2),
+         name = paste0("variableFiltered", MagellanNTK::Timestamp()),
+         filters = rv.custom$Variablefiltering_funFilter$ll.var
+       )
+       #indices <- rv.custom$Variablefiltering_funFilter$ll.indices
+       
+       # Add infos
+       
+       nBefore <- nrow(tmp[[length(tmp) - 1]])
+       nAfter <- nrow(tmp[[length(tmp)]])
+       
+       .html <- rv.custom$Variablefiltering_funFilter$ll.query
+       .nbDeleted <- nBefore - nAfter
+       .nbBefore <- nrow(SummarizedExperiment::assay(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]))
+       .nbAfter <- nrow(SummarizedExperiment::assay(tmp[[length(tmp)]]))
+       
+       rv.custom$Variablefiltering_variable_Filter_SummaryDT <- rbind(
+         rv.custom$Variablefiltering_variable_Filter_SummaryDT , 
+         c(.html, .nbDeleted, .nbAfter))
+       
+       # Keeps only the last filtered SE
+       len_start <- length(dataIn())
+       len_end <- length(tmp)
+       len_diff <- len_end - len_start
+       
+       req(len_diff > 0)
+       
+       if (len_diff == 2)
+         rv.custom$dataIn2 <- QFeatures::removeAssay(tmp, length(tmp)-1)
+       else 
+         rv.custom$dataIn2 <- tmp
+       
+       # Rename the new dataset with the name of the process
+       names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Variablefiltering'
+       
+       query <- rv.custom$Variablefiltering_funFilter$ll.query
+       i <- length(rv.custom$dataIn2)
+       #.history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
+       rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
+       
+       DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]),
+                                                                                       rv.custom$history)
+     })
+    
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(grepl('Variablefiltering', btnEvents()))
+      req(rv.custom$dataIn2)
+      
+      shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::incProgress(0.5)
+        
+        if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
+                              SummarizedExperiment::assays(rv.custom$dataIn1))) 
+             || !("Variablefiltering" %in% names(rv.custom$dataIn2)))
+          shinyjs::info(btnVentsMasg)
+        else {
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED
+        }
+      })
+    })
+    
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
+    output$Save <- renderUI({
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          # timeline_process_ui(ns('Save_timeline'))
+        ),
+        content = tagList(
+          uiOutput(ns('dl_ui'))
+        )
+      )
+    })
+    
+    output$dl_ui <- renderUI({
+      req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
+    })
+    
+    
+    
+    observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
+      req(grepl('Save', btnEvents()))
+      
+      shiny::withProgress(message = paste0("Saving process", id), {
+        shiny::incProgress(0.5)
+        
+        if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
+                             SummarizedExperiment::assays(dataIn()))))
+          shinyjs::info(btnVentsMasg)
+        else {
+          # Rename the new dataset with the name of the process
+          names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
+          # DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
+          #   c(DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]), 
+          #     reactiveValuesToList(rv.widgets))
+          S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelinePeptideSC'
+          
+          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- rv.custom$dataIn2
+          rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+          
+          Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+        }
+      })
+    })
+    
+    # <<< end ------------------------------------------------------------------
+    
+    # Insert necessary code which is hosted by MagellanNTK
+    # DO NOT MODIFY THIS LINE
+    eval(parse(text = MagellanNTK::Module_Return_Func()))
+  }
+  )
+}

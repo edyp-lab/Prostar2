@@ -6,29 +6,29 @@
 #' This documentation is for developers who want to create their own pipelines nor processes
 #' to be managed with `MagellanNTK`.
 #' 
-#' @name module_PiplelinePeptide
+#' @name module_PipelinePeptideSC
 #' @examples
 #' \dontrun{
-#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelinePeptide/R/PipelinePeptide.R")
-#' path <- system.file('extdata/workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(MagellanNTK::workflowApp("PipelinePeptide")
+#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelinePeptideSC/R/PipelinePeptideSC.R")
+#' path <- system.file('extdata/workflow/PipelinePeptideSC', package = 'Prostar2')
+#' shiny::runApp(MagellanNTK::workflowApp("PipelinePeptideSC")
 #' }
 #' 
-#' @name PipelinePeptide
+#' @name PipelinePeptideSC
 #' 
-#' @example inst/workflow/PipelinePeptide/examples/example_pipelinePeptide.R
+#' @example inst/workflow/PipelinePeptideSC/examples/example_PipelinePeptideSC.R
 #' 
 #' 
 NULL
 
 
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #' @export
 #' 
-PipelinePeptide_conf <- function(){
+PipelinePeptideSC_conf <- function(){
   MagellanNTK::Config(
   mode = 'pipeline',
-  fullname = 'PipelinePeptide',
+  fullname = 'PipelinePeptideSC',
   steps = c('Filtering', 'Normalization', 'Imputation', 'Aggregation', 'DifferentialAnalysis'),
   mandatory = c(FALSE, FALSE, FALSE, TRUE, FALSE)
 )
@@ -38,13 +38,13 @@ PipelinePeptide_conf <- function(){
 
 #' @param id xxx
 #'
-#' @rdname PipelinePeptide
+#' @rdname PipelinePeptideSC
 #'
 #' @author Samuel Wieczorek
 #' 
 #' @export
 #' 
-PipelinePeptide_ui <- function(id){
+PipelinePeptideSC_ui <- function(id){
   ns <- NS(id)
 }
 
@@ -68,14 +68,14 @@ PipelinePeptide_ui <- function(id){
 #' 
 #' @param current.pos xxx
 #' 
-#' @rdname PipelinePeptide
+#' @rdname PipelineProtein
 #'
 #' @import shiny
 #' @importFrom stats setNames
 #' 
 #' @export
 #'
-PipelinePeptide_server <- function(id,
+PipelinePeptideSC_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
   remoteReset = reactive({0}),

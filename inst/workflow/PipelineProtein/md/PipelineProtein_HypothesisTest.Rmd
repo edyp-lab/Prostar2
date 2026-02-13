@@ -1,18 +1,48 @@
 ---
-title: "Hypothesis test"
+title: "Workflow Protein: HypothesisTest"
 abstract: >
-    xxxxxxxx
+  The page describe the HypothesisTest step of the Protein Worflow.
 
 output:
     BiocStyle::html_document:
         highlight: tango
-        thme: sandstone
         toc: false
         number_sections: TRUE
-        css: style.css
-date: 30 mai 2024
+date: 12 February 2026
 link-citations: true
 ---
+# HypothesisTest
+
+The `HypothesisTest` step ...
+
+***
+
+### HypothesisTest
+...
+
+##### Description of parameters and options :
+###### **`Contrast`**
+...
+
+###### **`Statistical test`**
+...
+
+###### **`t-tests options`**
+...
+
+###### **`log(FC) threshold`**
+...
+
+***
+
+### Save
+
+Click on `Run` on the left side to validate the step. 
+The dataset can be downloaded through the `xlsx` or `qf` button, depending on the desired file type.
+It is possible to visualize the data, as well as viewing all informations related to the hypothesis testing made, by clicking the `EDA` button on the right side of the timeline.
+
+
+
 
 For datasets that do not contain any missing values, or for those where these missing values have
 been imputed, it is possible to test whether each protein is significantly differentially abundant
