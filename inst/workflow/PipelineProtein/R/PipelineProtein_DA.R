@@ -488,7 +488,7 @@ PipelineProtein_DA_server <- function(id,
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
-        remoteReset = reactive({0}),
+        remoteReset = reactive({remoteReset()}),
         is.enabled = reactive({rv$steps.enabled["Pairwisecomparison"]})
       )
     })
@@ -562,9 +562,8 @@ PipelineProtein_DA_server <- function(id,
         else {
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Push pval query', rv.custom$step1_query)
 
-          .comparisons2Txt <- Get_Pairwisecomparison_Names()
-          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', .comparisons2Txt)
-          
+          #.comparisons2Txt <- Get_Pairwisecomparison_Names()
+          rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Comparison', rv.widgets$Pairwisecomparison_Comparison)
           
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL

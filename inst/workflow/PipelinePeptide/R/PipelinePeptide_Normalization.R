@@ -498,7 +498,6 @@ PipelinePeptide_Normalization_server <- function(id,
           } else {
             new.dataset <- rv$dataIn[[length(rv$dataIn)]]
             SummarizedExperiment::assay(new.dataset) <- rv.custom$tmpAssay
-            DaparToolshed::paramshistory(new.dataset) <- rv.custom$history
             rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'Normalization')
           }
           
@@ -538,15 +537,21 @@ PipelinePeptide_Normalization_server <- function(id,
       
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
-        
-        S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
-        
-        # DO NOT MODIFY THE THREE FOLLOWING LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- rv$dataIn
-        rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
-        
-        Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+        if (isTRUE(all.equal(SummarizedExperiment::assays(dataIn()),
+                             SummarizedExperiment::assays(rv$dataIn))))
+          shinyjs::info(btnVentsMasg)
+        else {
+          S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
+          
+          DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]), rv.custom$history)
+          
+          # DO NOT MODIFY THE THREE FOLLOWING LINES
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- rv$dataIn
+          rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
+          
+          Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+        }
       })
     })
     

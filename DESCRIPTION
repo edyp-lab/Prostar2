@@ -1,19 +1,25 @@
 Package: Prostar2
 Title: Prostar 2
-Version: 0.99.27
-Date: 2026-02-13
-Authors@R: c(person("Prostar2 Package Maintainer",
-    email = "prostar-proteomics@cea.fr",
-    role = c("cre")),
-person('Samuel', 'Wieczorek', email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut'),
-      comment = c(ORCID="0000-0002-5016-1203")),
-                person('Thomas', 'Burger', email = 'thomas.burger@cea.fr', role = c('aut')))
+Version: 0.99.28
+Date: 2026-03-16
+Authors@R: c(
+    person("Prostar2 Package Maintainer",
+    email = "prostar-proteomics@cea.fr", role = c("cre")),
+    person('Samuel', 'Wieczorek', 
+    email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut'),
+    comment = c(ORCID="0000-0002-5016-1203")),
+    person('Thomas', 'Burger', 
+    email = 'thomas.burger@cea.fr', role = c('aut')),
+    person('Manon', 'Gaudin', 
+    email = 'manon.gaudin@cea.fr', role = c('ctb')))
 Description: This package provides a GUI interface for DAPAR2.
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 4.5.0)
-biocViews: MassSpectrometry, Normalization, Preprocessing, R.utils, Proteomics,GO, GUI
+Depends: 
+    R (>= 4.5.0),
+    omXplore
+biocViews: MassSpectrometry, Normalization, Preprocessing, R.utils, Proteomics, GO, GUI
 Imports: 
     shiny,
     DT,
@@ -43,7 +49,6 @@ Suggests:
     knitr,
     shinyalert,
     rmarkdown,
-    omXplore,
     magrittr,
     attempt,
     processx,
@@ -53,7 +58,8 @@ Suggests:
     sass,
     grDevices,
     stats,
-    spsComps
+    spsComps,
+    rrcovNA
 VignetteBuilder:
     knitr
 URL: https://github.com/edyp-lab/Prostar2, https://edyp-lab.github.io/Prostar2/

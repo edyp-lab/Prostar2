@@ -216,6 +216,103 @@ PipelinePeptide_Imputation_server <- function(id,
       )
     })
     
+    
+    #### _sidebar -----
+    output$Imp_UI <- renderUI({
+      req(rv$dataIn)
+      
+      .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
+      nbEmptyLines <- DaparToolshed::getNumberOfEmptyLines(.data)
+      
+      if (nbEmptyLines > 0) {
+        tags$p("Your dataset contains empty lines (fully filled with missing
+    values). In order to use the imputation tool, you must delete them by
+      using the filter tool.")
+      } else if (sum(is.na(.data)) == 0) {
+        tags$p("Your dataset does not contain missing values.")
+      } else {
+        tagList(
+          uiOutput(ns("Imp_algorithm_UI")),
+          uiOutput(ns("Imp_paramPirat_UI")),
+          uiOutput(ns("Imp_paramPirat_T_UI"))
+        )
+      }
+    })
+    
+    
+    output$Imp_algorithm_UI <- renderUI({
+      widget <- selectInput(ns("Imp_algorithm"), "Method",
+                            choices = list(
+                              "None" = "None",
+                              "Pirat" = "Pirat",
+                              "impSeq" = "impSeq"
+                            ),
+                            selected = rv.widgets$Imp_algorithm,
+                            width = "200px")
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Imputation"])
+    })
+    
+    
+    output$Imp_paramPirat_UI <- renderUI({
+      req(rv.widgets$Imp_algorithm == "Pirat")
+      # Extension input
+      widget1 <- selectInput(ns("Pirat_extension"), 
+                             "Extension", 
+                             choices = c(
+                               "base" = "base", 
+                               "2" = "2", 
+                               #"T" = "T", 
+                               "S" = "S"),
+                             selected = rv.widgets$Pirat_extension,
+                             width = "200px")
+      # Alpha factor input
+      widget2 <- numericInput(
+        ns("Pirat_alpha.factor"), 
+        "Alpha factor", 
+        value = rv.widgets$Pirat_alpha.factor,
+        min = 0,
+        step = 1,
+        width = "200px")
+      # MCAR input
+      widget3 <- shinyWidgets::awesomeCheckbox(ns("Pirat_mcar"), 
+                                               "MCAR", 
+                                               value = rv.widgets$Pirat_mcar)
+      
+      # Show widgets 
+      tagList(
+        MagellanNTK::toggleWidget(widget1, rv$steps.enabled["Imputation"]),
+        MagellanNTK::toggleWidget(widget2, rv$steps.enabled["Imputation"])#,
+        #MagellanNTK::toggleWidget(widget3, rv$steps.enabled["Imputation"])
+      )
+    })
+    
+    output$Imp_paramPirat_T_UI <- renderUI({ ### Transcriptomic specific widgets
+      req(rv.widgets$Pirat_extension == "T")
+      # Max PG size input
+      widget <- shinyWidgets::autonumericInput(
+        ns("Pirat_max.pg.size.pirat.t"), 
+        "Max PG size", 
+        value = rv.widgets$Pirat_max.pg.size.pirat.t, 
+        decimalPlaces = 0,
+        minimumValue = 0,
+        digitGroupSeparator = " ",
+        modifyValueOnWheel = TRUE,
+        align = "left",
+        width = "200px"
+      )
+      # add rna.cond.mask if extension == 'T'
+      # add pep.cond.mask if extension == 'T'
+      
+      # Show widgets
+      tagList(
+        MagellanNTK::toggleWidget(widget, rv$steps.enabled["Imputation"])
+      )
+    })
+    
+    
+    #### _content -----
+    ## General plots
     output$Imp_mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("mvplots"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Imputation"])
@@ -225,16 +322,17 @@ PipelinePeptide_Imputation_server <- function(id,
       req(rv$dataIn)
       mod_mv_plots_server("mvplots",
                           data = reactive({rv$dataIn[[length(rv$dataIn)]]}),
-                          grp = reactive({get_group(rv$dataIn)}),
+                          grp = reactive({omXplore::get_group(rv$dataIn)}),
                           mytitle = reactive({"POV imputation"}),
                           pal = reactive({NULL}),
                           pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })
     
+    ## Plots for Pirat 
     MagellanNTK::mod_popover_for_help_server( ### Correlation plot title and informations
       "plot_correlation_title",
-      title = h4("Empirical densities of correlations between peptides chosen randomly and between sibling peptides"),
+      title = "Empirical densities of correlations between peptides chosen randomly and between sibling peptides",
       content = HTML(paste0("The more the within-PG correlation distribution is right-shifted with respect to that of random correlations, the better Pirat’s performances.", 
                             "<br>", "<br>",
                             "See the FAQ for more infomations.")))
@@ -255,7 +353,7 @@ PipelinePeptide_Imputation_server <- function(id,
     
     MagellanNTK::mod_popover_for_help_server( ###  title and informations
       "plot_missingness_mechanism_title",
-      title = h4("Regression of the log-probability of missing onto mean observed abundance"),
+      title = "Regression of the log-probability of missing onto mean observed abundance",
       content = HTML(paste0("Fitting of missingness mechanism.", "<br>",
                             "Show the estimation of the parameters for gamma",
                             "<br>", "<br>",
@@ -264,7 +362,7 @@ PipelinePeptide_Imputation_server <- function(id,
     output$plot_missingness_mechanism <- renderPlot({ ### 
       req(rv$dataIn)
       req(rv.widgets$Imp_algorithm == "Pirat")
-      
+      par(mar = c(4,4,1,1))
       mv_rates <- colMeans(is.na(rv.custom$Pirat_dataformat$peptides_ab))
       mean_abund <- colMeans(rv.custom$Pirat_dataformat$peptides_ab, na.rm = T)
       mean_abund_sorted <- sort(mean_abund, index.return = T)
@@ -290,17 +388,19 @@ PipelinePeptide_Imputation_server <- function(id,
     output$Imp_plotPirat_UI <-renderUI({
       req(rv.widgets$Imp_algorithm == "Pirat")
       
-      tagList(
-      MagellanNTK::mod_popover_for_help_ui(ns("plot_correlation_title")),
-      plotOutput(ns("plot_correlation_pirat")),
-      uiOutput(ns("plot_reload_btn")),
-      MagellanNTK::mod_popover_for_help_ui(ns("plot_missingness_mechanism_title")),
-      plotOutput(ns("plot_missingness_mechanism")))
+      fluidRow(
+        column(width = 6,
+          MagellanNTK::mod_popover_for_help_ui(ns("plot_correlation_title")),
+          plotOutput(ns("plot_correlation_pirat")),
+          uiOutput(ns("plot_reload_btn"))),
+        column(width = 6,
+          MagellanNTK::mod_popover_for_help_ui(ns("plot_missingness_mechanism_title")),
+          plotOutput(ns("plot_missingness_mechanism"))))
     })
     
+    ## Pirat box messages
     output$Pirat_messbox <- renderUI({
       req(rv.widgets$Imp_algorithm == "Pirat")
-      print("oui")
       div(style="max-height: 150px; overflow: auto;",
           id = ns("notif_box"),  # ID pour la boîte de notification
           style = "border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9; margin-top: 20px;",
@@ -432,99 +532,7 @@ PipelinePeptide_Imputation_server <- function(id,
       )
     }
     
-    
-    output$Imp_UI <- renderUI({
-      # Checks if
-      req(rv$dataIn)
-      .data <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])
-      nbEmptyLines <- DaparToolshed::getNumberOfEmptyLines(.data)
-      if (nbEmptyLines > 0) {
-        tags$p("Your dataset contains empty lines (fully filled with missing
-    values). In order to use the imputation tool, you must delete them by
-      using the filter tool.")
-      } else if (sum(is.na(.data)) == 0) {
-        tags$p("Your dataset does not contains missing values.")
-      } else {
-        tagList(
-          uiOutput(ns("Imp_algorithm_UI")),
-          uiOutput(ns("Imp_paramPirat_UI")),
-          uiOutput(ns("Imp_paramPirat_T_UI"))
-        )
-      }
-    })
-    
-
-    output$Imp_algorithm_UI <- renderUI({
-      widget <- selectInput(ns("Imp_algorithm"), "Method",
-                            choices = list(
-                              "None" = "None",
-                              "Pirat" = "Pirat"
-                            ),
-                            selected = rv.widgets$Imp_algorithm,
-                            width = "150px"
-      )
-      
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Imputation"])
-    })
-    
-    
-    output$Imp_paramPirat_UI <- renderUI({
-      req(rv.widgets$Imp_algorithm == "Pirat")
-        # Extension input
-        widget1 <- selectInput(ns("Pirat_extension"), 
-                               "Extension", 
-                               choices = c(
-                                 "base" = "base", 
-                                 "2" = "2", 
-                                 #"T" = "T", 
-                                 "S" = "S"),
-                               selected = rv.widgets$Pirat_extension
-        )
-        # Alpha factor input
-        widget2 <- numericInput(
-          ns("Pirat_alpha.factor"), 
-          "Alpha factor", 
-          value = rv.widgets$Pirat_alpha.factor,
-          min = 0,
-          step = 1
-        )
-        # MCAR input
-        widget3 <- shinyWidgets::awesomeCheckbox(ns("Pirat_mcar"), 
-                                   "MCAR", 
-                                   value = rv.widgets$Pirat_mcar
-        )
-        
-        # Show widgets 
-        tagList(
-          MagellanNTK::toggleWidget(widget1, rv$steps.enabled["Imputation"]),
-          MagellanNTK::toggleWidget(widget2, rv$steps.enabled["Imputation"]),
-          MagellanNTK::toggleWidget(widget3, rv$steps.enabled["Imputation"])
-        )
-    })
-  
-    output$Imp_paramPirat_T_UI <- renderUI({ ### Transcriptomic specific widgets
-      req(rv.widgets$Pirat_extension == "T")
-      # Max PG size input
-      widget <- shinyWidgets::autonumericInput(
-        ns("Pirat_max.pg.size.pirat.t"), 
-        "Max PG size", 
-        value = rv.widgets$Pirat_max.pg.size.pirat.t, 
-        decimalPlaces = 0,
-        minimumValue = 0,
-        digitGroupSeparator = " ",
-        modifyValueOnWheel = TRUE,
-        align = "left"
-      )
-      # add rna.cond.mask if extension == 'T'
-      # add pep.cond.mask if extension == 'T'
-      
-      # Show widgets
-      tagList(
-        MagellanNTK::toggleWidget(widget, rv$steps.enabled["Imputation"])
-      )
-    })
-
-
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Imputation', btnEvents()))
       req(rv$dataIn)
@@ -555,17 +563,31 @@ PipelinePeptide_Imputation_server <- function(id,
                                                      max.pg.size.pirat.t = rv.widgets$Pirat_max.pg.size.pirat.t, #if extension == 'T' only
                                                      verbose = TRUE)
                      })
+                     if (is.null(Pirat_dataimput$data.imputed)){
+                       shinyjs::info("Error when imputing with Pirat")
+                     }
+                     req(Pirat_dataimput$data.imputed)
                      
                      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'algorithm', rv.widgets$Imp_algorithm)
                      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'extension', rv.widgets$Pirat_extension)
                      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'alpha.factor', rv.widgets$Pirat_alpha.factor)
                      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'mcar', rv.widgets$Pirat_mcar)
+                     
                      #rna.cond.mask = NULL, 
                      #pep.cond.mask = NULL,
                      #max.pg.size.pirat.t = rv.widgets$Pirat_max.pg.size.pirat.t
                      
                      .tmp <- rv$dataIn[[length(rv$dataIn)]] 
                      SummarizedExperiment::assay(.tmp, withDimnames=FALSE) <- t(Pirat_dataimput$data.imputed)
+                   },
+                   impSeq = {
+                     incProgress(0.5, detail = "impSeq imputation")
+                     impSeq_dataimput <- rrcovNA::impSeq(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]))
+                     
+                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'algorithm', rv.widgets$Imp_algorithm)
+                     
+                     .tmp <- rv$dataIn[[length(rv$dataIn)]] 
+                     SummarizedExperiment::assay(.tmp, withDimnames=FALSE) <- impSeq_dataimput
                    }
             )
           })
@@ -582,12 +604,10 @@ PipelinePeptide_Imputation_server <- function(id,
               rv$dataIn,
               .tmp,
               'Imputation')
-            DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- rv.custom$history
             names(rv$dataIn)[length(rv$dataIn)] <- 'Imputation'
           }
         })
         
-        req(Pirat_dataimput$data.imputed)
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
@@ -627,6 +647,8 @@ PipelinePeptide_Imputation_server <- function(id,
       shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
+        
+        DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]), rv.custom$history)
         
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()

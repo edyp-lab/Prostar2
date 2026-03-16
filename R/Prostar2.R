@@ -42,11 +42,4 @@ Prostar2 <- function(
     workflow.name = wf.name,
     convert.path = convert.path
   )
-  
-  
-  
-  
-  
-  
-  
 }

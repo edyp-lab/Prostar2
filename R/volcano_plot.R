@@ -159,7 +159,9 @@ diffAnaVolcanoplot_rCharts <- function(
       margin = 20, align = "center",
       style = list(size = 20, color = "black", useHTML = TRUE)
     ) |>
-    hc_yAxis(title = list(text = "-log10(pValue)")) |>
+    hc_yAxis(title = list(text = "-log10(pValue)"),
+             min = -0.1,
+             startOnTick = FALSE) |>
     hc_xAxis(
       title = list(text = "logFC"),
       plotLines = list(

@@ -18,20 +18,37 @@ The `HypothesisTest` step ...
 ***
 
 ### HypothesisTest
-...
+The `HypothesisTest` step ...
+
+The left side of the interface is used to select the type of test and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to run the chosen tests on the data.
+The central area of the interface displays a log(FC) density plot showing the distribution of log fold changes across all available contrasts simultaneously. The conditions within a given contrast can be swapped by selecting the corresponding option in the “Swap conditions” section above the graph. Once a threshold is defined, values below the selected log(FC) cutoff are shaded in gray, and the number and percentage of selected proteins are updated accordingly.
 
 ##### Description of parameters and options :
 ###### **`Contrast`**
 ...
 
+The possible options are as follows:
+
+- `None` : No type of contrast is chosen. It is not possible to validate without choosing one.
+- `One vs One` : ...
+- `One vs All` : ...
+
 ###### **`Statistical test`**
 ...
 
+The possible options are as follows:
+
+- `None` : No statistical test is chosen. It is not possible to validate without choosing one.
+- `t-tests` : ...
+- `Limma` : ...
+
 ###### **`t-tests options`**
-...
+*Available only for the `t-tests` statistical test.*
+
+... `Student` or `Welch`.
 
 ###### **`log(FC) threshold`**
-...
+This corresponds to the log(FC) value used as a threshold. This threshold is the same for all contrasts. The value must be a positive float. 
 
 ***
 
@@ -43,7 +60,7 @@ It is possible to visualize the data, as well as viewing all informations relate
 
 
 
-
+#######################################################################################################################
 For datasets that do not contain any missing values, or for those where these missing values have
 been imputed, it is possible to test whether each protein is significantly differentially abundant
 between the conditions . To do so, click on “Hypothesis testing” in the “Data processing” menu (see
@@ -58,11 +75,69 @@ plot as contrasts).
 4. Run the tests and save the dataset to preserve the results (i.e. all the computed p-values). Then,
 this new dataset, containing the p-values and FC cut-off for the desired contrasts, can be
 explored in the “Differential analysis” tabs available in the “Data mining” menu.
+#######################################################################################################################
+Differential protein expression analysis compares the relative abundance of the same protein between two conditions. The comparison between two conditions results in what is called a contrast, for example “A vs. B.” The dataset used here contains only two conditions, hence there is only one contrast to be considered.
+For additional advice on this step, see Wieczorek, Giai Gianetto, and Burger (2019).
 
+#Hypothesis test
+The first step in differential analysis is null hypothesis testing, which provides a p-value for each protein. These p-values will then enable the selection of the proteins which are significantly differentially abundant between the conditions contrasted. Limma can be used to do so with the limmaCompleteTest() function. This function returns a list of p-values and logarithmized fold-change (logFC) for each contrast.
 
+#Fold-change
+The next step is to define the logFC threshold. This threshold should be set relatively low to avoid discarding too many proteins, as the subsequent False Discovery Rate (FDR) control is more reliable when applied to a sufficiently large protein set. Because FDR is a percentage-based measure, it becomes unstable when too few proteins are retained.
 
+The plot obtained through hc_logFC_DensityPlot() can help tuning the logFC threshold. It shows the distribution of logFCs and indicates the percentage of discarded proteins based on the specified threshold. Here, with a threshold of 0.04, almost 39% of proteins are discarded.
+#######################################################################################################################
+For datasets that do not contain any missing values, or for those where these missing values have been imputed, it is possible to test whether each protein is significantly differentially abundant between the conditions.
+To do so, click on **{Hypothesis testing** in the **Data processing** menu (see Figure~\ref{fig:hp}). 
+First, choose the test contrasts. In case of 2 conditions to compare, there is only one possible contrast. 
+However, in case of $N  \geq 3$ conditions, several pairwise contrasts are possible. 
+Notably, it is possible to perform $N$ tests of the **1vsAll** type, or $N(N-1)/2$ tests of the **1vs1** type.
+Then, choose the type of statistical test, between limma (see the \Biocpkg{limma} package) or t-test (either Welch or Student, up to the user's choice). This makes appear a density plot representing the log fold-change (logFC) (as many density curves on the plot as contrasts). Thanks to the FC density plot, tune the **log(FC) threshold**.
+We advise to tune the logFC threshold conservatively by avoiding discarding to many proteins with it. Moreover, it is important tune the logFC to a small enough value, so as to avoid discarding too many proteins. In fact, it is important to keep enough remaining proteins for the next coming FDR computation step (see Section~\ref{sec:pushpval}), as *(i)* FDR estimation is more reliable with many proteins, *(ii)* FDR, which relates to a percentage, does not make sense on too few proteins.
+Finally, run the tests and save the dataset to preserve the results (i.e. all the computed p-values). Then, a new dataset containing the p-values and logFC cut-off for the desired contrasts, can be explored in the **Differential analysis** tab available in the **Data mining** menu.
+#######################################################################################################################
+For datasets that do not contain any missing values, or for those where these missing values have been imputed, it is possible to test whether each protein is significantly differentially abundant between the conditions. To do so, click on in the menu (see Figure~).
+
+First, choose the test contrasts. In case of 2 conditions to compare, there is only one possible contrast. However, in case of N≥3
+ conditions, several pairwise contrasts are possible. Notably, it is possible to perform N
+ tests of the type, or N(N−1)/2
+ tests of the type. Then, choose the type of statistical test, between limma (see the package) or t-test (either Welch or Student, up to the user’s choice). This makes appear a density plot representing the log fold-change (logFC) (as many density curves on the plot as contrasts). Thanks to the FC density plot, tune the . We advise to tune the logFC threshold conservatively by avoiding discarding to many proteins with it. Moreover, it is important tune the logFC to a small enough value, so as to avoid discarding too many proteins. In fact, it is important to keep enough remaining proteins for the next coming FDR computation step (see Section~), as FDR estimation is more reliable with many proteins, FDR, which relates to a percentage, does not make sense on too few proteins. Finally, run the tests and save the dataset to preserve the results (i.e. all the computed p-values). Then, a new dataset containing the p-values and logFC cut-off for the desired contrasts, can be explored in the tab available in the menu.
+#######################################################################################################################
 ### Step 1
 
 The different result of the tests are stored in the colData.
 
 As for any process, the values of parameters (values of the widgets) are stored
+#######################################################################################################################
+3.13 Hypothesis Testing for aggregated protein dataset
+Hypothesis testing can be conducted regardless of the version of the protein dataset (either aggregated, filtered,
+normalized or imputed) as long as it does not contain missing values. To do so, click on Data processing (protein)
+Hypothesis testing . The steps are similar to those that can be applied to a peptide dataset as part of a peptidomics
+strategy (see Subheading 3.10):
+1. Choose the test contrasts: In case of two conditions to compare, there is only one possible contrast.
+However, in case of N > 2 conditions, several pairwise contrasts are possible. Notably, it is possible to
+perform N tests of the "1vsAll" type, or N(N-1)/2 tests of the "1vs1" type.
+2. Choose the type of statistical test, between limma [15] or t-test (either Welch or Student). This makes
+appear a density plot of the logarithmized fold-change (logFC) (as many density curves on the plot as
+contrasts).
+3. Thanks to the logFC density plot, tune the logFC threshold (see Note 47). Refresh the plot to view
+the impact of the chosen threshold by clicking on Perform log FC plot . The corresponding logFC value is
+indicated for convenience.
+4. Run the tests by clicking on Perform log FC plot , move forward to the Save tab and click Save significance test
+to preserve the results (i.e., all the computed p-values). Then, a new dataset is created, containing the
+p-values and logFC cutoff for the desired contrasts. It can be explored as any other dataset ( Data mining
+Differential analysis menu).
+5. Check that a new version appears in the dataset version dropdown-menu, referred to as "HypothesisTest.protein".
+#######################################################################################################################
+3.10 Hypothesis Testing for peptidomics data
+For peptide datasets that do not contain any missing values, or for those where these missing values have been
+imputed, it is possible to test whether each peptide is significantly differentially abundant between the compared
+conditions and next proceed to differential analysis:
+1. Click on Data processing (peptide) Hypothesis testing (see Figure 13).
+2. Follow the very same four steps as for hypothesis testing with protein datasets (see Subheading 3.13).
+3. After saving, check that a new version appears in the dataset version dropdown-menu, referred to as
+"HypothesisTest.peptide".
+4. Then, this new peptide dataset, containing the p-values and fold change (FC) cutoff for the desired contrasts,
+can be explored in the Differential analysis tabs available in the Data mining menu (see Subheading 3.14).
+5. Follow the very same six steps as for diffeential analysis with protein datasets (see Subheading 3.14).
+6. From the FDR tab, you may download data and save any plot/table of interest (see Figure 14).

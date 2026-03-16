@@ -135,8 +135,8 @@ PipelinePeptide_Filtering_server <- function(id,
       stringsAsFactors = FALSE
     ), 
     df = data.frame(),
-    history = MagellanNTK::InitializeHistory(),
-    
+    history1 = MagellanNTK::InitializeHistory(),
+    history2 = MagellanNTK::InitializeHistory(),
     
     # Variable Filtering variables
     # indices = NULL,
@@ -380,13 +380,8 @@ PipelinePeptide_Filtering_server <- function(id,
       
       # Add params
       query <- rv.custom$funFilter()$value$ll.query
-      #i <- length(rv.custom$dataIn1)
-      #.history <- DaparToolshed::paramshistory(rv.custom$dataIn1[[i]])[['Metacell_Filtering']]
-      #.history[[paste0('query_', length(.history))]] <- query
       
-      rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Cellmetadatafiltering', 'query', query)
-      DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']])
-                                                                                          ,rv.custom$history)
+      rv.custom$history1 <- Prostar2::Add2History(rv.custom$history1, 'Filtering', 'Cellmetadatafiltering', 'query', query)
     })
     
     
@@ -422,7 +417,7 @@ PipelinePeptide_Filtering_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Cellmetadatafiltering', btnEvents()))
       
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
         if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn1),
@@ -431,6 +426,7 @@ PipelinePeptide_Filtering_server <- function(id,
           shinyjs::info(btnVentsMasg)
         else {
           req(rv.custom$dataIn1)
+          DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn1[['Cellmetadatafiltering']]), rv.custom$history1)
           
           rv.custom$dataIn2 <- rv.custom$dataIn1
           
@@ -631,7 +627,6 @@ PipelinePeptide_Filtering_server <- function(id,
     
     GuessIndices <- reactive({
       req(rv.custom$Variablefiltering_funFilter)
-      print("guesswhat")
       
       tmp <- DaparToolshed::filterFeaturesOneSE(
         object = rv.custom$dataIn2,
@@ -655,7 +650,6 @@ PipelinePeptide_Filtering_server <- function(id,
     
     output$Variablefiltering_Preview_UI <- renderUI({
       req(GuessIndices())
-      print("dedans")
       
       mod_filtering_example_server(id = "preview_filtering_query_result",
                                    dataIn = reactive({rv$dataIn[[length(rv$dataIn)]]}),
@@ -762,11 +756,8 @@ PipelinePeptide_Filtering_server <- function(id,
        
        query <- rv.custom$Variablefiltering_funFilter$ll.query
        i <- length(rv.custom$dataIn2)
-       #.history <- DaparToolshed::paramshistory(rv.custom$dataIn2[[i]])[['Variable_Filtering']]
-       rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
        
-       DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]),
-                                                                                       rv.custom$history)
+       rv.custom$history2 <- Prostar2::Add2History(rv.custom$history2, 'Filtering', 'Variablefiltering', 'query', rv.custom$Variablefiltering_ll.query)
      })
     
     
@@ -774,7 +765,7 @@ PipelinePeptide_Filtering_server <- function(id,
       req(grepl('Variablefiltering', btnEvents()))
       req(rv.custom$dataIn2)
       
-      shiny::withProgress(message = paste0("Reseting process", id), {
+      shiny::withProgress(message = paste0("Saving process", id), {
         shiny::incProgress(0.5)
         
         if ( isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn2),
@@ -782,6 +773,8 @@ PipelinePeptide_Filtering_server <- function(id,
              || !("Variablefiltering" %in% names(rv.custom$dataIn2)))
           shinyjs::info(btnVentsMasg)
         else {
+          DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn2[['Variablefiltering']]), rv.custom$history2)
+          
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED
@@ -827,9 +820,6 @@ PipelinePeptide_Filtering_server <- function(id,
         else {
           # Rename the new dataset with the name of the process
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
-          # DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]) <- 
-          #   c(DaparToolshed::paramshistory(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]), 
-          #     reactiveValuesToList(rv.widgets))
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelinePeptide'
           
           # DO NOT MODIFY THE THREE FOLLOWINF LINES

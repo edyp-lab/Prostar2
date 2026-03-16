@@ -478,7 +478,7 @@ req(rv.custom$dataGetExprsClickedProtein)
       withProgress(message = "Building plot...", detail = "", value = 0, {
         ht <- HypothesisTest(rv$dataIn)
         prefix <- paste0(comparison()[1], "_vs_", comparison()[2])
-
+        
         df <- data.frame(
           x = ht[, paste0(prefix, "_logFC")],
           y = -log10(ht[, paste0(prefix, "_pval")]),

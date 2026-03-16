@@ -50,7 +50,9 @@ It contains 1 sub-step : `Imputation`.
 ***
 
 ### Aggregation
-...
+The `Aggregation` step aggregates the peptide-level data into protein-level data. Although the various aggregation methods can handle missing values, it is best to impute them beforehand. 
+
+This step allows the selection of an aggregation method among several available options, particularly for handling shared peptides and defining the aggregation function.
 
 It contains 1 sub-step : `Aggregation`.
 

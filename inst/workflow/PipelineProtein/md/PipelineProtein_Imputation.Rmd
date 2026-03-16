@@ -13,7 +13,7 @@ link-citations: true
 ---
 # Imputation
 
-The `Imputation` step imputes missing values to produce a complete dataset. Theorically, imputation effectively creates estimated measurements rather than true experimental observations and should therefore be avoided whenever possible. In practice, most algorithms required subsequently cannot handle missing values, and even methods that claim robustness to missing data typically rely on implicit or explicit imputation, offering no real alternative. Therefore, this is a step that should not be overlooked and requires caution.
+The `Imputation` step imputes missing values to produce a complete dataset. Theoretically, imputation effectively creates estimated measurements rather than true experimental observations and should therefore be avoided whenever possible. In practice, most algorithms required subsequently cannot handle missing values, and even methods that claim robustness to missing data typically rely on implicit or explicit imputation, offering no real alternative. Therefore, this is a step that should not be overlooked and requires caution.
 Imputed values use a different color code and tags than observed values, making it possible to track which proteins have been imputed.
 
 This step allows the selection of a imputation method from several available options, which are described below. The imputation process is divided into two parts to account for the nature of the missing values (POV or MEC).
@@ -25,13 +25,13 @@ This step allows the selection of a imputation method from several available opt
 The `POV Imputation` step offers a number of different imputation method, that are described below. The parameters to be defined vary depending on the selected method. Only missing values identified as “POV” (Partially Observed Values) are imputed at this stage. A value is classified as a POV if at least one observation exists for that protein within the same condition.
 
 The left side of the interface is used to select the imputation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the imputation to the data.
-The table in the middle summarizes the number of missing values. After the imputation is applied, a second line summarizing the number of values imputed. If the `Det quantile` is selected, a second table will show under the first one indicating the values that will be used for the imputation.
+The table in the middle summarizes the number of missing values. After the imputation is applied, a second line summarizing the number of values imputed. If the `Det quantile` method is selected, a second table will show under the first one indicating the values that will be used for the imputation.
 The first graph under below the tables displays density plots showing the distribution of partially observed values for each condition. The x-axis corresponds to the mean intensity of a protein in a condition, while the y-axis indicates the number of observed values for that protein under the same condition. In general, it can be observed that the distribution tends to shift towards higher values when fewer missing values are present. This is a sign that at least some of the missing values originate from proteins that are below the lower limit of the mass spectrometer. 
 The second graph is a heatmap of the proteins mean value according to their distribution of missing values across the conditions. Each line corresponds a protein, that have been reordered so as to cluster the proteins that have a similar amount of missing values distributed in the same way over the conditions. Likewise, the columns do not depicts a specific sample but rather any sample belonging to the given condition, as the samples have been reordered to focus on patterns of missing values. Each line is colored to represent the mean abundance value within each condition : red indicates high intensities and yellow low intensities. 
 
 ##### Description of parameters and options :
 ###### **`Algorithm for POV`**
-Select for the drop-down menu the imputation method to be used. It is worth noting that each method has its own set of parameters, which are described further below.
+Select from the drop-down menu the imputation method to be used. It is worth noting that each method has its own set of parameters, which are described further below.
 
 The possible options are as follows:
 
@@ -66,6 +66,7 @@ The table in the middle summarizes the number of missing values. After the imput
 The first graph under below the tables displays density plots showing the distribution of partially observed values for each condition. The x-axis corresponds to the mean intensity of a protein in a condition, while the y-axis indicates the number of observed values for that protein under the same condition. In general, it can be observed that the distribution tends to shift towards higher values when fewer missing values are present. This is a sign that at least some of the missing values originate from proteins that are below the lower limit of the mass spectrometer. 
 The second graph is a heatmap of the proteins mean value according to their distribution of missing values across the conditions. Each line corresponds a protein, that have been reordered so as to cluster the proteins that have a similar amount of missing values distributed in the same way over the conditions. Likewise, the columns do not depicts a specific sample but rather any sample belonging to the given condition, as the samples have been reordered to focus on patterns of missing values. Each line is colored to represent the mean abundance value within each condition : red indicates high intensities and yellow low intensities. 
 
+##### Description of parameters and options :
 ###### **`Algorithm for MEC`**
 Select for the drop-down menu the imputation method to be used. It is worth noting that each method has its own set of parameters, which are described further below.
 

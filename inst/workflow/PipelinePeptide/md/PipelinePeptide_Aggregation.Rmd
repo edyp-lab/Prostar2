@@ -1,83 +1,83 @@
 ---
-title: "Aggreagtion"
+title: "Workflow Peptide: Aggregation"
 abstract: >
-  This page describes the computations done with Aggregation.
+  The page describe the Aggregation step of the Peptide Worflow.
 
 output:
     BiocStyle::html_document:
         highlight: tango
-        thme: sandstone
         toc: false
         number_sections: TRUE
-        css: style.css
-date: 30 mai 2024
+date: 6 March 2026
 link-citations: true
 ---
+# Aggregation
 
+The `Aggregation` step aggregates the peptide-level data into protein-level data. Although the various aggregation methods can handle missing values, it is best to impute them beforehand. 
 
-This page describes the computations done with Aggregation. 
+This step allows the selection of an aggregation method among several available options, particularly for handling shared peptides and defining the aggregation function.
 
+***
 
+### Aggregation
+The `Aggregation` step offers a number of different aggregation method, that are described below. The parameters to be defined vary depending on the selected method. Please note that certain combinations of parameters can lead to rather long processing times.
 
-### Methods
-**_Please refer to the table below for warnings about the different aggregation methods available._**
+The left side of the interface is used to select the aggregation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the aggregation to the data.
+The central area of the interface displays multiple tables. The top one shows information about to peptides, while the bottom one provides information about the proteins. Both use information from the adjacency matrix.
 
-#### Handling of shared peptides
-Multiple methods are available to handle shared peptides : 
-* No shared peptide
-* Shared as specific
-* Simple redistribution of shared peptides
-* Iterative redistribution of shared peptides
+##### Description of parameters and options :
+###### **`Include shared peptides`**
+This indicates the method to use to handle shared peptides.
 
+The possible options are as follows:
 
-#### Selecting peptides
-* All
-* TopN
+- `No` : Shared peptide are ignored, only specific peptides are used.
+- `Yes (as protein specific)` : Shared peptides are treated as protein-specific peptides. Therefore, shared peptides are duplicated for each protein they belong to.
+- `Yes (simple redistribution)` : Shared peptide intensities are proportionally redistributed among the proteins to which they belong. This redistribution is performed once.
+- `Yes (iterative redistribution)` : Shared peptide intensities are proportionally redistributed among the proteins to which they belong. This redistribution is performed iteratively until convergence is reached or the maximum number of iterations is met. Keep in mind that this method may take some time.
 
+###### **`Ponderation`**
+*Available only for `Yes (simple redistribution)` and `Yes (iterative redistribution)` methods.*
 
-#### Functions
-5 functions are available :
-* Sum
-* Mean
-* Median
-* medianPolish
-* robustSummary
+This modifies how is calculated the coefficient for shared peptides redistribution.
 
-<style>
-.tabledescagg table, 
-.tabledescagg th, 
-.tabledescagg td {
-  border:1px solid black;
- border-collapse: collapse;
-}
-.tabledescagg th, 
-.tabledescagg td {
-  padding: 10px;
-}
-.tabledescagg th {
-  font-weight: bold;
-}
-</style>
-<table class="tabledescagg">
-  <tr>
-    <th> </th>
-    <th>No shared peptide</th>
-    <th>Shared as specific</th>
-    <th>Simple redistribution of shared peptides</th>
-    <th>Iterative redistribution of shared peptides</th>
-  </tr>
-  <tr>
-    <td><b>All peptides</b></td>
-    <td>txt 11</td>
-    <td>txt 21</td>
-    <td>txt 31</td>
-    <td>txt 41</td>
-  </tr>
-  <tr>
-    <td><b>N most abundant</b></td>
-    <td>txt 12</td>
-    <td>txt 22</td>
-    <td>txt 32</td>
-    <td>txt 42</td>
-  </tr>
-</table>
+The possible options are as follows:
+
+- `Global` : Coefficients are calculated using every sample from every conditions.
+- `Condition` : Coefficients are calculated using samples from each condition independently.
+- `Sample` : Coefficients are calculated using each sample independently.
+
+###### **`Max iteration`**
+*Available only for `Yes (iterative redistribution)`.*
+
+This sets the maximum number of iteration for the iterative redistribution.
+
+###### **`Consider`**
+This parameter indicate which peptides to consider. Either `All peptides` to use all peptides, or `N most abundant` to only considers the top N peptides, which are the N most abundant peptides, for each protein.
+
+###### **`N`**
+*Available only for `N most abundant`.*
+
+This corresponds to the number N of top peptides to consider for each protein.
+
+###### **`Function`**
+This indicates to the aggregation function to use for quantitative feature aggregation.
+
+The possible options are as follows:
+
+- `Sum` : Corresponds to `base::rowSums()`.
+- `Mean` : Corresponds to `base::rowMeans()`.
+- `Median` : Corresponds to `matrixStats::rowMedians()`.
+- `medianPolish` : Corresponds to `MsCoreUtils::medianPolish()`. Note that this method takes significantly more time than the others, and is parallelized to be more efficient.
+- `robustSummary` : Corresponds to `MsCoreUtils::robustSummary()`. Note that this method takes significantly more time than the others, and is parallelized to be more efficient.
+
+###### **`RowData columns to aggregate`**
+Select the column from rowData to be kept and aggregated. If no column name is specified, none is kept. The kept columns are aggregated as a data frame. 
+
+***
+
+### Save
+
+Click on `Run` on the left side to validate the step. 
+The dataset can be downloaded through the `xlsx` or `qf` button, depending on the desired file type.
+It is possible to visualize the data, as well as viewing all informations related to the aggregation, by clicking the `EDA` button on the right side of the timeline.
