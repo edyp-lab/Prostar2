@@ -95,7 +95,8 @@ PipelinePeptide_Imputation_server <- function(id,
     Pirat_extension = "base",
     Pirat_alpha.factor = 2,
     Pirat_mcar = FALSE,
-    Pirat_max.pg.size.pirat.t = 1
+    Pirat_max.pg.size.pirat.t = 1,
+    BPCA_nPcs = 2
   )
   
   rv.custom.default.values <- list(
@@ -234,7 +235,8 @@ PipelinePeptide_Imputation_server <- function(id,
         tagList(
           uiOutput(ns("Imp_algorithm_UI")),
           uiOutput(ns("Imp_paramPirat_UI")),
-          uiOutput(ns("Imp_paramPirat_T_UI"))
+          uiOutput(ns("Imp_paramPirat_T_UI")),
+          uiOutput(ns("Imp_paramBPCA_UI"))
         )
       }
     })
@@ -245,7 +247,8 @@ PipelinePeptide_Imputation_server <- function(id,
                             choices = list(
                               "None" = "None",
                               "Pirat" = "Pirat",
-                              "impSeq" = "impSeq"
+                              "impSeq" = "impSeq",
+                              "BPCA" = "BPCA"
                             ),
                             selected = rv.widgets$Imp_algorithm,
                             width = "200px")
@@ -308,6 +311,21 @@ PipelinePeptide_Imputation_server <- function(id,
       tagList(
         MagellanNTK::toggleWidget(widget, rv$steps.enabled["Imputation"])
       )
+    })
+    
+    output$Imp_paramBPCA_UI <- renderUI({
+      req(rv.widgets$Imp_algorithm == "BPCA")
+      # nPcs
+      widget1 <- numericInput(
+        ns("BPCA_nPcs"), 
+        "nPcs", 
+        value = rv.widgets$BPCA_nPcs,
+        min = 1,
+        step = 1,
+        width = "200px")
+      
+      # Show widgets 
+      MagellanNTK::toggleWidget(widget1, rv$steps.enabled["Imputation"])
     })
     
     
@@ -588,6 +606,15 @@ PipelinePeptide_Imputation_server <- function(id,
                      
                      .tmp <- rv$dataIn[[length(rv$dataIn)]] 
                      SummarizedExperiment::assay(.tmp, withDimnames=FALSE) <- impSeq_dataimput
+                   },
+                   BPCA = {
+                     incProgress(0.5, detail = "BPCA imputation")
+                     BPCA_dataimput <- pcaMethods::pca(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), method = "bpca", nPcs = round(rv.widgets$BPCA_nPcs, 0))
+                     
+                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'Imputation', 'algorithm', rv.widgets$Imp_algorithm)
+                     
+                     .tmp <- rv$dataIn[[length(rv$dataIn)]] 
+                     SummarizedExperiment::assay(.tmp, withDimnames=FALSE) <- BPCA_dataimput@completeObs
                    }
             )
           })

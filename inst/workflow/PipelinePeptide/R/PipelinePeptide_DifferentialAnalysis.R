@@ -100,14 +100,14 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   # This is only for simple workflows
   widgets.default.values <- list(
     Scenario_choice = "Contrast",
-    Scenario_method = "ANOVA",
+    Scenario_method = "Limma",
     Foldchange_thlogFC = 0,
     Foldchange_contrastchoice = "Stacked",
     Foldchange_uniquechoice = "None",
     Finetuning_cluster_protprofile = "Mean",
     Finetuning_cluster_method = "kmeans",
     Finetuning_cluster_nbclust = 2,
-    Finetuning_aggreg_method = "Most significant FC",
+    Finetuning_aggreg_method = "MinPval",
     Pvaluecalibration_calibrationMethod = "Benjamini-Hochberg",
     Pvaluecalibration_numericValCalibration = "None",
     Pvaluecalibration_nBinsHistpval = 80,
@@ -115,6 +115,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     FDRcontrol_volcanocontrast = NULL,
     FDRcontrol_Pairwisecomparison_tooltipInfo = NULL,
     FDRcontrol_cluster_plot_type = "Fixed", 
+    FDRcontrol_aggreg_plot_type = "Fixed",
+    FDRcontrol_aggreg_plot_rep = "Associated FC",
     FDRcontrol_cluster_plot_clust = NULL
   )
   
@@ -139,6 +141,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       stringsAsFactors = FALSE),
     rowdatacolname = NULL,
     centered_means = NULL,
+    colidx_pvalagg = NULL,
     AnaDiff_indices = reactive({NULL}),
     errMsgcalibrationPlotALL = NULL,
     errMsgCalibrationPlot = NULL,
@@ -232,15 +235,15 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       )
     })
     
-    # Widgets
+    #### _sidebar -----
     output$Scenario_choice_UI <- renderUI({
       req(rv$dataIn)
       
-      widget1 <- selectInput(ns("Scenario_choice"), "Select a scenario",
+      widget1 <- selectInput(ns("Scenario_choice"), "Scenario",
                             choices = c("Contrast", "Cluster", "Aggregation"),
                             selected = rv.widgets$Scenario_choice,
                             width = "200px")
-      widget2 <- selectInput(ns("Scenario_method"), "Select a method",
+      widget2 <- selectInput(ns("Scenario_method"), "Method",
                             choices = c("ANOVA", "Limma"),
                             selected = rv.widgets$Scenario_method,
                             width = "200px")
@@ -250,6 +253,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       )
     })
     
+    #### _content -----
     # Warning if missing values in quantitative data
     output$Scenario_warningNA_UI <- renderUI({
       req(rv$dataIn)
@@ -356,6 +360,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           }else if (rv.widgets$Scenario_method == "Limma"){
             rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design.qf(rv$dataIn), comp.type="OnevsOne")
           }
+          
+          rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
         }
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Scenario', 'Scenario', rv.widgets$Scenario_choice)
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Scenario', 'Method', rv.widgets$Scenario_method)
@@ -420,7 +426,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
       
-      widget <- selectInput(ns("Foldchange_contrastchoice"), "Select contrast type",
+      widget <- selectInput(ns("Foldchange_contrastchoice"), "Contrast type",
                             choices = c("Stacked", "Unique"),
                             selected = rv.widgets$Foldchange_contrastchoice,
                             width = "200px")
@@ -432,7 +438,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Foldchange_contrastchoice == "Unique")
       
-      widget <- selectInput(ns("Foldchange_uniquechoice"), "Select contrast",
+      widget <- selectInput(ns("Foldchange_uniquechoice"), "Contrast",
                             choices = c("None", rv.custom$Scenario_constratnames),
                             selected = rv.widgets$Foldchange_uniquechoice,
                             width = "200px")
@@ -793,8 +799,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Aggregation")
       
-      widget1 <- selectInput(ns("Finetuning_aggreg_method"), "Select p-value agggregation method",
-                             choices = c("Most significant FC", "Worst FC"),
+      widget1 <- selectInput(ns("Finetuning_aggreg_method"), "p-value agggregation method",
+                             choices = c("MinPval", "MaxPval"),
                              selected = rv.widgets$Finetuning_aggreg_method,
                              width = "200px")
       
@@ -806,6 +812,48 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Aggregation")
       
+      tagList(plotOutput(ns('Finetuning_aggregation_plot')))
+    })
+    
+    output$Finetuning_aggregation_plot <- renderPlot({
+      req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
+      req(rv.widgets$Scenario_choice == "Aggregation")
+      req(rv.widgets$Finetuning_aggreg_method)
+      
+      nb_contr <- ncol(rv.custom$res_pval_FC_complete$P_Value)
+      min_pvals <- apply(rv.custom$res_pval_FC_complete$P_Value, 1, min, na.rm = TRUE)
+      max_pvals <- apply(rv.custom$res_pval_FC_complete$P_Value, 1, max, na.rm = TRUE)
+      
+      pval_agg <- switch(rv.widgets$Finetuning_aggreg_method,
+             MinPval = {
+               best.pval <- apply(rv.custom$res_pval_FC_complete$P_Value, 1, min)
+               1-(1-best.pval)^nb_contr},
+             MaxPval = {
+               worst.pval <- apply(rv.custom$res_pval_FC_complete$P_Value, 1, max)
+               worst.pval^nb_contr}
+      )
+      
+      ord <- order(pval_agg)
+      pval_agg_sorted <- pval_agg[ord]
+      min_sorted <- min_pvals[ord]
+      max_sorted <- max_pvals[ord]
+      
+      plot(pval_agg_sorted,
+           ylim = range(min_sorted, max_sorted),
+           pch = 16,
+           xaxt="n",
+           xlab = "",
+           ylab = "p-value",
+           main = "Ordered aggregated p-value with interval")
+      
+      arrows(x0 = seq_along(pval_agg_sorted),
+             y0 = min_sorted,
+             x1 = seq_along(pval_agg_sorted),
+             y1 = max_sorted,
+             angle = 90,
+             code = 3,
+             length = 0.05,
+             col = "blue")
     })
     
     
@@ -825,6 +873,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           
         } else if (rv.widgets$Scenario_choice == "Cluster"){
           rv.custom$comparison <- "omnibus_cluster"
+          rv.widgets$Finetuning_cluster_nbclust <- round(rv.widgets$Finetuning_cluster_nbclus, 0)
           
           conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
           prot_prof <- switch(rv.widgets$Finetuning_cluster_protprofile,
@@ -908,20 +957,26 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Finetuning', 'Protein_Profile_Method', rv.widgets$Finetuning_cluster_protprofile)
           
         } else if (rv.widgets$Scenario_choice == "Aggregation") {
-          rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
           rv.custom$comparison <- "aggregated"
           nb_contr <- ncol(rv.custom$res_pval_FC$P_Value)
           
-          if (rv.widgets$Finetuning_aggreg_method == "Most significant FC"){
-            best.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, min)
-            sidak.pval <- 1-(1-best.pval)^nb_contr
-            
-          }else if (rv.widgets$Finetuning_aggreg_method == "Worst FC"){
-            worst.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, max)
-            sidak.pval <- worst.pval^nb_contr
-          }
-          
-          rv.custom$res_pval_FC$P_Value <- sidak.pval
+          rv.custom$res_pval_FC$P_Value <- switch(rv.widgets$Finetuning_aggreg_method,
+                    MinPval = {
+                      best.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, min)
+                      rv.custom$colidx_pvalagg <- apply(rv.custom$res_pval_FC$P_Value, 1, which.min)
+                      #best.pval_colname <- colnames(rv.custom$res_pval_FC$P_Value)[rv.custom$colidx_pvalagg]
+                      
+                      sidak.pval <- 1-(1-best.pval)^nb_contr
+                      sidak.pval},
+                    MaxPval = {
+                      worst.pval <- apply(rv.custom$res_pval_FC$P_Value, 1, max)
+                      rv.custom$colidx_pvalagg <- apply(rv.custom$res_pval_FC$P_Value, 1, which.max)
+                      #worst.pval_colname <- colnames(rv.custom$res_pval_FC$P_Value)[rv.custom$colidx_pvalagg]
+                      
+                      sidak.pval <- worst.pval^nb_contr
+                      sidak.pval}
+                 )
+          rv.custom$res_pval_FC$logFC <- rep(NA, length(rv.custom$res_pval_FC$P_Value))
           
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Finetuning', 'Aggregation_Method', rv.widgets$Finetuning_aggreg_method)
         }
@@ -981,7 +1036,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     output$Pvaluecalibration_numericValCalibration_UI <- renderUI({
       req(rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value")
       widget <- numericInput(ns("Pvaluecalibration_numericValCalibration"),
-                             "Proportion of TRUE null hypothesis",
+                             "pi0",
                              value = rv.widgets$Pvaluecalibration_numericValCalibration,
                              min = 0,
                              max = 1,
@@ -996,12 +1051,14 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv.custom$res_pval_FC)
       req(rv.custom$pi0)
       
-      widget <- selectInput(
+      widget <- numericInput(
         ns("Pvaluecalibration_nBinsHistpval"), 
-        "n bins of p-value histogram",
-        choices = c(1, seq(from = 0, to = 100, by = 10)[-1]),
-        selected = rv.widgets$Pvaluecalibration_nBinsHistpval, 
-        width = "80px")
+        "n bins histogram",
+        value = rv.widgets$Pvaluecalibration_nBinsHistpval,
+        min = 1,
+        max = 100,
+        step = 10,
+        width = "200px")
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"])
     })
@@ -1032,7 +1089,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       }
 
       histPValue_HC(t,
-                    bins = as.numeric(rv.widgets$Pvaluecalibration_nBinsHistpval),
+                    bins = as.numeric(round(rv.widgets$Pvaluecalibration_nBinsHistpval, 0)),
                     pi0 = rv.custom$pi0
       )
 
@@ -1470,18 +1527,296 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         )
       })
 
-      highchart() |>
-        hc_chart(type = "line") |>
-        hc_title(text = paste0("Cluster ", rv.widgets$FDRcontrol_cluster_plot_clust)) |>
-        hc_xAxis(categories = vars, title = list(text = "Condition")) |>
-        hc_yAxis(title = list(text = "Protein profile value")) |>
-        hc_add_series_list(series_list) |>
-        hc_add_series(name = "Differential", data = list(), color = "orange") |>
-        hc_add_series(name = "Non differential", data = list(), color = "grey")
+      highcharter::highchart() |>
+        highcharter::hc_chart(type = "line") |>
+        highcharter::hc_title(text = paste0("Cluster ", rv.widgets$FDRcontrol_cluster_plot_clust)) |>
+        highcharter::hc_xAxis(categories = vars, title = list(text = "Condition")) |>
+        highcharter::hc_yAxis(title = list(text = "Protein profile value")) |>
+        highcharter::hc_add_series_list(series_list) |>
+        highcharter::hc_add_series(name = "Differential", data = list(), color = "orange") |>
+        highcharter::hc_add_series(name = "Non differential", data = list(), color = "grey")
     })
     
     ### Aggregation - Plot -----
+    output$FDRcontrol_plot_aggreg_ui <- renderUI({
+      req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
+      req(rv.widgets$Scenario_choice == "Aggregation")
+      
+      tagList(
+        fluidRow(
+                 column(width = 8,
+                        if(rv.widgets$FDRcontrol_aggreg_plot_type == "Fixed"){
+                          plotOutput(ns('FDRcontrol_plot_aggreg_plot_volcano_base'), height = "600px")
+                        } else {
+                          highcharter::highchartOutput(ns("FDRcontrol_plot_aggreg_plot_volcano_highchart"), height = "600px")
+                        }),
+                 column(width = 4,
+                        uiOutput(ns("FDR_nbSelectedItems_ui")),
+                        br(),
+                        uiOutput(ns("FDRcontrol_plot_aggreg_param")))
+        ))
+    })
     
+    output$FDRcontrol_plot_aggreg_param <- renderUI({
+      req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
+      req(rv.widgets$Scenario_choice == "Aggregation")
+      
+      widget1 <- radioButtons(ns("FDRcontrol_aggreg_plot_type"), 
+                              "Type of graph",
+                              choices = c("Fixed", "Interactive"),
+                              selected = rv.widgets$FDRcontrol_aggreg_plot_type)
+      
+      widget2 <- selectInput(ns("FDRcontrol_aggreg_plot_rep"), 
+                             "Representation",
+                             choices = c("Associated FC", "FC interval", "Ellipse"),
+                             selected = rv.widgets$FDRcontrol_aggreg_plot_rep,
+                             width = "200px")
+      
+      tagList(
+        MagellanNTK::toggleWidget(widget1, rv$steps.enabled['FDRcontrol']),
+        MagellanNTK::toggleWidget(widget2, rv$steps.enabled['FDRcontrol'])
+      )
+    })
+    
+    output$FDRcontrol_plot_aggreg_plot_volcano_highchart <- highcharter::renderHighchart({
+      req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
+      req(rv.widgets$Scenario_choice == "Aggregation")
+      req(rv.widgets$FDRcontrol_aggreg_plot_type == "Interactive")
+      
+      withProgress(message = "", detail = "", value = 0, {
+        incProgress(0.5, detail = "Making plot")
+        pal <- list(diff = "orange", nondiff = "gray")
+        clickFunction <-
+          shinyjqui::JS(paste0(
+            "function(event) {Shiny.onInputChange('",
+            ns("eventPointClicked"),
+            "', [this.index]+'_'+ [this.series.name]);}"
+          ))
+        
+        fcunique <- rv.custom$res_pval_FC_complete$logFC[cbind(seq(length(rv.custom$res_pval_FC$logFC)), rv.custom$colidx_pvalagg)]
+        df <- data.frame(
+          x = fcunique,
+          y = -log10(rv.custom$res_pval_FC$P_Value),
+          index = seq(length(rv.custom$res_pval_FC$P_Value)),
+          xmin = apply(rv.custom$res_pval_FC_complete$logFC, 1, min, na.rm = TRUE),
+          xmax = apply(rv.custom$res_pval_FC_complete$logFC, 1, max, na.rm = TRUE),
+          ymin = -log10(apply(rv.custom$res_pval_FC_complete$P_Value, 1, max, na.rm = TRUE)),
+          ymax = -log10(apply(rv.custom$res_pval_FC_complete$P_Value, 1, min, na.rm = TRUE)),
+          tooltip_ProtName = names(rv.custom$res_pval_FC$P_Value)
+        )
+        df <- cbind(df,
+                    g = ifelse(df$y >= rv.custom$FDRcontrol_thpval, "g1", "g2")
+        )
+        txt_tooltip <- "{point.tooltip_ProtName} <br>"
+        
+        title <- paste0("Aggregated p-values (", rv.widgets$Finetuning_aggreg_method, ")")
+        
+        if (rv.widgets$FDRcontrol_aggreg_plot_rep == "Ellipse"){
+          create_ellipse <- function(x, y, rx, ry, n = 40) {
+            theta <- seq(0, 2 * pi, length.out = n)
+            xvals <- x + rx * cos(theta)
+            yvals <- y + ry * sin(theta)
+            
+            # Highcharts format = list(x, y)
+            lapply(seq_along(xvals), function(i) {
+              list(xvals[i], yvals[i])
+            })
+          }
+          
+          # create ellipses
+          ellipses_list <- lapply(seq_len(nrow(df)), function(i) {
+            rx <- (df$xmax[i] - df$xmin[i]) / 2
+            ry <- (df$ymax[i] - df$ymin[i]) / 2
+            
+            ell <- create_ellipse(df$x[i], df$y[i], rx, ry)
+            
+            col <- if (df$g[i] == "g1") {
+              "rgba(255,165,0,0.20)"
+            } else {
+              "rgba(128,128,128,0.20)"
+            }
+            
+            list(
+              type = "polygon",
+              data = ell,
+              color = col,
+              lineWidth = 1,
+              enableMouseTracking = FALSE,
+              showInLegend = FALSE
+            )
+          })
+          
+          hc <- highcharter::highchart() |>
+            highcharter::hc_add_series_list(ellipses_list)
+        } else if (rv.widgets$FDRcontrol_aggreg_plot_rep == "FC interval") {
+          df_seg <- do.call(rbind, lapply(seq_len(nrow(df)), function(i) {
+            data.frame(
+              x = c(df$xmin[i], df$xmax[i]),
+              y = c(df$y[i], df$y[i]),
+              id = i
+            )
+          }))
+          
+          hc <- highcharter::highchart() |>
+            highcharter::hc_add_series(
+              data = df_seg,
+              type = "line",
+              highcharter::hcaes(x = x, y = y, group = id),
+              color = "darkgrey",
+              lineWidth = 1,
+              enableMouseTracking = FALSE,
+              marker = list(enabled = FALSE),
+              showInLegend = FALSE
+            )
+        } else {
+          hc <- highcharter::highchart()
+        }
+        
+        hc <- hc |>
+          highcharter::hc_add_series(data = df, type = "scatter", highcharter::hcaes(x, y, group = g)) |>
+          highcharter::hc_colors(c(pal$diff, pal$nondiff)) |>
+          DaparToolshed::my_hc_chart(zoomType = "xy", chartType = "scatter") |>
+          highcharter::hc_legend(enabled = FALSE) |>
+          highcharter::hc_title(
+            text = title,
+            margin = 20, align = "center",
+            style = list(size = 20, color = "black", useHTML = TRUE)
+          ) |>
+          highcharter::hc_yAxis(title = list(text = "-log10(pValue)"),
+                                min = -0.1,
+                                startOnTick = FALSE,
+                                plotLines = list(
+                                  list(
+                                    value = rv.custom$FDRcontrol_thpval,
+                                    color = "grey",
+                                    width = 3,
+                                    dashStyle = "Dash"
+                                  )
+                                )) |>
+          highcharter::hc_xAxis(
+            title = list(text = "logFC"),
+            plotLines = list(
+              list(
+                color = "grey",
+                width = 1,
+                value = 0,
+                zIndex = 5
+              )
+            )
+          ) |>
+          highcharter::hc_tooltip(headerFormat = "", pointFormat = txt_tooltip) |>
+          highcharter::hc_plotOptions(
+            scatter = list(
+              marker = list(
+                radius = 4,
+                lineWidth = 1,
+                lineColor = "white",
+                symbol = "circle"
+              )
+            ),
+            line = list(
+              marker = list(enabled = FALSE),
+              dashStyle = "Dash"
+            ),
+            series = list(
+              animation = list(duration = 100),
+              cursor = "pointer",
+              point = list(events = list(
+                click = clickFunction
+              ))
+            )
+          ) |>
+          DaparToolshed::my_hc_ExportMenu(filename = "volcanoplot")
+      })
+      hc
+    })
+    
+    output$FDRcontrol_plot_aggreg_plot_volcano_base <- renderPlot({
+      req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
+      req(rv.widgets$Scenario_choice == "Aggregation")
+      req(rv.widgets$FDRcontrol_aggreg_plot_type == "Fixed")
+      
+      pal <- list(diff = "orange", nondiff = "gray")
+      fcunique <- rv.custom$res_pval_FC_complete$logFC[
+        cbind(seq(length(rv.custom$res_pval_FC$logFC)),
+              rv.custom$colidx_pvalagg)
+      ]
+      df <- data.frame(
+        x = fcunique,
+        y = -log10(rv.custom$res_pval_FC$P_Value),
+        xmin = apply(rv.custom$res_pval_FC_complete$logFC, 1, min, na.rm = TRUE),
+        xmax = apply(rv.custom$res_pval_FC_complete$logFC, 1, max, na.rm = TRUE),
+        ymin = -log10(apply(rv.custom$res_pval_FC_complete$P_Value, 1, max, na.rm = TRUE)),
+        ymax = -log10(apply(rv.custom$res_pval_FC_complete$P_Value, 1, min, na.rm = TRUE))
+      )
+      df$g <- ifelse(df$y >= rv.custom$FDRcontrol_thpval, "g1", "g2")
+      cols <- ifelse(df$g == "g1", pal$diff, pal$nondiff)
+      
+      plot(
+        df$x, df$y,
+        pch = 16,
+        col = cols,
+        cex = 1,
+        xlab = "logFC",
+        ylab = "-log10(pValue)",
+        main = paste0("Aggregated p-values (", rv.widgets$Finetuning_aggreg_method, ")")
+      )
+      
+      abline(v = 0, col = "grey", lwd = 1)
+      abline(h = rv.custom$FDRcontrol_thpval, col = "grey", lwd = 2, lty = 2)
+      
+      if (rv.widgets$FDRcontrol_aggreg_plot_rep == "Ellipse") {
+        
+        draw_ellipse <- function(x, y, rx, ry, n = 40) {
+          theta <- seq(0, 2*pi, length.out = n)
+          xs <- x + rx * cos(theta)
+          ys <- y + ry * sin(theta)
+          polygon(xs, ys, border = NA, col = rgb(0, 0, 0, 0.05))
+        }
+        
+        for (i in seq_len(nrow(df))) {
+          rx <- (df$xmax[i] - df$xmin[i]) / 2
+          ry <- (df$ymax[i] - df$ymin[i]) / 2
+          
+          if (is.finite(rx) && is.finite(ry) && rx > 0 && ry > 0) {
+            
+            col <- if (df$g[i] == "g1") {
+              rgb(1, 0.65, 0, 0.08)   # orange transparent
+            } else {
+              rgb(0.5, 0.5, 0.5, 0.08)
+            }
+            
+            theta <- seq(0, 2*pi, length.out = 40)
+            xs <- df$x[i] + rx * cos(theta)
+            ys <- df$y[i] + ry * sin(theta)
+            
+            polygon(xs, ys, border = NA, col = col)
+          }
+        }
+        
+      } else if (rv.widgets$FDRcontrol_aggreg_plot_rep == "FC interval") {
+        
+        for (i in seq_len(nrow(df))) {
+          segments(
+            x0 = df$xmin[i],
+            y0 = df$y[i],
+            x1 = df$xmax[i],
+            y1 = df$y[i],
+            col = "darkgrey",
+            lwd = 1
+          )
+        }
+      }
+      
+      points(
+        df$x, df$y,
+        pch = 21,
+        bg = cols,
+        col = "white",
+        lwd = 1,
+        cex = 1.2
+      )
+    })
     
     ### FDR -----
     #### _sidebar -----

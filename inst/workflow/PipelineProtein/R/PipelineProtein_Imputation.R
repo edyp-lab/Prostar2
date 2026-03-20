@@ -423,7 +423,7 @@ PipelineProtein_Imputation_server <- function(id,
                   na.type = 'Missing POV')
                 
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
-                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'qval', rv.widgets$POVImputation_detQuant_quantile / 100)
+                rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'quantile', rv.widgets$POVImputation_detQuant_quantile)
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'factor', rv.widgets$POVImputation_detQuant_factor)
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'na.type', 'Missing POV')
                 
@@ -686,7 +686,7 @@ PipelineProtein_Imputation_server <- function(id,
                       na.type = 'Missing MEC')
                     
                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'qval', rv.widgets$MECImputation_detQuant_quantile / 100)
+                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'quantile', rv.widgets$MECImputation_detQuant_quantile)
                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'factor', rv.widgets$MECImputation_detQuant_factor)
                     rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
 

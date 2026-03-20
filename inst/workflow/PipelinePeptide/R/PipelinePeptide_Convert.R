@@ -381,8 +381,8 @@ PipelinePeptide_Convert_server <- function(id,
     output$SelectFile_typeOfData_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_typeOfData"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_typeOfData")),
-        choices = c("peptide dataset" = "peptide",
-          "protein dataset" = "protein"
+        choices = c("precursor or peptide dataset" = "peptide"#,
+          #"protein dataset" = "protein"
         ),
         selected = rv.widgets$SelectFile_typeOfData)
       

@@ -8,7 +8,7 @@ output:
         highlight: tango
         toc: false
         number_sections: FALSE
-date: 16 March 2026
+date: 19 March 2026
 link-citations: true
 ---
 # Imputation
@@ -23,10 +23,10 @@ This step allows the selection of a imputation method from several available opt
 ### Imputation
 The `Imputation` step offers a number of different imputation method, that are described below. The parameters to be defined vary depending on the selected method. POV (Partially Observed Values) and MEC (Missing in the Entire Condition) are imputed in the same way, as the implemented methods are robust enough to handle them appropriately.
 
-The left side of the interface is used to select the aggregation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the aggregation to the data. 
+The left side of the interface is used to select the imputation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the imputation to the data. 
 The first graph in the middle displays density plots showing the distribution of partially observed values for each condition. The x-axis corresponds to the mean intensity of a peptide in a condition, while the y-axis indicates the number of observed values for that peptide under the same condition. In general, it can be observed that the distribution tends to shift towards higher values when fewer missing values are present. This is a sign that at least some of the missing values originate from peptides that are below the lower limit of the mass spectrometer. 
 The second graph is a heatmap of the peptides mean value according to their distribution of missing values across the conditions. Each line corresponds a peptide, that have been reordered so as to cluster the peptides that have a similar amount of missing values distributed in the same way over the conditions. Likewise, the columns do not depicts a specific sample but rather any sample belonging to the given condition, as the samples have been reordered to focus on patterns of missing values. Each line is colored to represent the mean abundance value within each condition : red indicates high intensities and yellow low intensities. 
-If the `Pirat` method is selected, two other graphs appear above. The first Pirat graph represents the empirical densities of correlations between peptides chosen randomly and between sibling peptides. The second shows a regression of the log-probability of missing onto mean observed abundance for the dataset. 
+If the `Pirat` method is selected, two other graphs appear above. The first Pirat graph represents the empirical densities of correlations between peptides chosen randomly and between peptides from the same peptide group. Pirat performs better when the distribution of correlations within peptide groups is more right-shifted relative to the distribution of random correlations. The second shows a regression of the log-probability of missing onto mean observed abundance for the dataset. 
 
 
 ##### Description of parameters and options :
@@ -38,6 +38,7 @@ The possible options are as follows:
 - `None` : No imputation method is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
 - `Pirat` : Applies the Pirat method from the Pirat package. It is an imputation method that uses a penalized maximum likelihood strategy and accounts for sibling peptide correlations (Etourneau et al., 2024).
 - `impSeq` : Applies the impSeq method from the rrcovNA package. This method starts from a complete subset of the data set and estimates sequentially the missing values in an incomplete observation. As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `BPCA` : Applies the Bayesian PCA (BPCA) method using the pcaMethods package. This is an iterative method that uses a Bayesian model.
 
 ###### **`Extension`**
 *Available only for the `Pirat` method.*
@@ -54,6 +55,11 @@ The possible options are as follows:
 *Available only for the `Pirat` method.*
 
 This indicates the multiplicative factor applied to the alpha parameter of the penalty defined in the original paper on the Pirat method.
+
+###### **`nPcs`**
+*Available only for the `BPCA` method.*
+
+This corresponds to the number of components used for re-estimation. 
 
 ***
 

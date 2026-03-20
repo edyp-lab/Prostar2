@@ -6,7 +6,7 @@ Authors@R: c(
     person("Prostar2 Package Maintainer",
     email = "prostar-proteomics@cea.fr", role = c("cre")),
     person('Samuel', 'Wieczorek', 
-    email = 'samuel.wieczorek@cea.fr', role = c('cre', 'aut'),
+    email = 'samuel.wieczorek@cea.fr', role = c('aut'),
     comment = c(ORCID="0000-0002-5016-1203")),
     person('Thomas', 'Burger', 
     email = 'thomas.burger@cea.fr', role = c('aut')),
@@ -38,7 +38,8 @@ Imports:
     MultiAssayExperiment,
     shinyjqui,
     BiocGenerics,
-    cp4p
+    cp4p,
+    pcaMethods
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
     git::https://github.com/edyp-lab/DaparToolshed,

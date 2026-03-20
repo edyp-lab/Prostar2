@@ -105,7 +105,7 @@ PipelineProtein_Convert_server <- function(id,
   widgets.default.values <- list(
     SelectFile_software = '',
     SelectFile_file = NULL,
-    SelectFile_typeOfData = "peptide",
+    SelectFile_typeOfData = "protein",
     SelectFile_checkDataLogged = "no",
     SelectFile_replaceAllZeros = TRUE,
     SelectFile_XLSsheets = NULL,
@@ -383,7 +383,7 @@ PipelineProtein_Convert_server <- function(id,
     output$SelectFile_typeOfData_ui <- renderUI({
       widget <- radioButtons(ns("SelectFile_typeOfData"), 
         MagellanNTK::mod_popover_for_help_ui(ns("help_typeOfData")),
-        choices = c("peptide dataset" = "peptide",
+        choices = c(#"peptide dataset" = "peptide",
           "protein dataset" = "protein"
         ),
         selected = rv.widgets$SelectFile_typeOfData)

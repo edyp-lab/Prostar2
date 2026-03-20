@@ -18,43 +18,138 @@ The `DifferentialAnalysis` step ...
 ***
 
 ### Scenario
-...
+The `Scenario` step allows selection of the scenario for differential analysis, as well as the statistical test to be used. These scenarios are based on [Burger (2023)][https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/full/10.1002/pmic.202200406].
+
+The left side of the interface is used to select the test scenario and configure the settings associated with the chosen scenario. Once pleased with the selected options, click on `Run` at the top to proceed with the chosen scenario. 
+The text in the middle provides a summary of the various scenarios, what they mean and when they are most appropriate.
 
 ##### Description of parameters and options :
-###### **`...`**
+###### **`Scenario`**
 ...
+
+The possible options are as follows:
+
+- `Contrast` : ...
+- `Cluster` : ...
+- `Aggregation` : ...
+
+###### **`Method`**
+... `ANOVA` `Limma`
 
 ***
 
 ### Fold-change
-...
+*Sub-step relevant only for the `Contrast` scenario.* 
+If `Cluster` or `Aggregation` is chosen as scenario, validate and go to the next sub-step.
+
+The `Fold-change` step ...
 
 ##### Description of parameters and options :
-###### **`...`**
+###### **`log(FC) threshold`**
+...
+
+###### **`Contrast type`**
+... `Stacked` `Unique`
+
+###### **`Contrast`**
+*Available only for the `Unique` contrast type.*
+
 ...
 
 ***
 
 ### Fine tuning
-...
+The `Fine tuning` step ...
 
 ##### Description of parameters and options :
-###### **`...`**
+#### Push p-value
+*Available only for the `Contrast` scenario.*
+
+###### **`Tag tree`**
+At first, the only parameter shown is the tag tree. Click on it to open a window where you can select the tags to use for the desired query. At least one tag must be selected to access the other settings.
+The buttons at the top of the window allow you to choose between selecting a single tag at a time, an entire branch at once, or multiple tags regardless of their branch. Then click on the button to the left of each tag you want to select.
+To confirm your selection, click on `Validate & close`.
+
+###### **`Type of filter operation`**
+This allows to choose whether the lines identified by the query are to be kept or deleted. 
+Either `Delete` to remove the proteins identified, or `Keep` to keep them and instead removes all those that do not match the query.
+
+###### **`Scope`**
+This parameter defines how the selected tags are taken into account within a given protein.
+The possible options are as follows:
+
+- `None` : No filter is applied, the quantitative data is left unchanged. No need to validate, directly go to next step.
+- `Whole Line` : Applies to proteins containing only the selected tags. As no other parameters are needed for this option, no additional settings are displayed upon selection.
+- `Whole Matrix` : Takes into account tags across all conditions for a given protein.
+- `For every condition` : The filter only applies if all criteria are met in every conditions without exception.
+- `At least one condition` : The filter only applies if all criteria are met in at least one condition.
+
+###### **`Operator`**
+This specifies the algebric operator used to select lines associated with the threshold value.
+The possible options are as follows:
+
+- `<=` : Less than or equal to threshold value.
+- `<` : Stricly less than threshold value.
+- `>=` : Greater than or equal to threshold value.
+- `>` : Stricly greater than threshold value.
+- `==` : Equal to threshold value.
+- `!=` : Not equal to threshold value.
+
+###### **`Threshold Type`**
+This parameter determines the type of the threshold value.
+Either `Count` for an integer, or `Percentage` for a percentage.
+
+###### **`Threshold`**
+The threshold value to apply for the query. The way the value is selected depends on what was picked for  `Threshold Type`.
+If, for Threshold Type, `Count` is selected, a dropdown-menu proposes a list of integers. Values range from 0 to either the number of samples (if `Scope` is set to `Whole Matrix`) or the number of samples from the condition with the fewest samples (if `Scope` is `For every condition` or `At least one condition`).
+Otherwise, if `Percentage` is selected, a slider is used to select a percentage value ranging from 0 to 100.
+
+-----
+
+#### Clustering
+*Available only for the `Cluster` scenario.*
+
+###### **`Protein profile method`**
 ...
+
+###### **`Clustering method`**
+...
+
+###### **`Number of clusters`**
+*Available only for the `kmeans` clustering method.*
+
+...
+
+-----
+
+#### P-value aggregation
+*Available only for the `Aggregation` scenario.*
+
+###### **`p-value agggregation method`**
+...
+
 
 ***
 
 ### P-value calibration
-...
+The `P-value calibration` step ...
 
 ##### Description of parameters and options :
-###### **`...`**
+###### **`Calibration method`**
 ...
+
+###### **`n bins histogram`**
+...
+
+###### **`pi0`**
+*Available only for the `numeric value` calibration method.*
+
+... Proportion of TRUE null hypothesis
 
 ***
 
 ### FDR control
-...
+The `FDR control` step ...
 
 ##### Description of parameters and options :
 ###### **`...`**
