@@ -277,16 +277,49 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       fluidRow(
         column(4, div(class = "option-card", div(class = "option-panel",
                                                  h4("Contrast", class = "option-title"),
-                                                 p("Desc Contrast")))),
+                                                 p("Test conditions to compute the contrasts. If 'Stacked' is selected in the Fold-change step, p-values from all contrasts are stacked together so as to make only a single FDR control."),
+                                                 p(strong("Steps:")),
+                                                 tags$ul(
+                                                   tags$li("Choose the fold-change threshold and contrast (either a single contrast or all contrasts stacked)"),
+                                                   tags$li("Push p-value"),
+                                                   tags$li("Perform p-value calibration"),
+                                                   tags$li("Apply FDR control")),
+                                                 p(strong("When to use:")),
+                                                 tags$ul(
+                                                   tags$li("When comparing multiple conditions",
+                                                           tags$ul(tags$li("If interested in a single contrast = Unique"),
+                                                                   tags$li("If interested in all contrasts = Stacked"))))
+                                                 ))),
         column(4, div(class = "option-card", div(class = "option-panel",
                                                  h4("Cluster", class = "option-title"),
-                                                 p("Desc Cluster")))),
+                                                 p("Make a single omnibus test. In parallel, create of profile for each protein and cluster these profiles. This scenario focus more on the global trend of each protein."),
+                                                 p(strong("Steps:")),
+                                                 tags$ul(
+                                                   tags$li("Choose the method to create the protein profile and the clustering method"),
+                                                   tags$li("Perform p-value calibration"),
+                                                   tags$li("Apply FDR control")),
+                                                 p(strong("When to use:")),
+                                                 tags$ul(
+                                                   tags$li("Conditions corresponds to a time-course"),
+                                                   tags$li("..."))
+                                                 ))),
         column(4, div(class = "option-card", div(class = "option-panel",
                                                  h4("Aggregation", class = "option-title"),
-                                                 p("Desc Aggregation"))))
+                                                 p("Test conditions to compute the contrasts. The resulting p-values are then aggregated into a single set."),
+                                                 p(strong("Steps:")),
+                                                 tags$ul(
+                                                   tags$li("Choose the p-value aggregation method"),
+                                                   tags$li("Perform p-value calibration"),
+                                                   tags$li("Apply FDR control")),
+                                                 p(strong("When to use:")),
+                                                 tags$ul(
+                                                   tags$li("If there is more than 2 conditions"),
+                                                   tags$li("..."))
+                                                 )))
       ),
       tags$style(HTML(".option-card {
                             padding-right: 20px;
+                            margin-bottom: 10px;
                             }
                             
                             .option-panel {
@@ -2204,6 +2237,9 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         } else if (rv.widgets$Scenario_choice == "Cluster"){
           DaparToolshed::DifferentialAnalysis(rv$dataIn[[length(rv$dataIn)]]) <- Build_pval_table()
           SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])$Clusters <- rv.custom$res_clusters
+        } else if (rv.widgets$Scenario_choice == "Aggregation"){
+          pval_table <- Build_pval_table()
+          DaparToolshed::DifferentialAnalysis(rv$dataIn[[length(rv$dataIn)]]) <- cbind(pval_table, rv.custom$res_pval_FC_complete$logFC, rv.custom$res_pval_FC_complete$P_Value)
         }
         
         dataOut$trigger <- MagellanNTK::Timestamp()

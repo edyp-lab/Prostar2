@@ -14,10 +14,10 @@
 #'
 #' @examples
 #' if (interactive()){
-#' data(subbouyssie)
+#' data(subbouyssie, package = "Pirat")
 #'
 #' # Builds the instance of `SummarizedExperiment`
-#' obj.se <- pirat2SE(
+#' obj.se <- Pirat::pirat2SE(
 #'   subbouyssie$peptides_ab, subbouyssie$adj,
 #'   subbouyssie$mask_prot_diff, subbouyssie$mask_pep_diff
 #' )
@@ -88,7 +88,7 @@ mod_Pirat_server <- function(
 
     maxval <- reactiveVal(0)
 
-    data <- reactiveVal(NULL)
+    dataPirat <- reactiveVal(NULL)
 
     dataOut <- reactiveValues(
       trigger = NULL,
@@ -103,7 +103,7 @@ mod_Pirat_server <- function(
         return(NULL)
       }
 
-      data(list(
+      dataPirat <- reactiveVal(list(
         peptides_ab = t(SummarizedExperiment::assay(dataIn())),
         adj = S4Vectors::metadata(dataIn())$adj,
         mask_prot_diff = S4Vectors::metadata(dataIn())$mask_prot_diff,
@@ -136,7 +136,7 @@ mod_Pirat_server <- function(
       shiny::withProgress(
         withCallingHandlers(
           # out <- long_run_op(num_iter=10),
-          dataOut$value <- my_pipeline_llkimpute(data(),
+          dataOut$value <- my_pipeline_llkimpute(dataPirat(),
             extension = input$extension,
             verbose = verbose
           ),
@@ -156,8 +156,8 @@ mod_Pirat_server <- function(
 
 
     output$correlation_plot_UI <- renderPlot({
-      req(data())
-      plot_pep_correlations(pep.data = data())
+      req(dataPirat())
+      plot_pep_correlations(pep.data = dataPirat())
     })
 
     reactive({
