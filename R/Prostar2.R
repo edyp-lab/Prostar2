@@ -1,11 +1,13 @@
 #' @title xxx
+#' 
 #' @description xxxx
-#' @importFrom MagellanNTK MagellanNTK
 #' 
 #' @param wf.name xxx
 #' @param convert.name xxx
 #' @param usermod xxx
 #' @param verbose xxx
+#'
+#' @return NA
 #'
 #' @examples
 #' if (interactive()){
@@ -18,6 +20,8 @@
 #' Prostar2("PipelineProtein_HypothesisTest")
 #' }
 #'
+#' @importFrom MagellanNTK MagellanNTK
+#'
 #' @export
 #'
 Prostar2 <- function(
@@ -26,7 +30,7 @@ Prostar2 <- function(
     usermod = "user",
     verbose = FALSE) {
 
-  pkgs.require(c('MagellanNTK', 'omXplore'))
+  pkgs_require(c('MagellanNTK', 'omXplore'))
   
   # Launch in the Magellan workspace
   wf.path <- unlist(strsplit(wf.name, '_'))[1]

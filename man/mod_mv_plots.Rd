@@ -53,16 +53,19 @@ mod_mv_plots(data, grp = NULL, mytitle = NULL, pal = NULL, pattern = NULL)
 \item{remoteReset}{A \code{logical(1)} which acts as a remote command to reset
 the module to its default values. Default is FALSE.}
 }
+\value{
+NA
+}
 \description{
 xxx
 }
 \examples{
 if (interactive()){
 library(DaparToolshed)
-library(highcharter)
+library(plotly)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 pattern <- c("Missing POV")
-grp <- DaparToolshed::design.qf(Exp1_R25_prot)$Condition
+grp <- DaparToolshed::design_qf(Exp1_R25_prot)$Condition
 shiny::runApp(mod_mv_plots(obj[[4]], pattern = pattern, grp = grp))
 }
 

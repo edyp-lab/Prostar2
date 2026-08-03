@@ -11,85 +11,35 @@
 addDatasets(object, dataset, name)
 
 keepDatasets(object, range = seq(length(object)))
-
-keepDatasets(object, range = seq(length(object)))
 }
 \arguments{
-\item{object}{An object of class \code{list}.}
+\item{object}{An object of class \code{QFeatures}.}
 
-\item{dataset}{\code{character(1)} providing the base with respect to which
-logarithms are computed. Default is log2.}
+\item{dataset}{A \code{SummarizedExperiment} object containing the dataset to be
+added.}
 
-\item{name}{A \code{character(1)} naming the new array name.}
+\item{name}{A \code{character(1)} specifying the name of the new assay.}
 
-\item{range}{A xxxx}
+\item{range}{A \code{numeric} vector containing the indices of assays to retain.}
 }
 \value{
-An processed object of the same class as \code{object}.
-
-An processed object of the same class as \code{object}.
-
-An instance of the \code{QFeatures} class
-
-An processed object of the same class as \code{object}.
+A processed \code{QFeatures} object.
 }
 \description{
-This manual page describes manipulation methods using \link{list} objects. In
-index or name \code{i} can be specified to define the array (by name of
-index) on which to operate.
+This manual page describes methods for manipulating datasets stored in
+\link[QFeatures:QFeatures]{QFeatures} objects. A \code{QFeatures} object contains a collection of assays,
+each represented as a \code{SummarizedExperiment} object.
 
 The following functions are currently available:
-\itemize{
-\item \code{keepDatasets(object, range)} keep datasets in object which
-are in range
-\item \code{addDatasets(object, dataset, name)} add the 'dataset' to the
-object (of type list)
-\item \code{Save(object, file)} stores the object to a .RData file
-}
 
-This function appends a dataset in the list with customization
-if necessary
-
-This function deletes the items not included in the
-range parameter
-
-This manual page describes manipulation methods using \link{list} objects. In
-index or name \code{i} can be specified to define the array (by name of
-index) on which to operate.
-
-The following functions are currently available:
-\itemize{
-\item \code{keepDatasets(object, range)} keep datasets in object which
-are in range
-\item \code{addDatasets(object, dataset, name)} add the 'dataset' to the
-object (of type list)
-\item \code{Save(object, file)} stores the object to a .RData file
-}
-
-This function deletes the items not included in the
-range parameter. It is a cutomized function which replaces the default
-\code{keepDatasets()} function of the package MagellanNTK
-
-This manual page describes manipulation methods using \link{list} objects. In
-index or name \code{i} can be specified to define the array (by name of
-index) on which to operate.
-
-The following functions are currently available:
-\itemize{
-\item \code{keepDatasets(object, range)} keep datasets in object which
-are in range
-\item \code{addDatasets(object, dataset, name)} add the 'dataset' to the
-object (of type list)
-\item \code{Save(object, file)} stores the object to a .RData file
+\describe{
+\item{\code{addDatasets(object, dataset, name)}}{Adds a new dataset (assay) to a
+\code{QFeatures} object and assigns it a user-defined name.}
+\item{\code{keepDatasets(object, range)}}{Keeps only selected datasets (assays)
+from a \code{QFeatures} object and removes all others.}
 }
 }
-\details{
-The object must be of type list. Thetwo functions are implemented here for
-of the package which uses MagellanNTK
+\examples{
+NULL
 
-The object must be of type list. Thetwo functions are implemented here for
-of the package which uses MagellanNTK
-
-The object must be of type list. Thetwo functions are implemented here for
-of the package which uses MagellanNTK
 }

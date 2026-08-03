@@ -45,8 +45,8 @@ NA
 This module allows to change
 }
 \examples{
-if (interactive()){
-shiny::runApp(open_dataset())
+if (interactive()) {
+  shiny::runApp(open_dataset())
 }
 
 }

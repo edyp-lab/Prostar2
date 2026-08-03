@@ -9,6 +9,13 @@ BuildColorStyles(typeDataset)
 \arguments{
 \item{typeDataset}{xx}
 }
+\value{
+NA
+}
 \description{
 xxxx
+}
+\examples{
+NULL
+
 }

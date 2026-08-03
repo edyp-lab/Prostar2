@@ -1,43 +1,49 @@
-
-
 #' @title Get the last validated step before current position.
 #'
-#' @description This function returns the indice of the last validated step before
-#' the current step.
+#' @description This function returns the indice of the last validated step
+#' before the current step.
 #'
-#' @param history xxx
-#' @param process xxx
-#' @param step.name xxx
-#' @param param.name xxx
-#' @param value xxx
-#' @return A `integer(1)`
+#' @param history A `data.frame()`
+#' @param step A `character()`
+#' @param substep A `character()`
+#' @param param.name A `character()`
+#' @param value The value corresponding to the param.name
+#'
+#' @return A `data.frame()`
+#'
+#' @examples
+#' history <- InitializeHistory()
+#' Add2History(history, "Example step", "First sub-step", "my param", "THE value")
 #'
 #' @export
-#' @examples
-#' NULL
-Add2History <- function(history, process, step.name, param.name, value){
-  if (inherits(value, 'list'))
-    value <- unlist(value)
+#'
+Add2History <- function(history, step, substep, param.name, value){
+  if (inherits(value, "list")) {
+    value <- paste(names(value), unlist(value), collapse = ", ", sep = "=")
+  }
   
-  if (is.null(value))
+  if (is.null(value)) {
     value <- NA
+  }
   
-  history[nrow(history)+1, ] <- c(process, step.name, param.name, value)
+  history[nrow(history) + 1, ] <- c(step, substep, param.name, value)
   
   return(history)
 }
 
 
 
-#' @title Get the history of an assay.
+#' @title Get the history of an assay
+#' 
+#' @param dataIn An instance of `MultiAssayExperiment` class
+#' @param x The name of a slot in the object
 #'
-#' @param dataIn An instance of the `SummarizedExperiment` class
-#' @param x A `character` which is the name of an assay in the dataIn
 #' @return A `data.frame()`
 #'
-#' @export
 #' @examples
 #' NULL
+#' 
+#' @export
 #' 
 GetHistory <- function(dataIn, x){
     history <- NULL
@@ -45,7 +51,7 @@ GetHistory <- function(dataIn, x){
     if (x == 'Description'){
       if ('Convert' %in% names(dataIn))
         history <- DaparToolshed::paramshistory(dataIn[['Convert']])
-     } else if (x == 'Save'){
+    } else if (x == 'Save'){
       history <- NULL
     } else if (x %in% names(dataIn)){
       history <- DaparToolshed::paramshistory(dataIn[[x]])
@@ -56,30 +62,28 @@ GetHistory <- function(dataIn, x){
 
 
 
-
 #' @title Get the last validated step before current position.
 #'
-#' @description This function returns the indice of the last validated step before
-#' the current step.
+#' @description This function returns the indice of the last validated step
+#' before the current step.
 #'
-#' @param widgets.names xxx
-#' @return A `integer(1)`
+#' @return A `data.frame()` with four columns: 'Process', 'Step', 'Parameter'
+#' and 'Value'
+#'
+#' @examples
+#' InitializeHistory()
 #'
 #' @export
-#' @examples
-#' .names <- c('A_A', 'A_Z', 'B_Q', 'B_F')
-#' InitializeHistory(.names)
-#' 
-InitializeHistory <- function(){
-  
-  history <- setNames(data.frame(matrix(ncol = 4, nrow = 0)), 
-                      c('Process', 'Step', 'Parameter', 'Value'))
+#'
+InitializeHistory <- function() {
+  history <- NULL
+  history <- setNames(
+    data.frame(matrix(ncol = 4, nrow = 0)),
+    c("Step", "Substep", "Parameter", "Value")
+  )
   
   return(history)
 }
-
-
-
 
 
 
@@ -89,6 +93,8 @@ InitializeHistory <- function(){
 #' 
 #' @param ll.deps A `character()` vector which contains packages names
 #' 
+#' @return NA
+#' 
 #' @examples 
 #' NULL
 #' 
@@ -96,23 +102,21 @@ InitializeHistory <- function(){
 #' 
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets 
-#' source_shinyApp_files nav_process_ui nav_process_server source_wf_files 
-#' Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut 
-#' format_DT_ui format_DT_server Timestamp toggleWidget 
-#' mod_popover_for_help_server mod_popover_for_help_ui
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets source_shinyApp_files nav_process_ui nav_process_server source_wf_files Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_ui format_DT_server Timestamp toggleWidget mod_popover_for_help_server mod_popover_for_help_ui
 #' 
 #' @author Samuel Wieczorek
 #' 
-pkgs.require <- function(ll.deps){
+pkgs_require <- function(ll.deps){
   
   if (!requireNamespace('BiocManager', quietly = TRUE)) {
-    stop(paste0("Please run install.packages('BiocManager')"))
+    txt <- paste0("Please run install.packages('BiocManager')")
+    stop(txt)
   }
   
   lapply(ll.deps, function(x) {
     if (!requireNamespace(x, quietly = TRUE)) {
-      stop(paste0("Please install ", x, ": BiocManager::install('", x, "')"))
+      txt <- paste0("Please install ", x, ": BiocManager::install('", x, "')")
+      stop(txt)
     }
   })
 }
@@ -120,15 +124,17 @@ pkgs.require <- function(ll.deps){
 
 #' @title Add resource paths
 #' 
-#' @examples 
-#' add.resourcePath()
+#' @return NA
+#' 
+#' @examples
+#' add_resourcePath()
 #' 
 #' @export
 #' 
 #' @importFrom shiny addResourcePath
 #' @author Samuel Wieczorek
 #' 
-add.resourcePath <- function(){
+add_resourcePath <- function(){
   addResourcePath("www", system.file("app/www", package = "Prostar2"))
   addResourcePath("images", system.file("app/images", package = "Prostar2"))
 }
@@ -144,10 +150,15 @@ add.resourcePath <- function(){
 #' xxxx
 #'
 #' @param typeDataset xx
+#' 
+#' @return NA
+#' 
+#' @examples
+#' NULL
 #'
 #' @export
 BuildColorStyles <- function(typeDataset) {
-  mc <- DaparToolshed::metacell.def(typeDataset)
+  mc <- DaparToolshed::metacellDef(typeDataset)
   styles <- setNames(mc$color, nm = mc$node)
 
   styles
@@ -164,7 +175,12 @@ BuildColorStyles <- function(typeDataset) {
 #'
 #' @param obj.se xx
 #' @param digits xxx
-#'
+#' 
+#' @return NA
+#' 
+#' @examples
+#' NULL
+#' 
 #' @export
 #'
 Build_enriched_qdata <- function(obj.se, digits = NULL) {

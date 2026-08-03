@@ -133,7 +133,7 @@ mod_buildDesign_server <- function(
       txt <- "function (instance, td, row, col, prop, value, cellProperties) {
   Handsontable.renderers.TextRenderer.apply(this, arguments);"
       c <- 1
-      for (i in 1:length(conds)) {
+      for (i in seq_along(conds)) {
         if (conds[i] != "") {
           txt <- paste0(
             txt, "if(row==", (i - 1), " && col==",
@@ -163,7 +163,7 @@ mod_buildDesign_server <- function(
         rv$hot <- rv$hot[rv$newOrder, ]
       }
 
-      rv$conditionsChecked <- check.conditions(rv$hot$Condition)
+      rv$conditionsChecked <- checkConditions(rv$hot$Condition)
     })
 
 
@@ -389,23 +389,23 @@ mod_buildDesign_server <- function(
       rv$designChecked <- NULL
       switch(input$chooseExpDesign,
         FlatDesign = {
-          rv$hot <- data.frame(rv$hot[, 1:2],
-            Bio.Rep = seq(1:nrow(rv$hot)),
+          rv$hot <- data.frame(rv$hot[, seq_len(2)],
+            Bio.Rep = seq_len(nrow(rv$hot)),
             stringsAsFactors = FALSE
           )
         },
         twoLevelsDesign = {
-          rv$hot <- data.frame(rv$hot[, 1:2],
+          rv$hot <- data.frame(rv$hot[, seq_len(2)],
             Bio.Rep = rep("", nrow(rv$hot)),
-            Tech.Rep = seq(1:nrow(rv$hot)),
+            Tech.Rep = seq_len(nrow(rv$hot)),
             stringsAsFactors = FALSE
           )
         },
         threeLevelsDesign = {
-          rv$hot <- data.frame(rv$hot[, 1:2],
+          rv$hot <- data.frame(rv$hot[, seq_len(2)],
             Bio.Rep = rep("", nrow(rv$hot)),
             Tech.Rep = rep("", nrow(rv$hot)),
-            Analyt.Rep = seq(1:nrow(rv$hot)),
+            Analyt.Rep = seq_len(nrow(rv$hot)),
             stringsAsFactors = FALSE
           )
         }
@@ -420,7 +420,7 @@ mod_buildDesign_server <- function(
 
     #--------------------------------------------------------------------------
     observeEvent(input$btn_checkDesign, {
-      rv$designChecked <- check.design(rv$hot)
+      rv$designChecked <- checkDesign(rv$hot)
     })
 
     #--------------------------------------------------------------------------
@@ -554,7 +554,7 @@ mod_buildDesign <- function(quantCols) {
   })
  
     observeEvent(req(res()$design), ignoreInit = TRUE,{
-      print(res()$design)
+      message(res()$design)
     })
   }
 

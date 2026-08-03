@@ -63,15 +63,21 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
+    tags$style(HTML("
+    .radio-inline {
+      margin-right: 20px;  /* Adjust spacing between choices */
+      margin-left: 10px;   /* Adjust spacing around the group */
+      margin-bottom: -10px;
+    }
+  ")),
     uiOutput(ns("tree_UI")),
     uiOutput(ns("chooseKeepRemove_ui")),
     uiOutput(ns("chooseScope_ui")),
     uiOutput(ns("qMetacellScope_widgets_set2_ui")),
     uiOutput(ns("qMetacellScope_request_ui")),
-    div(id = ns('div_buttons'),
-      style = "display:inline-block; vertical-align: top;",
+    div(style = "display: flex; gap: 8px;",
       uiOutput(ns('Preview_UI')),
-    uiOutput(ns("Add_btn_UI"))
+      uiOutput(ns("Add_btn_UI"))
     )
   )
 }
@@ -89,7 +95,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     dataIn = reactive({NULL}),
     conds,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
-    val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
+    val_vs_percent = reactive({setNames(nm = c("count", "percentage"))}),
     operator = reactive({setNames(nm = DaparToolshed::SymFilteringOperators())}),
     remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})) {
@@ -149,38 +155,29 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-    
-    
-    
 
-    MagellanNTK::mod_popover_for_help_server("tag_help",
-      title = "Nature of data to filter",
-      content = "Define xxx"
-    )
-
-
-    help.txt1 <- "To filter the missing values, the choice of the lines to
-        be kept is made by different options:
-    <ul>
-    <li><strong>None</strong>: No filtering, the quantitative data is left
-    unchanged.</li>
-    <li><strong>(Remove) Empty lines</strong>: All the lines with 100% of
-    missing values are filtered out.</li>
-    <li><strong>Whole Matrix</strong>: The lines (across all conditions)
-    which contain less quantitative value than a user-defined threshold are
-    kept;</li>
-    <li><strong>For every condition</strong>: The lines for which each
-    condition contain less quantitative value than a user-defined threshold
-    are deleted;</li>
-    <li><strong>At least one condition</strong>: The lines for which at least
-    one condition contain less quantitative value than a user-defined
-    threshold are deleted.</li>
-    </ul>"
-
-    MagellanNTK::mod_popover_for_help_server("filterScope_help",
-      title = "Scope",
-      content = HTML(help.txt1)
-    )
+    # help.txt1 <- "To filter the missing values, the choice of the lines to
+    #     be kept is made by different options:
+    # <ul>
+    # <li><strong>None</strong>: No filtering, the quantitative data is left
+    # unchanged.</li>
+    # <li><strong>(Remove) Empty lines</strong>: All the lines with 100% of
+    # missing values are filtered out.</li>
+    # <li><strong>Whole Matrix</strong>: The lines (across all conditions)
+    # which contain less quantitative value than a user-defined threshold are
+    # kept;</li>
+    # <li><strong>For every condition</strong>: The lines for which each
+    # condition contain less quantitative value than a user-defined threshold
+    # are deleted;</li>
+    # <li><strong>At least one condition</strong>: The lines for which at least
+    # one condition contain less quantitative value than a user-defined
+    # threshold are deleted.</li>
+    # </ul>"
+    # 
+    # MagellanNTK::mod_popover_for_help_server("filterScope_help",
+    #   title = "Scope",
+    #   content = HTML(help.txt1)
+    # )
 
 
     
@@ -239,7 +236,8 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       widget <- radioButtons(ns("keep_vs_remove"),
         "Type of filter operation",
         choices = keep_vs_remove(),
-        selected = rv.widgets$keep_vs_remove
+        selected = rv.widgets$keep_vs_remove,
+        inline = TRUE
       )
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
@@ -247,7 +245,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     output$chooseScope_ui <- renderUI({
       req(rv.widgets$tag != "None")
       widget <- selectInput(ns("scope"),
-        MagellanNTK::mod_popover_for_help_ui(ns("filterScope_help")),
+        "Scope", #MagellanNTK::mod_popover_for_help_ui(ns("filterScope_help"))
         choices = c(
           "None" = "None",
           "Whole Line" = "WholeLine",
@@ -268,16 +266,17 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       req(!(rv.widgets$scope %in% c("None", "WholeLine")))
       req(rv.widgets$tag != "None")
 
-      MagellanNTK::mod_popover_for_help_server("chooseValPercent_help",
-        title = "Threshold Type",
-        content = "Define xxx"
-      )
+      # MagellanNTK::mod_popover_for_help_server("chooseValPercent_help",
+      #   title = "Threshold Type",
+      #   content = "Define xxx"
+      # )
 
       widget1 <- radioButtons(ns("valPercent"),
-        MagellanNTK::mod_popover_for_help_ui(ns("chooseValPercent_help")),
-        choices = val_vs_percent(),
-        selected = rv.widgets$valPercent
-      )
+                              "Threshold", #"Threshold Type", #MagellanNTK::mod_popover_for_help_ui(ns("chooseValPercent_help"))
+                              choices = val_vs_percent(),
+                              selected = rv.widgets$valPercent,
+                              inline = TRUE
+                              )
 
       widget2 <- selectInput(ns("operator"),
         "Operator",
@@ -288,14 +287,10 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
 
       tagList(
-        fluidRow(
-          column(4, MagellanNTK::toggleWidget(widget1, is.enabled())),
-          column(8,
-            MagellanNTK::toggleWidget(widget2, is.enabled()),
-            uiOutput(ns("value_ui")),
-            uiOutput(ns("percentage_ui"))
-          )
-        )
+        MagellanNTK::toggleWidget(widget1, is.enabled()),
+        uiOutput(ns("value_ui")),
+        uiOutput(ns("percentage_ui")),
+        MagellanNTK::toggleWidget(widget2, is.enabled())
       )
     })
 
@@ -303,23 +298,23 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     output$value_ui <- renderUI({
       req(rv.widgets$valPercent == "Count")
       req(!(rv.widgets$scope %in% c("None", "WholeLine")))
-      MagellanNTK::mod_popover_for_help_server("value_th_help",
-        title = "Threshold",
-        content = "Define xxx"
-      )
+      # MagellanNTK::mod_popover_for_help_server("value_th_help",
+      #   title = "Threshold",
+      #   content = "Define xxx"
+      # )
 
       widget <- selectInput(ns("valueTh"),
-        MagellanNTK::mod_popover_for_help_ui(ns("value_th_help")),
-        choices = getListNbValuesInLines(
-          object = rv$dataIn,
-          conds = conds(),
-          type = rv.widgets$scope
-        ),
-        selected = rv.widgets$valueTh,
-        width = "150px"
-      )
+                            NULL, #"Threshold", #MagellanNTK::mod_popover_for_help_ui(ns("value_th_help"))
+                            choices = getListNbValuesInLines(
+                              object = rv$dataIn,
+                              conds = conds(),
+                              type = rv.widgets$scope
+                              ),
+                            selected = rv.widgets$valueTh,
+                            width = "120px"
+                            )
       tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("keepVal_help")),
+        #MagellanNTK::mod_popover_for_help_ui(ns("keepVal_help")),
         MagellanNTK::toggleWidget(widget, is.enabled())
       )
     })
@@ -328,18 +323,18 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       req(rv.widgets$valPercent == "Percentage")
       req(!(rv.widgets$scope %in% c("None", "WholeLine")))
 
-      MagellanNTK::mod_popover_for_help_server("percentTh_help",
-        title = "Threshold",
-        content = "Define xxx"
-      )
+      # MagellanNTK::mod_popover_for_help_server("percentTh_help",
+      #   title = "Threshold",
+      #   content = "Define xxx"
+      # )
       widget <- sliderInput(ns("percentTh"),
-        MagellanNTK::mod_popover_for_help_ui(ns("percentTh_help")),
-        min = 0, max = 100, step = 1,
-        value = rv.widgets$percentTh,
-        width = "250px"
-      )
+                            NULL, #"Threshold", #MagellanNTK::mod_popover_for_help_ui(ns("percentTh_help"))
+                            min = 0, max = 100, step = 1,
+                            value = rv.widgets$percentTh,
+                            width = "240px"
+                            )
       tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("keepVal_percent_help")),
+        #MagellanNTK::mod_popover_for_help_ui(ns("keepVal_percent_help")),
         MagellanNTK::toggleWidget(widget, is.enabled())
       )
     })
@@ -511,7 +506,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       names_before <- rownames(assay_before)
       names_after <- rownames(assay_after)
 
-      indices <- 1:length(names_after)
+      indices <- seq_along(names_after)
       if (rv.custom$ll.fun@params$cmd == 'delete') {
         diff <- setdiff(names_before, names_after)
         indices <- match(diff, names_before)
@@ -647,9 +642,9 @@ mod_qMetacell_FunctionFilter_Generator <- function(
     )
 
     observeEvent(res()$trigger, {
-      print(" --- res()$value ---")
-      print(res()$value)
-      print(" -------------------")
+      message(" --- res()$value ---")
+      message(res()$value)
+      message(" -------------------")
     })
   }
 

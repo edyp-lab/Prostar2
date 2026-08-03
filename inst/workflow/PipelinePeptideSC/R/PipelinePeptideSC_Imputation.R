@@ -86,7 +86,7 @@ PipelinePeptideSC_Imputation_server <- function(id,
   path = NULL,
   btnEvents = reactive({NULL})
 ){
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -122,7 +122,7 @@ PipelinePeptideSC_Imputation_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     ###########################################################################-

@@ -1,4 +1,13 @@
 #' @title Global variables
+#' 
+#' @description Global constants used by the package for user interface 
+#' configuration and default values.
+#' 
+#' @return NA
+#' 
+#' @examples
+#' NULL 
+#' 
 #' @name globalvariables
 #' 
 NULL
@@ -8,37 +17,25 @@ NULL
 #' @export
 btn_success_color <- "btn-success"
 
+
 #' @rdname globalvariables
 #' @export
 optionsBtnClass <- "info"
+
 
 #' @rdname globalvariables
 #' @export
 redBtnClass <- "btn-danger"
 
+
 #' @rdname globalvariables
 #' @export
 PrevNextBtnClass <- "btn-info"
 
+
 #' @rdname globalvariables
 #' @export
 actionBtnClass <- "btn-primary"
-
-
-#
-#
-# btn_style <- "display:inline-block; vertical-align: middle; padding: 7px"
-#
-
-# list.plots.module <- c(
-#   'mod_plots_se_explorer',
-#   'mod_plots_intensity',
-#   'mod_plots_pca',
-#   'mod_plots_var_dist',
-#   'mod_plots_corr_matrix',
-#   'mod_plots_heatmap',
-#   'mod_plots_group_mv'
-# )
 
 
 #' @rdname globalvariables

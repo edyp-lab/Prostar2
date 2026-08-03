@@ -1,41 +1,48 @@
-#' @title Shiny example process module.
+#' @title PipelineProtein HypothesisTest module
 #'
 #' @description
-#' This module contains the configuration information for the corresponding pipeline.
-#' It is called by the nav_pipeline module of the package MagellanNTK
+#' This module contains the hypothesisTest step of the protein pipeline.
 #' 
-#' The name of the server and ui functions are formatted with keywords separated by '_', as follows:
-#' * first string `mod`: indicates that it is a Shiny module
-#' * `pipeline name` is the name of the pipeline to which the process belongs
-#' * `process name` is the name of the process itself
+#' @param id A `character(1)` which is the 'id' of the module.
+#'
+#' @param dataIn An instance of the class `MultiAssayExperiment`
+#'
+#' @param steps.enabled A vector of boolean which has the same length of the steps
+#' of the pipeline. This information is used to enable/disable the widgets. It is not
+#' a communication variable between the caller and this module, thus there is no
+#' corresponding output variable
+#'
+#' @param remoteReset It is a remote command to reset the module. An `integer()` that
+#' indicates is the pipeline has been reseted by a program of higher level
+#' Basically, it is the program which has called this module
+#'
+#' @param steps.status A vector of `character()` which indicates the status of each step
+#' which can be either 'validated', 'undone' or 'skipped'. Enabled or disabled in the UI.
 #' 
-#' This convention is important because MagellanNTK call the different
-#' server and ui functions by building dynamically their name.
-#' 
-#' In this example, `PipelineProtein_HypothesisTest_ulength(rv$dataIn)` and `PipelineProtein_HypothesisTest_server()` define
-#' the code for the process `ProcessProtein` which is part of the pipeline called `PipelineProtein`.
+#' @param current.pos A `integer(1)` which acts as a remote command to make
+#'  a step active in the timeline. Default is 1.
+#'  
+#' @param path A `character()` which is the path to the directory which 
+#' contains the files and directories of the pipeline.
 #' 
 #' @examples
 #' if (interactive()){
-#' library(MagellanNTK)
-#' library(DaparToolshed)
-#' data(Exp1_R25_prot, package = "DaparToolshedData")
-#' obj <- Exp1_R25_prot
-#' # Simulate imputation of missing values
-#' obj <- NAIsZero(obj, 1)
-#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelineProtein_HypothesisTest", path, dataIn = obj))
+#'   Prostar2("PipelineProtein_HypothesisTest")
 #' }
 #' 
+#' @name PipelineProtein_HypothesisTest
+#' 
+#' @importFrom stats setNames rnorm
+#' @importFrom shinyjs useShinyjs
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
 #' 
-#' @name PipelineProtein
+#' @return An instance of the class `MultiAssayExperiment`
 #' 
 NULL
 
-#' 
-#' @rdname PipelineProtein
+
+#' @rdname PipelineProtein_HypothesisTest
 #' @export
 #' 
 PipelineProtein_HypothesisTest_conf <- function(){
@@ -43,47 +50,20 @@ PipelineProtein_HypothesisTest_conf <- function(){
     fullname = 'PipelineProtein_HypothesisTest',
     mode = 'process',
     steps = c('HypothesisTest'),
-    mandatory = c(FALSE)
+    mandatory = c(TRUE)
   )
 }
 
 
-#' @param id xxx
-#' 
-#' @rdname PipelineProtein
-#' 
-#' @author Samuel Wieczorek
-#' 
+#' @rdname PipelineProtein_HypothesisTest
 #' @export
-#'
+#' 
 PipelineProtein_HypothesisTest_ui <- function(id){
   ns <- NS(id)
 }
 
 
-#' @param id xxx
-#'
-#' @param dataIn An instance of the class 
-#'
-#' @param steps.enabled A vector of boolean which has the same length of the steps
-#' of the pipeline. This information is used to enable/disable the widgets. It is not
-#' a communication variable between the caller and this module, thus there is no
-#' corresponding output variable
-#'
-#' @param remoteReset It is a remote command to reset the module. A boolean that
-#' indicates if the pipeline has been reset by a program of higher level
-#' Basically, it is the program which has called this module
-#' 
-#' @param steps.status xxx
-#' 
-#' @param current.pos xxx
-#'
-#' @rdname PipelineProtein
-#' 
-#' @importFrom stats setNames rnorm
-#' @import DaparToolshed
-#' @importFrom shinyjs useShinyjs
-#' 
+#' @rdname PipelineProtein_HypothesisTest
 #' @export
 #' 
 PipelineProtein_HypothesisTest_server <- function(id,
@@ -95,8 +75,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
-  
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -137,14 +116,14 @@ PipelineProtein_HypothesisTest_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
-    
-
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
+    add_resourcePath()
     
     
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -202,7 +181,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       req(grepl('Description', btnEvents()))
      req(dataIn())
 
-     m <- DaparToolshed::match.metacell(
+     m <- DaparToolshed::matchMetacell(
        DaparToolshed::qMetacell(dataIn()[[length(dataIn())]]),
        pattern = c("Missing", "Missing POV", "Missing MEC"),
        level = DaparToolshed::typeDataset(dataIn()[[length(dataIn())]])
@@ -273,7 +252,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         tagList(
           uiOutput(ns('HypothesisTest_warning_conditions_ui')),
           uiOutput(ns("HypothesisTest_swapConds_ui")),
-          highcharter::highchartOutput(ns("FoldChangePlot")) )
+          plotly::plotlyOutput(ns("FoldChangePlot")) )
     })
     
     
@@ -302,7 +281,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     output$HypothesisTest_warning_conditions_ui <- renderUI({
       req(rv.custom$dataIn)
-      req(length(unique(DaparToolshed::design.qf(rv.custom$dataIn)$Condition)) > 26)
+      req(length(unique(DaparToolshed::design_qf(rv.custom$dataIn)$Condition)) > 26)
       req(getDesignLevel(SummarizedExperiment::colData(rv.custom$dataIn)) > 1)
       h3('Limma with this version of Prostar does not handle datasets with 
       more than 26 conditions. Such, the Limma option is desactivated for the 
@@ -381,7 +360,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv.custom$swap.history <- rep(0, rv.custom$n)   
     })
 
-    output$FoldChangePlot <- highcharter::renderHighchart({
+    output$FoldChangePlot <- plotly::renderPlotly({
       req(rv.custom$logFC) 
       
       withProgress(message = "Computing plot...", detail = "", value = 0.5, {
@@ -516,7 +495,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       req(rv.custom$dataIn)
       
       enable <- TRUE
-      nConds <-length(unique(DaparToolshed::design.qf(rv.custom$dataIn)$Condition))
+      nConds <-length(unique(DaparToolshed::design_qf(rv.custom$dataIn)$Condition))
       design <- SummarizedExperiment::colData(rv.custom$dataIn)
       nLevel <- DaparToolshed::getDesignLevel(design)   
       enable <- (nConds <= 26 && nLevel == 1) ||

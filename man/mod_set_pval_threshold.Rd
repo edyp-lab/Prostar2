@@ -32,8 +32,9 @@ mod_set_pval_threshold(pval_init = 1)
 the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{xxx}
-
-\item{fdr}{xxx}
+}
+\value{
+NA
 }
 \description{
 A shiny Module.

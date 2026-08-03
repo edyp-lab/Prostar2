@@ -22,7 +22,7 @@
 #' @examples
 #' if (interactive()){
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
-#' grp <- DaparToolshed::design.qf(Exp1_R25_prot)$Condition
+#' grp <- DaparToolshed::design_qf(Exp1_R25_prot)$Condition
 #' shiny::runApp(mod_ds_metacell_Histos(Exp1_R25_prot[[1]], group = grp))
 #'
 #' # Test with pattern already defined
@@ -48,15 +48,15 @@ mod_ds_metacell_Histos_ui <- function(id) {
     fluidRow(
       column(
         width = 4,
-        highcharter::highchartOutput(ns("histo")), height = "600px"
+        plotly::plotlyOutput(ns("histo")), height = "600px"
       ),
       column(
         width = 4,
-        highcharter::highchartOutput(ns("histo_per_lines"))
+        plotly::plotlyOutput(ns("histo_per_lines"))
       ),
       column(
         width = 4,
-        highcharter::highchartOutput(ns("histo_per_lines_per_conds"))
+        plotly::plotlyOutput(ns("histo_per_lines_per_conds"))
       )
     )
   )
@@ -130,7 +130,7 @@ mod_ds_metacell_Histos_server <- function(
       )
     })
 
-    output$histo <- highcharter::renderHighchart({
+    output$histo <- plotly::renderPlotly({
       req(dataIn())
       req(group())
       tmp <- NULL
@@ -144,7 +144,7 @@ mod_ds_metacell_Histos_server <- function(
 
 
 
-    output$histo_per_lines <- highcharter::renderHighchart({
+    output$histo_per_lines <- plotly::renderPlotly({
       req(dataIn())
       req(group())
       tmp <- NULL
@@ -161,7 +161,7 @@ mod_ds_metacell_Histos_server <- function(
 
 
 
-    output$histo_per_lines_per_conds <- highcharter::renderHighchart({
+    output$histo_per_lines_per_conds <- plotly::renderPlotly({
       tmp <- NULL
       req(dataIn())
       req(group())

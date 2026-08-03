@@ -1,25 +1,43 @@
-#' @title Shiny example module `Pipeline A`
+#' @title PipelineProtein module
 #'
 #' @description
-#' This module contains the configuration information for the corresponding pipeline.
-#' It is called by the nav_pipeline module of the package MagellanNTK
-#' This documentation is for developers who want to create their own pipelines nor processes
-#' to be managed with `MagellanNTK`.
+#' This module contains the configuration information for the protein pipeline.
 #' 
-#' @name module_PiplelineProtein
+#' @param id A `character(1)` which is the 'id' of the module.
+#'
+#' @param dataIn An instance of the class `MultiAssayExperiment`
+#'
+#' @param steps.enabled A vector of boolean which has the same length of the steps
+#' of the pipeline. This information is used to enable/disable the widgets. It is not
+#' a communication variable between the caller and this module, thus there is no
+#' corresponding output variable
+#'
+#' @param remoteReset It is a remote command to reset the module. An `integer()` that
+#' indicates is the pipeline has been reseted by a program of higher level
+#' Basically, it is the program which has called this module
+#'
+#' @param steps.status A vector of `character()` which indicates the status of each step
+#' which can be either 'validated', 'undone' or 'skipped'. Enabled or disabled in the UI.
+#' 
+#' @param current.pos A `integer(1)` which acts as a remote command to make
+#'  a step active in the timeline. Default is 1.
+#'  
+#' @param path A `character()` which is the path to the directory which 
+#' contains the files and directories of the pipeline.
+#' 
 #' @examples
 #' if (interactive()){
-#' source("~/GitHub/Prostar2/inst/extdata/workflow/PipelineProtein/R/PipelineProtein.R")
-#' path <- system.file('extdata/workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(MagellanNTK::workflowApp("PipelineProtein"))
+#'   Prostar2("PipelineProtein")
 #' }
 #' 
 #' @name PipelineProtein
 #' 
-#' @example inst/workflow/PipelineProtein/examples/example_pipelineProtein.R
-#' 
+#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
+#' @importFrom stats setNames
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
+#' 
+#' @return An instance of the class `MultiAssayExperiment`
 #' 
 NULL
 
@@ -32,18 +50,12 @@ PipelineProtein_conf <- function(){
   mode = 'pipeline',
   fullname = 'PipelineProtein',
   steps = c('Filtering', 'Normalization', 'Imputation', 'HypothesisTest', 'DA'),
-  mandatory = c(FALSE, FALSE, FALSE, FALSE, FALSE)
+  mandatory = c(FALSE, FALSE, FALSE, TRUE, FALSE)
 )
 }
 
 
-
-#' @param id xxx
-#'
 #' @rdname PipelineProtein
-#'
-#' @author Samuel Wieczorek
-#' 
 #' @export
 #' 
 PipelineProtein_ui <- function(id){
@@ -51,32 +63,9 @@ PipelineProtein_ui <- function(id){
 }
 
 
-
-#' @param id xxx
-#'
-#' @param dataIn The dataset
-#'
-#' @param steps.enabled A vector of boolean which has the same length of the steps
-#' of the pipeline. This information is used to enable/disable the widgets. It is not
-#' a communication variable between the caller and this module, thus there is no
-#' corresponding output variable
-#'
-#'
-#' @param remoteReset It is a remote command to reset the module. A boolean that
-#' indicates is the pipeline has been reseted by a program of higher level
-#' Basically, it is the program which has called this module
-#'
-#' @param steps.status xxx
-#' 
-#' @param current.pos xxx
-#' 
 #' @rdname PipelineProtein
-#'
-#' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive fluidPage
-#' @importFrom stats setNames
-#' 
 #' @export
-#'
+#' 
 PipelineProtein_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
@@ -85,10 +74,8 @@ PipelineProtein_server <- function(id,
   current.pos = reactive({1}),
   path = NULL
   ){
-
-
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Contrary to the simple workflow, there is no widget in this module
   # because all the widgets are provided by the simple workflows.
@@ -110,8 +97,7 @@ PipelineProtein_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
-    
+    add_resourcePath()
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
@@ -119,5 +105,3 @@ PipelineProtein_server <- function(id,
     }
   )
 }
-
-

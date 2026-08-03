@@ -1,34 +1,48 @@
-#' @title Shiny example process module.
+#' @title PipelineProtein Imputation module
 #'
 #' @description
-#' This module contains the configuration informations for the corresponding pipeline.
-#' It is called by the nav_pipeline module of the package MagellanNTK
+#' This module contains the imputation step of the protein pipeline.
 #' 
-#' The name of the server and ui functions are formatted with keywords separated by '_', as follows:
-#' * first string `mod`: indicates that it is a Shiny module
-#' * `pipeline name` is the name of the pipeline to which the process belongs
-#' * `process name` is the name of the process itself
+#' @param id A `character(1)` which is the 'id' of the module.
+#'
+#' @param dataIn An instance of the class `MultiAssayExperiment`
+#'
+#' @param steps.enabled A vector of boolean which has the same length of the steps
+#' of the pipeline. This information is used to enable/disable the widgets. It is not
+#' a communication variable between the caller and this module, thus there is no
+#' corresponding output variable
+#'
+#' @param remoteReset It is a remote command to reset the module. An `integer()` that
+#' indicates is the pipeline has been reseted by a program of higher level
+#' Basically, it is the program which has called this module
+#'
+#' @param steps.status A vector of `character()` which indicates the status of each step
+#' which can be either 'validated', 'undone' or 'skipped'. Enabled or disabled in the UI.
 #' 
-#' This convention is important because MagellanNTK call the different
-#' server and ui functions by building dynamically their name.
-#' 
-#' In this example, `PipelineProtein_Imputation_ui()` and `PipelineProtein_Imputation_server()` define
-#' the code for the process `PipelineProtein_Imputation` which is part of the pipeline called `PipelineProtein`.
+#' @param current.pos A `integer(1)` which acts as a remote command to make
+#'  a step active in the timeline. Default is 1.
+#'  
+#' @param path A `character()` which is the path to the directory which 
+#' contains the files and directories of the pipeline.
 #' 
 #' @examples
 #' if (interactive()){
-#' library(MagellanNTK)
-#' data(Exp1_R25_prot, package = 'DaparToolshedData')
-#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(proc_workflowApp("PipelineProtein_Imputation", path, dataIn = Exp1_R25_prot))
+#'   Prostar2("PipelineProtein_Imputation")
 #' }
 #' 
+#' @name PipelineProtein_Imputation
+#' 
+#' @importFrom stats setNames rnorm
+#' @importFrom shinyjs useShinyjs
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
 #' 
+#' @return An instance of the class `MultiAssayExperiment`
+#' 
 NULL
 
-#' @rdname PipelineProtein
+
+#' @rdname PipelineProtein_Imputation
 #' @export
 #' 
 PipelineProtein_Imputation_conf <- function(){
@@ -40,41 +54,16 @@ PipelineProtein_Imputation_conf <- function(){
   )
 }
 
-#' @param id xxx
-#' 
-#' @rdname PipelineProtein
-#' 
-#' @author Samuel Wieczorek
-#' 
+
+#' @rdname PipelineProtein_Normalization
 #' @export
-#'
+#' 
 PipelineProtein_Imputation_ui <- function(id){
   ns <- NS(id)
 }
 
 
-#' @param id xxx
-#'
-#' @param dataIn The dataset
-#'
-#' @param steps.enabled A vector of boolean which has the same length of the steps
-#' of the pipeline. This information is used to enable/disable the widgets. It is not
-#' a communication variable between the caller and this module, thus there is no
-#' corresponding output variable
-#'
-#' @param remoteReset It is a remote command to reset the module. A boolean that
-#' indicates is the pipeline has been reseted by a program of higher level
-#' Basically, it is the program which has called this module
-#' 
-#' @param steps.status xxx
-#' 
-#' @param current.pos xxx
-#'
-#' @rdname PipelineProtein
-#' 
-#' @importFrom stats setNames rnorm
-#' @importFrom shinyjs useShinyjs
-#'
+#' @rdname PipelineProtein_Normalization
 #' @export
 #' 
 PipelineProtein_Imputation_server <- function(id,
@@ -86,8 +75,8 @@ PipelineProtein_Imputation_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -124,7 +113,6 @@ PipelineProtein_Imputation_server <- function(id,
     result_open_dataset = reactive({NULL})
   )
   
-  
   imputationAlgorithmsProteins_MEC <- list(
     "None" = "None",
     "Det quantile" = "detQuantile",
@@ -147,8 +135,7 @@ PipelineProtein_Imputation_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
-    
+    add_resourcePath()
     
     mv.present <- reactive({
       #Useful for the MEC imputation
@@ -156,11 +143,13 @@ PipelineProtein_Imputation_server <- function(id,
       rv.custom$mv.present <- sum(is.na(qdata)) > 0
       rv.custom$mv.present
     })
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
     
     
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -174,7 +163,6 @@ PipelineProtein_Imputation_server <- function(id,
           uiOutput(ns('open_dataset_UI'))
         ),
         content = div(id = ns('div_content'),
-          #div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -185,9 +173,7 @@ PipelineProtein_Imputation_server <- function(id,
       
     })
     
-    
-    
-    
+    #### _sidebar -----
     output$open_dataset_UI <- renderUI({
       req(session$userData$runmode == 'process')
       req(is.null(dataIn()))
@@ -202,7 +188,7 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
     })
     
-    
+    #### _content -----
     # output$Description_infos_dataset_UI <- renderUI({
     #   req(rv$dataIn)
     #   
@@ -214,19 +200,16 @@ PipelineProtein_Imputation_server <- function(id,
     #   infos_dataset_ui(id = ns("Description_infosdataset"))
     # })
     
-    
-    
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
       #rv.custom$result_open_dataset()$dataset
       req(dataIn())
+      
       rv$dataIn <- dataIn()
       
       if(!is.null(rv.custom$result_open_dataset()$dataset))
         rv$dataIn <- rv.custom$result_open_dataset()$dataset
-      
-      
       
       rv.custom$dataIn1 <- rv$dataIn
       rv.custom$dataIn2 <- rv$dataIn
@@ -253,12 +236,11 @@ PipelineProtein_Imputation_server <- function(id,
     })
     
     
-    
-    # >>>
-    # >>> START ------------- Code for step 1 UI---------------
-    # >>> 
-    
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #----------------------------POV IMPUTATION---------------------------------
+    #
+    ###########################################################################-
     output$POVImputation <- renderUI({
       shinyjs::useShinyjs()
       path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
@@ -267,27 +249,70 @@ PipelineProtein_Imputation_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-          # timeline_process_ui(ns('POVImputation_timeline')),
           uiOutput(ns("POVImputation_algorithm_UI")),
           uiOutput(ns("POVImputation_KNN_nbNeighbors_UI")),
           uiOutput(ns("POVImputation_detQuant_UI"))
         ),
-        content = tagList(
+        content = div(
           uiOutput(ns('POVImputation_DT_UI')),
-          uiOutput(ns("POVImputation_showDetQuantValues")),
-          htmlOutput("helpForImputation"),
-          tags$hr(),
-          uiOutput(ns('mvplots_ui'))
+          div(style = "display: flex; margin-top: 20px;",
+            uiOutput(ns("POVImputation_showDetQuantValues")),
+            uiOutput(ns("mvplots_ui"))
+          )
         )
       )
+    })
+    
+    #### _sidebar -----
+    output$POVImputation_algorithm_UI <- renderUI({
       
+      widget <- selectInput(ns("POVImputation_algorithm"), 
+                            "Algorithm for POV",
+                            choices = list(
+                              "None" = "None",
+                              "slsa" = "slsa",
+                              "Det quantile" = "detQuantile",
+                              "KNN" = "KNN"
+                            ),
+                            selected = rv.widgets$POVImputation_algorithm,
+                            width = "150px",
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
+    })
+    
+    output$POVImputation_KNN_nbNeighbors_UI <- renderUI({
+      req(rv.widgets$POVImputation_algorithm == 'KNN')
+      
+      widget <- numericInput(ns("POVImputation_KNN_nbNeighbors"), "Neighbors",
+                             value = rv.widgets$POVImputation_KNN_n, step = 1, min = 0,
+                             max = max(nrow(rv.custom$dataIn1), rv.widgets$POVImputation_KNN_n),
+                             width = "100px"
+      )
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
     })
     
     
+    output$POVImputation_detQuant_UI <- renderUI({
+      req(rv.widgets$POVImputation_algorithm == 'detQuantile')
+      
+      widget <- tagList(
+        numericInput(ns("POVImputation_detQuant_quantile"), "Quantile",
+                     value = rv.widgets$POVImputation_detQuant_quantile,
+                     step = 0.5, min = 0, max = 100, width = "100px"
+        ),
+        numericInput(ns("POVImputation_detQuant_factor"), "Factor",
+                     value = rv.widgets$POVImputation_detQuant_factor,
+                     step = 0.1, min = 0, max = 10, width = "100px"
+        )
+      )
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
+    })
     
+    #### _content -----
     MagellanNTK::format_DT_server("POV_dt", 
       dataIn = reactive({rv.custom$POVImputation_SummaryDT}))
-    
     
     output$POVImputation_DT_UI <- renderUI({
       req(rv.custom$POVImputation_SummaryDT)
@@ -304,30 +329,12 @@ PipelineProtein_Imputation_server <- function(id,
       
       mod_mv_plots_server("POVImputation_mvplots",
         data = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
-        grp = reactive({get_group(rv.custom$dataIn1)}),
+        grp = reactive({omXplore::get_group(rv.custom$dataIn1)}),
         mytitle = reactive({"POV imputation"}),
         pal = reactive({NULL}),
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })
-    
-    
-    output$POVImputation_algorithm_UI <- renderUI({
-      
-      widget <- selectInput(ns("POVImputation_algorithm"), 
-        "Algorithm for POV",
-        choices = list(
-          "None" = "None",
-          "slsa" = "slsa",
-          "Det quantile" = "detQuantile",
-          "KNN" = "KNN"
-        ),
-        selected = rv.widgets$POVImputation_algorithm,
-        width = "150px",
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
-    })
-    
     
     output$POVImputation_showDetQuantValues <- renderUI({
       req(rv.widgets$POVImputation_algorithm == "detQuantile")
@@ -345,39 +352,7 @@ PipelineProtein_Imputation_server <- function(id,
       )
     })
     
-    
-    
-    output$POVImputation_KNN_nbNeighbors_UI <- renderUI({
-      req(rv.widgets$POVImputation_algorithm == 'KNN')
-      
-      widget <- numericInput(ns("POVImputation_KNN_nbNeighbors"), "Neighbors",
-        value = rv.widgets$POVImputation_KNN_n, step = 1, min = 0,
-        max = max(nrow(rv.custom$dataIn1), rv.widgets$POVImputation_KNN_n),
-        width = "100px"
-      )
-      
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
-    })
-    
-    
-    output$POVImputation_detQuant_UI <- renderUI({
-      req(rv.widgets$POVImputation_algorithm == 'detQuantile')
-      
-      widget <- tagList(
-        numericInput(ns("POVImputation_detQuant_quantile"), "Quantile",
-          value = rv.widgets$POVImputation_detQuant_quantile,
-          step = 0.5, min = 0, max = 100, width = "100px"
-        ),
-        numericInput(ns("POVImputation_detQuant_factor"), "Factor",
-          value = rv.widgets$POVImputation_detQuant_factor,
-          step = 0.1, min = 0, max = 10, width = "100px"
-        )
-      )
-      
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["POVImputation"])
-      
-    })
-
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('POVImputation', btnEvents()))
       req(rv.custom$dataIn1)
@@ -385,9 +360,10 @@ PipelineProtein_Imputation_server <- function(id,
       if ( is.null(rv.custom$dataIn1) || 
           rv.widgets$POVImputation_algorithm == "None")
         shinyjs::info(btnVentsMasg)
+      
       else {
         req(rv.widgets$POVImputation_algorithm != "None")
-        m <- DaparToolshed::match.metacell(
+        m <- DaparToolshed::matchMetacell(
           DaparToolshed::qMetacell(rv.custom$dataIn1[[length(rv.custom$dataIn1)]]),
           pattern = "Missing POV",
           level = DaparToolshed::typeDataset(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])
@@ -400,23 +376,22 @@ PipelineProtein_Imputation_server <- function(id,
           .tmp <- NULL
           .param <- list()
           
-          
           try({
             switch(rv.widgets$POVImputation_algorithm,
-              None = .tmp <- rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
               slsa = {
                 incProgress(0.5, detail = "slsa Imputation")
                 
-                .tmp <- DaparToolshed::wrapper.impute.slsa(
+                .tmp <- DaparToolshed::wrapperImputeSLSA(
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
-                  design = DaparToolshed::design.qf(rv.custom$dataIn1))
+                  design = DaparToolshed::design_qf(rv.custom$dataIn1))
                 
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
-
               },
+              
               detQuantile = {
                 incProgress(0.5, detail = "det quantile Imputation")
-                .tmp <- DaparToolshed::wrapper.impute.detQuant(
+                
+                .tmp <- DaparToolshed::wrapperImputeDetQuant(
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
                   qval = rv.widgets$POVImputation_detQuant_quantile / 100,
                   factor = rv.widgets$POVImputation_detQuant_factor,
@@ -426,93 +401,82 @@ PipelineProtein_Imputation_server <- function(id,
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'quantile', rv.widgets$POVImputation_detQuant_quantile)
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'factor', rv.widgets$POVImputation_detQuant_factor)
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'na.type', 'Missing POV')
-                
-
               },
+              
               KNN = {
                 incProgress(0.5, detail = "KNN Imputation")
                 
-                .tmp <- DaparToolshed::wrapper.impute.KNN(
+                .tmp <- DaparToolshed::wrapperImputeKNN(
                   obj = rv.custom$dataIn1[[length(rv.custom$dataIn1)]],
-                  grp = DaparToolshed::design.qf(rv.custom$dataIn1)$Condition,
-                  K = rv.widgets$POVImputation_KNN_n);
+                  grp = DaparToolshed::design_qf(rv.custom$dataIn1)$Condition,
+                  K = rv.widgets$POVImputation_KNN_n)
+                
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'algorithm', rv.widgets$POVImputation_algorithm)
                 rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'POVImputation', 'K', rv.widgets$POVImputation_KNN_n)
-
-              },
-              None = {}
+              }
             )
           })
           
-          
           if(inherits(.tmp, "try-error") || inherits(.tmp, "try-warning")) {
-            mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
+            MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_POVimputation_button',
               text = .tmp,
               type = 'error' )
           } else {
             incProgress(1, detail = "Finalize POV imputation")
             
-            m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(.tmp),
+            m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(.tmp),
               pattern = "Missing POV",
               level = DaparToolshed::typeDataset(.tmp)
             )
             nbPOVAfter <- length(which(m))
             rv$nbPOVimputed <- nbPOVBefore - nbPOVAfter
+            
+            rv.custom$dataIn1 <- Prostar2::addDatasets(
+              rv.custom$dataIn1,
+              .tmp,
+              'POVImputation')
+            
+            # Add infos
+            nBefore <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])$nNA[, "nNA"]
+            nAfter <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])$nNA[, "nNA"]
+            
+            rv.custom$POVImputation_SummaryDT <- rbind(
+              rv.custom$POVImputation_SummaryDT ,
+              c("POV Imputation", nBefore - nAfter, nAfter, NA)
+            )
+            
+            rv.custom$dataIn2 <- rv.custom$dataIn1
+            
+            rv.custom$MECImputation_SummaryDT <- data.frame(
+              operation = "-",
+              nbMECImputed = "0",
+              TotalMissingValues = nAfter,
+              stringsAsFactors = FALSE
+            )
+            
+            # DO NOT MODIFY THE THREE FOLLOWING LINES
+            dataOut$trigger <- MagellanNTK::Timestamp()
+            dataOut$value <- NULL
+            rv$steps.status['POVImputation'] <- MagellanNTK::stepStatus$VALIDATED
           }
-          
-          
-          
-          
-          
-          rv.custom$dataIn1 <- Prostar2::addDatasets(
-            rv.custom$dataIn1,
-            .tmp,
-            'POVImputation')
-          
-          # Add infos
-          nBefore <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1) - 1]])$nNA[, "nNA"]
-          nAfter <- QFeatures::nNA(rv.custom$dataIn1[[length(rv.custom$dataIn1)]])$nNA[, "nNA"]
-          
-          rv.custom$POVImputation_SummaryDT <- rbind(
-            rv.custom$POVImputation_SummaryDT ,
-            c("POV Imputation", nBefore - nAfter, nAfter, NA)
-          )
-          
-          rv.custom$dataIn2 <- rv.custom$dataIn1
-          
-          rv.custom$MECImputation_SummaryDT <- data.frame(
-            operation = "-",
-            nbMECImputed = "0",
-            TotalMissingValues = nAfter,
-            stringsAsFactors = FALSE
-          )
         })
-        
-        # DO NOT MODIFY THE THREE FOLLOWING LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status['POVImputation'] <- MagellanNTK::stepStatus$VALIDATED
       }
     })
     
-    # <<< END ----------------------- Code for step 1 UI--------------------------
     
-    
-    # >>> START ----------------------- Code for step 2 UI-------------------------
-    
+    ###########################################################################-
+    #
+    #----------------------------MEC IMPUTATION---------------------------------
+    #
+    ###########################################################################-
     output$MECImputation <- renderUI({
       shinyjs::useShinyjs()
-      #path <- file.path(system.file('www/css', package = 'MagellanNTK'),'MagellanNTK.css')
-      #includeCSS(path)
-      
-
       widget <- NULL
       .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-          #timeline_process_ui(ns('MECImputation_timeline')),
           if (mv.present()) {
             div(id = ns('div_sidebar'),
               div(id = ns('div_MECImputation_chooseImputationMethod_ui'),
@@ -520,11 +484,9 @@ PipelineProtein_Imputation_server <- function(id,
               div(id = ns('div_MECImputation_Params_ui'),
                 style = .style, uiOutput(ns("MECImputation_Params_ui")))
             )
-            
           }
         ),
         content = tagList(
-          
           uiOutput(ns("MECImputation_DT_UI")),
           uiOutput(ns("warningMECImputation")),
           uiOutput(ns("MECImputation_showDetQuantValues_ui")),
@@ -535,50 +497,85 @@ PipelineProtein_Imputation_server <- function(id,
           })
         )
       )
-      
-      
-      
     })
     
+    #### _sidebar -----
+    output$MECImputation_chooseImputationMethod_ui <- renderUI({
+      widget <- selectInput(ns("MECImputation_algorithm"), "Algorithm for MEC",
+                            choices = imputationAlgorithmsProteins_MEC,
+                            selected = rv.widgets$MECImputation_algorithm, 
+                            width = "150px"
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
+    })
     
+    output$MECImputation_Params_ui <- renderUI({
+      req(rv.widgets$MECImputation_algorithm != "None")
+      
+      .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
+      
+      widget <- switch(rv.widgets$MECImputation_algorithm,
+                       detQuantile = {
+                         tagList(
+                           div(id = ns('div_MECImputation_detQuant_quantile'),
+                               style = .style,
+                               numericInput(ns("MECImputation_detQuant_quantile"), "Quantile",
+                                            value = rv.widgets$MECImputation_detQuant_quantile,
+                                            step = 0.5,
+                                            min = 0,
+                                            max = 100,
+                                            width = "100px"
+                               )),
+                           div(id = ns('div_MECImputation_detQuant_factor'),
+                               style = .style,
+                               numericInput(ns("MECImputation_detQuant_factor"), "Factor",
+                                            value = rv.widgets$MECImputation_detQuant_factor,
+                                            step = 0.1, min = 0, max = 10,
+                                            width = "100px"
+                               )
+                           )
+                         )
+                       },
+                       
+                       fixedValue = {
+                         div(id = ns('div_MECImputation_fixedValue'),
+                             style = .style,
+                             numericInput(ns("MECImputation_fixedValue"), "Fixed value",
+                                          value = rv.widgets$MECImputation_fixedValue,
+                                          step = 0.1, min = 0, max = 100,
+                                          width = "100px"
+                             )
+                         )
+                       }
+      )
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
+    })
     
+    #### _content -----
     MagellanNTK::format_DT_server("MEC_dt", 
       dataIn = reactive({rv.custom$MECImputation_SummaryDT}))
-    
     
     output$MECImputation_DT_UI <- renderUI({
       req(rv.custom$MECImputation_SummaryDT)
       MagellanNTK::format_DT_ui(ns("MEC_dt"))
     })
     
-    
     output$MECImputation_mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("MECImputation_mvplots"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
     })
     
-    
     observe({
       req(rv.custom$dataIn2)
       mod_mv_plots_server("MECImputation_mvplots",
         data = reactive({rv.custom$dataIn2[[length(rv.custom$dataIn2)]]}),
-        grp = reactive({get_group(rv.custom$dataIn2)}),
+        grp = reactive({omXplore::get_group(rv.custom$dataIn2)}),
         mytitle = reactive({"MEC imputation"}),
         pal = reactive({NULL}),
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })
-    
-    
-    output$MECImputation_chooseImputationMethod_ui <- renderUI({
-      widget <- selectInput(ns("MECImputation_algorithm"), "Algorithm for MEC",
-        choices = imputationAlgorithmsProteins_MEC,
-        selected = rv.widgets$MECImputation_algorithm, 
-        width = "150px"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
-    })
-    
     
     output$MECImputation_showDetQuantValues_ui <- renderUI({
       req(rv.widgets$MECImputation_algorithm == "detQuantile")
@@ -596,139 +593,81 @@ PipelineProtein_Imputation_server <- function(id,
       )
     })
     
-    
-    
-    output$MECImputation_Params_ui <- renderUI({
-      req(rv.widgets$MECImputation_algorithm != "None")
-      .style <- "display:inline-block; vertical-align: middle; padding: 7px;"
-      
-      widget <- switch(rv.widgets$MECImputation_algorithm,
-        detQuantile = {
-          tagList(
-            div(id = ns('div_MECImputation_detQuant_quantile'),
-              style = .style,
-              numericInput(ns("MECImputation_detQuant_quantile"), "Quantile",
-                value = rv.widgets$MECImputation_detQuant_quantile,
-                step = 0.5,
-                min = 0,
-                max = 100,
-                width = "100px"
-              )),
-            div(id = ns('div_MECImputation_detQuant_factor'),
-              style = .style,
-              numericInput(ns("MECImputation_detQuant_factor"), "Factor",
-                value = rv.widgets$MECImputation_detQuant_factor,
-                step = 0.1, min = 0, max = 10,
-                width = "100px"
-              )
-            )
-          )
-        },
-        fixedValue = {
-          div(id = ns('div_MECImputation_fixedValue'),
-            style = .style,
-            numericInput(ns("MECImputation_fixedValue"), "Fixed value",
-              value = rv.widgets$MECImputation_fixedValue,
-              step = 0.1, min = 0, max = 100,
-              width = "100px"
-            )
-          )
-        },
-        None = {}
-      )
-      
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
-    })
-    
-    
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
-      
       req(grepl('MECImputation', btnEvents()))
+      
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
         if ( is.null(rv.custom$dataIn2) || 
             rv.widgets$MECImputation_algorithm == "None")
           shinyjs::info(btnVentsMasg)
+        
         else {
-          
-          
           req(rv.custom$dataIn2)
           req(rv.widgets$MECImputation_algorithm != "None")
           withProgress(message = "", detail = "", value = 0, {
             incProgress(0.25, detail = "Reintroduce MEC")
             
-            m <- DaparToolshed::match.metacell(
+            m <- DaparToolshed::matchMetacell(
               DaparToolshed::qMetacell(rv.custom$dataIn2[[length(rv.custom$dataIn2)]]),
               pattern = "Missing MEC",
               level = DaparToolshed::typeDataset(rv.custom$dataIn2[[length(rv.custom$dataIn2)]])
             )
             nbMECBefore <- length(which(m))
-            incProgress(0.75, detail = "MEC Imputation")
+            incProgress(0.5, detail = "MEC Imputation")
             
-
-            withProgress(message = "", detail = "", value = 0, {
-              incProgress(0.25, detail = "Find MEC blocks")
-              
-              .tmp <- NULL
-              .param <- list()
-              try({
-                switch(rv.widgets$MECImputation_algorithm,
-                  None = .tmp <- rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
+            .tmp <- NULL
+            .param <- list()
+            try({
+              switch(rv.widgets$MECImputation_algorithm,
+                detQuantile = {
+                  incProgress(0.5, detail = "det quantile Imputation")
+                  .tmp <- DaparToolshed::wrapperImputeDetQuant(
+                    obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
+                    qval = rv.widgets$MECImputation_detQuant_quantile / 100,
+                    factor = rv.widgets$MECImputation_detQuant_factor,
+                    na.type = 'Missing MEC')
                   
-                  detQuantile = {
-                    incProgress(0.5, detail = "det quantile Imputation")
-                    .tmp <- DaparToolshed::wrapper.impute.detQuant(
-                      obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
-                      qval = rv.widgets$MECImputation_detQuant_quantile / 100,
-                      factor = rv.widgets$MECImputation_detQuant_factor,
-                      na.type = 'Missing MEC')
-                    
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'quantile', rv.widgets$MECImputation_detQuant_quantile)
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'factor', rv.widgets$MECImputation_detQuant_factor)
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
-
-                  },
-                  fixedValue = {
-                    .tmp <- DaparToolshed::wrapper.impute.fixedValue(
-                      obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
-                      fixVal = rv.widgets$MECImputation_fixedValue,
-                      na.type = "Missing MEC"
-                    )
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'fixVal', rv.widgets$MECImputation_fixedValue)
-                    rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
-
-                  },
-                  None = {}
-                )
-              })
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'quantile', rv.widgets$MECImputation_detQuant_quantile)
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'factor', rv.widgets$MECImputation_detQuant_factor)
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
+                },
+                
+                fixedValue = {
+                  .tmp <- DaparToolshed::wrapperImputeFixedValue(
+                    obj = rv.custom$dataIn2[[length(rv.custom$dataIn2)]],
+                    fixVal = rv.widgets$MECImputation_fixedValue,
+                    na.type = "Missing MEC"
+                  )
+                  
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'algorithm', rv.widgets$MECImputation_algorithm)
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'fixVal', rv.widgets$MECImputation_fixedValue)
+                  rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'Imputation', 'MECImputation', 'na.type', 'Missing MEC')
+                }
+              )
+            })
+            
+            if(inherits(.tmp, "try-error")) {
+              MagellanNTK::mod_SweetAlert_server(id = 'sweetalert_perform_MECimputation_button',
+                text = .tmp,
+                type = 'error' )
+            } else {
+              incProgress(1, detail = "Finalize MEC imputation")
               
-              if(inherits(.tmp, "try-error")) {
-                mod_SweetAlert_server(id = 'sweetalert_perform_MECimputation_button',
-                  text = .tmp,
-                  type = 'error' )
-              } else {
-                incProgress(1, detail = "Finalize MEC imputation")
-                
-                
-                m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(.tmp),
-                  pattern = "Missing MEC",
-                  level = DaparToolshed::typeDataset(.tmp)
-                )
-                nbMECAfter <- length(which(m))
-                rv$nbMECimputed <- nbMECBefore - nbMECAfter
-                
-              }
-              
+              m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(.tmp),
+                                                 pattern = "Missing MEC",
+                                                 level = DaparToolshed::typeDataset(.tmp)
+              )
+              nbMECAfter <- length(which(m))
+              rv$nbMECimputed <- nbMECBefore - nbMECAfter
               
               rv.custom$dataIn2 <- Prostar2::addDatasets(
                 rv.custom$dataIn2,
                 .tmp,
                 'MECImputation')
-
               
               # Add infos
               nBefore <- QFeatures::nNA(rv.custom$dataIn2[[length(rv.custom$dataIn2) - 1]])$nNA[, "nNA"]
@@ -742,22 +681,23 @@ PipelineProtein_Imputation_server <- function(id,
                   NA)
               )
               
-            })  
-            # DO NOT MODIFY THE THREE FOLLOWINF LINES
-            dataOut$trigger <- MagellanNTK::Timestamp()
-            dataOut$value <- NULL
-            rv$steps.status['MECImputation'] <- MagellanNTK::stepStatus$VALIDATED
+              # DO NOT MODIFY THE THREE FOLLOWING LINES
+              dataOut$trigger <- MagellanNTK::Timestamp()
+              dataOut$value <- NULL
+              rv$steps.status['MECImputation'] <- MagellanNTK::stepStatus$VALIDATED
+            }
           })
         }
       })
     })
     
-    # <<< END ------------- Code for step 2 UI---------------
     
-    
-    # >>> START ------------- Code for step 3 UI---------------
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
-      
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
@@ -767,6 +707,7 @@ PipelineProtein_Imputation_server <- function(id,
       )
     })
     
+    #### _content -----
     output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
@@ -774,7 +715,7 @@ PipelineProtein_Imputation_server <- function(id,
       Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       
@@ -782,10 +723,10 @@ PipelineProtein_Imputation_server <- function(id,
         shiny::incProgress(0.5)
         
         if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
-          SummarizedExperiment::assays(rv.custom$dataIn2))))
+          SummarizedExperiment::assays(rv.custom$dataIn2)))){
           shinyjs::info(btnVentsMasg)
-        else {
-          # Do some stuff
+        
+        } else {
           len_start <- length(rv$dataIn)
           len_end <- length(rv.custom$dataIn2)
           len_diff <- len_end - len_start
@@ -813,13 +754,12 @@ PipelineProtein_Imputation_server <- function(id,
         }
       })
     })
-    # <<< END ------------- Code for step 3 UI---------------
     
-    
+    ####### _END_ -----
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-  }
+    }
   )
 }

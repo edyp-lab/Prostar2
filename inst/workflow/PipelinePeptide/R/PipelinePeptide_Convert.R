@@ -163,7 +163,7 @@ PipelinePeptide_Convert_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     output$Description <- renderUI({
@@ -358,7 +358,7 @@ PipelinePeptide_Convert_server <- function(id,
     })
     
     MagellanNTK::format_DT_server('DT_previewfile',
-      reactive({rv.custom$previewtab[1:3,]}))
+      reactive({rv.custom$previewtab[seq_len(3),]}))
     
     output$SelectFile_previewfile_ui <- renderUI({
       req(rv.widgets$SelectFile_file)
@@ -553,7 +553,7 @@ PipelinePeptide_Convert_server <- function(id,
     previewdatasetID <- reactive({
       req(rv.widgets$DataId_datasetId)
       
-      if (rv.widgets$DataId_datasetId == "AutoID"){data.frame(AutoID = 1:6)} else {
+      if (rv.widgets$DataId_datasetId == "AutoID"){data.frame(AutoID = seq_len(6))} else {
         head(rv.custom$tab[, rv.widgets$DataId_datasetId, drop = FALSE])}
     })
     

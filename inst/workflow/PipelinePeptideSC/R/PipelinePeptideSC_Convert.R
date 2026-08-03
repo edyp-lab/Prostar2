@@ -163,7 +163,7 @@ PipelinePeptideSC_Convert_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     output$Description <- renderUI({

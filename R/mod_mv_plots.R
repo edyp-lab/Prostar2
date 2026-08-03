@@ -12,16 +12,17 @@
 #' @param remoteReset A `logical(1)` which acts as a remote command to reset
 #' the module to its default values. Default is FALSE.
 #'
-#' @name mod_mv_plots
+#' @return NA
 #'
+#' @name mod_mv_plots
 #'
 #' @examples
 #' if (interactive()){
 #' library(DaparToolshed)
-#' library(highcharter)
+#' library(plotly)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' pattern <- c("Missing POV")
-#' grp <- DaparToolshed::design.qf(Exp1_R25_prot)$Condition
+#' grp <- DaparToolshed::design_qf(Exp1_R25_prot)$Condition
 #' shiny::runApp(mod_mv_plots(obj[[4]], pattern = pattern, grp = grp))
 #' }
 #' 
@@ -42,7 +43,7 @@ mod_mv_plots_ui <- function(id) {
   tagList(
     tags$div(
       style = .style,
-      highcharter::highchartOutput(ns("plot_viewNAbyMean"), width = "600px")
+      plotly::plotlyOutput(ns("plot_viewNAbyMean"), width = "600px")
     ),
     tags$div(
       style = .style,
@@ -87,7 +88,7 @@ mod_mv_plots_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-  pkgs.require('grDevices')
+  pkgs_require('grDevices')
     rv <- reactiveValues(
       grp = NULL,
       mytitle = NULL,
@@ -119,7 +120,7 @@ mod_mv_plots_server <- function(
       rv$pattern <- pattern()
     })
 
-    output$plot_viewNAbyMean <- highcharter::renderHighchart({
+    output$plot_viewNAbyMean <- plotly::renderPlotly({
       req(data())
       req(rv$pattern)
       req(rv$grp)
@@ -137,7 +138,7 @@ mod_mv_plots_server <- function(
 
 
     output$WarnForImageNA <- renderUI({
-      req(!is.null(wrapper.mvImage(data(), rv$grp)))
+      req(!is.null(wrapperMVImage(data(), rv$grp)))
       wellPanel(
         p(
           style = "color: red;",
@@ -146,7 +147,7 @@ mod_mv_plots_server <- function(
       )
       # tryCatch(
       #     {
-      #         wrapper.mvImage(data())
+      #         wrapperMVImage(data())
       #     },
       #     warning = function(w) {
       #         #p(conditionMessage(w))
@@ -164,13 +165,13 @@ mod_mv_plots_server <- function(
 
     output$plot_showImageNA <- renderImage(
       {
-        pkgs.require('grDevices')
+        pkgs_require('grDevices')
         # A temp file to save the output. It will be deleted after
         # renderImage
         # sends it, because deleteFile=TRUE.
         outfile <- tempfile(fileext = ".png")
         grDevices::png(outfile)
-        wrapper.mvImage(obj = data(), group = rv$grp)
+        wrapperMVImage(obj = data(), group = rv$grp)
         grDevices::dev.off()
 
         # Return a list

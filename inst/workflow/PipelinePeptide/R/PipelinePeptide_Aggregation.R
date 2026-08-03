@@ -87,7 +87,7 @@ PipelinePeptide_Aggregation_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   widgets.default.values <- list(
     Aggregation_includeSharedPeptides = "Yes_Iterative_Redistribution",
@@ -129,7 +129,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     ###########################################################################-
     #
@@ -307,7 +307,7 @@ PipelinePeptide_Aggregation_server <- function(id,
       req(rv$dataIn)
       
       .data <- DaparToolshed::last_assay(rv$dataIn)
-      m <- DaparToolshed::match.metacell(
+      m <- DaparToolshed::matchMetacell(
         DaparToolshed::qMetacell(.data),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = DaparToolshed::typeDataset(.data)
@@ -372,7 +372,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     aggregationStatsPept <- reactive({
       req(rv$dataIn)
       
-      for (k in 1:length(rv$dataIn)){
+      for (k in seq_along(rv$dataIn)){
         if (DaparToolshed::typeDataset(rv$dataIn[[k]]) != "protein")
           i_datapept <- k
       }
@@ -401,7 +401,7 @@ PipelinePeptide_Aggregation_server <- function(id,
     aggregationStatsProt <- reactive({
       req(rv$dataIn)
       
-      for (k in 1:length(rv$dataIn)){
+      for (k in seq_along(rv$dataIn)){
         if (DaparToolshed::typeDataset(rv$dataIn[[k]]) != "protein")
           i_datapept <- k
       }

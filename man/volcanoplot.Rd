@@ -59,12 +59,15 @@ the module to its default values. Default is FALSE.}
 
 \item{is.enabled}{xxx}
 }
+\value{
+NA
+}
 \description{
 A shiny Module.
 }
 \examples{
 if (interactive()){
-library(highcharter)
+library(plotly)
 library(DaparToolshed)
 library(SummarizedExperiment)
 data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -94,7 +97,7 @@ colnames(df) <- c("x", "y", "index")
 hc_clickFunction <- JS("function(event) {
 Shiny.onInputChange('eventPointClicked',[this.index]+'_'+ [this.series.name]);}")
 cond <- c("25fmol", "10fmol")
-diffAnaVolcanoplot_rCharts(
+DaparToolshed::diffAnaVolcanoplot_rCharts(
   df,
   th_pval = 2.5,
   th_logfc = 1,

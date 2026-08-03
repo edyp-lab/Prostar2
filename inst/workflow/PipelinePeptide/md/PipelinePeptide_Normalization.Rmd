@@ -24,8 +24,8 @@ This step allows the selection of a normalization method from several available 
 The `Normalization` step offers a number of different normalization method, that are described below. The parameters to be defined vary depending on the selected method.
 
 The left side of the interface is used to select the normalization method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the normalization to the data.
-The central area of the interface displays multiple graphs. The graphs on the left shows the intensity distributions for each sample. For the top one, it is possible to hide a specified sample from the graph by clicking on its name in the legend. The bottom one can be switched from violin plot to a boxplot by clicking on the button above the graph.
-The graph on the right provides a way to visually compare the quantitative data before and after normalization. This plot shows the influence of the normalization method. 
+The central area of the interface displays multiple graphs. The graphs on the top shows the intensity distributions for each sample. For the left one, it is possible to hide a specified sample from the graph by clicking on its name in the legend. The right one can be switched from violin plot to a boxplot by clicking on the button above the graph.
+The graph on the bottom provides a way to visually compare the quantitative data before and after normalization. This plot shows the influence of the normalization method and only appears once the data is normalized. 
 
 If the normalization outcome is unsatisfactory, click “Reset” to return to the initial state and adjust the normalization method or its parameters.
 

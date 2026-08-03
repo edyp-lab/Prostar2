@@ -84,7 +84,7 @@ PipelinePeptide_Normalization_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -121,7 +121,7 @@ PipelinePeptide_Normalization_server <- function(id,
     )
 
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     ###########################################################################-
@@ -215,7 +215,7 @@ PipelinePeptide_Normalization_server <- function(id,
                    omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
             ),
             column(width = 6,
-                   highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
+                   plotly::plotlyOutput(ns("viewComparisonNorm_hc"))
             )
           ))
       )
@@ -314,7 +314,7 @@ PipelinePeptide_Normalization_server <- function(id,
     
     
     
-    output$viewComparisonNorm_hc <- highcharter::renderHighchart({
+    output$viewComparisonNorm_hc <- plotly::renderPlotly({
       req(rv$dataIn)
       req(length(rv$dataIn) > 1)
       #req(names(rv$dataIn)[length(rv$dataIn)] == 'Normalization')
@@ -339,7 +339,7 @@ PipelinePeptide_Normalization_server <- function(id,
         qDataBefore = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
         qDataAfter = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)-1),
         keyId = SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, protId],
-        conds = DaparToolshed::design.qf(rv$dataIn)$Condition,
+        conds = DaparToolshed::design_qf(rv$dataIn)$Condition,
         pal = NULL,
         # Consider only 2% of the entire dataset
         n = .n,
@@ -509,6 +509,7 @@ PipelinePeptide_Normalization_server <- function(id,
       })
     })
     
+    
     ###########################################################################-
     #
     #-------------------------------------SAVE----------------------------------
@@ -555,11 +556,11 @@ PipelinePeptide_Normalization_server <- function(id,
       })
     })
     
-    # <<< end ------------------------------------------------------------------
+    ####### _END_ -----
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-  }
+    }
   )
 }

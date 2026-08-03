@@ -35,7 +35,7 @@
 #' if (interactive()){
 #' library(MagellanNTK)
 #' library(MagellanNTK)
-#' library(highcharter)
+#' library(plotly)
 #' library(DaparToolshed)
 #' library(Prostar2)
 #' library(omXplore)
@@ -104,9 +104,9 @@ PipelineProtein_DA_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
-  pkgs.require('magrittr')
+  pkgs_require('magrittr')
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   
   # Define default selected values for widgets
@@ -159,7 +159,7 @@ PipelineProtein_DA_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pkgs.require('grDevices')
+    pkgs_require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(
@@ -172,7 +172,7 @@ PipelineProtein_DA_server <- function(id,
         )
       )
     )
-    add.resourcePath()
+    add_resourcePath()
     
     # >>>
     # >>> START ------------- Code for Description UI---------------
@@ -279,14 +279,14 @@ PipelineProtein_DA_server <- function(id,
       
       
       if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
-        .conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
+        .conds <- DaparToolshed::design_qf(rv$dataIn)$Condition
         condition1 <- strsplit(as.character(rv.widgets$Pairwisecomparison_Comparison), "_vs_")[[1]][1]
         ind_virtual_cond2 <- which(.conds != condition1)
         datasetToAnalyze <- rv$dataIn[[length(rv$dataIn)]]
       } else {
         ind <- c(
-          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition1),
-          which(DaparToolshed::design.qf(rv$dataIn)$Condition == rv.custom$Condition2)
+          which(DaparToolshed::design_qf(rv$dataIn)$Condition == rv.custom$Condition1),
+          which(DaparToolshed::design_qf(rv$dataIn)$Condition == rv.custom$Condition2)
         )
         
         
@@ -386,7 +386,7 @@ PipelineProtein_DA_server <- function(id,
       id = "Pairwisecomparison_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
-      group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
+      group = reactive({DaparToolshed::design_qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
@@ -476,7 +476,7 @@ PipelineProtein_DA_server <- function(id,
       tmpCond1 <- .split[[1]][1]
       tmpCond2 <- .split[[1]][2]
       compcond <- c(tmpCond1, tmpCond2)
-      idxcond <- which(DaparToolshed::design.qf(rv$dataIn)$Condition %in% compcond)
+      idxcond <- which(DaparToolshed::design_qf(rv$dataIn)$Condition %in% compcond)
       
       datapush <- rv$dataIn[[length(rv$dataIn)]][, idxcond]
       SummarizedExperiment::rowData(datapush)$qMetacell <- SummarizedExperiment::rowData(datapush)$qMetacell[, idxcond]
@@ -484,7 +484,7 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
         dataIn = reactive({datapush}),
-        conds = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition[idxcond]}),
+        conds = reactive({DaparToolshed::design_qf(rv$dataIn)$Condition[idxcond]}),
         keep_vs_remove = reactive({
           stats::setNames(c('Push p-value', 'Keep original p-value'), 
             nm = c("delete", "keep"))}),
@@ -598,7 +598,7 @@ PipelineProtein_DA_server <- function(id,
             column(width = 6, 
               imageOutput(ns("calibrationPlot"), height = "400px")
             ),
-            highcharter::highchartOutput(ns("histPValue"))
+            plotly::plotlyOutput(ns("histPValue"))
           )
         )
       )
@@ -666,7 +666,7 @@ PipelineProtein_DA_server <- function(id,
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
       
-      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
       )
@@ -685,14 +685,12 @@ PipelineProtein_DA_server <- function(id,
         t <- t[-toDelete]
       }
       
-      histPValue_HC(t,
-        bins = as.numeric(rv.widgets$Pvaluecalibration_nBinsHistpval),
-        pi0 = rv.custom$pi0
-      )
-      
+      DaparToolshed::histPValue_HC(t,
+                                   bins = as.numeric(rv.widgets$Pvaluecalibration_nBinsHistpval),
+                                   pi0 = rv.custom$pi0)
     })
     
-    output$histPValue <- highcharter::renderHighchart({
+    output$histPValue <- plotly::renderPlotly({
       histPValue()
     })
     
@@ -728,7 +726,7 @@ PipelineProtein_DA_server <- function(id,
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
-      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide")
       req(length(which(m)) == 0)
@@ -754,7 +752,7 @@ PipelineProtein_DA_server <- function(id,
               !is.null(rv.widgets$Pvaluecalibration_numericValCalibration)) {
             
             ll <- catchToList(
-              wrapperCalibrationPlot(
+              DaparToolshed::wrapperCalibrationPlot(
                 t,
                 rv.widgets$Pvaluecalibration_numericValCalibration
               )
@@ -762,12 +760,12 @@ PipelineProtein_DA_server <- function(id,
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
-            ll <- catchToList(wrapperCalibrationPlot(t, 1))
+            ll <- catchToList(DaparToolshed::wrapperCalibrationPlot(t, 1))
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else {
             ll <- catchToList(
-              wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
+              DaparToolshed::wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
             )
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
@@ -791,13 +789,6 @@ PipelineProtein_DA_server <- function(id,
           # cleanup-code
         }
       )
-      
-      # # → Le plot doit être dans ll$value$plot (cas Prostar/DaparToolshed)
-      #  validate(
-      #   need(!is.null(ll$value$plot), "Aucun plot renvoyé par wrapperCalibrationPlot")
-      # )
-      # 
-      # return(ll$value$plot)
     })
     
     output$calibrationPlot <- renderImage(
@@ -826,7 +817,7 @@ PipelineProtein_DA_server <- function(id,
       
       txt <- NULL
       
-      for (i in 1:length(rv.custom$errMsgCalibrationPlot)) {
+      for (i in seq_along(rv.custom$errMsgCalibrationPlot)) {
         txt <- paste(txt, "errMsgCalibrationPlot: ",
           rv.custom$errMsgCalibrationPlot[i], "<br>",
           sep = ""
@@ -844,7 +835,7 @@ PipelineProtein_DA_server <- function(id,
       req(!is.null(rv.custom$errMsgCalibrationPlotAll))
       
       txt <- NULL
-      for (i in 1:length(rv.custom$errMsgCalibrationPlotAll)) {
+      for (i in seq_along(rv.custom$errMsgCalibrationPlotAll)) {
         txt <- paste(txt, "errMsgCalibrationPlotAll:",
           rv.custom$errMsgCalibrationPlotAll[i], "<br>",
           sep = ""
@@ -864,7 +855,7 @@ PipelineProtein_DA_server <- function(id,
       req(!is.na(rv.custom$thlogfc))
       req(length(rv.custom$resAnaDiff$logFC) > 0) 
       
-      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide")
       req(length(which(m)) == 0)
@@ -886,7 +877,7 @@ PipelineProtein_DA_server <- function(id,
       l <- NULL
       result <- tryCatch(
         {
-          l <- catchToList(wrapperCalibrationPlot(t, "ALL"))
+          l <- catchToList(DaparToolshed::wrapperCalibrationPlot(t, "ALL"))
           .warns <- l$warnings[grep("Warning:", l$warnings)]
           rv.custom$errMsgCalibrationPlotAll <- .warns
         },
@@ -1036,10 +1027,10 @@ PipelineProtein_DA_server <- function(id,
     
     output$FDR_selectedItems_UI <- DT::renderDT({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
-      rv.custom$df <- Build_pval_table()
+      df <- Build_pval_table()
       
       if (rv.widgets$FDR_viewAdjPval){
-        rv.custom$df <- rv.custom$df[order(rv.custom$df$Adjusted_PValue, decreasing=FALSE), ]
+        df <- df[order(df$Adjusted_PValue, decreasing=FALSE), ]
       }
       
       if (rv.widgets$FDR_viewAdjPval){
@@ -1049,10 +1040,10 @@ PipelineProtein_DA_server <- function(id,
           as.character(rv.widgets$Pairwisecomparison_Comparison), ")")
         .coldefs <- list(
           list(width = "200px", targets = "_all"),
-          list(targets = (match(name, colnames(rv.custom$df)) - 1), visible = FALSE))
+          list(targets = (match(name, colnames(df)) - 1), visible = FALSE))
       }
       
-      DT::datatable(rv.custom$df,
+      DT::datatable(df,
         escape = FALSE,
         rownames = FALSE,
         selection = 'none',
@@ -1102,7 +1093,7 @@ PipelineProtein_DA_server <- function(id,
       id = "FDR_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
       comparison = reactive({c(rv.custom$Condition1, rv.custom$Condition2)}),
-      group = reactive({DaparToolshed::design.qf(rv$dataIn)$Condition}),
+      group = reactive({DaparToolshed::design_qf(rv$dataIn)$Condition}),
       thlogfc = reactive({rv.custom$thlogfc}),
       thpval = reactive({rv.custom$thpval}),
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
@@ -1126,7 +1117,7 @@ PipelineProtein_DA_server <- function(id,
       req(Build_pval_table())
       
       
-      m <- DaparToolshed::match.metacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
+      m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = "peptide"
       )
@@ -1349,7 +1340,7 @@ PipelineProtein_DA_server <- function(id,
       
        #upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
        #upItems_logFC <- which(abs(.logfc) >= rv.custom$thlogfc)
-       #rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(.pval[upItems_logFC],
+       #rv.custom$adjusted_pvalues <- DaparToolshed::diffAnaComputeAdjustedPValues(.pval[upItems_logFC],
        #  GetCalibrationMethod())
        #pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
       
@@ -1368,7 +1359,7 @@ PipelineProtein_DA_server <- function(id,
        if (length(upItems_pushedpval) != 0){
          pval_pushfc <- pval_pushfc[-upItems_pushedpval]
        }
-       rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+       rv.custom$adjusted_pvalues <- DaparToolshed::diffAnaComputeAdjustedPValues(
          pval_pushfc,
          GetCalibrationMethod())
        if (length(upItems_pushedpval) != 0){

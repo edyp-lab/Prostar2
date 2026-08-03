@@ -2,20 +2,37 @@
 % Please edit documentation in R/catchToList.R
 \name{catchToList}
 \alias{catchToList}
-\title{Catch to a list}
+\title{Evaluate an Expression While Capturing Warnings and Errors}
 \usage{
 catchToList(expr)
 }
 \arguments{
-\item{expr}{xxx}
+\item{expr}{An expression to evaluate.}
 }
 \value{
-A \code{list} of three items: 'value', 'warnings' and 'error'
+A list with three components:
+\item{value}{The result of the expression. If an error occurs, this will be \code{NULL}.}
+\item{warnings}{A character vector of all warning messages generated during evaluation. \code{NULL} if no warnings issued.}
+\item{error}{A character vector of all error messages generated during evaluation. \code{NULL} if no error occurred.}
 }
 \description{
-Catch to a list
+Evaluates an R expression and captures its return value, warnings, and errors
+in a structured list. Useful for logging, testing, or interactive environments
+where you need to inspect the output and messages without stopping execution.
 }
 \examples{
-NULL
+#Capture a successful evaluation
+catchToList(mean(1:10))
+
+# Capture warnings
+catchToList({
+  warning("First warning")
+  warning("Second warning")
+  42
+})
+catchToList(log(c(1, 0, -1)))
+
+# Capture errors
+catchToList(stop("Something went wrong"))
 
 }

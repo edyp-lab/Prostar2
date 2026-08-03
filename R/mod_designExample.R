@@ -20,9 +20,7 @@
 #' 
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets 
-#' Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut 
-#' format_DT_server Timestamp toggleWidget
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_server Timestamp toggleWidget
 #'
 NULL
 
@@ -53,7 +51,7 @@ mod_designExample_server <- function(
     is.enabled = reactive({
       TRUE
     })) {
-  pkgs.require(c('magrittr', "rhandsontable"))
+  pkgs_require(c('magrittr', "rhandsontable"))
 
 
   example_2 <- function() {
@@ -71,10 +69,10 @@ mod_designExample_server <- function(
                     }")
 
     df <- data.frame(
-      quantCols = paste0("Sample ", as.character(1:14)),
+      quantCols = paste0("Sample ", as.character(seq_len(14))),
       Condition = c(rep("A", 4), rep("B", 4), rep("C", 6)),
       Bio.Rep = as.integer(c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7)),
-      Tech.Rep = c(1:14),
+      Tech.Rep = seq_len(14),
       stringsAsFactors = FALSE
     )
 
@@ -103,11 +101,11 @@ mod_designExample_server <- function(
     )
 
     df <- data.frame(
-      quantCols = paste0("Sample ", as.character(1:16)),
+      quantCols = paste0("Sample ", as.character(seq_len(16))),
       Condition = c(rep("A", 8), rep("B", 8)),
       Bio.Rep = as.integer(c(rep(1, 4), rep(2, 4), rep(3, 4), rep(4, 4))),
       Tech.Rep = as.integer(c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8)),
-      Analyt.Rep = c(1:16),
+      Analyt.Rep = seq_len(16),
       stringsAsFactors = FALSE
     )
 

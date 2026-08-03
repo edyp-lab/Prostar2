@@ -30,7 +30,7 @@ NULL
 
 
 
-#' @import highcharter
+#' @import plotly
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show
 #'
 #' @rdname metacell-tree
@@ -43,27 +43,27 @@ mod_metacell_tree_ui <- function(id) {
   addResourcePath("images", system.file("images", package = "DaparToolshed"))
   fluidPage(
     shinyjs::useShinyjs(),
-    fluidRow(
+    fluidRow(style = "margin-bottom: 10px;", 
       column(
-        width = 6,
+        width = 4,
         actionButton(
           ns("openModalBtn"),
           tags$img(src = "images/ds_metacell.png", height = "50px"),
           style = "padding: 0px; margin: 0px; border: solid 1px gray;")
       ),
-      column(width = 6, uiOutput(ns("selectedNodes")))
+      column(width = 8, uiOutput(ns("selectedNodes")))
     ),
-    br(),
+    #br(),
     uiOutput(ns("modaltree"))
   )
 }
 
 
 
-#' @import highcharter
+#' @import plotly
 #' @importFrom shinyjs useShinyjs hidden toggle disable enable show inlineCSS runjs toggleState
 #' @importFrom stats setNames
-#' @importFrom DaparToolshed typeDataset metacell.def 
+#' @importFrom DaparToolshed typeDataset metacellDef 
 #'
 #' @rdname metacell-tree
 #'
@@ -208,7 +208,7 @@ mod_metacell_tree_server <- function(
     
     output$selectedNodes <- renderUI({
       req(length(dataOut$values) > 0)
-      p(paste0("Selected tags: ", paste0(dataOut$values, collapse = ",")))
+      p(strong("Selected tags: "), paste(dataOut$values, collapse = ", "))
     })
 
 
@@ -217,7 +217,7 @@ mod_metacell_tree_server <- function(
       req(dataIn())
       req(DaparToolshed::typeDataset(dataIn()))
       # print('------------ init_tree() ---------------')
-      rv$meta <- DaparToolshed::metacell.def(DaparToolshed::typeDataset(dataIn()))
+      rv$meta <- DaparToolshed::metacellDef(DaparToolshed::typeDataset(dataIn()))
       rv$mapping <- BuildMapping(rv$meta)$names
       rv$bg_colors <- BuildMapping(rv$meta)$colors
 
@@ -602,7 +602,7 @@ mod_metacell_tree_server <- function(
             # As the leaves are disabled, this selection is a node
             # by default, all its children must be also selected
             for (i in newSelection) {
-              if (i %in% metacell.def(level)$parent) {
+              if (i %in% metacellDef(level)$parent) {
                 childrens <- Children(level, i)
                 if (!is.null(childrens) && length(childrens) > 0) {
                   lapply(childrens, function(x) {
@@ -792,7 +792,7 @@ mod_metacell_tree <- function(
     )
 
     observeEvent(req(tags()$trigger), {
-      print(tags()$values)
+      message(tags()$values)
     })
   }
 

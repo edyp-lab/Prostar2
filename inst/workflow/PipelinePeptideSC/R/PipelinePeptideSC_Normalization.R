@@ -84,7 +84,7 @@ PipelinePeptideSC_Normalization_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -121,7 +121,7 @@ PipelinePeptideSC_Normalization_server <- function(id,
     )
 
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     ###########################################################################-
@@ -215,7 +215,7 @@ PipelinePeptideSC_Normalization_server <- function(id,
                    omXplore::omXplore_intensity_ui(ns("boxPlot_Norm"))
             ),
             column(width = 6,
-                   highcharter::highchartOutput(ns("viewComparisonNorm_hc"))
+                   plotly::plotlyOutput(ns("viewComparisonNorm_hc"))
             )
           ))
       )
@@ -314,7 +314,7 @@ PipelinePeptideSC_Normalization_server <- function(id,
     
     
     
-    output$viewComparisonNorm_hc <- highcharter::renderHighchart({
+    output$viewComparisonNorm_hc <- plotly::renderPlotly({
       req(rv$dataIn)
       req(length(rv$dataIn) > 1)
       #req(names(rv$dataIn)[length(rv$dataIn)] == 'Normalization')

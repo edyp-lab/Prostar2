@@ -13,12 +13,13 @@
 #' @param comparison xxx
 #' @param group xxx
 #'
+#' @return NA
 #'
 #' @name volcanoplot
 #'
 #' @examples
 #' if (interactive()){
-#' library(highcharter)
+#' library(plotly)
 #' library(DaparToolshed)
 #' library(SummarizedExperiment)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
@@ -48,7 +49,7 @@
 #' hc_clickFunction <- JS("function(event) {
 #' Shiny.onInputChange('eventPointClicked',[this.index]+'_'+ [this.series.name]);}")
 #' cond <- c("25fmol", "10fmol")
-#' diffAnaVolcanoplot_rCharts(
+#' DaparToolshed::diffAnaVolcanoplot_rCharts(
 #'   df,
 #'   th_pval = 2.5,
 #'   th_logfc = 1,
@@ -67,9 +68,7 @@
 #' 
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets 
-#' Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut 
-#' format_DT_ui format_DT_server Timestamp toggleWidget mod_popover_for_help_server mod_popover_for_help_ui
+#' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_ui format_DT_server Timestamp toggleWidget mod_popover_for_help_server mod_popover_for_help_ui
 #'
 NULL
 
@@ -79,14 +78,15 @@ NULL
 #' @importFrom shiny NS tagList
 #' @importFrom shinyjs inlineCSS useShinyjs
 #' @importFrom DT DTOutput renderDT datatable formatStyle styleEqual
-#' @importFrom highcharter highchartOutput
+#' @importFrom plotly plotlyOutput
+#' @importFrom omXplore get_type get_group
 #' @export
 #' @rdname volcanoplot
 #'
 mod_volcanoplot_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    highcharter::highchartOutput(ns("volcanoPlot_UI"),
+    plotly::plotlyOutput(ns("volcanoPlot_UI"),
       width = "600px", height = "600px"
     ),
     uiOutput(ns("quantiDT"))
@@ -133,7 +133,7 @@ mod_volcanoplot_server <- function(
 
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    pkgs.require(c('magrittr', "shinyjqui"))
+    pkgs_require(c('magrittr', "shinyjqui"))
     # DO NOT MODIFY THIS FUNCTION CALL
     eval(
       str2expression(
@@ -303,7 +303,7 @@ mod_volcanoplot_server <- function(
         )
       ) |>
         DT::formatStyle(
-          colnames(data)[1:(ncol(data) / 2)],
+          colnames(data)[seq_len(ncol(data) / 2)],
           colnames(data)[range.invisible],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) |>
@@ -372,7 +372,7 @@ mod_volcanoplot_server <- function(
         )
       ) |>
         DT::formatStyle(
-          colnames(data)[1:(ncol(data) / 2)],
+          colnames(data)[seq_len(ncol(data) / 2)],
           colnames(data)[range.invisible],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) |>
@@ -462,7 +462,7 @@ req(rv.custom$dataGetExprsClickedProtein)
         )
       ) |>
         DT::formatStyle(
-          colnames(data)[1:(ncol(data) / 2)],
+          colnames(data)[seq_len(ncol(data) / 2)],
           colnames(data)[range.invisible],
           backgroundColor = DT::styleEqual(c.tags, c.colors)
         ) |>
@@ -471,7 +471,7 @@ req(rv.custom$dataGetExprsClickedProtein)
     })
 
     ## ---------------------------------------------------------------------
-    output$volcanoPlot_UI <- highcharter::renderHighchart({
+    output$volcanoPlot_UI <- plotly::renderPlotly({
       req(rv$dataIn)
       req(comparison())
 
@@ -507,7 +507,7 @@ req(rv.custom$dataGetExprsClickedProtein)
             "', [this.index]+'_'+ [this.series.name]);}"
           ))
 
-        diffAnaVolcanoplot_rCharts(
+        DaparToolshed::diffAnaVolcanoplot_rCharts(
           df,
           th_logfc = as.numeric(thlogfc()),
           th_pval = as.numeric(thpval()),

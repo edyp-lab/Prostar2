@@ -86,7 +86,7 @@ PipelinePeptide_Imputation_server <- function(id,
   path = NULL,
   btnEvents = reactive({NULL})
 ){
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -123,7 +123,7 @@ PipelinePeptide_Imputation_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     ###########################################################################-
@@ -387,15 +387,15 @@ PipelinePeptide_Imputation_server <- function(id,
       mv_rates_sorted <- mv_rates[mean_abund_sorted$ix]
       kernel_size <- 10
       probs <- rep(0, length(mean_abund) - kernel_size + 1)
-      for (i in 1:length(probs)) {
+      for (i in seq_along(probs)) {
         probs[i] <- mean(mv_rates_sorted[i:(i + kernel_size - 1)])
       }
       not0 <- probs != 0
       m_ab_sorted <- mean_abund_sorted$x[not0]
       probs <- probs[not0]
-      res.reg <- lm(log(probs) ~ m_ab_sorted[1:length(probs)])
+      res.reg <- lm(log(probs) ~ m_ab_sorted[seq_along(probs)])
       sum.reg.reg <- summary(res.reg)
-      plot(m_ab_sorted[1:length(probs)], log(probs),
+      plot(m_ab_sorted[seq_along(probs)], log(probs),
            ylab="log(p_mis)", 
            xlab="observed mean")
       abline(res.reg, col="red")

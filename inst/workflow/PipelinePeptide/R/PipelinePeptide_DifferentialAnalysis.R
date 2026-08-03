@@ -92,9 +92,9 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
-  pkgs.require('magrittr')
+  pkgs_require('magrittr')
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -162,7 +162,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pkgs.require('grDevices')
+    pkgs_require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
@@ -173,7 +173,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     ###########################################################################-
     #
@@ -258,7 +258,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     output$Scenario_warningNA_UI <- renderUI({
       req(rv$dataIn)
       
-      m <- DaparToolshed::match.metacell(
+      m <- DaparToolshed::matchMetacell(
         DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
@@ -343,7 +343,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(grepl('Scenario', btnEvents()))
       req(rv$dataIn)
       
-      m <- DaparToolshed::match.metacell(
+      m <- DaparToolshed::matchMetacell(
         DaparToolshed::qMetacell(dataIn()[[length(dataIn())]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = DaparToolshed::typeDataset(dataIn()[[length(dataIn())]])
@@ -367,7 +367,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
             
           } else if (rv.widgets$Scenario_method == "Limma"){
-            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design.qf(rv$dataIn), comp.type="OnevsOne")
+            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design_qf(rv$dataIn), comp.type="OnevsOne")
           }
           
           rv.custom$res_pval_FC_stacked$logFC <- data.frame(cond1_vs_cond2_logFC = unlist(rv.custom$res_pval_FC$logFC, use.names = FALSE))
@@ -380,7 +380,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "Omnibus")
             
           } else if (rv.widgets$Scenario_method == "Limma"){
-            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design.qf(rv$dataIn), comp.type="anova1way")
+            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design_qf(rv$dataIn), comp.type="anova1way")
           }
           
           rv.custom$res_clusters <- rep("-", nrow(rv$dataIn[[length(rv$dataIn)]]))
@@ -391,7 +391,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
             
           }else if (rv.widgets$Scenario_method == "Limma"){
-            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design.qf(rv$dataIn), comp.type="OnevsOne")
+            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design_qf(rv$dataIn), comp.type="OnevsOne")
           }
           
           rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
@@ -484,7 +484,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$dataIn)
       req(rv.widgets$Scenario_choice == "Contrast")
       
-      m <- DaparToolshed::match.metacell(
+      m <- DaparToolshed::matchMetacell(
         DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
         level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
@@ -498,13 +498,13 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         tagList(
           uiOutput(ns('Foldchange_warning_conditions_ui')),
           uiOutput(ns("Foldchange_swapConds_ui")),
-          highcharter::highchartOutput(ns("Foldchange_Plot")),
-          highcharter::highchartOutput(ns("FoldchangeStacked_Plot"))
+          plotly::plotlyOutput(ns("Foldchange_Plot")),
+          plotly::plotlyOutput(ns("FoldchangeStacked_Plot"))
         )
       }
     })
     
-    output$Foldchange_Plot <- highcharter::renderHighchart({
+    output$Foldchange_Plot <- plotly::renderPlotly({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
       req(rv.widgets$Foldchange_thlogFC)
@@ -518,7 +518,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       })
     })
     
-    output$FoldchangeStacked_Plot <- highcharter::renderHighchart({
+    output$FoldchangeStacked_Plot <- plotly::renderPlotly({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
       req(rv.widgets$Foldchange_thlogFC)
@@ -549,7 +549,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             rv.custom$comparison <- "stacked"
             
             
-            all_conditions <- DaparToolshed::design.qf(rv$dataIn)$Condition
+            all_conditions <- DaparToolshed::design_qf(rv$dataIn)$Condition
             max_sample_cond <- max(unlist(lapply(unique(all_conditions), function(x) length(which(all_conditions == x)))))
             rv.custom$cond <- rep(c("cond1", "cond2"), c(max_sample_cond, max_sample_cond))
             
@@ -577,7 +577,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
               }
               assay_cond_contr <- do.call(cbind, assay_list)
               meta_cond_contr <- do.call(cbind, meta_list)
-              colnames(assay_cond_contr) <- paste0("c", rep(1:2, each = max_sample_cond), "_", rep(1:max_sample_cond, times = 2)) 
+              colnames(assay_cond_contr) <- paste0("c", rep(seq_len(2), each = max_sample_cond), "_", rep(seq_len(max_sample_cond), times = 2)) 
               colnames(meta_cond_contr) <- paste0("metacell_", colnames(assay_cond_contr))
               
               assay_contr_list[[contraste_name]] <- assay_cond_contr
@@ -612,13 +612,13 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             rv.custom$comparison <- rv.widgets$Foldchange_uniquechoice
             
             rv.custom$names_condition <- unlist(strsplit(as.character(rv.widgets$Foldchange_uniquechoice), "_vs_"))
-            col_cond <- which(DaparToolshed::design.qf(rv$dataIn)$Condition %in% rv.custom$names_condition)
+            col_cond <- which(DaparToolshed::design_qf(rv$dataIn)$Condition %in% rv.custom$names_condition)
             rv.custom$push_pval_data <- rv$dataIn[[length(rv$dataIn)]][, col_cond]
             SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell[, col_cond]
             DaparToolshed::idcol(rv.custom$push_pval_data) <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
             DaparToolshed::typeDataset(rv.custom$push_pval_data) <- DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
             SummarizedExperiment::rowData(rv.custom$push_pval_data)[, DaparToolshed::idcol(rv.custom$push_pval_data)] <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])]
-            rv.custom$cond <- DaparToolshed::design.qf(rv$dataIn)$Condition[col_cond]
+            rv.custom$cond <- DaparToolshed::design_qf(rv$dataIn)$Condition[col_cond]
             
             rv.custom$rowdatacolname <- names(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]]))[
               !vapply(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]]), function(x)
@@ -802,7 +802,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv.widgets$Scenario_choice == "Cluster")
       req(rv.widgets$Finetuning_cluster_protprofile)
       
-      conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
+      conds <- DaparToolshed::design_qf(rv$dataIn)$Condition
       prot_prof <- switch(rv.widgets$Finetuning_cluster_protprofile,
                           Mean = sapply(unique(conds), function(c) 
                             rowMeans(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, conds == c, drop = FALSE], 
@@ -813,7 +813,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       
       datapca <- prot_prof
       pca <- prcomp(datapca,  scale = TRUE)
-      scores <- pca$x[, 1:2]
+      scores <- pca$x[, seq_len(2)]
       
       clusterspca <- as.factor(rv.custom$res_clusters)
       cols <- as.numeric(clusterspca)
@@ -822,7 +822,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
            xlab = "PC1", ylab = "PC2", main = "Clusters"
       )
       legend("topright", legend = levels(clusterspca),
-             col = 1:length(levels(clusterspca)), pch = 19
+             col = seq_along(levels(clusterspca)), pch = 19
       )
     })
     
@@ -908,7 +908,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           rv.custom$comparison <- "omnibus_cluster"
           rv.widgets$Finetuning_cluster_nbclust <- round(rv.widgets$Finetuning_cluster_nbclus, 0)
           
-          conds <- DaparToolshed::design.qf(rv$dataIn)$Condition
+          conds <- DaparToolshed::design_qf(rv$dataIn)$Condition
           prot_prof <- switch(rv.widgets$Finetuning_cluster_protprofile,
                  Mean = sapply(unique(conds), function(c) 
                    rowMeans(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, conds == c, drop = FALSE], 
@@ -929,7 +929,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             }
           } else if (length(unique(conds)) > 2) {
             standards <- prot_prof
-            for (i in 1:nrow(standards)) {
+            for (i in seq_len(nrow(standards))) {
               standards[i, ] <- (standards[i, ] - mean(standards[i, ], na.rm = TRUE))/sd(standards[i, 
               ], na.rm = TRUE)
             }
@@ -1037,7 +1037,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
         ),
         content = tagList(
-          highcharter::highchartOutput(ns("histPValue")),
+          plotly::plotlyOutput(ns("histPValue")),
           imageOutput(ns("calibrationPlotAll"), height = "800px"),
           imageOutput(ns("calibrationPlot"), height = "400px")
           # p(tags$strong(
@@ -1121,14 +1121,12 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         t <- t[-toDelete]
       }
 
-      histPValue_HC(t,
-                    bins = as.numeric(round(rv.widgets$Pvaluecalibration_nBinsHistpval, 0)),
-                    pi0 = rv.custom$pi0
-      )
-
+      DaparToolshed::histPValue_HC(t,
+                                   bins = as.numeric(round(rv.widgets$Pvaluecalibration_nBinsHistpval, 0)),
+                                   pi0 = rv.custom$pi0)
     })
 
-    output$histPValue <- highcharter::renderHighchart({
+    output$histPValue <- plotly::renderPlotly({
       histPValue()
     })
 
@@ -1157,7 +1155,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       l <- NULL
       result <- tryCatch(
         {
-          l <- catchToList(wrapperCalibrationPlot(t, "ALL"))
+          l <- catchToList(DaparToolshed::wrapperCalibrationPlot(t, "ALL"))
           .warns <- l$warnings[grep("Warning:", l$warnings)]
           rv.custom$errMsgCalibrationPlotAll <- .warns
         },
@@ -1204,7 +1202,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(!is.null(rv.custom$errMsgCalibrationPlotAll))
 
       txt <- NULL
-      for (i in 1:length(rv.custom$errMsgCalibrationPlotAll)) {
+      for (i in seq_along(rv.custom$errMsgCalibrationPlotAll)) {
         txt <- paste(txt, "errMsgCalibrationPlotAll:",
                      rv.custom$errMsgCalibrationPlotAll[i], "<br>",
                      sep = "")
@@ -1240,7 +1238,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
               !is.null(rv.widgets$Pvaluecalibration_numericValCalibration)) {
 
             ll <- catchToList(
-              wrapperCalibrationPlot(
+              DaparToolshed::wrapperCalibrationPlot(
                 t,
                 rv.widgets$Pvaluecalibration_numericValCalibration
               )
@@ -1248,12 +1246,12 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
-            ll <- catchToList(wrapperCalibrationPlot(t, 1))
+            ll <- catchToList(DaparToolshed::wrapperCalibrationPlot(t, 1))
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
           } else {
             ll <- catchToList(
-              wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
+              DaparToolshed::wrapperCalibrationPlot(t, rv.widgets$Pvaluecalibration_calibrationMethod)
             )
             .warns <- ll$warnings[grep("Warning:", ll$warnings)]
             rv.custom$errMsgCalibrationPlot <- .warns
@@ -1300,7 +1298,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(rv$dataIn)
 
       txt <- NULL
-      for (i in 1:length(rv.custom$errMsgCalibrationPlot)) {
+      for (i in seq_along(rv.custom$errMsgCalibrationPlot)) {
         txt <- paste(txt, "errMsgCalibrationPlot: ",
                      rv.custom$errMsgCalibrationPlot[i], "<br>",
                      sep = "")
@@ -1362,6 +1360,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           uiOutput(ns('FDRcontrol_plot_contrast_ui')),
           uiOutput(ns('FDRcontrol_plot_cluster_ui')),
           uiOutput(ns('FDRcontrol_plot_aggreg_ui')),
+          downloadButton(ns("FDRcontrol_download_SelectedItems_UI"),
+                         "Selected final results (Excel file)", class = "btn-info"),
           tabsetPanel(
             id = ns("hidden_tabs"),
             type = "hidden",
@@ -1449,7 +1449,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
             if(rv.widgets$FDRcontrol_cluster_plot_type == "Fixed"){
               plotOutput(ns('FDRcontrol_plot_cluster_plot_mult'))
             } else {
-              highcharter::highchartOutput(ns("FDRcontrol_plot_cluster_plot_unique"))
+              plotly::plotlyOutput(ns("FDRcontrol_plot_cluster_plot_unique"))
             }),
           column(width = 4,
             uiOutput(ns('FDRcontrol_plot_cluster_param')))
@@ -1535,7 +1535,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       par(mfrow = c(1,1))
     })
     
-    output$FDRcontrol_plot_cluster_plot_unique <- highcharter::renderHighchart({
+    output$FDRcontrol_plot_cluster_plot_unique <- plotly::renderPlotly({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Cluster")
       req(Build_pval_table()$isDifferential)
@@ -1550,7 +1550,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
 
       df_cluster <- df[df$cluster == rv.widgets$FDRcontrol_cluster_plot_clust, ]
 
-      series_list <- lapply(1:nrow(df_cluster), function(i) {
+      series_list <- lapply(seq_len(nrow(df_cluster)), function(i) {
         flag_value <- df_cluster$flag[i]
         list(
           name = rownames(df_cluster)[i],
@@ -1581,7 +1581,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
                         if(rv.widgets$FDRcontrol_aggreg_plot_type == "Fixed"){
                           plotOutput(ns('FDRcontrol_plot_aggreg_plot_volcano_base'), height = "600px")
                         } else {
-                          highcharter::highchartOutput(ns("FDRcontrol_plot_aggreg_plot_volcano_highchart"), height = "600px")
+                          plotly::plotlyOutput(ns("FDRcontrol_plot_aggreg_plot_volcano_highchart"), height = "600px")
                         }),
                  column(width = 4,
                         uiOutput(ns("FDR_nbSelectedItems_ui")),
@@ -1611,7 +1611,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       )
     })
     
-    output$FDRcontrol_plot_aggreg_plot_volcano_highchart <- highcharter::renderHighchart({
+    output$FDRcontrol_plot_aggreg_plot_volcano_highchart <- plotly::renderPlotly({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Aggregation")
       req(rv.widgets$FDRcontrol_aggreg_plot_type == "Interactive")
@@ -1951,14 +1951,6 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       
       wb
     })
-    
-    output$FDR_download_SelectedItems_UI <- downloadHandler(
-      filename = function() {rv.custom$filename},
-      content = function(fname) {
-        wb <- BuildPairwiseComp_wb()
-        openxlsx::saveWorkbook(wb, file = fname, overwrite = TRUE)
-      }
-    )
 
     Get_FDR <- reactive({
       req(rv.custom$FDRcontrol_thpval)
@@ -2042,7 +2034,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         if (length(upItems_pushepval) != 0){
           pval_pushfc <- pval_pushfc[-upItems_pushepval]
         }
-        rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+        rv.custom$adjusted_pvalues <- DaparToolshed::diffAnaComputeAdjustedPValues(
           pval_pushfc,
           GetCalibrationMethod())
         if (length(upItems_pushepval) != 0){
@@ -2057,7 +2049,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         
         upItems_pval <- which(-log10(.pval) >= rv.custom$FDRcontrol_thpval)
         
-        rv.custom$adjusted_pvalues <- diffAnaComputeAdjustedPValues(
+        rv.custom$adjusted_pvalues <- DaparToolshed::diffAnaComputeAdjustedPValues(
           .pval,
           GetCalibrationMethod())
         pval_table[, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
@@ -2152,6 +2144,14 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       )
     })
     
+    output$FDRcontrol_download_SelectedItems_UI <- downloadHandler(
+      
+      filename = function() {paste0("anaDiff_", rv.custom$comparison, ".xlsx")},
+      content = function(fname) {
+        wb <- BuildPairwiseComp_wb()
+        openxlsx::saveWorkbook(wb, file = fname, overwrite = TRUE)
+      }
+    )
     
     observeEvent(input$SELECT_INPUT, {
       if (input$SELECT_INPUT %% 2 == 1) 
@@ -2227,7 +2227,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
               tmp
             })
             pvaltable <- do.call(cbind, listpvaltable)
-            pvaltable <- cbind(id[1:nrow(pvaltable)], pvaltable)
+            pvaltable <- cbind(id[seq_len(nrow(pvaltable))], pvaltable)
             
             DaparToolshed::DifferentialAnalysis(rv$dataIn[[length(rv$dataIn)]]) <- pvaltable
             

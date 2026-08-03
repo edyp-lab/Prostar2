@@ -2,20 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{GetHistory}
 \alias{GetHistory}
-\title{Get the history of an assay.}
+\title{Get the history of an assay}
 \usage{
 GetHistory(dataIn, x)
 }
 \arguments{
-\item{dataIn}{An instance of the \code{SummarizedExperiment} class}
+\item{dataIn}{An instance of \code{MultiAssayExperiment} class}
 
-\item{x}{A \code{character} which is the name of an assay in the dataIn}
+\item{x}{The name of a slot in the object}
 }
 \value{
 A \code{data.frame()}
 }
 \description{
-Get the history of an assay.
+Get the history of an assay
 }
 \examples{
 NULL

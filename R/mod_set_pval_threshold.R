@@ -3,12 +3,11 @@
 #'
 #' @param id A `charcater()` for the shiny module id
 #' @param pval_init xxx
-#' @param fdr xxx
 #' @param remoteReset A `logical(1)` which acts as a remote command to reset
 #' the module to its default values. Default is FALSE.
 #' @param is.enabled xxx
 #'
-#'
+#' @return NA
 #'
 #' @name mod_set_pval_threshold
 #'
@@ -227,7 +226,7 @@ mod_set_pval_threshold <- function(
       remoteReset = reactive({input$SimulateReset})
     )
     
-    observe({print(rv$logpval())})
+    observe({message(rv$logpval())})
     
   }
   

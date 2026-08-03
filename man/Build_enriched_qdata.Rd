@@ -11,6 +11,13 @@ Build_enriched_qdata(obj.se, digits = NULL)
 
 \item{digits}{xxx}
 }
+\value{
+NA
+}
 \description{
 xxxx
+}
+\examples{
+NULL
+
 }

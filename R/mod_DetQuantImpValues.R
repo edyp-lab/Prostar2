@@ -16,6 +16,8 @@
 #' the module to its default values. Default is FALSE.
 #' @param is.enabled xxx
 #'
+#' @return NA
+#' 
 #' @name mod_DetQuantImpValues
 #' 
 #' @importFrom DT DTOutput renderDT datatable
@@ -56,12 +58,12 @@ mod_DetQuantImpValues_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pkgs.require('omXplore')
+    pkgs_require('omXplore')
     
     output$detQuantValues_DT <- DT::renderDT(server = TRUE, {
       req(dataIn())
 
-      values <- getQuantile4Imp(
+      values <- DaparToolshed::getQuantile4Imp(
         SummarizedExperiment::assay(dataIn()),
         quant() / 100, factor()
       )
@@ -78,7 +80,6 @@ mod_DetQuantImpValues_server <- function(
 }
 
 
-
 #' @rdname mod_DetQuantImpValues
 #' @export
 #'
@@ -90,7 +91,7 @@ mod_DetQuantImpValues <- function(obj) {
     mod_DetQuantImpValues_server(
       id = "Title",
       dataIn = reactive({
-        dataIn
+        obj
       })
     )
   }

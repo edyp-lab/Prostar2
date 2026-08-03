@@ -93,9 +93,9 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
 ){
   
   requireNamespace('DaparToolshed')
-  pkgs.require('magrittr')
+  pkgs_require('magrittr')
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -153,7 +153,7 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pkgs.require('grDevices')
+    pkgs_require('grDevices')
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
@@ -164,7 +164,7 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     ###########################################################################-
     #
@@ -411,13 +411,13 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
         tagList(
           uiOutput(ns('Foldchange_warning_conditions_ui')),
           uiOutput(ns("Foldchange_swapConds_ui")),
-          highcharter::highchartOutput(ns("Foldchange_Plot")),
-          highcharter::highchartOutput(ns("FoldchangeStacked_Plot"))
+          plotly::plotlyOutput(ns("Foldchange_Plot")),
+          plotly::plotlyOutput(ns("FoldchangeStacked_Plot"))
         )
       }
     })
     
-    output$Foldchange_Plot <- highcharter::renderHighchart({
+    output$Foldchange_Plot <- plotly::renderPlotly({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
       
@@ -430,7 +430,7 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
       })
     })
     
-    output$FoldchangeStacked_Plot <- highcharter::renderHighchart({
+    output$FoldchangeStacked_Plot <- plotly::renderPlotly({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
       
@@ -870,7 +870,7 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
         ),
         content = tagList(
-          highcharter::highchartOutput(ns("histPValue")),
+          plotly::plotlyOutput(ns("histPValue")),
           imageOutput(ns("calibrationPlotAll"), height = "800px"),
           imageOutput(ns("calibrationPlot"), height = "400px")
           # p(tags$strong(
@@ -959,7 +959,7 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
 
     })
 
-    output$histPValue <- highcharter::renderHighchart({
+    output$histPValue <- plotly::renderPlotly({
       histPValue()
     })
 

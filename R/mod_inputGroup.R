@@ -212,7 +212,7 @@ mod_inputGroup <- function() {
 
   server <- function(input, output, session) {
     file <- system.file("extdata/Exp1_R25_prot.txt", package = "DaparToolshedData")
-    df <- read.csv(file, header = TRUE, sep = "\t", as.is = T)
+    df <- read.csv(file, header = TRUE, sep = "\t", as.is = TRUE)
 
     
     rv <- reactiveValues(
@@ -224,7 +224,7 @@ mod_inputGroup <- function() {
     )
     #
     observe({
-      print(rv$res())
+      message(rv$res())
     })
   }
 

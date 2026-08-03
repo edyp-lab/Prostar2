@@ -72,7 +72,7 @@ library(shiny)
 library(DT)
 data(Exp1_R25_prot, package = "DaparToolshedData")
 obj <- Exp1_R25_prot[[1]]
-indices <- 1:5
+indices <- seq_len(5)
 operation <- "delete"
 shiny::runApp(mod_filtering_example(obj, indices, operation))
 }

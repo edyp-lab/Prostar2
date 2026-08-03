@@ -45,6 +45,9 @@ the module to its default values. Default is FALSE.}
 
 \item{obj}{xxx}
 }
+\value{
+NA
+}
 \description{
 A shiny Module.
 }

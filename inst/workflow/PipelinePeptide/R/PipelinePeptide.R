@@ -84,7 +84,7 @@ PipelinePeptide_server <- function(id,
   path = NULL
   ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Contrary to the simple workflow, there is no widget in this module
   # because all the widgets are provided by the simple workflows.
@@ -106,7 +106,7 @@ PipelinePeptide_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

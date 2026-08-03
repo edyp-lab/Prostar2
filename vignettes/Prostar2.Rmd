@@ -83,6 +83,10 @@ Lorsque l'on lance un pipeline, l'interface est un peu plus complète que pour u
   * xxxxx
   * xxxx
   * xxxx
-  
 
 
+# Session information {-}
+
+```{r sessioninfo}
+sessionInfo()
+```

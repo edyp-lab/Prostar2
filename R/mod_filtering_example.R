@@ -27,7 +27,7 @@
 #' library(DT)
 #' data(Exp1_R25_prot, package = "DaparToolshedData")
 #' obj <- Exp1_R25_prot[[1]]
-#' indices <- 1:5
+#' indices <- seq_len(5)
 #' operation <- "delete"
 #' shiny::runApp(mod_filtering_example(obj, indices, operation))
 #' }
@@ -44,6 +44,7 @@ NULL
 #' @importFrom DT dataTableOutput renderDT datatable formatStyle styleEqual
 #' @importFrom stats setNames
 #' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
+#' @importFrom omXplore Build_enriched_qdata custom_metacell_colors
 #' @export
 #'
 mod_filtering_example_ui <- function(id) {
@@ -74,7 +75,7 @@ mod_filtering_example_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pkgs.require('magrittr')
+    pkgs_require('magrittr')
 
 
     observeEvent(req(showModal()), {
@@ -109,13 +110,13 @@ mod_filtering_example_server <- function(
           maxColorValue = 255
         )
       }
-      sapply(1:ncol(rgbmat), ProcessColumn)
+      vapply(seq_len(ncol(rgbmat)), ProcessColumn, FUN.VALUE = character(1))
     }
 
 
 
     DarkenColors <- function(ColorsHex) {
-      pkgs.require('grDevices')
+      pkgs_require('grDevices')
       # Convert to rgb
       # This is the step where we get the matrix
       ColorsRGB <- grDevices::col2rgb(ColorsHex)
@@ -158,7 +159,7 @@ mod_filtering_example_server <- function(
       # Darken lines that will be filtered
       if (!is.null(indices())) {
         if (operation() == "keep") {
-          index2darken <- (1:nrow(dataIn()))[-indices()]
+          index2darken <- (seq_len(nrow(dataIn())))[-indices()]
         } else if (operation() == "delete") {
           index2darken <- indices()
         }
@@ -226,7 +227,7 @@ mod_filtering_example <- function(
     
     rv.custom <- reactiveValues(
       showmodal = NULL,
-      indices = 1:4
+      indices = seq_len(4)
     )
     
     observeEvent(input$Preview_btn, {

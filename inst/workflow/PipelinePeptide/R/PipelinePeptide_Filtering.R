@@ -85,7 +85,7 @@ PipelinePeptide_Filtering_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   # Define default selected values for widgets
   # This is only for simple workflows
@@ -179,7 +179,7 @@ PipelinePeptide_Filtering_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     
     ###########################################################################-
@@ -261,7 +261,6 @@ PipelinePeptide_Filtering_server <- function(id,
     })
     
     
-    
     ###########################################################################-
     #
     #------------------------CELL METADATA FILTERING----------------------------
@@ -290,7 +289,7 @@ PipelinePeptide_Filtering_server <- function(id,
       rv.custom$funFilter <- mod_qMetacell_FunctionFilter_Generator_server(
         id = "query",
         dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
-        conds = reactive({DaparToolshed::design.qf(rv.custom$dataIn1)$Condition}),
+        conds = reactive({DaparToolshed::design_qf(rv.custom$dataIn1)$Condition}),
         keep_vs_remove = reactive({stats::setNames(c('Push p-value', 'Keep original p-value'), nm = c("delete", "keep"))}),
         val_vs_percent = reactive({stats::setNames(nm = c("Count", "Percentage"))}),
         operator = reactive({stats::setNames(nm = DaparToolshed::SymFilteringOperators())}),
@@ -392,7 +391,7 @@ PipelinePeptide_Filtering_server <- function(id,
         id = "plots",
         dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
-        group = reactive({DaparToolshed::design.qf(rv.custom$dataIn1)$Condition})
+        group = reactive({DaparToolshed::design_qf(rv.custom$dataIn1)$Condition})
       )
       
       
@@ -641,7 +640,7 @@ PipelinePeptide_Filtering_server <- function(id,
       namesafter <- rownames(assayafter)
       
       
-      indices <- 1:length(namesafter)
+      indices <- seq_along(namesafter)
       diff <- setdiff(namesbefore, namesafter)
       indices <- match(diff, namesbefore)
       indices
@@ -782,6 +781,7 @@ PipelinePeptide_Filtering_server <- function(id,
       })
     })
     
+    
     ###########################################################################-
     #
     #-------------------------------------SAVE----------------------------------
@@ -822,7 +822,7 @@ PipelinePeptide_Filtering_server <- function(id,
           names(rv.custom$dataIn2)[length(rv.custom$dataIn2)] <- 'Filtering'
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelinePeptide'
           
-          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
@@ -832,7 +832,7 @@ PipelinePeptide_Filtering_server <- function(id,
       })
     })
     
-    # <<< end ------------------------------------------------------------------
+    ####### _END_ -----
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

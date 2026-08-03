@@ -4,26 +4,28 @@
 \alias{Add2History}
 \title{Get the last validated step before current position.}
 \usage{
-Add2History(history, process, step.name, param.name, value)
+Add2History(history, step, substep, param.name, value)
 }
 \arguments{
-\item{history}{xxx}
+\item{history}{A \code{data.frame()}}
 
-\item{process}{xxx}
+\item{step}{A \code{character()}}
 
-\item{step.name}{xxx}
+\item{substep}{A \code{character()}}
 
-\item{param.name}{xxx}
+\item{param.name}{A \code{character()}}
 
-\item{value}{xxx}
+\item{value}{The value corresponding to the param.name}
 }
 \value{
-A \code{integer(1)}
+A \code{data.frame()}
 }
 \description{
-This function returns the indice of the last validated step before
-the current step.
+This function returns the indice of the last validated step
+before the current step.
 }
 \examples{
-NULL
+history <- InitializeHistory()
+Add2History(history, "Example step", "First sub-step", "my param", "THE value")
+
 }

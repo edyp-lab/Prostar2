@@ -87,7 +87,7 @@ PipelinePeptideSC_Aggregation_server <- function(id,
   btnEvents = reactive({NULL})
 ){
   
-  pkgs.require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
   widgets.default.values <- list(
     Aggregation_includeSharedPeptides = "Yes_Iterative_Redistribution",
@@ -129,7 +129,7 @@ PipelinePeptideSC_Aggregation_server <- function(id,
     )
     
     eval(str2expression(core.code))
-    add.resourcePath()
+    add_resourcePath()
     
     ###########################################################################-
     #

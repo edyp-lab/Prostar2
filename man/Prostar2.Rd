@@ -20,6 +20,9 @@ Prostar2(
 
 \item{verbose}{xxx}
 }
+\value{
+NA
+}
 \description{
 xxxx
 }
