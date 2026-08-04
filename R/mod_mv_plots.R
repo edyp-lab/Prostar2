@@ -73,9 +73,7 @@ mod_mv_plots_server <- function(
     mytitle = reactive({
       NULL
     }),
-    pal = reactive({
-      NULL
-    }),
+    pal = NULL,
     pattern = reactive({
       NULL
     }),
@@ -88,7 +86,7 @@ mod_mv_plots_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-  pkgs_require('grDevices')
+  #pkgs_require('grDevices')
     rv <- reactiveValues(
       grp = NULL,
       mytitle = NULL,
@@ -111,10 +109,11 @@ mod_mv_plots_server <- function(
         rv$mytitle <- mytitle()
       }
 
-      if (is.null(grDevices::palette())) {
+      #if (is.null(grDevices::palette())) {
+      if (is.null(pal)) {
         rv$palette <- GetColorsForConditions(grp())
       } else {
-        rv$palette <- grDevices::palette()
+        rv$palette <- pal #grDevices::palette()
       }
 
       rv$pattern <- pattern()
@@ -124,7 +123,7 @@ mod_mv_plots_server <- function(
       req(data())
       req(rv$pattern)
       req(rv$grp)
-
+      
       hc_mvTypePlot2(
         obj = data(),
         group = rv$grp,

@@ -254,10 +254,12 @@ PipelineProtein_Imputation_server <- function(id,
           uiOutput(ns("POVImputation_detQuant_UI"))
         ),
         content = div(
+          tags$style(HTML(".mv-container img {margin: 0 !important;}")),
           uiOutput(ns('POVImputation_DT_UI')),
           div(style = "display: flex; margin-top: 20px;",
             uiOutput(ns("POVImputation_showDetQuantValues")),
-            uiOutput(ns("mvplots_ui"))
+            div(class = "mv-container",
+                uiOutput(ns("mvplots_ui")))
           )
         )
       )
@@ -327,11 +329,13 @@ PipelineProtein_Imputation_server <- function(id,
     observe({
       req(rv.custom$dataIn1)
       
+      pal <- DaparToolshed::GetColorsForConditions(unique(DaparToolshed::design_qf(rv.custom$dataIn1)$Condition), 
+                                            DaparToolshed::ExtendPalette(length(unique(DaparToolshed::design_qf(rv.custom$dataIn1)$Condition))))
       mod_mv_plots_server("POVImputation_mvplots",
         data = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
         grp = reactive({omXplore::get_group(rv.custom$dataIn1)}),
         mytitle = reactive({"POV imputation"}),
-        pal = reactive({NULL}),
+        pal = pal,
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })
@@ -487,6 +491,7 @@ PipelineProtein_Imputation_server <- function(id,
           }
         ),
         content = tagList(
+          tags$style(HTML(".mv-container img {margin: 0 !important;}")),
           uiOutput(ns("MECImputation_DT_UI")),
           uiOutput(ns("warningMECImputation")),
           uiOutput(ns("MECImputation_showDetQuantValues_ui")),
@@ -568,11 +573,13 @@ PipelineProtein_Imputation_server <- function(id,
     
     observe({
       req(rv.custom$dataIn2)
+      pal <- DaparToolshed::GetColorsForConditions(unique(DaparToolshed::design_qf(rv.custom$dataIn2)$Condition), 
+                                                   DaparToolshed::ExtendPalette(length(unique(DaparToolshed::design_qf(rv.custom$dataIn2)$Condition))))
       mod_mv_plots_server("MECImputation_mvplots",
         data = reactive({rv.custom$dataIn2[[length(rv.custom$dataIn2)]]}),
         grp = reactive({omXplore::get_group(rv.custom$dataIn2)}),
         mytitle = reactive({"MEC imputation"}),
-        pal = reactive({NULL}),
+        pal = pal,
         pattern = reactive({c("Missing", "Missing POV", "Missing MEC")})
       )
     })

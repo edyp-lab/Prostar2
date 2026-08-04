@@ -356,7 +356,9 @@ PipelineProtein_Filtering_server <- function(id,
         id = "plots",
         dataIn = reactive({rv.custom$dataIn1[[length(rv.custom$dataIn1)]]}),
         pattern = reactive({rv.custom$funFilter()$value$ll.pattern}),
-        group = reactive({DaparToolshed::design_qf(rv.custom$dataIn1)$Condition})
+        group = reactive({DaparToolshed::design_qf(rv.custom$dataIn1)$Condition}),
+        pal = DaparToolshed::GetColorsForConditions(unique(DaparToolshed::design_qf(rv.custom$dataIn1)$Condition), 
+                                                    DaparToolshed::ExtendPalette(length(unique(DaparToolshed::design_qf(rv.custom$dataIn1)$Condition))))
       )
       
       widget <- mod_ds_metacell_Histos_ui(ns("plots"))

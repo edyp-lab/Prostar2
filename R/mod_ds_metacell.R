@@ -76,9 +76,7 @@ mod_ds_metacell_Histos_server <- function(
     group = reactive({
       NULL
     }),
-    pal = reactive({
-      NULL
-    }),
+    pal = NULL,
     pattern = reactive({
       NULL
     }),
@@ -137,7 +135,7 @@ mod_ds_metacell_Histos_server <- function(
       tmp <- metacellHisto_HC(dataIn(),
         group = group(),
         pattern = rv$chooseTag,
-        pal = pal()
+        pal = pal
       )
       tmp
     })
@@ -170,7 +168,7 @@ mod_ds_metacell_Histos_server <- function(
       tmp <- metacellPerLinesHistoPerCondition_HC(dataIn(),
         group = group(),
         pattern = rv$chooseTag,
-        pal = pal()
+        pal = pal
       )
       # future(createPNGFromWidget(tmp,pattern))
       # })

@@ -336,7 +336,8 @@ PipelineProtein_Normalization_server <- function(id,
       i = reactive({length(rv.custom$dataIn)}),
       track.indices = reactive({selectProt()$indices}),
       remoteReset = reactive({remoteReset()}),
-      is.enabled = reactive({rv$steps.enabled["Normalization"]})
+      is.enabled = reactive({rv$steps.enabled["Normalization"]}),
+      pal = DaparToolshed::ExtendPalette(length(unique(omXplore::get_group(rv.custom$dataIn))))
     )
     
     omXplore::omXplore_density_server("densityPlot_Norm", 
@@ -375,13 +376,13 @@ PipelineProtein_Normalization_server <- function(id,
         .n <- floor(0.02 * nrow(obj1))
         .subset <- seq(nrow(obj1))
       }
-      
       DaparToolshed::compareNormalizationD_HC(
         qDataBefore = SummarizedExperiment::assay(rv.custom$dataIn, norm_idx),
         qDataAfter = SummarizedExperiment::assay(rv.custom$dataIn, norm_idx-1),
         keyId = SummarizedExperiment::rowData(rv.custom$dataIn[[norm_idx]])[, protId],
         conds = DaparToolshed::design_qf(rv.custom$dataIn)$Condition,
-        pal = NULL,
+        pal = DaparToolshed::ExtendPalette(
+          length(unique(DaparToolshed::design_qf(rv.custom$dataIn)$Condition))),
         # Consider only 2% of the entire dataset
         n = .n,
         subset.view = .subset

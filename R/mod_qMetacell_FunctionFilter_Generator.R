@@ -95,7 +95,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     dataIn = reactive({NULL}),
     conds,
     keep_vs_remove = reactive({setNames(nm = c("delete", "keep"))}),
-    val_vs_percent = reactive({setNames(nm = c("count", "percentage"))}),
+    val_vs_percent = reactive({setNames(nm = c("Count", "Percentage"))}),
     operator = reactive({setNames(nm = DaparToolshed::SymFilteringOperators())}),
     remoteReset = reactive({0}),
     is.enabled = reactive({TRUE})) {
@@ -433,10 +433,11 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           req(rv.widgets$operator != "None")
           req(th)
           
+          percent <- (rv.widgets$valPercent == "Percentage")
           DaparToolshed::FunctionFilter("qMetacellWholeMatrix",
           cmd = rv.widgets$keep_vs_remove,
           pattern = rv.widgets$tag,
-          percent = rv.widgets$valPercent,
+          percent = percent,
           th = th,
           operator = rv.widgets$operator
         )
@@ -448,12 +449,13 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           req(rv.widgets$valPercent)
           req(conds())
           
+          percent <- (rv.widgets$valPercent == "Percentage")
           DaparToolshed::FunctionFilter("qMetacellOnConditions",
           cmd = rv.widgets$keep_vs_remove,
           mode = rv.widgets$scope,
           pattern = rv.widgets$tag,
           conds = conds(),
-          percent = rv.widgets$valPercent,
+          percent = percent,
           th = th,
           operator = rv.widgets$operator
         )
@@ -465,12 +467,13 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           req(rv.widgets$valPercent)
           req(conds())
           
+          percent <- (rv.widgets$valPercent == "Percentage")
           DaparToolshed::FunctionFilter("qMetacellOnConditions",
           cmd = rv.widgets$keep_vs_remove,
           mode = rv.widgets$scope,
           pattern = rv.widgets$tag,
           conds = conds(),
-          percent = rv.widgets$valPercent,
+          percent = percent,
           th = th,
           operator = rv.widgets$operator
         )
