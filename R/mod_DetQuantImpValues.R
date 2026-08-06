@@ -40,7 +40,8 @@ NULL
 mod_DetQuantImpValues_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h5("The missing values will be imputed by the following values :"),
+    p(style = "margin: 10px 0px 0px 15px; font-size: 20px;", 
+      "The missing values will be imputed by the following values :"),
     DT::DTOutput(ns("detQuantValues_DT"))
   )
 }

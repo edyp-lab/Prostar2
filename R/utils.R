@@ -213,3 +213,39 @@ Build_enriched_qdata <- function(obj.se, digits = NULL) {
   }
   return(test.table)
 }
+
+
+#' @title
+#' xxxx
+#'
+#' @description
+#' xxxx
+#'
+#' @param value xx
+#' @param expected_type xxx
+#' 
+#' @return NA
+#' 
+#' @examples
+#' NULL
+#' 
+#' @export
+#'
+
+Extract_Value <- function(value, expected_type = c("numeric", "character", "logical", "factor", "integer")) {
+  expected_type <- match.arg(expected_type)
+  
+  tryCatch({
+    switch(
+      expected_type,
+      numeric = as.numeric(value),
+      character = as.character(value),
+      logical = as.logical(value),
+      factor = as.factor(value),
+      integer = as.integer(value)
+    )
+  },
+  warning = function(w) NA,
+  error = function(e) NA
+  )
+}

@@ -136,43 +136,46 @@ mod_mv_plots_server <- function(
 
 
 
-    output$WarnForImageNA <- renderUI({
-      req(!is.null(wrapperMVImage(data(), rv$grp)))
-      wellPanel(
-        p(
-          style = "color: red;",
-          "The 'MEC plot' cannot be showed as the dataset contains empty lines."
-        )
-      )
-      # tryCatch(
-      #     {
-      #         wrapperMVImage(data())
-      #     },
-      #     warning = function(w) {
-      #         #p(conditionMessage(w))
-      #         p('toto')
-      #     },
-      #     error = function(e) {
-      #         #p(conditionMessage(e))
-      #         p('toto')
-      #     },
-      #     finally = {
-      #         # cleanup-code
-      #     }
-      # )
-    })
+    # output$WarnForImageNA <- renderUI({
+    #   req(!is.null(wrapperMVImage(data(), rv$grp)))
+    #   wellPanel(
+    #     p(
+    #       style = "color: red;",
+    #       "The 'MEC plot' cannot be showed as the dataset contains empty lines."
+    #     )
+    #   )
+    #   # tryCatch(
+    #   #     {
+    #   #         wrapperMVImage(data())
+    #   #     },
+    #   #     warning = function(w) {
+    #   #         #p(conditionMessage(w))
+    #   #         p('toto')
+    #   #     },
+    #   #     error = function(e) {
+    #   #         #p(conditionMessage(e))
+    #   #         p('toto')
+    #   #     },
+    #   #     finally = {
+    #   #         # cleanup-code
+    #   #     }
+    #   # )
+    # })
 
-    output$plot_showImageNA <- renderImage(
-      {
+    output$plot_showImageNA <- renderImage({
+      req(data())
+      req(length(which(DaparToolshed::qMetacell(data()) == "Missing MEC")) != 0)
         pkgs_require('grDevices')
         # A temp file to save the output. It will be deleted after
         # renderImage
         # sends it, because deleteFile=TRUE.
         outfile <- tempfile(fileext = ".png")
-        grDevices::png(outfile)
-        wrapperMVImage(obj = data(), group = rv$grp)
-        grDevices::dev.off()
-
+        withProgress(message = "Making plot", value = 100, {
+          grDevices::png(outfile)
+          tmp <- wrapperMVImage(obj = data(), group = rv$grp)
+          grDevices::dev.off()
+        })
+        tmp
         # Return a list
         list(
           src = outfile,

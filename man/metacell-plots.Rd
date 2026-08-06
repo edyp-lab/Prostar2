@@ -18,9 +18,7 @@ mod_ds_metacell_Histos_server(
   group = reactive({
      NULL
  }),
-  pal = reactive({
-     NULL
- }),
+  pal = NULL,
   pattern = reactive({
      NULL
  }),

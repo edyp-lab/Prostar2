@@ -3,6 +3,7 @@
 export(Add2History)
 export(BuildColorStyles)
 export(Build_enriched_qdata)
+export(Extract_Value)
 export(GetHistory)
 export(InitializeHistory)
 export(PrevNextBtnClass)

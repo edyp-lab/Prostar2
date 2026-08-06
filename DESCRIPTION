@@ -41,7 +41,8 @@ Imports:
     shinyjqui,
     BiocGenerics,
     pcaMethods,
-    Pirat
+    Pirat,
+    imp4p
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

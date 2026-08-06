@@ -107,8 +107,7 @@ PipelineProtein_DA_server <- function(id,
   pkgs_require('magrittr')
   
   pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
-  
-  
+
   # Define default selected values for widgets
   # This is only for simple workflows
   widgets.default.values <- list(
@@ -119,7 +118,6 @@ PipelineProtein_DA_server <- function(id,
     Pvaluecalibration_nBinsHistpval = 80,
     FDR_viewAdjPval = FALSE
   )
-  
   
   rv.custom.default.values <- list(
     result_open_dataset = reactive({NULL}),
@@ -174,11 +172,12 @@ PipelineProtein_DA_server <- function(id,
     )
     add_resourcePath()
     
-    # >>>
-    # >>> START ------------- Code for Description UI---------------
-    # >>> 
     
-    
+    ###########################################################################-
+    #
+    #-----------------------------DESCRIPTION-----------------------------------
+    #
+    ###########################################################################-
     output$Description <- renderUI({
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
@@ -189,7 +188,6 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
-        #timeline_process_ui(ns('Description_timeline')),
         content = tagList(
           if (file.exists(file))
             includeMarkdown(file)
@@ -200,6 +198,23 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
+    #### _sidebar -----
+    output$open_dataset_UI <- renderUI({
+      req(session$userData$runmode == 'process')
+      req(is.null(dataIn()))
+      req(NULL)
+      
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+      
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    })
+    
+    #### _content -----
     # output$Description_infos_dataset_UI <- renderUI({
     #   req(rv$dataIn)
     #   
@@ -211,14 +226,7 @@ PipelineProtein_DA_server <- function(id,
     #   infos_dataset_ui(id = ns("Description_infosdataset"))
     # })
     
-    # output$Description_btn_validate_UI <- renderUI({
-    #   widget <- actionButton(ns("Description_btn_validate"),
-    #     "Start",
-    #     class = "btn-success")
-    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled['Description'])
-    # })
-    
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
       req(dataIn())
@@ -261,9 +269,7 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    
-    
-    
+    ### func -----
     Get_Dataset_to_Analyze <- reactive({
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
       req(rv$dataIn)
@@ -308,13 +314,9 @@ PipelineProtein_DA_server <- function(id,
       datasetToAnalyze
     })
     
-    
-    
-    
     Get_Dataset_to_Analyze_pushPVAL <- reactive({
       rv$dataIn[[length(rv$dataIn)]]
     })
-    
     
     GetComparisons <- reactive({
       req(rv.widgets$Pairwisecomparison_Comparison != 'None')
@@ -322,41 +324,6 @@ PipelineProtein_DA_server <- function(id,
       req(rv.custom$Condition2)
       c(rv.custom$Condition1, rv.custom$Condition2)
     })
-    
-    
-    
-    # >>>
-    # >>> START ------------- Code for step 1 UI---------------
-    # >>> 
-    
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
-    output$Pairwisecomparison <- renderUI({
-      shinyjs::useShinyjs()
-      
-      .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
-      
-      
-      MagellanNTK::process_layout(session,
-        ns = NS(id),
-        sidebar = tagList(
-          #timeline_process_ui(ns('Pairwisecomparison_timeline')),
-          tags$div(id = ns('div_Pairwisecomparison_Comparison_UI'),
-            uiOutput(ns('Pairwisecomparison_Comparison_UI')),
-            uiOutput(ns("Pairwisecomparison_pushpval_UI"))
-          )
-        ),
-        content = div(id = ns('div_Pairwisecomparison_tooltipInfo_UI'),
-          div(style = "display: inline-block; vertical-align: top;", 
-            uiOutput(ns("Pairwisecomparison_volcano_UI"))),
-          div(style = "display: inline-block; vertical-align: top;", 
-            uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
-        )
-      )
-      
-      
-      
-    })
-    
     
     Get_Pairwisecomparison_Names <- reactive({
       req(rv.custom$res_AllPairwiseComparisons)
@@ -369,7 +336,65 @@ PipelineProtein_DA_server <- function(id,
       .names
     })
     
+    GetFiltersScope <- function(){
+      c("Whole Line" = "WholeLine",
+        "Whole matrix" = "WholeMatrix",
+        "For every condition" = "AllCond",
+        "At least one condition" = "AtLeastOneCond"
+      )
+    }
     
+    not_a_numeric <- function(input) {
+      if (is.na(as.numeric(input))) {
+        "Please input a number"
+      } else {
+        NULL
+      }
+    }
+    
+    GetCalibrationMethod <- reactive({
+      req(rv.widgets$Pvaluecalibration_numericValCalibration)
+      req(rv.widgets$Pvaluecalibration_calibrationMethod != 'None')
+      .calibMethod <- NULL
+      if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
+        .calibMethod <- 1
+      } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value") {
+        .calibMethod <- as.numeric(rv.widgets$Pvaluecalibration_numericValCalibration)
+      } else {
+        .calibMethod <- rv.widgets$Pvaluecalibration_calibrationMethod
+      }
+      .calibMethod
+    })
+    
+    
+    ###########################################################################-
+    #
+    #--------------------------PAIRWISE COMPARISON------------------------------
+    #
+    ###########################################################################-
+    output$Pairwisecomparison <- renderUI({
+      shinyjs::useShinyjs()
+      
+      .style <- "display:inline-block; vertical-align: top; padding-right: 60px"
+      
+      MagellanNTK::process_layout(session,
+        ns = NS(id),
+        sidebar = tagList(
+          tags$div(id = ns('div_Pairwisecomparison_Comparison_UI'),
+            uiOutput(ns('Pairwisecomparison_Comparison_UI')),
+            uiOutput(ns("Pairwisecomparison_pushpval_UI"))
+          )
+        ),
+        content = div(id = ns('div_Pairwisecomparison_tooltipInfo_UI'),
+          div(style = "display: inline-block; vertical-align: top;", 
+            uiOutput(ns("Pairwisecomparison_volcano_UI"))),
+          div(style = "display: inline-block; vertical-align: top;", 
+            uiOutput(ns("Pairwisecomparison_tooltipInfo_UI")))
+        )
+      )
+    })
+    
+    #### _sidebar -----
     output$Pairwisecomparison_Comparison_UI <- renderUI({
       req(rv.custom$res_AllPairwiseComparisons)
       
@@ -380,7 +405,24 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
     })
     
+    output$Pairwisecomparison_pushpval_UI <- renderUI({
+      req(rv.widgets$Pairwisecomparison_Comparison != "None")
+      
+      widget <- tagList(
+        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
+        Prostar2::mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
+    })
     
+    #### _content -----
+    output$Pairwisecomparison_volcano_UI <- renderUI({
+      widget <- div(id = ns('div_Pairwisecomparison_volcano'),
+                    style = "height: 500px;",
+                    mod_volcanoplot_ui(ns("Pairwisecomparison_volcano"))
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
+    })
     
     Prostar2::mod_volcanoplot_server(
       id = "Pairwisecomparison_volcano",
@@ -391,16 +433,6 @@ PipelineProtein_DA_server <- function(id,
       tooltip = reactive({rv.custom$Pairwisecomparison_tooltipInfo}),
       remoteReset = reactive({remoteReset()})
     )
-
-    
-    output$Pairwisecomparison_volcano_UI <- renderUI({
-      widget <- div(id = ns('div_Pairwisecomparison_volcano'),
-        style = "height: 500px;",
-        mod_volcanoplot_ui(ns("Pairwisecomparison_volcano"))
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
-    })
-    
     
     output$Pairwisecomparison_tooltipInfo_UI <- renderUI({
       req(rv$dataIn)
@@ -417,24 +449,27 @@ PipelineProtein_DA_server <- function(id,
           width = "300px", 
           size = 5
         ),
-        actionButton(ns("Pairwisecomparison_validTooltipInfo"),  "Validate tooltip choice", 
-          class = "btn-info")
+        actionButton(ns("Pairwisecomparison_validTooltipInfo"),  
+                     "Validate tooltip choice", 
+                     class = "btn-info")
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
     })
     
-    
-    
     observeEvent(input$Pairwisecomparison_validTooltipInfo, {
       rv.custom$Pairwisecomparison_tooltipInfo <- rv.widgets$Pairwisecomparison_tooltipInfo
     })
+    
+    
+    
+    
+    
     
     MagellanNTK::mod_popover_for_help_server("modulePopover_volcanoTooltip",
       title = "Tooltip",
       content = "Infos to be displayed in the tooltip of volcanoplot"
     )
-    
     
     MagellanNTK::mod_popover_for_help_server("modulePopover_pushPVal",
       title = h3("Push p-value"),
@@ -459,13 +494,9 @@ PipelineProtein_DA_server <- function(id,
     )
     
     
-    GetFiltersScope <- function(){
-      c("Whole Line" = "WholeLine",
-        "Whole matrix" = "WholeMatrix",
-        "For every condition" = "AllCond",
-        "At least one condition" = "AtLeastOneCond"
-      )
-    }
+    
+    
+
     
     observe({
       req(rv$steps.enabled["Pairwisecomparison"])
@@ -493,22 +524,10 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-    output$Pairwisecomparison_pushpval_UI <- renderUI({
-      req(rv.widgets$Pairwisecomparison_Comparison != "None")
-      
-      widget <- tagList(
-        MagellanNTK::mod_popover_for_help_ui(ns("modulePopover_pushPVal")),
-        Prostar2::mod_qMetacell_FunctionFilter_Generator_ui(ns("AnaDiff_query"))
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pairwisecomparison"])
-    })
-    
-    
     observeEvent(req(length(rv.custom$AnaDiff_indices()$value$ll.fun) > 0),{
       
       .ind <- unlist(rv.custom$AnaDiff_indices()$value$ll.indices)
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
-      
       
       if (length(.ind) > 1 && length(.ind) < nrow(Get_Dataset_to_Analyze())) {
         
@@ -517,44 +536,24 @@ PipelineProtein_DA_server <- function(id,
         else if (.cmd == 'keep')
           indices_to_push <- seq_len(nrow(Get_Dataset_to_Analyze()))[-(.ind)]
         
-        
         .pval <- paste0(rv.widgets$Pairwisecomparison_Comparison, '_pval')
         
         DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])[indices_to_push, .pval] <- 1.00000000001
         rv.custom$res_AllPairwiseComparisons <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
         #rv.custom$history <- MagellanNTK::Add2History(rv.custom$history, 'DA', 'Pairwisecomparison', 'Number of pushed values to 1', length(indices_to_push))
         
-        
         n <- length(rv.custom$resAnaDiff$P_Value)
         rv.custom$pushed <- seq(n)[indices_to_push]
         rv.custom$resAnaDiff$pushed <- length(indices_to_push)
         rv.custom$step1_query <- rv.custom$AnaDiff_indices()$value$ll.query
-        
       }
     })
     
-    
-    
-    MagellanNTK::mod_popover_for_help_server("modulePopover_keepLines",
-      title = "n values",
-      content = "Keep the lines which have at least n intensity values."
-    )
-    
-    not_a_numeric <- function(input) {
-      if (is.na(as.numeric(input))) {
-        "Please input a number"
-      } else {
-        NULL
-      }
-    }
-    
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      
       req(grepl('Pairwisecomparison', btnEvents()))
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
-        
         
         if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
           || is.null(rv$dataIn))
@@ -573,16 +572,16 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    # <<< END ------------- Code for step 1 UI---------------
-    
-    
-    # >>> START ------------- Code for step 2 UI---------------
+    ###########################################################################-
+    #
+    #--------------------------P-VALUE CALIBRATION------------------------------
+    #
+    ###########################################################################-
     output$Pvaluecalibration <- renderUI({
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-          # timeline_process_ui(ns('Pvaluecalibration_timeline')),
           uiOutput(ns('Pvaluecalibration_calibrationMethod_UI')),
           uiOutput(ns("Pvaluecalibration_numericValCalibration_UI")),
           uiOutput(ns("Pvaluecalibration_nBins_UI"))
@@ -602,13 +601,9 @@ PipelineProtein_DA_server <- function(id,
           )
         )
       )
-      
-      
-      
     })
     
-    
-    
+    #### _sidebar -----
     output$Pvaluecalibration_calibrationMethod_UI <- renderUI({
       calibMethod_Choices <- c(
         "Benjamini-Hochberg",
@@ -627,8 +622,6 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget,  rv$steps.enabled["Pvaluecalibration"])
     })
     
-    
-    
     output$Pvaluecalibration_numericValCalibration_UI <- renderUI({
       req(rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value")
       widget <- numericInput(ns("Pvaluecalibration_numericValCalibration"),
@@ -641,7 +634,6 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"] &&
           rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value")
     })
-    
     
     output$Pvaluecalibration_nBins_UI <- renderUI({
       req(rv.custom$resAnaDiff)
@@ -656,28 +648,25 @@ PipelineProtein_DA_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Pvaluecalibration"])
     })
     
-    
-    histPValue <- reactive({
-      req(rv.custom$resAnaDiff)
-      req(rv.custom$pi0)
-      req(rv.widgets$Pvaluecalibration_nBinsHistpval)
-      req(rv.custom$thlogfc)
+    #### _content -----
+    calibrationPlotAll <- reactive({
+      rv.custom$resAnaDiff
+      req(rv$dataIn)
       req(!is.na(rv.custom$thlogfc))
-      req(length(rv.custom$resAnaDiff$logFC) > 0)
-      
+      req(length(rv.custom$resAnaDiff$logFC) > 0) 
       
       m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-      )
+                                        pattern = c("Missing", "Missing POV", "Missing MEC"),
+                                        level = "peptide")
       req(length(which(m)) == 0)
+      
+      cond <- c(rv.custom$resAnaDiff$condition1, rv.custom$resAnaDiff$condition2)
       
       t <- NULL
       method <- NULL
       # t <- rv.custom$resAnaDiff$P_Value
       # t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
       # toDelete <- which(t == 1)
-      
       t <- rv.custom$resAnaDiff$P_Value
       toDelete <- which(t > 1)
       
@@ -685,43 +674,67 @@ PipelineProtein_DA_server <- function(id,
         t <- t[-toDelete]
       }
       
-      DaparToolshed::histPValue_HC(t,
-                                   bins = as.numeric(rv.widgets$Pvaluecalibration_nBinsHistpval),
-                                   pi0 = rv.custom$pi0)
-    })
-    
-    output$histPValue <- plotly::renderPlotly({
-      histPValue()
-    })
-    
-    
-    
-    
-    
-    
-    output$Pvaluecalibration_calibrationResults <- renderUI({
-      req(rv.custom$calibrationRes)
-      rv$dataIn
-      
-      txt <- paste("Non-DA protein proportion = ",
-        round(100 * rv.custom$calibrationRes$pi0, digits = 2), "%<br>",
-        "DA protein concentration = ",
-        round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2),
-        "%<br>",
-        "Uniformity underestimation = ",
-        rv.custom$calibrationRes$unif.under, "<br><br><hr>",
-        sep = ""
+      l <- NULL
+      result <- tryCatch(
+        {
+          l <- catchToList(DaparToolshed::wrapperCalibrationPlot(t, "ALL"))
+          .warns <- l$warnings[grep("Warning:", l$warnings)]
+          rv.custom$errMsgCalibrationPlotAll <- .warns
+        },
+        warning = function(w) {
+          shinyjs::info(paste("Calibration Plot All methods", ":",
+                              conditionMessage(w),
+                              sep = " "
+          ))
+        },
+        error = function(e) {
+          shinyjs::info(paste("Calibration Plot All methods", ":",
+                              conditionMessage(e),
+                              sep = " "
+          ))
+        },
+        finally = {
+          # cleanup-code
+        }
       )
-      
-      HTML(txt)
     })
     
+    output$calibrationPlotAll <- renderImage({
+      outfile <- tempfile(fileext = ".png")
+      
+      # Generate a png
+      grDevices::png(outfile, width = 600, height = 500)
+      calibrationPlotAll()
+      grDevices::dev.off()
+      
+      # Return a list
+      list(
+        src = outfile,
+        alt = "This is alternate text"
+      )
+    },
+    deleteFile = TRUE
+    )
     
+    output$errMsgCalibrationPlotAll <- renderUI({
+      rv.custom$errMsgCalibrationPlotAll
+      req(rv$dataIn)
+      req(!is.null(rv.custom$errMsgCalibrationPlotAll))
+      
+      txt <- NULL
+      for (i in seq_along(rv.custom$errMsgCalibrationPlotAll)) {
+        txt <- paste(txt, "errMsgCalibrationPlotAll:",
+                     rv.custom$errMsgCalibrationPlotAll[i], "<br>",
+                     sep = ""
+        )
+      }
+      
+      div(id = ns('div_errMsgCalibrationPlotAll'),
+          HTML(txt), style = "color:red")
+    })
     
     
     calibrationPlot <- reactive({
-      #req(rv.widgets$Pvaluecalibration_calibrationMethod != "None")
-      
       req(rv.custom$resAnaDiff)
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
@@ -742,7 +755,6 @@ PipelineProtein_DA_server <- function(id,
       if (length(toDelete) > 0) {
         t <- t[-toDelete]
       }
-      
       
       l <- NULL
       ll <- NULL
@@ -791,8 +803,7 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
-    output$calibrationPlot <- renderImage(
-      {
+    output$calibrationPlot <- renderImage({
         outfile <- tempfile(fileext = ".png")
         
         # Generate a png
@@ -808,8 +819,6 @@ PipelineProtein_DA_server <- function(id,
       },
       deleteFile = TRUE
     )
-    
-    
     
     output$errMsgCalibrationPlot <- renderUI({
       req(rv.custom$errMsgCalibrationPlot)
@@ -829,44 +838,31 @@ PipelineProtein_DA_server <- function(id,
     })
     
     
-    output$errMsgCalibrationPlotAll <- renderUI({
-      rv.custom$errMsgCalibrationPlotAll
-      req(rv$dataIn)
-      req(!is.null(rv.custom$errMsgCalibrationPlotAll))
-      
-      txt <- NULL
-      for (i in seq_along(rv.custom$errMsgCalibrationPlotAll)) {
-        txt <- paste(txt, "errMsgCalibrationPlotAll:",
-          rv.custom$errMsgCalibrationPlotAll[i], "<br>",
-          sep = ""
-        )
-      }
-      
-      div(id = ns('div_errMsgCalibrationPlotAll'),
-        HTML(txt), style = "color:red")
+    output$histPValue <- plotly::renderPlotly({
+      histPValue()
     })
     
-    
-    
-    calibrationPlotAll <- reactive({
-      
-      rv.custom$resAnaDiff
-      req(rv$dataIn)
+    histPValue <- reactive({
+      req(rv.custom$resAnaDiff)
+      req(rv.custom$pi0)
+      req(rv.widgets$Pvaluecalibration_nBinsHistpval)
+      req(rv.custom$thlogfc)
       req(!is.na(rv.custom$thlogfc))
-      req(length(rv.custom$resAnaDiff$logFC) > 0) 
+      req(length(rv.custom$resAnaDiff$logFC) > 0)
+      
       
       m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = "peptide")
+                                        pattern = c("Missing", "Missing POV", "Missing MEC"),
+                                        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+      )
       req(length(which(m)) == 0)
-      
-      cond <- c(rv.custom$resAnaDiff$condition1, rv.custom$resAnaDiff$condition2)
       
       t <- NULL
       method <- NULL
       # t <- rv.custom$resAnaDiff$P_Value
       # t <- t[which(abs(rv.custom$resAnaDiff$logFC) >= rv.custom$thlogfc)]
       # toDelete <- which(t == 1)
+      
       t <- rv.custom$resAnaDiff$P_Value
       toDelete <- which(t > 1)
       
@@ -874,72 +870,31 @@ PipelineProtein_DA_server <- function(id,
         t <- t[-toDelete]
       }
       
-      l <- NULL
-      result <- tryCatch(
-        {
-          l <- catchToList(DaparToolshed::wrapperCalibrationPlot(t, "ALL"))
-          .warns <- l$warnings[grep("Warning:", l$warnings)]
-          rv.custom$errMsgCalibrationPlotAll <- .warns
-        },
-        warning = function(w) {
-          shinyjs::info(paste("Calibration Plot All methods", ":",
-            conditionMessage(w),
-            sep = " "
-          ))
-        },
-        error = function(e) {
-          shinyjs::info(paste("Calibration Plot All methods", ":",
-            conditionMessage(e),
-            sep = " "
-          ))
-        },
-        finally = {
-          # cleanup-code
-        }
+      DaparToolshed::histPValue_HC(t,
+                                   bins = as.numeric(rv.widgets$Pvaluecalibration_nBinsHistpval),
+                                   pi0 = rv.custom$pi0)
+    })
+    
+    
+    output$Pvaluecalibration_calibrationResults <- renderUI({
+      req(rv.custom$calibrationRes)
+      rv$dataIn
+      
+      txt <- paste("Non-DA protein proportion = ",
+                   round(100 * rv.custom$calibrationRes$pi0, digits = 2), "%<br>",
+                   "DA protein concentration = ",
+                   round(100 * rv.custom$calibrationRes$h1.concentration, digits = 2),
+                   "%<br>",
+                   "Uniformity underestimation = ",
+                   rv.custom$calibrationRes$unif.under, "<br><br><hr>",
+                   sep = ""
       )
+      
+      HTML(txt)
     })
     
-    
-    output$calibrationPlotAll <- renderImage(
-      {
-        outfile <- tempfile(fileext = ".png")
-        
-        # Generate a png
-        grDevices::png(outfile, width = 600, height = 500)
-        calibrationPlotAll()
-        grDevices::dev.off()
-        
-        # Return a list
-        list(
-          src = outfile,
-          alt = "This is alternate text"
-        )
-      },
-      deleteFile = TRUE
-    )
-    
-    
-    GetCalibrationMethod <- reactive({
-      req(rv.widgets$Pvaluecalibration_numericValCalibration)
-      req(rv.widgets$Pvaluecalibration_calibrationMethod != 'None')
-      .calibMethod <- NULL
-      if (rv.widgets$Pvaluecalibration_calibrationMethod == "Benjamini-Hochberg") {
-        .calibMethod <- 1
-      } else if (rv.widgets$Pvaluecalibration_calibrationMethod == "numeric value") {
-        .calibMethod <- as.numeric(rv.widgets$Pvaluecalibration_numericValCalibration)
-      } else {
-        .calibMethod <- rv.widgets$Pvaluecalibration_calibrationMethod
-      }
-      .calibMethod
-      
-      
-      
-    })
-    
-    
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      
       req(grepl('Pvaluecalibration', btnEvents()))
       shiny::withProgress(message = paste0("Runninf P-value calibration", id), {
         shiny::incProgress(0.5)
@@ -947,14 +902,12 @@ PipelineProtein_DA_server <- function(id,
         if (is.null(rv$dataIn))
           shinyjs::info(btnVentsMasg)
         else {
-          
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
           
           if (!is.null(rv.custom$calibrationRes$pi0))
             rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'pi0', rv.custom$calibrationRes$pi0)
           
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'h1.concentration', rv.custom$calibrationRes$h1.concentration)
-          
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', rv.custom$calibrationRes$unif.under)
           
           if (!is.null(rv.custom$calibrationRes$pi0))
@@ -970,10 +923,12 @@ PipelineProtein_DA_server <- function(id,
       })
     })
     
-    # <<< END ------------- Code for step 2 UI---------------
-    
-    
-    # >>> START ------------- Code for step 2 UI---------------
+
+    ###########################################################################-
+    #
+    #----------------------------------FDR--------------------------------------
+    #
+    ###########################################################################-
     output$FDR <- renderUI({
       
       MagellanNTK::process_layout(session,
@@ -1006,6 +961,10 @@ PipelineProtein_DA_server <- function(id,
       )
     })
     
+    #### _sidebar -----
+    #### _content -----
+    
+    
     
     output$FDR_showHideDT_UI <- renderUI({
       widget <- actionButton(ns("SELECT_INPUT"), "Hide/Show table")
@@ -1020,8 +979,6 @@ PipelineProtein_DA_server <- function(id,
       else updateTabsetPanel(session, "hidden_tabs", 
         selected = paste0("panelNULL")
       )
-      
-      
     })
     
     
@@ -1070,12 +1027,9 @@ PipelineProtein_DA_server <- function(id,
     output$FDR_widgets_ui <- renderUI({
       widget <- tags$div(
         mod_set_pval_threshold_ui(ns("Title")),
-        
-        
       )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["FDR"])
-      
     })
     
     
@@ -1087,8 +1041,8 @@ PipelineProtein_DA_server <- function(id,
       }
       h3(txt)
     })
-    #-------------------------------------------------------------------
-    #
+    
+    ###############
     Prostar2::mod_volcanoplot_server(
       id = "FDR_volcano",
       dataIn = reactive({Get_Dataset_to_Analyze()}),
@@ -1111,11 +1065,9 @@ PipelineProtein_DA_server <- function(id,
     
     
     output$FDR_nbSelectedItems_ui <- renderUI({
-      
       rv.custom$thpval
       rv$dataIn
       req(Build_pval_table())
-      
       
       m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
         pattern = c("Missing", "Missing POV", "Missing MEC"),
@@ -1125,7 +1077,6 @@ PipelineProtein_DA_server <- function(id,
       p <- Build_pval_table()
       upItemsPVal <- NULL
       upItemsLogFC <- NULL
-      
       
       upItemsLogFC <- which(abs(p$logFC) >= as.numeric(rv.custom$thlogfc))
       upItemsPVal <- which(-log10(p$P_Value) >= as.numeric(rv.custom$thpval))
@@ -1142,7 +1093,6 @@ PipelineProtein_DA_server <- function(id,
         t <- upItemsLogFC
       }
       rv.custom$nbSelectedAnaDiff <- length(t)
-      
       
       ##
       ## Condition: A = C + D
@@ -1165,14 +1115,7 @@ PipelineProtein_DA_server <- function(id,
     
     
     
-    
-    
-    
-    
-    #################################################################
     ###### Set code for widgets managment
-    ################################################################
-    
     logpval <- Prostar2::mod_set_pval_threshold_server(id = "Title",
       pval_init = reactive({10^(-rv.custom$thpval)}),
       #fdr = reactive({Get_FDR()}),
@@ -1199,7 +1142,6 @@ PipelineProtein_DA_server <- function(id,
           text = warntxt)
       }
     })
-    
     
     
     BuildPairwiseComp_wb <- reactive({
@@ -1238,13 +1180,10 @@ PipelineProtein_DA_server <- function(id,
         style = DA_Style
       )
       
-      
       wb
     })
     
-    
     output$FDR_download_SelectedItems_UI <- downloadHandler(
-      
       filename = function() {rv.custom$filename},
       content = function(fname) {
         wb <- BuildPairwiseComp_wb()
@@ -1252,10 +1191,7 @@ PipelineProtein_DA_server <- function(id,
       }
     )
     
-    
-    
     Get_FDR <- reactive({
-
       req(rv.custom$thpval)
       req(rv.custom$thlogfc)
       req(Build_pval_table())
@@ -1266,7 +1202,6 @@ PipelineProtein_DA_server <- function(id,
       # # 
       #  fdr <- max(adj.pval[upitems_logpval], na.rm = TRUE)
       
-   ##########################################################################
    ##################Code de Manon #################################
       adj.pval <- Build_pval_table()$Adjusted_PValue
       logpval <- Build_pval_table()$Log_PValue
@@ -1284,13 +1219,10 @@ PipelineProtein_DA_server <- function(id,
         fdr <- 1
       }
       
-       ##########################################################################
-      
-      
+       ##############################################################
       rv.custom$FDR <- as.numeric(fdr)
       as.numeric(rv.custom$FDR)
     })
-    
     
     Get_Nb_Significant <- reactive({
       nb <- length(
@@ -1304,8 +1236,6 @@ PipelineProtein_DA_server <- function(id,
       rv$widgets$anaDiff$NbSelected <- nb
       nb
     })
-    
-    
     
     Build_pval_table <- reactive({
       req(rv$steps.status["Pvaluecalibration"] == MagellanNTK::stepStatus$VALIDATED)
@@ -1331,7 +1261,6 @@ PipelineProtein_DA_server <- function(id,
         isDifferential = rep(0, length(.logfc))
       )
       
-      
       # Determine significant proteins
       signifItems <- intersect(which(pval_table$Log_PValue >= rv.custom$thpval),
         which(abs(pval_table$logFC) >= rv.custom$thlogfc)
@@ -1344,8 +1273,6 @@ PipelineProtein_DA_server <- function(id,
        #  GetCalibrationMethod())
        #pval_table[upItems_logFC, 'Adjusted_PValue'] <- rv.custom$adjusted_pvalues
       
-      
-      ##################################################################
       ################# Code de Manon    ###############
        upItems_pval <- which(-log10(.pval) >= rv.custom$thpval)
        #push to 1 proteins with logFC under threshold
@@ -1369,15 +1296,11 @@ PipelineProtein_DA_server <- function(id,
        }
        
       ##################################################################
-      
-      
       # Set only significant values
       pval_table$logFC <- signif(pval_table$logFC, digits = 4)
       pval_table$P_Value <- signif(pval_table$P_Value, digits = 4)
       pval_table$Adjusted_PValue <- signif(pval_table$Adjusted_PValue, digits = 4)
       pval_table$Log_PValue <- signif(pval_table$Log_PValue, digits = 4)
-      
-      
       
       tmp <- as.data.frame(
         SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$Pairwisecomparison_tooltipInfo]
@@ -1390,18 +1313,15 @@ PipelineProtein_DA_server <- function(id,
       pval_table
     })
     
-    
-    
     isContainedIn <- function(strA, strB) {
       return(all(strA %in% strB))
     }
     
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('FDR', btnEvents()))
       shiny::withProgress(message = paste0("COmputing FDR", id), {
         shiny::incProgress(0.5)
-
         if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
           shinyjs::info(btnVentsMasg)
         else {
@@ -1416,13 +1336,38 @@ PipelineProtein_DA_server <- function(id,
       })
     })
     
-    # >>> START ------------- Code for step 'Save' UI---------------
+    
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
+          uiOutput(ns('save_txt')),
           uiOutput(ns('dl_ui'))
+        )
+      )
+    })
+    
+    #### _content -----
+    output$save_txt <- renderUI({
+      req(rv$steps.status['Save'] != MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      div(
+        style = "margin: 25px;",
+        p(HTML("Click <b>'Run'</b> to validate this step.<br>
+                If you need to make changes, click <b>'Reset'</b>."),
+          style = "font-size: 17px;
+                   line-height: 1.6;
+                   margin: 0;
+                   padding: 12px 16px;
+                   background-color: #EAEAEA;
+                   border-radius: 4px;"
         )
       )
     })
@@ -1434,6 +1379,7 @@ PipelineProtein_DA_server <- function(id,
       Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       
       req(grepl('Save', btnEvents()))
@@ -1446,14 +1392,11 @@ PipelineProtein_DA_server <- function(id,
         else {
           
           # Do some stuff
-          
           last.se <- length(rv$dataIn)
           DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[last.se]]), rv.custom$history)
           
-          
           # Add the result of pairwise comparison to the coldata
           DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
-          
           
           # DO NOT MODIFY THE THREE FOLLOWINF LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
@@ -1464,9 +1407,8 @@ PipelineProtein_DA_server <- function(id,
         }
       })
     })
-    # <<< END ------------- Code for step 3 UI---------------
-    
-    
+
+    ####### _END_ -----
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE

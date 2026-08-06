@@ -18,7 +18,7 @@ mod_qMetacell_FunctionFilter_Generator_server(
      setNames(nm = c("delete", "keep"))
  }),
   val_vs_percent = reactive({
-     setNames(nm = c("count", "percentage"))
+     setNames(nm = c("Count", "Percentage"))
  }),
   operator = reactive({
      setNames(nm = DaparToolshed::SymFilteringOperators())

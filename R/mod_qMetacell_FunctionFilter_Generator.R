@@ -591,21 +591,36 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
 
     observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
-      rv.custom$showmodal <- NULL
-      GetIndicesAndFunction()
-      req(rv.custom$ll.fun)
-      req(rv.custom$ll.query)
-      req(rv.custom$ll.widgets.value)
-      
-      # Append a new FunctionFilter to the list
-      dataOut$trigger <- as.numeric(Sys.time())
-      dataOut$value <- list(
-        ll.fun = list(rv.custom$ll.fun),
-        ll.query = rv.custom$ll.query,
-        ll.widgets.value = rv.custom$ll.widgets.value,
-        ll.pattern = rv.widgets$tag,
-         ll.indices = list(rv.custom$indices)
-      )
+      if (rv.widgets$tag == "None" || rv.widgets$scope == "None"){
+        shiny::showModal(shiny::modalDialog(
+          id = ns('apply_nofilter'),
+          title = "Filter application impossible",
+          tagList(tags$head(tags$style(paste0(".modal-content:has(#", ns('apply_nofilter'), ") {width: 500px !important;}"))),
+                  "Please select a tag and scope to apply a filter."
+          ),
+          easyClose = TRUE,
+          size = "l",
+          footer = tagList(
+            modalButton("Close")
+          )
+        ))
+      } else {
+        rv.custom$showmodal <- NULL
+        GetIndicesAndFunction()
+        req(rv.custom$ll.fun)
+        req(rv.custom$ll.query)
+        req(rv.custom$ll.widgets.value)
+        
+        # Append a new FunctionFilter to the list
+        dataOut$trigger <- as.numeric(Sys.time())
+        dataOut$value <- list(
+          ll.fun = list(rv.custom$ll.fun),
+          ll.query = rv.custom$ll.query,
+          ll.widgets.value = rv.custom$ll.widgets.value,
+          ll.pattern = rv.widgets$tag,
+           ll.indices = list(rv.custom$indices)
+        )
+      }
     })
 
     return(reactive({dataOut}))

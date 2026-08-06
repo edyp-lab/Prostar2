@@ -19,9 +19,7 @@ mod_mv_plots_server(
   mytitle = reactive({
      NULL
  }),
-  pal = reactive({
-     NULL
- }),
+  pal = NULL,
   pattern = reactive({
      NULL
  }),

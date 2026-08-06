@@ -175,7 +175,6 @@ PipelineProtein_Normalization_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
-      #rv.custom$result_open_dataset()$dataset
       req(dataIn())
       
       rv$dataIn <- dataIn()
@@ -211,7 +210,8 @@ PipelineProtein_Normalization_server <- function(id,
           uiOutput(ns("Normalization_method_ui")),
           shinyjs::hidden(uiOutput(ns('Normalization_type_ui'))),
           shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
-          uiOutput(ns("Normalization_quantile_ui")),
+          div(style = "white-space: nowrap;",
+              uiOutput(ns("Normalization_quantile_ui"))),
           uiOutput(ns("Normalization_varReduction_ui")),
           uiOutput(ns('tracking')),
           shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
@@ -251,11 +251,18 @@ PipelineProtein_Normalization_server <- function(id,
     })
     
     output$Normalization_spanLOESS_ui <- renderUI({
-      widget <- textInput(
+      widget <- shinyWidgets::autonumericInput(
         ns('Normalization_spanLOESS'),
-        'Span',
-        value = rv.widgets$Normalization_spanLOESS,
-        width = '100px')
+        label = 'Span',
+        value = isolate(rv.widgets$Normalization_spanLOESS), 
+        width = "100px",
+        minimumValue = 0,
+        maximumValue = 1,
+        decimalCharacter = ".",
+        decimalPlaces = 2,
+        modifyValueOnWheel = TRUE,
+        align = "left"
+      )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
     })
@@ -263,11 +270,18 @@ PipelineProtein_Normalization_server <- function(id,
     output$Normalization_quantile_ui <- renderUI({
       req(rv.widgets$Normalization_method == "QuantileCentering")
       
-      widget <- textInput(
+      widget <- shinyWidgets::autonumericInput(
         ns('Normalization_quantile'),
-        "Normalization quantile",
-        value = rv.widgets$Normalization_quantile,
-        width = '100px')
+        label = "Normalization quantile",
+        value = isolate(rv.widgets$Normalization_quantile), 
+        width = "100px",
+        minimumValue = 0,
+        maximumValue = 1,
+        decimalCharacter = ".",
+        decimalPlaces = 2,
+        modifyValueOnWheel = TRUE,
+        align = "left"
+      )
       
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
     })
@@ -287,7 +301,7 @@ PipelineProtein_Normalization_server <- function(id,
     output$Normalization_sync_ui <- renderUI({
       widget <- checkboxInput(
         ns('Normalization_sync'),
-        "Synchronise with selection above",
+        "Synchronise plots with the above selection",
         value = rv.widgets$Normalization_sync
       )
       
@@ -306,7 +320,7 @@ PipelineProtein_Normalization_server <- function(id,
       remoteReset = reactive({remoteReset()})
     )
     
-    observeEvent(rv.widgets$Normalization_method, {
+    observeEvent(rv.widgets$Normalization_method, ignoreInit = TRUE, {
       req(rv.widgets$Normalization_method)
       req(rv.custom$dataIn)
       shinyjs::toggle("Normalization_btn_validate",
@@ -392,15 +406,16 @@ PipelineProtein_Normalization_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Normalization', btnEvents()))
-      
       shiny::withProgress(message = paste0("Normalization process", id), {
         shiny::incProgress(0.5)
 
         if ( is.null(rv.custom$dataIn) ||
-          rv.widgets$Normalization_method == widgets.default.values$Normalization_method)
-        shinyjs::info(btnVentsMasg)
+          rv.widgets$Normalization_method == "None" ||
+          rv.widgets$Normalization_quantile == "" ||
+          rv.widgets$Normalization_spanLOESS == ""){
+          shinyjs::info(btnVentsMasg)
         
-        else {
+        } else {
           req(rv.widgets$Normalization_method)
           req(rv.custom$dataIn)
         
@@ -523,12 +538,31 @@ PipelineProtein_Normalization_server <- function(id,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
+          uiOutput(ns('save_txt')),
           uiOutput(ns('dl_ui'))
         )
       )
     })
     
     #### _content -----
+    output$save_txt <- renderUI({
+      req(rv$steps.status['Save'] != MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      div(
+        style = "margin: 25px;",
+        p(HTML("Click <b>'Run'</b> to validate this step.<br>
+                If you need to make changes, click <b>'Reset'</b>."),
+          style = "font-size: 17px;
+                   line-height: 1.6;
+                   margin: 0;
+                   padding: 12px 16px;
+                   background-color: #EAEAEA;
+                   border-radius: 4px;"
+        )
+      )
+    })
+    
     output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')

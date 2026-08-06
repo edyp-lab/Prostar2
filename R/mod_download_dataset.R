@@ -40,9 +40,12 @@ NULL
 download_dataset_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3('Download dataset'),
-    uiOutput(ns('nodataset_ui')),
-    uiOutput(ns('buttons_ui'))
+    div(style = "background: #ffffff; border: 1px solid #dddddd; border-radius: 6px;
+                 padding: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin: 25px;",
+        h3('Download dataset'),
+        uiOutput(ns('nodataset_ui')),
+        uiOutput(ns('buttons_ui'))
+    )
   )
 }
 

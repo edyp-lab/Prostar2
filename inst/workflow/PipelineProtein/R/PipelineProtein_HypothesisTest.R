@@ -137,7 +137,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
           uiOutput(ns('open_dataset_UI'))
         ),
         content = div(id = ns('div_content'),
-          #div(id = ns("chunk"), style = "width: 100px; height: 100px;" ),
           if (file.exists(file))
             includeMarkdown(file)
           else
@@ -147,24 +146,23 @@ PipelineProtein_HypothesisTest_server <- function(id,
       )
     })
     
+    #### _sidebar -----
+    output$open_dataset_UI <- renderUI({
+      req(session$userData$runmode == 'process')
+      req(is.null(dataIn()))
+      req(NULL)
+
+      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
+        id = "open_dataset",
+        class = 'QFeatures',
+        extension = "qf",
+        remoteReset = reactive({remoteReset()})
+      )
+
+      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
+    })
     
-    
-    # output$open_dataset_UI <- renderUI({
-    #   req(session$userData$runmode == 'process')
-    #   req(is.null(dataIn()))
-    #   req(NULL)
-    #   
-    #   rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
-    #     id = "open_dataset",
-    #     class = 'QFeatures',
-    #     extension = "qf",
-    #     remoteReset = reactive({remoteReset()})
-    #   )
-    #   
-    #   MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
-    # })
-    
-    
+    #### _content -----
     # output$Description_infos_dataset_UI <- renderUI({
     #   req(rv$dataIn)
     #   
@@ -176,7 +174,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     #   infos_dataset_ui(id = ns("Description_infosdataset"))
     # })
     
-
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
      req(dataIn())
@@ -221,62 +219,121 @@ PipelineProtein_HypothesisTest_server <- function(id,
       dataOut$value <- NULL
       rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
       })
-      
      }
     })
     
     
-    
-    # >>>
-    # >>> START ------------- Code for HypothesisTest UI---------------
-    # >>> 
-    
-    # >>>> -------------------- STEP 1 : Global UI ------------------------------------
+    ###########################################################################-
+    #
+    #----------------------------HYPOTHESIS TEST--------------------------------
+    #
+    ###########################################################################-
     output$HypothesisTest <- renderUI({
       shinyjs::useShinyjs()
       
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(
-          #timeline_process_ui(ns('HypothesisTest_timeline')),
-          uiOutput(ns('HypothesisTest_widgets_ui'))),
+          uiOutput(ns('HypothesisTest_design_ui')),
+          uiOutput(ns('HypothesisTest_method_ui')),
+          uiOutput(ns('HypothesisTest_ttestOptions_ui')),
+          uiOutput(ns('HypothesisTest_thlogFC_ui')),
+          uiOutput(ns("HypothesisTest_correspondingRatio_ui")),
+          uiOutput(ns('HypothesisTest_info_Limma_disabled_ui'))
+        ),
         content = uiOutput(ns('HypothesisTest_plots_ui'))
       )
     })
     
+    #### _sidebar -----
+    output$HypothesisTest_design_ui <- renderUI({
+      widget <- selectInput(ns("HypothesisTest_design"), "Contrast",
+                            choices = c("None" = "None", 
+                                        "One vs One" = "OnevsOne",
+                                        "One vs All" = "OnevsAll"),
+                            selected = rv.widgets$HypothesisTest_design,
+                            width = "150px"
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+                                  !isTRUE(rv.custom$containsNA))
+    })
     
+    output$HypothesisTest_method_ui <- renderUI({
+      .methods <- c("None" = "None", "t-tests" = "ttests")
+      if(enable_Limma())
+        .methods <- c(.methods, "Limma" = "Limma")
+      
+      widget <- selectInput(ns("HypothesisTest_method"), "Statistical test",
+                            choices = .methods,
+                            selected = rv.widgets$HypothesisTest_method,
+                            width = "150px"
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+                                  !isTRUE(rv.custom$containsNA))
+    })
     
+    output$HypothesisTest_ttestOptions_ui <- renderUI({
+      req(rv.widgets$HypothesisTest_method == "ttests")
+      widget <- radioButtons(ns("HypothesisTest_ttestOptions"), 
+                             "t-tests options",
+                             choices = c("Student", "Welch"),
+                             selected = rv.widgets$HypothesisTest_ttestOptions,
+                             width = "150px"
+      )
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+                                  !isTRUE(rv.custom$containsNA))
+    })
+    
+    output$HypothesisTest_thlogFC_ui <- renderUI({
+      widget <- shinyWidgets::autonumericInput(
+        ns("HypothesisTest_thlogFC"),
+        label = "log(FC) threshold",
+        value = isolate(rv.widgets$HypothesisTest_thlogFC), 
+        width = "150px",
+        minimumValue = 0,
+        decimalCharacter = ".",
+        decimalPlaces = 2,
+        modifyValueOnWheel = TRUE,
+        align = "left"
+      )
+      
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
+                                  !isTRUE(rv.custom$containsNA))
+    })
+    
+    output$HypothesisTest_correspondingRatio_ui <- renderUI({
+      if (!is.na(Extract_Value(rv.widgets$HypothesisTest_thlogFC, "numeric"))){
+        ratio <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
+        txt <- p(style = "margin-top: -10px; font-size: 13px;",
+                 "(FC = ", round(2^(ratio), 2), ")")
+      } else { 
+        txt <- p(style = "margin-top: -15px; font-weight: bold; color: red; font-size: 13px;", 
+                 "/!\\ Numeric value expected")
+      }
+      txt
+    })
+    
+    output$HypothesisTest_info_Limma_disabled_ui <- renderUI({
+      req(!enable_Limma())
+      tagList(
+        tags$p('Info: Limma has been disabled because the design of your dataset:'),
+        tags$ul(
+          tags$li(p('is of level 1 and contains more than 26 conditions,')),
+          tags$li('is of level 2 or 3 and contains more than 9 conditions.')
+        ),
+        tags$p('Prostar does not currently handle these cases.')
+      )
+    })
+    
+    #### _content -----
     output$HypothesisTest_plots_ui <- renderUI({
       req(rv.custom$dataIn)
 
         tagList(
           uiOutput(ns('HypothesisTest_warning_conditions_ui')),
-          uiOutput(ns("HypothesisTest_swapConds_ui")),
-          plotly::plotlyOutput(ns("FoldChangePlot")) )
-    })
-    
-    
-    
-    output$HypothesisTest_widgets_ui <- renderUI({
-      .style <- "display:inline-block; vertical-align: middle; 
-      padding-right: 20px;"
-      
-      tagList(
-        div(id = ns('div_HypothesisTest_widgets_ui'),
-          div(id = ns('div_HypothesisTest_design_ui'),
-            style = .style, uiOutput(ns('HypothesisTest_design_ui'))),
-          div(id = ns('div_HypothesisTest_method_ui'),
-            style = .style, uiOutput(ns('HypothesisTest_method_ui'))),
-          div(id = ns('div_HypothesisTest_ttestOptions_ui'),
-            style = .style, uiOutput(ns('HypothesisTest_ttestOptions_ui'))),
-          div(id = ns('div_HypothesisTest_thlogFC_ui'),
-            style = .style, uiOutput(ns('HypothesisTest_thlogFC_ui'))),
-          div(id = ns('div_HypothesisTest_correspondingRatio_ui'),
-            style = .style, uiOutput(ns("HypothesisTest_correspondingRatio_ui"))),
-          div(id = ns('div_HypothesisTest_info_Limma_disabled_ui'),
-            style = .style, uiOutput(ns('HypothesisTest_info_Limma_disabled_ui')))
-        )
-      )
+          plotly::plotlyOutput(ns("FoldChangePlot")), 
+          div(style = "margin-left: 25px;", 
+              uiOutput(ns("HypothesisTest_swapConds_ui"))) )
     })
     
     output$HypothesisTest_warning_conditions_ui <- renderUI({
@@ -287,62 +344,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       more than 26 conditions. Such, the Limma option is desactivated for the 
         current dataset')
     })
-    # >>> START: Definition of the widgets
-    
-    
-    output$HypothesisTest_design_ui <- renderUI({
-      widget <- selectInput(ns("HypothesisTest_design"), "Contrast",
-        choices = c("None" = "None", 
-          "One vs One" = "OnevsOne",
-          "One vs All" = "OnevsAll"),
-        selected = rv.widgets$HypothesisTest_design,
-        width = "150px"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
-          !isTRUE(rv.custom$containsNA))
-    })
-    
-    output$HypothesisTest_method_ui <- renderUI({
-      .methods <- c("None" = "None", "t-tests" = "ttests")
-      if(enable_Limma())
-        .methods <- c(.methods, "Limma" = "Limma")
-      
-      widget <- selectInput(ns("HypothesisTest_method"), "Statistical test",
-        choices = .methods,
-        selected = rv.widgets$HypothesisTest_method,
-        width = "150px"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
-          !isTRUE(rv.custom$containsNA))
-    })
-    
-    output$HypothesisTest_ttestOptions_ui <- renderUI({
-      req(rv.widgets$HypothesisTest_method == "ttests")
-      widget <- radioButtons(ns("HypothesisTest_ttestOptions"), 
-        "t-tests options",
-        choices = c("Student", "Welch"),
-        selected = rv.widgets$HypothesisTest_ttestOptions,
-        width = "150px"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
-          !isTRUE(rv.custom$containsNA))
-    })
-    
-    output$HypothesisTest_thlogFC_ui <- renderUI({
-      widget <- textInput(ns("HypothesisTest_thlogFC"),
-        "log(FC) threshold",
-        value = rv.widgets$HypothesisTest_thlogFC,
-        width = "150px"
-      )
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled['HypothesisTest'] &&
-          !isTRUE(rv.custom$containsNA))
-    })
-    
-    output$HypothesisTest_correspondingRatio_ui <- renderUI({
-      ratio <- as.numeric(rv.widgets$HypothesisTest_thlogFC)
-      p("(FC = ", 2^(ratio), ")")
-    })
-    
     
     observeEvent(req(rv.widgets$HypothesisTest_design != 'None'), {
       req(rv.custom$dataIn)
@@ -362,14 +363,17 @@ PipelineProtein_HypothesisTest_server <- function(id,
 
     output$FoldChangePlot <- plotly::renderPlotly({
       req(rv.custom$logFC) 
+      req(rv.widgets$HypothesisTest_thlogFC)
+      logFC_th <- Extract_Value(rv.widgets$HypothesisTest_thlogFC, "numeric")
+      req(!is.na(logFC_th))
       
       withProgress(message = "Computing plot...", detail = "", value = 0.5, {
-        rv.widgets$HypothesisTest_thlogFC <- as.numeric(
-          rv.widgets$HypothesisTest_thlogFC)
+        pal <- DaparToolshed::ExtendPalette(ncol(as.data.frame(rv.custom$logFC)), "Paired")
         
         DaparToolshed::hc_logFC_DensityPlot(
           df_logFC = as.data.frame(rv.custom$logFC),
-          th_logFC = as.numeric(rv.widgets$HypothesisTest_thlogFC)
+          th_logFC = as.numeric(logFC_th),
+          pal = pal
         )
       })
     })
@@ -377,7 +381,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
     output$showConds <- renderUI({
       req(rv.custom$listNomsComparaison)
       
-
       widget <- lapply(seq_len(rv.custom$n), function(i) {
         ll.conds <- unlist(
           strsplit(rv.custom$listNomsComparaison[i], split = "_vs_")
@@ -401,7 +404,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
           !isTRUE(rv.custom$containsNA))
     })
     
-    
     observeEvent(GetSwapShinyValue(), ignoreInit = TRUE,{
       ind.swap <- which(GetSwapShinyValue() != rv.custom$swap.history)
       
@@ -416,7 +418,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       tmp.cond1 <- gsub("[( )]", "", ll[1])
       tmp.cond2 <- gsub("[( )]", "", ll[3])
       tmp.logFC <- paste0("(", tmp.cond2, ")_vs_(", tmp.cond1, ")_logFC" )
-      
       
       colnames(rv.custom$logFC)[ind.swap] <- tmp.logFC 
       
@@ -433,16 +434,13 @@ PipelineProtein_HypothesisTest_server <- function(id,
       ))
     })
     
-    
     ### Computation of comparisons selected in the variable
     # 'rv$widgets$hypothesisTest$design'
     ComputeComparisons <- reactive({
-      
       req(rv.widgets$HypothesisTest_method != "None")
       req(rv.widgets$HypothesisTest_design != "None")
       if (rv.widgets$HypothesisTest_method == 'ttests')
         req(rv.widgets$HypothesisTest_ttestOptions != "None")
-      
       
       rv.custom$AllPairwiseComp <- NULL
       rv.custom$AllPairwiseCompMsg <- NULL
@@ -479,7 +477,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'HypothesisTest', 'HypothesisTest', 'method', rv.widgets$HypothesisTest_method)
       rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'HypothesisTest', 'HypothesisTest', 'design', rv.widgets$HypothesisTest_design)
       
-      
       if (rv.widgets$HypothesisTest_method == 'ttests')
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'HypothesisTest', 'HypothesisTest', 'ttestOptions', rv.widgets$HypothesisTest_ttestOptions)
 
@@ -488,8 +485,6 @@ PipelineProtein_HypothesisTest_server <- function(id,
       rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = '_logFC'))
       }
     }) 
-    
-    
     
     enable_Limma <- reactive({
       req(rv.custom$dataIn)
@@ -500,24 +495,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
       nLevel <- DaparToolshed::getDesignLevel(design)   
       enable <- (nConds <= 26 && nLevel == 1) ||
         (nConds < 10 && (nLevel%in% c(2,3)))
-      
       enable
     })
-    
-    output$HypothesisTest_info_Limma_disabled_ui <- renderUI({
-      req(!enable_Limma())
-      tagList(
-        tags$p('Info: Limma has been disabled because the design of your dataset:'),
-        tags$ul(
-          tags$li(p('is of level 1 and contains more than 26 conditions,')),
-          tags$li('is of level 2 or 3 and contains more than 9 conditions.')
-        ),
-        tags$p('Prostar does not currently handle these cases.')
-      )
-    })
-    
 
     output$HypothesisTest_swapConds_ui <- renderUI({
+      req(rv.widgets$HypothesisTest_design != "None")
       widget <- tagList(
         h3("Swap conditions"),
         uiOutput(ns("showConds")),
@@ -527,12 +509,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
           !isTRUE(rv.custom$containsNA))
     })
     
-    
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('HypothesisTest', btnEvents()))
      
-      shiny::withProgress(message = paste0("Computing Hypothesis Test", id), {
+      shiny::withProgress(message = "Computing Hypothesis Test", {
         shiny::incProgress(0.5)
         
       if ( is.null(rv.custom$dataIn) || rv.widgets$HypothesisTest_method == "None" || rv.widgets$HypothesisTest_design == "None" || 
@@ -580,21 +561,41 @@ PipelineProtein_HypothesisTest_server <- function(id,
       })
     })
     
-    # >>> END: Definition of the widgets
-
-    # >>> START ------------- Code for step 3 UI---------------
+    
+    ###########################################################################-
+    #
+    #-------------------------------------SAVE----------------------------------
+    #
+    ###########################################################################-
     output$Save <- renderUI({
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          #timeline_process_ui(ns('Save_timeline'))
-        ),
+        sidebar = tagList(),
         content = tagList(
+          uiOutput(ns('save_txt')),
           uiOutput(ns('dl_ui'))
           )
       )
     })
     
+    #### _content -----
+    output$save_txt <- renderUI({
+      req(rv$steps.status['Save'] != MagellanNTK::stepStatus$VALIDATED)
+      req(config@mode == 'process')
+      
+      div(
+        style = "margin: 25px;",
+        p(HTML("Click <b>'Run'</b> to validate this step.<br>
+                If you need to make changes, click <b>'Reset'</b>."),
+          style = "font-size: 17px;
+                   line-height: 1.6;
+                   margin: 0;
+                   padding: 12px 16px;
+                   background-color: #EAEAEA;
+                   border-radius: 4px;"
+        )
+      )
+    })
     
     output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
@@ -603,7 +604,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
-
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Save', btnEvents()))
       shiny::withProgress(message = paste0("Reseting process", id), {
@@ -616,11 +617,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         else {
           S4Vectors::metadata(rv.custom$dataIn)$name.pipeline <- 'PipelineProtein'
             
-          
-         
           DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]),
             rv.custom$history)
-          
           
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
@@ -631,9 +629,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
         }
       })
     })
-    # <<< END ------------- Code for step 3 UI---------------
     
-    
+    ####### _END_ -----
     
     # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
