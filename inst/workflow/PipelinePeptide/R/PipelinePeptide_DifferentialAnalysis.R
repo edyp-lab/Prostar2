@@ -2283,7 +2283,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           
           DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]), rv.custom$history)
           
-          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

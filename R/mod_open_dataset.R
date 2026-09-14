@@ -235,6 +235,7 @@ open_dataset_server <- function(
     # })
 
     observeEvent(input$file, {
+      print("load start")
       rv.widgets$file <- input$file
       rv.custom$dataRead <- NULL
       tryCatch(
@@ -252,6 +253,7 @@ open_dataset_server <- function(
       )
 
       if (is.null(rv.custom$dataRead)) {
+        print("if (is.null(rv.custom$dataRead))")
         rv.custom$dataRead <- tryCatch(
           {
             load(file = rv.widgets$file$datapath)
@@ -270,6 +272,8 @@ open_dataset_server <- function(
       dataOut$dataset <- rv.custom$dataRead
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$name <- rv.custom$name
+      
+      print("load end")
     })
 
     # Part of open custom dataset

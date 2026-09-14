@@ -46,15 +46,12 @@
 #' #      sep = ""
 #' #    )
 #' #}
-#' hc_clickFunction <- JS("function(event) {
-#' Shiny.onInputChange('eventPointClicked',[this.index]+'_'+ [this.series.name]);}")
 #' cond <- c("25fmol", "10fmol")
 #' DaparToolshed::diffAnaVolcanoplot_rCharts(
 #'   df,
 #'   th_pval = 2.5,
 #'   th_logfc = 1,
-#'   conditions = cond,
-#'   clickFunction = hc_clickFunction
+#'   conditions = cond
 #' )
 #' 
 #' 
@@ -122,7 +119,6 @@ mod_volcanoplot_server <- function(
     colorsVolcanoplot = NULL,
     data = NULL,
     conditions = NULL,
-    clickFun = NULL,
     eventPointClicked = NULL
   )
  
@@ -237,17 +233,12 @@ mod_volcanoplot_server <- function(
       borders_index
     })
 
-
-
     output$Warning_sharedPeptidesInfos <- renderUI({
       GetDataFor_sharedPeptidesInfos()
       if (nrow(GetDataFor_sharedPeptidesInfos()) > 153) {
         p(MSG_WARNING_SIZE_DT)
       }
     })
-
-
-
 
     GetDataFor_sharedPeptidesInfos <- reactive({
       req(comparison())
@@ -484,12 +475,10 @@ req(rv.custom$dataGetExprsClickedProtein)
           y = -log10(ht[, paste0(prefix, "_pval")]),
           index = seq(nrow(ht))
         )
+        df$y[which(df$y < 0)] <- 0
 
         if (length(tooltip()) > 0 && sum(is.na(tooltip())) == 0) {
-          df <- cbind(
-            df,
-            rowData(rv$dataIn)[tooltip()]
-          )
+          df <- cbind(df, rowData(rv$dataIn)[tooltip()])
         }
 
         colnames(df) <- gsub(".", "_", colnames(df), fixed = TRUE)
@@ -499,27 +488,15 @@ req(rv.custom$dataGetExprsClickedProtein)
             paste("tooltip_", colnames(df)[.range], sep = "")
         }
 
-
-        rv.custom$clickFun <-
-          shinyjqui::JS(paste0(
-            "function(event) {Shiny.onInputChange('",
-            ns("eventPointClicked"),
-            "', [this.index]+'_'+ [this.series.name]);}"
-          ))
-
         DaparToolshed::diffAnaVolcanoplot_rCharts(
           df,
           th_logfc = as.numeric(thlogfc()),
           th_pval = as.numeric(thpval()),
           conditions = comparison(),
-          clickFunction = rv.custom$clickFun,
           pal = rv.custom$colorsVolcanoplot
         )
       })
-
     })
-    
-    
   })
 }
 

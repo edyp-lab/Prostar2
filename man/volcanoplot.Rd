@@ -94,15 +94,12 @@ colnames(df) <- c("x", "y", "index")
 #      sep = ""
 #    )
 #}
-hc_clickFunction <- JS("function(event) {
-Shiny.onInputChange('eventPointClicked',[this.index]+'_'+ [this.series.name]);}")
 cond <- c("25fmol", "10fmol")
 DaparToolshed::diffAnaVolcanoplot_rCharts(
   df,
   th_pval = 2.5,
   th_logfc = 1,
-  conditions = cond,
-  clickFunction = hc_clickFunction
+  conditions = cond
 )
 
 

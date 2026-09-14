@@ -201,8 +201,6 @@ PipelineProtein_Normalization_server <- function(id,
     ###########################################################################-
     output$Normalization <- renderUI({
       shinyjs::useShinyjs()
-      .style <- "display:inline-block; vertical-align: middle; 
-      padding-right: 20px;"
 
       MagellanNTK::process_layout(session,
         ns = NS(id),

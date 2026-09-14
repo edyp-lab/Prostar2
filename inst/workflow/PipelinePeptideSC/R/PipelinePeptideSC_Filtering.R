@@ -832,7 +832,7 @@ PipelinePeptideSC_Filtering_server <- function(id,
           #     reactiveValuesToList(rv.widgets))
           S4Vectors::metadata(rv.custom$dataIn2)$name.pipeline <- 'PipelinePeptideSC'
           
-          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv.custom$dataIn2
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

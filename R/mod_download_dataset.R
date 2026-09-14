@@ -113,7 +113,13 @@ download_dataset_server <- function(
     output$downloadDataExcel <- downloadHandler(
       filename = function() {
         #paste("data-", Sys.Date(), ".xlsx", sep = "")
-        paste(filename, '.xlsx', sep = "")
+        tmpname <- rv$data_save@metadata$analysis$analysis
+        if(is.null(tmpname) || (tmpname == "")){ 
+          analysis_name <- "myDataset"
+        } else {
+          analysis_name <- tmpname
+        }
+        paste0(analysis_name, ".xlsx")
       },
       content = function(file) {
         rv$export_file_xlsx <- tryCatch({
@@ -151,7 +157,13 @@ download_dataset_server <- function(
     output$downloadDataQf <- downloadHandler(
       filename = function() {
         # paste ("data-", Sys.Date(), ".qf", sep = "")
-        paste(filename, ".qf", sep = "")
+        tmpname <- rv$data_save@metadata$analysis$analysis
+        if(is.null(tmpname) || (tmpname == "")){ 
+          analysis_name <- "myDataset"
+        } else {
+          analysis_name <- tmpname
+        }
+        paste0(analysis_name, ".qf")
       },
       content = function(file) {
         rv$export_file_qf <- tryCatch({

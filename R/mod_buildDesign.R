@@ -34,41 +34,46 @@ mod_buildDesign_ui <- function(id) {
   ns <- NS(id)
   tagList(
     shinyjs::useShinyjs(),
-    tags$p(
-      "If you do not know how to fill the experimental design, you can
-            click on the '?' next to each design in the list that appear
-            once the conditions are checked or got to the ",
-      actionLink(ns("linkToFaq1"), "FAQ", style = "background-color: white"),
-      " page."
-    ),
-    fluidRow(
-      column(
-        width = 6,
-        tags$b("1 - Fill the \"Condition\" column to identify
-                the conditions to compare.")
+    tags$style(HTML("
+    .Design_mod_content label{
+      float:left;
+    }
+    .Design_mod_content .radio-inline {
+      margin-left: 30px;
+    }")),
+    # tags$p(
+    #   "If you do not know how to fill the experimental design, you can
+    #         click on the '?' next to each design in the list that appear
+    #         once the conditions are checked or got to the ",
+    #   actionLink(ns("linkToFaq1"), "FAQ", style = "background-color: white"),
+    #   " page."
+    # ),
+    div(style = "display: flex; gap: 20px;",
+      div(#width = "100%",
+          div(style = "display: flex; justify-content: space-between;", 
+              h4("Design"), 
+              uiOutput(ns("reset_btn")), style = "margin-bottom: 5px;"),
+          rhandsontable::rHandsontableOutput(ns("hot")),
       ),
-      column(width = 6, uiOutput(ns("UI_checkConditions")))
-    ),
-    fluidRow(
-      column(width = 6, uiOutput(ns("UI_hierarchicalExp"))),
-      column(width = 6, uiOutput(ns("checkDesign")))
-    ),
-    hr(),
-    tags$div(
-      style = "display:inline-block; vertical-align: top;",
-      uiOutput(ns("UI_reorder")),
-      actionButton(ns('reset'), 'Reset design')
-    ),
-    tags$div(
-        style = "display:inline-block; vertical-align: top;",
-        h4("Design"),
-        rhandsontable::rHandsontableOutput(ns("hot")),
-        width = "100%"
-      ),
-    tags$div(
-        style = "display:inline-block; vertical-align: top;",
-        shinyjs::hidden(div(id = "showExamples", uiOutput(ns("designExamples"))))
+      div(
+        div(class = "Design_mod_content", style = "display: flex; gap: 20px; margin-bottom: 20px;",
+          div(
+            tags$b("1 - Fill the \"Condition\" column to identify the conditions to compare."),
+            uiOutput(ns("UI_reorder"), style = "white-space: nowrap; margin-left: 15px;"),
+          ),
+          uiOutput(ns("UI_checkConditions"))
+        ),
+        
+        div(style = "display: flex; gap: 20px;",
+            uiOutput(ns("UI_hierarchicalExp")),
+            uiOutput(ns("checkDesign"))
+        )
       )
+    )
+    # tags$div(
+    #     style = "display:inline-block; vertical-align: top;",
+    #     shinyjs::hidden(div(id = "showExamples", uiOutput(ns("designExamples"))))
+    #   )
   )
 }
 
@@ -83,42 +88,165 @@ mod_buildDesign_server <- function(
     is.enabled = reactive({TRUE})) {
   
   requireNamespace("magrittr")
-
+  
+  widgets.default.values <- list(
+    convert_reorder = "No",
+    chooseExpDesign = "FlatDesign"
+  )
+  
+  rv.custom.default.values <- list(
+    hot = data.frame(
+      quantCols = as.character(quantCols()),
+      Condition = rep("", length(quantCols())),
+      stringsAsFactors = FALSE
+    ),
+    conditionsChecked = NULL,
+    newOrder = NULL,
+    resettingHot = TRUE
+  )
+  
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
-
-    rv <- reactiveValues(
-      hot = data.frame(
-        quantCols = as.character(quantCols()),
-        Condition = rep("", length(quantCols())),
-        stringsAsFactors = FALSE
-      ),
-      conditionsChecked = NULL,
-      newOrder = NULL
+    
+    core <- paste0(
+      MagellanNTK::Get_Code_Declare_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_ObserveEvent_widgets(names(widgets.default.values)),
+      MagellanNTK::Get_Code_for_rv_reactiveValues(),
+      MagellanNTK::Get_Code_Declare_rv_custom(names(rv.custom.default.values)),
+      MagellanNTK::Get_Code_for_dataOut(),
+      MagellanNTK::Get_Code_for_remoteReset(widgets = TRUE, custom = TRUE, dataIn = NA),
+      sep = "\n"
     )
+    eval(str2expression(core))
 
-
+    
+    # Init ----
     dataOut <- reactiveValues(
       trigger = NULL,
-      design = NULL
+      design = NULL,
+      order = NULL
     )
     
     
-    output$UI_reorder <- renderUI({
-      widget <- selectInput(ns("convert_reorder"), "Order by conditions ?",
-        choices = setNames(nm = c("No", "Yes")),
-        width = "100px"
-      )
-
+    # Reset ----
+    output$reset_btn <- renderUI({
+      widget <- actionButton(ns('reset'), 'Reset design')
+      
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-
-
-
+    
+    observeEvent({list(remoteReset(), input$reset)}, ignoreInit = TRUE, ignoreNULL = TRUE, {
+        rv.custom$hot <- data.frame(
+          quantCols = as.character(quantCols()),
+          Condition = rep("", length(quantCols())),
+          stringsAsFactors = FALSE
+        )
+        
+        rv.custom$resettingHot <- TRUE
+        
+        rv.widgets$convert_reorder <- "No"
+        rv.custom$conditionsChecked <- NULL
+        rv.custom$designChecked <- NULL
+        rv.widgets$chooseExpDesign <- "FlatDesign"
+        
+        dataOut$trigger <- NULL
+        dataOut$design <- NULL
+        dataOut$order <- NULL
+      })
+    
+    
+    # Text ----
+    observeEvent(req(input$linkToFaq1), {
+      updateTabsetPanel(session, "navPage", "faqTab")
+    })
+    
+    
+    # Table ----
+    output$hot <- rhandsontable::renderRHandsontable({
+      hot <- rhandsontable::rhandsontable(
+        rv.custom$hot,
+        rowHeaders = NULL,
+        fillHandle = list(
+          direction = "vertical",
+          autoInsertRow = FALSE,
+          maxRows = nrow(rv.custom$hot)
+        )
+      ) |>
+        rhandsontable::hot_rows(rowHeights = 30) |>
+        rhandsontable::hot_context_menu(
+          allowRowEdit = TRUE,
+          allowColEdit = FALSE,
+          allowInsertRow = FALSE,
+          allowInsertColumn = FALSE,
+          allowRemoveRow = TRUE,
+          allowRemoveColumn = FALSE,
+          autoInsertRow = FALSE
+        ) |>
+        rhandsontable::hot_cols(renderer = color_renderer()) |>
+        rhandsontable::hot_col(col = "quantCols", readOnly = TRUE)
+      
+      if (isTRUE(rv.custom$conditionsChecked$valid)){
+        hot <- hot |>
+          rhandsontable::hot_col(
+            col = "Condition",
+            readOnly = TRUE
+          )
+      }
+      
+      if (!is.null(rv.widgets$chooseExpDesign) && isTRUE(rv.custom$conditionsChecked$valid)) {
+        switch(rv.widgets$chooseExpDesign,
+               FlatDesign = {
+                 if ("Bio.Rep" %in% colnames(rv.custom$hot)) {
+                   hot <- hot |>
+                     rhandsontable::hot_col(
+                       col = "Bio.Rep",
+                       readOnly = TRUE
+                     )
+                 }
+               },
+               twoLevelsDesign = {
+                 if ("Tech.Rep" %in% colnames(rv.custom$hot)) {
+                   hot <- hot |>
+                     rhandsontable::hot_col(
+                       col = "Tech.Rep",
+                       readOnly = TRUE
+                     )
+                   if (isTRUE(rv.custom$designChecked$valid)){
+                     hot <- hot |>
+                       rhandsontable::hot_col(
+                         col = "Bio.Rep",
+                         readOnly = TRUE
+                       )
+                   }
+                 }
+               },
+               threeLevelsDesign = {
+                 if ("Analyt.Rep" %in% colnames(rv.custom$hot)) {
+                   hot <- hot |>
+                     rhandsontable::hot_col(col = "Analyt.Rep", readOnly = TRUE)
+                   if (isTRUE(rv.custom$designChecked$valid)){
+                     hot <- hot |>
+                       rhandsontable::hot_col(
+                         col = "Tech.Rep",
+                         readOnly = TRUE
+                       ) |>
+                       rhandsontable::hot_col(
+                         col = "Bio.Rep",
+                         readOnly = TRUE
+                       )
+                   }
+                 }
+               }
+        )
+      }
+      
+      hot
+    })
+    
     color_renderer <- reactive({
-      rv$hot$Condition
-      conds <- rv$hot$Condition
+      rv.custom$hot$Condition
+      conds <- rv.custom$hot$Condition
 
       req(length(conds) > 0)
       if (length(which(conds == "")) == 0) {
@@ -145,215 +273,113 @@ mod_buildDesign_server <- function(
       txt <- paste0(txt, "}")
 
       return(txt)
+    })    
+    
+    observeEvent(req(input$hot), {
+      if (rv.custom$resettingHot) {
+        rv.custom$resettingHot <- FALSE
+      } else {
+        rv.custom$hot <- rhandsontable::hot_to_r(input$hot)
+      }
     })
+    
+    
+    # Conditions ----
+    output$UI_reorder <- renderUI({
+      widget <- radioButtons(ns("convert_reorder"),
+                             "Order by conditions ?",
+                             choices = setNames(nm = c("No", "Yes")),
+                             #selected = rv.widgets$keep_vs_remove,
+                             inline = TRUE
+                             )
 
-
-
-    #----------------------------------------------------------
+      MagellanNTK::toggleWidget(widget, !isTRUE(rv.custom$conditionsChecked$valid))
+    })
+    
+    output$UI_checkConditions <- renderUI({
+      req(rv.custom$hot)
+      rv.custom$conditionsChecked
+      rv.widgets$convert_reorder
+      req(sum(rv.custom$hot$Condition == "") == 0)
+      widget <- actionButton(ns("btn_checkConds"), 
+                             "Check conditions"
+            )
+      
+      txt <- NULL
+      img <- NULL
+      if (!is.null(rv.custom$conditionsChecked)) {
+              if (isTRUE(rv.custom$conditionsChecked$valid)) {
+                img <- img(src = "images/Ok.png", height = 25)
+              } else {
+                img <- img(src = "images/Problem.png", height = 25)
+                txt <- p(style = "color: red;", 
+                         rv.custom$conditionsChecked$warn)
+                
+              }
+      } 
+      
+      tagList(
+        div(style = "display: flex;",
+            MagellanNTK::toggleWidget(widget, !isTRUE(rv.custom$conditionsChecked$valid)),
+            img),
+        txt
+      )
+    })    
+    
     observeEvent(input$btn_checkConds, {
-      input$convert_reorder
+      req(rv.widgets$convert_reorder)
 
-      # if (length(grep("Bio.Rep", colnames(rv$hot))) > 0) {
+      # if (length(grep("Bio.Rep", colnames(rv.custom$hot))) > 0) {
       #   return(NULL)
       # }
-      req(!("Bio.Rep" %in% colnames(rv$hot)))
+      req(!("Bio.Rep" %in% colnames(rv.custom$hot)))
 
-      if (input$convert_reorder == "Yes") {
-        rv$newOrder <- order(rv$hot[, "Condition"])
-        rv$hot <- rv$hot[rv$newOrder, ]
+      if (rv.widgets$convert_reorder == "Yes") {
+        rv.custom$newOrder <- order(rv.custom$hot[, "Condition"])
+        rv.custom$hot <- rv.custom$hot[rv.custom$newOrder, ]
       }
 
-      rv$conditionsChecked <- checkConditions(rv$hot$Condition)
-    })
-
-
-
-
-
-    observeEvent(req(input$linkToFaq1), {
-      updateTabsetPanel(session, "navPage", "faqTab")
-    })
-
-
-
-    #-------------------------------------------------------------
-    output$hot <- rhandsontable::renderRHandsontable({
-      rv$hot
-      input$chooseExpDesign
-
-      hot <- rhandsontable::rhandsontable(
-        rv$hot,
-        rowHeaders = NULL,
-        fillHandle = list(
-          direction = "vertical",
-          autoInsertRow = FALSE,
-          maxRows = nrow(rv$hot)
-        )
-      ) |>
-        rhandsontable::hot_rows(rowHeights = 30) |>
-        rhandsontable::hot_context_menu(
-          allowRowEdit = TRUE,
-          allowColEdit = FALSE,
-          allowInsertRow = FALSE,
-          allowInsertColumn = FALSE,
-          allowRemoveRow = TRUE,
-          allowRemoveColumn = FALSE,
-          autoInsertRow = FALSE
-        ) |>
-        rhandsontable::hot_cols(renderer = color_renderer()) |>
-        rhandsontable::hot_col(col = "quantCols", readOnly = TRUE)
-
-      if (!is.null(input$chooseExpDesign)) {
-        switch(input$chooseExpDesign,
-          FlatDesign = {
-            if ("Bio.Rep" %in% colnames(rv$hot)) {
-              hot <- hot |>
-                rhandsontable::hot_col(
-                  col = "Bio.Rep",
-                  readOnly = TRUE
-                )
-            }
-          },
-          twoLevelsDesign = {
-            if ("Tech.Rep" %in% colnames(rv$hot)) {
-              hot <- hot |>
-                rhandsontable::hot_col(
-                  col = "Tech.Rep",
-                  readOnly = TRUE
-                )
-            }
-          },
-          threeLevelsDesign = {
-            if ("Analyt.Rep" %in% colnames(rv$hot)) {
-              hot <- hot |>
-                rhandsontable::hot_col(col = "Analyt.Rep", readOnly = TRUE)
-            }
-          }
-        )
-      }
-
-      
-      hot
-    })
-
-
-    
-    observeEvent(remoteReset()+input$reset, ignoreInit = TRUE, ignoreNULL = TRUE,{
-        
-      rv$hot <- data.frame(
-        quantCols = as.character(quantCols()),
-        Condition = rep("", length(quantCols())),
-        stringsAsFactors = FALSE
-      )
-      
-      rv$conditionsChecked <- NULL
-      rv$newOrder <- NULL
-      
-      
-      dataOut$trigger <- MagellanNTK::Timestamp()
-      
-      dataOut$design <- data.frame(
-        quantCols = as.character(quantCols()),
-        Condition = rep("", length(quantCols())),
-        stringsAsFactors = FALSE
-      )
+      rv.custom$conditionsChecked <- checkConditions(rv.custom$hot$Condition)
     })
     
-    #--------------------------------------------------------------------------
-    observeEvent(req(input$hot), {
-      rv$hot <- rhandsontable::hot_to_r(input$hot)
-    })
-
-    #----------------------------------------------------------
-    output$UI_checkConditions <- renderUI({
-      req(rv$hot)
-      rv$conditionsChecked
-      input$convert_reorder
-
-      if ((sum(rv$hot$Condition == "") == 0) && (input$convert_reorder != "None")) {
-        tags$div(
-          tags$div(
-            style = "display:inline-block;",
-            actionButton(ns("btn_checkConds"), "Check conditions",
-              class = "btn btn-primary"
-            )
-          ),
-          tags$div(
-            style = "display:inline-block;",
-            if (!is.null(rv$conditionsChecked)) {
-              if (isTRUE(rv$conditionsChecked$valid)) {
-                txt <- "<img src=\"images/Ok.png\" height=\"24\"></img>Correct conditions."
-              } else {
-                txt <- "<img src=\"images/Problem.png\" height=\"24\"></img><font color=\"red\">Invalid conditions."
-              }
-              tagList(
-                tags$div(style = "display:inline-block;", HTML(txt)),
-                if (!isTRUE(rv$conditionsChecked$valid)) {
-                  tags$p(rv$conditionsChecked$warn)
-                }
-              )
-            }
-          )
-        )
-      } else {
-        tagList(
-          br(), br(), br(), br()
-        )
-      }
-    })
-
-
-
-    #--------------------------------------------------------------------------
+    
+    # Design ----
     output$UI_hierarchicalExp <- renderUI({
-      req(rv$conditionsChecked)
-      req(rv$conditionsChecked$valid)
+      req(rv.custom$conditionsChecked)
+      req(rv.custom$conditionsChecked$valid)
+      
+      widget <- radioButtons(ns("chooseExpDesign"), "",
+          choices = c(
+            "Flat design (automatic)" = "FlatDesign",
+            "2 levels design (complete Bio.Rep column)" = "twoLevelsDesign",
+            "3 levels design (complete Bio.Rep and Tech.Rep columns)" = "threeLevelsDesign"
+          ),
+          selected = rv.widgets$chooseExpDesign
+        )
 
       tagList(
         div(id = ns('div_UI_hierarchicalExp'),
           div(id = ns('div_choosetype'),
             style = "display:inline-block; vertical-align: middle;",
             tags$b("2 - Choose the type of experimental design and complete it accordingly")
-          ),
-          div(id = ns('div_btn_helpDesign'),
-            style = "display:inline-block; vertical-align: middle;",
-            tags$button(
-              id = "btn_helpDesign", tags$sup("[?]"),
-              class = "Prostar_tooltip"
-            )
-          )
+          )# ,
+          # div(id = ns('div_btn_helpDesign'),
+          #   style = "display:inline-block; vertical-align: middle;",
+          #   tags$button(
+          #     id = "btn_helpDesign", tags$sup("[?]"),
+          #     class = "Prostar_tooltip"
+          #   )
+          # )
         ),
-        radioButtons(ns("chooseExpDesign"), "",
-          choices = c(
-            "Flat design (automatic)" = "FlatDesign",
-            "2 levels design (complete Bio.Rep column)" = "twoLevelsDesign",
-            "3 levels design (complete Bio.Rep and Tech.Rep columns)" = "threeLevelsDesign"
-          ),
-          selected = character(0)
-        )
+        MagellanNTK::toggleWidget(widget, !isTRUE(rv.custom$designChecked$valid))
       )
     })
 
 
-
-
-
-
-    #------------------------------------------------------------------------------
-    # output$viewDesign <- renderUI({
-    #   # req(!(rv$designSaved))
-    # 
-    #   tagList(
-    #     h4("Design"),
-    #     rhandsontable::rHandsontableOutput(ns("hot"))
-    #   )
-    # })
-
-    #------------------------------------------------------------------------------
     output$designExamples <- renderUI({
-      req(input$chooseExpDesign)
+      req(rv.widgets$chooseExpDesign)
 
-      switch(input$chooseExpDesign,
+      switch(rv.widgets$chooseExpDesign,
         FlatDesign = {
           tags$p("There is nothing to do for the flat design: the 'Bio.Rep'
            column is already filled.")
@@ -376,36 +402,37 @@ mod_buildDesign_server <- function(
     })
 
 
-    #------------------------------------------------------------------------------
     observe({
       shinyjs::onclick("btn_helpDesign", {
         shinyjs::toggle(id = "showExamples", anim = TRUE)
       })
     })
 
-    #------------------------------------------------------------------------------
-    observeEvent(input$chooseExpDesign, {
-      rv$hot
-      rv$designChecked <- NULL
-      switch(input$chooseExpDesign,
+
+    observeEvent({rv.widgets$chooseExpDesign
+      rv.custom$conditionsChecked$valid}, {
+      req(isTRUE(rv.custom$conditionsChecked$valid))
+      rv.custom$hot
+      rv.custom$designChecked <- NULL
+      switch(rv.widgets$chooseExpDesign,
         FlatDesign = {
-          rv$hot <- data.frame(rv$hot[, seq_len(2)],
-            Bio.Rep = seq_len(nrow(rv$hot)),
+          rv.custom$hot <- data.frame(rv.custom$hot[, seq_len(2)],
+            Bio.Rep = seq_len(nrow(rv.custom$hot)),
             stringsAsFactors = FALSE
           )
         },
         twoLevelsDesign = {
-          rv$hot <- data.frame(rv$hot[, seq_len(2)],
-            Bio.Rep = rep("", nrow(rv$hot)),
-            Tech.Rep = seq_len(nrow(rv$hot)),
+          rv.custom$hot <- data.frame(rv.custom$hot[, seq_len(2)],
+            Bio.Rep = rep("", nrow(rv.custom$hot)),
+            Tech.Rep = seq_len(nrow(rv.custom$hot)),
             stringsAsFactors = FALSE
           )
         },
         threeLevelsDesign = {
-          rv$hot <- data.frame(rv$hot[, seq_len(2)],
-            Bio.Rep = rep("", nrow(rv$hot)),
-            Tech.Rep = rep("", nrow(rv$hot)),
-            Analyt.Rep = seq_len(nrow(rv$hot)),
+          rv.custom$hot <- data.frame(rv.custom$hot[, seq_len(2)],
+            Bio.Rep = rep("", nrow(rv.custom$hot)),
+            Tech.Rep = rep("", nrow(rv.custom$hot)),
+            Analyt.Rep = seq_len(nrow(rv.custom$hot)),
             stringsAsFactors = FALSE
           )
         }
@@ -413,124 +440,79 @@ mod_buildDesign_server <- function(
     })
 
 
-
-
-
-
-
-    #--------------------------------------------------------------------------
     observeEvent(input$btn_checkDesign, {
-      rv$designChecked <- checkDesign(rv$hot)
+      rv.custom$designChecked <- checkDesign(rv.custom$hot)
     })
 
-    #--------------------------------------------------------------------------
-    output$checkDesign <- renderUI({
-      req(input$chooseExpDesign)
-      rv$designChecked
-      req(rv$conditionsChecked)
 
-      req(rv$conditionsChecked$valid)
+    output$checkDesign <- renderUI({
+      req(rv.widgets$chooseExpDesign)
+      rv.custom$designChecked
+      req(rv.custom$conditionsChecked)
+
+      req(rv.custom$conditionsChecked$valid)
 
       switch(isolate({
-        input$chooseExpDesign
+        rv.widgets$chooseExpDesign
       }),
       FlatDesign = {},
       twoLevelsDesign = {
-        if (sum(rv$hot$Bio.Rep == "") > 0) {
+        if (sum(rv.custom$hot$Bio.Rep == "") > 0) {
           return(NULL)
         }
       },
       threeLevelsDesign = {
-        if ((sum(rv$hot$Bio.Rep == "") + sum(rv$hot$Tech.Rep == "")) > 0) {
+        if ((sum(rv.custom$hot$Bio.Rep == "") + sum(rv.custom$hot$Tech.Rep == "")) > 0) {
           return(NULL)
         }
       }
       )
+      
+      widget <- actionButton(ns("btn_checkDesign"), 
+                             "Check design")
+      img <- NULL
+      txt <- NULL
+      
+      if (!is.null(rv.custom$designChecked)) {
+        if (isTRUE(rv.custom$designChecked$valid)) {
+          img <- img(src = "images/Ok.png", height = 25)
+        } else {
+          img <- img(src = "images/Problem.png", height = 25)
+          txt <- unique(rv.custom$designChecked$warn)
+        }
+      }
 
-
-      tags$div(
-        tags$div(
-          style = "display:inline-block;",
-          actionButton(ns("btn_checkDesign"), "Check design",
-            class = "btn btn-primary"
+      tagList(
+        div(style = "display: flex;",
+            MagellanNTK::toggleWidget(widget, !isTRUE(rv.custom$designChecked$valid)),
+            img),
+        div(style = "color: red;",
+          tags$ul(
+            lapply(txt, function(x) {tags$li(x)})
           )
-        ),
-        tags$div(
-          style = "display:inline-block;",
-          if (!is.null(rv$designChecked)) {
-            if (isTRUE(rv$designChecked$valid)) {
-              shinyjs::enable("validateDesign")
-              img <- "images/Ok.png"
-              txt <- "Correct design"
-            } else {
-              img <- "images/Problem.png"
-              txt <- "Invalid design"
-            }
-
-
-            tagList(
-              tags$div(
-                tags$div(
-                  style = "display:inline-block;",
-                  tags$img(src = img, height = 25)
-                ),
-                tags$div(
-                  style = "display:inline-block;",
-                  tags$p(txt)
-                )
-              ),
-              if (!isTRUE(rv$designChecked$valid)) {
-                shinyjs::disable("validateDesign")
-                warn.txt <- unique(rv$designChecked$warn)
-                tags$ul(
-                  lapply(
-                    warn.txt,
-                    function(x) {
-                      tags$li(x)
-                    }
-                  )
-                )
-              } else {
-                shinyjs::enable("validateDesign")
-              }
-            )
-          } else {
-            shinyjs::disable("validateDesign")
-          }
         )
       )
     })
 
-
-
-
-    observeEvent(req(rv$designChecked$valid), {
-      req(isTRUE(rv$conditionsChecked$valid))
+    observeEvent(req(rv.custom$designChecked$valid), {
+      req(isTRUE(rv.custom$conditionsChecked$valid))
       
       dataOut$trigger <- MagellanNTK::Timestamp()
       
-        dataOut$design <- rv$hot
+        dataOut$design <- rv.custom$hot
         #dataOut$design <- NULL
 
-
-      if (input$convert_reorder == "Yes") {
-        dataOut$order <- rv$newOrder
+      if (rv.widgets$convert_reorder == "Yes") {
+        dataOut$order <- rv.custom$newOrder
       } else {
-        dataOut$order <- order(rownames(rv$hot))
+        dataOut$order <- order(rownames(rv.custom$hot))
       }
     })
 
 
     return(reactive({dataOut}))
   })
-} # end of
-
-
-
-
-
-
-
+} 
 
 
 

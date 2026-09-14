@@ -249,3 +249,66 @@ Extract_Value <- function(value, expected_type = c("numeric", "character", "logi
   error = function(e) NA
   )
 }
+
+
+#' @title Get filters scope
+#'
+#' @description Get the list of possible scopes for filters
+#'
+#' @return A `list`
+#'
+#' @examples
+#' GetFiltersScope()
+#'
+#' @export
+#'
+GetFiltersScope <- function(){
+  c("Whole Line" = "WholeLine",
+    "Whole matrix" = "WholeMatrix",
+    "For every condition" = "AllCond",
+    "At least one condition" = "AtLeastOneCond"
+  )
+}
+
+
+#' @title Numeric test
+#'
+#' @description Test whether an object is numeric or not
+#'
+#' @param input The object to test
+#'
+#' @return `NULL` if numeric, a `character` if not
+#'
+#' @examples
+#' not_a_numeric(1)
+#' not_a_numeric("A")
+#'
+#' @export
+#'
+not_a_numeric <- function(input) {
+  if (is.na(as.numeric(input))) {
+    "Please input a number"
+  } else {
+    NULL
+  }
+}
+
+
+#' @title Object contained in another one
+#'
+#' @description Check whether an object contained in another one
+#'
+#' @param strA Object to find
+#' @param strB Object to check
+#' 
+#' @return A `logical(1)`
+#'
+#' @examples
+#' isContainedIn("A", c("A", "B"))
+#' isContainedIn("A", c("ABCDE", "FGHIJ"))
+#'
+#' @export
+#'
+isContainedIn <- function(strA, strB) {
+  return(all(strA %in% strB))
+}

@@ -1571,7 +1571,7 @@ PipelinePeptideSC_DifferentialAnalysis_server <- function(id,
         shiny::withProgress(message = paste0("Saving process", id), {
           shiny::incProgress(0.5)
           
-          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

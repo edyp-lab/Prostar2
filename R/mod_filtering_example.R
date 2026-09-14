@@ -41,10 +41,10 @@ NULL
 
 #' @rdname filtering-example
 #' @importFrom shiny NS actionLink tagList radioButtons uiOutput
-#' @importFrom DT dataTableOutput renderDT datatable formatStyle styleEqual
+#' @importFrom DT renderDT datatable formatStyle styleEqual
 #' @importFrom stats setNames
 #' @importFrom shiny moduleServer reactiveValues observeEvent NS tagList actionLink fluidRow column uiOutput hr reactive
-#' @importFrom omXplore Build_enriched_qdata custom_metacell_colors
+#' @importFrom omXplore Build_enriched_qdata
 #' @export
 #'
 mod_filtering_example_ui <- function(id) {

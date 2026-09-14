@@ -466,7 +466,7 @@ PipelinePeptide_Convert_server <- function(id,
             })
           
           
-          # DO NOT MODIFY THE THREE FOLLOWINF LINES
+          # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status['SelectFile'] <- MagellanNTK::stepStatus$VALIDATED
@@ -650,7 +650,7 @@ PipelinePeptide_Convert_server <- function(id,
         if(rv.widgets$SelectFile_typeOfData != "protein"){
           req(rv.widgets$DataId_parentProteinID)}
         
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['DataId'] <- MagellanNTK::stepStatus$VALIDATED
@@ -778,7 +778,7 @@ PipelinePeptide_Convert_server <- function(id,
         #                                     dataset = new.dataset,
         #                                     name = paste0('temp_',id))
         # 
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['ExpandFeatData'] <- MagellanNTK::stepStatus$VALIDATED
@@ -850,7 +850,7 @@ PipelinePeptide_Convert_server <- function(id,
         # rv$dataIn <- Add_Datasets_to_Object(object = rv$dataIn,
         #                                     dataset = new.dataset,
         #                                     name = paste0('temp_',id))
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['Design'] <- MagellanNTK::stepStatus$VALIDATED
@@ -956,7 +956,7 @@ PipelinePeptide_Convert_server <- function(id,
       })
       
       
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
+      # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       dataOut$name = rv.custom$name

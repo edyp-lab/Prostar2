@@ -35,8 +35,8 @@ mod_inputGroup_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    uiOutput(ns("inputGroup")),
-    uiOutput(ns("checkIdentificationTab"))
+    uiOutput(ns("checkIdentificationTab")),
+    uiOutput(ns("inputGroup"))
   )
 }
 
@@ -111,12 +111,11 @@ mod_inputGroup_server <- function(
         inputName <- ns(paste("input_", i, sep = ""))
         div(id = ns('div_input_group'),
           div(id = ns('div_Identification_col'),
-            style = "align: center;display:inline-block; vertical-align:
-          middle;padding-right: 10px;",
+            style = "align: center;display:inline-block; padding-right: 10px;",
             p(tags$strong(paste0("Identification col. for ", quantCols()[i])))
           ),
           div(id = ns('div_inputName'),
-            style = "align: center;display:inline-block; vertical-align: middle;",
+            style = "align: center;display:inline-block;",
             selectInput(inputName, "",
               choices = c("None", colnames(df())),
               width = "300px"
@@ -157,20 +156,17 @@ mod_inputGroup_server <- function(
 
       res <- NULL
       if (length(which(temp == "None")) > 0) {
-        txt <- "The identification method is not appropriately defined for
-      each sample."
+        txt <- "The identification method is not appropriately defined for each sample."
         res <- list(trigger = MagellanNTK::Timestamp(), ok = FALSE, temp = temp, txt = txt)
         dataOut(NULL)
-      } else {
-        if (length(temp) != length(unique(temp))) {
+      } else if (length(temp) != length(unique(temp))) {
           txt <- "There are duplicates in identification columns."
           res <- list(trigger = MagellanNTK::Timestamp(), ok = FALSE, temp = temp, txt = txt)
           dataOut(NULL)
-        } else {
+      } else {
           txt <- "Correct"
           res <- list(trigger = MagellanNTK::Timestamp(), ok = TRUE, temp = temp, txt = txt)
           dataOut(temp)
-        }
       }
 
       res
@@ -180,21 +176,21 @@ mod_inputGroup_server <- function(
 
     output$checkIdentificationTab <- renderUI({
       req(isOk())
-      if (isOk()$ok) {
-        img <- "images/Ok.png"
-      } else {
-        img <- "images/Problem.png"
-      }
-
-      tags$div(
-        tags$div(
-          tags$div(
-            style = "display:inline-block;",
-            tags$img(src = img, height = 25)
-          ),
-          tags$div(style = "display:inline-block;", tags$p(isOk()$txt))
+      tmp <- isOk()
+      if (tmp$ok) {
+        div(style = "display: flex; margin-top: -10px;",
+            img(src = "images/Ok.png", height = 25),
+            p(style = "margin-top: 5px;",
+              tmp$txt)
         )
-      )
+        
+      } else {
+        div(style = "display: flex; margin-top: -10px;",
+            img(src = "images/Problem.png", height = 25),
+            p(style = "color: red; margin-top: 5px;", 
+              tmp$txt)
+        )
+      }
     })
 
     return(reactive({dataOut()}))

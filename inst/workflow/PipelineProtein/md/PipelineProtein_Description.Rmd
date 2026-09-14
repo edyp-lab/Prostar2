@@ -8,7 +8,7 @@ output:
         highlight: tango
         toc: false
         number_sections: FALSE
-date: 30 mai 2024
+date: 2 September 2024
 link-citations: true
 ---
 # Protein Workflow
@@ -43,16 +43,16 @@ It contains 1 sub-step : `Normalization`.
 The `Imputation` step imputes missing values to produce a complete dataset. Theorically, imputation effectively creates estimated measurements rather than true experimental observations and should therefore be avoided whenever possible. In practice, most algorithms required subsequently cannot handle missing values, and even methods that claim robustness to missing data typically rely on implicit or explicit imputation, offering no real alternative. Therefore, this is a step that should not be overlooked and requires caution.
 Imputed values use a different color code and tags than observed values, making it possible to track which proteins have been imputed.
 
-This step allows the selection of a imputation method from several available options.
+This step allows the selection of a imputation method from several available options. The imputation process is divided into two parts to account for the nature of the missing values (POV or MEC).
 
 It contains 1 sub-step : `Imputation`.
 
 ***
 
 ### HypothesisTest
-The `HypothesisTest` step ...
+The `HypothesisTest` step performs the statistical tests that allow identifying proteins that are significantly differentially abundant between the selected conditions. The tests can be carried out only on datasets without missing values or where missing values have been imputed. The log fold-change (logFC) threshold is also selected during this step.
 
-This step allows ...
+This step allows the selection of statistical tests and contrasts, as well as the tuning of the FC threshold. Once the parameters have been defined, the tests can be run and the resulting p-values and FC cut-offs are saved to be use during the differential analysis.
 
 It contains 1 sub-step : `HypothesisTest`.
 

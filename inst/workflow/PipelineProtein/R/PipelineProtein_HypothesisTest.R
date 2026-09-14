@@ -553,7 +553,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
         
         rv.custom$dataIn <- QFeatures::addAssay(rv.custom$dataIn, new.dataset, 'HypothesisTest')
 
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['HypothesisTest'] <- MagellanNTK::stepStatus$VALIDATED

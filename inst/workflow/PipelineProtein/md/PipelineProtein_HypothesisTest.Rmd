@@ -8,12 +8,14 @@ output:
         highlight: tango
         toc: false
         number_sections: TRUE
-date: 12 February 2026
+date: 2 September 2026
 link-citations: true
 ---
 # HypothesisTest
 
-The `HypothesisTest` step ...
+The `HypothesisTest` step performs the statistical tests that allow identifying proteins that are significantly differentially abundant between the selected conditions. The tests can be carried out only on datasets without missing values or where missing values have been imputed. The log fold-change (logFC) threshold is also selected during this step.
+
+This step allows the selection of statistical tests and contrasts, as well as the tuning of the FC threshold. Once the parameters have been defined, the tests can be run and the resulting p-values and FC cut-offs are saved to be use during the differential analysis.
 
 ***
 

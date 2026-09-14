@@ -83,8 +83,6 @@ infos_dataset_server <- function(
       rv$dataIn <- dataIn()
     })
 
-
-
     output$samples_tab_ui <- renderUI({
       req(rv$dataIn)
 
@@ -112,17 +110,12 @@ infos_dataset_server <- function(
       )
     })
 
-
-
-
-
     MagellanNTK::format_DT_server("dt",
       dataIn = reactive({
         req(Get_QFeatures_summary())
         tibble::as_tibble(Get_QFeatures_summary())
       })
     )
-
 
     output$title <- renderUI({
       req(rv$dataIn)
@@ -135,8 +128,6 @@ infos_dataset_server <- function(
       )
     })
 
-
-
     output$choose_SE_ui <- renderUI({
       req(rv$dataIn)
       
@@ -148,7 +139,6 @@ infos_dataset_server <- function(
         selected = .selected
       )
     })
-
 
     Get_QFeatures_summary <- reactive({
       req(rv$dataIn)
@@ -173,8 +163,6 @@ infos_dataset_server <- function(
         }
       )
 
-
-
       do <- data.frame(
         Definition = columns,
         Value = vals
@@ -183,13 +171,9 @@ infos_dataset_server <- function(
       do
     })
 
-
-
-
     Get_SE_Summary <- reactive({
       req(rv$dataIn)
       req(input$selectInputSE != "None")
-
 
       .se <- rv$dataIn[[input$selectInputSE]]
       req(.se)
@@ -198,13 +182,17 @@ infos_dataset_server <- function(
       .nNA <- QFeatures::nNA(.se)
       percentMV <- round(100 * .nNA$nNA[, "pNA"], digits = 2)
       nEmptyLines <- length(which(.nNA$nNArows[, "nNA"] == ncol(.se)))
-
-      val <- c(typeOfData, nLines, percentMV, nEmptyLines)
+      nSamples <- ncol(.se)
+      nConditions <- length(unique(DaparToolshed::design_qf(rv$dataIn)$Condition))
+      
+      val <- c(typeOfData, nLines, percentMV, nEmptyLines, nSamples, nConditions)
       row_names <- c(
         "Type of data",
         "Number of lines",
         "% of missing values",
-        "Number of empty lines"
+        "Number of empty lines",
+        "Number of samples",
+        "Number of conditions"
       )
 
       if (tolower(typeOfData) == "peptide") {
@@ -224,7 +212,6 @@ infos_dataset_server <- function(
         row_names <- c(row_names, "Adjacency matrices", "Connex components")
       }
 
-
       do <- data.frame(
         Definition = row_names,
         Value = val,
@@ -232,71 +219,6 @@ infos_dataset_server <- function(
       )
       do
     })
-
-
-# 
-#     
-#     Get_QFeatures_History <- reactive({
-#       req(rv$dataIn)
-#       
-#       
-#       .se <- rv$dataIn[[input$selectInputSE]]
-#       req(.se)
-#       se_history <- "-"
-#       
-#       if (!is.null(DaparToolshed::paramshistory(.se))) {
-#         se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
-#           ConvertListToHtml(paste0(names(x), " = ", x))
-#         })
-#         
-#         # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
-#         
-#         data.frame(
-#           Name = names(se_history),
-#           History = unlist(se_history)
-#         )
-#       } else {
-#         data.frame(
-#           Name = "-",
-#           History = "-"
-#         )
-#       }
-#     })
-#     
-#     
-# 
-#     Get_SE_History <- reactive({
-#       req(rv$dataIn)
-#       req(input$selectInputSE != "None")
-#       input$selectInputSE
-# 
-# 
-#       .se <- rv$dataIn[[input$selectInputSE]]
-#       req(.se)
-#       
-#       
-#       se_history <- "-"
-# 
-#       if (!is.null(DaparToolshed::paramshistory(.se))) {
-#         se_history <- lapply(DaparToolshed::paramshistory(.se), function(x) {
-#           ConvertListToHtml(paste0(names(x), " = ", x))
-#         })
-# 
-#         # se_history_values <- lapply(DaparToolshed::paramshistory(.se), function(x) x)
-# 
-#         data.frame(
-#           Name = names(se_history),
-#           History = unlist(se_history)
-#         )
-#       } else {
-#         data.frame(
-#           Name = "-",
-#           History = "-"
-#         )
-#       }
-#     })
-
-
 
     output$properties_ui <- renderUI({
       req(input$selectInputSE)
@@ -307,8 +229,6 @@ infos_dataset_server <- function(
       }
     })
 
-
-
     observeEvent(input$selectInputSE, {
       if (isTRUE(input$properties_button)) {
         output$properties_ui <- renderUI({
@@ -318,29 +238,12 @@ infos_dataset_server <- function(
         return(NULL)
       }
     })
-
-
-    # output$properties <- renderPrint({
-    #   req(input$properties_button)
-    #
-    #   if (input$selectInputSE != "None" && isTRUE(input$properties_button)) {
-    #
-    #     data <- experiments(obj())[[input$selectInputSE]]
-    #     metadata(data)
-    #   }
-    # })
-
+    
     MagellanNTK::format_DT_server("dt2",
       dataIn = reactive({
         Get_SE_Summary()
       })
     )
-
-    # MagellanNTK::format_DT_server("history",
-    #   dataIn = reactive({
-    #     Get_SE_History()
-    #   })
-    # )
 
     output$show_SE_ui <- renderUI({
       req(input$selectInputSE != "None")
@@ -348,59 +251,9 @@ infos_dataset_server <- function(
 
       tagList(
         MagellanNTK::format_DT_ui(ns("dt2"))
-       # br(),
-        # uiOutput(ns('info'))
-        #MagellanNTK::format_DT_ui(ns("history"))
       )
     })
-
-
-
-    # output$info <- renderUI({
-    #   req(input$selectInputSE)
-    #   req(rv$dataIn)
-    #
-    #   if (input$selectInputSE != "None") {
-    #
-    #     typeOfDataset <- Get_SE_Summary()["Type of data", 2]
-    #     pourcentage <- Get_SE_Summary()["% of missing values", 2]
-    #     nb.empty.lines <- Get_SE_Summary()["Number of empty lines", 2]
-    #     if (pourcentage > 0 && nb.empty.lines > 0) {
-    #       tagList(
-    #         tags$h4("Info"),
-    #         if (typeOfDataset == "protein"){
-    #           tags$p("The aggregation tool
-    #              has been disabled because the dataset contains
-    #              protein quantitative data.")
-    #         },
-    #
-    #         if (pourcentage > 0){
-    #           tags$p("As your dataset contains missing values, you should
-    #              impute them prior to proceed to the differential analysis.")
-    #         },
-    #         if (nb.empty.lines > 0){
-    #           tags$p("As your dataset contains lines with no values, you
-    #              should remove them with the filter tool
-    #              prior to proceed to the analysis of the data.")
-    #         }
-    #       )
-    #     }
-    #   }
-    # })
-
-
-
-
-    # NeedsUpdate <- reactive({
-    #   req(obj())
-    #   PROSTAR.version <- metadata(experiments(obj()))$versions$Prostar_Version
-    #
-    #   if(compareVersion(PROSTAR.version,"1.12.9") != -1 && !is.na(PROSTAR.version) && PROSTAR.version != "NA") {
-    #     return (FALSE)
-    #   } else {
-    #     return(TRUE)
-    #   }
-    # })
+    
   })
 }
 

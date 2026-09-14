@@ -253,7 +253,7 @@ mod_Agregation_server <- function(
         name = "adjMatfiltered",
         filters = list(f)
       )
-      # DO NOT MODIFY THE THREE FOLLOWINF LINES
+      # DO NOT MODIFY THE THREE FOLLOWING LINES
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$value <- rv$dataIn
       rv$steps.status["Filterpeptides"] <- stepStatus$VALIDATED

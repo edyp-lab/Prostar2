@@ -113,7 +113,7 @@ PipelinePeptideSC_Save_server <- function(id,
         shiny::incProgress(0.5)
         
         S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelineProtein'
-        # DO NOT MODIFY THE THREE FOLLOWINF LINES
+        # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
         rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED

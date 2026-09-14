@@ -64,20 +64,22 @@ mod_qMetacell_FunctionFilter_Generator_ui <- function(id) {
   tagList(
     shinyjs::useShinyjs(),
     tags$style(HTML("
-    .radio-inline {
+    .filtering .radio-inline {
       margin-right: 20px;  /* Adjust spacing between choices */
       margin-left: 10px;   /* Adjust spacing around the group */
       margin-bottom: -10px;
     }
-  ")),
-    uiOutput(ns("tree_UI")),
-    uiOutput(ns("chooseKeepRemove_ui")),
-    uiOutput(ns("chooseScope_ui")),
-    uiOutput(ns("qMetacellScope_widgets_set2_ui")),
-    uiOutput(ns("qMetacellScope_request_ui")),
-    div(style = "display: flex; gap: 8px;",
-      uiOutput(ns('Preview_UI')),
-      uiOutput(ns("Add_btn_UI"))
+    ")),
+    div(class = "filtering",
+      uiOutput(ns("tree_UI")),
+      uiOutput(ns("chooseKeepRemove_ui")),
+      uiOutput(ns("chooseScope_ui")),
+      uiOutput(ns("qMetacellScope_widgets_set2_ui")),
+      uiOutput(ns("qMetacellScope_request_ui")),
+      div(style = "display: flex; gap: 8px;",
+        uiOutput(ns('Preview_UI')),
+        uiOutput(ns("Add_btn_UI"))
+      )
     )
   )
 }
@@ -120,16 +122,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     tmp.tags = reactive({NULL}),
     showmodal = NULL
   )
-
-
-  GetFiltersScope <- function() {
-    c(
-      "Whole Line" = "WholeLine",
-      "Whole matrix" = "WholeMatrix",
-      "For every condition" = "AllCond",
-      "At least one condition" = "AtLeastOneCond"
-    )
-  }
 
 
   moduleServer(id, function(input, output, session) {
