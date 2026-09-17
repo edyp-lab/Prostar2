@@ -838,7 +838,7 @@ PipelineProtein_Convert_server <- function(id,
       MagellanNTK::process_layout_process(session,
         ns = NS(id),
         sidebar = tagList(),
-        content = tagList(div(style = "margin-left:;",
+        content = tagList(div(style = "margin-left: 10px;",
           uiOutput(ns('dl_ui')),
           br(),
           uiOutput(ns('Save_infos_ui')))
