@@ -2,27 +2,26 @@
 % Please edit documentation in R/utils.R
 \name{Add2History}
 \alias{Add2History}
-\title{Get the last validated step before current position.}
+\title{Add row to history}
 \usage{
 Add2History(history, step, substep, param.name, value)
 }
 \arguments{
-\item{history}{A \code{data.frame()}}
+\item{history}{A \code{data.frame} corresponding to the current history.}
 
-\item{step}{A \code{character()}}
+\item{param.name}{A \code{character(1)} corresponding to the parameter name.}
 
-\item{substep}{A \code{character()}}
+\item{value}{The value of the corresponding parameter.}
 
-\item{param.name}{A \code{character()}}
+\item{process}{A \code{character(1)} corresponding to the process name.}
 
-\item{value}{The value corresponding to the param.name}
+\item{step.name}{A \code{character(1)} corresponding to the step name.}
 }
 \value{
-A \code{data.frame()}
+A \code{data.frame} with one added row
 }
 \description{
-This function returns the indice of the last validated step
-before the current step.
+This function adds a row to the history.
 }
 \examples{
 history <- InitializeHistory()

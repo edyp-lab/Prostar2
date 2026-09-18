@@ -298,7 +298,7 @@ PipelineProtein_Filtering_server <- function(id,
     })
     
     #### _content -----
-    observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = TRUE,{
+    observeEvent(req(length(rv.custom$funFilter()$value$ll.fun) > 0), ignoreInit = FALSE, {
       req(rv.custom$dataIn1)
       
       tmp <- DaparToolshed::filterFeaturesOneSE(
@@ -498,7 +498,7 @@ PipelineProtein_Filtering_server <- function(id,
         "/!\\ Numeric value expected")
     })
     
-    observeEvent(c(rv.widgets$Variablefiltering_value, rv.widgets$Variablefiltering_cname), ignoreInit = TRUE, {
+    observeEvent(c(rv.widgets$Variablefiltering_value, rv.widgets$Variablefiltering_cname), {
       req(rv.custom$dataIn2)
       req(!is.null(rv.widgets$Variablefiltering_value))
       req(rv.widgets$Variablefiltering_cname != "None")
@@ -527,7 +527,7 @@ PipelineProtein_Filtering_server <- function(id,
     
     #### _content -----
     observeEvent(input$Variablefiltering_addFilter_btn,
-                 ignoreInit = TRUE, ignoreNULL = TRUE, {
+                 ignoreInit = FALSE, ignoreNULL = TRUE, {
                    req(rv.custom$dataIn2)
                    if ((rv.widgets$Variablefiltering_cname == "None") || 
                        (rv.widgets$Variablefiltering_operator == "None") || 

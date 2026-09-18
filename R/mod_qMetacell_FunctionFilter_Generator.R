@@ -583,7 +583,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
     })
 
     observeEvent(input$BuildFilter_btn, ignoreInit = TRUE, {
-      if (rv.widgets$tag == "None" || rv.widgets$scope == "None"){
+      if (any(rv.widgets$tag == "None") || rv.widgets$scope == "None"){
         shiny::showModal(shiny::modalDialog(
           id = ns('apply_nofilter'),
           title = "Filter application impossible",
@@ -602,7 +602,6 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         req(rv.custom$ll.fun)
         req(rv.custom$ll.query)
         req(rv.custom$ll.widgets.value)
-        
         # Append a new FunctionFilter to the list
         dataOut$trigger <- as.numeric(Sys.time())
         dataOut$value <- list(

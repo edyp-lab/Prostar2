@@ -1,15 +1,14 @@
-#' @title Get the last validated step before current position.
+#' @title Add row to history
 #'
-#' @description This function returns the indice of the last validated step
-#' before the current step.
+#' @description This function adds a row to the history.
 #'
-#' @param history A `data.frame()`
-#' @param step A `character()`
-#' @param substep A `character()`
-#' @param param.name A `character()`
-#' @param value The value corresponding to the param.name
-#'
-#' @return A `data.frame()`
+#' @param history A `data.frame` corresponding to the current history.
+#' @param process A `character(1)` corresponding to the process name.
+#' @param step.name A `character(1)` corresponding to the step name.
+#' @param param.name A `character(1)` corresponding to the parameter name.
+#' @param value The value of the corresponding parameter.
+#' 
+#' @return A `data.frame` with one added row
 #'
 #' @examples
 #' history <- InitializeHistory()
@@ -62,19 +61,17 @@ GetHistory <- function(dataIn, x){
 
 
 
-#' @title Get the last validated step before current position.
+#' @title Initialize the history
 #'
-#' @description This function returns the indice of the last validated step
-#' before the current step.
+#' @description This function initializes the history.
 #'
-#' @return A `data.frame()` with four columns: 'Process', 'Step', 'Parameter'
-#' and 'Value'
+#' @return An empty `data.frame` with 4 columns ('Step', 'Substep', 'Parameter' and 'Value')
 #'
 #' @examples
 #' InitializeHistory()
-#'
+#' 
 #' @export
-#'
+#' 
 InitializeHistory <- function() {
   history <- NULL
   history <- setNames(

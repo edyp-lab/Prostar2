@@ -1,8 +1,8 @@
 Package: Prostar2
 Type: Package
 Title: Prostar 2
-Version: 0.99.29
-Date: 2026-09-14
+Version: 0.99.30
+Date: 2026-09-18
 Authors@R: c(
     person("Prostar2 Package Maintainer",
     email = "prostar-proteomics@cea.fr", role = c("cre")),
@@ -61,6 +61,7 @@ Suggests:
     spsComps,
     cp4p,
     rrcovNA,
+    systemfonts,
     highcharter
 Remotes:
     git::https://github.com/edyp-lab/MagellanNTK,
