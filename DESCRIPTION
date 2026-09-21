@@ -1,8 +1,8 @@
 Package: Prostar2
 Type: Package
 Title: Prostar 2
-Version: 0.99.30
-Date: 2026-09-18
+Version: 0.99.31
+Date: 2026-09-21
 Authors@R: c(
     person("Prostar2 Package Maintainer",
     email = "prostar-proteomics@cea.fr", role = c("cre")),
@@ -28,7 +28,7 @@ Imports:
     omXplore,
     plotly,
     MagellanNTK,
-    DaparToolshed,
+    DaparToolshed  (>= 0.99.40),
     DaparToolshedData,
     BiocManager,
     rhandsontable,

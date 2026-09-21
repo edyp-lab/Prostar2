@@ -542,7 +542,8 @@ PipelineProtein_HypothesisTest_server <- function(id,
           rv.custom$swap.history <- rep(0, rv.custom$n)
         }
         
-        
+        req(rv.custom$AllPairwiseComp$P_Value)
+        req(rv.custom$AllPairwiseComp$logFC)
         
         new.dataset <- rv.custom$dataIn[[length(rv.custom$dataIn)]]
         df <- cbind(rv.custom$AllPairwiseComp$logFC, 

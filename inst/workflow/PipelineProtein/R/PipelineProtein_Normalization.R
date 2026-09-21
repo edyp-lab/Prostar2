@@ -210,9 +210,9 @@ PipelineProtein_Normalization_server <- function(id,
           shinyjs::hidden(uiOutput(ns('Normalization_spanLOESS_ui'))),
           div(style = "white-space: nowrap;",
               uiOutput(ns("Normalization_quantile_ui"))),
-          uiOutput(ns("Normalization_varReduction_ui")),
-          uiOutput(ns('tracking')),
-          shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
+          uiOutput(ns("Normalization_varReduction_ui"))#,
+          # uiOutput(ns('tracking')),
+          # shinyjs::hidden(uiOutput(ns("Normalization_sync_ui")))
           ),
         content = tagList(fluidRow(
           column(6,
@@ -296,21 +296,21 @@ PipelineProtein_Normalization_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
     })
     
-    output$Normalization_sync_ui <- renderUI({
-      widget <- checkboxInput(
-        ns('Normalization_sync'),
-        "Synchronise plots with the above selection",
-        value = rv.widgets$Normalization_sync
-      )
-      
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
-    })
+    # output$Normalization_sync_ui <- renderUI({
+    #   widget <- checkboxInput(
+    #     ns('Normalization_sync'),
+    #     "Synchronise plots with the above selection",
+    #     value = rv.widgets$Normalization_sync
+    #   )
+    #   
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
+    # })
     
-    output$tracking <- renderUI({
-      req(rv.widgets$Normalization_method %in% c('QuantileCentering', 'MeanCentering', 'SumByColumns'))
-      widget <-  omXplore::plots_tracking_ui(ns("tracker"))
-      MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
-    })
+    # output$tracking <- renderUI({
+    #   req(rv.widgets$Normalization_method %in% c('QuantileCentering', 'MeanCentering', 'SumByColumns'))
+    #   widget <-  omXplore::plots_tracking_ui(ns("tracker"))
+    #   MagellanNTK::toggleWidget(widget, rv$steps.enabled["Normalization"])
+    # })
     
     selectProt <- omXplore::plots_tracking_server(
       id = "tracker",
@@ -406,7 +406,7 @@ PipelineProtein_Normalization_server <- function(id,
       req(grepl('Normalization', btnEvents()))
       shiny::withProgress(message = paste0("Normalization process", id), {
         shiny::incProgress(0.5)
-
+        
         if ( is.null(rv.custom$dataIn) ||
           rv.widgets$Normalization_method == "None" ||
           rv.widgets$Normalization_quantile == "" ||

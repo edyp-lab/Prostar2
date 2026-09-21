@@ -501,11 +501,10 @@ mod_buildDesign_server <- function(
       
         dataOut$design <- rv.custom$hot
         #dataOut$design <- NULL
-
       if (rv.widgets$convert_reorder == "Yes") {
         dataOut$order <- rv.custom$newOrder
       } else {
-        dataOut$order <- order(rownames(rv.custom$hot))
+        dataOut$order <- seq_len(nrow(rv.custom$hot))
       }
     })
 

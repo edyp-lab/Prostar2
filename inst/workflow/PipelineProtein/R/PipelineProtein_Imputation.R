@@ -532,9 +532,9 @@ PipelineProtein_Imputation_server <- function(id,
                          widget <- div(
                            style = "display: flex; gap: 10px;",
                            shinyWidgets::autonumericInput(
-                             ns("POVImputation_detQuant_quantile"),
+                             ns("MECImputation_detQuant_quantile"),
                              label = "Quantile",
-                             value = isolate(rv.widgets$POVImputation_detQuant_quantile),  
+                             value = isolate(rv.widgets$MECImputation_detQuant_quantile),  
                              width = "100px",
                              minimumValue = 0,
                              maximumValue = 100,
@@ -546,9 +546,9 @@ PipelineProtein_Imputation_server <- function(id,
                              align = "left"
                            ),
                            shinyWidgets::autonumericInput(
-                             ns("POVImputation_detQuant_factor"),
+                             ns("MECImputation_detQuant_factor"),
                              label = "Factor",
-                             value = isolate(rv.widgets$POVImputation_detQuant_factor), 
+                             value = isolate(rv.widgets$MECImputation_detQuant_factor), 
                              width = "100px",
                              minimumValue = 0,
                              maximumValue = 10,

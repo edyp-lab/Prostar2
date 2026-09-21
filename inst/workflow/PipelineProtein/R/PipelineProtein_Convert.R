@@ -378,6 +378,7 @@ PipelineProtein_Convert_server <- function(id,
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('SelectFile', btnEvents()))
       
+      rv.widgets$SelectFile_XLSsheets <- input$SelectFile_XLSsheets
       if (is.null(rv.widgets$SelectFile_file) || is.null(rv.widgets$SelectFile_software) || 
           is.null(rv.widgets$SelectFile_typeOfData) || is.null(rv.widgets$SelectFile_checkDataLogged) ||
           is.null(rv.widgets$SelectFile_replaceAllZeros) || 

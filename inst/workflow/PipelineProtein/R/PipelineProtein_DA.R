@@ -537,7 +537,7 @@ PipelineProtein_DA_server <- function(id,
                   dt[which(dt$comparison == rv.widgets$Pairwisecomparison_Comparison), ])
       dt <- dt[, -1]
       rv.custom$Pairwisecomparison_pushPval_SummaryDT_comp <- dt
-    }, ignoreInit = TRUE)
+    })
      
     MagellanNTK::format_DT_server("dt", 
                                   dataIn = reactive({rv.custom$Pairwisecomparison_pushPval_SummaryDT_comp}))
@@ -658,7 +658,7 @@ PipelineProtein_DA_server <- function(id,
     
     observeEvent(input$Pvaluecalibration_numericValCalibration, {
       rv.widgets$Pvaluecalibration_numericValCalibration <- input$Pvaluecalibration_numericValCalibration
-    }, ignoreInit = TRUE)
+    })
     
     # Debounce the reactive value ONLY for the plot (300ms delay)
     debounced_numericVal <- debounce(
