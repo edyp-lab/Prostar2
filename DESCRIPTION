@@ -28,7 +28,7 @@ Imports:
     omXplore,
     plotly,
     MagellanNTK,
-    DaparToolshed  (>= 0.99.40),
+    DaparToolshed (>= 0.99.40),
     DaparToolshedData,
     BiocManager,
     rhandsontable,
