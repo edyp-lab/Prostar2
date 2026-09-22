@@ -115,7 +115,7 @@ PipelineProtein_Convert_server <- function(id,
     ExpandFeatData_quantCols = NULL,
     ExpandFeatData_inputGroup = reactive({NULL}),
     
-    Save_analysis = NULL,
+    Save_analysis = "",
     Save_description = NULL
   )
   
@@ -894,17 +894,22 @@ PipelineProtein_Convert_server <- function(id,
         # print(rv.custom$design()$order)
         # as.data.frame(rv.custom$design()$design)
         
-        if (rv.widgets$Save_analysis == ""){
+        if ((rv.widgets$Save_analysis == "") || is.null(rv.widgets$Save_analysis)){
           rv.widgets$Save_analysis <- "myDataset"
         }
         
         .indexForMetacell <- NULL
-        if (!is.null(rv.widgets$ExpandFeatData_inputGroup))
+        if (!is.null(rv.widgets$ExpandFeatData_inputGroup)){
+          print("_________if !is.null(rv.widgets$ExpandFeatData_inputGroup)")
+          print("-- order :")
+          print(rv.custom$design()$order)
+          print("--rv.wid$expand_inputgrp :")
+          print(rv.widgets$ExpandFeatData_inputGroup())
+          print("--rv.wid$expand_quantcol :")
+          print(rv.widgets$ExpandFeatData_quantCols)
           .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
+        }
         .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
-        #browser() ## order= ??? nb si No on a:
-        # > rv.custom$design()$order
-        # [1]  1 10 11 12  2  3  4  5  6  7  8  9
         
         # Create QFeatures dataset file
         rv$dataIn <- DaparToolshed::createQFeatures(
