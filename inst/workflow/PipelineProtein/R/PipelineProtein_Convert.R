@@ -732,7 +732,13 @@ PipelineProtein_Convert_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('ExpandFeatData', btnEvents()))
-      
+      print("________btnEvent Expand")
+      print("-- rv.widgets$ExpandFeatData_idMethod")
+      print(rv.widgets$ExpandFeatData_idMethod)
+      print("-- rv.widgets$ExpandFeatData_inputGroup")
+      print(rv.widgets$ExpandFeatData_inputGroup)
+      print("--- w/ ()")
+      print(rv.widgets$ExpandFeatData_inputGroup())
       if (is.null(rv.widgets$ExpandFeatData_quantCols) || !all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE], is.numeric)) || 
           (as.logical(rv.widgets$ExpandFeatData_idMethod) && is.null(rv.widgets$ExpandFeatData_inputGroup()))) {
         shinyjs::info(btnVentsMasg)
