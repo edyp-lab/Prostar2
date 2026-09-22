@@ -718,6 +718,7 @@ PipelineProtein_Convert_server <- function(id,
     })
     
     output$ExpandFeatData_inputGroup_ui <- renderUI({
+      req(rv$steps.enabled["ExpandFeatData"])
       req(as.logical(rv.widgets$ExpandFeatData_idMethod))
       
       rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
@@ -732,13 +733,7 @@ PipelineProtein_Convert_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('ExpandFeatData', btnEvents()))
-      print("________btnEvent Expand")
-      print("-- rv.widgets$ExpandFeatData_idMethod")
-      print(rv.widgets$ExpandFeatData_idMethod)
-      print("-- rv.widgets$ExpandFeatData_inputGroup")
-      print(rv.widgets$ExpandFeatData_inputGroup)
-      print("--- w/ ()")
-      print(rv.widgets$ExpandFeatData_inputGroup())
+      
       if (is.null(rv.widgets$ExpandFeatData_quantCols) || !all(sapply(rv.custom$tab[, rv.widgets$ExpandFeatData_quantCols, drop = FALSE], is.numeric)) || 
           (as.logical(rv.widgets$ExpandFeatData_idMethod) && is.null(rv.widgets$ExpandFeatData_inputGroup()))) {
         shinyjs::info(btnVentsMasg)
@@ -906,13 +901,9 @@ PipelineProtein_Convert_server <- function(id,
         
         .indexForMetacell <- NULL
         if (!is.null(rv.widgets$ExpandFeatData_inputGroup)){
-          print("_________if !is.null(rv.widgets$ExpandFeatData_inputGroup)")
-          print("-- order :")
-          print(rv.custom$design()$order)
-          print("--rv.wid$expand_inputgrp :")
-          print(rv.widgets$ExpandFeatData_inputGroup())
-          print("--rv.wid$expand_quantcol :")
-          print(rv.widgets$ExpandFeatData_quantCols)
+          # print("_________if !is.null(rv.widgets$ExpandFeatData_inputGroup)")
+          # print("--rv.wid$expand_inputgrp :")
+          # print(rv.widgets$ExpandFeatData_inputGroup())
           .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
         }
         .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
