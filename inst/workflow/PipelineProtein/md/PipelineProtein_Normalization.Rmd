@@ -63,23 +63,23 @@ This specifies whether variance reduction is performed during normalization, mea
 
 This indicates the quantile of the intensity distribution that is used as reference. The value must be a float between 0 and 1. The most classically used is the median (quantile 0.5), but other quantiles can aslo be useful, depending on the dataset. Notably, as the lower limit of quantitation is roughly constant over the samples, relying on a lower quantile such as 0.15 can be efficient to align the signal/noise ratios.
 
-###### **`Type of selection`**
-*Available only for the `SumByColumns`, `QuantileCentering` and `MeanCentering` method.*
+<!-- ###### **`Type of selection`** -->
+<!-- *Available only for the `SumByColumns`, `QuantileCentering` and `MeanCentering` method.* -->
 
-This setting applies normalization only to the selected proteins, leaving the others unchanged. Several selection methods are available.
+<!-- This setting applies normalization only to the selected proteins, leaving the others unchanged. Several selection methods are available. -->
 
-The possible options are as follows:
+<!-- The possible options are as follows: -->
 
-- `None` : No selection. All proteins are normalized. 
-- `List` : Use the `Select protein` selector to choose proteins. The selected proteins are displayed in the violin and box plots and are the only ones shown in the right-hand graph. Only the selected proteins will be normalized.
-- `Random` : Enter an integer n in `Random` to select n proteins at random from the dataset. Only the n randomly selected proteins will be normalized.
-- `Column` : Select a column with boolean values using `Column of rowData` to indicate which proteins to retain. This option is available only if such column exists in rowData. Only the selected proteins will be normalized.
+<!-- - `None` : No selection. All proteins are normalized.  -->
+<!-- - `List` : Use the `Select protein` selector to choose proteins. The selected proteins are displayed in the violin and box plots and are the only ones shown in the right-hand graph. Only the selected proteins will be normalized. -->
+<!-- - `Random` : Enter an integer n in `Random` to select n proteins at random from the dataset. Only the n randomly selected proteins will be normalized. -->
+<!-- - `Column` : Select a column with boolean values using `Column of rowData` to indicate which proteins to retain. This option is available only if such column exists in rowData. Only the selected proteins will be normalized. -->
 
 
-###### **`Synchronise with selection above`**
-*Available only for the `SumByColumns`, `QuantileCentering` and `MeanCentering` method.*
+<!-- ###### **`Synchronise with selection above`** -->
+<!-- *Available only for the `SumByColumns`, `QuantileCentering` and `MeanCentering` method.* -->
 
-This option synchronizes the graphs with the proteins selected above.
+<!-- This option synchronizes the graphs with the proteins selected above. -->
 
 ***
 

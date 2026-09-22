@@ -124,6 +124,9 @@ PipelineProtein_Convert_server <- function(id,
     previewtab = NULL,
     design = NULL,
     name = NULL,
+    
+    inputGroup = NULL,
+    
     history = MagellanNTK::InitializeHistory()
   )
   
@@ -673,7 +676,6 @@ PipelineProtein_Convert_server <- function(id,
                                "Yes" = TRUE),
                              selected = rv.widgets$ExpandFeatData_idMethod)
       
-      cond <- rv$steps.enabled['ExpandFeatData'] && !is.null(rv.widgets$ExpandFeatData_quantCols)
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['ExpandFeatData'])
     })
     
@@ -717,17 +719,21 @@ PipelineProtein_Convert_server <- function(id,
       )
     })
     
-    output$ExpandFeatData_inputGroup_ui <- renderUI({
+    observe({
       req(rv$steps.enabled["ExpandFeatData"])
       req(as.logical(rv.widgets$ExpandFeatData_idMethod))
       
-      rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroup',
+      rv.widgets$ExpandFeatData_inputGroup <- Prostar2::mod_inputGroup_server('inputGroups',
         df = reactive({rv.custom$tab}),
         quantCols = reactive({rv.widgets$ExpandFeatData_quantCols}),
         is.enabled = reactive({rv$steps.enabled['ExpandFeatData']}))
+    })
       
-      rv.widgets$ExpandFeatData_quantCols
-      mod_inputGroup_ui(ns('inputGroup'))
+    output$ExpandFeatData_inputGroup_ui <- renderUI({  
+      req(as.logical(rv.widgets$ExpandFeatData_idMethod))
+      
+      widget <- mod_inputGroup_ui(ns('inputGroups'))
+      MagellanNTK::toggleWidget(widget, rv$steps.enabled["ExpandFeatData"])
     })
     
     ### btnEvent -----
@@ -747,6 +753,8 @@ PipelineProtein_Convert_server <- function(id,
           
           if (as.logical(rv.widgets$ExpandFeatData_idMethod)){
             req(rv.widgets$ExpandFeatData_inputGroup())
+            
+            rv.custom$inputGroup <- rv.widgets$ExpandFeatData_inputGroup()
           }
           
           # new.dataset <- 10*rv$dataIn[[length(rv$dataIn)]]
@@ -786,10 +794,6 @@ PipelineProtein_Convert_server <- function(id,
     #### _content -----
     observe({
       req(rv$steps.enabled["Design"])
-      # rv.widgets$ExpandFeatData_quantCols
-      # remoteReset
-      # print("obs")
-      # print(remoteReset())
 
       rv.custom$design <- Prostar2::mod_buildDesign_server(
         "designEx", 
@@ -900,11 +904,8 @@ PipelineProtein_Convert_server <- function(id,
         }
         
         .indexForMetacell <- NULL
-        if (!is.null(rv.widgets$ExpandFeatData_inputGroup)){
-          # print("_________if !is.null(rv.widgets$ExpandFeatData_inputGroup)")
-          # print("--rv.wid$expand_inputgrp :")
-          # print(rv.widgets$ExpandFeatData_inputGroup())
-          .indexForMetacell <- rv.widgets$ExpandFeatData_inputGroup()[rv.custom$design()$order]
+        if (!is.null(rv.custom$inputGroup)){
+          .indexForMetacell <- rv.custom$inputGroup[rv.custom$design()$order]
         }
         .indQData <- rv.widgets$ExpandFeatData_quantCols[rv.custom$design()$order]
         
