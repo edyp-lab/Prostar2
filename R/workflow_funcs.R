@@ -120,3 +120,35 @@ Variablefiltering_WriteQuery <- function(
     cname, " ", operator, " ", value)
   query
 }
+
+
+#' @title Save text UI
+#'
+#' @description The UI for the text and its appearance in each save
+#'
+#' @return The corresponding HTML
+#'
+#' @examples
+#' save_txt_ui()
+#'
+#' @export
+#'
+save_txt_ui <- function() {
+  div(
+    style = "margin: 25px;",
+    p(
+      HTML(
+        "Click <b>'Run'</b> to validate this step.<br>
+         If you need to make changes, click <b>'Reset'</b>."
+      ),
+      style = "
+        font-size: 17px;
+        line-height: 1.6;
+        margin: 0;
+        padding: 12px 16px;
+        background-color: #EAEAEA;
+        border-radius: 4px;
+      "
+    )
+  )
+}

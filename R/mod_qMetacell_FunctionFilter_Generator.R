@@ -597,20 +597,25 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
           )
         ))
       } else {
-        rv.custom$showmodal <- NULL
-        GetIndicesAndFunction()
-        req(rv.custom$ll.fun)
-        req(rv.custom$ll.query)
-        req(rv.custom$ll.widgets.value)
-        # Append a new FunctionFilter to the list
-        dataOut$trigger <- as.numeric(Sys.time())
-        dataOut$value <- list(
-          ll.fun = list(rv.custom$ll.fun),
-          ll.query = rv.custom$ll.query,
-          ll.widgets.value = rv.custom$ll.widgets.value,
-          ll.pattern = rv.widgets$tag,
-           ll.indices = list(rv.custom$indices)
-        )
+        shiny::withProgress(message = paste0("Building filter", id), {
+          shiny::incProgress(0.5)
+          rv.custom$showmodal <- NULL
+          GetIndicesAndFunction()
+          req(rv.custom$ll.fun)
+          req(rv.custom$ll.query)
+          req(rv.custom$ll.widgets.value)
+          # Append a new FunctionFilter to the list
+          dataOut$trigger <- as.numeric(Sys.time())
+          dataOut$value <- list(
+            ll.fun = list(rv.custom$ll.fun),
+            ll.query = rv.custom$ll.query,
+            ll.widgets.value = rv.custom$ll.widgets.value,
+            ll.pattern = rv.widgets$tag,
+             ll.indices = list(rv.custom$indices)
+          )
+          
+          shiny::incProgress(1)
+        })
       }
     })
 

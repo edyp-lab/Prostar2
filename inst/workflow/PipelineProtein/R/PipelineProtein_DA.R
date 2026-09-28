@@ -496,9 +496,10 @@ PipelineProtein_DA_server <- function(id,
     observeEvent(req(length(rv.custom$AnaDiff_indices()$value$ll.fun) > 0),{
       .ind <- unlist(rv.custom$AnaDiff_indices()$value$ll.indices)
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
-      
-      if (length(.ind) > 1 && length(.ind) < nrow(Get_Dataset_to_Analyze())) {
-        
+      print("obs>0")
+      browser()
+      if (length(.ind) > 1 && length(.ind) <= nrow(Get_Dataset_to_Analyze())) {
+        print("in if obs >0")
         if (.cmd == 'delete')
           indices_to_push <- .ind
         else if (.cmd == 'keep')
@@ -552,14 +553,14 @@ PipelineProtein_DA_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Pairwisecomparison', btnEvents()))
-      shiny::withProgress(message = paste0("Reseting process", id), {
-        shiny::incProgress(0.5)
-        
-        if ( rv.widgets$Pairwisecomparison_Comparison == widgets.default.values$Pairwisecomparison_Comparison 
-          || is.null(rv$dataIn))
-          shinyjs::info(btnVentsMasg)
-        else {
-          rv.custom$resAnaDiff$pushed <- length(rv.custom$pushed[rv.widgets$Pairwisecomparison_Comparison])
+      
+      if (rv.widgets$Pairwisecomparison_Comparison == "None" || is.null(rv$dataIn)) {
+        shinyjs::info(btnVentsMasg)
+      } else {
+        shiny::withProgress(message = paste0("Reseting process", id), {
+          shiny::incProgress(0.5)
+          
+          rv.custom$resAnaDiff$pushed <- length(unlist(rv.custom$pushed[rv.widgets$Pairwisecomparison_Comparison]))
           query_list <- unlist(rv.custom$Pairwisecomparison_pushPval_SummaryDT_comp[, "query"])
           if (length(query_list) > 1){
             rv.custom$step1_query <- paste(query_list[-1], sep = " ; ")
@@ -576,8 +577,8 @@ PipelineProtein_DA_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Pairwisecomparison"] <- MagellanNTK::stepStatus$VALIDATED
-        }
-      })
+        })
+      }
     })
     
     
@@ -685,12 +686,9 @@ PipelineProtein_DA_server <- function(id,
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
-      m <- DaparToolshed::matchMetacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = "peptide"
-      )
-      req(length(which(m)) == 0)
+      containsNA <- checkNA(rv$dataIn)
+      
+      req(!containsNA)
       
       t <- rv.custom$resAnaDiff$P_Value
       toDelete <- which(t > 1)
@@ -759,12 +757,9 @@ PipelineProtein_DA_server <- function(id,
       req(rv$dataIn)
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
-      m <- DaparToolshed::matchMetacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = "peptide"
-      )
-      req(length(which(m)) == 0)
+      containsNA <- checkNA(rv$dataIn)
+      
+      req(!containsNA)
       
       t <- rv.custom$resAnaDiff$P_Value
       toDelete <- which(t > 1)
@@ -850,12 +845,9 @@ PipelineProtein_DA_server <- function(id,
       req(!is.na(rv.custom$thlogfc))
       req(length(rv.custom$resAnaDiff$logFC) > 0)
       
+      containsNA <- checkNA(rv$dataIn)
       
-      m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-                                        pattern = c("Missing", "Missing POV", "Missing MEC"),
-                                        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-      )
-      req(length(which(m)) == 0)
+      req(!containsNA)
       
       t <- NULL
       method <- NULL
@@ -1053,11 +1045,6 @@ PipelineProtein_DA_server <- function(id,
       rv.custom$thpval
       rv$dataIn
       req(Build_pval_table())
-      
-      m <- DaparToolshed::matchMetacell(DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-                                        pattern = c("Missing", "Missing POV", "Missing MEC"),
-                                        level = "peptide"
-      )
       
       p <- Build_pval_table()
       upItemsPVal <- NULL
@@ -1376,18 +1363,7 @@ PipelineProtein_DA_server <- function(id,
       req(rv$steps.status['Save'] != MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       
-      div(
-        style = "margin: 25px;",
-        p(HTML("Click <b>'Run'</b> to validate this step.<br>
-                If you need to make changes, click <b>'Reset'</b>."),
-          style = "font-size: 17px;
-                   line-height: 1.6;
-                   margin: 0;
-                   padding: 12px 16px;
-                   background-color: #EAEAEA;
-                   border-radius: 4px;"
-        )
-      )
+      save_txt_ui()
     })
     
     output$dl_ui <- renderUI({
@@ -1410,8 +1386,9 @@ PipelineProtein_DA_server <- function(id,
         else {
           
           # Do some stuff
-          last.se <- length(rv$dataIn)
-          DaparToolshed::paramshistory(rv$dataIn[[last.se]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[last.se]]), rv.custom$history)
+          rv$dataIn <- prepareQFsave(data = rv$dataIn, 
+                                     history = rv.custom$history,
+                                     namePipeline = 'PipelineProtein')
           
           # Add the result of pairwise comparison to the coldata
           DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()

@@ -309,3 +309,101 @@ not_a_numeric <- function(input) {
 isContainedIn <- function(strA, strB) {
   return(all(strA %in% strB))
 }
+
+
+
+#' @title Check missing values
+#'
+#' @description Check whether there is missing values in a SE assay
+#'
+#' @param data A `QFeatures` 
+#' @param i The index or name of the assay to check
+#' 
+#' @return A `logical(1)`
+#'
+#' @examples
+#' data(subR25prot, package = "DaparToolshed")
+#' checkNA(subR25prot)
+#'
+#' @export
+#'
+checkNA <- function(data, 
+                    i = NULL) {
+  if (is.null(i)){
+    i <- length(data)
+  }
+  
+  qdata <- SummarizedExperiment::assay(data[[i]])
+  sum(is.na(qdata)) > 0
+}
+
+
+#' @title Count pattern
+#'
+#' @description Count the number of occurence of a selected metacell tag 
+#'
+#' @param data A `SummarizedExperiment`
+#' @param pattern A `character(1)`, pattern to count
+#' @param level Dataset level
+#'
+#' @return A `numeric(1)` 
+#'
+#' @examples
+#' data(subR25prot, package = "DaparToolshed")
+#' countPattern(subR25prot[[length(subR25prot)]],
+#'                pattern = "Missing POV")
+#'
+#' @export
+#'
+countPattern <- function(dataSE, 
+                         pattern, 
+                         level = NULL) {
+  if (is.null(level)){
+    level <- DaparToolshed::typeDataset(dataSE)
+  }
+  
+  m <- DaparToolshed::matchMetacell(
+    DaparToolshed::qMetacell(dataSE),
+    pattern = pattern,
+    level = level)
+  
+  length(which(m))
+}
+
+
+#' @title End process save dataset
+#'
+#' @description Do the necessary steps at the end of a process
+#'
+#' @param data A `QFeatures`
+#' @param i A `numeric(1)`, SE to work on
+#' @param history A `data.frame`, contains the history to add to 
+#' the designated SE
+#' @param namePipeline A `character(1)`, the pipeline type
+#' @param SEname A `character(1)`, name to give to the designated SE
+#'
+#' @return A `QFeatures` 
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+prepareQFsave <- function(data, 
+                          i = NULL,
+                          history,
+                          namePipeline = 'PipelineProtein', 
+                          SEname = NULL) {
+  if (is.null(i)){
+    i <- length(data)
+  }
+  
+  if (!is.null(SEname)){
+    names(data)[i] <- SEname
+  }
+  
+  S4Vectors::metadata(data)$name.pipeline <- namePipeline
+  DaparToolshed::paramshistory(data[[i]]) <- rbind(DaparToolshed::paramshistory(data[[i]]),
+                                                   history)
+  return(data)
+}

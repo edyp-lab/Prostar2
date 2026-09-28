@@ -306,15 +306,9 @@ PipelinePeptide_Aggregation_server <- function(id,
     output$Aggregation_warning_ui <- renderUI({
       req(rv$dataIn)
       
-      .data <- DaparToolshed::last_assay(rv$dataIn)
-      m <- DaparToolshed::matchMetacell(
-        DaparToolshed::qMetacell(.data),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(.data)
-      )
-      NA.count <- length(which(m))
+      containsNA <- checkNA(rv$dataIn)
       
-      if (NA.count > 0) {
+      if (containsNA) {
         tags$p(style = "color: red;",
                tags$b("Warning:"), " Your dataset contains missing values. 
         For better results, you should impute them first"

@@ -273,6 +273,10 @@ open_dataset_server <- function(
       dataOut$trigger <- MagellanNTK::Timestamp()
       dataOut$name <- rv.custom$name
       
+      #to make older dataset compliant with new history
+      for (i in names(dataOut$dataset)) {
+        colnames(DaparToolshed::paramshistory(dataOut$dataset[[i]])) <- c("Step", "Substep", "Parameter", "Value")
+      }
       print("load end")
     })
 
@@ -310,6 +314,10 @@ open_dataset_server <- function(
           dataOut$dataset <- rv.custom$dataRead
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$name <- rv.custom$name
+        }
+        #to make older dataset compliant with new history
+        for (i in names(dataOut$dataset)) {
+          colnames(DaparToolshed::paramshistory(dataOut$dataset[[i]])) <- c("Step", "Substep", "Parameter", "Value")
         }
       })
       shinyjs::toggleState("load_dataset_btn")

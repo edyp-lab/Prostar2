@@ -258,14 +258,9 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     output$Scenario_warningNA_UI <- renderUI({
       req(rv$dataIn)
       
-      m <- DaparToolshed::matchMetacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-      )
-      NA.count <- length(which(m))
+      containsNA <- checkNA(rv$dataIn)
       
-      if (NA.count > 0) {
+      if (containsNA) {
         tags$b(style = "color: red;",
                "Your dataset contains missing values. Please filter or impute them before proceeding.")
       }
@@ -343,12 +338,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(grepl('Scenario', btnEvents()))
       req(rv$dataIn)
       
-      m <- DaparToolshed::matchMetacell(
-        DaparToolshed::qMetacell(dataIn()[[length(dataIn())]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(dataIn()[[length(dataIn())]])
-      )
-      containsNA <- length(which(m)) > 0
+      containsNA <- checkNA(dataIn())
       
       if (is.null(rv$dataIn) ||
           !(rv.widgets$Scenario_choice %in% c("Contrast", "Cluster", "Aggregation")) ||

@@ -177,17 +177,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE,{
       req(grepl('Description', btnEvents()))
-     req(dataIn())
+      req(dataIn())
 
-     m <- DaparToolshed::matchMetacell(
-       DaparToolshed::qMetacell(dataIn()[[length(dataIn())]]),
-       pattern = c("Missing", "Missing POV", "Missing MEC"),
-       level = DaparToolshed::typeDataset(dataIn()[[length(dataIn())]])
-     )
+      NApresent <- checkNA(dataIn())
      
-     rv.custom$containsNA <- length(which(m)) > 0
-     
-     if (rv.custom$containsNA){
+     if (NApresent){
        warntxt <- "The dataset contains missing values.
         It must be first filtered or imputed."
        MagellanNTK::mod_errorModal_server('warn_NA',
@@ -195,7 +189,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
          text = warntxt)
      } else {
      
-       rv$dataIn <- rv.custom$dataIn <- dataIn()
+       rv$dataIn <- dataIn()
       
       # if(!is.null(rv.custom$result_open_dataset()$dataset))
       #   rv$dataIn <- rv.custom$result_open_dataset()$dataset
@@ -204,14 +198,14 @@ PipelineProtein_HypothesisTest_server <- function(id,
         shiny::incProgress(0.5)
         
         tmp_onevsone <- DaparToolshed::limmaCompleteTest(
-          qData = SummarizedExperiment::assay(rv.custom$dataIn, length(rv.custom$dataIn)),
-          sTab = SummarizedExperiment::colData(rv.custom$dataIn),
+          qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+          sTab = SummarizedExperiment::colData(rv$dataIn),
           comp.type = "OnevsOne" )
         rv.custom$logFC_onevsone <- tmp_onevsone$logFC
         
         tmp_onevsall <- DaparToolshed::limmaCompleteTest(
-          qData = SummarizedExperiment::assay(rv.custom$dataIn, length(rv.custom$dataIn)),
-          sTab = SummarizedExperiment::colData(rv.custom$dataIn),
+          qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+          sTab = SummarizedExperiment::colData(rv$dataIn),
           comp.type = "OnevsAll" )
         rv.custom$logFC_onevsall <- tmp_onevsall$logFC
 
@@ -327,7 +321,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
     
     #### _content -----
     output$HypothesisTest_plots_ui <- renderUI({
-      req(rv.custom$dataIn)
+      req(rv$dataIn)
 
         tagList(
           uiOutput(ns('HypothesisTest_warning_conditions_ui')),
@@ -337,16 +331,16 @@ PipelineProtein_HypothesisTest_server <- function(id,
     })
     
     output$HypothesisTest_warning_conditions_ui <- renderUI({
-      req(rv.custom$dataIn)
-      req(length(unique(DaparToolshed::design_qf(rv.custom$dataIn)$Condition)) > 26)
-      req(getDesignLevel(SummarizedExperiment::colData(rv.custom$dataIn)) > 1)
+      req(rv$dataIn)
+      req(length(unique(DaparToolshed::design_qf(rv$dataIn)$Condition)) > 26)
+      req(getDesignLevel(SummarizedExperiment::colData(rv$dataIn)) > 1)
       h3('Limma with this version of Prostar does not handle datasets with 
       more than 26 conditions. Such, the Limma option is desactivated for the 
         current dataset')
     })
     
     observeEvent(req(rv.widgets$HypothesisTest_design != 'None'), {
-      req(rv.custom$dataIn)
+      req(rv$dataIn)
       # Get logFC
       if(rv.widgets$HypothesisTest_design == "OnevsOne"){
         rv.custom$logFC <- rv.custom$logFC_onevsone
@@ -449,14 +443,14 @@ PipelineProtein_HypothesisTest_server <- function(id,
         switch(rv.widgets$HypothesisTest_method,
           Limma = {
             DaparToolshed::limmaCompleteTest(
-              qData = SummarizedExperiment::assay(rv.custom$dataIn, length(rv.custom$dataIn)),
-              sTab = SummarizedExperiment::colData(rv.custom$dataIn),
+              qData = SummarizedExperiment::assay(rv$dataIn, length(rv$dataIn)),
+              sTab = SummarizedExperiment::colData(rv$dataIn),
               comp.type = rv.widgets$HypothesisTest_design )
           },
           ttests = {
             rv.custom$AllPairwiseComp <- DaparToolshed::compute_t_tests(
-              obj = rv.custom$dataIn,
-              i = length(rv.custom$dataIn),
+              obj = rv$dataIn,
+              i = length(rv$dataIn),
               contrast = rv.widgets$HypothesisTest_design,
               type = rv.widgets$HypothesisTest_ttestOptions )
           })
@@ -487,11 +481,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
     }) 
     
     enable_Limma <- reactive({
-      req(rv.custom$dataIn)
+      req(rv$dataIn)
       
       enable <- TRUE
-      nConds <-length(unique(DaparToolshed::design_qf(rv.custom$dataIn)$Condition))
-      design <- SummarizedExperiment::colData(rv.custom$dataIn)
+      nConds <-length(unique(DaparToolshed::design_qf(rv$dataIn)$Condition))
+      design <- SummarizedExperiment::colData(rv$dataIn)
       nLevel <- DaparToolshed::getDesignLevel(design)   
       enable <- (nConds <= 26 && nLevel == 1) ||
         (nConds < 10 && (nLevel%in% c(2,3)))
@@ -516,11 +510,11 @@ PipelineProtein_HypothesisTest_server <- function(id,
       shiny::withProgress(message = "Computing Hypothesis Test", {
         shiny::incProgress(0.5)
         
-      if ( is.null(rv.custom$dataIn) || rv.widgets$HypothesisTest_method == "None" || rv.widgets$HypothesisTest_design == "None" || 
+      if ( is.null(rv$dataIn) || rv.widgets$HypothesisTest_method == "None" || rv.widgets$HypothesisTest_design == "None" || 
            (rv.widgets$HypothesisTest_method == 'ttests' && rv.widgets$HypothesisTest_ttestOptions == "None"))
         shinyjs::info(btnVentsMasg)
       else {
-        req(rv.custom$dataIn)
+        req(rv$dataIn)
         
         rv.widgets$HypothesisTest_thlogFC <- as.numeric(
           rv.widgets$HypothesisTest_thlogFC)
@@ -545,14 +539,14 @@ PipelineProtein_HypothesisTest_server <- function(id,
         req(rv.custom$AllPairwiseComp$P_Value)
         req(rv.custom$AllPairwiseComp$logFC)
         
-        new.dataset <- rv.custom$dataIn[[length(rv.custom$dataIn)]]
+        new.dataset <- rv$dataIn[[length(rv$dataIn)]]
         df <- cbind(rv.custom$AllPairwiseComp$logFC, 
           rv.custom$AllPairwiseComp$P_Value)
         DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'HypothesisTest', 'HypothesisTest', 'thlogFC', as.numeric(rv.widgets$HypothesisTest_thlogFC))
         
         
-        rv.custom$dataIn <- QFeatures::addAssay(rv.custom$dataIn, new.dataset, 'HypothesisTest')
+        rv$dataIn <- QFeatures::addAssay(rv$dataIn, new.dataset, 'HypothesisTest')
 
         # DO NOT MODIFY THE THREE FOLLOWING LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
@@ -584,18 +578,7 @@ PipelineProtein_HypothesisTest_server <- function(id,
       req(rv$steps.status['Save'] != MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
       
-      div(
-        style = "margin: 25px;",
-        p(HTML("Click <b>'Run'</b> to validate this step.<br>
-                If you need to make changes, click <b>'Reset'</b>."),
-          style = "font-size: 17px;
-                   line-height: 1.6;
-                   margin: 0;
-                   padding: 12px 16px;
-                   background-color: #EAEAEA;
-                   border-radius: 4px;"
-        )
-      )
+      save_txt_ui()
     })
     
     output$dl_ui <- renderUI({
@@ -612,18 +595,17 @@ PipelineProtein_HypothesisTest_server <- function(id,
           shiny::incProgress(0.5)
           # Do some stuff
 
-        if (isTRUE(all.equal(SummarizedExperiment::assays(rv.custom$dataIn),
+        if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn),
           SummarizedExperiment::assays(dataIn()))))
           shinyjs::info(btnVentsMasg)
         else {
-          S4Vectors::metadata(rv.custom$dataIn)$name.pipeline <- 'PipelineProtein'
-            
-          DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv.custom$dataIn[[length(rv.custom$dataIn)]]),
-            rv.custom$history)
+          rv$dataIn <- prepareQFsave(data = rv$dataIn, 
+                                            history = rv.custom$history,
+                                            namePipeline = 'PipelineProtein')
           
           # DO NOT MODIFY THE THREE FOLLOWING LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
-          dataOut$value <- rv.custom$dataIn
+          dataOut$value <- rv$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
           Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
