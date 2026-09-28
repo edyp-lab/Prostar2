@@ -497,7 +497,7 @@ PipelineProtein_DA_server <- function(id,
       .ind <- unlist(rv.custom$AnaDiff_indices()$value$ll.indices)
       .cmd <- rv.custom$AnaDiff_indices()$value$ll.widgets.value[[1]]$keep_vs_remove
       print("obs>0")
-      browser()
+      
       if (length(.ind) > 1 && length(.ind) <= nrow(Get_Dataset_to_Analyze())) {
         print("in if obs >0")
         if (.cmd == 'delete')
