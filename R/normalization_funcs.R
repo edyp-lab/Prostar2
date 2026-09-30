@@ -121,5 +121,6 @@ normalizationProt <- function(data,
     )
   })
   
-  return(list(data = .tmp, history = history))
+  return(list(data = .tmp, 
+              history = history))
 }

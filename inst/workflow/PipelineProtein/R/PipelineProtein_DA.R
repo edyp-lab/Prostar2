@@ -1,67 +1,40 @@
-#' @title Shiny example process module.
+#' @title PipelineProtein DA module
 #'
 #' @description
-#' This module contains the configuration informations for the corresponding pipeline.
-#' It is called by the nav_pipeline module of the package MagellanNTK
+#' This module contains the DA step of the protein pipeline.
 #' 
-#' The name of the server and ui functions are formatted with keywords separated by '_', as follows:
-#' * first string `mod`: indicates that it is a Shiny module
-#' * `pipeline name` is the name of the pipeline to which the process belongs
-#' * `process name` is the name of the process itself
-#' 
-#' This convention is important because MagellanNTK call the different
-#' server and ui functions by building dynamically their name.
-#' 
-#' In this example, `PipelineProtein_DA_UI()` and `PipelineProtein_DA_server()` define
-#' the code for the process `PipelineProtein` which is part of the pipeline called `PipelineProtein`.
-#'
-#' @name PipelineProtein
-#' 
-#' @param id xxx
-#' @param dataIn The dataset
+#' @param id A `character(1)` which is the 'id' of the module.
+#' @param dataIn An instance of the class `MultiAssayExperiment`
 #' @param steps.enabled A vector of boolean which has the same length of the steps
 #' of the pipeline. This information is used to enable/disable the widgets. It is not
 #' a communication variable between the caller and this module, thus there is no
 #' corresponding output variable
-#' @param remoteReset It is a remote command to reset the module. A boolean that
+#' @param remoteReset It is a remote command to reset the module. An `integer()` that
 #' indicates is the pipeline has been reseted by a program of higher level
 #' Basically, it is the program which has called this module
-#' @param steps.status xxx
-#' @param current.pos xxx
-#' @param path xxx
+#' @param steps.status A vector of `character()` which indicates the status of each step
+#' which can be either 'validated', 'undone' or 'skipped'. Enabled or disabled in the UI.
+#' @param current.pos A `integer(1)` which acts as a remote command to make
+#'  a step active in the timeline. Default is 1.
+#' @param path A `character()` which is the path to the directory which 
+#' contains the files and directories of the pipeline.
 #' 
+#' @return An instance of the class `MultiAssayExperiment`
 #' 
 #' @examples
-#' if (interactive()){
-#' library(MagellanNTK)
-#' library(MagellanNTK)
-#' library(plotly)
-#' library(DaparToolshed)
-#' library(Prostar2)
-#' library(omXplore)
-#' library(SummarizedExperiment)
-#' data(Exp1_R25_prot, package = "DaparToolshedData")
-#' obj <- Exp1_R25_prot
-#' # Simulate imputation of missing values
-#' obj <- NAIsZero(obj, 1)
-#' obj <- NAIsZero(obj, 2)
-#' qData <- as.matrix(SummarizedExperiment::assay(obj[[2]]))
-#' sTab <- colData(obj)
-#' limma <- limmaCompleteTest(qData, sTab)
-#' df <- cbind(limma$logFC, limma$P_Value)
-#' new.dataset <- obj[[length(obj)]]
-#' DaparToolshed::HypothesisTest(new.dataset) <- as.data.frame(df)
-#' obj <- Prostar2::addDatasets(obj, new.dataset, 'HypothesisTest')
-#' path <- system.file('workflow/PipelineProtein', package = 'Prostar2')
-#' shiny::runApp(proc_workflowApp("PipelineProtein_DA", path, dataIn = obj))
+#' if (interactive()) {
+#'   Prostar2("PipelineProtein_DA")
 #' }
 #' 
+#' @name PipelineProtein_DA
 #' 
-#' @author Samuel Wieczorek
-#' 
+#' @importFrom stats setNames rnorm
+#' @importFrom shinyjs useShinyjs
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
+#' 
 NULL
+
 
 #' @rdname PipelineProtein
 #' @export
@@ -102,14 +75,10 @@ PipelineProtein_DA_server <- function(id,
   current.pos = reactive({1}),
   btnEvents = reactive({NULL})
 ){
-  
   requireNamespace('DaparToolshed')
-  pkgs_require('magrittr')
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors', 'magrittr', 'grDevices'))
   
-  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
-
-  # Define default selected values for widgets
-  # This is only for simple workflows
+  # Default values for widgets
   widgets.default.values <- list(
     Pairwisecomparison_Comparison = "None",
     Pairwisecomparison_tooltipInfo = NULL,
@@ -121,10 +90,10 @@ PipelineProtein_DA_server <- function(id,
     FDR_showtable = FALSE
   )
   
+  # Default values for reactive values
   rv.custom.default.values <- list(
-    result_open_dataset = reactive({NULL}),
-    
-    tmp.dataIn = NULL,
+    history = MagellanNTK::InitializeHistory(),
+
     resAnaDiff = NULL,
     res_AllPairwiseComparisons = NULL,
     Pairwisecomparison_tooltipInfo = NULL,
@@ -140,25 +109,17 @@ PipelineProtein_DA_server <- function(id,
     thlogfc = 0,
     nbTotalAnaDiff = NULL,
     nbSelectedAnaDiff = NULL,
-    nbSelectedTotal_FDR = NULL,
-    nbSelected_FDR = NULL,
-    conditions = list(cond1 = NULL, cond2 = NULL),
     calibrationRes = NULL,
     errMsgcalibrationPlot = NULL,
-    errMsgcalibrationPlotALL = NULL,
+    errMsgCalibrationPlotAll = NULL,
     pi0 = NULL,
     filename = NULL,
     AnaDiff_indices = reactive({NULL}),
-    dataToAnalyze = NULL,
     Condition1 = NULL,
     Condition2 = NULL,
-    history = MagellanNTK::InitializeHistory(),
     step1_query = '-',
     FDR_tooltipInfo = NULL
   )
-  
-  grey <- "#FFFFFF"
-  orangeProstar <- "#E97D5E"
   
   ###-------------------------------------------------------------###
   ###                                                             ###
@@ -167,10 +128,9 @@ PipelineProtein_DA_server <- function(id,
   ###-------------------------------------------------------------###
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    pkgs_require('grDevices')
-    # Insert necessary code which is hosted by MagellanNTK
-    # DO NOT MODIFY THIS LINE
+
+    # Code hosted by MagellanNTK to create the process
+    # DO NOT MODIFY THESE LINES
     eval(
       str2expression(
         MagellanNTK::Get_Workflow_Core_Code(
@@ -204,38 +164,9 @@ PipelineProtein_DA_server <- function(id,
             includeMarkdown(file)
           else
             p('No Description available')
-          #uiOutput(ns('Description_infos_dataset_UI'))
         )
       )
     })
-    
-    #### _sidebar -----
-    output$open_dataset_UI <- renderUI({
-      req(session$userData$runmode == 'process')
-      req(is.null(dataIn()))
-      req(NULL)
-      
-      rv.custom$result_open_dataset <- MagellanNTK::open_dataset_server(
-        id = "open_dataset",
-        class = 'QFeatures',
-        extension = "qf",
-        remoteReset = reactive({remoteReset()})
-      )
-      
-      MagellanNTK::open_dataset_ui(id = ns("open_dataset"))
-    })
-    
-    #### _content -----
-    # output$Description_infos_dataset_UI <- renderUI({
-    #   req(rv$dataIn)
-    #   
-    #   infos_dataset_server(
-    #     id = "Description_infosdataset",
-    #     dataIn = reactive({rv$dataIn})
-    #   )
-    #   
-    #   infos_dataset_ui(id = ns("Description_infosdataset"))
-    # })
     
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
@@ -251,6 +182,8 @@ PipelineProtein_DA_server <- function(id,
             x
         }))
         #rv$dataIn <- dataIn()[[.ind]]
+        
+        # Copy the input dataset to use it during this step
         rv$dataIn <- dataIn()
         
         # Adds an assay to work on
@@ -267,9 +200,7 @@ PipelineProtein_DA_server <- function(id,
         
         .ind_logFC <- which(.history[, 'Parameter'] == 'thlogFC')
         # Get logfc threshold from Hypothesis test dataset
-        .thlogfc <- as.numeric(.history[.ind_logFC, 'Value'])
-        if(!is.null(.thlogfc))
-          rv.custom$thlogfc <- .thlogfc
+        rv.custom$thlogfc <- as.numeric(.history[.ind_logFC, 'Value'])
         
         rv.custom$Pairwisecomparison_pushPval_SummaryDT <- data.frame(
           comparison = "-",
@@ -284,6 +215,7 @@ PipelineProtein_DA_server <- function(id,
         compname <- Get_Pairwisecomparison_Names()
         rv.custom$pushed <- setNames(rep(list(NULL), length(compname)), compname)
         
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
@@ -334,17 +266,6 @@ PipelineProtein_DA_server <- function(id,
       )
       
       datasetToAnalyze
-    })
-    
-    Get_Dataset_to_Analyze_pushPVAL <- reactive({
-      rv$dataIn[[length(rv$dataIn)]]
-    })
-    
-    GetComparisons <- reactive({
-      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
-      req(rv.custom$Condition1)
-      req(rv.custom$Condition2)
-      c(rv.custom$Condition1, rv.custom$Condition2)
     })
     
     Get_Pairwisecomparison_Names <- reactive({
@@ -574,6 +495,7 @@ PipelineProtein_DA_server <- function(id,
           
           #.comparisons2Txt <- Get_Pairwisecomparison_Names()
           
+          # DO NOT MODIFY THE NEXT THREE LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Pairwisecomparison"] <- MagellanNTK::stepStatus$VALIDATED
@@ -911,6 +833,7 @@ PipelineProtein_DA_server <- function(id,
           rv.widgets$FDR_tooltipInfo <- rv.widgets$Pairwisecomparison_tooltipInfo
           rv.custom$FDR_tooltipInfo <- rv.widgets$Pairwisecomparison_tooltipInfo
           
+          # DO NOT MODIFY THE NEXT THREE LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
@@ -1163,13 +1086,13 @@ PipelineProtein_DA_server <- function(id,
           paste0("isDifferential (",
             as.character(rv.widgets$Pairwisecomparison_Comparison), ")"),
           target = "row",
-          backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
+          backgroundColor = DT::styleEqual(c(0, 1), c("white", "#E97D5E"))
         )
       
     })
     
     BuildPairwiseComp_wb <- reactive({
-      DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
+      DA_Style <- openxlsx::createStyle(fgFill = "#E97D5E")
       hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
         halign = "CENTER",
         textDecoration = "italic",
@@ -1259,7 +1182,9 @@ PipelineProtein_DA_server <- function(id,
       req(rv.custom$thpval)
       req(rv$dataIn)
       req(GetCalibrationMethod())
-      req(GetComparisons())
+      req(rv.widgets$Pairwisecomparison_Comparison != 'None')
+      req(rv.custom$Condition1)
+      req(rv.custom$Condition2)
       
       rv.widgets$Pairwisecomparison_Comparison
       ht <- DaparToolshed::HypothesisTest(rv$dataIn[[length(rv$dataIn)]])
@@ -1334,6 +1259,7 @@ PipelineProtein_DA_server <- function(id,
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
           
+          # DO NOT MODIFY THE NEXT THREE LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["FDR"] <- MagellanNTK::stepStatus$VALIDATED
@@ -1359,6 +1285,7 @@ PipelineProtein_DA_server <- function(id,
     })
     
     #### _content -----
+    # Save text (before saving)
     output$save_txt <- renderUI({
       req(rv$steps.status['Save'] != MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
@@ -1366,6 +1293,7 @@ PipelineProtein_DA_server <- function(id,
       save_txt_ui()
     })
     
+    # Download (ui) (after saving)
     output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'process')
@@ -1375,39 +1303,37 @@ PipelineProtein_DA_server <- function(id,
     
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
-      
       req(grepl('Save', btnEvents()))
-      
-      shiny::withProgress(message = paste0("Reseting process", id), {
-        shiny::incProgress(0.5)
+
+      if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
+        shinyjs::info(btnVentsMasg)
         
-        if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn()))))
-          shinyjs::info(btnVentsMasg)
-        else {
-          
+      else {
+        shiny::withProgress(message = paste0("Reseting process", id), {
+          shiny::incProgress(0.5)
           # Do some stuff
           rv$dataIn <- prepareQFsave(data = rv$dataIn, 
                                      history = rv.custom$history,
                                      namePipeline = 'PipelineProtein')
           
           # Add the result of pairwise comparison to the coldata
-          DaparToolshed::DifferentialAnalysis(rv$dataIn[[last.se]]) <- Build_pval_table()
+          DaparToolshed::DifferentialAnalysis(rv$dataIn[[length(rv$dataIn)]]) <- Build_pval_table()
           
-          # DO NOT MODIFY THE THREE FOLLOWING LINES
+          # DO NOT MODIFY THE NEXT THREE LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
+          # Download (server)
           Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
-        }
-      })
+          shiny::incProgress(1)
+        })
+      }
     })
 
     ####### _END_ -----
     
-    # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-  }
-  )
+  })
 }

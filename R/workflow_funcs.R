@@ -1,127 +1,3 @@
-#' @title Create filter
-#'
-#' @description Create filter for variable filtering
-#'
-#' @param value A `character(1)` or `numeric(1)` the value to apply
-#' @param operator A `character(1)` of the operator used in the filter
-#' @param cname A `character(1)` of the column name
-#' @param keep_vs_remove A `character(1)` whether the filter is used to keep 
-#'                       or to delete 
-#' @param data A `QFeatures` corresponding to the dataset to which filters 
-#'             are applied
-#' @param i A `numeric(1)` corresponding to the SummarizedExperiment to use
-#'
-#' @return A `NumericVariableFilter` filter to apply on the dataset
-#'
-#' @examples
-#' data(subR25prot, package = "DaparToolshed")
-#' Variablefiltering_BuildVariableFilter(value = 2,
-#'                              operator = "<",
-#'                              cname = "Unique_peptides",
-#'                              keep_vs_remove = "delete",
-#'                              data = subR25prot,
-#'                              i = 1)
-#'
-#' @export
-#'
-Variablefiltering_BuildVariableFilter <- function(
-    value = NULL,
-    operator = NULL,
-    cname = NULL,
-    keep_vs_remove = NULL,
-    data = NULL,
-    i = NULL){
-  req(value != "Enter value..." && !is.null(value))
-  req(operator != "None" && !is.null(operator))
-  req(cname != "None" && !is.null(cname))
-  req(!is.null(keep_vs_remove))
-  req(!is.null(data))
-  
-  if (is.null(i)){ 
-    i <- length(data)
-  }
-  
-  rowdata <- SummarizedExperiment::rowData(data[[i]])
-  col_data <- rowdata[, cname, drop = TRUE]
-  expected_type <- if (is.numeric(col_data)) "numeric" else "character"
-  
-  val <- tryCatch(
-    Extract_Value(value, expected_type),
-    warning = function(w) NULL,
-    error = function(e) NULL
-  )
-  req(val)
-  
-  QFeatures::VariableFilter(
-    field = cname,
-    value = val,
-    condition = operator,
-    not = keep_vs_remove == "delete"
-  )
-}
-
-
-#' @title Write query filtering
-#'
-#' @description Write query for variable filtering
-#'
-#' @param value A `character(1)` or `numeric(1)` the value to apply
-#' @param operator A `character(1)` of the operator used in the filter
-#' @param cname A `character(1)` of the column name
-#' @param keep_vs_remove A `character(1)` whether the filter is used to keep 
-#'                       or to delete 
-#' @param data A `QFeatures` corresponding to the dataset to which filters 
-#'             are applied
-#' @param i A `numeric(1)` corresponding to the SummarizedExperiment to use
-#'
-#' @return A `character`
-#'
-#' @examples
-#' data(subR25prot, package = "DaparToolshed")
-#' Variablefiltering_WriteQuery(value = 2,
-#'                              operator = "<",
-#'                              cname = "Unique_peptides",
-#'                              keep_vs_remove = "delete",
-#'                              data = subR25prot,
-#'                              i = 1)
-#'
-#' @export
-#'
-Variablefiltering_WriteQuery <- function(
-    value = NULL,
-    operator = NULL,
-    cname = NULL,
-    keep_vs_remove = NULL,
-    data = NULL,
-    i = NULL){
-  req(value != "Enter value..." && !is.null(value))
-  req(operator != "None" && !is.null(operator))
-  req(cname != "None" && !is.null(cname))
-  req(!is.null(keep_vs_remove))
-  req(!is.null(data))
-  
-  if (is.null(i)){ 
-    i <- length(data)
-  }
-  
-  rowdata <- SummarizedExperiment::rowData(data[[i]])
-  col_data <- rowdata[, cname, drop = TRUE]
-  expected_type <- if (is.numeric(col_data)) "numeric" else "character"
-  
-  val <- tryCatch(
-    Extract_Value(value, expected_type),
-    warning = function(w) NULL,
-    error = function(e) NULL
-  )
-  req(val)
-  
-  query <- paste0(
-    keep_vs_remove, " values for which ",
-    cname, " ", operator, " ", value)
-  query
-}
-
-
 #' @title Save text UI
 #'
 #' @description The UI for the text and its appearance in each save
@@ -151,4 +27,63 @@ save_txt_ui <- function() {
       "
     )
   )
+}
+
+
+#' @title End process save dataset
+#'
+#' @description Do the necessary steps at the end of a process
+#'
+#' @param data A `QFeatures`
+#' @param i A `numeric(1)`, SE to work on
+#' @param history A `data.frame`, contains the history to add to 
+#' the designated SE
+#' @param namePipeline A `character(1)`, the pipeline type
+#' @param SEname A `character(1)`, name to give to the designated SE
+#'
+#' @return A `QFeatures` 
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+prepareQFsave <- function(data, 
+                          i = NULL,
+                          history,
+                          namePipeline = 'PipelineProtein', 
+                          SEname = NULL) {
+  if (missing(data)) {
+    stop("'data' is required.")
+  }
+  if (!inherits(data, "QFeatures")) {
+    stop("'data' must be an object of class QFeatures.")
+  }
+  if (!is.null(i) && (!is.numeric(i) || (length(i) != 1))){
+    stop("'i' must be a numeric of length 1.")
+  }
+  if (missing(history)) {
+    stop("'history' is required.")
+  }
+  if (!is.data.frame(history)) {
+    stop("'history' must be an object of class data.frame.")
+  }
+  if (!is.character(namePipeline) || is.na(namePipeline) || (length(namePipeline) != 1)) {
+    stop("'namePipeline' must be a character of length 1.")
+  }
+  if (!is.null(SEname) && (!is.character(SEname)  || is.na(SEname) || (length(SEname) != 1))) {
+    stop("'SEname' must be a character of length 1.")
+  }
+  
+  if (is.null(i)){
+    i <- length(data)
+  }
+  if (!is.null(SEname)){
+    names(data)[i] <- SEname
+  }
+  
+  S4Vectors::metadata(data)$name.pipeline <- namePipeline
+  DaparToolshed::paramshistory(data[[i]]) <- rbind(DaparToolshed::paramshistory(data[[i]]),
+                                                   history)
+  return(data)
 }
