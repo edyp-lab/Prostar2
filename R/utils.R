@@ -369,3 +369,173 @@ countPattern <- function(dataSE,
   
   length(which(m))
 }
+
+
+#' @title Show log console
+#'
+#' @description Show R logs in a console in shiny 
+#'
+#' @param expr xxx
+#' @param id_notif xxx
+#' @param cond_info xxx
+#' @param cond_warning xxx
+#' @param cond_error xxx
+#' @param color_info xxx
+#' @param color_warning xxx
+#' @param color_error xxx
+#' @param new_first xxx
+#' @param console_message xxx
+#' @param prefix xxx
+#'
+#' @return xxx
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+show_log_console <- function(
+    expr,
+    id_notif = NULL,
+    cond_info = TRUE,
+    cond_warning = TRUE,
+    cond_error = TRUE,
+    color_info = "grey",
+    color_warning = "blue",
+    color_error = "red",
+    new_first = TRUE,
+    console_message = TRUE,
+    prefix = "Imputation"
+) {
+  notifications <- reactiveVal(list()) # To store messages 
+  prefix <- paste0(prefix, if (prefix == "") " " else "-")
+  msg_actions <- list( ### Create functions to use depending on message type
+    message = function(m) { ### For info
+      if (cond_info){
+        ### Show custom message in console
+        if (console_message) message_console(m$message, level = "INFO", info_text = paste0(prefix, "INFO"), color_info = color_info)
+        ### Get message
+        if (!all(m$message %in% c("\r", "\n", ""))){
+          new_notification <- paste0("<b>[", prefix, "INFO]</b> <i>", format(Sys.time(), "%d-%m-%Y %X"), "</i> — ", m$message)
+          current_notifications <- notifications()
+          if (new_first) current_notifications <- c(paste0('<span style="color: ', color_info, '">', new_notification, '</span>'), current_notifications)
+          else current_notifications <- c(current_notifications, paste0('<span style="color: ', color_info, '">', new_notification, '</span>'))
+          notifications(current_notifications) # Update list of messages
+          ### Show message in app
+          if (!is.null(id_notif)) shinyjs::html(id_notif, paste("<ul>", paste("<li>", current_notifications, "</li>", collapse = ""), "</ul>"))
+        }
+      }
+    },
+    warning = function(m) { ### For warning
+      if (cond_warning){
+        ### Show custom message in console
+        if (console_message) message_console(m$message, level = "WARNING", warning_text = paste0(prefix, "WARNING"), color_warning = color_warning)
+        ### Get message
+        if (!all(m$message %in% c("\r", "\n", ""))){
+          new_notification <- paste0("<b>[", prefix, "WARNING]</b> <i>", format(Sys.time(), "%d-%m-%Y %X"), "</i> — ", m$message)
+          current_notifications <- notifications()
+          if (new_first) current_notifications <- c(paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'), current_notifications)
+          else current_notifications <- c(current_notifications, paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'))
+          notifications(current_notifications) # Update list of messages
+          ### Show message in app
+          if (!is.null(id_notif)) shinyjs::html(id_notif, paste("<ul>", paste("<li>", current_notifications, "</li>", collapse = ""), "</ul>"))
+        }
+      }
+    },
+    error = function(m) { ### For error
+      if (cond_error){
+        ### Show custom message in console
+        if (console_message) message_console(m$message, level = "ERROR", error_text = paste0(prefix, "ERROR"), color_error = color_error)
+        ### Get message
+        if (!all(m$message %in% c("\r", "\n", ""))){
+          new_notification <- paste0("<b>[", prefix, "ERROR]</b> <i>", format(Sys.time(), "%d-%m-%Y %X"), "</i> — ", m$message)
+          current_notifications <- notifications()
+          if (new_first) current_notifications <- c(paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'), current_notifications)
+          else current_notifications <- c(current_notifications, paste0('<span style="color: ', color_warning, '">', new_notification, '</span>'))
+          notifications(current_notifications) # Update list of messages
+          ### Show message in app
+          if (!is.null(id_notif)) shinyjs::html(id_notif, paste("<ul>", paste("<li>", current_notifications, "</li>", collapse = ""), "</ul>"))
+        }
+      }
+    }
+  )
+  
+  if (console_message) { ### Show custom message in console
+    tryCatch(
+      suppressMessages(suppressWarnings( # Remove R messages in console
+        withCallingHandlers( # Add custom messages in console
+          expr,
+          message = function(m) msg_actions$message(m),
+          warning = function(m) msg_actions$warning(m)
+        ))),
+      error = function(m) {
+        msg_actions$error(m)
+        return(NULL)}
+      
+    )
+  } else { ### Show message only in app
+    tryCatch(
+      withCallingHandlers(
+        expr,
+        message = function(m) msg_actions$message(m),
+        warning = function(m) msg_actions$warning(m)
+      )
+      ,
+      error = function(m) {
+        msg_actions$error(m)
+        return(NULL)
+      }
+    )
+  }
+  return(notifications())
+}
+
+
+#' @title Message console
+#'
+#' @description Style R logs in a console in shiny 
+#'
+#' @param msg xxx
+#' @param level xxx
+#' @param info_text xxx
+#' @param warning_text xxx
+#' @param error_text xxx
+#' @param color_info xxx
+#' @param color_warning xxx
+#' @param color_error xxx
+#' @param color_other xxx
+#'
+#' @return xxx
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+message_console <- function(msg,
+                            level = "INFO",
+                            info_text = "INFO",
+                            warning_text = "WARNING",
+                            error_text = "ERROR",
+                            color_info = "grey",
+                            color_warning = "blue",
+                            color_error = "red",
+                            color_other = "black"){
+  msg <- paste0(msg, collapse = "")
+  # Text in the prefix depending on message type
+  level_text <- switch(toupper(level), 
+                       "INFO" = info_text,
+                       "WARNING" = warning_text,
+                       "ERROR" = error_text,
+                       level
+  )
+  # Create message
+  msg <- if(!(msg %in% c("\r", "\n", ""))){ paste0("[", level_text, "] ", format(Sys.time(), "%d-%m-%Y %X"), " — ", msg)}
+  # Show custom message in console depending on message type
+  switch(toupper(level),
+         "INFO" = message(print_color(msg, color_info)),
+         "WARNING" = print_color(paste0(msg, "\n"), color_warning),
+         "ERROR" = print_color(paste0(msg, "\n"), color_error),
+         cat(print_color(msg, color_other), sep = "\n")
+  )
+}

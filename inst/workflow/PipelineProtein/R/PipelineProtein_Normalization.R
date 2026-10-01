@@ -105,9 +105,9 @@ PipelineProtein_Normalization_server <- function(
   )
 
   ### -------------------------------------------------------------###
-  ###                                                             ###
-  ### ------------------- MODULE SERVER --------------------------###
-  ###                                                             ###
+  ###                                                              ###
+  ### -------------------- MODULE SERVER --------------------------###
+  ###                                                              ###
   ### -------------------------------------------------------------###
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -158,7 +158,8 @@ PipelineProtein_Normalization_server <- function(
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl("Description", btnEvents()))
       req(dataIn())
-
+      req(inherits(dataIn(), 'QFeatures'))
+      
       # Copy the input dataset to use it during this step
       rv$dataIn <- dataIn()
 

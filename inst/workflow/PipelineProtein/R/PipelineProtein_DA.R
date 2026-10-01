@@ -36,7 +36,7 @@
 NULL
 
 
-#' @rdname PipelineProtein
+#' @rdname PipelineProtein_DA
 #' @export
 #' 
 PipelineProtein_DA_conf <- function(){
@@ -49,8 +49,7 @@ PipelineProtein_DA_conf <- function(){
 }
 
 
-#' @rdname PipelineProtein
-#' 
+#' @rdname PipelineProtein_DA
 #' @export
 #'
 PipelineProtein_DA_ui <- function(id){
@@ -58,15 +57,9 @@ PipelineProtein_DA_ui <- function(id){
 }
 
 
-
-#' @rdname PipelineProtein
-#' 
-#' @importFrom stats setNames rnorm
-#' @import DaparToolshed
-#' @importFrom shinyjs info useShinyjs
-#' 
+#' @rdname PipelineProtein_DA
 #' @export
-#' 
+#'
 PipelineProtein_DA_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
@@ -131,16 +124,14 @@ PipelineProtein_DA_server <- function(id,
 
     # Code hosted by MagellanNTK to create the process
     # DO NOT MODIFY THESE LINES
-    eval(
-      str2expression(
-        MagellanNTK::Get_Workflow_Core_Code(
-          mode = 'process',
-          name = id,
-          w.names = names(widgets.default.values),
-          rv.custom.names = names(rv.custom.default.values)
-        )
-      )
+    core.code <- MagellanNTK::Get_Workflow_Core_Code(
+      mode = "process",
+      name = id,
+      w.names = names(widgets.default.values),
+      rv.custom.names = names(rv.custom.default.values)
     )
+
+    eval(str2expression(core.code))
     add_resourcePath()
     
     
@@ -173,6 +164,7 @@ PipelineProtein_DA_server <- function(id,
       req(grepl('Description', btnEvents()))
       req(dataIn())
       req(inherits(dataIn(), 'QFeatures'))
+      
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
         
@@ -181,7 +173,6 @@ PipelineProtein_DA_server <- function(id,
           if(!is.null(DaparToolshed::HypothesisTest(dataIn()[[x]])))
             x
         }))
-        #rv$dataIn <- dataIn()[[.ind]]
         
         # Copy the input dataset to use it during this step
         rv$dataIn <- dataIn()
@@ -474,9 +465,11 @@ PipelineProtein_DA_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Pairwisecomparison', btnEvents()))
+      req(rv$dataIn)
       
       if (rv.widgets$Pairwisecomparison_Comparison == "None" || is.null(rv$dataIn)) {
         shinyjs::info(btnVentsMasg)
+        
       } else {
         shiny::withProgress(message = paste0("Reseting process", id), {
           shiny::incProgress(0.5)
@@ -810,12 +803,14 @@ PipelineProtein_DA_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Pvaluecalibration', btnEvents()))
-      shiny::withProgress(message = paste0("Runninf P-value calibration", id), {
-        shiny::incProgress(0.5)
+      req(rv$dataIn)
         
-        if (is.null(rv$dataIn))
-          shinyjs::info(btnVentsMasg)
-        else {
+      if (is.null(rv$dataIn))
+        shinyjs::info(btnVentsMasg)
+      
+      else {
+        shiny::withProgress(message = paste0("Runninf P-value calibration", id), {
+          shiny::incProgress(0.5)
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'Pvaluecalibration', 'Calibration method', GetCalibrationMethod())
           
           if (!is.null(rv.custom$calibrationRes$pi0))
@@ -837,8 +832,9 @@ PipelineProtein_DA_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
-        }
-      })
+          shiny::incProgress(1)
+        })
+      }
     })
     
 
@@ -1250,11 +1246,14 @@ PipelineProtein_DA_server <- function(id,
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('FDR', btnEvents()))
-      shiny::withProgress(message = paste0("COmputing FDR", id), {
-        shiny::incProgress(0.5)
-        if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
-          shinyjs::info(btnVentsMasg)
-        else {
+      req(rv$dataIn)
+      
+      if (is.null(rv$dataIn) || is.null(rv.custom$thpval))
+        shinyjs::info(btnVentsMasg)
+      
+      else {
+        shiny::withProgress(message = paste0("COmputing FDR", id), {
+          shiny::incProgress(0.5)
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'th pval', rv.custom$thpval)
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', '% FDR', round(100 * Get_FDR(), digits = 2))
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DA', 'FDR', 'Nb significant', Get_Nb_Significant())
@@ -1263,8 +1262,9 @@ PipelineProtein_DA_server <- function(id,
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["FDR"] <- MagellanNTK::stepStatus$VALIDATED
-        }
-      })
+          shiny::incProgress(1)
+        })
+      }
     })
     
     

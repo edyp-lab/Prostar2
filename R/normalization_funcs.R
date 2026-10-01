@@ -124,3 +124,55 @@ normalizationProt <- function(data,
   return(list(data = .tmp, 
               history = history))
 }
+
+
+#' @title Peptide normalization
+#'
+#' @description Perform normalization for peptides
+#'
+#' @param data A `QFeatures`
+#' @param method A `character(1)`, normalization method to be used. Must choose 
+#' between : `GlobalQuantileAlignment`, `SumByColumns`, `QuantileCentering`, 
+#' `MeanCentering`, `LOESS` and `vsn` 
+#' @param history The history
+#' @param quantile A `numeric(1)`, quantile of the intensity distribution that 
+#' is used as reference. Must be a float between 0 and 1
+#' @param type A `character(1)`, indicates whether the method is applied to the 
+#' entire dataset at once (`overall`) or whether each condition is normalized 
+#' independently (`within conditions`)
+#' @param scaling A `logical(1)`, whether variance reduction is performed
+#' @param subset.norm Selection of the proteins to which normalization will 
+#' be applied
+#' @param span A `numeric(1)`, proportion of the other analytes considered to 
+#' perform the regression. Must be a float between 0 and 1
+#'
+#' @return A `list` containing the normalized dataset and the history
+#'
+#' @examples
+#' data(subR25pept, package = "DaparToolshed")
+#' normalizationPept(subR25prot,
+#'                   method = "GlobalQuantileAlignment")
+#'
+#' @export
+#'
+normalizationPept <- function(data,
+                              method,
+                              history = NULL,
+                              quantile = NULL,
+                              type = NULL,
+                              scaling = NULL,
+                              subset.norm = NULL,
+                              span = NULL) {
+  res <- normalizationProt(
+          data = data,
+          method = method,
+          quantile = quantile,
+          type = type,
+          scaling = scaling,
+          subset.norm = subset.norm,
+          span = span,
+          history = history
+        )
+  
+  return(res)
+}

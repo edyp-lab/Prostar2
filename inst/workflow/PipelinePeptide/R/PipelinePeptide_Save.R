@@ -1,15 +1,46 @@
-#' @title xxx
-#' @name PipelinePeptide_Save
-#' 
+#' @title PipelinePeptide Save module
+#'
+#' @description
+#' This module contains the save step of the peptide pipeline.
+#'
+#' @param id A `character(1)` which is the 'id' of the module.
+#' @param dataIn An instance of the class `MultiAssayExperiment`
+#' @param steps.enabled A vector of boolean which has the same length of the steps
+#' of the pipeline. This information is used to enable/disable the widgets. It is not
+#' a communication variable between the caller and this module, thus there is no
+#' corresponding output variable
+#' @param remoteReset It is a remote command to reset the module. An `integer()` that
+#' indicates is the pipeline has been reseted by a program of higher level
+#' Basically, it is the program which has called this module
+#' @param steps.status A vector of `character()` which indicates the status of each step
+#' which can be either 'validated', 'undone' or 'skipped'. Enabled or disabled in the UI.
+#' @param current.pos A `integer(1)` which acts as a remote command to make
+#'  a step active in the timeline. Default is 1.
+#' @param path A `character()` which is the path to the directory which
+#' contains the files and directories of the pipeline.
+#'
+#' @return An instance of the class `MultiAssayExperiment`
+#'
 #' @examples
-#' NULL
-#' 
+#' if (interactive()) {
+#'   Prostar2("PipelinePeptide_Save")
+#' }
+#'
+#' @name PipelinePeptide_Save
+#'
+#' @importFrom stats setNames rnorm
+#' @import omXplore
+#' @importFrom shinyjs hidden useShinyjs toggle
+#' @importFrom shinyFeedback showFeedbackWarning hideFeedback
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
-#' 
+#'
+NULL
 
-#' @export
+
 #' @rdname PipelinePeptide_Save
+#' @export
+#'
 PipelinePeptide_Save_conf <- function(){
   MagellanNTK::Config(
     fullname = 'PipelinePeptide_Save',
@@ -18,16 +49,17 @@ PipelinePeptide_Save_conf <- function(){
 }
 
 
-
-#' @export
 #' @rdname PipelinePeptide_Save
+#' @export
+#'
 PipelinePeptide_Save_ui <- function(id){
   ns <- NS(id)
 }
 
 
-#' @export
 #' @rdname PipelinePeptide_Save
+#' @export
+#'
 PipelinePeptide_Save_server <- function(id,
   dataIn = reactive({NULL}),
   steps.enabled = reactive({NULL}),
@@ -36,27 +68,26 @@ PipelinePeptide_Save_server <- function(id,
   current.pos = reactive({1}),
   btnEvents = reactive({NULL})
 ){
-  
   pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
   
-  # Define default selected values for widgets
-  # By default, this list is empty for the Save module
-  # but it can be customized
+  # Default values for widgets
   widgets.default.values <- list()
+  
+  # Default values for reactive values
   rv.custom.default.values <- list(
     history = MagellanNTK::InitializeHistory()
   )
   
-  ###-------------------------------------------------------------###
+  ### ------------------------------------------------------------###
   ###                                                             ###
   ### ------------------- MODULE SERVER --------------------------###
   ###                                                             ###
-  ###-------------------------------------------------------------###
+  ### ------------------------------------------------------------###
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Insert necessary code which is hosted by MagellanNTK
-    # DO NOT MODIFY THIS LINE
+    # Code hosted by MagellanNTK to create the process
+    # DO NOT MODIFY THESE LINES
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
@@ -67,37 +98,29 @@ PipelinePeptide_Save_server <- function(id,
     eval(str2expression(core.code))
     add_resourcePath()
     
-    observeEvent(req(dataIn()), {
-      rv$dataIn <- dataIn()
-    })
-    
-    ###########################################################################-
+   
+    ########################################################################### -
     #
     #-------------------------------------SAVE----------------------------------
     #
-    ###########################################################################-
+    ########################################################################### -
     output$Save <- renderUI({
-      
-      file <- normalizePath(file.path(
-        system.file('workflow', package = 'Prostar2'),
-        unlist(strsplit(id, '_'))[1], 
-        'md', 
-        paste0(id, '.Rmd')))
-      
-      
       MagellanNTK::process_layout(session,
         ns = NS(id),
         sidebar = tagList(),
         content = tagList(
-          uiOutput(ns('dl_ui')),
-          if (file.exists(file))
-            includeMarkdown(file)
-          else
-            p('No Save available'),
+          uiOutput(ns("dl_ui"))
         )
       )
     })
     
+    #### _content -----
+    # Copy the input dataset to use it during this step
+     observeEvent(req(dataIn()), {
+      rv$dataIn <- dataIn()
+    })
+    
+    # Download (ui) (after saving)
     output$dl_ui <- renderUI({
       req(rv$steps.status['Save'] == MagellanNTK::stepStatus$VALIDATED)
       req(config@mode == 'pipeline')
@@ -105,29 +128,29 @@ PipelinePeptide_Save_server <- function(id,
       Prostar2::download_dataset_ui(ns(paste0(id, '_createQuickLink')))
     })
     
-    
+    ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Save', btnEvents()))
-      req(inherits(dataIn(), 'QFeatures'))
+      
       shiny::withProgress(message = paste0("Saving all processes", id), {
         shiny::incProgress(0.5)
         
         S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
-        # DO NOT MODIFY THE THREE FOLLOWING LINES
+        
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- rv$dataIn
         rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
         
+        # Download (server)
         Prostar2::download_dataset_server('createQuickLink', dataIn = reactive({dataOut$value}))
+        shiny::incProgress(1)
       })
     })
     
-    # <<< end ------------------------------------------------------------------
+    ####### _END_ -----
     
-    # Insert necessary code which is hosted by MagellanNTK
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-    
-  }
-  )
+  })
 }

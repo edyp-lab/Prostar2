@@ -180,7 +180,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
-    observeEvent(req(dataIn()), ignoreNULL = FALSE, {
+    observeEvent(req(dataIn()), ignoreInit = FALSE, ignoreNULL = FALSE, {
       
       req(inherits(dataIn(), "SummarizedExperiment"))
         rv$dataIn <- dataIn()

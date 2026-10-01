@@ -49,7 +49,7 @@ PipelineProtein_Imputation_conf <- function() {
 }
 
 
-#' @rdname PipelineProtein_Normalization
+#' @rdname PipelineProtein_Imputation
 #' @export
 #'
 PipelineProtein_Imputation_ui <- function(id) {
@@ -57,7 +57,7 @@ PipelineProtein_Imputation_ui <- function(id) {
 }
 
 
-#' @rdname PipelineProtein_Normalization
+#' @rdname PipelineProtein_Imputation
 #' @export
 #'
 PipelineProtein_Imputation_server <- function(
@@ -116,9 +116,9 @@ PipelineProtein_Imputation_server <- function(
   )
 
   ### -------------------------------------------------------------###
-  ###                                                             ###
-  ### ------------------- MODULE SERVER --------------------------###
-  ###                                                             ###
+  ###                                                              ###
+  ### -------------------- MODULE SERVER --------------------------###
+  ###                                                              ###
   ### -------------------------------------------------------------###
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -544,11 +544,13 @@ PipelineProtein_Imputation_server <- function(
       MagellanNTK::format_DT_ui(ns("MEC_dt"))
     })
 
+    # Plot - NA plots (ui)
     output$MECImputation_mvplots_ui <- renderUI({
       widget <- mod_mv_plots_ui(ns("MECImputation_mvplots"))
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["MECImputation"])
     })
 
+    # Plot - NA plots (server)
     observe({
       req(rv.custom$dataIn2)
 
@@ -713,6 +715,7 @@ PipelineProtein_Imputation_server <- function(
         SummarizedExperiment::assays(rv.custom$dataIn2)
       ))) {
         shinyjs::info(btnVentsMasg)
+        
       } else {
         shiny::withProgress(message = paste0("Save process", id), {
           shiny::incProgress(0.5)
