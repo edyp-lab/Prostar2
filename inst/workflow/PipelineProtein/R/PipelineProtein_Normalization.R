@@ -140,9 +140,7 @@ PipelineProtein_Normalization_server <- function(
 
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          uiOutput(ns("open_dataset_UI"))
-        ),
+        sidebar = tagList(),
         content = div(
           id = ns("div_content"),
           if (file.exists(file)) {
@@ -424,6 +422,7 @@ PipelineProtein_Normalization_server <- function(
         shiny::withProgress(message = paste0("Normalization process", id), {
           shiny::incProgress(0.5)
           
+          # Apply normalization
           norm <- normalizationProt(
             data = rv$dataIn,
             method = rv.widgets$Normalization_method,
@@ -434,6 +433,8 @@ PipelineProtein_Normalization_server <- function(
             span = as.numeric(rv.widgets$Normalization_spanLOESS),
             history = rv.custom$history
           )
+          
+          # Update values
           .tmp <- norm$data
           rv.custom$history <- norm$history
   
@@ -454,6 +455,7 @@ PipelineProtein_Normalization_server <- function(
             dataOut$value <- NULL
             rv$steps.status["Normalization"] <- MagellanNTK::stepStatus$VALIDATED
           }
+          shiny::incProgress(1)
         }) 
       }
     })
@@ -505,7 +507,7 @@ PipelineProtein_Normalization_server <- function(
         shiny::withProgress(message = paste0("Saving process", id), {
           shiny::incProgress(0.5)
 
-          # Rename the new dataset and add the history
+          # Add the history
           rv$dataIn <- prepareQFsave(
             data = rv$dataIn,
             history = rv.custom$history,

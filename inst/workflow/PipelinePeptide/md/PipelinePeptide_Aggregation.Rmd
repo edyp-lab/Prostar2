@@ -20,7 +20,7 @@ This step allows the selection of an aggregation method among several available 
 ***
 
 ### Aggregation
-The `Aggregation` step offers a number of different aggregation method, that are described below. The parameters to be defined vary depending on the selected method. Please note that certain combinations of parameters can lead to rather long processing times.
+The `Aggregation` step offers a number of different aggregation method, that are described below. The parameters to be defined vary depending on the selected method. All proteins without at least one associated value are automatically removed at the end of the aggregation. Please note that certain combinations of parameters can lead to rather long processing times.
 
 The left side of the interface is used to select the aggregation method and configure the settings associated with the chosen method. Once pleased with the selected options, click on `Run` at the top to apply the aggregation to the data.
 The central area of the interface displays multiple tables. The top one shows information about to peptides, while the bottom one provides information about the proteins. Both use information from the adjacency matrix.

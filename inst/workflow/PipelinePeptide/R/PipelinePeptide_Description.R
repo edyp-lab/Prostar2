@@ -124,9 +124,7 @@ PipelinePeptide_Description_server <- function(
 
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          uiOutput(ns("open_dataset_UI"))
-        ),
+        sidebar = tagList(),
         content = tagList(
           if (file.exists(file)) {
             includeMarkdown(file)

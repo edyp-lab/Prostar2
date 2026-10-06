@@ -149,10 +149,7 @@ PipelineProtein_Filtering_server <- function(id,
 
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = div(
-          id = "div_sidebar_Description",
-          uiOutput(ns("open_dataset_UI"))
-        ),
+        sidebar = tagList(),
         content = div(
           id = ns("div_content"),
           if (file.exists(file)) {
@@ -333,7 +330,7 @@ PipelineProtein_Filtering_server <- function(id,
         !("Cellmetadatafiltering" %in% names(rv.custom$dataIn1))) {
         shinyjs::info(btnVentsMasg)
       } else {
-        shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::withProgress(message = paste0("Applying filter", id), {
           shiny::incProgress(0.5)
 
           # Update dataset for the next sub-step
@@ -551,11 +548,12 @@ PipelineProtein_Filtering_server <- function(id,
       )) ||
         !("Variablefiltering" %in% names(rv.custom$dataIn2))) {
         shinyjs::info(btnVentsMasg)
+        
       } else {
-        shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::withProgress(message = paste0("Applying filter", id), {
           shiny::incProgress(0.5)
 
-          # DO NOT MODIFY
+          # DO NOT MODIFY THE NEXT THREE LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Variablefiltering"] <- MagellanNTK::stepStatus$VALIDATED

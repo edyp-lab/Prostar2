@@ -196,14 +196,14 @@ infos_dataset_server <- function(
       )
 
       if (tolower(typeOfData) == "peptide") {
-        if (length(S4Vectors::metadata(.se)$list.matAdj) > 0) {
-          adjMat.txt <- "<span style=\"color: lime\">OK</span>"
+        if (length(SummarizedExperiment::rowData(.se)[['adjacencyMatrix']]) > 0) {
+          adjMat.txt <- "<span style=\"color: green\">OK</span>"
         } else {
           adjMat.txt <- "<span style=\"color: red\">Missing</span>"
         }
 
         if (!is.null(S4Vectors::metadata(.se)$list.cc)) {
-          cc.txt <- "<span style=\"color: lime\">OK</span>"
+          cc.txt <- "<span style=\"color: green\">OK</span>"
         } else {
           cc.txt <- "<span style=\"color: red\">Missing</span>"
         }

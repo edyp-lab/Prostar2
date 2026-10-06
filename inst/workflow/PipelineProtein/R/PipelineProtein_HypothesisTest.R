@@ -1,7 +1,7 @@
 #' @title PipelineProtein HypothesisTest module
 #'
 #' @description
-#' This module contains the hypothesisTest step of the protein pipeline.
+#' This module contains the hypothesis test step of the protein pipeline.
 #'
 #' @param id A `character(1)` which is the 'id' of the module.
 #' @param dataIn An instance of the class `MultiAssayExperiment`
@@ -142,9 +142,7 @@ PipelineProtein_HypothesisTest_server <- function(
 
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          uiOutput(ns("open_dataset_UI"))
-        ),
+        sidebar = tagList(),
         content = div(
           id = ns("div_content"),
           if (file.exists(file)) {
@@ -160,6 +158,7 @@ PipelineProtein_HypothesisTest_server <- function(
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl("Description", btnEvents()))
       req(dataIn())
+      req(inherits(dataIn(), 'QFeatures'))
 
       # Copy the input dataset to use it during this step
       rv$dataIn <- dataIn()
@@ -189,6 +188,7 @@ PipelineProtein_HypothesisTest_server <- function(
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- NULL
           rv$steps.status["Description"] <- MagellanNTK::stepStatus$VALIDATED
+          shiny::incProgress(1)
         })
       }
     })
@@ -476,6 +476,7 @@ PipelineProtein_HypothesisTest_server <- function(
             dataOut$value <- NULL
             rv$steps.status["HypothesisTest"] <- MagellanNTK::stepStatus$VALIDATED
           }
+          shiny::incProgress(1)
         })
       }
     })
@@ -521,7 +522,7 @@ PipelineProtein_HypothesisTest_server <- function(
       if (isTRUE(all.equal(SummarizedExperiment::assays(rv$dataIn), SummarizedExperiment::assays(dataIn())))) {
         shinyjs::info(btnVentsMasg)
       } else {
-        shiny::withProgress(message = paste0("Reseting process", id), {
+        shiny::withProgress(message = paste0("Saving process", id), {
           shiny::incProgress(0.5)
 
           rv$dataIn <- prepareQFsave(

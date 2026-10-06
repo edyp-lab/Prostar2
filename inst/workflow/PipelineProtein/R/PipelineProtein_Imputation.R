@@ -151,9 +151,7 @@ PipelineProtein_Imputation_server <- function(
 
       MagellanNTK::process_layout(session,
         ns = NS(id),
-        sidebar = tagList(
-          uiOutput(ns("open_dataset_UI"))
-        ),
+        sidebar = tagList(),
         content = div(
           id = ns("div_content"),
           if (file.exists(file)) {
@@ -169,6 +167,7 @@ PipelineProtein_Imputation_server <- function(
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl("Description", btnEvents()))
       req(dataIn())
+      req(inherits(dataIn(), 'QFeatures'))
 
       # Copy the input dataset to use it during this step
       rv$dataIn <- dataIn()
@@ -717,7 +716,7 @@ PipelineProtein_Imputation_server <- function(
         shinyjs::info(btnVentsMasg)
         
       } else {
-        shiny::withProgress(message = paste0("Save process", id), {
+        shiny::withProgress(message = paste0("Saving process", id), {
           shiny::incProgress(0.5)
           len_start <- length(rv$dataIn)
           len_end <- length(rv.custom$dataIn2)

@@ -1,57 +1,42 @@
-#' @title Shiny example process module.
+#' @title PipelinePeptide DifferentialAnalysis module
 #'
 #' @description
-#' This module contains the configuration informations for the corresponding pipeline.
-#' It is called by the nav_pipeline module of the package MagellanNTK
+#' This module contains the differential analysis step of the peptide pipeline.
 #' 
-#' The name of the server and ui functions are formatted with keywords separated by '_', as follows:
-#' * first string `mod`: indicates that it is a Shiny module
-#' * `pipeline name` is the name of the pipeline to which the process belongs
-#' * `process name` is the name of the process itself
-#' 
-#' This convention is important because MagellanNTK call the different
-#' server and ui functions by building dynamically their name.
-#' 
-#' In this example, `PipelinePeptide_DifferentialAnalysis_UI()` and `PipelinePeptide_DifferentialAnalysis_server()` define
-#' the code for the process `PipelinePeptide` which is part of the pipeline called `PipelinePeptide`.
-#'
-#' @name PipelinePeptide
-#' 
-#' @param id xxx
-#' @param dataIn The dataset
+#' @param id A `character(1)` which is the 'id' of the module.
+#' @param dataIn An instance of the class `MultiAssayExperiment`
 #' @param steps.enabled A vector of boolean which has the same length of the steps
 #' of the pipeline. This information is used to enable/disable the widgets. It is not
 #' a communication variable between the caller and this module, thus there is no
 #' corresponding output variable
-#' @param remoteReset It is a remote command to reset the module. A boolean that
+#' @param remoteReset It is a remote command to reset the module. An `integer()` that
 #' indicates is the pipeline has been reseted by a program of higher level
 #' Basically, it is the program which has called this module
-#' @param steps.status xxx
-#' @param current.pos xxx
-#' @param path xxx
+#' @param steps.status A vector of `character()` which indicates the status of each step
+#' which can be either 'validated', 'undone' or 'skipped'. Enabled or disabled in the UI.
+#' @param current.pos A `integer(1)` which acts as a remote command to make
+#'  a step active in the timeline. Default is 1.
+#' @param path A `character()` which is the path to the directory which 
+#' contains the files and directories of the pipeline.
 #' 
+#' @return An instance of the class `MultiAssayExperiment`
 #' 
 #' @examples
-#' if (interactive()){
-#' library(MagellanNTK)
-#' library(DaparToolshed)
-#' data(Exp2_R100_pept, package = "DaparToolshedData")
-#' obj <- Exp2_R100_pept
-#' # Simulate imputation of missing values
-#' obj <- NAIsZero(obj, 1)
-#' obj <- NAIsZero(obj, 2)
-#' path <- system.file('workflow/PipelinePeptide', package = 'Prostar2')
-#' shiny::runApp(workflowApp("PipelinePeptide_DifferentialAnalysis", path, dataIn = obj))
+#' if (interactive()) {
+#'   Prostar2("PipelinePeptide_DifferentialAnalysis")
 #' }
 #' 
+#' @name PipelinePeptide_DifferentialAnalysis
 #' 
-#' @author Manon Gaudin
-#' 
+#' @importFrom stats setNames rnorm
+#' @importFrom shinyjs useShinyjs
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
+#' 
 NULL
 
-#' @rdname PipelinePeptide
+
+#' @rdname PipelinePeptide_DifferentialAnalysis
 #' @export
 #' 
 PipelinePeptide_DifferentialAnalysis_conf <- function(){
@@ -64,8 +49,7 @@ PipelinePeptide_DifferentialAnalysis_conf <- function(){
 }
 
 
-#' @rdname PipelinePeptide
-#' 
+#' @rdname PipelinePeptide_DifferentialAnalysis
 #' @export
 #'
 PipelinePeptide_DifferentialAnalysis_ui <- function(id){
@@ -73,13 +57,7 @@ PipelinePeptide_DifferentialAnalysis_ui <- function(id){
 }
 
 
-
-#' @rdname PipelinePeptide
-#' 
-#' @importFrom stats setNames rnorm
-#' @import DaparToolshed
-#' @importFrom shinyjs info useShinyjs
-#' 
+#' @rdname PipelinePeptide_DifferentialAnalysis
 #' @export
 #' 
 PipelinePeptide_DifferentialAnalysis_server <- function(id,
@@ -90,27 +68,27 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   current.pos = reactive({1}),
   btnEvents = reactive({NULL})
 ){
-  
+  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors', 'magrittr', 'grDevices'))
   requireNamespace('DaparToolshed')
-  pkgs_require('magrittr')
   
-  pkgs_require(c('QFeatures', 'SummarizedExperiment', 'S4Vectors'))
-  
-  # Define default selected values for widgets
-  # This is only for simple workflows
+  # Default values for widgets
   widgets.default.values <- list(
     Scenario_choice = "Contrast",
     Scenario_method = "Limma",
+    
     Foldchange_thlogFC = 0,
     Foldchange_contrastchoice = "Stacked",
     Foldchange_uniquechoice = "None",
+    
     Finetuning_cluster_protprofile = "Mean",
     Finetuning_cluster_method = "kmeans",
     Finetuning_cluster_nbclust = 2,
     Finetuning_aggreg_method = "MinPval",
+    
     Pvaluecalibration_calibrationMethod = "Benjamini-Hochberg",
     Pvaluecalibration_numericValCalibration = "None",
     Pvaluecalibration_nBinsHistpval = 80,
+    
     FDRcontrol_viewAdjPval = FALSE,
     FDRcontrol_volcanocontrast = NULL,
     FDRcontrol_Pairwisecomparison_tooltipInfo = NULL,
@@ -120,11 +98,10 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     FDRcontrol_cluster_plot_clust = NULL
   )
   
-  
+  # Default values for reactive values
   rv.custom.default.values <- list(
-    result_open_dataset = reactive({NULL}),
-    
     history = MagellanNTK::InitializeHistory(),
+    
     res_pval_FC = NULL,
     res_pval_FC_complete = NULL,
     res_pval_FC_stacked = NULL,
@@ -152,8 +129,6 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     FDRcontrol_Pairwisecomparison_tooltipInfo = NULL
   )
   
-  orangeProstar <- "#E97D5E"
-  
   ###-------------------------------------------------------------###
   ###                                                             ###
   ### ------------------- MODULE SERVER --------------------------###
@@ -162,9 +137,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pkgs_require('grDevices')
-    # Insert necessary code which is hosted by MagellanNTK
-    # DO NOT MODIFY THIS LINE
+    # Code hosted by MagellanNTK to create the process
+    # DO NOT MODIFY THESE LINES
     core.code <- MagellanNTK::Get_Workflow_Core_Code(
       mode = 'process',
       name = id,
@@ -181,7 +155,6 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     #
     ###########################################################################-
     output$Description <- renderUI({
-      
       file <- normalizePath(file.path(
         system.file('workflow', package = 'Prostar2'),
         unlist(strsplit(id, '_'))[1], 
@@ -200,18 +173,23 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       )
     })
     
-    
     ### btnEvent -----
     observeEvent(req(btnEvents()), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(grepl('Description', btnEvents()))
+      req(dataIn())
       req(inherits(dataIn(), 'QFeatures'))
       
       shiny::withProgress(message = paste0("Reseting process", id), {
         shiny::incProgress(0.5)
+        
+        # Copy the input dataset to use it during this step
         rv$dataIn <- dataIn()
+        
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status['Description'] <- MagellanNTK::stepStatus$VALIDATED
+        shiny::incProgress(1)
       })
     })
 
@@ -389,6 +367,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Scenario', 'Scenario', rv.widgets$Scenario_choice)
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Scenario', 'Method', rv.widgets$Scenario_method)
         
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status["Scenario"] <- MagellanNTK::stepStatus$VALIDATED
@@ -634,6 +613,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', '-', '-')
         }
         
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status["Foldchange"] <- MagellanNTK::stepStatus$VALIDATED
@@ -1004,6 +984,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Finetuning', 'Aggregation_Method', rv.widgets$Finetuning_aggreg_method)
         }
         
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status["Finetuning"] <- MagellanNTK::stepStatus$VALIDATED
@@ -1325,6 +1306,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Pvaluecalibration', 'Calibration_Method', rv.widgets$Pvaluecalibration_calibrationMethod)
         rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Pvaluecalibration', 'pi0', rv.custom$pi0)
         
+        # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
         rv$steps.status["Pvaluecalibration"] <- MagellanNTK::stepStatus$VALIDATED
@@ -1903,7 +1885,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     })
     
     BuildPairwiseComp_wb <- reactive({
-      DA_Style <- openxlsx::createStyle(fgFill = orangeProstar)
+      DA_Style <- openxlsx::createStyle(fgFill = "#E97D5E")
       hs1 <- openxlsx::createStyle(fgFill = "#DCE6F1",
                                    halign = "CENTER",
                                    textDecoration = "italic",
@@ -2185,7 +2167,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
           paste0("isDifferential (",
                  as.character(rv.custom$comparison), ")"),
           target = "row",
-          backgroundColor = DT::styleEqual(c(0, 1), c("white", orangeProstar))
+          backgroundColor = DT::styleEqual(c(0, 1), c("white", "#E97D5E"))
         )
     })
     
@@ -2269,26 +2251,28 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       else {
         shiny::withProgress(message = paste0("Saving process", id), {
           shiny::incProgress(0.5)
-          S4Vectors::metadata(rv$dataIn)$name.pipeline <- 'PipelinePeptide'
           
-          DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]) <- rbind(DaparToolshed::paramshistory(rv$dataIn[[length(rv$dataIn)]]), rv.custom$history)
-          
-          # DO NOT MODIFY THE THREE FOLLOWING LINES
+          rv$dataIn <- prepareQFsave(
+            data = rv$dataIn,
+            history = rv.custom$history,
+            namePipeline = 'PipelinePeptide'
+          )
+
+          # DO NOT MODIFY THE NEXT THREE LINES
           dataOut$trigger <- MagellanNTK::Timestamp()
           dataOut$value <- rv$dataIn
           rv$steps.status['Save'] <- MagellanNTK::stepStatus$VALIDATED
           
-          
+          # Download (server)
           Prostar2::download_dataset_server(paste0(id, '_createQuickLink'), dataIn = reactive({dataOut$value}))
+          shiny::incProgress(1)
         })
       }
     })
     
-    # <<< end ------------------------------------------------------------------
-
-    # Insert necessary code which is hosted by MagellanNTK
+    ####### _END_ -----
+    
     # DO NOT MODIFY THIS LINE
     eval(parse(text = MagellanNTK::Module_Return_Func()))
-  }
-  )
+  })
 }

@@ -87,3 +87,49 @@ prepareQFsave <- function(data,
                                                    history)
   return(data)
 }
+
+
+#' @title Read file
+#'
+#' @description Read a file uploaded
+#'
+#' @param file The object from a fileInput widget
+#' @param sheet The name of the sheet if the dataset is an excel
+#'
+#' @return The dataset
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+readFileConvert <- function(file,
+                            sheet = NULL){
+  tryCatch({
+    ext <- MagellanNTK::GetExtension(file$name)
+    f.path <- file$datapath
+    data <- switch(ext,
+                   txt = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+                   csv = read.csv(f.path, header = TRUE, sep = ";", as.is = T),
+                   tsv = read.csv(f.path, header = TRUE, sep = "\t", as.is = T),
+                   xls = DaparToolshed::readExcel(f.path, sheet = sheet),
+                   xlsx = DaparToolshed::readExcel(f.path, sheet = sheet)
+                   )
+    
+    colnames(data) <- gsub(".", "_", colnames(data), fixed = TRUE)
+    colnames(data) <- gsub(" ", "_", colnames(data), fixed = TRUE)
+  },
+  warning = function(w) {
+    shinyjs::info(conditionMessage(w))
+    return(NULL)
+  },
+  error = function(e) {
+    shinyjs::info(conditionMessage(e))
+    return(NULL)
+  },
+  finally = {
+    # cleanup-code
+  })
+  
+  return(data)
+}
