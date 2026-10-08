@@ -212,24 +212,25 @@ Build_enriched_qdata <- function(obj.se, digits = NULL) {
 }
 
 
-#' @title
-#' xxxx
+#' @title Extract value with the correct class
 #'
 #' @description
-#' xxxx
+#' Extract value with the correct class
 #'
-#' @param value xx
-#' @param expected_type xxx
+#' @param value Value to extract
+#' @param expected_type Expected value class
 #' 
-#' @return NA
+#' @return The value with the correct class, 
+#' or NA if the coercion is not possible
 #' 
 #' @examples
-#' NULL
+#' Extract_Value(1, "character")
+#' Extract_Value("test", "numeric")
 #' 
 #' @export
 #'
-
-Extract_Value <- function(value, expected_type = c("numeric", "character", "logical", "factor", "integer")) {
+Extract_Value <- function(value, 
+                          expected_type = c("numeric", "character", "logical", "factor", "integer")) {
   expected_type <- match.arg(expected_type)
   
   tryCatch({

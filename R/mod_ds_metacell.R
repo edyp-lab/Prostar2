@@ -102,22 +102,22 @@ mod_ds_metacell_Histos_server <- function(
       showSelect = if (is.null(pattern())) TRUE else showSelect(),
       type = NULL
     )
-
+    # nocov start
     observeEvent(req(dataIn()), {
       rv$type <- DaparToolshed::typeDataset(dataIn())
     })
-
+    # nocov end
     tmp.tags <- mod_metacell_tree_server("tree",
       dataIn = reactive({
         dataIn()
       })
     )
 
-
+    # nocov start
     observeEvent(tmp.tags()$values, ignoreNULL = FALSE, ignoreInit = TRUE, {
       rv$chooseTag <- tmp.tags()$values
     })
-
+    # nocov end
 
     output$chooseTagUI <- renderUI({
       req(dataIn())

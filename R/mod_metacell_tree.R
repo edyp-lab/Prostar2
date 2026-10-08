@@ -159,7 +159,7 @@ mod_metacell_tree_server <- function(
     #   )
     # })
 
-# 
+    # nocov start
     observeEvent(input$openModalBtn, {
       req(dataIn())
       req(input$openModalBtn != rv$tmpbtnval)
@@ -203,7 +203,7 @@ mod_metacell_tree_server <- function(
       )
       )
     })
-    
+    # nocov end
     
     
     output$selectedNodes <- renderUI({
@@ -226,7 +226,7 @@ mod_metacell_tree_server <- function(
       rv$autoChanged <- TRUE
     }
 
-
+    # nocov start
     observeEvent(req(remoteReset()), ignoreInit = FALSE, {
       req(dataIn())
       # print('------------ observeEvent(req(reset()) ---------------')
@@ -243,12 +243,13 @@ mod_metacell_tree_server <- function(
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- NULL
     })
-
+    # nocov end
 
 
     # When OK button is pressed, attempt to load the data set. If successful,
     # remove the modal. If not show another modal, but this time with a failure
     # message.
+    # nocov start
     observeEvent(input$validatetree, ignoreInit = FALSE, ignoreNULL = TRUE, {
       dataOut$trigger <- as.numeric(Sys.time())
       dataOut$values <- names(rv$tags)[which(rv$tags == TRUE)]
@@ -305,7 +306,7 @@ mod_metacell_tree_server <- function(
 
       rv$autoChanged <- FALSE
     })
-
+    # nocov end
 
     output$tree <- renderUI({
       if(is.null(dataIn())){
@@ -571,6 +572,7 @@ mod_metacell_tree_server <- function(
 
 
     # Catch a change in the selection of a node
+    # nocov start
     observeEvent(somethingChanged(), ignoreInit = TRUE, {
       req(length(names(rv$mapping)) > 0)
       if (rv$autoChanged) {
@@ -621,8 +623,7 @@ mod_metacell_tree_server <- function(
         )
       }
     })
-
-
+    # nocov end
 
 
     return(reactive({
@@ -790,10 +791,11 @@ mod_metacell_tree <- function(
         remoteReset() + input$Reset
       })
     )
-
+    # nocov start
     observeEvent(req(tags()$trigger), {
       message(tags()$values)
     })
+    # nocov end
   }
 
   app <- shinyApp(ui, server)

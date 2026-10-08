@@ -93,7 +93,7 @@ mod_mv_plots_server <- function(
       palette = NULL,
       pattern = NULL
     )
-
+    # nocov start
     observeEvent(req(data()), {
       req(inherits(data(), "SummarizedExperiment"))
 
@@ -118,7 +118,7 @@ mod_mv_plots_server <- function(
 
       rv$pattern <- pattern()
     })
-
+    # nocov end
     output$plot_viewNAbyMean <- plotly::renderPlotly({
       req(data())
       req(rv$pattern)

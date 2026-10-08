@@ -140,17 +140,17 @@ mod_volcanoplot_server <- function(
       )
     )
 
-
+    # nocov start
     observeEvent(req(dataIn()), {
       rv$dataIn <- dataIn()
       rv.custom$data <- HypothesisTest(dataIn())
     })
-
+    
     
     observeEvent(input$eventPointClicked, {
       rv.custom$eventPointClicked <- input$eventPointClicked
     })
-
+    # nocov end
 
     output$quantiDT <- renderUI({
       req(rv.custom$eventPointClicked)
@@ -375,6 +375,7 @@ mod_volcanoplot_server <- function(
 
     ## ---------------------------------------------------------
     #GetExprsClickedProtein <- bindEvent({
+    # nocov start
     observeEvent(rv.custom$eventPointClicked, {
       req(rv$dataIn)
       req(rv.custom$eventPointClicked)
@@ -406,7 +407,7 @@ mod_volcanoplot_server <- function(
       )
 
     })
-
+    # nocov end
 
 
     output$Warning_Infos <- renderUI({

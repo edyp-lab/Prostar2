@@ -89,11 +89,11 @@ download_dataset_server <- function(
       )
 
     })
-    
+    # nocov start
     observeEvent(req(dataIn()), ignoreNULL = TRUE, ignoreInit = FALSE,{
       rv$data_save <- dataIn()
     })
-    
+    # nocov end
     ## Save as .xlsx -----
     output$dl_xl <- renderUI({
       req("xlsx" %in% extension)

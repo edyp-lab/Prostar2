@@ -136,6 +136,7 @@ mod_buildDesign_server <- function(
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
     
+    # nocov start
     observeEvent({list(remoteReset(), input$reset)}, ignoreInit = TRUE, ignoreNULL = TRUE, {
         rv.custom$hot <- data.frame(
           quantCols = as.character(quantCols()),
@@ -160,7 +161,7 @@ mod_buildDesign_server <- function(
     observeEvent(req(input$linkToFaq1), {
       updateTabsetPanel(session, "navPage", "faqTab")
     })
-    
+    # nocov end
     
     # Table ----
     output$hot <- rhandsontable::renderRHandsontable({
@@ -274,7 +275,7 @@ mod_buildDesign_server <- function(
 
       return(txt)
     })    
-    
+    # nocov start
     observeEvent(req(input$hot), {
       if (rv.custom$resettingHot) {
         rv.custom$resettingHot <- FALSE
@@ -282,7 +283,7 @@ mod_buildDesign_server <- function(
         rv.custom$hot <- rhandsontable::hot_to_r(input$hot)
       }
     })
-    
+    # nocov end
     
     # Conditions ----
     output$UI_reorder <- renderUI({
@@ -325,7 +326,7 @@ mod_buildDesign_server <- function(
         txt
       )
     })    
-    
+    # nocov start
     observeEvent(input$btn_checkConds, {
       req(rv.widgets$convert_reorder)
 
@@ -341,7 +342,7 @@ mod_buildDesign_server <- function(
 
       rv.custom$conditionsChecked <- checkConditions(rv.custom$hot$Condition)
     })
-    
+    # nocov end
     
     # Design ----
     output$UI_hierarchicalExp <- renderUI({
@@ -408,7 +409,7 @@ mod_buildDesign_server <- function(
       })
     })
 
-
+    # nocov start
     observeEvent({rv.widgets$chooseExpDesign
       rv.custom$conditionsChecked$valid}, {
       req(isTRUE(rv.custom$conditionsChecked$valid))
@@ -443,7 +444,7 @@ mod_buildDesign_server <- function(
     observeEvent(input$btn_checkDesign, {
       rv.custom$designChecked <- checkDesign(rv.custom$hot)
     })
-
+    # nocov end
 
     output$checkDesign <- renderUI({
       req(rv.widgets$chooseExpDesign)
@@ -493,7 +494,7 @@ mod_buildDesign_server <- function(
         )
       )
     })
-
+    # nocov start
     observeEvent(req(rv.custom$designChecked$valid), {
       req(isTRUE(rv.custom$conditionsChecked$valid))
       
@@ -507,7 +508,7 @@ mod_buildDesign_server <- function(
         dataOut$order <- seq_len(nrow(rv.custom$hot))
       }
     })
-
+    # nocov end
 
     return(reactive({dataOut}))
   })
@@ -533,10 +534,11 @@ mod_buildDesign <- function(quantCols) {
       quantCols = reactive({quantCols})
       )
   })
- 
+    # nocov start
     observeEvent(req(res()$design), ignoreInit = TRUE,{
       message(res()$design)
     })
+    # nocov end
   }
 
   app <- shinyApp(ui, server)

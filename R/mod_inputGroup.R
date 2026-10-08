@@ -126,7 +126,7 @@ mod_inputGroup_server <- function(
       do.call(tagList, input_list)
     })
 
-
+    # nocov start
     observeEvent(req(input[["input_1"]]), ignoreInit = TRUE, ignoreNULL = TRUE, {
       req(quantCols())
       req(df())
@@ -144,7 +144,7 @@ mod_inputGroup_server <- function(
         updateSelectInput(session, inputName, selected = .select)
       })
     })
-
+    # nocov end
 
 
     isOk <- reactive({

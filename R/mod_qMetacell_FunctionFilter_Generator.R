@@ -179,7 +179,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         )
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
+    # nocov start
     observeEvent(req(dataIn()), ignoreInit = FALSE, ignoreNULL = FALSE, {
       
       req(inherits(dataIn(), "SummarizedExperiment"))
@@ -193,7 +193,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
       },
       priority = 1000
     )
-
+    
 
     observeEvent(rv.custom$tmp.tags()$trigger, ignoreInit = FALSE, {
       rv.widgets$tag <- rv.custom$tmp.tags()$values
@@ -215,7 +215,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         ll.indices = NULL
       )
     })
-
+    # nocov end
 
 
     keep_vs_remove <- reactive({
@@ -387,13 +387,14 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
 
 
     # Set useless widgets to default values
+    # nocov start
     observeEvent(rv.widgets$scope == "WholeLine",
       {
         rv.widgets$percentThh <- 0
         rv.widgets$valueTh <- 0
         rv.widgets$valPercent <- "Percentage"
       }, priority = 1000)
-
+    # nocov end
 
 
 
@@ -524,7 +525,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         )
       )
     })
-    
+    # nocov start
     observeEvent(input$Preview_btn, ignoreInit = TRUE,{
       req(rv$dataIn)
       
@@ -618,7 +619,7 @@ mod_qMetacell_FunctionFilter_Generator_server <- function(
         })
       }
     })
-
+    # nocov end
     return(reactive({dataOut}))
   })
 }
@@ -654,12 +655,13 @@ mod_qMetacell_FunctionFilter_Generator <- function(
       is.enabled = reactive({is.enabled}),
       remoteReset = reactive({remoteReset() + input$Reset})
     )
-
+    # nocov start
     observeEvent(res()$trigger, {
       message(" --- res()$value ---")
       message(res()$value)
       message(" -------------------")
     })
+    # nocov end
   }
 
   app <- shiny::shinyApp(ui, server)

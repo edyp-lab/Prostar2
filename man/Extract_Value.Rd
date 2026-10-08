@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{Extract_Value}
 \alias{Extract_Value}
-\title{xxxx}
+\title{Extract value with the correct class}
 \usage{
 Extract_Value(
   value,
@@ -10,17 +10,19 @@ Extract_Value(
 )
 }
 \arguments{
-\item{value}{xx}
+\item{value}{Value to extract}
 
-\item{expected_type}{xxx}
+\item{expected_type}{Expected value class}
 }
 \value{
-NA
+The value with the correct class,
+or NA if the coercion is not possible
 }
 \description{
-xxxx
+Extract value with the correct class
 }
 \examples{
-NULL
+Extract_Value(1, "character")
+Extract_Value("test", "numeric")
 
 }

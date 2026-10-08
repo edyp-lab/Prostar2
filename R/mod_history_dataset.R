@@ -65,10 +65,11 @@ history_dataset_server <- function(
     rv <- reactiveValues(
       dataIn = NULL
     )
+    # nocov start
     observeEvent(req(inherits(dataIn(), "QFeatures")), {
       rv$dataIn <- dataIn()
     })
-    
+    # nocov end
 
     Get_QFeatures_History <- reactive({
       req(rv$dataIn)

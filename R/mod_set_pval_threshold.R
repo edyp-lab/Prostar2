@@ -87,7 +87,7 @@ mod_set_pval_threshold_server <- function(
       sep = "\n"
     )
     eval(str2expression(core))
-    
+    # nocov start
     observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
       lapply(names(rv.widgets), function(x){
         rv.widgets[[x]] <- widgets.default.values[[x]]})
@@ -101,7 +101,7 @@ mod_set_pval_threshold_server <- function(
       })
         
         })
-
+    # nocov end
     dataOut <- reactiveVal()
     
     output$ApplyThreshold_UI <- renderUI({
@@ -118,12 +118,12 @@ mod_set_pval_threshold_server <- function(
       
       MagellanNTK::toggleWidget(widget, is.enabled())
     })
-    
+    # nocov start
     observeEvent(pval_init(), {
       rv.custom$text_log_pval <- -log10(pval_init())
       rv.custom$text_pval <- pval_init()
     })
-    
+    # nocov end
     output$text_pval_UI <- renderUI({
       widget <- shinyWidgets::autonumericInput(
         ns("text_pval"),
@@ -156,7 +156,7 @@ mod_set_pval_threshold_server <- function(
       
       MagellanNTK::toggleWidget(widget, is.enabled() && rv.widgets$thresholdType == "logpval")
     })
-
+    # nocov start
     observeEvent(rv.widgets$text_pval, ignoreInit = TRUE, {
       req(rv.widgets$thresholdType == "pval")
       shinyWidgets::updateAutonumericInput(session, "text_log_pval", value = -log10(rv.widgets$text_pval))
@@ -170,7 +170,7 @@ mod_set_pval_threshold_server <- function(
     observeEvent(input$ApplyThreshold, ignoreInit = FALSE, ignoreNULL = FALSE, {
       dataOut(as.numeric(rv.widgets$text_log_pval))
     })
-    
+    # nocov end
     return(reactive({dataOut()}))
   })
 }

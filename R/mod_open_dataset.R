@@ -104,7 +104,7 @@ open_dataset_server <- function(
       sep = "\n"
     )
     eval(str2expression(core))
-
+    # nocov start
     observeEvent(remoteReset(), ignoreInit = TRUE, ignoreNULL = TRUE, {
       lapply(names(rv.widgets), function(x) {
         rv.widgets[[x]] <- widgets.default.values[[x]]
@@ -117,7 +117,7 @@ open_dataset_server <- function(
       dataOut$name <- NULL
       dataOut$dataset <- NULL
     })
-
+    # nocov end
 
     output$chooseSource_UI <- renderUI({
       widget <- selectInput(ns("chooseSource"), "Dataset source",
@@ -233,7 +233,7 @@ open_dataset_server <- function(
     #   req(rv.widgets$demoDataset)
     #   req(rv.widgets$chooseSource == "packageDataset")
     # })
-
+    # nocov start
     observeEvent(input$file, {
       print("load start")
       rv.widgets$file <- input$file
@@ -322,7 +322,7 @@ open_dataset_server <- function(
       })
       shinyjs::toggleState("load_dataset_btn")
     })
-
+    # nocov end
     output$Description_infos_dataset_UI <- renderUI({
       req(rv.custom$dataRead)
 
@@ -360,11 +360,11 @@ open_dataset <- function() {
     )
 
     rv$result <- open_dataset_server("qf_file")
-
+    # nocov start
     observeEvent(req(rv$result()), {
       rv$obj <- rv$result()
     })
-
+    # nocov end
     output$res <- renderText({
       rv$obj
       message(rv$obj)

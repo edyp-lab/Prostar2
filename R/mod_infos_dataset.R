@@ -79,10 +79,11 @@ infos_dataset_server <- function(
     rv <- reactiveValues(
       dataIn = NULL
     )
+    # nocov start
     observeEvent(req(inherits(dataIn(), "QFeatures")), {
       rv$dataIn <- dataIn()
     })
-
+    # nocov end
     output$samples_tab_ui <- renderUI({
       req(rv$dataIn)
 
@@ -228,7 +229,7 @@ infos_dataset_server <- function(
         checkboxInput(ns("properties_button"), "Display details?", value = FALSE)
       }
     })
-
+    # nocov start
     observeEvent(input$selectInputSE, {
       if (isTRUE(input$properties_button)) {
         output$properties_ui <- renderUI({
@@ -238,7 +239,7 @@ infos_dataset_server <- function(
         return(NULL)
       }
     })
-    
+    # nocov end
     MagellanNTK::format_DT_server("dt2",
       dataIn = reactive({
         Get_SE_Summary()

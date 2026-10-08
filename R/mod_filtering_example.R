@@ -77,7 +77,7 @@ mod_filtering_example_server <- function(
 
     pkgs_require('magrittr')
 
-
+    # nocov start
     observeEvent(req(showModal()), {
 
       shiny::showModal(shinyjqui::draggableModalDialog(
@@ -91,7 +91,7 @@ mod_filtering_example_server <- function(
       ))
 
     })
-    
+    # nocov end
     
     legendTypeMV <- list(
       MEC = "Missing in Entire Condition (MEC)",
@@ -229,11 +229,11 @@ mod_filtering_example <- function(
       showmodal = NULL,
       indices = seq_len(4)
     )
-    
+    # nocov start
     observeEvent(input$Preview_btn, {
       rv.custom$showmodal <- MagellanNTK::Timestamp()
     })
-    
+    # nocov end
     
     mod_filtering_example_server(
       id = "preview_filtering_query_result",
