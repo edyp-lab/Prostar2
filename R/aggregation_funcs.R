@@ -37,6 +37,16 @@ aggregationPept <- function(data,
                             aggCol,
                             maxIter,
                             rmEmptyLines){
+  # Input validation
+  sharePept <- match.arg(sharePept, c("Yes_As_Specific", "Yes_Iterative_Redistribution",
+                                      "Yes_Simple_Redistribution", "No"))
+  operator <- match.arg(operator, c("Sum", "Mean", "Median", "medianPolish", "robustSummary"))
+  considerPept <- match.arg(considerPept, c("allPeptides", "topN"))
+  ponderation <- match.arg(ponderation, c("Global", "Condition", "Sample"))
+  
+  if (considerPept == "topN" && missing(n)) {
+    stop("'n' must be provided when considerPept = 'topN'")
+  }
 
   .tmp <- DaparToolshed::RunAggregation(
     qf = data,
@@ -88,6 +98,10 @@ aggregationPept <- function(data,
 #' @export
 #'
 aggregStatTables <- function(data){
+  if (!inherits(data, "QFeatures")){
+    stop("data must be a QFeatures")
+  }
+  
   res <- DaparToolshed::getProteinsStats(SummarizedExperiment::rowData(data[[length(data)]])[['adjacencyMatrix']])
   
   # Make peptide table

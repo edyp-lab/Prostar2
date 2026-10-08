@@ -107,9 +107,9 @@ PipelineProtein_HypothesisTest_server <- function(
   )
 
   ### -------------------------------------------------------------###
-  ###                                                             ###
-  ### ------------------- MODULE SERVER --------------------------###
-  ###                                                             ###
+  ###                                                              ###
+  ### -------------------- MODULE SERVER --------------------------###
+  ###                                                              ###
   ### -------------------------------------------------------------###
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -233,6 +233,8 @@ PipelineProtein_HypothesisTest_server <- function(
 
     # Widget - test
     output$HypothesisTest_method_ui <- renderUI({
+      req(rv.custom$enable_Limma)
+      
       .methods <- c("None" = "None", "t-tests" = "ttests")
       if (rv.custom$enable_Limma) {
         .methods <- c(.methods, "Limma" = "Limma")

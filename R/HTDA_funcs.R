@@ -179,6 +179,110 @@ hypothesisTestProt <- function(data,
 }
 
 
+#' @title Get data to analyse
+#'
+#' @description Get the dataset with only the conditions of interest
+#'
+#' @param data A `QFeatures`
+#' @param comparison A `character(1)`, the name of the comparison
+#'
+#' @return A `SummarizedExperiment`
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+GetdatasetToAnalyze <- function(data,
+                                comparison){
+  if (length(grep("all-", comparison)) == 1) {
+    datasetToAnalyze <- data[[length(data)]]
+  } else {
+    split <- unlist(strsplit(comparison, "_vs_"))
+    cond <- DaparToolshed::design_qf(data)$Condition %in% split
+    datasetToAnalyze <- data[[length(data)]][, cond]
+    SummarizedExperiment::rowData(datasetToAnalyze)$qMetacell <- SummarizedExperiment::rowData(datasetToAnalyze)$qMetacell[, cond]
+  }
+  
+  return(datasetToAnalyze)
+}
+
+
+#' @title Pushed p-values
+#'
+#' @description Pusing p-values
+#'
+#' @param data A `QFeatures`
+#' @param ind The p-values to push
+#' @param command A `character(1)`, the command
+#' @param query A `character(1)`, the query
+#' @param comparison A `character(1)`, the name of the comparison
+#' @param dt A `data.frame`, the pushed p-values dt
+#' @param pushed A `list` with pushed p-values in the differents comparisons
+#'
+#' @return A `list` containing the data, the pushed p-values dt and the pushed 
+#' list
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+pushPvalues <- function(data,
+                        ind,
+                        command,
+                        query,
+                        comparison,
+                        dt,
+                        pushed){
+  if (command == 'delete')
+    indices_to_push <- ind
+  else if (command == 'keep')
+    indices_to_push <- seq_len(nrow(data))[-(ind)]
+  
+  .pval <- paste0(comparison, '_pval')
+  
+  DaparToolshed::HypothesisTest(data)[indices_to_push, .pval] <- 1.00000000001
+  
+  comppushed <- unlist(pushed[comparison])
+  comppushed <- unique(c(comppushed, indices_to_push))
+  pushed[comparison] <- list(comppushed)
+  
+  nbpushed <- length(indices_to_push)
+  totalpushed <- length(comppushed)
+  totalnonpushed <- nrow(data) - totalpushed
+  dt <- rbind(dt,
+              c(comparison, query, nbpushed, totalpushed, totalnonpushed))
+  
+  
+  return(list(data = data,
+              dt = dt,
+              pushed = pushed))
+}
+
+
+#' @title Update pushed DT
+#'
+#' @description Update pushed DT
+#'
+#' @param dt A `data.frame` 
+#' @param comparison A `character(1)`, the name of the comparison
+#'
+#' @return A `data.frame`
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+updatePushedDT <- function(dt,
+                           comparison){
+  dt <- rbind(dt[1, ], dt[which(dt$comparison == comparison), ])
+  dt <- dt[, -1]
+  return(dt)
+}
+
+
 #' @title Comparison names
 #'
 #' @description Get name of the comparisons 
@@ -198,6 +302,42 @@ Get_Pairwisecomparison_Names <- function(data){
   .names <- gsub('_pval', '', .names, fixed = TRUE)
   
   return(unique(.names))
+}
+
+
+#' @title PipelineProtein pairwise comparison sub-step
+#'
+#' @description Do what has to be done at the end of the pairwise comparison 
+#' sub-step of the PipelineProtein
+#'
+#' @param history The history
+#' @param comparison A `character(1)`, the name of the comparison
+#' @param dt A `data.frame`, the pushed p-values dt
+#' @param pushed A `list` with pushed p-values in the differents comparisons
+#' 
+#' @return A `list` containing the history
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+pairwiseComparisonProt <- function(history,
+                                   comparison,
+                                   dt,
+                                   pushed){
+  query_list <- unlist(dt[, "query"])
+  if (length(query_list) > 1){
+    query <- paste(query_list[-1], sep = " ; ")
+  } else {
+    query <- "-"
+  }
+  
+  history <- Prostar2::Add2History(history, 'DA', 'Pairwisecomparison', 'Comparison', comparison)
+  history <- Prostar2::Add2History(history, 'DA', 'Pairwisecomparison', 'Push pval query', query)
+  history <- Prostar2::Add2History(history, 'DA', 'Pairwisecomparison', 'Nb pushed pval', pushed)
+  
+  return(list(history = history))
 }
 
 
@@ -287,7 +427,7 @@ get_calibration_method <- function(calibration_method,
 #' @param h1concent The h1 concentration
 #' @param unifunder The Uniformity underestimation
 #' 
-#' @return A list containing the history
+#' @return A `list` containing the history
 #'
 #' @examples
 #' NULL
@@ -522,9 +662,10 @@ build_pval_table <- function(data,
   tmp <- as.data.frame(
     SummarizedExperiment::rowData(data)[, tooltip_info]
   )
-  
-  names(tmp) <- tooltip_info
-  
+  if (length(tmp) == 1){
+    names(tmp) <- tooltip_info
+  }
+
   pval_table <- cbind(pval_table, tmp)
   
   colnames(pval_table)[2:6] <- paste0(
@@ -533,6 +674,62 @@ build_pval_table <- function(data,
   )
   
   return(pval_table)
+}
+
+
+#' @title Make DT selected proteins
+#'
+#' @description Make the DT of selected proteins
+#'
+#' @param pval_table A `data.frame` containing the p-values, adjusted p-values 
+#' and logFC
+#' @param view_adj A `logical(1)`, whether to show the adjusted p-values or not
+#' @param comparison A `character(1)`, the name of the comparison
+#' 
+#' @return A DT::datatable
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+makeDTselectedProt <- function(pval_table,
+                view_adj,
+                comparison){
+  #browser()
+  if (view_adj){
+    pval_table <- pval_table[order(pval_table$isDifferential, decreasing = TRUE), ]
+    pval_table <- pval_table[order(pval_table$Adjusted_PValue, decreasing = FALSE), ]
+    coldefs <- list(list(width = "200px", targets = "_all"))
+  } else {
+    name <- paste0(c('Log_PValue (', 'Adjusted_PValue ('),
+                   as.character(comparison), ")")
+    coldefs <- list(
+      list(width = "200px", targets = "_all"),
+      list(targets = (match(name, colnames(pval_table)) - 1), visible = FALSE))
+  }
+  
+  DT::datatable(pval_table,
+                escape = FALSE,
+                rownames = FALSE,
+                selection = 'none',
+                options = list(initComplete = MagellanNTK::initComplete(),
+                               dom = "frtip",
+                               pageLength = 100,
+                               scrollY = 500,
+                               scrollX = TRUE,
+                               scroller = TRUE,
+                               server = FALSE,
+                               columnDefs = coldefs,
+                               ordering = !view_adj
+                )
+  ) |>
+    DT::formatStyle(
+      paste0("isDifferential (",
+             as.character(comparison), ")"),
+      target = "row",
+      backgroundColor = DT::styleEqual(c(0, 1), c("white", "#E97D5E"))
+    )
 }
 
 

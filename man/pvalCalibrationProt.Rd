@@ -18,7 +18,7 @@ pvalCalibrationProt(history, calibmet, pi0, h1concent, unifunder)
 \item{unifunder}{The Uniformity underestimation}
 }
 \value{
-A list containing the history
+A \code{list} containing the history
 }
 \description{
 Do what has to be done at the end of the p-value calibration
