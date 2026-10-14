@@ -90,17 +90,26 @@ mock_htp <- function(cap,
   testthat::local_mocked_bindings(
     InitializeHistory = function(...) {
       cap$init <- TRUE
-      list()
+      data.frame(Step = character(), Substep = character(),
+                 Parameter = character(), Value = character(),
+                 stringsAsFactors = FALSE)
     },
     .package = "MagellanNTK",
     .env = env
   )
   testthat::local_mocked_bindings(
-    Add2History = function(history, ...) {
-      args <- list(...)
+    Add2History = function(history, step, substep, param.name, value) {
       if (is.null(cap$first)) cap$first <- list(history)
-      cap$calls <- c(cap$calls, list(args))
-      c(history, list(args))
+      cap$calls <- c(cap$calls, list(list(step, substep, param.name, value)))
+      
+      if (is.null(history)) {
+        history <- data.frame(Step = character(), Substep = character(),
+                              Parameter = character(), Value = character(),
+                              stringsAsFactors = FALSE)
+      }
+      value_txt <- if (is.null(value)) NA else paste(unlist(value), collapse = ", ")
+      history[nrow(history) + 1, ] <- c(step, substep, param.name, value_txt)
+      history
     },
     .package = "Prostar2",
     .env = env
@@ -201,11 +210,18 @@ make_dt_upd <- function() {
 # 'cap$calls' and the history received by the first call in 'cap$first'
 mock_history <- function(cap, env = parent.frame()) {
   testthat::local_mocked_bindings(
-    Add2History = function(history, ...) {
-      args <- list(...)
+    Add2History = function(history, step, substep, param.name, value) {
       if (is.null(cap$first)) cap$first <- list(history)
-      cap$calls <- c(cap$calls, list(args))
-      c(history, list(args))
+      cap$calls <- c(cap$calls, list(list(step, substep, param.name, value)))
+      
+      if (is.null(history)) {
+        history <- data.frame(Step = character(), Substep = character(),
+                              Parameter = character(), Value = character(),
+                              stringsAsFactors = FALSE)
+      }
+      value_txt <- if (is.null(value)) NA else paste(unlist(value), collapse = ", ")
+      history[nrow(history) + 1, ] <- c(step, substep, param.name, value_txt)
+      history
     },
     .package = "Prostar2",
     .env = env
@@ -217,21 +233,6 @@ make_dt_pw <- function(queries) {
     comparison = rep("A_vs_B", length(queries)),
     query = queries,
     stringsAsFactors = FALSE
-  )
-}
-
-# Mocks Prostar2::Add2History(); records every call (without the history) in
-# 'cap$calls' and the history received by the first call in 'cap$first'
-mock_history_cal <- function(cap, env = parent.frame()) {
-  testthat::local_mocked_bindings(
-    Add2History = function(history, ...) {
-      args <- list(...)
-      if (is.null(cap$first)) cap$first <- list(history)
-      cap$calls <- c(cap$calls, list(args))
-      c(history, list(args))
-    },
-    .package = "Prostar2",
-    .env = env
   )
 }
 
@@ -257,21 +258,6 @@ make_pval_tbl <- function() {
     `isDifferential (A_vs_B)` = c(0, 1, 0, 1),
     check.names = FALSE,
     stringsAsFactors = FALSE
-  )
-}
-
-# Mocks Prostar2::Add2History(): records every call (without the history) in
-# 'cap$calls' and the history received by the first call in 'cap$first'
-mock_history_fdr <- function(cap, env = parent.frame()) {
-  testthat::local_mocked_bindings(
-    Add2History = function(history, ...) {
-      args <- list(...)
-      if (is.null(cap$first)) cap$first <- list(history)
-      cap$calls <- c(cap$calls, list(args))
-      c(history, list(args))
-    },
-    .package = "Prostar2",
-    .env = env
   )
 }
 
@@ -710,7 +696,7 @@ test_that("hypothesisTestProt still updates the history when the test fails", {
   
   expect_null(res$AllPairwiseComp)
   expect_length(cap$calls, 3)
-  expect_length(res$history, 3)
+  expect_equal(nrow(res$history), 3)
 })
 
 test_that("hypothesisTestProt initialises the history when it is NULL", {
@@ -722,22 +708,23 @@ test_that("hypothesisTestProt initialises the history when it is NULL", {
                      design = "OnevsOne")
   
   expect_true(cap$init)
-  expect_identical(cap$first[[1]], list())   # value returned by InitializeHistory
+  expect_equal(nrow(cap$first[[1]]), 0)
 })
 
 test_that("hypothesisTestProt keeps an existing history", {
   qf <- make_qf_fc(mat_2c(), c("A", "A", "B", "B"))
   cap <- new.env()
   mock_htp(cap)
-  init <- list(previous = "step")
+  init <- data.frame(Step = "old", Substep = "s", Parameter = "p",
+                     Value = "v", stringsAsFactors = FALSE)
   
   res <- hypothesisTestProt(qf, "Limma", history = init, logFC_thr = 1,
                             design = "OnevsOne")
   
   expect_null(cap$init)
   expect_identical(cap$first[[1]], init)
-  expect_identical(res$history[["previous"]], "step")
-  expect_length(res$history, 4)   # previous step + 3 new entries
+  expect_identical(res$history$Step[1], "old")
+  expect_equal(nrow(res$history), 4)   # previous step + 3 new entries
 })
 
 test_that("hypothesisTestProt records 3 parameters in the history for Limma", {
@@ -1197,7 +1184,7 @@ test_that("pairwiseComparisonProt records 3 entries in the history", {
   res <- pairwiseComparisonProt(NULL, "A_vs_B", make_dt_pw("-"), pushed)
   
   expect_length(cap$calls, 3)
-  expect_length(res$history, 3)
+  expect_equal(nrow(res$history), 3)
   for (cl in cap$calls) {
     expect_identical(cl[[1]], "DA")
     expect_identical(cl[[2]], "Pairwisecomparison")
@@ -1246,19 +1233,20 @@ test_that("pairwiseComparisonProt: current behaviour with several queries", {
   
   pairwiseComparisonProt(NULL, "A_vs_B", make_dt_pw(c("-", "q1", "q2")), list())
   
-  expect_identical(cap$calls[[2]][[4]], c("q1", "q2"))
+  expect_identical(cap$calls[[2]][[4]], c("q1 ; q2"))
 })
 
 test_that("pairwiseComparisonProt passes the existing history to Add2History", {
   cap <- new.env()
   mock_history(cap)
-  init <- list(previous = "step")
+  init <- data.frame(Step = "old", Substep = "s", Parameter = "p",
+                     Value = "v", stringsAsFactors = FALSE)
   
   res <- pairwiseComparisonProt(init, "A_vs_B", make_dt_pw("-"), list())
   
   expect_identical(cap$first[[1]], init)
-  expect_identical(res$history[["previous"]], "step")
-  expect_length(res$history, 4)   # previous step + 3 new entries
+  expect_identical(res$history$Step[1], "old")
+  expect_equal(nrow(res$history), 4)   # previous step + 3 new entries
 })
 
 
@@ -1437,7 +1425,7 @@ test_that("get_calibration_method works with every value of GetCalibMethod", {
 
 ## ----- pvalCalibrationProt -----
 test_that("pvalCalibrationProt returns a list with the history", {
-  mock_history_cal(new.env())
+  mock_history(new.env())
   
   res <- pvalCalibrationProt(NULL, "langaas", 0.5, 0.2, 0.1)
   
@@ -1447,12 +1435,12 @@ test_that("pvalCalibrationProt returns a list with the history", {
 
 test_that("pvalCalibrationProt records 6 entries when pi0 and h1concent are given", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   res <- pvalCalibrationProt(NULL, "langaas", 0.5, 0.2, 0.1)
   
   expect_length(cap$calls, 6)
-  expect_length(res$history, 6)
+  expect_equal(nrow(res$history), 6)
   expect_identical(
     recorded_params(cap),
     c("Calibration method", "pi0", "h1.concentration",
@@ -1463,7 +1451,7 @@ test_that("pvalCalibrationProt records 6 entries when pi0 and h1concent are give
 
 test_that("pvalCalibrationProt targets the 'Pvaluecalibration' step of 'DA'", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   pvalCalibrationProt(NULL, "langaas", 0.5, 0.2, 0.1)
   
@@ -1475,7 +1463,7 @@ test_that("pvalCalibrationProt targets the 'Pvaluecalibration' step of 'DA'", {
 
 test_that("pvalCalibrationProt records the raw values", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   pvalCalibrationProt(NULL, "langaas", 0.5, 0.2, 0.1)
   
@@ -1487,7 +1475,7 @@ test_that("pvalCalibrationProt records the raw values", {
 
 test_that("pvalCalibrationProt records pi0 and h1concent as percentages", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   pvalCalibrationProt(NULL, "langaas", 0.5, 0.2, 0.1)
   
@@ -1497,7 +1485,7 @@ test_that("pvalCalibrationProt records pi0 and h1concent as percentages", {
 
 test_that("pvalCalibrationProt rounds the percentages to 2 decimals", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   pvalCalibrationProt(NULL, "langaas", 0.123456, 0.987654, 0.1)
   
@@ -1507,7 +1495,7 @@ test_that("pvalCalibrationProt rounds the percentages to 2 decimals", {
 
 test_that("pvalCalibrationProt skips the pi0 entries when pi0 is NULL", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   res <- pvalCalibrationProt(NULL, "Benjamini-Hochberg", NULL, 0.2, 0.1)
   
@@ -1523,7 +1511,7 @@ test_that("pvalCalibrationProt skips the pi0 entries when pi0 is NULL", {
 
 test_that("pvalCalibrationProt skips the DA concentration when h1concent is NULL", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   res <- pvalCalibrationProt(NULL, "langaas", 0.5, NULL, 0.1)
   
@@ -1533,13 +1521,13 @@ test_that("pvalCalibrationProt skips the DA concentration when h1concent is NULL
       "Uniformity underestimation", "Non-DA protein proportion")
   )
   expect_false("DA protein concentration" %in% recorded_params(cap))
-  expect_length(res$history, 5)
+  expect_equal(nrow(res$history), 5)
 })
 
 test_that("pvalCalibrationProt still records h1.concentration when it is NULL", {
   # The 'h1.concentration' entry is not guarded by is.null()
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   pvalCalibrationProt(NULL, "langaas", 0.5, NULL, 0.1)
   
@@ -1549,7 +1537,7 @@ test_that("pvalCalibrationProt still records h1.concentration when it is NULL", 
 
 test_that("pvalCalibrationProt records only 3 entries when pi0 and h1concent are NULL", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   res <- pvalCalibrationProt(NULL, "Benjamini-Hochberg", NULL, NULL, 0.1)
   
@@ -1557,37 +1545,38 @@ test_that("pvalCalibrationProt records only 3 entries when pi0 and h1concent are
     recorded_params(cap),
     c("Calibration method", "h1.concentration", "Uniformity underestimation")
   )
-  expect_length(res$history, 3)
+  expect_equal(nrow(res$history), 3)
 })
 
 test_that("pvalCalibrationProt passes the existing history to Add2History", {
   cap <- new.env()
-  mock_history_cal(cap)
-  init <- list(previous = "step")
+  mock_history(cap)
+  init <- data.frame(Step = "old", Substep = "s", Parameter = "p",
+                     Value = "v", stringsAsFactors = FALSE)
   
   res <- pvalCalibrationProt(init, "langaas", 0.5, 0.2, 0.1)
   
   expect_identical(cap$first[[1]], init)
-  expect_identical(res$history[["previous"]], "step")
-  expect_length(res$history, 7)   # previous step + 6 new entries
+  expect_equal(nrow(res$history), 7)          # 1 previous + 6 new
+  expect_identical(res$history$Step[1], "old")
 })
 
 test_that("pvalCalibrationProt errors when pi0 is not numeric", {
-  mock_history_cal(new.env())
+  mock_history(new.env())
   
   expect_error(pvalCalibrationProt(NULL, "langaas", "abc", 0.2, 0.1))
 })
 
 test_that("pvalCalibrationProt works with the output of get_calibration_method", {
   cap <- new.env()
-  mock_history_cal(cap)
+  mock_history(cap)
   
   calibmet <- get_calibration_method("numeric value", 0.3)
   res <- pvalCalibrationProt(NULL, "numeric value", calibmet, 0.2, 0.1)
   
   expect_equal(recorded_value(cap, "pi0"), 0.3)
   expect_equal(recorded_value(cap, "Non-DA protein proportion"), 30)
-  expect_length(res$history, 6)
+  expect_equal(nrow(res$history), 6)
 })
 
 
@@ -2145,7 +2134,7 @@ test_that("build_pairwise_comparison_workbook errors when the isDifferential col
 
 ## ----- fdrProt -----
 test_that("fdrProt returns a list with the history", {
-  mock_history_fdr(new.env())
+  mock_history(new.env())
   
   res <- fdrProt(NULL, thpval = 2, FDR = 0.05, nbSignif = 10)
   
@@ -2155,12 +2144,12 @@ test_that("fdrProt returns a list with the history", {
 
 test_that("fdrProt records 3 entries in the 'FDR' step of 'DA'", {
   cap <- new.env()
-  mock_history_fdr(cap)
+  mock_history(cap)
   
   res <- fdrProt(NULL, 2, 0.05, 10)
   
   expect_length(cap$calls, 3)
-  expect_length(res$history, 3)
+  expect_equal(nrow(res$history), 3)
   for (cl in cap$calls) {
     expect_identical(cl[[1]], "DA")
     expect_identical(cl[[2]], "FDR")
@@ -2173,7 +2162,7 @@ test_that("fdrProt records 3 entries in the 'FDR' step of 'DA'", {
 
 test_that("fdrProt records the threshold and the number of significant proteins as given", {
   cap <- new.env()
-  mock_history_fdr(cap)
+  mock_history(cap)
   
   fdrProt(NULL, thpval = 2.5, FDR = 0.05, nbSignif = 10)
   
@@ -2183,7 +2172,7 @@ test_that("fdrProt records the threshold and the number of significant proteins 
 
 test_that("fdrProt records the FDR as a percentage", {
   cap <- new.env()
-  mock_history_fdr(cap)
+  mock_history(cap)
   
   fdrProt(NULL, 2, 0.05, 10)
   
@@ -2192,7 +2181,7 @@ test_that("fdrProt records the FDR as a percentage", {
 
 test_that("fdrProt rounds the FDR percentage to 2 decimals", {
   cap <- new.env()
-  mock_history_fdr(cap)
+  mock_history(cap)
   
   fdrProt(NULL, 2, 0.123456, 10)
   
@@ -2201,18 +2190,19 @@ test_that("fdrProt rounds the FDR percentage to 2 decimals", {
 
 test_that("fdrProt passes the existing history to Add2History", {
   cap <- new.env()
-  mock_history_fdr(cap)
-  init <- list(previous = "step")
+  mock_history(cap)
+  init <- data.frame(Step = "old", Substep = "s", Parameter = "p",
+                     Value = "v", stringsAsFactors = FALSE)
   
   res <- fdrProt(init, 2, 0.05, 10)
   
   expect_identical(cap$first[[1]], init)
-  expect_identical(res$history[["previous"]], "step")
-  expect_length(res$history, 4)   # previous step + 3 new entries
+  expect_identical(res$history$Step[1], "old")
+  expect_equal(nrow(res$history), 4)   # previous step + 3 new entries
 })
 
 test_that("fdrProt errors when FDR is not numeric", {
-  mock_history_fdr(new.env())
+  mock_history(new.env())
   
   expect_error(fdrProt(NULL, 2, "abc", 10))
 })

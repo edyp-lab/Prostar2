@@ -587,46 +587,55 @@ test_that("imputationPept 'impSeq' does not modify the input dataset", {
   expect_true(anyNA(SummarizedExperiment::assay(qf[[1]])))
 })
 
-# test_that("imputationPept 'BPCA' rounds nPcs and imputes the last assay", {
-#   skip_if_not_installed("pcaMethods")
-#   cap <- new.env(); mock_pept(cap)
-#   qf <- make_qf_imp()
-#   pca_class <- methods::getClass("pcaRes", where = asNamespace("pcaMethods"))
-#   testthat::local_mocked_bindings(
-#     pca = function(object, method, nPcs, ...) {
-#       cap$bpca <- list(object = object, method = method, nPcs = nPcs)
-#       methods::new(pca_class, completeObs = filled_assay(qf))
-#     },
-#     .package = "pcaMethods"
-#   )
-#   
-#   res <- imputationPept(qf, method = "BPCA", nPcs = 2.6)
-#   
-#   expect_equal(cap$bpca$object, SummarizedExperiment::assay(qf[[length(qf)]]))
-#   expect_identical(cap$bpca$method, "bpca")
-#   expect_equal(cap$bpca$nPcs, 3)
-#   expect_equal(SummarizedExperiment::assay(res$data), filled_assay(qf))
-# })
-# 
-# test_that("imputationPept 'BPCA' records the algorithm and the raw nPcs", {
-#   skip_if_not_installed("pcaMethods")
-#   cap <- new.env(); mock_pept(cap)
-#   qf <- make_qf_imp()
-#   pca_class <- methods::getClass("pcaRes", where = asNamespace("pcaMethods"))
-#   testthat::local_mocked_bindings(
-#     pca = function(...) methods::new(pca_class, completeObs = filled_assay(qf)),
-#     .package = "pcaMethods"
-#   )
-#   
-#   res <- imputationPept(qf, method = "BPCA", nPcs = 2.6)
-#   
-#   expect_identical(recorded_params(cap), c("algorithm", "nPcs"))
-#   expect_identical(recorded_value(cap, "algorithm"), "BPCA")
-#   expect_identical(recorded_value(cap, "nPcs"), 2.6)
-#   expect_length(cap$progress, 1)
-#   expect_length(res$history, 2)
-# })
-### ------------^^^issue w/ BPCA testing----------------
+test_that("imputationPept 'BPCA' rounds nPcs and imputes the last assay", {
+  skip_if_not_installed("pcaMethods")
+  cap <- new.env(); mock_pept(cap)
+  qf <- make_qf_imp()
+  
+  # Minimal stand-in for pcaMethods::pcaRes: only @completeObs is read
+  methods::setClass("FakePcaRes",
+                    methods::representation(completeObs = "matrix"))
+  withr::defer(methods::removeClass("FakePcaRes"))
+  
+  testthat::local_mocked_bindings(
+    pca = function(object, method, nPcs, ...) {
+      cap$bpca <- list(object = object, method = method, nPcs = nPcs)
+      methods::new("FakePcaRes", completeObs = filled_assay(qf))
+    },
+    .package = "pcaMethods"
+  )
+  
+  res <- imputationPept(qf, method = "BPCA", nPcs = 2.6)
+  
+  expect_equal(cap$bpca$object, SummarizedExperiment::assay(qf[[length(qf)]]))
+  expect_identical(cap$bpca$method, "bpca")
+  expect_equal(cap$bpca$nPcs, 3)
+  expect_equal(SummarizedExperiment::assay(res$data), filled_assay(qf))
+})
+
+test_that("imputationPept 'BPCA' records the algorithm and the raw nPcs", {
+  skip_if_not_installed("pcaMethods")
+  cap <- new.env(); mock_pept(cap)
+  qf <- make_qf_imp()
+  
+  methods::setClass("FakePcaRes",
+                    methods::representation(completeObs = "matrix"))
+  withr::defer(methods::removeClass("FakePcaRes"))
+  
+  testthat::local_mocked_bindings(
+    pca = function(...) methods::new("FakePcaRes", completeObs = filled_assay(qf)),
+    .package = "pcaMethods"
+  )
+  
+  res <- imputationPept(qf, method = "BPCA", nPcs = 2.6)
+  
+  expect_identical(recorded_params(cap), c("algorithm", "nPcs"))
+  expect_identical(recorded_value(cap, "algorithm"), "BPCA")
+  expect_identical(recorded_value(cap, "nPcs"), 2.6)
+  expect_length(cap$progress, 1)
+  expect_length(res$history, 2)
+})
+
 test_that("imputationPept 'Pirat' calls my_pipeline_llkimpute with its parameters", {
   skip_if_not_installed("Pirat")
   cap <- new.env(); mock_pept(cap)
