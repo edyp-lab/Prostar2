@@ -4,7 +4,15 @@
 \alias{hypothesisTestProt}
 \title{Hypothesis test}
 \usage{
-hypothesisTestProt(data, method, history = NULL, logFC_thr, design, ttest_type)
+hypothesisTestProt(
+  data,
+  method,
+  history = NULL,
+  logFC_thr,
+  design,
+  ttest_type,
+  swap
+)
 }
 \arguments{
 \item{data}{A \code{QFeatures}}
@@ -21,6 +29,8 @@ between : \code{"Limma"} and \code{"ttests"}}
 
 \item{ttest_type}{A \code{character(1)}, the type of t-test. Must choose between :
 \code{"Student"} and \code{"Welch"}}
+
+\item{swap}{A \code{logical()} with the same length as the number of contrasts}
 }
 \value{
 A \code{list} containing the hypothesis test result, the history

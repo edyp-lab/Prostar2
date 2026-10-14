@@ -123,41 +123,8 @@ mod_metacell_tree_server <- function(
 
 
     Get_bg_color <- function(name) {
-      gsub("#bg-color#", rv$bg_colors[name], .style)
+      gsub("#bg-color#", rv$bg_colors[name], "vertical-align: top; background: #bg-color#; color: white; padding: 5px;")
     }
-
-    # output$modaltree2 <- renderUI({
-    #   tagList(
-    #     shinyjs::inlineCSS(css),
-    #     tags$head(tags$style(paste0(".modal-dialog { width: fit-content !important; z-index: 1000;}"))),
-    #     tags$head(tags$style(paste0("#", ns("modalExample"), " .modal-footer{ display:none}"))),
-    #     shinyBS::bsModal(ns("modalExample"),
-    #       title = "",
-    #       trigger = ns("openModalBtn"),
-    #       size = "large",
-    #       div(
-    #         div(
-    #           style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
-    #           p("To get help about the organization of those tags, please refer to the FAQ"),
-    #           radioButtons(ns("checkbox_mode"), "",
-    #             choices = c(
-    #               "Single selection" = "single",
-    #               "Complete subtree" = "subtree",
-    #               "Multiple selection" = "multiple"
-    #             ),
-    #             width = "150px"
-    #           )
-    #         ),
-    #         div(
-    #           style = "align: center;display:inline-block; vertical-align: middle; margin: 5px; padding-right: 0px",
-    #           actionButton(ns("cleartree"), "Clear"),
-    #           actionButton(ns("validatetree"), "Validate & close", class = "btn-success")
-    #         )
-    #       ),
-    #       uiOutput(ns("tree"))
-    #     )
-    #   )
-    # })
 
     # nocov start
     observeEvent(input$openModalBtn, {
@@ -169,10 +136,7 @@ mod_metacell_tree_server <- function(
       updateRadioButtons(session, "checkbox_mode", selected = "single")
       rv$autoChanged <- FALSE
 
-    #observeEvent(input$openModalBtn, {
-    #output$modaltree <- renderUI({
       shiny::showModal(shiny::modalDialog(
-          #ns("modalExample"),
           title = "",
           size = "l",
         tagList(
@@ -229,13 +193,6 @@ mod_metacell_tree_server <- function(
     # nocov start
     observeEvent(req(remoteReset()), ignoreInit = FALSE, {
       req(dataIn())
-      # print('------------ observeEvent(req(reset()) ---------------')
-      # init_tree()
-      # update_CB()
-      # updateRadioButtons(session, 'checkbox_mode', selected = 'single')
-      # rv$autoChanged <- TRUE
-      # dataOut$trigger <- as.numeric(Sys.time())
-      # dataOut$values <- NULL
 
       if (!is.null(DaparToolshed::typeDataset(dataIn()))) {
         init_tree()
@@ -318,9 +275,6 @@ mod_metacell_tree_server <- function(
       )
       }
     })
-
-    .style <- "vertical-align: top; background: #bg-color#; color: white; padding: 5px;"
-
 
     # Define tree for protein dataset
     output$metacell_tree_protein <- renderUI({
@@ -426,13 +380,6 @@ mod_metacell_tree_server <- function(
                 paste0("Combined tags (", nb["Combined tags"], " - ", pourcentages["Combined tags"], "%)")
               )
             )
-            # tags$ul(
-            #     tags$li(
-            #         checkboxInput(ns('partiallyquantified_cb'),
-            #                       tags$span(style = .style, 'Partially quantified')
-            #         )
-            #     )
-            # )
           )
         )
       )
@@ -634,21 +581,8 @@ mod_metacell_tree_server <- function(
 
 
 
-
+### css ----
 css <- "
-/*
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    padding: 00px;
-    font-family: helvetica, arial, sans-serif;
-}
-*/
-
 .wtree {
     margin-top: 30px;
 }
@@ -696,74 +630,6 @@ body {
     text-decoration: none;
     width: 250px;
 }"
-
-
-# 
-# 
-# # This css is adapted from: https://codepen.io/willpower/pen/pJKdej
-# css <- "
-# /*
-# * {
-#     margin: 0;
-#     padding: 0;
-#     box-sizing: border-box;
-# }
-# 
-# body {
-#     padding: 00px;
-#     font-family: helvetica, arial, sans-serif;
-# }
-# */
-# 
-# .wtree {
-#     margin-top: 30px;
-# }
-# .wtree ul {
-#     list-style-type: none;
-#     margin: -19px 0px 30px 10px;
-# }
-# .wtree li {
-#     list-style-type: none;
-#     margin: 0px 0px -19px 10px;
-#     position: relative;
-# }
-# .wtree li:before {
-#     content: '';
-#     position: absolute;
-#     top: -5px;
-#     left: -25px;
-#     border-left: 1px solid #ddd;
-#     border-bottom: 1px solid #ddd;
-#     width: 20px;
-#     height: 23px;
-# }
-# .wtree li:after {
-#     position: absolute;
-#     content: '';
-#     top: 17px;
-#     left: -25px;
-#     border-left: 1px solid #ddd;
-#     border-top: 1px solid #ddd;
-#     width: 20px;
-#     height: 95%;
-# }
-# .wtree li:last-child:after {
-#     display: none;
-#     padding: 0px 0px 10px 0px;
-# }
-# .wtree li span {
-#     display: inline-block;
-#     border: 0px solid #ddd;
-#     border-radius: 10px;
-#     text-align: center;
-#     vertical-align: middle;
-#     padding: 0px 5px 0px 0px;
-#     color: #888;
-#     text-decoration: none;
-#     width: 250px;
-# }"
-
-
 
 
 

@@ -221,25 +221,6 @@ infos_dataset_server <- function(
       do
     })
 
-    output$properties_ui <- renderUI({
-      req(input$selectInputSE)
-      req(rv$dataIn)
-
-      if (input$selectInputSE != "None") {
-        checkboxInput(ns("properties_button"), "Display details?", value = FALSE)
-      }
-    })
-    # nocov start
-    observeEvent(input$selectInputSE, {
-      if (isTRUE(input$properties_button)) {
-        output$properties_ui <- renderUI({
-          checkboxInput(ns("properties_button"), "Display details?", value = TRUE)
-        })
-      } else {
-        return(NULL)
-      }
-    })
-    # nocov end
     MagellanNTK::format_DT_server("dt2",
       dataIn = reactive({
         Get_SE_Summary()

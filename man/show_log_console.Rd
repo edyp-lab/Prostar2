@@ -19,30 +19,33 @@ show_log_console(
 )
 }
 \arguments{
-\item{expr}{xxx}
+\item{expr}{Part of the code to get the logs from}
 
-\item{id_notif}{xxx}
+\item{id_notif}{Id of where the messages should be displayed}
 
-\item{cond_info}{xxx}
+\item{cond_info}{A \code{logical(1)}, whether the messages should be displayed}
 
-\item{cond_warning}{xxx}
+\item{cond_warning}{A \code{logical(1)}, whether the warnings should be displayed}
 
-\item{cond_error}{xxx}
+\item{cond_error}{A \code{logical(1)}, whether the errors should be displayed}
 
-\item{color_info}{xxx}
+\item{color_info}{A \code{characer(1)}, color of the messages}
 
-\item{color_warning}{xxx}
+\item{color_warning}{A \code{characer(1)}, color of the warnings}
 
-\item{color_error}{xxx}
+\item{color_error}{A \code{characer(1)}, color of the errors}
 
-\item{new_first}{xxx}
+\item{new_first}{A \code{logical(1)}, whether the newest messages should be
+diplayed on top of the others}
 
-\item{console_message}{xxx}
+\item{console_message}{A \code{logical(1)}, whether all info should be also
+displayed in the console or hidden}
 
-\item{prefix}{xxx}
+\item{prefix}{A \code{character(1)}, text to display at the beginning of every
+info}
 }
 \value{
-xxx
+A reactive value
 }
 \description{
 Show R logs in a console in shiny

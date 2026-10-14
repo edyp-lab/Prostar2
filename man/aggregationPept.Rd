@@ -7,14 +7,15 @@
 aggregationPept(
   data,
   history = NULL,
-  sharePept,
-  operator,
-  considerPept,
-  ponderation,
-  n,
+  sharePept = c("Yes_As_Specific", "Yes_Iterative_Redistribution",
+    "Yes_Simple_Redistribution", "No"),
+  operator = c("Sum", "Mean", "Median", "medianPolish", "robustSummary"),
+  considerPept = c("allPeptides", "topN"),
+  ponderation = c("Global", "Condition", "Sample"),
+  n = NULL,
   aggCol,
   maxIter,
-  rmEmptyLines
+  rmEmptyLines = TRUE
 )
 }
 \arguments{
@@ -22,12 +23,11 @@ aggregationPept(
 
 \item{history}{The history}
 
-\item{sharePept}{How shared peptides are handled. Either \code{Yes_As_Specific},
+\item{sharePept}{How shared peptides are handled. One of \code{Yes_As_Specific},
 \code{Yes_Iterative_Redistribution}, \code{Yes_Simple_Redistribution} or \code{No}}
 
-\item{operator}{A function used for quantitative feature aggregation.
-Available functions are \code{Sum}, \code{Mean}, \code{Median}, \code{medianPolish} or
-\code{robustSummary}}
+\item{operator}{Aggregation function: \code{Sum}, \code{Mean}, \code{Median},
+\code{medianPolish} or \code{robustSummary}}
 
 \item{considerPept}{A \code{character(1)} defining what peptide to consider.
 Available values are \code{allPeptides} and \code{topN}}
@@ -36,17 +36,17 @@ Available values are \code{allPeptides} and \code{topN}}
 coefficient for redistribution of shared peptides. Available values are
 \code{Global}, \code{Condition} or \code{Sample}}
 
-\item{n}{If \code{topN}, specifies the number of peptides to use for each protein}
+\item{n}{Number of peptides to consider per protein.
+Required if \code{considerPept = "topN"}}
 
-\item{aggCol}{A \code{character()} of column names from rowdata to be aggregated}
+\item{aggCol}{A \code{character()} of rowData column names to aggregate}
 
-\item{maxIter}{A \code{numeric(1)} setting the maximum number of iteration}
+\item{maxIter}{A \code{numeric(1)}, maximum number of iterations}
 
-\item{rmEmptyLines}{A \code{logical(1)}, whether empty lines should be
-automatically removed after aggregation}
+\item{rmEmptyLines}{A \code{logical(1)}, remove empty lines after aggregation}
 }
 \value{
-A \code{list} containing the aggregated dataset and the history
+A \code{list} with the aggregated dataset (\code{data}) and the \code{history}
 }
 \description{
 Perform aggregation for peptides

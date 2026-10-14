@@ -334,6 +334,10 @@ checkNA <- function(data,
     i <- length(data)
   }
   
+  if (is.character(i) && !(i %in% names(data))) {
+    stop("Unknown assay: ", i)
+  }
+  
   qdata <- SummarizedExperiment::assay(data[[i]])
   sum(is.na(qdata)) > 0
 }
@@ -376,19 +380,22 @@ countPattern <- function(dataSE,
 #'
 #' @description Show R logs in a console in shiny 
 #'
-#' @param expr xxx
-#' @param id_notif xxx
-#' @param cond_info xxx
-#' @param cond_warning xxx
-#' @param cond_error xxx
-#' @param color_info xxx
-#' @param color_warning xxx
-#' @param color_error xxx
-#' @param new_first xxx
-#' @param console_message xxx
-#' @param prefix xxx
+#' @param expr Part of the code to get the logs from
+#' @param id_notif Id of where the messages should be displayed
+#' @param cond_info A `logical(1)`, whether the messages should be displayed
+#' @param cond_warning A `logical(1)`, whether the warnings should be displayed
+#' @param cond_error  A `logical(1)`, whether the errors should be displayed
+#' @param color_info  A `characer(1)`, color of the messages
+#' @param color_warning A `characer(1)`, color of the warnings
+#' @param color_error A `characer(1)`, color of the errors
+#' @param new_first A `logical(1)`, whether the newest messages should be 
+#' diplayed on top of the others
+#' @param console_message A `logical(1)`, whether all info should be also 
+#' displayed in the console or hidden
+#' @param prefix A `character(1)`, text to display at the beginning of every 
+#' info
 #'
-#' @return xxx
+#' @return A reactive value
 #'
 #' @examples
 #' NULL

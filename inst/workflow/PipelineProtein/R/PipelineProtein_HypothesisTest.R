@@ -342,7 +342,7 @@ PipelineProtein_HypothesisTest_server <- function(
       rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = "_logFC"))
       # Get number of comparison
       rv.custom$n <- ncol(rv.custom$logFC)
-      rv.custom$swap.history <- rep(0, rv.custom$n)
+      rv.custom$swap.history <- rep(FALSE, rv.custom$n)
     })
 
     # Widget - swap conditions
@@ -435,15 +435,19 @@ PipelineProtein_HypothesisTest_server <- function(
       } else {
         shiny::withProgress(message = "Computing Hypothesis Test", {
           shiny::incProgress(0.5)
-
+          
+          # Perform hypothesis test sub-step
           result <- hypothesisTestProt(
             data = rv$dataIn,
             method = rv.widgets$HypothesisTest_method,
             history = rv.custom$history,
             logFC_thr = rv.widgets$HypothesisTest_thlogFC,
             design = rv.widgets$HypothesisTest_design,
-            ttest_type = rv.widgets$HypothesisTest_ttestOptions
+            ttest_type = rv.widgets$HypothesisTest_ttestOptions,
+            swap = rv.custom$swap.history
           )
+          
+          # Update values
           rv.custom$AllPairwiseComp <- result$AllPairwiseComp
           rv.custom$history <- result$history
           rv.custom$AllPairwiseCompMsg <- result$message

@@ -4,23 +4,22 @@
 #'
 #' @param data A `QFeatures`
 #' @param history The history
-#' @param sharePept How shared peptides are handled. Either `Yes_As_Specific`, 
+#' @param sharePept How shared peptides are handled. One of `Yes_As_Specific`, 
 #' `Yes_Iterative_Redistribution`, `Yes_Simple_Redistribution` or `No`
-#' @param operator A function used for quantitative feature aggregation. 
-#' Available functions are `Sum`, `Mean`, `Median`, `medianPolish` or 
-#' `robustSummary`
+#' @param operator Aggregation function: `Sum`, `Mean`, `Median`, 
+#' `medianPolish` or `robustSummary`
 #' @param considerPept A `character(1)` defining what peptide to consider. 
 #' Available values are `allPeptides` and `topN`
 #' @param ponderation A `character(1)` defining what to consider to create the 
 #' coefficient for redistribution of shared peptides. Available values are 
 #' `Global`, `Condition` or `Sample`
-#' @param n If `topN`, specifies the number of peptides to use for each protein
-#' @param aggCol A `character()` of column names from rowdata to be aggregated
-#' @param maxIter A `numeric(1)` setting the maximum number of iteration
-#' @param rmEmptyLines A `logical(1)`, whether empty lines should be 
-#' automatically removed after aggregation
+#' @param n Number of peptides to consider per protein. 
+#' Required if `considerPept = "topN"`
+#' @param aggCol A `character()` of rowData column names to aggregate
+#' @param maxIter A `numeric(1)`, maximum number of iterations
+#' @param rmEmptyLines A `logical(1)`, remove empty lines after aggregation
 #'
-#' @return A `list` containing the aggregated dataset and the history
+#' @return A `list` with the aggregated dataset (`data`) and the `history`
 #'
 #' @examples
 #' NULL
@@ -29,26 +28,38 @@
 #'
 aggregationPept <- function(data,
                             history = NULL,
-                            sharePept,
-                            operator,
-                            considerPept,
-                            ponderation,
-                            n,
+                            sharePept = c("Yes_As_Specific",
+                                         "Yes_Iterative_Redistribution",
+                                         "Yes_Simple_Redistribution",
+                                         "No"),
+                            operator = c("Sum", "Mean", "Median",
+                                         "medianPolish", "robustSummary"),
+                            considerPept = c("allPeptides", "topN"),
+                            ponderation = c("Global", "Condition", "Sample"),
+                            n = NULL,
                             aggCol,
                             maxIter,
-                            rmEmptyLines){
+                            rmEmptyLines = TRUE){
   # Input validation
-  sharePept <- match.arg(sharePept, c("Yes_As_Specific", "Yes_Iterative_Redistribution",
-                                      "Yes_Simple_Redistribution", "No"))
-  operator <- match.arg(operator, c("Sum", "Mean", "Median", "medianPolish", "robustSummary"))
-  considerPept <- match.arg(considerPept, c("allPeptides", "topN"))
-  ponderation <- match.arg(ponderation, c("Global", "Condition", "Sample"))
+  if (!inherits(data, "QFeatures")) {
+    stop("'data' must be a QFeatures")
+  }
+  sharePept    <- match.arg(sharePept)
+  operator     <- match.arg(operator)
+  considerPept <- match.arg(considerPept)
+  ponderation  <- match.arg(ponderation)
+  stopifnot(is.logical(rmEmptyLines), length(rmEmptyLines) == 1,
+            !is.na(rmEmptyLines))
   
-  if (considerPept == "topN" && missing(n)) {
-    stop("'n' must be provided when considerPept = 'topN'")
+  if (considerPept == "topN") {
+    if (is.null(n) || length(n) != 1 || !is.numeric(n) || n < 1) {
+      stop("'n' must be a positive number when considerPept = 'topN'")
+    }
+  } else {
+    n <- NULL
   }
 
-  .tmp <- DaparToolshed::RunAggregation(
+  agg <- DaparToolshed::RunAggregation(
     qf = data,
     includeSharedPeptides = sharePept,
     operator = operator,
@@ -60,15 +71,16 @@ aggregationPept <- function(data,
     max_iter = maxIter
   )
   
-  req(.tmp)
+  req(agg)
   
   if (rmEmptyLines) {
+    last <- length(agg)
     # Make it so aggregated protein with 0 as value are transformed in NA
-    .tmp <- QFeatures::zeroIsNA(.tmp, length(.tmp))
+    agg <- QFeatures::zeroIsNA(agg, last)
     # Removes empty lines
-    .tmp <- QFeatures::filterNA(.tmp, pNA = 0.99, length(.tmp))
+    agg <- QFeatures::filterNA(agg, pNA = 0.99, last)
     # Put the 0 back
-    SummarizedExperiment::assay(.tmp[[length(.tmp)]])[which(is.na(SummarizedExperiment::assay(.tmp[[length(.tmp)]])))] <- 0
+    SummarizedExperiment::assay(agg[[last]])[which(is.na(SummarizedExperiment::assay(agg[[last]])))] <- 0
     # This avoid issues with NA and empty lines in the next step
   }
   
@@ -78,7 +90,7 @@ aggregationPept <- function(data,
   history <- Prostar2::Add2History(history, 'Aggregation', 'Aggregation', 'ponderation', ponderation)
   history <- Prostar2::Add2History(history, 'Aggregation', 'Aggregation', 'topN', n)
   
-  return(list(data = .tmp, 
+  return(list(data = agg, 
               history = history))
 }
 
@@ -87,9 +99,10 @@ aggregationPept <- function(data,
 #'
 #' @description Make table for aggregation stats
 #'
-#' @param data A `QFeatures`
+#' @param data A `QFeatures` whose last assay has an `adjacencyMatrix` 
+#' in its rowData
 #'
-#' @return A `list` containing the 2 `data.frame`
+#' @return A `list` with two `data.frame`s: `pept` and `prot`
 #'
 #' @examples
 #' data(subR25pept, package = "DaparToolshed")
@@ -98,11 +111,19 @@ aggregationPept <- function(data,
 #' @export
 #'
 aggregStatTables <- function(data){
-  if (!inherits(data, "QFeatures")){
+  if (!inherits(data, "QFeatures")) {
     stop("data must be a QFeatures")
   }
+  if (length(data) == 0) {
+    stop("data contains no assay")
+  }
   
-  res <- DaparToolshed::getProteinsStats(SummarizedExperiment::rowData(data[[length(data)]])[['adjacencyMatrix']])
+  adj <- SummarizedExperiment::rowData(data[[length(data)]])[["adjacencyMatrix"]]
+  if (is.null(adj)) {
+    stop("No 'adjacencyMatrix' found in the rowData of the last assay")
+  }
+  
+  res <- DaparToolshed::getProteinsStats(adj)
   
   # Make peptide table
   tablePept_desc <- c(

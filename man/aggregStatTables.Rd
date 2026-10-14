@@ -7,10 +7,11 @@
 aggregStatTables(data)
 }
 \arguments{
-\item{data}{A \code{QFeatures}}
+\item{data}{A \code{QFeatures} whose last assay has an \code{adjacencyMatrix}
+in its rowData}
 }
 \value{
-A \code{list} containing the 2 \code{data.frame}
+A \code{list} with two \code{data.frame}s: \code{pept} and \code{prot}
 }
 \description{
 Make table for aggregation stats

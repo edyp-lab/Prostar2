@@ -21,6 +21,7 @@
 #' @importFrom QFeatures addAssay removeAssay
 #' @import DaparToolshed
 #' @importFrom MagellanNTK Get_Code_Declare_widgets Get_Code_for_ObserveEvent_widgets Get_Code_for_rv_reactiveValues Get_Code_Declare_rv_custom Get_Code_for_dataOut format_DT_server Timestamp toggleWidget
+#' @importFrom rhandsontable rHandsontableOutput renderRHandsontable
 #'
 NULL
 
@@ -117,7 +118,7 @@ mod_designExample_server <- function(
     ns <- session$ns
 
 
-    output$examples <- renderRHandsontable({
+    output$examples <- rhandsontable::renderRHandsontable({
       if (n == 2) {
         data <- example_2()
       } else if (n == 3) {

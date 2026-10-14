@@ -113,6 +113,7 @@ swapConditions <- function(logFC, i) {
 #' `"OnevsOne"` and `"OnevsAll"`
 #' @param ttest_type A `character(1)`, the type of t-test. Must choose between : 
 #' `"Student"` and `"Welch"`
+#' @param swap A `logical()` with the same length as the number of contrasts
 #'
 #' @return A `list` containing the hypothesis test result, the history 
 #' and additionnal informations
@@ -127,7 +128,8 @@ hypothesisTestProt <- function(data,
                                history = NULL,
                                logFC_thr,
                                design,
-                               ttest_type) {
+                               ttest_type,
+                               swap) {
 
   if (is.null(history)){
     history <- MagellanNTK::InitializeHistory()
@@ -166,6 +168,32 @@ hypothesisTestProt <- function(data,
     }
   )
   
+  # Swap conditions
+  for (i in which(swap)) {
+    # Reverse logFC sign
+    AllPairwiseComp$logFC[[i]] <-
+      -AllPairwiseComp$logFC[[i]]
+    
+    # Reverse comparison name
+    old_name <- names(AllPairwiseComp$logFC)[i]
+    new_name <- sub(
+      "^(.+)_vs_(.+)_logFC$",
+      "\\2_vs_\\1_logFC",
+      old_name
+    )
+    names(AllPairwiseComp$logFC)[i] <- new_name
+    
+    # Rename corresponding p-value column
+    old_pval_name <- names(AllPairwiseComp$P_Value)[i]
+    new_pval_name <- sub(
+      "^(.+)_vs_(.+)_pval$",
+      "\\2_vs_\\1_pval",
+      old_pval_name
+    )
+    names(AllPairwiseComp$P_Value)[i] <- new_pval_name
+  }
+  
+  # History
   history <- Prostar2::Add2History(history, "HypothesisTest", "HypothesisTest", "method", method)
   history <- Prostar2::Add2History(history, "HypothesisTest", "HypothesisTest", "design", design)
   history <- Prostar2::Add2History(history, "HypothesisTest", "HypothesisTest", "thlogFC", as.numeric(logFC_thr))
@@ -235,10 +263,11 @@ pushPvalues <- function(data,
                         comparison,
                         dt,
                         pushed){
-  if (command == 'delete')
+  if (command == 'delete') {
     indices_to_push <- ind
-  else if (command == 'keep')
+  } else if (command == 'keep') {
     indices_to_push <- seq_len(nrow(data))[-(ind)]
+  }
   
   .pval <- paste0(comparison, '_pval')
   
@@ -326,9 +355,13 @@ pairwiseComparisonProt <- function(history,
                                    comparison,
                                    dt,
                                    pushed){
+  if (is.null(history)){
+    history <- MagellanNTK::InitializeHistory()
+  }
+  
   query_list <- unlist(dt[, "query"])
   if (length(query_list) > 1){
-    query <- paste(query_list[-1], sep = " ; ")
+    query <- paste(query_list[-1], collapse = " ; ")
   } else {
     query <- "-"
   }
@@ -439,19 +472,26 @@ pvalCalibrationProt <- function(history,
                     pi0,
                     h1concent,
                     unifunder){
+  if (is.null(history)){
+    history <- MagellanNTK::InitializeHistory()
+  }
+  
   history <- Prostar2::Add2History(history, 'DA', 'Pvaluecalibration', 'Calibration method', calibmet)
   
-  if (!is.null(pi0))
+  if (!is.null(pi0)) {
     history <- Prostar2::Add2History(history, 'DA', 'Pvaluecalibration', 'pi0', pi0)
+  }
   
   history <- Prostar2::Add2History(history, 'DA', 'Pvaluecalibration', 'h1.concentration', h1concent)
   history <- Prostar2::Add2History(history, 'DA', 'Pvaluecalibration', 'Uniformity underestimation', unifunder)
   
-  if (!is.null(pi0))
+  if (!is.null(pi0)) {
     history <- Prostar2::Add2History(history, 'DA', 'Pvaluecalibration', 'Non-DA protein proportion', round(100 * pi0, digits = 2))
+  }
   
-  if (!is.null(h1concent))
+  if (!is.null(h1concent)) {
     history <- Prostar2::Add2History(history, 'DA', 'Pvaluecalibration', 'DA protein concentration', round(100 * h1concent, digits = 2))
+  }
   
   return(list(history = history))
 }
@@ -810,6 +850,10 @@ fdrProt <- function(history,
                        thpval,
                        FDR,
                        nbSignif){
+  if (is.null(history)){
+    history <- MagellanNTK::InitializeHistory()
+  }
+  
   history <- Prostar2::Add2History(history, 'DA', 'FDR', 'th pval', thpval)
   history <- Prostar2::Add2History(history, 'DA', 'FDR', '% FDR', round(100 * FDR, digits = 2))
   history <- Prostar2::Add2History(history, 'DA', 'FDR', 'Nb significant', nbSignif)

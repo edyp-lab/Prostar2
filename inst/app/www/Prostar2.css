@@ -1,0 +1,7 @@
+body {
+  background-color: magenta !important;
+}
+  
+  .process-timeline .li.mandatory .icon {
+    border-color: #FFFFF !important;
+}

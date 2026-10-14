@@ -102,6 +102,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
   rv.custom.default.values <- list(
     history = MagellanNTK::InitializeHistory(),
     
+    containsNA = NULL,
     res_pval_FC = NULL,
     res_pval_FC_complete = NULL,
     res_pval_FC_stacked = NULL,
@@ -185,6 +186,9 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         # Copy the input dataset to use it during this step
         rv$dataIn <- dataIn()
         
+        # Check if contains NA
+        rv.custom$containsNA <- checkNA(rv$dataIn)
+        
         # DO NOT MODIFY THE NEXT THREE LINES
         dataOut$trigger <- MagellanNTK::Timestamp()
         dataOut$value <- NULL
@@ -214,6 +218,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     })
     
     #### _sidebar -----
+    # Widget - scenario choice
     output$Scenario_choice_UI <- renderUI({
       req(rv$dataIn)
       
@@ -232,13 +237,11 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     })
     
     #### _content -----
-    # Warning if missing values in quantitative data
+    # Txt warning if missing values in quantitative data
     output$Scenario_warningNA_UI <- renderUI({
       req(rv$dataIn)
       
-      containsNA <- checkNA(rv$dataIn)
-      
-      if (containsNA) {
+      if (rv.custom$containsNA) {
         tags$b(style = "color: red;",
                "Your dataset contains missing values. Please filter or impute them before proceeding.")
       }
@@ -246,68 +249,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     
     # Description of each scenario
     output$Scenario_desc_UI <- renderUI({
-      tagList(h2("Scenario choices"),
-      fluidRow(
-        column(4, div(class = "option-card", div(class = "option-panel",
-                                                 h4("Contrast", class = "option-title"),
-                                                 p("Test conditions to compute the contrasts. If 'Stacked' is selected in the Fold-change step, p-values from all contrasts are stacked together so as to make only a single FDR control."),
-                                                 p(strong("Steps:")),
-                                                 tags$ul(
-                                                   tags$li("Choose the fold-change threshold and contrast (either a single contrast or all contrasts stacked)"),
-                                                   tags$li("Push p-value"),
-                                                   tags$li("Perform p-value calibration"),
-                                                   tags$li("Apply FDR control")),
-                                                 p(strong("When to use:")),
-                                                 tags$ul(
-                                                   tags$li("When comparing multiple conditions",
-                                                           tags$ul(tags$li("If interested in a single contrast = Unique"),
-                                                                   tags$li("If interested in all contrasts = Stacked"))))
-                                                 ))),
-        column(4, div(class = "option-card", div(class = "option-panel",
-                                                 h4("Cluster", class = "option-title"),
-                                                 p("Make a single omnibus test. In parallel, create of profile for each protein and cluster these profiles. This scenario focus more on the global trend of each protein."),
-                                                 p(strong("Steps:")),
-                                                 tags$ul(
-                                                   tags$li("Choose the method to create the protein profile and the clustering method"),
-                                                   tags$li("Perform p-value calibration"),
-                                                   tags$li("Apply FDR control")),
-                                                 p(strong("When to use:")),
-                                                 tags$ul(
-                                                   tags$li("Conditions corresponds to a time-course"),
-                                                   tags$li("..."))
-                                                 ))),
-        column(4, div(class = "option-card", div(class = "option-panel",
-                                                 h4("Aggregation", class = "option-title"),
-                                                 p("Test conditions to compute the contrasts. The resulting p-values are then aggregated into a single set."),
-                                                 p(strong("Steps:")),
-                                                 tags$ul(
-                                                   tags$li("Choose the p-value aggregation method"),
-                                                   tags$li("Perform p-value calibration"),
-                                                   tags$li("Apply FDR control")),
-                                                 p(strong("When to use:")),
-                                                 tags$ul(
-                                                   tags$li("If there is more than 2 conditions"),
-                                                   tags$li("..."))
-                                                 )))
-      ),
-      tags$style(HTML(".option-card {
-                            padding-right: 20px;
-                            margin-bottom: 10px;
-                            }
-                            
-                            .option-panel {
-                            background: #ffffff;
-                            border: 1px solid #dddddd;
-                            border-radius: 6px;
-                            padding: 18px;
-                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-                            }
-                            
-                            .option-title {
-                            margin-bottom: 12px;
-                            font-weight: 600;
-                            text-align: center;
-                            }")))
+      scenarioInfos()
     })
     
     
@@ -316,61 +258,44 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       req(grepl('Scenario', btnEvents()))
       req(rv$dataIn)
       
-      containsNA <- checkNA(dataIn())
-      
-      if (is.null(rv$dataIn) ||
-          !(rv.widgets$Scenario_choice %in% c("Contrast", "Cluster", "Aggregation")) ||
+      if (!(rv.widgets$Scenario_choice %in% c("Contrast", "Cluster", "Aggregation")) ||
           !(rv.widgets$Scenario_method %in% c("ANOVA", "Limma"))) {
         shinyjs::info(btnVentsMasg)
         
-      } else if (containsNA){
+      } else if (rv.custom$containsNA){
         warntxt <- "Your dataset contains missing values. Please filter or impute them before proceeding."
         MagellanNTK::mod_errorModal_server('warn_NA',
                                            title = 'Warning',
                                            text = warntxt)
-      } else {
-        if (rv.widgets$Scenario_choice == "Contrast"){
-          if (rv.widgets$Scenario_method == "ANOVA"){
-            anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
-            rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
-            
-          } else if (rv.widgets$Scenario_method == "Limma"){
-            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design_qf(rv$dataIn), comp.type="OnevsOne")
-          }
-          
-          rv.custom$res_pval_FC_stacked$logFC <- data.frame(cond1_vs_cond2_logFC = unlist(rv.custom$res_pval_FC$logFC, use.names = FALSE))
-          rv.custom$res_pval_FC_stacked$P_Value <- data.frame(cond1_vs_cond2_pval = unlist(rv.custom$res_pval_FC$P_Value, use.names = FALSE))
-          rv.custom$Scenario_constratnames <- sub("_logFC$", "", colnames(rv.custom$res_pval_FC$logFC))
-          
-        } else if (rv.widgets$Scenario_choice == "Cluster"){
-          if (rv.widgets$Scenario_method == "ANOVA"){
-            anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
-            rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "Omnibus")
-            
-          } else if (rv.widgets$Scenario_method == "Limma"){
-            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design_qf(rv$dataIn), comp.type="anova1way")
-          }
-          
-          rv.custom$res_clusters <- rep("-", nrow(rv$dataIn[[length(rv$dataIn)]]))
-          
-        }else if (rv.widgets$Scenario_choice == "Aggregation"){
-          if (rv.widgets$Scenario_method == "ANOVA"){
-            anova.models <- DaparToolshed::applyAnovasOnProteins(rv$dataIn, length(rv$dataIn))
-            rv.custom$res_pval_FC <- DaparToolshed::testAnovaModels(anova.models, test = "TukeyNoMTC")
-            
-          }else if (rv.widgets$Scenario_method == "Limma"){
-            rv.custom$res_pval_FC <- DaparToolshed::limmaCompleteTest(SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]]), DaparToolshed::design_qf(rv$dataIn), comp.type="OnevsOne")
-          }
-          
-          rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
-        }
-        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Scenario', 'Scenario', rv.widgets$Scenario_choice)
-        rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Scenario', 'Method', rv.widgets$Scenario_method)
         
-        # DO NOT MODIFY THE NEXT THREE LINES
-        dataOut$trigger <- MagellanNTK::Timestamp()
-        dataOut$value <- NULL
-        rv$steps.status["Scenario"] <- MagellanNTK::stepStatus$VALIDATED
+      } else {
+        shiny::withProgress(message = paste0("Initializing scenario", id), {
+          shiny::incProgress(0.5)
+          
+          # Perform scenario sub-step
+          result <- scenarioPept(data = rv$dataIn,
+                                 scenario = rv.widgets$Scenario_choice,
+                                 method = rv.widgets$Scenario_method,
+                                 history = rv.custom$history)
+          
+          # Update values
+          rv.custom$history <- result$history
+          rv.custom$res_pval_FC <- result$res_pval_FC
+          # For Contrast
+          rv.custom$res_pval_FC_stacked <- result$res_pval_FC_stacked
+          rv.custom$Scenario_constratnames <- result$constratnames
+          # For Cluster
+          rv.custom$res_clusters <- result$clusters
+          # For Aggregation
+          rv.custom$res_pval_FC_complete <- result$res_pval_FC_complete
+  
+          
+          # DO NOT MODIFY THE NEXT THREE LINES
+          dataOut$trigger <- MagellanNTK::Timestamp()
+          dataOut$value <- NULL
+          rv$steps.status["Scenario"] <- MagellanNTK::stepStatus$VALIDATED
+          shiny::incProgress(1)
+        })
       }
     })
     
@@ -398,6 +323,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     })
     
     ### Cluster / Aggregation - Skip -----
+    # Txt validate
     output$Foldchange_skiptxt_ui <- renderUI({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice != "Contrast")
@@ -409,6 +335,8 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     })
     
     ### Contrast - Fold Change -----
+    #### _sidebar -----
+    # Widget - logFC value
     output$Foldchange_thlogFC_ui <- renderUI({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
@@ -423,7 +351,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Foldchange'])
     })
     
-    
+    # Widget - contrast type
     output$Foldchange_contrastchoice_ui <- renderUI({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
@@ -436,6 +364,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Foldchange'])
     })
     
+    # Widget - unique contrast choice
     output$Foldchange_uniquechoice_ui <- renderUI({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Foldchange_contrastchoice == "Unique")
@@ -448,31 +377,22 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       MagellanNTK::toggleWidget(widget, rv$steps.enabled['Foldchange'])
     })
     
+    #### _content -----
+    # All content for contrast scenario
     output$Foldchange_plots_ui <- renderUI({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv$dataIn)
       req(rv.widgets$Scenario_choice == "Contrast")
       
-      m <- DaparToolshed::matchMetacell(
-        DaparToolshed::qMetacell(rv$dataIn[[length(rv$dataIn)]]),
-        pattern = c("Missing", "Missing POV", "Missing MEC"),
-        level = DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
+      tagList(
+        uiOutput(ns('Foldchange_warning_conditions_ui')),
+        uiOutput(ns("Foldchange_swapConds_ui")),
+        plotly::plotlyOutput(ns("Foldchange_Plot")),
+        plotly::plotlyOutput(ns("FoldchangeStacked_Plot"))
       )
-      NA.count <- length(which(m))
-      if (NA.count > 0) {
-        
-        tags$p("Your dataset contains missing values. Before using the
-      Hypothesis test, you must filter/impute them.")
-      } else {
-        tagList(
-          uiOutput(ns('Foldchange_warning_conditions_ui')),
-          uiOutput(ns("Foldchange_swapConds_ui")),
-          plotly::plotlyOutput(ns("Foldchange_Plot")),
-          plotly::plotlyOutput(ns("FoldchangeStacked_Plot"))
-        )
-      }
     })
     
+    # Plot - logFC all contrast
     output$Foldchange_Plot <- plotly::renderPlotly({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
@@ -487,6 +407,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       })
     })
     
+    # Plot - logFC stacked
     output$FoldchangeStacked_Plot <- plotly::renderPlotly({
       req(rv$steps.status["Scenario"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
@@ -510,105 +431,30 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
         
       } else {
         if (rv.widgets$Scenario_choice == "Contrast"){
-          if (rv.widgets$Foldchange_contrastchoice == "Stacked"){
-            rv.custom$contrast_list <- rep(rv.custom$Scenario_constratnames,  
-                                           rep(nrow(rv$dataIn[[length(rv$dataIn)]]),length(colnames(rv.custom$res_pval_FC$logFC))))
-            rv.custom$res_pval_FC_complete <- rv.custom$res_pval_FC
-            rv.custom$res_pval_FC <- rv.custom$res_pval_FC_stacked
-            rv.custom$comparison <- "stacked"
-            
-            
-            all_conditions <- DaparToolshed::design_qf(rv$dataIn)$Condition
-            max_sample_cond <- max(unlist(lapply(unique(all_conditions), function(x) length(which(all_conditions == x)))))
-            rv.custom$cond <- rep(c("cond1", "cond2"), c(max_sample_cond, max_sample_cond))
-            
-            assay_contr_list <- list()
-            meta_contr_list <- list()
-            for (contraste_name in rv.custom$Scenario_constratnames){
-              rv.custom$names_condition <- unlist(strsplit(as.character(contraste_name), "_vs_"))
-              
-              assay_list <- list()
-              meta_list <- list()
-              for (contrast_cond in rv.custom$names_condition){
-                index_cond <- which(all_conditions == contrast_cond)
-                assay_cond <- SummarizedExperiment::assay(rv$dataIn[[length(rv$dataIn)]])[, index_cond]
-                meta_cond <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])$qMetacell[, index_cond]
-                
-                diff_nb_sample_cond <- max_sample_cond - length(index_cond) 
-                if (diff_nb_sample_cond != 0){
-                  add_col <- as.data.frame(matrix(NA, nrow = nrow(assay_cond), ncol = diff_nb_sample_cond)) 
-                  assay_cond <- cbind(assay_cond, add_col)
-                  meta_cond <- cbind(meta_cond, add_col)
-                }
-                
-                assay_list[[contrast_cond]] <- assay_cond
-                meta_list[[contrast_cond]] <- meta_cond
-              }
-              assay_cond_contr <- do.call(cbind, assay_list)
-              meta_cond_contr <- do.call(cbind, meta_list)
-              colnames(assay_cond_contr) <- paste0("c", rep(seq_len(2), each = max_sample_cond), "_", rep(seq_len(max_sample_cond), times = 2)) 
-              colnames(meta_cond_contr) <- paste0("metacell_", colnames(assay_cond_contr))
-              
-              assay_contr_list[[contraste_name]] <- assay_cond_contr
-              meta_contr_list[[contraste_name]] <- meta_cond_contr
-            } 
-            assay_contr <- do.call(rbind, assay_contr_list)
-            meta_contr <- do.call(rbind, meta_contr_list)
-            
-            rv.custom$push_pval_data <- SummarizedExperiment::SummarizedExperiment(assay_contr)
-            DaparToolshed::idcol(rv.custom$push_pval_data) <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
-            DaparToolshed::typeDataset(rv.custom$push_pval_data) <- DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-            rv.custom$names_condition <- unique(rv.custom$cond)
-            
-            rv.custom$rowdatacolname <- names(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]]))[
-              !vapply(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]]), function(x)
-                is(x, "matrix") || is(x, "DataFrame") || is.data.frame(x), TRUE)]
-            SummarizedExperiment::rowData(rv.custom$push_pval_data) <- do.call(rbind, replicate(length(rv.custom$Scenario_constratnames), SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, rv.custom$rowdatacolname], simplify = FALSE))
-            SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- meta_contr
-            SummarizedExperiment::rowData(rv.custom$push_pval_data)$Contrast <- rep(rv.custom$Scenario_constratnames, each = nrow(rv$dataIn[[length(rv$dataIn)]]))
-            rv.custom$rowdatacolname <- c(rv.custom$rowdatacolname, "Contrast")  
-            
-            rv.custom$res_pval_tmp <- rv.custom$res_pval_FC$P_Value
-            tmp_df <- cbind(rv.custom$res_pval_FC$logFC, rv.custom$res_pval_FC$P_Value)
-            DaparToolshed::HypothesisTest(rv.custom$push_pval_data) <- as.data.frame(tmp_df)
-            
-            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', 'Contrast_Type', rv.widgets$Foldchange_contrastchoice)
-            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', 'Foldchange_Threshold', rv.widgets$Foldchange_thlogFC)
-            
-          } else if (rv.widgets$Foldchange_contrastchoice == "Unique") {
-            rv.custom$res_pval_FC$P_Value <- rv.custom$res_pval_FC$P_Value[, paste0(rv.widgets$Foldchange_uniquechoice, "_pval"), FALSE]
-            rv.custom$res_pval_FC$logFC <- rv.custom$res_pval_FC$logFC[, paste0(rv.widgets$Foldchange_uniquechoice, "_logFC"), FALSE]
-            rv.custom$comparison <- rv.widgets$Foldchange_uniquechoice
-            
-            rv.custom$names_condition <- unlist(strsplit(as.character(rv.widgets$Foldchange_uniquechoice), "_vs_"))
-            col_cond <- which(DaparToolshed::design_qf(rv$dataIn)$Condition %in% rv.custom$names_condition)
-            rv.custom$push_pval_data <- rv$dataIn[[length(rv$dataIn)]][, col_cond]
-            SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell <- SummarizedExperiment::rowData(rv.custom$push_pval_data)$qMetacell[, col_cond]
-            DaparToolshed::idcol(rv.custom$push_pval_data) <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
-            DaparToolshed::typeDataset(rv.custom$push_pval_data) <- DaparToolshed::typeDataset(rv$dataIn[[length(rv$dataIn)]])
-            SummarizedExperiment::rowData(rv.custom$push_pval_data)[, DaparToolshed::idcol(rv.custom$push_pval_data)] <- SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]])[, DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])]
-            rv.custom$cond <- DaparToolshed::design_qf(rv$dataIn)$Condition[col_cond]
-            
-            rv.custom$rowdatacolname <- names(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]]))[
-              !vapply(SummarizedExperiment::rowData(rv$dataIn[[length(rv$dataIn)]]), function(x)
-                is(x, "matrix") || is(x, "DataFrame") || is.data.frame(x), TRUE)]
-            
-            rv.custom$res_pval_tmp <- rv.custom$res_pval_FC$P_Value
-            tmp_df <- cbind(rv.custom$res_pval_FC$logFC, rv.custom$res_pval_FC$P_Value)
-            DaparToolshed::HypothesisTest(rv.custom$push_pval_data) <- as.data.frame(tmp_df)
-            
-            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', 'Contrast_Type', rv.widgets$Foldchange_contrastchoice)
-            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', 'Contrast_Choice', rv.widgets$Foldchange_uniquechoice)
-            rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', 'Foldchange_Threshold', rv.widgets$Foldchange_thlogFC)
-          }
-          rv.widgets$FDRcontrol_Pairwisecomparison_tooltipInfo <- DaparToolshed::idcol(rv$dataIn[[length(rv$dataIn)]])
-          rv.custom$FDRcontrol_Pairwisecomparison_tooltipInfo <- rv.widgets$FDRcontrol_Pairwisecomparison_tooltipInfo
+          # Perform fold change sub-step
+          result <- foldChangePept(data = rv$dataIn,
+                                   history = rv.custom$history,
+                                   contrastchoice = rv.widgets$Foldchange_contrastchoice,
+                                   contrastnames = rv.custom$Scenario_constratnames,
+                                   res_pval_FC = rv.custom$res_pval_FC,
+                                   res_pval_FC_stacked = rv.custom$res_pval_FC_stacked,
+                                   thlogFC = rv.widgets$Foldchange_thlogFC,
+                                   uniquechoice = rv.widgets$Foldchange_uniquechoice)
           
-          rv.custom$pushPval_SummaryDT <- data.frame(
-            query = "-",
-            nbPushed = "-",
-            nbRemaining = nrow(rv.custom$res_pval_tmp),
-            stringsAsFactors = FALSE)
+          # Update values
+          rv.custom$history <- result$history
+          rv.custom$res_pval_FC_complete <- result$res_pval_FC_complete
+          rv.custom$comparison <- result$comparison
+          rv.custom$contrast_list <- result$contrast_list
+          rv.custom$cond <- result$cond
+          rv.custom$names_condition <- result$names_condition
+          rv.custom$push_pval_data <- result$push_pval_data
+          rv.custom$rowdatacolname <- result$rowdatacolname
+          rv.custom$res_pval_tmp <- result$res_pval_tmp
+          rv.widgets$FDRcontrol_Pairwisecomparison_tooltipInfo <- result$tooltipInfo 
+          rv.custom$FDRcontrol_Pairwisecomparison_tooltipInfo <- result$tooltipInfo 
+          rv.custom$pushPval_SummaryDT <- result$SummaryDT
+          
         } else {
           rv.custom$history <- Prostar2::Add2History(rv.custom$history, 'DifferentialAnalysis', 'Foldchange', '-', '-')
         }
@@ -647,6 +493,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     
     ### Contrast - Push p-val -----
     #### _sidebar -----
+    # Widget - filter creation for push p-values (ui)
     output$Finetuning_pushpval_param_ui <- renderUI({
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
@@ -657,20 +504,22 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       )
       MagellanNTK::toggleWidget(widget, rv$steps.enabled["Finetuning"])
     })
-    
-    GetFiltersScope <- function(){
-      c("Whole Line" = "WholeLine",
-        "Whole matrix" = "WholeMatrix",
-        "For every condition" = "AllCond",
-        "At least one condition" = "AtLeastOneCond")
-    }
 
+    # Widget - filter creation for push p-values (server)
     observe({
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
       req(rv.custom$push_pval_data)
       req(rv.custom$res_pval_tmp)
-      rv.custom$res_pval_tmp
+      
+      ## A MODIFIER QUAND RAJOUT DE ALL COMME CONTRAST
+      # if (length(grep("all-", rv.widgets$Pairwisecomparison_Comparison)) == 1) {
+      #   conds <- DaparToolshed::design_qf(rv$dataIn)$Condition
+      # } else {
+      #   split <- unlist(strsplit(rv.widgets$Pairwisecomparison_Comparison, "_vs_"))
+      #   idxcond <- DaparToolshed::design_qf(rv$dataIn)$Condition %in% split
+      #   conds <- DaparToolshed::design_qf(rv$dataIn)$Condition[idxcond]
+      # }
       
       rv.custom$AnaDiff_indices <- Prostar2::mod_qMetacell_FunctionFilter_Generator_server(
         id = "AnaDiff_query",
@@ -712,6 +561,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
     })
     
     #### _content -----
+    # Pushed p-values DT (ui)
     output$Finetuning_pushpval_ui <- renderUI({
       req(rv$steps.status["Foldchange"] == MagellanNTK::stepStatus$VALIDATED)
       req(rv.widgets$Scenario_choice == "Contrast")
@@ -720,6 +570,7 @@ PipelinePeptide_DifferentialAnalysis_server <- function(id,
       MagellanNTK::format_DT_ui(ns("dt"))
     })
     
+    # Pushed p-values DT (server)
     MagellanNTK::format_DT_server("dt",
                                   dataIn = reactive({rv.custom$pushPval_SummaryDT}))
     
