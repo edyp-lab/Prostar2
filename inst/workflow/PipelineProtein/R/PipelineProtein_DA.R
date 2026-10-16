@@ -387,7 +387,7 @@ PipelineProtein_DA_server <- function(
     observeEvent(req(length(rv.custom$AnaDiff_indices()$value$ll.fun) > 0), {
       ind <- unlist(rv.custom$AnaDiff_indices()$value$ll.indices)
 
-      if (length(ind) > 1 && length(ind) <= nrow(Get_Dataset_to_Analyze())) {
+      if (length(ind) > 0 && length(ind) <= nrow(Get_Dataset_to_Analyze())) {
         result <- pushPvalues(
           data = rv$dataIn[[length(rv$dataIn)]],
           ind = ind,

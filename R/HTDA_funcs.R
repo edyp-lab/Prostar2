@@ -20,7 +20,8 @@ getlogFC <- function(data, type = "OnevsOne"){
   groups <- sTab$Condition
   conds <- unique(groups)
   
-  if (type == "OnevsOne") {
+  switch(type,
+         OnevsOne = {
     logFC_onevsone <- sapply(combn(conds, 2, simplify = FALSE), function(x) {
       rowMeans(qData[, groups == x[1], drop = FALSE]) - rowMeans(qData[, groups == x[2], drop = FALSE])
     })
@@ -29,7 +30,8 @@ getlogFC <- function(data, type = "OnevsOne"){
     colnames(logFC_onevsone) <- vapply(pairs,
       \(x) paste0(x[1], "_vs_", x[2], "_logFC"), character(1) )
     return(logFC_onevsone)
-  } else if (type == "OnevsAll") {
+  }, 
+  OnevsAll = {
     logFC_onevsall <- sapply(conds, function(cond) {
       in_group <- groups == cond
       out_group <- groups != cond
@@ -38,7 +40,8 @@ getlogFC <- function(data, type = "OnevsOne"){
     
     colnames(logFC_onevsall) <- paste0(conds, "_vs_(all-", conds, ")_logFC")
     return(logFC_onevsall)
-  }
+  })
+  
   return(NULL)
 }
 
@@ -263,11 +266,9 @@ pushPvalues <- function(data,
                         comparison,
                         dt,
                         pushed){
-  if (command == 'delete') {
-    indices_to_push <- ind
-  } else if (command == 'keep') {
-    indices_to_push <- seq_len(nrow(data))[-(ind)]
-  }
+  indices_to_push <- switch(command,
+         delete = ind,
+         keep = seq_len(nrow(data))[-(ind)])
   
   .pval <- paste0(comparison, '_pval')
   

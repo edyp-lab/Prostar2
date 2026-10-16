@@ -186,7 +186,7 @@ mod_volcanoplot_server <- function(
             )
             )
         }
-      } else if (omXplore::get_type(rv$dataIn) == "peptide") {
+      } else if (DaparToolshed::typeDataset(rv$dataIn) == "peptide") {
         tabsetPanel(id = ns("collapseVolcanoInfos"),
           shiny::tabPanel("Peptide",
             tagList(

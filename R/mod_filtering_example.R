@@ -158,11 +158,9 @@ mod_filtering_example_server <- function(
 
       # Darken lines that will be filtered
       if (!is.null(indices())) {
-        if (operation() == "keep") {
-          index2darken <- (seq_len(nrow(dataIn())))[-indices()]
-        } else if (operation() == "delete") {
-          index2darken <- indices()
-        }
+        index2darken <- switch(operation(),
+                               keep = seq_len(nrow(dataIn()))[-indices()],
+                               delete = indices())
       }
 
 

@@ -12,7 +12,8 @@ scenarioPept(data, scenario, method, history)
 \item{scenario}{A \code{character(1)}, the chosen scenario. Either \code{Contrast},
 \code{Cluster} or \code{Aggregation}}
 
-\item{method}{A \code{character(1)}, the chosen method. Either \code{ANOVA} or \code{Limma}}
+\item{method}{A \code{character(1)}, the chosen method. Either \code{ttests}, \code{ANOVA}
+or \code{Limma}}
 
 \item{history}{The history}
 }

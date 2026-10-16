@@ -606,7 +606,7 @@ test_that("hypothesisTestProt returns AllPairwiseComp, history and message", {
   mock_htp(cap <- new.env())
   
   res <- hypothesisTestProt(qf, method = "Limma", logFC_thr = 1,
-                            design = "OnevsOne")
+                            design = "OnevsOne", swap = c(FALSE))
   
   expect_type(res, "list")
   expect_named(res, c("AllPairwiseComp", "history", "message"))
@@ -618,7 +618,7 @@ test_that("hypothesisTestProt with Limma calls limmaCompleteTest", {
   mock_htp(cap)
   
   res <- hypothesisTestProt(qf, method = "Limma", logFC_thr = 1,
-                            design = "OnevsAll")
+                            design = "OnevsAll", swap = c(FALSE))
   
   expect_identical(res$AllPairwiseComp, "limma_res")
   expect_equal(cap$limma$qData, SummarizedExperiment::assay(qf, length(qf)))
@@ -633,7 +633,7 @@ test_that("hypothesisTestProt with ttests calls compute_t_tests", {
   mock_htp(cap)
   
   res <- hypothesisTestProt(qf, method = "ttests", logFC_thr = 1,
-                            design = "OnevsOne", ttest_type = "Welch")
+                            design = "OnevsOne", ttest_type = "Welch", swap = c(FALSE))
   
   expect_identical(res$AllPairwiseComp, "ttest_res")
   expect_identical(cap$ttest$obj, qf)
@@ -647,8 +647,8 @@ test_that("hypothesisTestProt returns NULL when the test emits a warning", {
   qf <- make_qf_fc(mat_2c(), c("A", "A", "B", "B"))
   mock_htp(cap <- new.env(), limma = warns, ttest = warns)
   
-  res_l <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne")
-  res_t <- hypothesisTestProt(qf, "ttests", NULL, 1, "OnevsOne", "Student")
+  res_l <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", swap = c(FALSE))
+  res_t <- hypothesisTestProt(qf, "ttests", NULL, 1, "OnevsOne", "Student", swap = c(FALSE))
   
   expect_null(res_l$AllPairwiseComp)
   expect_null(res_t$AllPairwiseComp)
@@ -658,8 +658,8 @@ test_that("hypothesisTestProt returns NULL when the test fails", {
   qf <- make_qf_fc(mat_2c(), c("A", "A", "B", "B"))
   mock_htp(cap <- new.env(), limma = fails, ttest = fails)
   
-  res_l <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne")
-  res_t <- hypothesisTestProt(qf, "ttests", NULL, 1, "OnevsOne", "Student")
+  res_l <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", swap = c(FALSE))
+  res_t <- hypothesisTestProt(qf, "ttests", NULL, 1, "OnevsOne", "Student", swap = c(FALSE))
   
   expect_null(res_l$AllPairwiseComp)
   expect_null(res_t$AllPairwiseComp)
@@ -669,9 +669,9 @@ test_that("hypothesisTestProt does not let errors or warnings propagate", {
   qf <- make_qf_fc(mat_2c(), c("A", "A", "B", "B"))
   mock_htp(cap <- new.env(), limma = fails, ttest = warns)
   
-  expect_no_error(hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne"))
+  expect_no_error(hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", swap = c(FALSE)))
   expect_no_warning(
-    hypothesisTestProt(qf, "ttests", NULL, 1, "OnevsOne", "Student")
+    hypothesisTestProt(qf, "ttests", NULL, 1, "OnevsOne", "Student", swap = c(FALSE))
   )
 })
 
@@ -680,7 +680,7 @@ test_that("hypothesisTestProt returns NULL for an unknown method", {
   cap <- new.env()
   mock_htp(cap)
   
-  res <- hypothesisTestProt(qf, "Unknown", NULL, 1, "OnevsOne")
+  res <- hypothesisTestProt(qf, "Unknown", NULL, 1, "OnevsOne", swap = c(FALSE))
   
   expect_null(res$AllPairwiseComp)
   expect_null(cap$limma)
@@ -692,7 +692,7 @@ test_that("hypothesisTestProt still updates the history when the test fails", {
   cap <- new.env()
   mock_htp(cap, limma = fails)
   
-  res <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne")
+  res <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", swap = c(FALSE))
   
   expect_null(res$AllPairwiseComp)
   expect_length(cap$calls, 3)
@@ -705,7 +705,7 @@ test_that("hypothesisTestProt initialises the history when it is NULL", {
   mock_htp(cap)
   
   hypothesisTestProt(qf, "Limma", history = NULL, logFC_thr = 1,
-                     design = "OnevsOne")
+                     design = "OnevsOne", swap = c(FALSE))
   
   expect_true(cap$init)
   expect_equal(nrow(cap$first[[1]]), 0)
@@ -719,7 +719,7 @@ test_that("hypothesisTestProt keeps an existing history", {
                      Value = "v", stringsAsFactors = FALSE)
   
   res <- hypothesisTestProt(qf, "Limma", history = init, logFC_thr = 1,
-                            design = "OnevsOne")
+                            design = "OnevsOne", swap = c(FALSE))
   
   expect_null(cap$init)
   expect_identical(cap$first[[1]], init)
@@ -733,7 +733,7 @@ test_that("hypothesisTestProt records 3 parameters in the history for Limma", {
   mock_htp(cap)
   
   hypothesisTestProt(qf, "Limma", NULL, logFC_thr = "0.75",
-                     design = "OnevsAll")
+                     design = "OnevsAll", swap = c(FALSE))
   
   expect_length(cap$calls, 3)
   for (cl in cap$calls) {
@@ -756,7 +756,7 @@ test_that("hypothesisTestProt also records the t-test type for ttests", {
   mock_htp(cap)
   
   res <- hypothesisTestProt(qf, "ttests", NULL, logFC_thr = 1,
-                            design = "OnevsOne", ttest_type = "Welch")
+                            design = "OnevsOne", ttest_type = "Welch", swap = c(FALSE))
   
   expect_length(cap$calls, 4)
   expect_identical(
@@ -773,21 +773,17 @@ test_that("hypothesisTestProt does not record ttestOptions for Limma", {
   cap <- new.env()
   mock_htp(cap)
   
-  hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", ttest_type = "Welch")
+  hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", ttest_type = "Welch", swap = c(FALSE))
   
   params <- vapply(cap$calls, function(x) x[[3]], character(1))
   expect_false("ttestOptions" %in% params)
 })
 
 test_that("hypothesisTestProt: current behaviour of the 'message' element", {
-  # The handlers assign `message <- e$message` in their OWN environment, so
-  # the `message` returned by the function is never the error text: it is
-  # base::message(). If the handlers are fixed (e.g. with `<<-`), update this
-  # test to expect the warning/error text instead.
   qf <- make_qf_fc(mat_2c(), c("A", "A", "B", "B"))
   mock_htp(cap <- new.env(), limma = fails)
   
-  res <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne")
+  res <- hypothesisTestProt(qf, "Limma", NULL, 1, "OnevsOne", swap = c(FALSE))
   
   expect_true(is.function(res$message))
 })

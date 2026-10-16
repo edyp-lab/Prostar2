@@ -98,7 +98,8 @@ scenarioInfos <- function() {
 #' @param data A `QFeatures`
 #' @param scenario A `character(1)`, the chosen scenario. Either `Contrast`,
 #' `Cluster` or `Aggregation`
-#' @param method A `character(1)`, the chosen method. Either `ANOVA` or `Limma`
+#' @param method A `character(1)`, the chosen method. Either `ttests`, `ANOVA` 
+#' or `Limma`
 #' @param history The history
 #'
 #' @return A list containing the history and necessary values
@@ -242,19 +243,97 @@ stackContrasts <- function(se, conditions, contrastnames) {
 }
 
 
-#' @title PipelinePeptide fold change sub-step
+#' @title Make test
 #'
-#' @description Do what has to be done at the end of the fold change sub-step
-#' of the PipelinePeptide
+#' @description Make statistical test
+#'
+#' @param data A `QFeatures`
+#' @param method A `character(1)`, the chosen method. Either `ttests`, `ANOVA` 
+#' or `Limma`
+#' @param design A `character(1)`, the type of contrast. Must choose between : 
+#' `"OnevsOne"` and `"OnevsAll"`
+#' @param ttest_type A `character(1)`, the type of t-test. Must choose between : 
+#' `"Student"` and `"Welch"`
+#' @param testANOVA A `character(1)`, the type of ANOVA test. Must choose 
+#' between : `"TukeyNoMTC"` and `"Omnibus"`
+#'
+#' @return Result of test
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+makeTest <- function(data,
+                     method = c("Limma", "ttests", "ANOVA"), 
+                     design = c("OnevsOne", "OnevsAll", "anova1way"),
+                     ttest_type = c("Student", "Welch"),
+                     testANOVA = c("TukeyNoMTC", "Omnibus")){
+  if (!inherits(data, "QFeatures")) {
+    stop("'data' must be of class QFeatures")
+  }
+  method <- match.arg(method)
+  design <- match.arg(design)
+  ttest_type <- match.arg(ttest_type)
+  testANOVA <- match.arg(testANOVA)
+  
+  AllPairwiseComp <- tryCatch({
+    switch(method,
+           Limma = {
+             DaparToolshed::limmaCompleteTest(
+               qData = SummarizedExperiment::assay(data[[length(data)]]),
+               sTab = DaparToolshed::design_qf(data),
+               comp.type = design
+             )
+           },
+           ttests = {
+             DaparToolshed::compute_t_tests(
+               obj = data,
+               i = length(data),
+               contrast = design,
+               type = ttest_type
+             )
+           },
+           ANOVA = {
+             anova.models <- DaparToolshed::applyAnovasOnProteins(data, length(data))
+             DaparToolshed::testAnovaModels(anova.models, test = testANOVA)
+           }
+    )
+  },
+  warning = function(w) {
+    msg <- w
+    message <- w$message
+    return(NULL)
+  },
+  error = function(e) {
+    message <- e$message
+    return(NULL)
+  },
+  finally = {
+    # cleanup-code
+  }
+  )
+  
+  return(AllPairwiseComp)
+}
+
+
+#' @title PipelinePeptide hypothesis test sub-step for Contrast
+#'
+#' @description Do what has to be done at the end of the hypothesis test 
+#' sub-step of the PipelinePeptide for the Contrast scenario
 #'
 #' @param data A `QFeatures`
 #' @param history The history
-#' @param contrastchoice A `character(1)`, either `"Stacked"` or `"Unique"`
-#' @param contrastnames A `character()`, names of contrasts
-#' @param res_pval_FC A `data.frame`, containing `logFC` and `P_Value` columns
-#' @param res_pval_FC_stacked A `data.frame`, with stacked `logFC` and `P_Value`
+#' @param method A `character(1)`, the chosen method. Either `ttests`, `ANOVA` 
+#' or `Limma`
+#' @param ttest_type A `character(1)`, the type of t-test. Must choose between : 
+#' `"Student"` and `"Welch"`
+#' @param contrastchoice A `character(1)`, either `"Stacked"`, `"Unique_OvO"` 
+#' or `"Unique_OvA"`
 #' @param thlogFC A `numeric(1)`, threshold for log fold change
 #' @param uniquechoice A `character(1)`, contrast name
+#' @param swap A `logical()` with the same length as the number of contrasts
 #'
 #' @return A list containing the history and necessary values
 #'
@@ -263,108 +342,254 @@ stackContrasts <- function(se, conditions, contrastnames) {
 #'
 #' @export
 #'
-foldChangePept <- function(data,
-                           history,
-                           contrastchoice = c("Stacked", "Unique"),
-                           contrastnames,
-                           res_pval_FC,
-                           res_pval_FC_stacked,
-                           thlogFC,
-                           uniquechoice = NULL) {
+hypothesisTestPeptContrast <- function(data,
+                                       history,
+                                       method = c("Limma", "ttests", "ANOVA"),
+                                       ttest_type = c("Student", "Welch"),
+                                       contrastchoice = c("Stacked", "Unique_OvO", "Unique_OvA"),
+                                       thlogFC,
+                                       uniquechoice = NULL,
+                                       swap) {
+  if (!inherits(data, "QFeatures")) {
+    stop("'data' must be of class QFeatures")
+  }
+  method <- match.arg(method)
+  ttest_type <- match.arg(ttest_type)
   contrastchoice <- match.arg(contrastchoice)
-
+  
+  
   se <- data[[length(data)]]
   conditions <- DaparToolshed::design_qf(data)$Condition
   id <- DaparToolshed::idcol(se)
   type <- DaparToolshed::typeDataset(se)
   base_cols <- plainRowDataCols(se)
-
-  hist_args <- list(Contrast_Type = contrastchoice)
-
+  
+  AllPairwiseComp_stacked <- NULL
+  contrast_list <- NULL
+  
+  hist_args <- list("Method" = method)
+  if (method == "ttests") {
+    hist_args["t-test options"] <- ttest_type
+  }
+  
+  hist_args["Contrast type"] <- contrastchoice
   if (contrastchoice == "Stacked") {
-    res_pval_FC_complete <- res_pval_FC
-    res_pval <- res_pval_FC_stacked
+    # Make test
+    AllPairwiseCompOvO <- makeTest(data = data, method = method, design = "Unique_OvO", ttest_type = ttest_type, testANOVA = "TukeyNoMTC")
+    AllPairwiseCompOvA <- makeTest(data = data, method = method, design = "Unique_OvA", ttest_type = ttest_type, testANOVA = "TukeyNoMTC")
+    
+    # AllPairwiseComp #w/ tt
+    # Voir pour le swap
+    ##### 
+    # !! C'est pas ok ici faudra voir en fonction de ce qu'on prend pour les stacked genre tous ou juste OvO/OvA
+    AllPairwiseComp_stacked$logFC <- data.frame(cond1_vs_cond2_logFC = unlist(AllPairwiseComp$logFC, use.names = FALSE))
+    AllPairwiseComp_stacked$P_Value <- data.frame(cond1_vs_cond2_pval = unlist(AllPairwiseComp$P_Value, use.names = FALSE))
+    
+    # AllPairwiseComp_stacked #quand c'est stack
     comparison <- "stacked"
-
+    res_pval <- AllPairwiseComp_stacked
+    
+    contrastnames <- sub("_logFC$", "", colnames(AllPairwiseComp$logFC))
     stk <- stackContrasts(se, conditions, contrastnames)
     contrast_list <- rep(contrastnames, each = nrow(se))
-
+    
     push_pval_data <- SummarizedExperiment::SummarizedExperiment(stk$assay)
     rd <- do.call(rbind, replicate(length(contrastnames),
-      SummarizedExperiment::rowData(se)[, base_cols],
-      simplify = FALSE
+                                   SummarizedExperiment::rowData(se)[, base_cols],
+                                   simplify = FALSE
     ))
     SummarizedExperiment::rowData(push_pval_data) <- rd
     SummarizedExperiment::rowData(push_pval_data)$qMetacell <- stk$meta
     SummarizedExperiment::rowData(push_pval_data)$Contrast <- contrast_list
-
+    
     cond <- rep(c("cond1", "cond2"), each = stk$n_max)
     names_condition <- unique(cond)
     rowdatacolname <- c(base_cols, "Contrast")
-  } else { # Unique
+    
+  } else { 
+    # Make test
+    design <- switch(contrastchoice, 
+                     "Unique_OvO" = "OnevsOne", 
+                     "Unique_OvA" = "OnevsAll")
+    AllPairwiseComp <- makeTest(data = data, method = method, design = design, ttest_type = ttest_type, testANOVA = "TukeyNoMTC")
+    
+    # Swap contrast
+    for (i in which(swap)) {
+      # Reverse logFC sign
+      AllPairwiseComp$logFC[[i]] <- -AllPairwiseComp$logFC[[i]]
+      
+      # Reverse comparison name
+      old_name <- names(AllPairwiseComp$logFC)[i]
+      new_name <- sub("^(.+)_vs_(.+)_logFC$", "\\2_vs_\\1_logFC", old_name)
+      names(AllPairwiseComp$logFC)[i] <- new_name
+      
+      # Rename corresponding p-value column
+      old_pval_name <- names(AllPairwiseComp$P_Value)[i]
+      new_pval_name <- sub("^(.+)_vs_(.+)_pval$", "\\2_vs_\\1_pval", old_pval_name)
+      names(AllPairwiseComp$P_Value)[i] <- new_pval_name
+    }
+    
+    # Select contrast
     stopifnot(!is.null(uniquechoice), length(uniquechoice) == 1)
     pval_col <- paste0(uniquechoice, "_pval")
     fc_col <- paste0(uniquechoice, "_logFC")
     if (!all(c(pval_col, fc_col) %in% c(
-      colnames(res_pval_FC$P_Value),
-      colnames(res_pval_FC$logFC)
+      colnames(AllPairwiseComp$P_Value),
+      colnames(AllPairwiseComp$logFC)
     ))) {
       txt <- paste0("Unknown contrast: ", uniquechoice)
       stop(txt)
     }
-
-    res_pval_FC_complete <- NULL
-    contrast_list <- NULL
+    
     comparison <- uniquechoice
     res_pval <- list(
-      P_Value = res_pval_FC$P_Value[, pval_col, drop = FALSE],
-      logFC   = res_pval_FC$logFC[, fc_col, drop = FALSE]
+      logFC   = AllPairwiseComp$logFC[, fc_col, drop = FALSE],
+      P_Value = AllPairwiseComp$P_Value[, pval_col, drop = FALSE]
     )
-
+    
     names_condition <- strsplit(uniquechoice, "_vs_", fixed = TRUE)[[1]]
     col_cond <- which(conditions %in% names_condition)
-
+    
     push_pval_data <- se[, col_cond]
     SummarizedExperiment::rowData(push_pval_data)$qMetacell <-
       SummarizedExperiment::rowData(se)$qMetacell[, col_cond, drop = FALSE]
-
+    
     cond <- conditions[col_cond]
     rowdatacolname <- base_cols
-    hist_args$Contrast_Choice <- uniquechoice
+    
+    hist_args["Contrast choice"] <- uniquechoice
   }
-
+  
   # Common to both branches
   DaparToolshed::idcol(push_pval_data) <- id
   DaparToolshed::typeDataset(push_pval_data) <- type
-  DaparToolshed::HypothesisTest(push_pval_data) <-
-    as.data.frame(cbind(res_pval$logFC, res_pval$P_Value))
-
-  hist_args$Foldchange_Threshold <- thlogFC
+  DaparToolshed::HypothesisTest(push_pval_data) <- as.data.frame(cbind(res_pval$logFC, res_pval$P_Value))
+  
+  hist_args["Fold-change threshold"] <- thlogFC
+  SummaryDT <- data.frame(
+    query = "-",
+    nbPushed = "0",
+    TotalPushed = "0",
+    TotalNonPushed = nrow(AllPairwiseComp$P_Value),
+    stringsAsFactors = FALSE
+  )
+  
+  
   for (nm in names(hist_args)) {
     history <- Prostar2::Add2History(
       history, "DifferentialAnalysis",
-      "Foldchange", nm, hist_args[[nm]]
+      "Hypothesistest", nm, hist_args[[nm]]
     )
   }
+  
+  return(list(history = history,
+              AllPairwiseComp = AllPairwiseComp,
+              AllPairwiseComp_stacked = AllPairwiseComp_stacked,
+              res_pval_tmp = res_pval$P_Value,
+              rowdatacolname = rowdatacolname,
+              push_pval_data = push_pval_data,
+              cond = cond,
+              contrast_list = contrast_list,
+              comparison = comparison,
+              names_condition = names_condition,
+              SummaryDT = SummaryDT,
+              tooltipInfo = id))
+}
 
-  SummaryDT <- data.frame(
-    query = "-",
-    nbPushed = "-",
-    nbRemaining = nrow(res_pval$P_Value),
-    stringsAsFactors = FALSE
-  )
 
-  return(list(
-    history = history,
-    res_pval_FC_complete = res_pval_FC_complete,
-    comparison = comparison,
-    contrast_list = contrast_list,
-    cond = cond,
-    names_condition = names_condition,
-    push_pval_data = push_pval_data,
-    rowdatacolname = rowdatacolname,
-    res_pval_tmp = res_pval$P_Value,
-    tooltipInfo = id,
-    SummaryDT = SummaryDT
-  ))
+#' @title PipelinePeptide hypothesis test sub-step Cluster
+#'
+#' @description Do what has to be done at the end of the hypothesis test 
+#' sub-step of the PipelinePeptide for the Cluster scenario
+#'
+#' @param data A `QFeatures`
+#' @param history The history
+#' @param method A `character(1)`, the chosen method. Either `ttests`, `ANOVA` 
+#' or `Limma`
+#' @param ttest_type A `character(1)`, the type of t-test. Must choose between : 
+#' `"Student"` and `"Welch"`
+#'
+#' @return A list containing the history and necessary values
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+hypothesisTestPeptCluster <- function(data,
+                                      history,
+                                      method = c("Limma", "ttests", "ANOVA"),
+                                      ttest_type = c("Student", "Welch")) {
+  if (!inherits(data, "QFeatures")) {
+    stop("'data' must be of class QFeatures")
+  }
+  method <- match.arg(method)
+  ttest_type <- match.arg(ttest_type)
+  
+  hist_args <- list("Method" = method)
+  if (method == "ttests") {
+    hist_args["t-test options"] <- ttest_type
+  }
+  
+  AllPairwiseComp <- makeTest(data = data, method = method, design = "anova1way", ttest_type = ttest_type, testANOVA = "Omnibus")
+  clusters <- rep("-", nrow(data[[length(data)]]))
+  
+  for (nm in names(hist_args)) {
+    history <- Prostar2::Add2History(
+      history, "DifferentialAnalysis",
+      "Hypothesistest", nm, hist_args[[nm]]
+    )
+  }
+  
+  return(list(history = history,
+              AllPairwiseComp = AllPairwiseComp,
+              clusters = clusters))
+}
+
+
+#' @title PipelinePeptide hypothesis test sub-step Aggregation
+#'
+#' @description Do what has to be done at the end of the hypothesis test 
+#' sub-step of the PipelinePeptide for the Aggregation scenario
+#'
+#' @param data A `QFeatures`
+#' @param history The history
+#' @param method A `character(1)`, the chosen method. Either `ttests`, `ANOVA` 
+#' or `Limma`
+#' @param ttest_type A `character(1)`, the type of t-test. Must choose between : 
+#' `"Student"` and `"Welch"`
+#'
+#' @return A list containing the history and necessary values
+#'
+#' @examples
+#' NULL
+#'
+#' @export
+#'
+hypothesisTestPeptAggregation <- function(data,
+                                          history,
+                                          method = c("Limma", "ttests", "ANOVA"),
+                                          ttest_type = c("Student", "Welch")) {
+  if (!inherits(data, "QFeatures")) {
+    stop("'data' must be of class QFeatures")
+  }
+  method <- match.arg(method)
+  ttest_type <- match.arg(ttest_type)
+  
+  hist_args <- list("Method" = method)
+  if (method == "ttests") {
+    hist_args["t-test options"] <- ttest_type
+  }
+  
+  AllPairwiseComp <- makeTest(data = data, method = method, design = "OnevsOne", ttest_type = ttest_type, testANOVA = "TukeyNoMTC")
+  
+  for (nm in names(hist_args)) {
+    history <- Prostar2::Add2History(
+      history, "DifferentialAnalysis",
+      "Hypothesistest", nm, hist_args[[nm]]
+    )
+  }
+  
+  return(list(history = history,
+              AllPairwiseComp = AllPairwiseComp))
 }

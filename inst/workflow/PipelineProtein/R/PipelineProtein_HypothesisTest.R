@@ -99,7 +99,7 @@ PipelineProtein_HypothesisTest_server <- function(
     logFC_onevsall = NULL,
     containsNA = FALSE,
     enable_Limma = NULL,
-    listNomsComparaison = NULL,
+    listNamesComparaison = NULL,
     n = NULL,
     swap.history = NULL,
     AllPairwiseComp = NULL,
@@ -331,15 +331,15 @@ PipelineProtein_HypothesisTest_server <- function(
     # Change which logFC to show on the plot
     observeEvent(req(rv.widgets$HypothesisTest_design != "None"), {
       req(rv$dataIn)
+      
       # Get logFC
-      if (rv.widgets$HypothesisTest_design == "OnevsOne") {
-        rv.custom$logFC <- rv.custom$logFC_onevsone
-      } else if (rv.widgets$HypothesisTest_design == "OnevsAll") {
-        rv.custom$logFC <- rv.custom$logFC_onevsall
-      }
+      rv.custom$logFC <- switch(rv.widgets$HypothesisTest_design,
+             OnevsOne = rv.custom$logFC_onevsone,
+             OnevsAll = rv.custom$logFC_onevsall)
+      
       # Get comparison names
-      rv.custom$listNomsComparaison <- colnames(rv.custom$logFC)
-      rv.custom$listNomsComparaison <- unlist(strsplit(rv.custom$listNomsComparaison, split = "_logFC"))
+      rv.custom$listNamesComparaison <- colnames(rv.custom$logFC)
+      rv.custom$listNamesComparaison <- unlist(strsplit(rv.custom$listNamesComparaison, split = "_logFC"))
       # Get number of comparison
       rv.custom$n <- ncol(rv.custom$logFC)
       rv.custom$swap.history <- rep(FALSE, rv.custom$n)
@@ -348,12 +348,12 @@ PipelineProtein_HypothesisTest_server <- function(
     # Widget - swap conditions
     output$HypothesisTest_swapConds_ui <- renderUI({
       req(rv.widgets$HypothesisTest_design != "None")
-      req(rv.custom$listNomsComparaison)
+      req(rv.custom$listNamesComparaison)
 
-      n <- length(rv.custom$listNomsComparaison)
+      n <- length(rv.custom$listNamesComparaison)
 
       widget <- lapply(seq_len(n), function(i) {
-        conds <- strsplit(rv.custom$listNomsComparaison[i], "_vs_", fixed = TRUE)[[1]]
+        conds <- strsplit(rv.custom$listNamesComparaison[i], "_vs_", fixed = TRUE)[[1]]
 
         div(
           style = "margin-bottom: -15px;",
@@ -386,12 +386,12 @@ PipelineProtein_HypothesisTest_server <- function(
 
     # When changes in swap conditions checkbox
     observeEvent(lapply(
-      seq_along(rv.custom$listNomsComparaison),
+      seq_along(rv.custom$listNamesComparaison),
       function(i) {
         input[[paste0("compswap_", i)]]
       }
     ), ignoreInit = TRUE, {
-      n <- length(rv.custom$listNomsComparaison)
+      n <- length(rv.custom$listNamesComparaison)
 
       swap <- vapply(
         seq_len(n),
@@ -432,6 +432,7 @@ PipelineProtein_HypothesisTest_server <- function(
       if (is.null(rv$dataIn) || rv.widgets$HypothesisTest_method == "None" || rv.widgets$HypothesisTest_design == "None" ||
         (rv.widgets$HypothesisTest_method == "ttests" && rv.widgets$HypothesisTest_ttestOptions == "None")) {
         shinyjs::info(btnVentsMasg)
+        
       } else {
         shiny::withProgress(message = "Computing Hypothesis Test", {
           shiny::incProgress(0.5)
